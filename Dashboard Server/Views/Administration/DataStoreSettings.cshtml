@@ -1,0 +1,187 @@
+﻿@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    ViewBag.Title = "[[[Data Store Settings]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+
+    var dbDetails = ViewBag.DBConfig as DatabaseConfiguration;
+    ViewBag.dbType = dbDetails.ServerType == DatabaseType.MSSQL ? "MSSQL" : dbDetails.ServerType == DatabaseType.PostgreSQL ? "PostgreSQL" : "SQLite";
+    ViewBag.authorizationType = !string.IsNullOrEmpty(dbDetails.UserName) ? "SQL" : "windows";
+    ViewBag.serverName = !string.IsNullOrEmpty(dbDetails.ServerName) ? dbDetails.ServerName : string.Empty;
+    ViewBag.portNumber = !string.IsNullOrEmpty(dbDetails.Port) ? dbDetails.Port : string.Empty;
+    ViewBag.databaseName = !string.IsNullOrEmpty(dbDetails.DatabaseName) ? dbDetails.DatabaseName : string.Empty;
+    ViewBag.username = !string.IsNullOrEmpty(dbDetails.UserName) ? dbDetails.UserName : string.Empty;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DataStoreSettings);
+}
+
+@section styles{
+    @Styles.Render("~/bundles/styles/admin/site-settings")
+}
+
+@section scripts{
+
+    @Scripts.Render("~/bundles/scripts/admin/site-settings")
+    @Scripts.Render("~/bundles/scripts/intermediatedb-configuration")
+    <script>
+    var getAllDatabaseUrl = "@Url.Action("GetAllDatabase", "InterMediateDB")";
+    var updateIntermediateDBUrl = "@Url.Action("UpdateIntermediateDB", "InterMediateDB")";
+    var connectDatabaseUrl = "@Url.Action("ConnectDatabase", "InterMediateDB")";
+    var generateIntermediateDatabaseUrl = "@Url.Action("GenerateIntermediateDatabase", "InterMediateDB")";
+    var isSelfHosted = "@ServerAppConfig.IsSelfHosted";
+    </script>
+}
+
+@section MainSection{
+
+    @Html.Partial("_AdminMenu")
+
+    <div id="look-and-feel-container" class="col-xs-12 admin-page-container">
+        <div id="datastore-settings-header" class="col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="h2 page-title">
+                    [[[DATA STORE SETTINGS]]]
+                </h1>
+                <h5 class="page-description">
+                    [[[Database configuration for the intermediate data source]]]
+                </h5>
+            </hgroup>
+        </div>
+
+        <div id="look-and-feel-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+            <div class="col-lg-12 admin-page-body">
+                <div class="col-lg-12 form-group">
+                    <div class="system-settings-page-container" id="system-settings-db-selection-container">
+                        <div class="system-settings-db-selection-field">
+                            @*<div class="col-lg-12 form-group">
+                                    @Html.Label("intermediate-db", "[[[Database]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 database-types">
+                                        <div id="database-type-dropdown" class="system-settings-startup-page-fields database-dropdown-margin">
+                                            <select id="database-type" class="selectpicker system-settings-startup-page-fields db-fields" style="display: none;">
+                                                <option class="no-margin-dropdown-ul" value="SQLite" @(ViewBag.dbType= ="SQLite" ? "Selected" : string.Empty )>
+                                                    [[[SQLite]]]
+                                                </option>
+                                                <option class="no-margin-dropdown-ul" value="MSSQL" @(ViewBag.dbType= ="MSSQL" ? "Selected" : string.Empty)>[[[SQL Server]]]</option>
+                                            </select>
+                                        </div>
+                                        <div id="connection-validation" class="txt-holder">
+                                            <div class="validation-errors"></div>
+                                        </div>
+                                    </div>
+                                </div>*@
+
+                            <form id="db-content-holder" class="no-padding @(ViewBag.dbType == "MSSQL" ? string.Empty : "display-none") content-display text-wrap show-sql-content" autocomplete="off">
+                                <div class="col-lg-12 form-group e-hide">
+                                    @Html.Label("intermediate-db", "[[[Server Type]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 txt-holder center-align">
+                                        <div id="database-type-dropdown" class="system-settings-startup-page-fields txt-holder database-dropdown-margin">
+                                            <select id="database-type" class="selectpicker system-settings-startup-page-fields db-fields" data-width="100%">
+                                                <option class="no-margin-dropdown-ul" value="MSSQL" @(ViewBag.dbType == "MSSQL" ? "selected" : string.Empty)>[[[SQL Server]]]</option>
+                                                @if (ViewBag.IsNpgsqlExist)
+                                                {
+                                                    <option class="no-margin-dropdown-ul" value="PostgreSQL" @(ViewBag.dbType == "PostgreSQL" ? "selected" : string.Empty)>[[[Postgre SQL]]]</option>
+                                                }
+                                                else
+                                                {
+                                                    <option class="no-margin-dropdown-ul" title="Please install Npgsql client library to connect with PostgreSQL database." value="PostgreSQL" @(ViewBag.dbType == "PostgreSQL" ? "selected" : string.Empty) disabled>[[[Postgre SQL]]]</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    @Html.Label("intermediate-db", "[[[Server Name]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 txt-holder center-align input-alignment">
+                                        <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.serverName" placeholder="[[[Server name]]]" autocomplete="off">
+                                        <span class="startup-validation validation-txt-errors"></span>
+                                    </div>
+                                </div>
+                                <div id="authentication-dropdown" class="col-lg-12 form-group hide">
+                                    @Html.Label("intermediate-db", "[[[Authentication Mode]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 txt-holder center-align">
+                                        <div id="auth-type-dropdown" class="system-settings-startup-page-fields">
+                                            <select id="check-windows" class="selectpicker db-fields  full-width">
+                                                <option value="sql" @(ViewBag.authorizationType == "SQL" ? "Selected" : string.Empty)>[[[SQL Authentication]]]</option>
+                                                <option value="windows" @(ViewBag.authorizationType == "windows" ? "Selected" : string.Empty)>[[[Windows Authentication]]]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="port-number-dropdown" class="col-lg-12 form-group hide">
+                                    @Html.Label("intermediate-db", "[[[Port number ]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 txt-holder center-align input-alignment">
+                                        <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.portNumber" placeholder="[[[Port number]]]" autocomplete="off">
+                                        <span class="startup-validation validation-txt-errors"></span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    @Html.Label("intermediate-db", "[[[Username]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 txt-holder center-align">
+                                        <input type="text" id="txt-login" name="username" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.username" placeholder="[[[Username]]]" autocomplete="off" @(ViewBag.authorizationType == "windows" ? "disabled" : string.Empty)>
+                                        <span class="startup-validation validation-txt-errors"></span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    @Html.Label("intermediate-db", "[[[Password]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 txt-holder center-align">
+                                        <input type="password" id="txt-password-db" name="password" class="form-control system-settings-startup-page-fields db-fields" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" @(ViewBag.authorizationType == "windows" ? "disabled" : string.Empty)>
+                                        <span id="password-field" class="startup-validation validation-txt-errors"></span>
+                                        <div class="su su-eye show-hide-password"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group-radio">
+                                    <div class="col-lg-2"></div>
+                                    <div class="col-lg-10 txt-holder center-align system-settings-startup-page-fields">
+                                        <div class="new-db">
+                                            <input type="radio" id="new-db" class="css-radio" name="databaseType" value="0" @(ViewBag.databaseName != string.Empty ? string.Empty : "checked")>
+                                            <label for="new-db"><span class="text">[[[New Database]]]</span></label>
+                                        </div>
+                                        <div class="existing-db">
+                                            <input type="radio" id="existing-db" class="css-radio" name="databaseType" value="1" @(ViewBag.databaseName != string.Empty ? "checked" : string.Empty)>
+                                            <label for="existing-db"><span class="text">[[[Existing Database]]]</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="new-db-form" class="col-lg-12 form-group @(ViewBag.databaseName != string.Empty ? "display-none" : string.Empty)">
+                                    @Html.Label("intermediate-db", "[[[Database Name]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-10 sql-server-new-db center-align">
+                                        <div class="txt-holder database-name center-align system-settings-startup-page-fields">
+                                            <input type="text" id="txt-dbname" name="dbname" class="form-control system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.databaseName" placeholder="[[[Database name]]]" autocomplete="off">
+                                            <span class="startup-validation validation-txt-errors"></span>
+                                            <div class="show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="existing-db-form" class="col-lg-12 form-group @(ViewBag.databaseName != string.Empty ? string.Empty : " display-none" )">
+                                    @Html.Label("intermediate-db", "[[[Database Name]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    <div class="col-lg-4 sql-server-existing-db center-align">
+                                      <input type="text" id="database-name" name="dbname" class="form-control system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.databaseName" placeholder="[[[Existing Database name]]]" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 form-group">
+                                    @Html.Label("secure-sql-connection", "[[[Enable SSL]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 switch-align">
+                                        <span class="material-switch text-left">
+                                            <input type="checkbox" id="secure-sql-connection" name="secure-sql-connection" @((bool)dbDetails.SslEnabled ? "checked" : string.Empty) />
+                                            <label for="secure-sql-connection" class="label-primary"></label>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div id="connection-validation" class="col-lg-12 form-group">
+                                    <span class="col-lg-2"></span>
+                                    <div class="validation-errors col-lg-10"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+            <a href="@Url.Action("Index", "Home")" class="secondary-button pull-right" id="cancel-site-settings" title="">[[[Cancel]]]</a>
+            <button type="button" title="" id="update-datastore-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings">
+                [[[Save]]]
+            </button>
+        </div>
+    </div>
+}

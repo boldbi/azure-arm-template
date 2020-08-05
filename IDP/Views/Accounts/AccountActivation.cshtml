@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.IncludeHeader = false;
+    ViewBag.RemoveUserProfile = HttpContext.Current.User.Identity.IsAuthenticated ? !HttpContext.Current.User.Identity.IsAuthenticated : true;
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    if (CloudAppConfig.IsSelfHosted)
+    {
+        ViewBag.Title = "[[[Account Activation]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    }
+    else
+    {
+        ViewBag.Title = "[[[Account Activation]]] | " + GlobalAppSettings.BrandingDisplayName + "[[[ Account]]]";
+    }
+}
+@section styles{
+    @Styles.Render("~/bundles/styles/account-activation")
+}
+
+@section MainSection{
+    <div id="account-activation-content">
+        @Html.Partial("_EmailSentConfirmation")
+    </div>
+}

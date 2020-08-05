@@ -1,0 +1,42 @@
+﻿@model LogResponse
+
+@using System.Configuration
+@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+
+    ViewBag.Title = "[[[Notifications]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var idPAvatarUrl = ServerAppConfig.InternalAppIdpUrl + "/User/Avatar";
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SystemNotifications);
+}
+
+
+@section styles{
+    @Styles.Render("~/bundles/scripts/notification-listing")
+}
+
+@section Scripts{
+    @Scripts.Render("~/bundles/scripts/ej2-dialog")
+    @Scripts.Render("~/bundles/scripts/notification-listing")
+
+    <script>
+        $(document).ready(function () {
+            $("#notifciation-page-container #user-notification-container").show();
+            $("#user-system-notification").hide();
+            userNotificationContainer.show().removeClass("user-notification-close").addClass("user-notification-open");
+            ejs.popups.createSpinner({
+                target: document.getElementById('notifciation-page-container')
+            });
+            ejs.popups.setSpinner({ type: 'Material' });
+            ejs.popups.showSpinner(document.getElementById('notifciation-page-container'));
+            var notificationController = angular.element(userNotificationObj).scope();
+            notificationController.getUserSystemNotification();
+        });
+    </script>
+}
+
+@section MainSection{
+    <div id="notifciation-page-container">
+        @Html.Partial("~/Views/Notification/_UserNotificationPartial.cshtml")
+    </div>
+}

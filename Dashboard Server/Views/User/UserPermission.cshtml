@@ -1,0 +1,30 @@
+﻿@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+
+    ViewBag.Title = "[[[My Permissions]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MyPermissions);
+}
+
+@section styles{
+    @Styles.Render("~/bundles/styles/user-permissions")
+}
+
+@section scripts{
+    @Scripts.Render("~/bundles/scripts/user-permissions")
+}
+
+@section MainSection{
+@Html.Partial("_ProfileMenu")
+    <div id="user-permissions-container" class="admin-page-container">
+        <div class="admin-page-header col-xs-12">
+            <hgroup class="col-xs-8 no-padding">
+                <h1 class="page-title">[[[MY PERMISSIONS]]]</h1>
+                <h5 class="no-padding page-description">[[[View the permissions for the resources you can access.]]]</h5>
+            </hgroup>            
+        </div>
+
+        <div class="admin-page-body col-lg-12">
+            @(!DeviceDetection.IsMobile ? Html.Partial("../User/_UserPermissionGrid") : Html.Partial("../User/_UserPermissionGridForMobile"))
+        </div>
+    </div>
+}

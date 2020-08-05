@@ -1,0 +1,288 @@
+﻿@using System.Configuration
+@using Newtonsoft.Json
+@{
+    Layout = null;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
+    var licenseSettings = globalAppSettings.GetLicenseSettings();
+    var displayName = HttpContext.Current.Session["displayname"] != null ? HttpContext.Current.Session["displayname"].ToString() : string.Empty;
+    var emailAddress = HttpContext.Current.Session["emailaddress"] != null ? HttpContext.Current.Session["emailaddress"].ToString() : string.Empty;
+    var notificationCount = new NotificationManagement(globalAppSettings).GetUnreadNotificationCount();
+    var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/images/application/" + ServerAppConfig.AppBranding + "/" + IconFileNames.MainLogo;
+    var idpreferenceId = HttpContext.Current.Session["idpReferenceId"] != null ? HttpContext.Current.Session["idpReferenceId"].ToString() : string.Empty;
+    var idPUrl = ServerAppConfig.InternalAppIdpUrl;
+    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var currentUrl = HttpContext.Current.Request.RawUrl.ToString();
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var designerShapeFilesLink = globalAppSettings.SystemSettings.UseCDN ? globalAppSettings.SystemSettings.CDNLink + "/scripts/shapefiles" : (isSelfHosted ? ServerAppConfig.InternalAppDataServiceUrl + "/scripts/shapefiles" : "/scripts/shapefiles");
+    var tourCookie = Request.Cookies["syncfusion.dashboards.designer.tour"];
+    var tourObj = new TourCookie();
+    if (tourCookie != null)
+    {
+        tourObj = JsonConvert.DeserializeObject<TourCookie>(JsonConvert.DeserializeObject(tourCookie.Value).ToString());
+    }
+    var showDatasourceTour = !string.IsNullOrWhiteSpace(ViewBag.showDatasourceTour) && ViewBag.showDatasourceTour.ToString().ToLower() == "true";
+    var showTour = !DeviceDetection.IsMobile && ((tourCookie == null || (tourObj.TourCompleted == "false" && tourObj.TourSkipped == "false")) || showDatasourceTour);
+    var feedbackCookie = Request.Cookies["feedback.visible"];
+    var showFeedbackKey = ServerAppConfig.EnableCloudFeedback;
+    var showFeedback = (feedbackCookie == null && !DeviceDetection.IsMobile && showFeedbackKey);
+    var isAdmin = HttpContext.Current.Session["IsAdmin"] != null && Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]);
+    var donotShowJourney = Request.Cookies["syncfusion.dashboards.server.journey"] != null;
+    var issampledata = !string.IsNullOrEmpty(ViewBag.IsSampleData) ? bool.Parse(ViewBag.IsSampleData) : false;
+    var helpSiteBaseUrl = ConfigurationManager.AppSettings["documentation:base_url"];
+    var currentUrlLocalPath = HttpContext.Current.Request.Url.LocalPath.ToLower();
+
+    var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
+
+    var dashboardPageUrl = Url.Action("Dashboards", "Dashboards");
+
+    var widgetsPageUrl = Url.Action("Widgets", "Widgets");
+    var dataSourcesPageUrl = Url.Action("DataSources", "DataSources");
+    var schedulePageUrl = Url.Action("Schedules", "Scheduler");
+    var profilePageUrl = Url.Action("Profilepage", "User");
+    var homepagePageUrl = Server.UrlDecode(Url.Action("Homepages", "Boards"));
+    var isMobile = DeviceDetection.IsMobile;
+    var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
+    var configurationPath = isSelfHosted ? dashboardBIUrl + "/webdesignerservice/scripts/settings/" + GlobalAppSettings.Branding.ToLower() + "/settings.min.js" : globalAppSettings.SystemSettings.CDNLink.ToLower() + "/scripts/settings/" + GlobalAppSettings.Branding.ToLower() + "/settings.min.js";
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
+    var navigationUrl = Url.Action("Index", "Home");
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var canCreateDatasource = permissions[ItemType.Datasource];
+
+    HttpContext.Current.Response.Cookies.Add(new HttpCookie(ServerAppConfig.DesignerLanguageCookieName)
+    {
+        Value = ViewBag.Culture,
+        HttpOnly = true,
+        Expires = DateTime.UtcNow.AddYears(1)
+    });
+}
+<!DOCTYPE html>
+
+<html style="height:100%;width:100% ; overflow:hidden;">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    @if (!isSelfHosted && !globalAppSettings.SystemSettings.IsDebug)
+    {
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    }
+
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
+    <meta name="designer_service:url" content="@ServerAppConfig.InternalAppDataServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+    <meta name="data_service:url" content="@ServerAppConfig.InternalAppDataServiceUrl" />
+    <meta name="datasource_schedule:url" content="@Url.Action("GetRecurrenceTypeView", "DataSources")" />
+    <meta name="dashboard:version" content="@ViewBag.Version" />
+    <meta name="dashboard:id" content="@ViewBag.DashboardId" />
+    <meta name="dashboard:name" content="@ViewBag.DashboardName" />
+    <meta name="category:name" content="@ViewBag.CategoryName" />
+    <meta name="dashboard:description" content="@ViewBag.Description" />
+
+    <meta name="datasource:version" content="@ViewBag.DatasourceVersion" />
+    <meta name="datasource:id" content="@ViewBag.DatasourceId" />
+
+    <meta name="datasource:connectionlist" content="@ViewBag.Datasources" />
+    <meta name="intermediatedbstatus" content="@ViewBag.IntermediateDbStatus" />
+    <meta name="isurlchange" content="@ViewBag.IsUrlChange" />
+    <meta name="isdraft" content="@ViewBag.IsDraft" />
+    <meta name="ispublic" content="@ViewBag.IsPublic" />
+    <meta name="dashboards:allow_public_dashboards" content="@ViewBag.CanMarkDashboardAsPublic" />
+
+    <meta name="user:is_admin" content="@ViewBag.IsAdmin" />
+    <meta name="user:culture" content="@ViewBag.Culture" />
+
+    <meta name="globalization:date_format" content="@globalAppSettings.SystemSettings.DateFormat" />
+    <meta name="globalization:time_format" content="@globalAppSettings.SystemSettings.TimeFormat.ToString()" />
+
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/worldmap_continent.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/canada.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/usa_states.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/africa.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/southamerica.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/france.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/germany.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/australia_territories.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/unitedkingdom.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/europe.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/asia.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/northamerica.js" />
+    <meta name="dashboard_designer:maps:shapes" content="@designerShapeFilesLink/india.js" />
+
+    @if (ViewBag.dashboardName != null)
+    {
+        <title>@ViewBag.dashboardName - [[[Design Dashboard]]] - @globalAppSettings.SystemSettings.OrganizationName</title>
+    }
+    else
+    {
+        <title>Untitled - [[[Design Dashboard]]] - @globalAppSettings.SystemSettings.OrganizationName</title>
+    }
+    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.Favicon') this.href = '@globalAppSettings.SystemSettings.CDNLink/Images/Application/@ServerAppConfig.AppBranding/@IconFileNames.Favicon';" />
+
+    @Html.Partial("~/Views/Shared/_LoaderIcon.cshtml")
+
+    <style>
+        #create-item, #user-system-notification {
+            display: none !important;
+        }
+    </style>
+
+    <script>
+        var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
+        var licenseSettings =@Html.Raw(JsonConvert.SerializeObject(licenseSettings));
+		var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var currentUrl = "@currentUrl";
+        var organizationName = "@globalAppSettings.SystemSettings.OrganizationName";
+        var isDebug = "@isDebug";
+        var idpreferenceId = "@idpreferenceId";
+        var idpUrl = "@idPUrl";
+        var displayName = "@displayName";
+        var showDatasourceTour = "@showDatasourceTour";
+        var feedbackSendUrl = "@Url.Action("AddUserFeedback", "Feedback")";
+        var feedbackCookieUrl = "@Url.Action("SetUserFeedbackCookies", "FeedBack")";
+        var showFeedbackDialog = "@showFeedback";
+        var issampledata = "@issampledata";
+        var helpSiteBaseUrl = "@helpSiteBaseUrl";
+        var appBranding = "@GlobalAppSettings.Branding";
+        var configurationPath = "@configurationPath";
+        var rootUrlAction = "@Url.Action("", "")";
+        var isSelfHosted = "@isSelfHosted";
+        var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
+        var exportFormat = @Html.Raw(Json.Encode(ViewBag.ExportFormat));
+        var dataStoreSettingUrl = "@Url.Action("DataStoreSettings", "Administration")";
+        var canCreateDatasource = @Json.Encode(canCreateDatasource);
+        var modelLanguage = "@ViewBag.ModelLanguage";
+    </script>
+    <script type="text/javascript">
+        window.addEventListener("beforeunload", function (e) {
+            var confirmationMessage = "[[[Are you sure you want to close? The current progress will be lost if you continue.]]]";
+
+            if ($('#dashboardDesigner').data('ejDashboardDesigner').hasReportChanges()) {
+                (e || window.event).returnValue = confirmationMessage;
+                return 'false';
+            }
+            else {
+                return;
+            }
+        });
+    </script>
+</head>
+<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+    <input type="hidden" id="embed-iframe" value="@ViewBag.isEmbed" />
+    <div class="preloader-wrap" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: #fff; z-index : 2; ">
+        <div id="loader_image" align="center" style="position:relative;top:39%;">
+            <div class="loader-blue loader-icon" id="loader-icon">
+                <svg class="circular">
+                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                </svg>
+            </div>
+        </div>
+        <div id="loader_text" align="center" style="font-family:Segoe UI,SegoeUI,Helvetica Neue,Helvetica,Arial,sans-serif;position:relative;top: 42%;font-size:21px;font-weight:400;">[[[Initializing Dashboard Designer]]]</div>
+    </div>
+
+    @Styles.Render("~/bundles/styles/dashboard-designer")
+    @Styles.Render("~/bundles/Styles/webdesignerservice/dashboard-designer-component")
+
+    <script src="@(EarlyUrlLocalizer.IgnoreLocalizationUrlPrefix)@ServerAppConfig.InternalAppDataServiceUrl/localization/designerlocalization.js?v=@globalAppSettings.SystemSettings.ProductVersion"></script>
+
+    @Scripts.Render("~/bundles/Scripts/webdesignerservice/dashboard-designer-dependency")
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+    @if (isSelfHosted)
+    {
+        @Scripts.Render("~/bundles/Scripts/webdesignerservice/ej1-web-all")
+        @Scripts.Render("~/bundles/Scripts/webdesignerservice/ej2-web-all")
+        @Scripts.Render("~/bundles/Scripts/webdesignerservice/dashboard-designer-component")
+        <script>
+        $.getScript("@ServerAppConfig.InternalAppDataServiceUrl/scripts/shapefiles/worldmap_countries.js", function () { });
+        </script>
+    }
+    else
+    {
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
+
+        <script src="@cdnLink/scripts/designer/ej1.web.all.min.js"></script>
+        <script src="@cdnLink/scripts/designer/ej2.web.all.min.js"></script>
+        @Scripts.Render("~/bundles/Scripts/webdesignerservice/dashboard-designer-component")
+        <script>
+        $.getScript("@designerShapeFilesLink/worldmap_countries.js", function () { });
+        </script>
+    }
+
+    @Scripts.Render("~/bundles/scripts/dashboard-designer")
+    <script src="~/signalr/hubs"></script>
+    @Scripts.Render("~/bundles/scripts/signalr-bundle")
+
+    <section id="menu-area" style="display:none" class="custom-bootstrap-styles">
+        @Html.Partial("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", ViewBag.HelpSiteUrl }, { "GlobalAppSettings", globalAppSettings } })
+    </section>
+    @*<div id="designer-header" class="custom-bootstrap-styles">
+            <div class="dashboard-name">
+                <span class="edit-dashboard">@ViewBag.dashboardName</span>
+                <span class="dashboard-status">[[[(Edited)]]]</span>
+                <span class="dashboard-unsave" style="display:none">Unsaved Changes</span>
+            </div>
+        </div>*@
+    <div id="dashboardDesigner"></div>
+
+    <div id="messageBox">
+        <div class="message-header"></div>
+        <div class="message-box-close"></div>
+        <div class="message-content text-center"></div>
+        <div class="message-box-btn-holder"></div>
+    </div>
+    @if (showTour)
+    {
+        @Styles.Render("~/bundles/styles/dashboard-designer-tour")
+        Html.RenderPartial("~/Views/Shared/_DesignerTour.cshtml");
+        @Scripts.Render("~/bundles/scripts/dashboard-designer-tour")
+    }
+
+    @Styles.Render("~/bundles/styles/dashboard-feedback")
+    @if (!ServerAppConfig.IsSelfHosted)
+    {
+        @Html.Partial("~/Views/Shared/_GeneralFeedback.cshtml")
+        @Html.Partial("~/Views/Support/_ConciergeSupport.cshtml")
+        @Scripts.Render("~/bundles/scripts/dashboard-feedback-viewer")
+    }
+
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
+    <div class="custom-bootstrap-styles custom-server-style">
+        <div id="success-alert">
+            <div id="image-container">
+                <div class="image-holder">
+                    <span class="su su-tick" alt="Success Icon"></span>
+                </div>
+            </div>
+            <div id="message">
+                <h1 id="message-header"></h1>
+                <span id="message-content"></span>
+            </div>
+        </div>
+        <div id="warning-alert">
+            <div id="image-container">
+                <span class="su su-warning-alt" alt="Warning Icon"></span>
+            </div>
+            <div id="message" class="div-close">
+                <h1 id="message-header"></h1>
+                <span id="message-content"></span>
+            </div>
+            <div class="close-div">
+                <span id="close-content">[[[Close]]]</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+</html>

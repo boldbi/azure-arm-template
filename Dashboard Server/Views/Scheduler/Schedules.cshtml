@@ -1,0 +1,310 @@
+﻿@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+
+    ViewBag.Title = "[[[Schedules]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    var isMobile = DeviceDetection.IsMobile;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageSchedules);
+    var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+}
+@model List<ScheduleViewModel>
+
+@section styles{
+    @Styles.Render("~/bundles/styles/schedules")
+}
+
+@section scripts{
+
+    <script>
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var enableScheduleUrl = "@Url.Action("EnableSchedule", "scheduler")";
+        var disableScheduleUrl = "@Url.Action("DisableSchedule", "scheduler")";
+        var ondemandScheduleUrl = "@Url.Action("OnDemandSchedule", "scheduler")";
+        var deleteScheduleUrl = "@Url.Action("deleteschedule", "scheduler")";
+        var removeScheduleUrl = "@Url.Action("RemoveSchedule", "scheduler")";
+        var getSchedulesUrl = "@Url.Action("getschedules", "scheduler")";
+        var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
+    </script>
+
+    @if (!isMobile)
+    {
+        @Scripts.Render("~/bundles/scripts/scheduleslisting")
+        <script type="text/javascript">
+            $(document)
+                .ready(function () {
+                    $("#search-schedules").val("");
+                    $.views.helpers({
+                        checkMobile: function() {
+                            return ("@isMobile.ToString().ToLower()" == "false" &&
+                            (window.innerWidth > 1040));
+                        }
+                    });
+                    addPlacehoder("#search-area");
+                    var schedules = @Html.Raw(Json.Encode(Model));
+                    schedules = ej.parseJSON(schedules);
+                    ej.support.enableLocalizedSort = true;
+                    $("#scheduleGrid")
+                        .ejGrid({
+                            dataSource: schedules,
+                            allowPaging: true,
+                            pageSettings: { pageSize: 20 },
+                            allowSorting: true,
+                            allowSearching: true,
+                            allowFiltering: true,
+                            filterSettings: { filterType: "menu" },
+                            enableAltRow: false,
+                            gridLines: ej.Grid.GridLines.None,
+                            recordClick: manageSchedule,
+                            toolbarSettings: { showToolbar: false, toolbarItems: [ej.Grid.ToolBarItems.Search] },
+                            searchSettings: { fields: ["Name", "ItemName", "CreatedByDisplayName", "LastRunString", "NextScheduleString", "Status"], key: "", ignoreCase: false },
+                            actionBegin: "fnActionBegin",
+                            actionComplete: function(args) {
+                                $('[data-toggle="tooltip"]').tooltip();
+                                if (args.model.currentViewData.length === 0) {
+                                    rowBound();
+                                }
+
+                                showOrHideGridPager("#scheduleGrid");
+                            },
+                            rowDataBound: function() {
+                                var height = $(".e-gridcontent").height();
+                                if (height != null) {
+                                    rowBound();
+                                }
+                            },
+                            dataBound: function(args) {
+                                $("[data-toggle='tooltip']").tooltip();
+                            },
+                            columns: [
+                                {
+                                    field: "Name",
+                                    headerText: "[[[Name]]]",
+                                    templateID: "#schedule-template",
+                                    headerTemplateID: "#item-name-header",
+                                    type: "string",
+                                    width: ("@isMobile.ToString().ToLower()" == "false" &&
+                                    (window.innerWidth > 1040))
+                                    ? 100
+                                    : 80
+                                },
+                                {
+                                    field: "ItemName",
+                                    headerText: "[[[Dashboard]]]",
+                                    templateID: "#dashboard-template",
+                                    type: "string",
+                                    width: 100,
+                                    visible: ("@isMobile.ToString().ToLower()" == "false" &&
+                                    (window.innerWidth > 1040))
+                                },
+                                {
+                                    field: "LastRunString",
+                                    headerText: "[[[Last Run]]]",
+                                    visible: !(window.innerWidth < 1200),
+                                    width: 70,
+                                    allowSorting: false,
+                                    allowFiltering: false
+                                },
+                                {
+                                    field: "NextScheduleString",
+                                    headerText: "[[[Next Scheduled Run]]]",
+                                    width: 100,
+                                    headerTemplateID: "#next-schedule-header",
+                                    allowSorting: false,
+                                    allowFiltering: false
+                                },
+                                {
+                                    field: "CreatedByDisplayName",
+                                    headerText: "[[[Owner]]]",
+                                    width: 100,
+                                    headerTemplateID: "#owner-column",
+                                    allowSorting: true,
+                                    allowFiltering: true
+                                },
+                                {
+                                    field: "Status",
+                                    headerText: "[[[Status]]]",
+                                    width: 60,
+                                    allowSorting: false,
+                                    templateID: "#status-template",
+                                    allowFiltering: false,
+                                    visible: ("@isMobile.ToString().ToLower()" == "false" &&
+                                    (window.innerWidth > 1040))
+                                },
+                                {
+                                    template: true,
+                                    templateID: "#options",
+                                    width: (window.innerWidth > 1200) ? 15 : 25,
+                                    allowSorting: false,
+                                    allowFiltering: false
+                                }
+                            ]
+                        });
+                    if (window.location.search.length > 0) {
+                        var query = decodeURIComponent(window.location.search.split('?')[1]);
+                        searchValue = query.replace('=', ':');
+                        $("#search-schedules").val(searchValue);
+                        var searchEvent = $.Event('keydown');
+                        $("#search-schedules").trigger(searchEvent);
+                    }
+                });
+        </script>
+    }
+    else
+    {
+        @Scripts.Render("~/bundles/scripts/scheduleslisting-mobile")
+    }
+
+}
+
+@section MainSection{
+    @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Schedule) && itemsCount[ItemType.Schedule] > 0)
+    {
+        if (!isMobile)
+        {
+            <script id="template-data" type="text/x-jsrender">
+                <div class="details">
+                    <a href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">
+                        <div class="item-name">{{:Name}}<span class="{{toLowerCase:Status}} su su-schedule-status"></span></div><br />
+                        [[[Dashboard:]]] <span class="values">{{:ItemName}}</span> <br />
+                        [[[Last Run]]] <span class="values">{{:LastRunString}}</span><br />
+                        [[[Next Run]]] <span class="values">{{:NextScheduleString}}</span>
+                    </a>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="dashboard-template">
+                <div class="item-dashboard grid-content" title="{{:ItemName}}" data-toggle="tooltip" data-placement="top">
+                    {{if MultiDashboardName}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{else}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{/if}}
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="status-template">
+                <span class="{{toLowerCase:Status}} su su-schedule-status"></span>
+                {{:Status}}
+            </script>
+            <script type="text/x-jsrender" id="schedule-template">
+                <div class="item-name grid-content">
+                    <span title="{{:Name}}" data-toggle="tooltip" data-placement="top">{{:Name}}</span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="item-name-header">
+                <div class="item-name">[[[Name]]]</div>
+            </script>
+            <script type="text/x-jsrender" id="next-schedule-header">
+                <div title="[[[Next Scheduled Run]]]">[[[Next Scheduled Run]]]</div>
+            </script>
+            <script type="text/x-jsrender" id="owner-column">
+                <div title="[[[Owner]]]">[[[Owner]]]</div>
+            </script>
+            <script type="text/x-jsrender" id="options">
+                <div class="dropdown">
+                    <span class="dropdown-toggle option-icon" title="[[[Actions]]]" data-toggle="dropdown">
+                        <span class="su su-options"> </span>
+                    </span>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="menu-group">
+                            <a href="javascript:void(0);" title="[[[Run now]]]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-play" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">[[[Run Now]]]</span>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        {{if Status=="Active"}}
+                        <li class="menu-group">
+                            <a href="javascript:void(0);" title="[[[Disable]]]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-disable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">[[[Disable]]]</span>
+                            </a>
+                        </li>
+
+                        {{else Status=="Inactive"}}
+                        <li class="menu-group">
+                            <a href="javascript:void(0);" title="[[[Enable]]]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-enable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">[[[Enable]]]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+
+                        {{if ~checkMobile()}}
+                        {{if CanWrite}}
+                        <li title="[[[Edit]]]">
+
+                            <a href="javascript:void(0);" title="[[[Edit]]]" class="edit-schedule" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}")'>
+                                <i class="su su-edit" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">[[[Edit]]]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+                        {{/if}}
+
+                        {{if ~checkMobile()}}
+                        {{if CanDelete}}
+                        <li title="[[[Delete]]]">
+                            <a href="javascript:void(0);" title="[[[Delete]]]" class="remove-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-delete" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">[[[Delete]]]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+                        {{/if}}
+                    </ul>
+                </div>
+            </script>
+            <div id="item-grid-container" data-grid-name="schedules" class="admin-page-container schedule-listing">
+                <div class="admin-page-header col-lg-12">
+                    <h1 class="page-title col-lg-6 no-margin">
+                        [[[SCHEDULES]]]
+                    </h1>
+                    @if (itemPermissions[ItemType.Schedule])
+                    {
+                        <button type="button" class="create-schedule pull-right primary-button">[[[Create Schedule]]]</button>
+                    }
+                </div>
+
+                <div id="schedules-grid-container" class="col-lg-12 admin-page-body  @(isMobile ? "mobile" : "desktop")">
+                    <div id="search-area" class="pull-right">
+                        <input type="text" id="search-schedules" class="pull-left no-margin" placeholder="[[[Search schedules]]]" />
+                        <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="[[[Clear search]]]"></span>
+                        <span class="su su-search search-schedule pull-left no-margin" title="[[[Search schedules]]]"></span>
+                    </div>
+                    <div id="scheduleGrid" class="schedule-grid">
+                    </div>
+                </div>
+
+            </div>
+        }
+        else
+        {
+            @Html.Partial("../Scheduler/_ScheduleGridForMobile", Model)
+        }
+    }
+    else
+    {
+        @Html.Partial("../DefaultPages/DefaultPages", new ViewDataDictionary { { "Permissions", itemPermissions }, { "ItemsCount", itemsCount }, { "ItemType", ItemType.Schedule } })
+    }
+
+    @if (!isMobile)
+    {
+        @Html.Partial("../Items/_AddItems")
+        @Html.Partial("../Items/_ItemVersion")
+    }
+
+    <div id="popup-container" style="display:none;">
+        <iframe id="scheduler-popup-iframe"></iframe>
+    </div>
+
+    <div id="editpopup-container" style="display:none;">
+        <iframe id="editscheduler-popup-iframe"></iframe>
+    </div>
+
+    <div id="schedule-delete-confirmation" class="no-padding"></div>
+
+    <div id="permission-popup" class="no-padding" style="display:none;">
+        <iframe id="permission-iframe"></iframe>
+    </div>
+
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
+}

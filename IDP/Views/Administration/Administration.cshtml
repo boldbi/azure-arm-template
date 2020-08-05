@@ -1,0 +1,125 @@
+﻿@{
+    ViewBag.Title = "Administration - " +  GlobalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+}
+
+@section styles{
+    @Styles.Render("~/styles/admin/site-settings")
+    @Styles.Render("~/Styles/user-database-import")
+}
+
+@section scripts{
+
+<script>
+    serverApp.controller("adSettingsController", ["$scope", function($scope) {
+        $scope.regex = '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
+        $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_]+)*$/;
+    }]);
+    
+</script>
+
+<script type="text/javascript">
+    var SystemSettingsProperties = @Html.Raw(Json.Encode(ViewBag.SystemSettings));
+    var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+    var updateSystemSettingsUrl = "@Url.Action("UpdateSystemSettings", "Administration")";
+    var updateAdSettingsUrl = "@Url.Action("UpdateActiveDirectorySettings", "Administration")";
+    var adTestconnectionUrl = "@Url.Action("activedirectorytestconnection", "Administration")";
+    var azureadTestconnectionUrl = "@Url.Action("AzureADTestConnection", "Administration")";
+    var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
+    var updateAzureADSettingsUrl = "@Url.Action("UpdateAzureADSettings", "Administration")";
+    var saveDbSettingsUrl = "@Url.Action("SaveDatabaseSettings", "Administration")";
+    var testConnectionUrl = "@Url.Action("TestDatabaseConnection", "UserManagement")";
+    var connectDatabaseUrl = "@Url.Action("ConnectDatabaseToImport", "UserManagement")";
+    var getDatabaseUrl = "@Url.Action("GetDatabaseList", "UserManagement")";
+    var getTableRelationUrl = "@Url.Action("GetTableRelation", "UserManagement")";
+    var baseRootUrl = "@Url.Content("~/")";
+    if (baseRootUrl.toLowerCase() === "/")
+        baseRootUrl = "";
+
+    $(function() {
+        if ("@ViewBag.scheme.ToLower()" != "null") {
+            $("#enable-ssl").val("@ViewBag.scheme");
+        } else {
+            $("#enable-ssl").val("http");
+        }
+        $("#enable-ssl").selectpicker("refresh");
+
+        $(document).click(function(e){
+            if (e.target.id !== "error_icon") {
+                $("#ssl-help-message").hide();
+            }
+        });
+    });
+</script>
+
+    <script type="text/javascript">
+
+        $(document)
+            .ready(function() {
+                var section = window.location.href;
+                $(".system-settings-sidebar li").hide();
+
+                if (section.toLowerCase().indexOf("groups") > 0 ||
+                    section.toLowerCase().indexOf("users") > 0 ||
+                    section.toLowerCase().indexOf("user-management") > 0) {
+                    $("li[data-current-content='groups'],li[data-current-content='users']").show();
+                } else {
+                    $("li[data-current-content='emailsettings'],li[data-current-content='general'],li[data-current-content='activedirectorysettings'],li[data-current-content='notificationsettings'],li[data-current-content='usersettings'],li[data-current-content='databasesettings'],li[data-current-content='licensesettings'], li[data-current-content='samlsettings']").show();
+                }
+                if (section.toLowerCase().indexOf("groups") > 0) {
+                    $("li[data-current-content='groups'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("users") > 0 ||
+                    section.toLowerCase().indexOf("user-management") > 0) {
+                    $("li[data-current-content='users'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("e-mail-settings") > 0) {
+
+                    $("li[data-current-content='emailsettings'] a").addClass('active');
+                    $("#look-and-feel-container, #active-directory-container,#database-settings-container").hide();
+                    $("#mail-settings-container").show();
+                } else if (section.toLowerCase().indexOf("user-directory-settings") > 0) {
+
+                    $("li[data-current-content='activedirectorysettings'] a").addClass('active');
+                    $("#look-and-feel-container, #mail-settings-container,#database-settings-container").hide();
+                    $("#active-directory-container").show();
+                } else if (section.toLowerCase().indexOf("notification-settings") > 0) {
+                    $("li[data-current-content='notificationsettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("user-settings") > 0) {
+                    $("li[data-current-content='usersettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("saml-settings") > 0) {
+                    $("li[data-current-content='samlsettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("database-settings") > 0) {
+                    $("li[data-current-content='databasesettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("license-settings") > 0) {
+                    $("li[data-current-content='licensesettings'] a").addClass('active');
+                    $("#mail-settings-container, #active-directory-container").hide();
+                } else {
+                    $("li[data-current-content='general'] a").addClass('active');
+                    $("#look-and-feel-container").show();
+                    $("#mail-settings-container, #active-directory-container,#database-settings-container").hide();
+                }
+            });
+    </script>
+
+    <script>
+        var machineName = "@ViewBag.SystemSettings.MachineName";
+        if (machineName !== "") {
+            $("#HasKerberos").attr("checked", true);
+            $("#kerberos-setting input:not('#HasKerberos')").attr("disabled", false);
+        } else {
+            $("#HasKerberos").attr("checked", false);
+            $("#kerberos-setting input:not('#HasKerberos')").attr("disabled", true);
+        }
+    </script>
+
+    @Scripts.Render("~/scripts/admin/site-settings")
+}
+
+@section MainSection{
+    @Html.Partial("_AdminMenu")
+
+    @Html.Partial("_SiteSettings")
+
+    @Html.Partial("_EmailSettings")
+
+    @Html.Partial("_ActiveDirectorySettings")
+}

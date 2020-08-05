@@ -1,0 +1,229 @@
+﻿@{
+    Layout = null;
+    var item = "dashboards";
+    var baseUrl = CloudAppConfig.InternalAppBIUrl + "/" + CloudAppConfig.TenantIdentifierPrefix + "/";
+
+    if (ViewBag.IsBoldBIMultiTenant && !ViewBag.IsBoldReportsMultiTenant)
+    {
+        item = "dashboards";
+        baseUrl = CloudAppConfig.InternalAppBIUrl + "/" + CloudAppConfig.TenantIdentifierPrefix + "/";
+    }
+    else if (!ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
+    {
+        item = "reports";
+        baseUrl = CloudAppConfig.InternalAppReportUrl + "/" + CloudAppConfig.TenantIdentifierPrefix + "/";
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>[[[Add Tenants]]]</title>
+    @Styles.Render("~/styles/AddTenantIframe")
+    @Scripts.Render("~/scripts/localizationcontent")
+    @Scripts.Render("~/scripts/AddTenantIframe")
+    <script>
+
+        var boldReportsUrl = "@CloudAppConfig.InternalAppReportUrl/@CloudAppConfig.TenantIdentifierPrefix/";
+        var boldBIUrl = "@CloudAppConfig.InternalAppBIUrl/@CloudAppConfig.TenantIdentifierPrefix/";
+        var item = "@item";
+        var actionType = "@HttpContext.Current.Request.QueryString["actionType"].ToString()";
+        var tenantId = "@HttpContext.Current.Request.QueryString["tenantId"].ToString()";
+        var setSystemSettingsUrl = "@Url.Action("AddTenant", "ServerConfiguration")";
+        var connectDatabaseUrl = "@Url.Action("ConnectDatabaseForServer", "ServerConfiguration")";
+        var generateDatabaseUrl = "@Url.Action("GenerateDatabase", "ServerConfiguration")";
+        var getAllDatabaseUrl = "@Url.Action("GetAllDatabase", "ServerConfiguration")";
+        var checkTableExistsUrl = "@Url.Action("CheckTableAlreadyExistsForServer", "ServerConfiguration")";
+        var blobExist = "@Url.Action("IsBlobExists", "ServerConfiguration")";
+        var checkTenantNameExistsUrl = "@Url.Action("CheckTenantNameExist", "TenantsManagement")";
+        var addTenantsUrl = "@Url.Action("AddTenant", "ServerConfiguration")";
+        var getTenantDetailsUrl = "@Url.Action("GetTenantInfo", "TenantsManagement")";
+        var blobDetails = "@Url.Action("GetAzureDetails", "TenantsManagement")";
+        var updateTenantDetailsUrl = "@Url.Action("UpdateTenantInfo", "TenantsManagement")";
+        var checkDatabaseExistForServerUrl = "@Url.Action("CheckDatabaseExistsForServer", "ServerConfiguration")";
+        var dataConnectorsCount = "@CloudAppConfig.DataConnectorsCount";
+        var umsSitesUrl = "@Url.Action("Sites", "TenantsManagement")";
+        var isBoldBI = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldBI.DisplayName)".toLowerCase() == "true";
+        var isAzureApplication = ("@ViewBag.IsAzureApplication".toLowerCase() === "true");
+        var isBoldReports = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldReports.DisplayName)".toLowerCase() == "true";
+        var selfHosted = ("@ViewBag.selfHosted".toLowerCase() === "true");
+    </script>
+</head>
+<body>
+    <div class="add-tenant-dialog-wrapper">
+        <div class="col-lg-12 no-padding" id="popup-container" data-spy="scroll">
+            <div class="modal-header no-margin col-sm-12 no-padding">
+                <div class="add-tenant-popup-title">
+                    <label>[[[Create new site]]]</label>
+                </div>
+                <div class="title icons">
+                    <a href="javascript:void(0);" class="popup-close" title="[[[Close]]]">
+                        <span id="add-tenant-close" class="su su-close pull-right"></span>
+                    </a>
+                </div>
+                <div class="another-div">
+                    <div class="selector no-padding">
+                        <div class="selector-icons">
+                            <div class="selector-panel" id="creationsite">
+                                <div class="circle selectedClass">
+                                </div>
+                                <div class="hr-tag"> </div>
+                            </div>
+                            <div class="selector-panel" id="selectiondb">
+                                <div class="circle"></div>
+                                <div class="hr-tag"> </div>
+                            </div>
+                            @if (ViewBag.IsBoldBIMultiTenant)
+                            {
+                                <div class="selector-panel" id="selection-intermediate-db">
+                                    <div class="circle"></div>
+                                    <div class="hr-tag"> </div>
+                                </div>
+                            }
+                            <div class="selector-panel" id="selection-storage">
+                                <div class="circle"></div>
+                                <div class="hr-tag"> </div>
+                            </div>
+                            <div class="selector-panel" id="selectionadmin">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                        <div class="selector-content">
+                            <span class="site-creation selectedContent">[[[SITE CREATION]]]</span>
+                            <span class="select-database">[[[SELECT DATABASE]]]</span>
+                            @if (ViewBag.IsBoldBIMultiTenant)
+                            {
+                                <span class="select-intermediate-database">[[[SELECT DATA STORE]]]</span>
+                            }
+                            <span class="select-storage">[[[SELECT STORAGE]]]</span>
+                            <span class="administrator">[[[ADMINISTRATOR]]]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-tenant-body col-xs-12 no-padding tenant-body">
+                <div id="dialog-header">
+                    <div class="col-xs-12 no-padding">
+                        <label class="text-header-content header-label">[[[Site Name]]]</label>
+                        <div id="used-tenant-name" class="header-description"></div>
+                    </div>
+                    <div class="col-xs-12 no-padding">
+                        <label class="text-header-content header-label">[[[Site URL]]]</label>
+                        <div id="used-tenant-identifier" class="header-description"></div>
+                    </div>
+                </div>
+                <div id="dialog-body">
+                    <div class="dialog-body-div">
+                        <div id="dialog-body-header">
+                            <div id="header-logo">
+                                <img src="@Url.Content(HttpRuntime.AppDomainAppVirtualPath + "/Content/images/" + GlobalAppSettings.Branding + "/Application/site_creation.svg")" />
+                            </div>
+                            <div id="header-title">
+                                [[[Site Creation]]]
+                            </div>
+                            @if (!ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
+                            {
+                                <div id="header-description">
+                                    [[[Bold Reports multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]
+                                </div>
+                            }
+                            else
+                            {
+                                <div id="header-description">
+                                    [[[Bold BI multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]
+                                </div>
+                            }
+
+                            <div id="search-area">
+                                <div class="search-bar">
+                                    <input type="text" class="pull-left" id="search-tenant-users" placeholder="[[[Search user]]]" />
+                                    <span class="su su-inner-close close-icon" id="clear-search" title="[[[Clear search]]]"></span>
+                                    <span class="su su-search search-icon" title="[[[Search]]]"></span>
+                                </div>
+                                <div class="sort">
+                                    <span class="su su-sort text-right" id="order" data-value="descending">
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dialog-body-container">
+                            <div class="tenant-registration-form show">
+                                <form class="col-lg-12 col-sm-12 col-xs-12 col-md-12 no-padding" id="tenant-registration-form" autocomplete="off">
+                                    <div class="txt-holder text-wrap center-align">
+                                        <label class="field-label">[[[Tenant Type]]]</label>
+                                        <select @(ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant ? string.Empty : "disabled") id="tenant-type" name="tenanttype" class="selectpicker" data-width="100%">
+
+                                            @if (ViewBag.IsCreateActionType)
+                                            {
+                                                if (ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
+                                                {
+                                                    <option value="@TenantType.BoldBIOnPremise" class="">[[[Bold BI]]]</option>
+                                                    <option value="@TenantType.BoldReportsOnPremise" class="">[[[Bold Reports]]]</option>
+                                                }
+                                                else if (ViewBag.IsBoldBIMultiTenant && !ViewBag.IsBoldReportsMultiTenant)
+                                                {
+                                                    <option value="@TenantType.BoldBIOnPremise" class="">[[[Bold BI]]]</option>
+                                                }
+                                                else if (!ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
+                                                {
+                                                    <option value="@TenantType.BoldReportsOnPremise" class="">[[[Bold Reports]]]</option>
+                                                }
+                                            }
+
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12 no-padding site-name">
+                                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 txt-holder center-align input-alignment no-padding">
+                                            <label class="text-content">[[[Site Name]]]</label>
+                                        </div>
+                                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 txt-holder center-align input-alignment no-padding">
+                                            <input type="text" id="tenant-name" name="tenantname" class="form-text form-control system-settings-startup-page-fields db-fields text-content" placeholder="[[[Site name]]]" />
+                                            <span class="startup-validation validation-txt-errors" id="tenant-name-validation-error"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12 no-padding site-url">
+                                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 txt-holder center-align input-alignment no-padding">
+                                            <label class="text-content">[[[Site Identifier]]]</label>
+                                        </div>
+                                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 txt-holder center-align input-alignment no-padding">
+                                            <input type="text" id="tenant-identifier" name="tenantidentifier" class=" form-text form-control system-settings-startup-page-fields db-fields text-content" placeholder="[[[Site identifier]]]" />
+                                            <span class="startup-validation validation-txt-errors" id="tenant-identifier-validation-error"></span>
+                                            <span class="identifier-info">
+                                                [[[The site identifier should be unique, and it is part of your site URL.]]]
+                                                <div class="site-default-text text-content">[[[i.e. ]]]@baseUrl</div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="tenant-database-form hide">
+                                <div class="system-startUp-settings-bg">
+                                    <div class="startup-page-conatiner" id="startup-page-conatiner">
+                                        <div id="system-settings-general">
+                                            @Html.Action("DatabaseConfiguration", "serverconfiguration")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="storage-form hide">
+                                @Html.Action("StorageConfiguraton", "serverconfiguration")
+                            </div>
+                            <div class="tenant-user-form hide">
+                                @Html.Partial("_TenantUserSelection")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer col-xs-12 col-lg-12 col-xs-12 col-sm-12" id="dialog-body-footer">
+                <input id="details-back" type="button" value="[[[Back]]]" tabindex="6" class="secondary-button button-left back-button">
+                <input id="details-next" type="button" value="[[[Next]]]" tabindex="4" class="primary-button database">
+                <input type="button" id="move-to-next" value="[[[Proceed]]]" class="proceed-button content-display show-sqlce-content hide" />
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

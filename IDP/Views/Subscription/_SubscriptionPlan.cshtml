@@ -1,0 +1,241 @@
+﻿@using System.Configuration
+﻿@{
+    var tenantInfoId = ViewBag.TenantInfoId;
+    var tenantInfo = ViewBag.TenantInfo as TenantInfo;
+    LicenseSettings licenseSettings = tenantInfo.LicenseSettings;
+    var isadditionalStoragePresent = licenseSettings.Addons.Where(x => x.PlanId == GlobalAppSettings.GetDescription(AddOnProducts.AdditionalDataStorage)).FirstOrDefault();
+    var quantity = isadditionalStoragePresent != null ? isadditionalStoragePresent.Quantity.ToString() : string.Empty;
+    var tenantStatus = licenseSettings.TenantStatus;
+    var isCardExist = ViewBag.IsCardExist;
+    var globalAppSettings = new GlobalAppSettings();
+    var productName = GlobalAppSettings.GetDescription((TenantType)tenantInfo.TenantTypeId);
+}
+<div id="stripePublicKey" style="display:none">
+    @CloudAppConfig.StripePublicKey
+</div>
+<div id="subscription-plan-container" class="admin-page-container col-xs-12 no-padding">
+    <div id="subscription-plan-block" class="col-xs-12 no-padding">
+        <div class="col-md-12 import-area admin-page-header">
+            <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                <h1 class="h2 page-title">SUBSCRIPTION</h1>
+                <h5 class="page-description">Manage the subscription and plan for the application</h5>
+            </hgroup>
+        </div>
+
+        <form id="subscription-plan-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+            <div id="issubscriptioncancel" style="display:none">@ViewBag.IsSubscriptionCancel</div>
+            <div id="currentPlanId" style="display: none">@Model.PlanId</div>
+            <div class="col-xs-12 admin-page-body">
+                <h3 class="title col-xs-12 sub-section-heading">Subscription Information</h3>
+                <div class="col-xs-6 no-margin no-padding" id="subscription-information">
+                    <table class="table table-section">
+                        <tr>
+                            <td>Plan</td>
+                            <td>
+
+                                @if (tenantStatus != TenantStatus.MarkedForSuspension)
+                                {
+                                    <span style="float: left; padding: 6px 10px 0px 0px;">
+                                        @Model.PlanName
+                                    </span>
+                                    if (!licenseSettings.IsKcBenefit && Model.PlanId.ToString() != CloudAppConfig.BoldBiPlanId)
+                                    {
+                                        <button type="button" title="" id="change-plan-settings" name="ChangePlanSettings" onclick="openPlanPickupPartial();" class="primary-button">
+                                            Change Plan
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>
+                                        @Model.PlanName
+                                    </span>
+                                    <div class="alert-note">(Note: Subscription plan cannot be changed due to failed payments. <a href='@Url.Action("GetCardDetail", "Payment")' id=''>Update your payment details.</a>)</div>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Price</td>
+                            <td>
+                                @{
+                                    if (licenseSettings.IsKcBenefit || licenseSettings.PlanId == (int)SaaSPlan.SingleUserPlan)
+                                    {
+                                        <span>Free subscription</span>
+                                    }
+                                    else
+                                    {
+                                        if (@Model.Status.ToLower() == "trialing" || @Model.Status.ToLower() == GlobalAppSettings.GetDescription(TenantStatus.Trial).ToLower() || @Model.Status.ToLower() == GlobalAppSettings.GetDescription(TenantStatus.ActivePaymentRequired).ToLower())
+                                        {
+                                            <span>Free until @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate).</span>
+                                            if (!ViewBag.IsSubscriptionCancel)
+                                            {
+                                                <span>Will be charged $@Model.Price from @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate) every @Model.Interval.</span>
+                                            }
+                                        }
+                                        else if (@Model.Status.ToLower() == GlobalAppSettings.GetDescription(TenantStatus.TrialNotStarted).ToLower())
+                                        {
+                                            <span>$@Model.Price/@Model.Interval</span>
+                                            <span>Your trial period not yet started.</span>
+                                        }
+                                        else
+                                        {
+                                            <span>$@Model.Price/@Model.Interval</span>
+                                            if (!ViewBag.IsSubscriptionCancel)
+                                            {
+                                                <span>Will be charged next on @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate) and after every @Model.Interval.</span>
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Created</td>
+                            <td>@globalAppSettings.GetDateFormat(Model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td>Billing cycle</td>
+                            @if (licenseSettings.IsKcBenefit || (licenseSettings.PlanId == (int)SaaSPlan.SingleUserPlan && !isCardExist) || Model.Status.ToLower() == GlobalAppSettings.GetDescription(TenantStatus.TrialNotStarted).ToLower() || Model.Status.ToLower() == GlobalAppSettings.GetDescription(TenantStatus.Trial).ToLower() || (ViewBag.IsSubscriptionCancel && !isCardExist))
+                            {
+                                <td>-</td>
+                            }
+                            else
+                            {
+                                <td>@globalAppSettings.GetDateFormat(Model.BillingCycle.StartDate) to @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Last payment</td>
+                            @if (Model.LastPaymentDate != null && !licenseSettings.IsKcBenefit && isCardExist)
+                            {
+                                <td>@globalAppSettings.GetDateFormat(Model.LastPaymentDate)</td>
+                            }
+                            else
+                            {
+                                <td>-</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            @if (tenantStatus == TenantStatus.Trial || tenantStatus == TenantStatus.ActivePaymentRequired || tenantStatus == TenantStatus.TrialNotStarted)
+                            {
+                                <td><span class="label label-primary status-label">Trial / Benefits</span></td>
+                            }
+                            else if (tenantStatus == TenantStatus.MarkedForSuspension || tenantStatus == TenantStatus.Suspended)
+                            {
+                                <td><span class="label label-warning status-label">Suspended</span></td>
+                            }
+                            else if (tenantStatus == TenantStatus.Active)
+                            {
+                                <td><span class="label label-success status-label">Active</span></td>
+                            }
+                            else if (tenantStatus == TenantStatus.MarkedForDeletion)
+                            {
+                                <td><span class="label label-danger status-label">Marked for deletion</span></td>
+                            }
+                            else if (tenantStatus == TenantStatus.SubscriptionCancelled)
+                            {
+                                <td><span class="label label-warning status-label">Subscription Cancelled</span></td>
+                            }
+                            else
+                            {
+                                <td>-</td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+                <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                    <button type="button" title="" id="change-subscription-settings" name="ChangeSubscriptionSettings" onclick="openSubscriptionSettings();" class="secondary-button cancel-subscription-button pull-right disable-subscription">
+                        Cancel my subscription
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="subscription-settings-container">
+    <div id="cancel-subscription-container" class="admin-page-container hide-block">
+        <div id="cancel-subscription-block" class="col-xs-12 no-padding">
+            <div class="col-md-12 import-area admin-page-header">
+                <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                    <h1 class="h2 page-title">CANCEL MY SUBSCRIPTION</h1>
+                    <h5 class="page-description">Cancel your subscription to @productName</h5>
+                </hgroup>
+            </div>
+            <form id="cancel-subscription-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+                <div class="admin-page-body subscription-content">
+                    <span>Please click on the cancel subscription button below to end your subscription.</span>
+                    <span>Your subscription will terminate at the end of this billing period. You will continue to have access until your subscription end date – @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate).</span>
+                    <span>You can reactivate your account before @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate). <b>After this date your subscription and all data stored under it will be completely deleted from our system.</b></span>
+                    <span>We are sad to see you go.  Please consider us for your future needs. We appreciate your business.</span>
+                    <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                        <div id="cancelsubscription-group-button">
+                            <div class="col-lg-12 col-md-12 no-margin">
+                                @Html.CheckBox("deactivesubscription", new { @class = "material-checkbox" })
+                                @Html.Label("deactivesubscription", "I choose to cancel my subscription", new { @class = "pull-right toggle-space" })
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 no-margin">
+                            <button type="button" title="" name="ChangeSubscriptionSettings" onclick="redirectToSubscriptionPlan();" class="primary-button pull-right">
+                                Go back
+                            </button>
+                            <button type="button" title="" id="enable-cancelsubscription" onclick="cancelSubscriptionFeedback();" class="secondary-button cancel-subscription-button pull-right disable-subscription">
+                                Cancel my subscription
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="reactivate-subscription-container" class="admin-page-container hide-block">
+        <div id="reactivate-subscription-block" class="col-xs-12 no-padding">
+            <div class="col-md-12 import-area admin-page-header">
+                <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                    <h1 class="h2 page-title">REACTIVATE MY SUBSCRIPTION</h1>
+                    <h5 class="page-description">Continue the subscription for @productName</h5>
+                </hgroup>
+            </div>
+            <form id="reactivate-subscription-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+                <div class="admin-page-body subscription-content">
+                    <span>We are happy to see you continue using @productName.</span>
+                    @if (isCardExist)
+                    {
+                        <span>Your billing period and billed amount is not affected by this action as you have already paid for the current billing cycle. Click <b>Reactivate my subscription</b> to continue using @((TenantType)tenantInfo.TenantTypeId == TenantType.BoldBIOnPremise ? "dashboards" : "reports").</span>
+                    }
+                    else
+                    {
+                        <span>Your billing period and billed amount is not affected by this action if you have already paid for the current billing cycle. Click <b>Reactivate my subscription</b> to continue using @((TenantType)tenantInfo.TenantTypeId == TenantType.BoldBIOnPremise ? "dashboards" : "reports").</span>
+                    }
+
+                    <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                        <button type="button" title="" onclick="redirectToSubscriptionPlan();" class="secondary-button pull-right">
+                            Go back
+                        </button>
+                        <button type="button" title="" onclick="activateSubscription();" class="primary-button reactivate-subscription-button pull-right">
+                            Reactivate my subscription
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    var applyKcCouponUrl = "@Url.Action("ApplyKcOffer", "Payment")";
+    var createSubscriptionCardUrl = "@Url.Action("AddPaymentDetail", "Payment")";
+    var updateSubscriptionUrl = "@Url.Action("UpdateAddonInStripe", "Payment")";
+    var isCardExist = "@isCardExist";
+    var quantity = "@quantity";
+    $(document).ready(function () {
+        $("#issubscriptioncancel").text('@ViewBag.IsSubscriptionCancel');
+        validateSubscriptionStatus();
+        if ('@Model.Status.ToLower()' != "trialing") {
+            $("#subscription-information table").removeClass("table-section");
+            $("#subscription-information table").addClass("active-subscription-table-section");
+            $("#plan-details-contianer table").removeClass("table-section");
+            $("#plan-details-contianer table").addClass("active-subscription-table-section");
+        }
+    });
+</script>

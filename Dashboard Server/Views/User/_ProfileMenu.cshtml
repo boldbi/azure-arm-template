@@ -1,0 +1,46 @@
+﻿@{
+    var currentUrl = HttpContext.Current.Request.Url.LocalPath.TrimEnd('/');
+    var profilePageUrl = Url.Action("Profilepage", "User");
+    var myPremissionPageUrl = Url.Action("UserPermission", "User");
+    var connectedAccountPageUrl = Url.Action("ConnectedAccounts", "User");
+    var supportTicketsUrl = Url.Action("TicketList", "Support");
+    var connectedSitesPageUrl = Url.Action("ConnectedSites", "User");
+}
+
+<nav id="admin-nav">
+    <ul>
+        <li>
+            <a id="site-settings-link" class="admin-menu-item @(currentUrl.IndexOf(profilePageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(profilePageUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)" href="@profilePageUrl" role="tab">
+                <i class="su su-user-1"></i>
+                <span>[[[My Profile]]]</span>
+            </a>
+        </li>
+        <li>
+            <a id="dashboard-settings-link" class="admin-menu-item @(currentUrl.IndexOf(myPremissionPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@myPremissionPageUrl" role="tab">
+                <i class="su su-manage-permission"></i>
+                <span>[[[My Permissions]]]</span>
+            </a>
+        </li>
+        <li>
+            <a id="active-directory-settings-link" class="admin-menu-item @(currentUrl.IndexOf(connectedAccountPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@connectedAccountPageUrl" role="tab">
+                <i class="su su-link"></i>
+                <span>[[[Connected Accounts]]]</span>
+            </a>
+        </li>
+        <li>
+            <a id="connected-sites-settings-link" class="admin-menu-item @(currentUrl.IndexOf(connectedSitesPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@connectedSitesPageUrl" role="tab">
+                <i class="su su-connected"></i>
+                <span>[[[Connected Sites]]]</span>
+            </a>
+        </li>
+        @if (!ServerAppConfig.IsSelfHosted)
+        {
+            <li>
+                <a id="ticket-listing-link" class="admin-menu-item @(currentUrl.IndexOf(supportTicketsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@supportTicketsUrl" role="tab">
+                    <i class="su su-concierge-support"></i>
+                    <span>[[[Support Incidents]]]</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

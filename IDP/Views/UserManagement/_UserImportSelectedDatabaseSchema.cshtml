@@ -1,0 +1,106 @@
+﻿@model List<SchemaInfo>
+<script>
+    var tableSchema=@Html.Raw(Json.Encode(Model))
+    var importDatabaseQuerySchema = {};
+</script>
+<div class="col-xs-12 schema-selection">
+    <div class="table-list-treeview-header no-padding pull-left">
+        <h5>Choose the columns that has the user data</h5>
+    </div>
+    <div class="selected-schema-holder-header pull-left">
+        <h5>User data</h5>
+    </div>
+</div>
+<div id="schema-selection" class="col-lg-12 schema-selection">
+    <div id="table-list-treeview" class="col-lg-4 no-padding table-list-treeview">
+        <div id="parent-scroll-element">
+            <div class="tree-view-search-holder">
+                <input id="search-tree" type="text" class="form-control" placeholder="Search" />
+                <span id="search-tree-close" class="su su-inner-close close-icon" title="Clear search"></span>
+                <span class="su su-search search-user" title="Search database schema"></span>
+            </div>
+            <div id="scroll-element">
+                <div>
+                    <ul id="tree-view">
+                        @for (var schema = 0; schema < Model.Count; schema++)
+                        {
+                            <li id="schema_@schema" data-field-type="schema" class="expanded">
+                                @Model[schema].Schema
+                                <ul>
+                                    @for (var table = 0; table < Model[schema].Tables.Count; table++)
+                                    {
+                                        <li id="table_@table" data-field-type="table">
+                                            @Model[schema].Tables[table].TableName
+                                            <ul>
+                                                @for (var column = 0; column < Model[schema].Tables[table].Columns.Count; column++)
+                                                {
+                                                    <li id="table_@(table)_column_@(column)" data-field-type="column" data-table-name="@Model[schema].Tables[table].TableName" data-column-name="@Model[schema].Tables[table].Columns[column].ColumnName" data-schema-name="@Model[schema].Schema" data-type="@Model[schema].Tables[table].Columns[column].DataType" class="column-hover">
+                                                        @Model[schema].Tables[table].Columns[column].ColumnName
+                                                        <span class="su su-add selection-add-btn"></span>
+                                                        <div class="selected-schema-btn-dialog">
+
+                                                            <div>
+                                                                <h5><strong>Assign to</strong></h5>
+                                                                <button type="button" class="btn btn-default selected-schema-btn" data-field="username">Username</button>
+                                                                <button type="button" class="btn btn-default selected-schema-btn" data-field="firstname" disabled="disabled">First name</button>
+                                                                <button type="button" class="btn btn-default selected-schema-btn" data-field="email" disabled="disabled">Email</button>
+                                                                <button type="button" class="btn btn-default selected-schema-btn" data-field="lastname" disabled="disabled">Last name</button>
+                                                                <button type="button" class="btn btn-default selected-schema-btn" data-field="isactive" disabled="disabled">IsActive</button>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="selected-schema-holder" class="col-lg-8 selected-schema-holder">
+        <div class="col-xs-12">
+            <div class="col-xs-12 no-padding selected-labels">
+                <label class="col-xs-3 app-textbox-label">Username :</label>
+                <div class="col-xs-9 selected-schema-fields mandatory" data-field="username">
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding selected-labels">
+                <label class="col-xs-3 app-textbox-label">First name :</label>
+                <div class="col-xs-9 selected-schema-fields mandatory" data-field="firstname">
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding selected-labels">
+                <label class="col-xs-3 app-textbox-label">Email :</label>
+                <div class="col-xs-9 selected-schema-fields mandatory" data-field="email">
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding selected-labels">
+                <label class="col-xs-3 app-textbox-label">Last name :</label>
+                <div class="col-xs-9 selected-schema-fields" data-field="lastname">
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding selected-labels">
+                <label class="col-xs-3 app-textbox-label">IsActive :</label>
+                <div class="col-xs-9 selected-schema-fields" data-field="isactive">
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding selected-labels">
+                <label class="col-xs-3 app-textbox-label">IsActive value :</label>
+                <div class="col-xs-4">
+                    <input type="text" id="txt-activestatus" class="form-control" maxlength="255" />
+                </div>
+                <div class="record-count-info">
+                    <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                    <div class="col-xs-2 dropdown-menu" role="menu">This value will determine whether the user can be imported into the Identity Provider or removed during synchronization.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="selected-data-list" class="col-xs-12 no-padding">
+</div>

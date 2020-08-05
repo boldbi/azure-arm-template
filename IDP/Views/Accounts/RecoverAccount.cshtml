@@ -1,0 +1,91 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    if (CloudAppConfig.IsSelfHosted)
+    {
+        ViewBag.Title = "[[[Account Recovery - ]]]" + GlobalAppSettings.SystemSettings.OrganizationName;
+    }
+    else
+    {
+        ViewBag.Title = "[[[Account Recovery | ]]]" + GlobalAppSettings.BrandingDisplayName + "[[[ Account]]]";
+    }
+
+    var returnUrl = TempData["returnUrl"] != null ? TempData["returnUrl"].ToString() : string.Empty;
+    var resetPasswordUtilityLink = "https://help.syncfusion.com/bold-bi/on-premise/admin-utility/reset-password";
+}
+
+@section styles{
+    @Styles.Render("~/bundles/styles/accounts/forget-password")
+}
+
+@section scripts{
+    @Scripts.Render("~/bundles/scripts/accounts/forget-password")
+    <script>
+        $(document).ready(function () {
+            var userDirectiryType = "@TempData["userDirectiryType"]";
+
+            if (parseInt(userDirectiryType) == 5) {
+            window.open("https://www.syncfusion.com/account/forgotpassword", "_blank")
+        }
+    });
+    </script>
+}
+
+@section MainSection{
+    <form name="forgotPasswordForm" class="forgot-password-container" action="@Url.Action("RecoverAccount","Accounts")" onsubmit="return ForgotValidate();" id="forgot-password-form" method="post" autocomplete="off">
+        @if (!ViewBag.IsEmailSettingsConfigured)
+        {
+            <div class="icon-container"><span class="su su-warning-alt"></span></div>
+            <div class="heading text-h4">[[[Reset password]]]</div>
+            <div class="user-validation text-body">[[[As the email settings are not configured, we will not be able to send an email to reset your password. If you are the administrator, please follow the ]]]<a href="@resetPasswordUtilityLink">[[[steps]]]</a>[[[ to reset your password.]]]</div>
+        }
+        else
+        {
+            if (!string.IsNullOrWhiteSpace((string)TempData["uservalidationMessage"]))
+            {
+                <div class="icon-container"><span class="su su-warning-alt"></span></div>
+                <div class="heading text-h4">[[[Reset password]]]</div>
+                <div class="user-validation text-body">@TempData["userValidationMessage"]</div>
+            }
+            else if (ViewBag.IsEmailPresent)
+            {
+                <div class="form-name text-h1">[[[Cannot access your account?]]]</div>
+                if (ViewBag.IsAccountActivationRequest)
+                {
+                    <div class="forgot-password-content text-body">[[[Enter your email address and we will send you a link to activate your account.]]]</div>
+                }
+                else
+                {
+                    <div class="forgot-password-content text-body">[[[Enter your email address and we will send you a link to recover your account.]]]</div>
+                }
+
+                <div class="forgot-form-input-field">
+                    <input type="hidden" name="form-submit" id="form-submit" value="true" />
+                    <input type="hidden" name="callBackUri" value="@TempData["returnUrl"]" />
+                    <input type="text" required ng-minlength="1" md-no-asterisk name="email" id="key-input" class="form-control" placeholder="[[[Email address]]]" maxlength="100">
+                    <span class="special-char-msg validation-holder"></span>
+                    <span id="username-validation">
+                        @if (TempData["errorMessage"] as string != string.Empty)
+                        {
+                            <p class="validation-holder">@TempData["errorMessage"]</p>
+                        }
+                    </span>
+                </div>
+                if (ViewBag.IsAccountActivationRequest)
+                {
+                    <button id="submit-button" class="submit-button proceed-button" type="submit">
+                        [[[Send activation link]]]
+                    </button>
+                }
+                else
+                {
+                    <button id="submit-button" class="submit-button proceed-button" type="submit">
+                        [[[Send recovery link]]]
+                    </button>
+                }
+
+            }
+        }
+
+        <div class="back-button text-body"> <a href="@(Url.Action("login","accounts") + (string.IsNullOrWhiteSpace(returnUrl) ? string.Empty : "?returnUrl=" + returnUrl))"><span>[[[Return to login]]]</span></a></div>
+    </form>
+}

@@ -1,0 +1,96 @@
+﻿@{ 
+    var passwordRules = "<ul class='text-body' id='password_policy_rules'><li id='p_policy_length'><span class = 'icon'></span><span class='content'>[[[6 characters]]]</span></li><li id='p_policy_uppercase'><span class = 'icon'></span><span class='content'>[[[1 uppercase letter]]]</span></li><li id='p_policy_lowercase'><span class = 'icon'></span><span class='content'>[[[1 lowercase letter]]]</span></li><li id='p_policy_number'><span class = 'icon'></span><span class='content'>[[[1 number]]]</span></li><li id='p_policy_specialcharacter'><span class = 'icon'></span><span class='content'>[[[1 special character]]]</span></li></ul>";
+}
+
+<script>
+    var setSystemSettingsApp = angular.module("setSystemSettingsApp", []);
+    setSystemSettingsApp.controller("SetSystemSettingsController", function ($scope, $http) {
+        $scope.preventFormPost = false;
+
+        $scope.SaveUserAccountData = function ($event) {
+            if (($event.keyCode == 13 || $event.type == "click") && $scope.preventFormPost === false) {
+                $event.preventDefault();
+                getFormData();
+                if ($(".admin-account-fields-container").valid()) {
+                    $scope.preventFormPost = true;
+                    $("#txt-confirm-password").prop("disabled", "disabled");
+                    var elem = $(".startup-page-container-body");
+                    elem.ejWaitingPopup({ text: " " });
+                    $(".e-text").find(".configuration-status").remove();
+                    $(".e-text").append('<span class="configuration-status"></span>');
+                    elem.ejWaitingPopup("show");
+                    $("#image-parent-container, #system-settings-user-account-container").hide();
+                    $("#progress-parent-container").show();
+                    var globalAdminDetails = $("#global-admin-details").val();
+                    var systemSettingsData = $("#system-settings-data").val();
+                    var azureData = $("#azure-data").val();
+                    var appDetails = $("#app-details").val();
+                    setSystemSettingsData = { systemSettingsData: systemSettingsData, azureData: azureData, appDetails: appDetails, globalAdminDetails: globalAdminDetails };
+                    $http.post(setSystemSettingsUrl, setSystemSettingsData)
+                        .success(function (setSystemSettingsResponse) {
+                            window.location = setSystemSettingsResponse.redirectUrl;
+                        })
+                        .error(function (setSystemSettingsResponse) {
+                            $scope.preventFormPost = false;
+                            $("#txt-confirm-password").removeProp("disabled");
+                        });
+                }
+                return false;
+            }
+        }
+
+        $scope.init = function () {
+            $("#new-password").popover();
+        }
+    });
+</script>
+<div class="col-md-12 system-settings-page-container display-none" id="system-settings-user-account-container" ng-app="setSystemSettingsApp" ng-controller="SetSystemSettingsController" ng-init="init()">
+    <form id="admin-account-fields-container" class="admin-account-fields-container" autocomplete="off" ng-keypress="SaveUserAccountData($event)">
+        <input type="hidden" id="tenant-password-policy" data-policy-uppercase="True" data-policy-lowercase="True" data-policy-number="True" data-policy-specialcharacter="True" data-policy-partofusername="True" data-policy-minimumlength="6" />
+        <input type="hidden" id="user-details" data-username="" data-email="" data-displayname="" />
+        <div class="form-div form-group input-alignment">
+            <label class="field-label">[[[First name]]]</label>
+            <input type="text" tabindex="2" id="txt-firstname" name="firstname" class="form-control" placeholder="[[[First name]]]" maxlength="254" />
+            <span class="startup-validation txt-firstname validation-txt-errors"></span>
+        </div>
+        <div class="form-div form-group input-alignment">
+            <label class="field-label">[[[Last name]]]</label>
+            <input type="text" tabindex="2" id="txt-lastname" class="form-control" placeholder="[[[Last name]]]" name="lastname" maxlength="254" />
+            <span class="startup-validation validation-txt-errors"></span>
+        </div>
+        <div class="form-div form-group input-alignment">
+            <label class="field-label">[[[Email address]]]</label>
+            <input type="text" tabindex="3" id="txt-emailid" class="form-control" placeholder="[[[Email address]]]" name="email" autocomplete="off" maxlength="254" />
+            <span class="startup-validation txt-emailid validation-txt-errors"></span>
+            <div class="dropdown-menu mail-description" role="menu">
+                <div class="mail-contain">
+                    <div class="check-div">*</div><div id="mail-detail">[[[Please enter a valid email address.]]]</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-div form-group input-alignment">
+            <label class="field-label">[[[Password]]]</label>
+            <input type="text" class="display-none">
+            <input type="password" class="fake-password" name="fake_passwordfield_to_turnoff_autocomplete">
+            <input type="password" tabindex="4" id="new-password" class="form-control" placeholder="[[[Password]]]" name="password" autocomplete="off" maxlength="85" data-toggle="popover" data-title="[[[Password must contain:]]]" data-trigger="focus" data-html="true" data-content="@passwordRules" data-placement="left" />
+            <span class="su su-eye show-hide-password"></span>
+            <div class="startup-validation validation-txt-errors" id="new-password"></div>
+        </div>
+
+        <div id="confirm-password-section" class="form-div form-group input-alignment">
+            <label class="field-label">[[[Confirm password]]]</label>
+            <input type="text" class="display-none">
+            <input type="password" tabindex="5" id="txt-confirm-password" class="form-control" placeholder="[[[Confirm password]]]" name="confirm" autocomplete="off" maxlength="85" />
+            <span class="su su-eye show-hide-password"></span>
+            <div class="startup-validation validation-txt-errors" id="confirm-password"></div>
+        </div>
+        <div class="btn-holder" id="admin-account-submit-container">
+            <input type="text" name="globalAdminDetails" id="global-admin-details" class="display-none">
+            <input type="text" name="systemSettingsData" id="system-settings-data" class="display-none">
+            <input type="text" name="AzureData" id="azure-data" class="display-none">
+            <input type="submit" tabindex="5" id="btn-proceed-page3" class="proceed-button" ng-click="SaveUserAccountData($event)" ng-disabled="preventFormPost" value="[[[Next]]]" />
+        </div>
+    </form>
+</div>
+
+

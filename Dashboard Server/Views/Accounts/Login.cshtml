@@ -1,0 +1,31 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
+    var loginImage = globalAppSettings.SystemSettings.LoginLogo;
+
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    @Html.Partial("_OGPContent", new ViewDataDictionary { { "PageTitle", "Login" }, { "OrganizationName", globalAppSettings.SystemSettings.OrganizationName }, { "Logo", loginImage } })
+    @Styles.Render("~/bundles/styles/account-page")
+    @Html.Partial("~/Views/Shared/_LoaderIcon.cshtml")
+
+	<script type="text/javascript">
+        window.onload = function () {
+            document.getElementById('login-form').submit();
+        }
+    </script>
+</head>
+<body>
+    <form method="post" id="login-form" name="loginForm" class="login-form">
+        <div id="container">
+            <div id="inner-container">
+                <div id="loading-popup"></div>
+                <span id="waiting-text">[[[Please wait...]]]</span>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,51 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    if (CloudAppConfig.IsSelfHosted)
+    {
+        ViewBag.Title = "[[[Login - ]]]" + GlobalAppSettings.SystemSettings.OrganizationName;
+    }
+    else
+    {
+        ViewBag.Title = "[[[Login | ]]]" + GlobalAppSettings.BrandingDisplayName + "[[[ Account]]]";
+    }
+    var isAdfsUserNotFound = TempData["IsAdfsUserNotFound"] as string;
+    var callBackUri = string.IsNullOrWhiteSpace(ViewBag.CallBackUri) ? string.Empty : ViewBag.CallBackUri;
+    var isAuthError = TempData["AuthError"];
+    var authMessage = TempData["AuthMessage"] as string;
+}
+
+@section styles{
+    @Styles.Render("~/bundles/styles/accounts")
+}
+
+@section scripts{
+    <script>
+        var callBackUri = "@callBackUri";
+        var IsAdfsUserNotFound = '@isAdfsUserNotFound';
+        var isAuthError = "@isAuthError";
+        var authMessage = "@authMessage";
+        var validateEmailUrl = "@Url.Action("ValidateEmail", "Accounts")";
+        var rootUrl = "@Url.Content("~/")";
+        if (rootUrl.toLowerCase() === "/")
+            rootUrl = "";
+        var homeUrl = "@Url.Action("Index", "Home")";
+    </script>
+}
+
+@section MainSection{
+    <div class="login-wrapper">
+        <div class="login-body">
+            @Html.Partial("_LoginForm")
+            @Html.Partial("_ExternalAuthentication")
+            <div id="access-denied" class="error-message validation-holder bg-danger">
+                <span class="su su-login-error text-danger"></span>[[[Access denied]]]
+            </div>
+            <div id="validate-auth-user" class="error-message validation-holder bg-danger">                
+                <span class="auth-error-text"></span>
+            </div>
+            
+            <div class="forget-password-align"><a href="@(Url.Action("RecoverAccount", "Accounts") + (string.IsNullOrWhiteSpace(callBackUri) ? string.Empty : "?callBackUri=" + callBackUri))" class="forgot-pwd-link" tabindex="6">[[[Cannot access your account?]]]</a></div>            
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/scripts/accounts/login")
+}

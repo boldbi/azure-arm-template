@@ -1,0 +1,184 @@
+﻿@{
+    var includeHeader = ViewBag.IncludeHeader != null ? ViewBag.IncludeHeader : false;
+    var headerLogo = (ViewBag.LoginLogo != null) ? ViewBag.LoginLogo : CloudAppConfig.FallbackLoginLogoUrl;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    @Html.Partial("_OGPContent")
+    @RenderSection("meta", false)
+    <title>
+        @ViewBag.Title
+    </title>
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        <link rel="icon" href="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.Favicon" onerror="if (this.href != '~/content/images/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon') this.href = '~/content/images/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon';" />
+    }
+    else
+    {
+        <link rel="icon" href="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/Application/@IconFileNames.Favicon';" />
+    }
+    @Styles.Render("~/bundles/styles/accounts-layout")
+    @RenderSection("styles", false)
+    @Scripts.Render("~/bundles/scripts/accounts")
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
+    @RenderSection("scripts", false)
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="popover"]').popover();
+            var layoutBodyWaitingPopupTemplateId = createLoader("body");
+            $("#body").ejWaitingPopup({ template: $("#" + layoutBodyWaitingPopupTemplateId) });
+        });
+
+         @if(GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier && Syncfusion.Server.Base.CloudAppConfig.EnableAnalyticsTracking)
+        {
+            <text>
+                 var analyticKeyUA = "@Syncfusion.Server.Base.CloudAppConfig.GoogleAnalyticKeyUA";
+                (function(i, s, o, g, r, a, m) {
+                    window['GoogleAnalyticsObject'] = 'ga';
+                    window['ga'] = window['ga'] || function() {
+                        (window['ga'].q = window['ga'].q || []).push(arguments)
+                       }, window['ga'].l = 1 * new Date();
+                    a = document.createElement('script'),
+                        m = document.getElementsByTagName('script')[0];
+                    a.async = 1;
+                    a.src = '//www.google-analytics.com/analytics.js';
+                    m.parentNode.insertBefore(a, m)
+                   })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+                ga('create', analyticKeyUA, 'auto', { allowLinker: true });
+                ga('require', 'linker');
+                ga('linker:autoLink', ['@(GlobalAppSettings.BrandingDomain)']);
+                ga('send', 'pageview');
+            </text>
+        }
+
+        @if (GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier && Syncfusion.Server.Base.CloudAppConfig.EnableAnalyticsTracking) {
+            <text>
+            var analyticKeyUA = "@Syncfusion.Server.Base.CloudAppConfig.GoogleAnalyticKeyUA";
+            var google_tag_manager = document.createElement("script");
+            google_tag_manager.src = "https://www.googletagmanager.com/gtag/js?id=" + analyticKeyUA;
+            google_tag_manager.async = 1;
+            var parent_node = document.head || document.body;
+            parent_node.appendChild(google_tag_manager);
+
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', analyticKeyUA);
+            </text>
+        }
+    </script>
+    <style>
+        .loader-icon {
+            display: block;
+        }
+
+        .loader-icon {
+            left: 0px !important;
+            position: relative;
+            margin: 0px auto;
+            width: 54px;
+            height: 54px;
+        }
+
+            .loader-icon .circular {
+                -webkit-animation: rotate 2s linear infinite;
+                animation: rotate 2s linear infinite;
+                height: 54px;
+                width: 54px;
+                position: relative;
+            }
+
+            .loader-icon .path {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+                -webkit-animation: dash 1.5s ease-in-out infinite;
+                animation: dash 1.5s ease-in-out infinite;
+                stroke: #5592FB;
+                stroke-linecap: square;
+            }
+
+        @@keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@-webkit-keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes dash {
+            0% {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -124;
+            }
+        }
+
+        @@-webkit-keyframes dash {
+            0% {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -124;
+            }
+        }
+    </style>
+</head>
+<body id="body" class="layout-accounts">
+    @if (includeHeader)
+    {
+        <section id="header">
+            @Html.Partial("_Header")
+        </section>
+    }
+    <div class="account-parent @(includeHeader ? "header-padding" : string.Empty)">
+        <div class="account-child">
+            <div class="account-bg">
+                <div class="account-header">
+                    @if (!CloudAppConfig.IsSelfHosted)
+                    {
+                        <img alt="[[[Login Logo]]]" src="@headerLogo" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" />
+                    }
+                    else
+                    {
+                        <img alt="[[[Login Logo]]]" src="@Url.Content(@headerLogo)" onerror="this.onerror=null;this.src='@Url.Content("~/Content/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.LoginLogo)';" />
+                    }
+                </div>
+                @RenderSection("MainSection", true)
+            </div>
+        </div>
+    </div>
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        @Html.Partial("../Shared/_Footer")
+    }
+    else
+    {
+        @Html.Partial("../Shared/_FooterOnPremise")
+    }
+</body>
+</html>

@@ -1,0 +1,60 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @RenderSection("meta", false)
+    <title>
+        @ViewBag.Title
+    </title>
+    @Styles.Render("~/styles/layout")
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
+    @RenderSection("styles", false)
+    @RenderSection("scripts", false)
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        <link rel="icon" href="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.Favicon" onerror="if (this.href != '~/Content/images/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon') this.href = '~/Content/images/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon';" />
+    }
+    else
+    {
+        <link rel="icon" href="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/Application/@IconFileNames.Favicon';" />
+    }
+</head>
+<body class="clearfix" id="body">
+    <div id="server-app-container">
+        <section id="header-area">
+            <div class="header-bar col-lg-12 col-md-12 col-sm-12">
+                <div class="main-screen-logo mobile-hidden">
+                    <a href="@Url.Action("Login", "Accounts")" class="home-link" data-container="body">
+                        @if (!CloudAppConfig.IsSelfHosted)
+                        {
+                            <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.MainLogo" />
+                        }
+                        else
+                        {
+                            <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/Application/@IconFileNames.MainLogo';" />
+                        }
+                    </a>
+                </div>
+                <div class="org-name-wrapper">
+                    <h5 class="header-org-name">@GlobalAppSettings.SystemSettings.OrganizationName</h5>
+                </div>
+            </div>
+        </section>
+        <div id="content-area" class="clearfix">
+            @RenderSection("MainSection", true)
+        </div>
+        @if (!CloudAppConfig.IsSelfHosted)
+        {
+            @Html.Partial("../Shared/_Footer")
+        }
+        else
+        {
+            @Html.Partial("../Shared/_FooterOnPremise")
+        }
+    </div>
+</body>
+</html>
