@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "User Notification Preference - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var notificationAdminSettings = GlobalAppSettings.SystemSettings.NotificationAdministration;
+    var defaultNotificationSettings = GlobalAppSettings.SystemSettings.DefaultNotificationSettings;
+}
+
+@section styles{
+    @Styles.Render("~/styles/notification-settings")
+}
+
+@section scripts{
+    @Scripts.Render("~/scripts/notification-settings")
+}
+
+@section MainSection{
+
+    @Html.Partial("_AdminMenu")
+
+    <div id="notification-settings-container" class="col-xs-12 admin-page-container">
+        <div id="notification-settings-header" class="col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="h2 page-title">
+                    NOTIFICATION SETTINGS
+                </h1>
+                <h5 class="page-description">
+                    Customization of notifications for IdentityProvider
+                </h5>
+            </hgroup>
+        </div>
+        <div id="notification-settings-body" class="admin-page-body">
+            <div class="row input-field-wrapper">
+                <div class="col-xs-8 field-container-notification bottom-width ">
+                    <div class="col-xs-6">
+                    </div>
+                    <div class="col-xs-3 text-center notification-header">
+                        <strong>Default settings</strong>
+                        <div class="tool-tip col-xs-1">
+                            <span class="dropdown-toggle" data-toggle="dropdown" id="help-text-default"><span id="error_icon" class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu" id="help-text-message">This will be the default notification settings. Users can either choose the default settings or their own notification settings.</div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3 text-center notification-header">
+                        <strong> Allow / Restrict</strong>
+                        <div class="tool-tip col-xs-1">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">Allow or restrict notifications.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row input-field-wrapper">
+                    <div class="col-xs-8 field-container-notification">
+                        <label class="col-xs-6 app-textbox-label">
+                            System notifications
+                        </label>
+
+                        <div class="col-xs-3 text-center switch-align">
+                            <span class="material-switch text-left">
+                            <input id="enable-system-notification" name="enable_system" type="checkbox" @(defaultNotificationSettings.EnableSystemNotification == NotificationPreferenceOption.Enable ? "checked" : string.Empty) />
+                            <label for="enable-system-notification" class="label-primary"></label>
+                        </span>
+                        </div>
+                        <div class="col-xs-3 text-center switch-align">
+                            <span class="material-switch text-left">
+                            <input type="checkbox" id="restrict-system-notification" @(notificationAdminSettings.EnableSystemNotification ? "checked" : string.Empty) />
+                            <label for="restrict-system-notification" class="label-primary"></label>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row input-field-wrapper">
+                    <div class="col-xs-8 field-container-notification">
+                        <label class="col-xs-6 app-textbox-label">
+                            Mail notifications
+                        </label>
+                        <div class="col-xs-3 text-center switch-align">
+                            <span class="material-switch text-left">
+                            <input id="enable-mail-notification" name="enable_system" type="checkbox" @(defaultNotificationSettings.EnableMailNotification == NotificationPreferenceOption.Enable ? "checked" : string.Empty) />
+                            <label for="enable-mail-notification" class="label-primary"></label>
+                        </span>
+                        </div>
+                        <div class="col-xs-3 text-center switch-align">
+                            <span class="material-switch text-left">
+                            <input type="checkbox" id="restrict-mail-notification" @(notificationAdminSettings.EnableMailNotification ? "checked" : string.Empty) />
+                            <label for="restrict-mail-notification" class="label-primary"></label>
+                        </span>
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin-page-actions col-xs-12 col-md-12">
+            <a href="@Url.Action("Profilepage", "user")" class="secondary-button pull-right" id="cancel-notification-settings" title="">Cancel</a>
+            <input type="button" title="" data-url="@Url.Action("savenotificationsettings", "administration")" id="update-notification-settings" class="primary-button pull-right" value="Save" />
+        </div>
+    </div>
+}

@@ -1,0 +1,60 @@
+﻿@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    var isMobile = DeviceDetection.IsMobile;
+    ViewBag.Title = globalAppSettings.SystemSettings.OrganizationName + " - [[[Files]]]";
+}
+
+@model List<ItemDetail>
+
+@section styles{
+    @Styles.Render("~/bundles/styles/files-page")
+}
+
+@section scripts{
+    <script>
+        var editFilePopupUrl = "@Url.Action("getfiledetails", "files")";
+        var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
+    </script>
+    @(!isMobile ? Scripts.Render("~/bundles/scripts/files-page") : Scripts.Render("~/bundles/scripts/files-page-mobile"))
+}
+
+@section MainSection{
+    <div id="item-grid-container" data-grid-name="files" class="admin-page-container">
+        <input type="hidden" class="page-name" data-content="[[[FILES]]]">
+        @if (!isMobile)
+        {
+            <div class="import-area admin-page-header">
+                <h2 class="page-title">[[[FILES]]]</h2>
+            </div>
+            <div class="admin-page-body">
+                <div id="search-area" class="pull-right">
+                    <input type="text" id="search-items" class="pull-left no-margin" placeholder="[[[Search files]]]" />
+                    <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" data-toggle="tooltip" data-placement="left" title="[[[Clear search]]]"></span>
+                    <span class="su su-search search-item pull-left no-margin" data-toggle="tooltip" data-placement="left" title="[[[Search files]]]"></span>
+                </div>
+
+                <div class="grid-container grid">
+                    @Html.Partial("../Items/_ItemsGrid", new ViewDataDictionary { { "gridName", "files" } })
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="grid-container grid">
+                @Html.Partial("../Items/_ItemsGridForMobile", new ViewDataDictionary { { "gridName", "files" } })
+            </div>
+        }
+    </div>
+    <div id="edit-files-popup" style="display:none">
+        <iframe id="edit-files-popup-iframe" class="file-popup-frame"></iframe>
+    </div>
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="file-popup-frame"></iframe>
+    </div>
+    @if (!isMobile)
+    {
+        @Html.Partial("../Items/_AddItems")
+        @Html.Partial("../Items/_ItemVersion")
+    }
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
+}

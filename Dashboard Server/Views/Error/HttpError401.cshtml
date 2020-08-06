@@ -1,0 +1,85 @@
+﻿@using System.Configuration
+@{
+    Layout = null;
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    ViewBag.Title = "[[[Access Denied]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    var cdnLink = ConfigurationManager.AppSettings["CdnLink"].TrimEnd('/');
+    var ipAddress = HttpContext.Current.Request.UserHostAddress;
+    var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
+    bool isEmbedSignature = Convert.ToBoolean(HttpContext.Current.Request.Url.Query.ToLower().Contains("embed_signature"));
+    bool isEmbedUserToken = Convert.ToBoolean(HttpContext.Current.Request.Url.Query.ToLower().Contains("embed_user_token"));
+    var isEmbedExpired = ViewBag.IsEmbedExpired == null ? false : ViewBag.IsEmbedExpired;
+    var nonce = ViewBag.Nonce == null ? false : ViewBag.Nonce;
+    var isEmbedEnabled = ViewBag.IsEmbedEnabled == null ? false : ViewBag.IsEmbedEnabled;
+    var publishedItemIsLocked = ViewBag.IsPublishedCanEdit == null ? false : ViewBag.IsPublishedCanEdit;
+    var publishedDatasourceIsLocked = ViewBag.IsDatasourceCanEdit == null ? false : ViewBag.IsDatasourceCanEdit;
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/bundles/styles/layout")
+    @Styles.Render("~/bundles/styles/error-page-new")
+    @Scripts.Render("~/bundles/scripts/error-page")
+    <script>
+        var setPermissionUrl = "@Url.Action("SetCookieStoragePermission", "Accounts")";
+    </script>
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.Favicon') this.href = '@cdnLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.Favicon';" />
+    @Html.Partial("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@globalAppSettings.SystemSettings.LoginLogo" onerror="if (this.src != '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.LoginLogo') this.src = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.LoginLogo';" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@GlobalAppSettings.CdnDomain/static/error-pages/v1/access-denied.svg" class="error-image-2">
+                </div>
+                <div class="error-type">[[[Access Denied]]]</div>
+                @if (publishedItemIsLocked)
+                {
+                    <div class="error-text">
+                        [[[Editing access is denied because the dashboard was published from another site and editing has been disabled.]]] <br> [[[Please contact the site administrator for help.]]]
+                    </div>
+                }
+                else if (publishedDatasourceIsLocked)
+                {
+                    <div class="error-text">
+                        [[[Editing access is denied for the data source because it was published from another site and editing has been disabled.]]] <br> [[[Please contact the site administrator for help.]]]
+                    </div>
+                }
+                else if (isEmbedEnabled)
+                {
+                    <div class="error-text">
+                        [[[Embed authentication is disabled.]]] <br> [[[Please contact the site administrator for help.]]]
+                    </div>
+                }
+                else if (isEmbedExpired || nonce)
+                {
+                <div class="error-text">
+                    [[[The embed dashboard link is invalid or expired.]]] <br> [[[Please contact the site administrator for help.]]]
+                </div>
+                }
+                else if (embedConfig != null && (isEmbedSignature || isEmbedUserToken))
+                {
+                    <div class="error-text">
+                        [[[You do not have permission to view this dashboard.<br>Please contact your administrator.]]]
+                    </div>
+                }
+                else
+                {
+                    <div class="error-text">
+                        [[[Oops! The dashboard you are trying to access is restricted from viewing from the current IP address:]]] <b>@ipAddress</b><br>
+                        [[[Please contact the site administrator for help.]]]
+                    </div>
+                    <div class="take-me-back-to-home-page"><span class="error-page-cursor"><a class="error-to-beck-text-color" href="@Url.Action("Dashboards", "Dashboards")">[[[Go to home page]]]</a></span></div>
+                }
+            </div>
+        </div>
+    </div>
+    @Html.Partial("../Shared/_Footer", new ViewDataDictionary { { "appsettings", globalAppSettings } })
+</body>
+</html>

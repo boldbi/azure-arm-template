@@ -1,0 +1,199 @@
+﻿@model SAMLSettings
+
+@{
+    ViewBag.Title = "Single Sign-On settings - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    @Styles.Render("~/styles/saml-settings-page")
+}
+
+@section scripts{
+    @Scripts.Render("~/scripts/saml-settings-page")
+    <script type="text/javascript">
+        var defaultAuthentication = "@(ViewBag.DefaultAuthSetting == null ? string.Empty : ViewBag.DefaultAuthSetting.LoginProvider)";
+
+        function authenticationDialogBoxClose() {
+            $("#default-authentication-confirmation-diolog").ejDialog("close");
+        }
+
+        function updateSetting() {
+            ajaxService.postJsonData("/Administration/UpdateSAMLSettings", { "samlSettingsData": $scope.ssoSettings }).then(function (data) {
+                $scope.categories = data;
+                if (data) {
+                    var messageText = "SSO settings has been updated. The application will be restarted automatically inorder to apply this changes.";
+                    messageBox("su-single-sign-on", "SSO Settings", messageText, "success", function () {
+                        onCloseMessageBox();
+                        location.href = "/";
+                    });
+                }
+                else {
+                    WarningAlert("SSO Settings", "Error while updating settings.", 7000);
+                }
+            });
+        }
+
+        serverApp.controller("ssoController",
+            [
+                "$scope", "ajaxService", function ($scope, ajaxService) {
+                    //$scope.metaDataUriRegex = '^(http(s)?:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/([a-zA-Z0-9]+[a-zA-Z0-9-]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]*(\.[a-z]{2,8}-)?)*?$';
+                    $scope.tenantRegex = '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
+                    $scope.init = function () {
+                        $scope.ssoSettings = @Html.Raw(Json.Encode(Model));
+                    };
+
+                    $scope.saveSsoSettings = function () {
+                        if ((defaultAuthentication.toLowerCase() == authPrefix) && !($("#enable-sso").is(":checked"))) {
+                            $("#default-authentication-confirmation-diolog").ejDialog("open");
+                        }
+                        else {
+                            updateSetting();
+                        }
+                    };
+
+                $scope.hideValidationMessage = function(data) {
+                    if(!data){
+                        $("span.validation-message").addClass("ng-hide");
+                        $("#update-saml-settings").prop("disabled",false);
+                    }
+                    else if ($scope.ssoSettingsForm.$invalid) {
+                        $("#update-saml-settings").prop("disabled",true);
+                    }
+                };
+    }]);
+
+        $(document).ready(function () {
+            addPlacehoder("body");
+            $("[data-toggle='popover']").popover({
+                container: 'body'
+            });
+            function addPlacehoder(object) {
+                if (regexIe8.test(userAgent)) {
+                    $(object).find("input[type=text][class!='hidden-input'],input[type=password][class!='hidden-input'],textarea[id='txt_welcome_note']").each(function () {
+                        if ($(this).val() === "") {
+                            $($("<div>", { "class": "placeholder", text: $(this).attr("placeholder") })).insertAfter(this).show();
+                        }
+                        else {
+                            $($("<div>", { "class": "placeholder", text: $(this).attr("placeholder"), "style":"display:block" })).insertAfter(this).hide();
+                        }
+                    });
+                }
+            }
+            $(".update-oauth-or-openid-settings").click(function () {
+                $("#default-authentication-confirmation-diolog").ejDialog("close");
+                updateSetting();
+            });
+
+            $("#default-authentication-confirmation-diolog").ejDialog({
+                showOnInit: false,
+                allowDraggable: true,
+                enableResize: false,
+                width: "600px",
+                enableModal: true,
+                showHeader: false,
+                close: "authenticationDialogBoxClose",
+                closeOnEscape: true
+            });
+        });
+
+        $(document).on('click', function (e) {
+            if ($(".popover").children().hasClass("popover-content")) {
+                $(".popover-content").attr("id", "popover-content");
+                $(".arrow").attr("id", "arrow");
+            }
+
+            if (e.target.id !== "popover-content" && e.target.id !== "arrow" && e.target.id !== "relyingParty-info" && e.target.id !== "clientId-info" && e.target.id !== "authority-info" && e.target.id !== "uri-info" && e.target.id !== "tenantName-info")
+            {
+                $(".popover").css("display", "none");
+            }
+            $('.popover').each(function () {
+                if (!($(this).is(e.target) || $(this).has(e.target).length > 0)
+                     && $(this).siblings('.popover').length !== 0
+                     && $(this).siblings('.popover').has(e.target).length === 0)
+                {
+                    $(this).popover().remove();
+                }
+            });
+        });
+
+    </script>
+}
+
+@section MainSection{
+    @Html.Partial("_AdminMenu")
+    @Html.Partial("_DiologBox")
+    <div id="saml-container" class="admin-page-container" ng-controller="ssoController" ng-init="init()">
+        <div class="col-lg-12 col-md-12 col-sm-12 admin-page-header">
+            <hgroup>
+                <h1 class="page-title">SINGLE SIGN-ON SETTINGS</h1>
+                <h5 class="page-description">Configuration for setting Single Sign-On</h5>
+            </hgroup>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 check-box-label">
+            @Html.CheckBox("enable-sso", true, new { @class = "material-checkbox selfhosted schedule-checkbox", data_ng_model = "ssoSettings.IsEnabled", ng_click = "hideValidationMessage(ssoSettings.IsEnabled)" })
+            @Html.Label("enable-sso", "Enable SSO", new { @class = "clspadleft app-checkbox-label normal-font" })
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+
+            <form id="saml-setting" name="ssoSettingsForm" class="saml-form col-lg-12 col-md-12 col-sm-12" method="post" enctype="multipart/form-data" autocomplete="off">
+                <div class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+                    <div class="col-lg-12 col-md-12 no-padding">
+                        <label class="app-textbox-label col-lg-2 col-md-2 no-margin">Metadata URI</label>
+                        <div class="col-lg-8 col-md-8 no-margin form-input-field">
+                            <div class="col-lg-10 col-md-10 no-margin">
+                                <input type="text" class="form-control no-margin" ng-model="ssoSettings.MetadataUri" ng-init="metaDataUri=ssoSettings.MetadataUri" name="metaData" placeholder="Metadata URI" id="metadata-uri" data-ng-disabled="!ssoSettings.IsEnabled" @*ng-pattern="metaDataUriRegex"*@ required />
+                                <span class="validation-message top-padding" ng-show="ssoSettingsForm.metaData.$error.required && ssoSettingsForm.metaData.$dirty ">Please enter metadata URI.</span>
+                                @*<span class="validation-message top-padding" ng-show="ssoSettingsForm.metaData.$error.pattern ">Invalid metadata URI</span>*@ @*Due to backtracking issue in regex this validation is commented*@
+                            </div>
+                            <span id="uri-info" class="su su-info info-popup" data-toggle="popover" data-placement="bottom" data-html="true" data-content="A URI that will be used to obtain the wsFederation metadata<br>Example: http://myFederationServer/federationmetadata/2007-06/federationmetadata.xml"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 no-padding">
+                        <label class="app-textbox-label col-lg-2 col-md-2 no-margin">Authority</label>
+                        <div class="col-lg-8 col-md-8 no-margin form-input-field">
+                            <div class="col-lg-10 col-md-10 no-margin">
+                                <input type="text" class="form-control no-margin" ng-model="ssoSettings.Authority" ng-init="ssoAuthority=ssoSettings.Authority" name="ssoAuthority" placeholder="Authority" id="authority" data-ng-disabled="!ssoSettings.IsEnabled" required />
+                                <span class="validation-message top-padding" ng-show="ssoSettingsForm.ssoAuthority.$dirty && ssoSettingsForm.ssoAuthority.$invalid">Please enter authority URL.</span>
+                            </div>
+                            <span id="authority-info" class="su su-info info-popup" data-toggle="popover" data-placement="bottom" data-html="true" data-content="The URL to the authority that issues the authorization token <br>Example: http://myFederationServer/adfs"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 no-padding">
+                        <label class="app-textbox-label col-lg-2 col-md-2 no-margin">Designer Client Id</label>
+                        <div class="col-lg-8 col-md-8 no-margin form-input-field">
+                            <div class="col-lg-10 col-md-10 no-margin">
+                                <input type="text" class="form-control no-margin" ng-model="ssoSettings.DesignerClientId" ng-init="designerClientId=ssoSettings.DesignerClientId" name="designerClientId" placeholder="Designer client id" id="designer-clientId" data-ng-disabled="!ssoSettings.IsEnabled" required />
+                                <span class="validation-message top-padding" ng-show="ssoSettingsForm.designerClientId.$dirty && ssoSettingsForm.designerClientId.$invalid">Please enter designer client id</span>
+                            </div>
+                            <span id="clientId-info" class="su su-info info-popup" data-toggle="popover" data-placement="bottom" data-html="true" data-content="A unique identifier, used to register the Standalone Report Designer into AD FS."></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 no-padding">
+                        <label class="app-textbox-label col-lg-2 col-md-2 no-margin">Tenant Name</label>
+                        <div class="col-lg-8 col-md-8 no-margin form-input-field">
+                            <div class="col-lg-10 col-md-10 no-margin">
+                                <input type="text" class="form-control no-margin" ng-model="ssoSettings.TenantName" ng-init="tenantName=ssoSettings.TenantName" name="tenantName" placeholder="Tenant name" id="tenant-name" data-ng-disabled="!ssoSettings.IsEnabled" ng-pattern="tenantRegex" required />
+                                <span class="validation-message top-padding" ng-show="ssoSettingsForm.tenantName.$error.required && ssoSettingsForm.tenantName.$dirty">Please enter tenant name.</span>
+                                <span class="validation-message top-padding" ng-show="ssoSettingsForm.tenantName.$error.pattern ">Please enter valid URL.</span>
+                            </div>
+                            <span id="tenantName-info" class="su su-info info-popup" data-toggle="popover" data-placement="bottom" data-html="true" data-content="A dedicated instance of the Azure AD service."></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 no-padding">
+                        <label class="app-textbox-label col-lg-2 col-md-2 no-margin">Relying Party Id</label>
+                        <div class="col-lg-8 col-md-8 no-margin form-input-field">
+                            <div class="col-lg-10 col-md-10 no-margin">
+                                <input type="text" class="form-control no-margin" placeholder="Relying party id" id="relying-party-id" data-ng-model="ssoSettings.RelyingPartyId" readonly />
+                            </div>
+                            <span id="relyingParty-info" class="su su-info info-popup" data-toggle="popover" data-placement="bottom" data-html="true" data-content="A URI that identifies the relying party to the security token service."></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="admin-page-actions col-lg-12 col-md-12 col-sm-12">
+            <a href="/" class="secondary-button pull-right" id="UpdateSAMLSettingsCancel-bottom" title="">Cancel</a>
+            <button type="submit" id="update-saml-settings" class="primary-button pull-right" ng-click="saveSsoSettings()" ng-disabled="ssoSettingsForm.$invalid">Save</button>
+        </div>
+    </div>
+}

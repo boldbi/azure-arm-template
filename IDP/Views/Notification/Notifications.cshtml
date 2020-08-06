@@ -1,0 +1,197 @@
+﻿@model LogResponse
+
+@{
+    ViewBag.Title = GlobalAppSettings.SystemSettings.OrganizationName + " - Notifications";
+    ViewBag.MessageBox = false;
+}
+@section styles{
+    @Styles.Render("~/styles/notification-listing")
+}
+@section scripts{
+    @Scripts.Render("~/scripts/notification-listing")
+    <script>
+        var serverApp = angular.module("serverApp",['ngSanitize']);
+        serverApp.controller('NotificationController', ["$scope", "$window", "$http", function($scope, $window, $http) {
+            $scope.notifications = @Html.Raw(Json.Encode(Model.LogList));
+            $scope.totalNotifications=@Model.LogCount;
+            $scope.skip = @Model.LogList.Count;
+            $scope.isFinal = $scope.skip == $scope.totalNotifications;
+            $scope.timerMinutes = 0;
+            $scope.getInitMinutes = function(minutes) {
+                return minutes;
+            };
+            $scope.getInitHours = function(minutes, notification) {
+                if (Math.floor(minutes / 60) < 24) {
+                    return Math.floor(minutes / 60);
+                } else {
+                    notification.IsToday = false;
+                    notification.DaysAgo = 1;
+                }
+            };
+            $scope.getInitDays = function(item) {
+                if (item.DaysAgo < 7) {
+                    if (item.DaysAgo == 1) {
+                        return "Yesterday";
+                    } else {
+                        return item.DaysAgo + " days ago";
+                    }
+                }
+                if (item.DaysAgo >= 7 && item.DaysAgo < 14) {
+                    return "A week ago";
+                }
+                if (item.DaysAgo >= 14) {
+                    return item.UpdatedDateString;
+                }
+            };
+            $scope.setTimer = function(t) {
+                $scope.timerMinutes = t;
+            }
+            $scope.converthtml = function(htmlCode) {
+                return $window.trustAsHtml(htmlCode);
+            }
+            $scope.returnString = function(stringValue) {
+                return stringValue;
+            }
+            $scope.bindTooltip= function(arg) {
+                $('#tooltip_dom'+arg).tooltip();
+            }
+            $scope.bindDisplayText = function(notificationContent, image) {
+                var appendComment = notificationContent.Url.indexOf("?")>0 ? "&comment=" : "?comment=";
+                var displayImage = "<span class='notification-picture-menu'><img class = 'img-circle' src='@Url.Action("Avatar", "User")?Username=" +
+                    notificationContent.DoneById + "&ImageSize=64' width='40' height='40' /></span>";
+                var displayText = "<span class='notification-text-content'>";
+                
+                var a;
+                if(image){
+                    a = displayImage += "</span>";
+                }
+                else{
+                    a = displayText += "</span>";
+                }
+                return a;
+            }
+            $scope.getMoreNotifications = function(event) {
+                $("#more-notification-btn").ejWaitingPopup("show");
+                $http.post("@Url.Action("getnotificationsonrequest", "notification")", { skip: $scope.skip, take: 20,isPartialViewResult:false })
+                    .success(function(data, status, headers, config) {
+                        for (var i = 0; i < data.LogList.length; i++) {
+                            $scope.notifications.push(data.LogList[i]);
+                        }
+                        $scope.skip = $scope.skip + data.LogList.length;
+                        $scope.isFinal = $scope.skip == $scope.totalNotifications;
+                        $("#more-notification-btn").ejWaitingPopup("hide");
+                    }).error(function(data, status, headers, config) {
+                        $("#more-notification-btn").ejWaitingPopup("hide");
+                    });
+            }
+        }]);
+
+        var timer = {
+            elapsed: 0,
+            period: 60000,
+            intervalTimer: null,
+            start: function(f) {
+                var that = { timer: this, callback: f };
+                this.intervalTimer = window.setInterval(function() {
+                    that.timer.elapsed += 1;
+                    that.callback(that.timer.elapsed);
+                }, this.period);
+            }
+        };
+        document.addEventListener("DOMContentLoaded", init, false);
+
+        function init() {
+            timer.start(function(elapsed) {
+                var elt = $(".timer-class");
+                elt.innerText = elapsed;
+                updateAngularModel(elapsed);
+            });
+        }
+
+        function updateAngularModel(newTime) {
+            var notificationScope = angular.element($("#notification-content")).scope();
+            notificationScope.$apply(function() {
+                notificationScope.setTimer(newTime);
+            });
+        }
+
+        $(function() {
+            document.getElementById("page").setAttribute("data-content", $(".page-title").attr("data-page"));
+            $("#more-notification-btn").ejWaitingPopup();
+            $("#notification-read-status").remove();
+        });
+        $(window).on("load resize",function () {
+            var notificationContentSmallScreen = $(window).width() - 135;
+            var notificationContentLargeScreen = $(window).width() - 190;
+            if($(window).width() < 720)
+            {
+                $(".notification-text-content").css({ 'width': notificationContentSmallScreen, 'overflow': 'auto' });
+            }
+            else
+            {
+                $(".notification-text-content").css({ 'width': notificationContentLargeScreen, 'overflow': 'auto' });
+            }
+        });
+    </script>
+}
+
+@section MainSection{
+    <div ng-app="serverApp" ng-controller="NotificationController" id="notification-content" class="notification-content-container admin-page-container">
+        <input type="hidden" class="page-name" data-content="NOTIFICATIONS">
+        <div class="admin-page-header">
+            <h1 class="page-title"> NOTIFICATIONS </h1>
+        </div>
+        <ul ng-if="notifications.length!=0" class="notification-list-ul admin-page-body">
+            <li ng-repeat="item in notifications">
+                <span ng-bind-html="bindDisplayText(item, true)"></span>
+                <p>
+                    <span ng-bind-html="bindDisplayText(item, false)"></span><br />
+                    <span id="tooltip_dom{{$index}}" title="{{item.UpdatedDateString}}" data-html="false" data-toggle="tooltip" data-placement="right" class="time-option">
+                            <span ng-if="item.IsToday && timerMinutes+item.MinutesAgo<60" class="notification-period">
+                            <span ng-if="timerMinutes+item.MinutesAgo==0" class="notification-period" ng-bind="Just now">
+                                <time ng-bind="returnString('Just now')"></time>
+                            </span>
+                            <span ng-if="timerMinutes+item.MinutesAgo!=0 && timerMinutes+item.MinutesAgo!=1" class="notification-period">
+                                <span ng-bind="timerMinutes+getInitMinutes(item.MinutesAgo)" class="timer-class"></span>
+                                <time ng-bind="returnString('Minutes ago')"></time>
+                            </span>
+                            <span ng-if="timerMinutes+item.MinutesAgo!=0 && timerMinutes+item.MinutesAgo==1" class="notification-period">
+                                <time ng-bind="returnString('A minute ago')" class="timer-class"></time>
+                            </span>
+                        </span>
+                        <span ng-if="item.IsToday && timerMinutes+item.MinutesAgo>=60" class="notification-period">
+                            <span ng-if="timerMinutes+item.MinutesAgo<120" class="notification-period">
+                                <time ng-bind="returnString('An hour ago')"></time>
+                            </span>
+                            <span ng-if="timerMinutes+item.MinutesAgo>=120" class="notification-period">
+                                <span ng-bind="getInitHours(timerMinutes+item.MinutesAgo,item)"></span>
+                                <time ng-bind="returnString('Hours ago')"></time>
+                            </span>
+                        </span>
+                        <span ng-if="!item.IsToday" class="notification-period">
+                            <span class="notification-period" ng-bind="getInitDays(item)">
+                            </span>
+                        </span>
+                    </span>
+                </p>             
+                {{bindTooltip($index)}}
+            </li>
+        </ul>
+        <div ng-if="!isFinal" id="more-notification-btn" class="additional-content">
+            <div ng-click="getMoreNotifications($event)" id="action-btn">
+                <span class="su su-load-more"></span>
+                <h6>LOAD MORE</h6>
+            </div>
+        </div>
+        <div ng-if="isFinal && notifications.length!=0 && notifications.length>=20" id="no-more-notification-info" class="additional-content">
+            <div>
+                <h3>No more notifications found</h3>
+            </div>
+        </div>
+        <div ng-if="notifications.length==0" id="no-notification-info" class="additional-content">
+            <div>
+                <h4>No notifications found</h4>
+            </div>
+        </div>
+    </div>
+}

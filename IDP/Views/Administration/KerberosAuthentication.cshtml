@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "Kerberos Authentication - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+}
+@section styles{
+    @Styles.Render("~/styles/admin/kerberos-authentication")
+}
+
+@section scripts{
+    @Scripts.Render("~/scripts/admin/kerberos-authentication")
+    <script>
+        var updateKerberosSettingsUrl = "@Url.Action("Updatekerberossettings", "Administration")";
+        var downloadBatchUrl = "@Url.Action("downloadBatFile", "Administration")";
+    </script>
+
+    <script>
+            $(document).ready(function () {
+                addPlacehoder("#kerberos-setting");
+            });
+    </script>
+}
+@section MainSection{
+    @Html.Partial("_AdminMenu")    
+    <div id="kerberos-container" role="tabpanel" class="admin-page-container pull-left">
+        <div id="kerberos-header" class="col-md-12 admin-page-header">
+            <a href="@Url.Action("user-directory-settings","administration")" title="Active Directory settings" class="back-button pull-left">               
+                    <i class="su su-arrow-back back-navigaion img-size"> </i>               
+            </a>
+            <hgroup>
+                <h2 class="page-title">KERBEROS AUTHENTICATION SETTINGS</h2>
+                <h5 class="page-description">Download and run the .bat file (Administration Mode) in the windows server, where Active Directory domain services role is installed</h5>
+            </hgroup>
+        </div>
+        <form id="kerberos-setting" class="active-directory-form col-md-12 pull-left admin-page-body" method="post" enctype="multipart/form-data">
+            <div class="col-md-12 form-group">
+                <div class="col-md-6 no-padding no-margin">
+                    <label class="app-textbox-label col-md-4">Machine name</label>
+                    <div class="col-md-8 no-margin form-input-field">
+                        <input type="text" class="form-control col-md-6 no-margin" name="machineName" value="@ViewBag.SystemSettings.MachineName" placeholder="Machine name" id="machine-name" />
+                        <span id="url-validation" class="validation-message"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 form-group">
+                <div class="col-md-6 no-padding no-margin">
+                    <label class="app-textbox-label col-md-4 no-margin">Host domain name </label>
+                    <div class="col-md-8 no-margin form-input-field">
+                        <input type="text" class="form-control col-md-6" name="hostDomain" value="@ViewBag.SystemSettings.HostDomain" placeholder="Host domain name" id="host-domain" />
+                        <span id="example">(For example : example.com)</span><br>
+                        <span class="validation-message"></span>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="admin-page-actions col-lg-12 col-md-12">
+            <a href="@Url.Action("user-directory-settings","administration")" class="secondary-button pull-right" title="">Cancel</a>
+            <input type="button" title="Generate and download .bat file" onclick="DownloadBatFile()" name="UpdateSystemSettings" class="primary-button pull-right" value="Generate and download .bat file" />
+        </div>
+    </div>
+}

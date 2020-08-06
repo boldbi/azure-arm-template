@@ -1,0 +1,107 @@
+﻿<div class="system-settings-page-container col-lg-5 col-md-5 col-sm-5 col-xs-5" id="system-settings-db-selection-container">
+    <div class="system-settings-db-selection-field">
+        <input type="hidden" name="Ums_table_prefix" id="tenant-table-prefix" value="@DbTablePrefixes.DashboardServer" />
+
+        <div class="database-types">
+            <div class="center-align">
+                <div id="database-type-dropdown" class="system-settings-startup-page-fields txt-holder database-dropdown-margin">
+                    <label class="field-label">[[[Server type]]]</label>
+                    <select id="database-type" class="selectpicker system-settings-startup-page-fields db-fields" data-width="100%">
+                        <option class="no-margin-dropdown-ul" value="MSSQL">[[[SQL Server]]]</option>
+                        @if (ViewBag.IsNpgsqlExist)
+                        {
+                            <option class="no-margin-dropdown-ul" value="PostgreSQL">[[[Postgre SQL]]]</option>
+                        }
+                        else
+                        {
+                            <option class="no-margin-dropdown-ul cursor-class" title="[[[Please install Npgsql client library to connect with PostgreSQL database.]]]" value="PostgreSQL" disabled>[[[Postgre SQL]]]</option>
+                        }
+                        <option class="no-margin-dropdown-ul hide" value="MSSQLCE">[[[Embedded SQL CE]]]</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="sqlce-content hide">
+            <span>[[[This embedded SQL CE can be use only for testing purpose. Please choose the different database if you want to setup the application for production use.]]]</span>
+        </div>
+        <form id="db-content-holder" class="col-md-12 no-padding display-none content-display text-wrap show-sql-content" autocomplete="off">
+            <div class="txt-holder center-align">
+                <label class="field-label">[[[Server name]]]</label>
+                <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Server name]]]" />
+                <span class="startup-validation validation-txt-errors"></span>
+            </div>
+            <div class="txt-holder center-align">
+                <div id="auth-type-dropdown" class="hide">
+                    <label class="field-label">[[[Authentication type]]]</label>
+                    <select id="check-windows" class="selectpicker db-fields  full-width" data-width="100%">
+                        <option value="sql">[[[SQL authentication]]]</option>
+                        <option value="windows">[[[Windows authentication]]]</option>
+                    </select>
+                </div>
+                <div id="port-number-dropdown" class="hide">
+                    <label class="field-label">[[[Port number]]]</label>
+                    <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Port number]]]" />
+                    <span class="startup-validation validation-txt-errors"></span>
+                </div>
+            </div>
+            <div class="txt-holder center-align">
+                <label class="field-label">[[[Username]]]</label>
+                <input type="text" id="txt-login" name="username" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Username]]]" />
+                <span class="startup-validation validation-txt-errors"></span>
+            </div>
+            <div class="txt-holder center-align">
+                <label class="field-label">[[[Password]]]</label>
+                <input type="text" class="display-none">
+                <input type="password" class="fake-password" name="fake_passwordfield_to_turnoff_autocomplete">
+                <input type="password" id="txt-password-db" name="password" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Password]]]" autocomplete="off" />
+                <span id="password-field" class="startup-validation validation-txt-errors"></span>
+                <div class="su su-eye show-hide-password"></div>
+            </div>
+            <div class="txt-holder center-align">
+                <div class="new-db">
+                    <input type="radio" id="new-db" class="css-radio" name="databaseType" value="0" checked='checked' />
+                    <label for="new-db"><span class="text">[[[New database]]]</span></label>
+                </div>
+                <div class="existing-db">
+                    <input type="radio" id="existing-db" class="css-radio" name="databaseType" value="1" />
+                    <label for="existing-db"><span class="text">[[[Existing database]]]</span></label>
+                </div>
+            </div>
+            <div class="txt-holder database-name center-align">
+                <label class="field-label">[[[Database name]]]</label>
+                <input type="text" id="txt-dbname" name="dbname" class="form-control system-settings-startup-page-fields dbname-fields db-fields" placeholder="[[[Database name]]]" />
+                <span class="startup-validation validation-txt-errors"></span>
+                <div class="show-hide-password"></div>
+                <span class="database-error validation-txt-errors"></span>
+            </div>
+            <div class="sql-server-existing-db center-align">
+                <div class="txt-holder databse-dropdown text-wrap database-dropdown-margin center-align">
+                    <label class="field-label">[[[Existing Database name]]]</label>
+                    <input type="text" id="database-name" name="databaseName" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Existing database name]]]" />
+                    <span class="startup-validation validation-txt-errors"></span>
+                    <div class="show-hide-password"></div>
+                    <span class="database-error validation-txt-errors"></span>
+                </div>
+            </div>
+            <div class="secure-sql material-checkbox selfhosted center-align">
+                @Html.CheckBox("secure-sql-connection", false)
+                <label for="secure-sql-connection" class="">[[[Enable SSL]]]</label>
+            </div>
+            <label id="no-need-datastore">[[[Data Store not available for Bold Reports]]]</label>
+            <div class="material-checkbox selfhosted skip-intermediate-db-container">
+                @Html.CheckBox("skip-intermediate-db", false)
+                <label for="skip-intermediate-db" class="">[[[I will configure the data store later.]]]</label>
+            </div>
+        </form>
+        <div class="btn-holder center-align button-alignment">
+            <button type="button" id="ds-db-config-submit" class="proceed-button  content-display show-sql-content">[[[Next]]]</button>
+            <button type="button" id="sql-existing-ds-db-submit" class="proceed-button display-none content-display">[[[Next]]]</button>
+        </div>
+    </div>
+</div>
+<div id="messageBox">
+    <div class="message-header"></div>
+    <div class="message-box-close"></div>
+    <div class="message-content text-center"></div>
+    <div class="message-box-btn-holder"></div>
+</div>

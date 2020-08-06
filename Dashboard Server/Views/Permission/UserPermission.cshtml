@@ -1,0 +1,178 @@
+﻿@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+
+    ViewBag.Title = "[[[User Permissions]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePermissions);
+}
+
+@model List<ItemDetail>
+
+@section styles{
+   @Styles.Render("~/bundles/styles/PermissionPage") 
+}
+
+@section scripts{
+    <script>
+        var addUserPermissionViewIframeUrl = "@Url.Action("AddUserPermissionView", "permission")";
+        var getPermissionEntityUrl = "@Url.Action("GetPermissionEntity", "permission")";
+        var getItemScopeUrl = "@Url.Action("GetItemScope", "permission")";
+        var addnewuserpermissionUrl = "@Url.Action("addnewpermission", "permission")";
+        var deleteuserPermissionUrl = "@Url.Action("DeleteUserPermission", "permission")";
+    </script>
+
+   @Scripts.Render("~/bundles/scripts/PermissionPage")
+}
+
+@section MainSection{
+    @Html.Partial("../UserManagement/_UserMenu")
+    <div id="base-container" role="tabpanel" class="admin-page-container user-permission">
+        <div id="user-header" class="col-lg-12 col-md-12 co-sm-12 col-xs-12 admin-page-header">
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
+                <a class="back-button pull-left" href="@Url.Action("Index","UserManagement")" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Users]]]">
+                      <i class="su su-arrow-back back-navigaion img-size"> </i>
+                </a>
+                <hgroup>
+                    <h2 class="page-title adjust-style-for-backarrow no-margin">[[[Manage Permissions]]] - <span title="@ViewBag.DisplayName">@ViewBag.DisplayName</span></h2>
+                </hgroup>
+            </div>
+            <div class="col-md-6 col-xs-12 col-sm-6 col-xs-12 no-padding">
+                <input type="button" title="[[[Add Permission to the user]]]" id="add-permission-button-top" value="[[[Add Permission]]]" class="primary-button pull-right" />
+                @if (!ViewBag.IsAdUser)
+                {
+                    <a type="button" class="link-button pull-right margin-right" href="@Url.Action("ViewProfile", "UserManagement")?email=@ViewBag.Email">[[[View Profile]]]</a>
+                }
+            </div>
+        </div>
+        <div class="active-directory-form col-lg-12 admin-page-body">
+            <div class="col-md-12 col-xs-12 col-sm-12 permission-grid">@Html.Partial("_PermissionGrid", Model)</div>
+            <div class="col-md-3">
+                <div id="add-permission" class="no-padding">
+                    <iframe src="" id="add-permission-iframe" width="100%" height="100%" style="border:0;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="user-id-hidden" value="@Request["userid"]" />
+
+   
+    <script type="text/x-jsrender" id="commandstemplate">
+        <div>
+            {{if IsUserPermission}}
+            <span><a href="javascript:void(0);" class="delete-permission" data-permission-id="{{:PermissionId}}"><i class="su su-close"></i> [[[Remove]]]</a></span>
+            {{else}}
+            <span title="{{:GroupName}}" data-toggle="tooltip"><a href="@Url.Action("grouppermission","permission")?groupId={{:TargetId}}">{{:GroupName}}</a></span>
+            {{/if}}
+        </div>
+    </script>
+    <script type="text/x-jsrender" id="accessmodetemplate">
+        <div class="item-name" title="{{:PermissionAccessDescription}}" data-toggle="tooltip">{{:PermissionAccessDescription}}</div>
+    </script>
+    <script type="text/x-jsrender" id="scopetemplate">
+        <div  class="grid-content" title="{{:ItemName}}" data-toggle="tooltip">{{:ItemName}}</div>
+    </script>
+    <script type="text/x-jsrender" id="entitytemplate">
+        <div title="{{:PermissionEntityDescription}}" data-toggle="tooltip">{{:PermissionEntityDescription}}</div>
+    </script>
+    <script type="text/x-jsrender" id="accessmodeheader">
+        <div class="item-name">[[[Access Mode]]]</div>
+    </script>
+    <script type="text/x-jsrender" id="entityheader">
+        <div class="item-header">[[[Entity]]]</div>
+    </script>
+    <script type="text/x-jsrender" id="scopeheader">
+        <div class="item-header">[[[Scope]]]</div>
+    </script>
+    <script type="text/x-jsrender" id="actionsheader">
+        <div class="item-header">[[[Actions]]]</div>
+    </script>
+    <script>
+        var userId = @Request["userid"]
+
+            $(document).ready(function () {
+                $("#add-permission").ejDialog({
+                    width: "600px",
+                    showOnInit: false,
+                    allowDraggable: true,
+                    enableResize: false,
+                    showHeader: false,
+                    height: "300px",
+                    title: "[[[Add New Permission]]]",
+                    enableModal: true,
+                    closeOnEscape: true,
+                    close: ''
+                });
+                var addPermissionWaitingPopupTemplateId = createLoader("add-permission_wrapper");
+				$("#add-permission_wrapper").ejWaitingPopup({ template:$("#" + addPermissionWaitingPopupTemplateId) });
+                $("#Grid").ejGrid({
+                    dataSource: ej.DataManager({ url: "@Url.Action("GetAllUserPermission", "permission")?userId=" + userId, adaptor: "UrlAdaptor" }),
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    allowSorting: true,
+                    enableAltRow: false,
+                    allowSearching: true,
+                    allowSelection: true,
+                    rowHover: "HoverEf",
+                    pageSettings: { pageSize: 10 },
+                    actionBegin: "fnOnUserPermissionActionBegin",
+                    actionComplete: function (args) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                        if (args.model.currentViewData.length == 0) {
+                            rowBound();
+                        }
+
+                        showOrHideGridPager("#Grid");
+                    },
+                    rowDataBound: function () {
+                        var height = $(".e-gridcontent").height();
+                        if (height != null) {
+                            rowBound();
+                        }
+                    },
+                    dataBound: function (args) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
+                    enableRowHover: true,
+                    columns: [
+                        {
+                            allowSorting: true,
+                            headerText: "[[[Access Mode]]]",
+                            width: 80,
+                            field: "PermissionAccessDescription",
+                            templateID: "#accessmodetemplate",
+                            headerTemplateID: "#accessmodeheader"
+                        },
+                        {
+                            field: "PermissionEntityDescription",
+                            allowSorting: true,
+                            headerText: "[[[Entity]]]",
+                            templateID: "#entitytemplate",
+                            headerTemplateID: "#entityheader",
+                            width: 80
+                        },
+
+                        {
+                            field: "ItemName",
+                            allowSorting: true,
+                            headerText: "[[[Scope]]]",
+                            templateID: "#scopetemplate",
+                            headerTemplateID: "#scopeheader",
+                            width: 80
+                        },
+                        {
+
+                            template: true,
+                            allowSorting: false,
+                            headerText: "[[[Actions]]]",
+                            templateID: "#commandstemplate",
+                            headerTemplateID: "#actionsheader",
+                            width: (window.innerWidth > 1024) ? 40 : 80
+                        }
+                    ]
+
+                });
+            });
+    </script>
+@Html.Partial("../Permission/_DeletePermission")
+ @Scripts.Render("~/bundles/scripts/localizationcontent")
+}

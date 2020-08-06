@@ -1,0 +1,271 @@
+﻿@{
+    ViewBag.Title = GlobalAppSettings.SystemSettings.OrganizationName + " - Database User Import";
+}
+<script>
+    var importDatabaseQuerySchema = {};
+</script>
+@section styles{
+    @Styles.Render("~/Styles/user-database-import")
+}
+
+@section scripts{
+    @Scripts.Render("~/Scripts/user-database-import")
+    <script>
+            var getSearchedResultUrl = "@Url.Action("GetDataWithSearchForImport", "UserManagement")";
+            var saveSelectedUsersUrl = "@Url.Action("ImportSelectedUsersFromDatabase", "UserManagement")";
+
+    </script>
+}
+
+@section MainSection{
+    @Html.Partial("_UserMenu")
+    @if (ViewBag.DbSettings != null)
+    {
+        if (GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation && ViewBag.IsEmailSettingsConfigured)
+        {
+
+            <script type="text/x-jsrender" id="user-detail-validation">
+                {{if IsDuplicated}}
+                <span class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+                {{/if}}
+            </script>
+            <script type="text/x-jsrender" id="checkbox-row-template">
+                {{if IsDuplicated}}
+                <input disabled type="checkbox" class="checkbox-row-disabled material-checkbox selfhosted" data-checked-id="{{:Index}}" id="row-check{{:Index}}" />
+                <input name="row-check{{:Index}}" type="hidden" value="false">
+                <label for="row-check{{:Index}}"> </label>
+                {{else}}
+                <input type="checkbox" class="checkbox-row material-checkbox selfhosted" data-checked-id="{{:Index}}" id="row-check{{:Index}}" />
+                <input name="row-check{{:Index}}" type="hidden" value="false">
+                <label for="row-check{{:Index}}"> </label>
+                {{/if}}
+            </script>
+
+            <script type="text/x-jsrender" id="checkbox-header-template">
+                @Html.CheckBox("checkbox-header", new { @class = "material-checkbox selfhosted" })
+                @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+            </script>
+
+            <script type="text/x-jsrender" id="full-name-header">
+                <span class="item-header">Name</span>
+            </script>
+            <script type="text/x-jsrender" id="user-name-header">
+                <span class="item-header">Username</span>
+            </script>
+            <script type="text/x-jsrender" id="last-name-header">
+                <div class="item-header">Last Name</div>
+            </script>
+            <script type="text/x-jsrender" id="first-name-header">
+                <div class="item-header">First Name</div>
+            </script>
+            <script type="text/x-jsrender" id="email-id-header">
+                <span class="item-header">Email Address</span>
+            </script>
+            <script type="text/javascript">
+                var gridData = @Html.Raw(Json.Encode(ViewBag.ExternalDatabaseUsers));
+            </script>
+
+            <script type="text/javascript">
+
+                $(function() {
+                    addPlacehoder(".search-user-holder");
+                    gridData = ej.parseJSON(gridData);
+                    gridData.Success
+                        ? $("#error-value").find("span").html("")
+                        : $("#error-value").find("span").html(gridData.Message);
+                    $("#import-selected").attr("disabled", "disabled");
+                    ej.support.stableSort = false;
+                    GridLocalization();
+                    searchedResult = $.grep(gridData.Value, function(item) { return item.IsDuplicated != true; });
+                    $("#Grid")
+                        .ejGrid({
+                            dataSource: gridData.Value,
+                            gridLines: ej.Grid.GridLines.None,
+                            allowPaging: true,
+                            allowSorting: true,
+                            allowSelection: true,
+                            allowScrolling: false,
+                            allowFiltering: false,
+                            allowSearching: true,
+                            locale: "en-us",
+                            filterSettings: { filterType: "menu" },
+                            pageSettings: { pageSize: 20 },
+                            selectionType: ej.Grid.SelectionType.Multiple,
+                            selectionSettings: { selectionMode: ["row"] },
+                            templateRefresh: "refreshTemplate",
+                            actionComplete: "fnActionComplete",
+                            create: "fnCreate",
+                            recordClick: "recordClick",
+                            actionBegin: "fnOnUserGridActionBegin",
+                            enableAltRow: false,
+                            rowDataBound: function() {
+                                $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
+                            },
+                            dataBound: function() {
+                                $("#checkbox-header").change(headCheckboxOnChange);
+                                this.model.indexes = {}; /* Additional property*/
+                            },
+                            columns: [
+                                {
+                                    headerTemplateID: "#checkbox-header-template",
+                                    template: true,
+                                    templateID: "#checkbox-row-template",
+                                    textAlign: ej.TextAlign.Center,
+                                    width: 20,
+                                    allowFiltering: false
+                                },
+                                {
+                                    field: "UserName",
+                                    cssClass: "user-name",
+                                    headerText: "Username",
+                                    headerTemplateID: "#user-name-header",
+                                    width: 60,
+                                    type: "string"
+                                },
+                                {
+                                    field: "FirstName",
+                                    cssClass: "first-name",
+                                    headerText: "First Name",
+                                    headerTemplateID: "#first-name-header",
+                                    width: 60,
+                                    type: "string"
+                                },
+                                {
+                                    field: "LastName",
+                                    cssClass: "last-name",
+                                    headerText: "Last Name",
+                                    headerTemplateID: "#last-name-header",
+                                    width: 60,
+                                    type: "string"
+                                },
+                                {
+                                    field: "EmailId",
+                                    cssClass: "email-id",
+                                    headerText: "Email Address",
+                                    headerTemplateID: "#email-id-header",
+                                    width: 80,
+                                    type: "string"
+                                },
+                                {
+                                    field: "",
+                                    width: 10,
+                                    templateID: "#user-detail-validation",
+                                    allowFiltering: false,
+                                    textAlign: ej.TextAlign.Center
+                                }
+                            ]
+                        });
+                    $("#Grid").data("ejGrid").refreshContent();
+                    $('[data-toggle="tooltip"]').tooltip();
+                    $("#content-area").ejWaitingPopup("hide");
+                });
+            </script>
+
+            <div id="import-database-users" class="col-lg-12 admin-page-container">
+                <div class="col-lg-12 admin-page-header">
+                    <div class="col-lg-6 no-padding import-area">
+                        <a href="@Url.Action("Index", "UserManagement")" title="Users" class="back-button pull-left">
+                            <i class="su su-arrow-back"> </i>
+                        </a>
+                        <h2 class="page-title no-margin">
+
+                            <span>IMPORT USERS &mdash; From database </span>
+
+                        </h2>
+                    </div>
+                    <div class="col-lg-6 no-padding">
+                        <input type="button" value="Import users" disabled="" title="Import the selected users and activate their accounts" onclick="SaveSelectedUsers()" id="import-selected" class="primary-button pull-right import-button" />
+                    </div>
+                </div>
+
+                <div class="content-section admin-page-body">
+                    <div class="col-md-12 col-xs-12 no-margin no-padding import-user-search">
+                        <div class="col-md-9 col-xs-9 no-padding connection-string-area">
+                            <div class="connection-path no-padding">
+                                <span id="txt-connection" style="float: left; padding-right: 10px">Connection string : </span>
+                                <input type="text" id="txt-connection-string" class="form-control" disabled="disabled" value="@ViewBag.ConnectionString" />
+                            </div>
+                            <span class="no-padding database-settings-url">
+                                <a href="@Url.Action("user-directory-settings", "Administration")#database-settings-tab" title="Update database configuration settings" class="link-button">Modify</a>
+                            </span>
+                            <div class="no-padding error-msg"></div>
+                        </div>
+                        <div id="search-area" class="pull-right">
+                            <input type="text" id="search-database-users" class="pull-left" placeholder="Search users" autocomplete="off" />
+                            <span class="su su-inner-close close-icon pull-left" id="clear-search" title="Clear search"></span>
+                            <span class="su su-search search-user pull-left" title="Search"></span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding no-margin user-data-grid">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-12 col-md-12 no-padding">
+                                <span class="import-message">
+                                    Select the users from the following list to import into Identity Provider
+                                </span>
+                                <div id="error-value" class="col-xs-12">
+                                    <span class="error-message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="grid-container" class="col-md-12 no-top-margin no-padding">
+                            <div class="col-md-12 container-fluid page-inner-padding no-padding ">
+                                <div id="Grid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 no-padding"></div>
+                        <div class="col-xs-8 no-padding"></div>
+                    </div>
+                </div>
+
+                @Html.Partial("../UserManagement/_LimitUserCreation")
+            </div>
+        }
+
+        else
+        {
+            <div id="import-database-container" class="container-fluid admin-page-container">
+                <div class="col-lg-12 admin-page-header">
+                    <div class="col-md-12 no-padding import-area">
+                        <a href="@Url.Action("Index", "UserManagement")" title="Users" class="back-button pull-left">
+                            <i class="su su-arrow-back"> </i>
+                        </a>
+                        <h1 class="page-title">
+                            <span>IMPORT USERS &mdash; From database</span>
+                        </h1>
+                    </div>
+                </div>
+                <div class="col-md-12 admin-page-body">
+                    @if (GlobalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation)
+                    {
+                        <h5>Importing users from existing database is not available in automatic account activation type.</h5>
+                        <a href="@Url.Action("user-settings", "administration")" class="admin-page-link">Click here to change the account activation type.</a>
+                    }
+                    else if (!ViewBag.IsEmailSettingsConfigured)
+                    {
+                        <a href="@Url.Action("e-mail-settings", "administration")" class="admin-page-link">Click here to configure the email settings.</a>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-lg-12 admin-page-container" id="import-active-directory-users">
+            <div class="col-lg-12 admin-page-header">
+                <div class="col-md-12 no-padding import-area">
+                    <a href="@Url.Action("Index", "UserManagement")" title="Users" class="back-button pull-left">
+                        <i class="su su-arrow-back"> </i>
+                    </a>
+                    <h1 class="page-title">
+                        <span>IMPORT USERS &mdash; From database</span>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="col-md-12 admin-page-body">
+                <a href="@Url.Action("user-directory-settings", "administration")#database-settings-tab" class="btn btn-link admin-page-link">Click here to configure the database settings.</a>
+            </div>
+        </div>
+    }
+}}

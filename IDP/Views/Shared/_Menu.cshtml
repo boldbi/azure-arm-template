@@ -1,0 +1,89 @@
+﻿@{
+    var currentUrl = HttpContext.Current.Request.Url.ToString().TrimEnd('/');
+    var userId = (HttpContext.Current.User as ServerPrincipal).UserId;
+    var displayName = HttpContext.Current.Session["displayname"] != null ? HttpContext.Current.Session["displayname"].ToString() : string.Empty;
+    var emailAddress = HttpContext.Current.Session["emailaddress"] != null ? HttpContext.Current.Session["emailaddress"].ToString() : string.Empty;
+    var tenantHomePage = @CloudAppConfig.TenantManagementUrl.TrimEnd('/') + "/homepage";
+    var adminType = (AdminType)Session["AdminType"];
+    var tenantSitesUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/sites";
+    var tenantUsersUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/users";
+    var tenantSettingsUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/administration";
+    var idpUrl = CloudAppConfig.IdPUrl;
+}
+
+<aside class="menu-bar" id="app-navigation">
+    <nav id="main-nav">
+        <ul id="items-menu">
+            <li>
+                <a href="/" class="home-link" style="background-color:transparent;" title=@GlobalAppSettings.SystemSettings.OrganizationName>
+                    @if (!CloudAppConfig.IsSelfHosted)
+                    {
+                        <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.MainLogo" />
+                    }
+                    else
+                    {
+                        <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/Application/@IconFileNames.MainLogo';" />
+                    }
+                </a>
+            </li>
+            @if (adminType == AdminType.SuperAdmin)
+            {
+                <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                <li>
+                    <a href="@tenantSitesUrl">
+                        <span class="menu-icon-container">
+                            <i class="su su-applications"></i>
+                        </span>
+                        <span class="menu-label">[[[Sites]]]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="@tenantUsersUrl">
+                        <span class="menu-icon-container">
+                            <i class="su su-nav-user-management"></i>
+                        </span>
+                        <span class="menu-label">[[[Users]]]</span>
+                    </a>
+                </li>
+                <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                <li class="mobile-hidden">
+                    <a href="@tenantSettingsUrl">
+                        <span class="menu-icon-container">
+                            <i class="su su-nav-settings"></i>
+                        </span>
+                        <span class="menu-label">[[[Settings]]]</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+    <nav id="sub-nav" class="sf-nav-group mobile-hidden">
+        <ul>
+            <li class="profile-section dropup">
+                <a class="dropdown-toggle" data-toggle="dropdown">
+                    <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="45" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@idpUrl" style="border-radius:50%"></div>
+                </a>
+                <ul class="dropdown-menu sub-menu" role="menu">
+                    <li class="sub-menu-item sub-menu-profile">
+
+                        <div class="sub-menu-profile-text-padding">[[[Profile]]]</div>
+                        <a href="@Url.Action("ProfilePage", "User")">
+
+                            <div class="sub-menu-profile-hover">
+                                <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="40" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@idpUrl" style="border-radius:50%"></div>
+                                <div class="sub-menu-user-name"><div class="sub-menu-user-name-style">@displayName</div><div class="sub-menu-user-email-style">@emailAddress</div></div>
+                            </div>
+                        </a>
+
+                    </li>
+                    <li class="sf-sub-menu-separator"></li>
+                    <li class="sub-menu-item">
+                        <a href="@Url.Action("logout", "accounts")">
+                            [[[Logout]]]
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</aside>

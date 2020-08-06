@@ -1,0 +1,626 @@
+﻿@{
+    var ldapRegEx = @"/(?:ldap|http)s?:\/\/(?:(?!.*\d[\/?:])[a-z0-9\-._~%]+|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\[[a-z0-9\-._~%!$&'()*+,;=:]+\])(?::\d+)?(?:[\/?][\-A-Z0-9+&@#\/%?=~_|$!:,.;]*)?$/i";
+}
+
+<div id="active-directory-container" role="tabpanel" class="row admin-page-container" aria-labelledby="active-directory-settings-link" ng-controller="adSettingsController">
+
+    <div class="col-md-12 import-area admin-page-header">
+        <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+            <h1 class="h2 page-title">USER DIRECTORY SETTINGS</h1>
+            <h5 class="page-description">Configuration for connecting to User Directory</h5>
+        </hgroup>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+            <a href="@Url.Action("KerberosAuthentication", "Administration")" class="schedule-synchronization link-button pull-right" title="Settings to authenticate users via kerberos ticket management system">Kerberos Authentication</a>
+                <button class="dropdown-toggle primary-button pull-right" data-toggle="dropdown" id="schedule-synchronization" title="Synchronize schedules">
+                    <span>Synchronization </span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu multi-level pull-right" role="menu" id="synchronization-options">
+                    <li>
+                        <a href="@Url.Action("ScheduleSynchronization", "Administration")" title="Synchronize Active Directory users and groups on a regular schedule">
+                            <span>AD schedule synchronization</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("ScheduleAzureSynchronization", "Administration")" title="Synchronize Azure AD users and groups on a regular schedule">
+                            <span>Azure AD schedule synchronization</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("ScheduleDatabaseSynchronization", "Administration")" title="Synchronize users and groups from database on a regular schedule">
+                            <span>Database schedule synchronization</span>
+                        </a>
+                    </li>
+                </ul>
+        </div>
+    </div>
+
+    <div>
+        <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#windows-ad-tab" id="windows-ad" aria-controls="windows-ad-tab" role="tab" data-toggle="tab">Windows Active Directory</a>
+            </li>
+            <li role="presentation">
+                <a href="#azure-ad-tab" id="azure-ad" aria-controls="azure-ad-tab" role="tab" data-toggle="tab">Azure Active Directory</a>
+            </li>
+            <li role="presentation">
+                <a href="#database-settings-tab" id="database-settings" aria-controls="database-settings-tab" role="tab" data-toggle="tab">Database</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="windows-ad-tab">
+                <form autocomplete="off" class="active-directory-form col-lg-12 admin-page-body" name="windowsAdSettingsForm" enctype="multipart/form-data" id="active-directory-setting" method="post">
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            @Html.Label("username", "Username", new { @class = "app-textbox-label col-md-4 no-margin" })
+
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(windowsAdSettingsForm.userName.$dirty && windowsAdSettingsForm.userName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" name="userName" placeholder="Username" id="username" ng-model="windowsAduserName" ng-init="windowsAduserName='@ViewBag.SystemSettings.ActiveDirectoryUserName'" required />
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.userName.$dirty && windowsAdSettingsForm.userName.$invalid">Please enter username.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            @Html.Label("password", "Password", new { @class = "app-textbox-label col-md-4 no-margin" })
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(windowsAdSettingsForm.passWord.$dirty && windowsAdSettingsForm.passWord.$invalid) ? 'has-error' : ''">
+                                <input type="text" style="display: none;">
+                                <input style="visibility: hidden; position: absolute; left: -99999px" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
+                                <input type="password" class="form-control col-md-6 no-margin" value="" name="passWord" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" id="password" ng-model="passWord" required />
+                                <div class="show-hide-password su su-eye"></div>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.passWord.$dirty && windowsAdSettingsForm.passWord.$invalid">Please enter password.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            @Html.Label("ldapurl", "LDAP URL(LDAP://)", new { @class = "app-textbox-label col-md-4 no-margin" })
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(windowsAdSettingsForm.ldapUrl.$dirty && windowsAdSettingsForm.ldapUrl.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" name="ldapUrl" placeholder="LDAP URL" id="ldapurl" ng-model="windowsLdapUrl" ng-init="windowsLdapUrl='@ViewBag.SystemSettings.LdapUrl'" ng-pattern="@ldapRegEx" required />
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.ldapUrl.$error.required && windowsAdSettingsForm.ldapUrl.$dirty ">Please enter LDAP URL.</span>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.ldapUrl.$error.pattern ">Invalid LDAP URL.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            @Html.Label("distinguished-name", "Distinguished name", new { @class = "app-textbox-label col-md-4 no-margin" })
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(windowsAdSettingsForm.distinguishedName.$dirty && windowsAdSettingsForm.distinguishedName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" name="distinguishedName" placeholder="DC=example,DC=com" id="distinguished-name" ng-model="windowsDistinguishedName" ng-init="windowsDistinguishedName='@ViewBag.SystemSettings.DistinguishedName'" ng-pattern="distinguishedNameRegex" required />
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.distinguishedName.$error.required && windowsAdSettingsForm.distinguishedName.$dirty ">Please enter distinguished name.</span>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.distinguishedName.$error.pattern ">Invalid distinguished name.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin enablesslcontainer">
+                            @Html.Label("enable-ldap-ssl", "Enable SSL", new { @class = "app-textbox-label col-md-4 no-margin" })
+
+                            <div class="col-md-8 form-input-field pull-left switch-align">
+                                <span class="material-switch text-left">
+                                    <input type="checkbox" id="enable-ldap-ssl" name="enablessl" @((bool)ViewBag.SystemSettings.EnableSsl ? "checked" : string.Empty) />
+                                    <label for="enable-ldap-ssl" class="label-primary"></label>
+                                </span>
+                                <span class="validation-message"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            @Html.Label("ldap-port-number", "Port number", new { @class = "app-textbox-label col-md-4 no-margin" })
+
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(windowsAdSettingsForm.portNo.$dirty && windowsAdSettingsForm.portNo.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" name="portNo" placeholder="Port number" id="ldap-port-number" ng-model="windowsPortNo" ng-init="windowsPortNo='@ViewBag.SystemSettings.PortNo'" required />
+                                <span class="port-number-info">(Default: SSL: 636, Non-SSL: 389)</span>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.portNo.$dirty && windowsAdSettingsForm.portNo.$invalid">Please enter port number.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-margin no-padding">
+                            <input type="button" onclick="ActiveDirectoryFormValidate()" class="primary-button pull-right test-connection" title="Test Active Directory connection" value="Test connection" ng-disabled="windowsAdSettingsForm.$invalid" />
+                        </div>
+                        <div class="col-md-6 error-message" style="display: none"></div>
+                        <div class="col-md-6 success-message" style="display: none"></div>
+                    </div>
+                </form>
+
+            </div>
+            <div role="tabpanel" class="tab-pane" id="azure-ad-tab">
+                <form id="azure-ad-setting" name="azureAdSettingsForm" class="admin-page-body" method="post" enctype="multipart/form-data" autocomplete="off">
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            <label class="app-textbox-label col-md-4 no-margin">Tenant name</label>
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(azureAdSettingsForm.tenantName.$dirty && azureAdSettingsForm.tenantName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" ng-model="azureTenantName" ng-init="azureTenantName='@ViewBag.AzureADSetting.TenantName'" name="tenantName" placeholder="example.onmicrosoft.com" id="tenantName" ng-pattern ="regex" required />
+                                <span class="validation-message" ng-show="azureAdSettingsForm.tenantName.$error.required && azureAdSettingsForm.tenantName.$dirty ">Please enter tenant name.</span>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.tenantName.$error.pattern ">Please enter valid URL.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            <label class="app-textbox-label col-md-4 no-margin">Client id</label>
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(azureAdSettingsForm.clientId.$dirty && azureAdSettingsForm.clientId.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" ng-model="azureClientId" name="clientId" ng-init="azureClientId='@ViewBag.AzureADSetting.ClientId'" placeholder="Client id" id="clientId" required />
+                                <span class="validation-message" ng-show="azureAdSettingsForm.clientId.$dirty && azureAdSettingsForm.clientId.$invalid">Please enter client id.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            <label class="app-textbox-label col-md-4 no-margin">Client secret code</label>
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(azureAdSettingsForm.clientKey.$dirty && azureAdSettingsForm.clientKey.$invalid) ? 'has-error' : ''">
+                                <input type="text" style="display:none;">
+                                <input style="visibility: hidden; position: absolute; left:-99999px" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
+                                <input type="password" class="form-control col-md-6 no-margin" value="" ng-model="azureClientKey" name="clientKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" id="clientKey" required />
+                                <div class="show-hide-password su su-eye"></div>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.clientKey.$dirty && azureAdSettingsForm.clientKey.$invalid">Please enter client key.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-6 no-padding no-margin">
+                            <input type="button" id="testAzureConnection" ng-disabled="azureAdSettingsForm.$invalid" onclick="AzureADFormValidate()" class="primary-button test-connection pull-right" title="Test Azure Active Directory connection" value="Test connection" />
+                        </div>
+                        <div class="col-md-6 error-message" style="display: none"></div>
+                        <div class="col-md-6 success-message" style="display: none"></div>
+                    </div>
+                </form>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="database-settings-tab">
+                <div id="import-database-container" class="container-fluid admin-page-container">
+                    <div class="col-lg-12 connection-properties-form admin-page-body">
+                        <div id="connect-properties">
+                            <form class="no-padding form-horizontal" method="post">
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <div id="databasetype-holder" class="no-padding">
+                                            <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                                Database type
+                                            </label>
+                                            <div class="col-md-8 connect-database-padding txt-holder">
+                                                <select id="database-type" class="selectpicker">
+                                                    @if (ViewBag.DbSettings.DatabaseName != null)
+                                                    {
+                                                        if (ViewBag.DbSettings.ServerType.ToString() == "MSSQL")
+                                                        {
+                                                            <option value="MSSQL" selected="selected">SQL Server</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="MSSQL">SQL Server</option>
+                                                        }
+                                                        if (ViewBag.DbSettings.ServerType.ToString() == "MySQL")
+                                                        {
+                                                            <option value="MYSQL" selected="selected">MySQL</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="MYSQL">MySQL</option>
+                                                        }
+                                                        if (ViewBag.DbSettings.ServerType.ToString() == "Oracle")
+                                                        {
+                                                            <option value="ORACLE" selected="selected">Oracle</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="ORACLE">Oracle</option>
+                                                        }
+                                                        if (ViewBag.DbSettings.ServerType.ToString() == "PostgreSQL")
+                                                        {
+                                                            <option value="PostgreSQL" selected="selected">PostgreSQL</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="PostgreSQL">PostgreSQL</option>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="MSSQL">SQL Server</option>
+                                                        if (ViewBag.StorageType != (int)StorageType.AzureBlob)
+                                                        {
+                                                            <option value="ORACLE">Oracle</option>
+                                                            <option value="MYSQL">MySQL</option>
+                                                        }
+                                                        <option value="PostgreSQL">PostgreSQL</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="sql-content-holder" class="no-padding content-display show-sql-content form-horizontal" method="post">
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Server name
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="txt-servername" name="servername" class="form-control" placeholder="Server name" value="@ViewBag.DbSettings.ServerName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Authentication
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <select id="check-windows" class="selectpicker">
+                                                <option value="sql">SQL authentication</option>
+                                                <option value="windows">Windows authentication</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Username
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="txt-login" name="username" class="form-control" placeholder="Username" value="@ViewBag.DbSettings.UserName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Password
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="txt-password-db" name="password" class="form-control" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" />
+                                            <span id="password-field" class="validation-txt-errors"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-8 no-padding no-margin">
+                                        <label class="col-md-3 connect-database-padding txt-holder app-textbox-label">
+                                            Database name
+                                        </label>
+                                        <div class="col-md-6 connect-database-padding txt-holder">
+                                            <select id="txt-dbname" class="selectpicker database-name-select sqlpopup" title="Database name" data-size="5">
+                                                <option data-hidden="true" value="">Database name</option>
+                                                @if (ViewBag.DbSettings != null)
+                                                {
+                                                    <option value="@ViewBag.DbSettings.DatabaseName" selected="selected">@ViewBag.DbSettings.DatabaseName</option>
+                                                }
+
+                                            </select>
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                        <img class="waiting-icon display-none" src="@Url.Content("~/Content/images/common/waitingpopup.gif")" width="25" height="25" />
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="mysql-content-holder" class="no-padding content-display show-mysql-content display-none form-horizontal" method="post">
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            MySQL ODBC DSN
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <select id="mysql-odbc-dsn" name="mySqlDsn" class="selectpicker" data-size="5">
+                                                <option value="" class="display-none">Select MySQL ODBC DSN</option>
+                                                <option data-hidden="true" value="">Select MySQL ODBC DSN</option>
+                                                @if (ViewBag.DbSettings != null)
+                                                {
+                                                    for (var dsn = 0; dsn < ViewBag.DsnList.Count; dsn++)
+                                                    {
+                                                        if (ViewBag.DsnList[dsn] == ViewBag.DbSettings.DSN)
+                                                        {
+                                                            <option value="@ViewBag.DbSettings.DSN" selected="selected">@ViewBag.DsnList[dsn]</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@ViewBag.DsnList[dsn]">@ViewBag.DsnList[dsn]</option>
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    for (var dsn = 0; dsn < ViewBag.DsnList.Count; dsn++)
+                                                    {
+                                                        <option value="@ViewBag.DsnList[dsn]">@ViewBag.DsnList[dsn]</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <span id="dsn-validate" class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Username
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="mysql-username" name="mySqlUserName" class="form-control" placeholder="Username" value="@ViewBag.DbSettings.UserName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Password
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="mysql-password" name="mysqlPassword" class="form-control system-settings-startup-page-fields db-fields" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" />
+                                            <span id="password-field" class="validation-txt-errors"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-8 no-padding no-margin">
+                                        <label class="col-md-3 connect-database-padding txt-holder app-textbox-label">
+                                            Database name
+                                        </label>
+                                        <div class="col-md-6 connect-database-padding txt-holder">
+                                            <select id="mysql-txt-dbname" class="selectpicker database-name-select mysqlpopup" title="Database name" data-size="5">
+                                                <option data-hidden="true" value="">Database name</option>
+                                                @if (ViewBag.DbSettings != null)
+                                                {
+                                                    <option value="@ViewBag.DbSettings.DatabaseName" selected="selected">@ViewBag.DbSettings.DatabaseName</option>
+                                                }
+                                            </select>
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                        <img class="waiting-icon display-none" src="@Url.Content("~/Content/images/common/waitingpopup.gif")" width="25" height="25" />
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="oracle-content-holder" class="no-padding content-display show-oracle-content display-none form-horizontal" method="post">
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Oracle ODBC DSN
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <select id="oracle-dsn" name="oracleDsn" class="selectpicker" data-size="5">
+                                                <option value="" class="display-none">Select Oracle ODBC DSN</option>
+                                                <option data-hidden="true" value="">Select Oracle ODBC DSN</option>
+
+                                                @if (ViewBag.DbSettings != null)
+                                                {
+                                                    for (var dsn = 0; dsn < ViewBag.DsnList.Count; dsn++)
+                                                    {
+                                                        if (ViewBag.DsnList[dsn] == ViewBag.DbSettings.DSN)
+                                                        {
+                                                            <option value="@ViewBag.DbSettings.DSN" selected="selected">@ViewBag.DsnList[dsn]</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@ViewBag.DsnList[dsn]">@ViewBag.DsnList[dsn]</option>
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    for (var dsn = 0; dsn < ViewBag.DsnList.Count; dsn++)
+                                                    {
+                                                        <option value="@ViewBag.DsnList[dsn]">@ViewBag.DsnList[dsn]</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <span id="oracle-dsn-validate" class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Admin username
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="admin-username" name="adminUserName" class="form-control" placeholder="Admin username" value="@ViewBag.DbSettings.UserName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Admin password
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="admin-password" name="adminPassword" class="form-control" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" />
+                                            <span id="admin-password-field" class="validation-txt-errors password-field"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-8 no-padding no-margin">
+                                        <label class="col-md-3 connect-database-padding txt-holder app-textbox-label">
+                                            Database name
+                                        </label>
+                                        <div class="col-md-6 connect-database-padding txt-holder">
+                                            <select id="client-username" class="selectpicker database-name-select orapopup" title="Database name / Username" data-size="5">
+                                                <option data-hidden="true" value="">Database name / Username</option>
+                                                @if (ViewBag.DbSettings != null)
+                                                {
+                                                    <option value="@ViewBag.DbSettings.DatabaseName" selected="selected">@ViewBag.DbSettings.DatabaseName</option>
+                                                }
+                                            </select>
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                        <img class="waiting-icon" src="@Url.Content("~/Content/images/common/waitingpopup.gif")" width="25" height="25" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Database password
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="client-password" name="clientPassword" class="form-control" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" />
+                                            <span id="client-password-field" class="validation-txt-errors password-field"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="postgresql-content-holder" class="no-padding content-display show-postgresql-content display-none form-horizontal" method="post">
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Server name
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="postgresql-servername" name="servername" class="form-control" placeholder="Server name" value="@ViewBag.DbSettings.ServerName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Port
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="postgresql-port" name="port" class="form-control" placeholder="Port" value="@ViewBag.DbSettings.Port" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Username
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" id="postgresql-login" name="username" class="form-control" placeholder="Username" value="@ViewBag.DbSettings.UserName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-6 no-padding no-margin">
+                                        <label class="col-md-4 connect-database-padding txt-holder app-textbox-label">
+                                            Password
+                                        </label>
+                                        <div class="col-md-8 connect-database-padding txt-holder">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="postgresql-password-db" name="password" class="form-control" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" />
+                                            <span id="password-field" class="validation-txt-errors"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <div class="col-md-8 no-padding no-margin">
+                                        <label class="col-md-3 connect-database-padding txt-holder app-textbox-label">
+                                            Database name
+                                        </label>
+                                        <div class="col-md-6 connect-database-padding txt-holder">
+                                            <select id="postgresql-dbname" class="selectpicker database-name-select postgrepopup" title="Database name" data-size="5">
+                                                <option data-hidden="true" value="">Database name</option>
+
+                                                @if (ViewBag.DbSettings != null)
+                                                {
+                                                    <option value="@ViewBag.DbSettings.DatabaseName" selected="selected">@ViewBag.DbSettings.DatabaseName</option>
+                                                }
+                                            </select>
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                        <img class="waiting-icon display-none" src="@Url.Content("~/Content/images/common/waitingpopup.gif")" width="25" height="25" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-12 connection-properties-form">
+                            <div class="col-md-6">
+                                <button type="button" id="test-connection" class="primary-button pull-right">Test connection</button>
+                            </div>
+                            <div class="col-md-6 text-left connection-validation">
+                                <span id="test-connection-validation"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="selected-schema-container" class="col-xs-12 selected-schema-container display-none admin-page-body">
+                    </div>
+                </div>
+            </div>
+
+            <div id="select-existing-join">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-12 no-padding">
+                        <h3>Select relation</h3>
+                    </div>
+                    <div class="col-xs-12 no-padding table-content">
+                        <table class="relation-list"></table>
+                    </div>
+                </div>
+                <div class="col-xs-12 btn-relation-holder">
+                    <button type="button" id="select-relation" class="primary-button pull-right">Apply</button>
+                </div>
+            </div>
+
+            <div id="get-join-details">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-12 no-padding">
+                        <span class="join-dialog-title">Form relation</span>
+                    </div>
+                    <div class="col-xs-12 no-padding relation-select-content">
+                        <div class="col-xs-5 no-padding">
+                            <h5>Left table</h5>
+                            <div class="col-xs-12 no-padding">
+                                <select id="left-table-selection" class="selectpicker"></select>
+                            </div>
+                            <div id="left-table-columnlist" class="col-xs-12 no-padding column-list">
+                                <ul></ul>
+                            </div>
+                        </div>
+                        <div class="col-xs-2 no-padding">
+                            <div id="join-type-holder">
+                                <select id="join-type" class="selectpicker">
+                                    <option value="inner join">Inner join</option>
+                                    <option value="left join">Left join</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-5 no-padding">
+                            <h5>Right table</h5>
+                            <div class="col-xs-12 no-padding">
+                                <select id="right-table-selection" class="selectpicker" disabled="disabled"></select>
+                            </div>
+                            <div id="right-table-columnlist" class="col-xs-12 no-padding column-list">
+                                <ul></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 btn-relation-holder">
+                    <button type="button" id="apply-relation" class="primary-button pull-right" disabled="disabled">Apply</button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    
+
+    <div class="admin-page-actions col-lg-12 col-md-12">
+        <a href="@Url.Content("~/")" class="secondary-button pull-right" id="cancel-active-dir-settings" title="">Cancel</a>
+        <button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">Save</button>
+        <button type="button" title="" id="UpdateAzureADSettings-bottom" name="UpdateSystemSettings" class="primary-button pull-right hidden" ng-disabled="azureAdSettingsForm.$invalid" ng-click="">Save</button>
+        <button type="button" title="" id="save-db-settings" disabled="disabled" name="UpdateSystemSettings" class="primary-button pull-right">Save</button>
+        <button type="button" id="connect-database" class="primary-button pull-right">Next</button>
+        <button type="button" id="change-connection" class="primary-button  pull-right">Back</button>
+    </div>
+
+</div>

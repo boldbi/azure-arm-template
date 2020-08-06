@@ -1,0 +1,49 @@
+﻿@{
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    var emailAddress = HttpContext.Current.Session["emailaddress"] != null ? HttpContext.Current.Session["emailaddress"].ToString() : string.Empty;
+    var model = Model as Dictionary<ItemType, bool>;
+    var isNotHomepage = HttpContext.Current.Request.Url.LocalPath.ToLower() != Url.Action("Index", "Home");
+    var showCreate = model[ItemType.Dashboard] || model[ItemType.Category] || model[ItemType.Schedule] || model[ItemType.Slideshow] || model[ItemType.Datasource];
+    var showUpload = model[ItemType.Dashboard] && (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier || emailAddress.EndsWith("@syncfusion.com", StringComparison.OrdinalIgnoreCase) || emailAddress.Equals(ServerAppConfig.ConciergeSupportEmail)) && isNotHomepage;
+    var showImport = model[ItemType.Dashboard] && HttpContext.Current.Request.Url.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards") && isNotHomepage;
+    var isDashboardsPage = ViewBag.IsDashboardsPage != null && ViewBag.IsDashboardsPage;
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <title>
+        @ViewBag.Title
+    </title>
+   
+    @Html.Partial("~/Views/Shared/_LoaderIcon.cshtml")
+
+    <script>
+        var canCreateDashboard = @Json.Encode(model[ItemType.Dashboard]);
+        var isCategoryExistUrl = "@Url.Action("iscategoryexist", "category")";
+        var addCategoryUrl = "@Url.Action("addcategory", "category")";
+        var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
+        var getCategoryItem = "@Url.Action("RefreshCategoryList", "Dashboards")";
+        var editcategoryUrl = "@Url.Action("editcategory", "category")";
+        var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
+    </script>
+    @Styles.Render("~/bundles/styles/add-category")
+    @Styles.Render("~/bundles/styles/edit-category")
+</head>
+<body>
+    
+    @if (model[ItemType.Category])
+    {
+        @Html.Partial("../Items/_AddCategory")
+    }
+
+    @if (isDashboardsPage)
+    {
+        @Html.Partial("../Items/_EditCategory")
+    }
+
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
+</body>
+</html>

@@ -1,0 +1,38 @@
+﻿@using System.Web.Configuration;
+@{
+    Layout = null;
+    var globalAppSettings = new TenantHandler().GetTenantConfig();
+    var appLogo = globalAppSettings.SystemSettings.LoginLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/images/application/" + ServerAppConfig.AppBranding + "/" + IconFileNames.LoginLogo;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Embed - @globalAppSettings.SystemSettings.OrganizationName</title>
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@IconFileNames.Favicon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@IconFileNames.Favicon';" />
+    <script>
+        var idLogin = '@ServerAppConfig.InternalAppIdpUrl';
+        var serverUrl = '@globalAppSettings.SystemSettings.BaseUrl';
+    </script>
+
+    @Scripts.Render("~/bundles/scripts/embed-login")
+    @Styles.Render("~/bundles/Styles/embed-login")
+
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href != '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.Favicon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppBranding/@IconFileNames.Favicon';" />
+</head>
+<body>
+        <div class="container">
+            <div class="content">
+                <div class="embed-login-image">
+                    <img data-alt="@globalAppSettings.SystemSettings.OrganizationName" data-id="application-logo" data-src="@appLogo" data-default="@defaultAppLogo" class="lazyload img-loader" style="width:100%" />
+                </div>
+                <p class="embed-login-header">@globalAppSettings.SystemSettings.OrganizationName</p>
+                <p class="embed-login-description">[[[Please Login to render the dashboard]]]</p>
+                <button id="login" class="primary-button">[[[Login]]]</button>
+            </div>
+            <div class='loader-blue loader-icon' id='loader'><svg class='circular'><circle class='path' cx='27' cy='27' r='20' fill='none' stroke-width='4' stroke-miterlimit='10'></circle></svg></div>
+        </div>
+</body>
+</html>

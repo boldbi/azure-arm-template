@@ -1,0 +1,39 @@
+﻿@model Syncfusion.Server.Base.DataClasses.Subscription
+
+@{
+    var tenantInfo = ViewBag.TenantInfo as TenantInfo;
+    var productName = GlobalAppSettings.GetDescription((TenantType)tenantInfo.TenantTypeId);
+    ViewBag.Title = "Subscriptions - " + productName;
+    ViewBag.HeaderTitle = productName + " - " + tenantInfo.Tenant.DNS;
+    ViewBag.MessageBox = false;
+    var priorityOrderId = @Model.PlanId;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SubscriptionSiteSettings);
+}
+@section styles{
+    @Styles.Render("~/bundles/styles/subscription-settings")
+}
+@section scripts{
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        var cancelSubscriptionUrl = "@Url.Action("CancelSubscription", "Subscription")";
+        var activateSubscriptionUrl = "@Url.Action("ActivateSubscription", "Subscription")";
+        var getSubscriptionPlanUrl = "@Url.Action("GetSubscriptionPlan", "Subscription")";
+        var cancelSubscriptionFeedbackUrl = "@Url.Action("AddUserFeedback", "FeedBack")";
+        var getPlansUrl = "@Url.Action("GetPlans", "Subscription")";
+        var updatePlanUrl = "@Url.Action("UpdatePlan", "Subscription")";
+    </script>
+    @Scripts.Render("~/bundles/scripts/subscription-settings")
+}
+
+@section MainSection{
+    @Html.Partial("../Shared/_SiteMenu")
+    <div id="license-settings-container">
+        <div id="subscription-plan-dialog">
+            @Html.Partial("../Subscription/_SubscriptionPlan", @Model)
+            @Html.Partial("../Shared/_CancelSubscriptionFeedback")
+        </div>
+        <div id="choose-plan-dialog">
+            @Html.Partial("../Subscription/_UpgradePlans", (List<SaaSPlanDetail>)ViewBag.PlansList, new ViewDataDictionary { { "PriorityOrderId", priorityOrderId }, { "TenantTypeId", tenantInfo.TenantTypeId } })
+        </div>
+    </div>
+}

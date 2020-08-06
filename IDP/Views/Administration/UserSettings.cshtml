@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = GlobalAppSettings.SystemSettings.OrganizationName + " -User Settings ";
+    ViewBag.MessageBox = false;
+}
+
+@section styles{
+    @Styles.Render("~/styles/user-settings")
+}
+
+@section scripts{
+    <script type="text/javascript">
+        var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+        var saveUserSettingsUrl = "@Url.Action("SaveUserSettings", "Administration")";
+    </script>
+    @Scripts.Render("~/scripts/user-settings")
+}
+
+@section  MainSection{
+
+    @Html.Partial("_AdminMenu")
+
+    <div id="user-settings-container" class="col-xs-12 admin-page-container">
+        <div id="user-settings-header" class="col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="h2 page-title">USER SETTINGS</h1>
+                <h5 class="page-description">Configuration for activating user accounts in the IdentityProvider</h5>
+            </hgroup>
+        </div>
+        <div id="user-settings-body" class="admin-page-body">
+            <div class="field-container">
+                <div class="row">
+                    <label class="col-lg-2 app-textbox-label activation">Account Activation Mode</label>
+                    <div class="activation-mode col-lg-2" id="automatic">
+                        <input type="radio" id="automatic-account-activation" name="activation" class="css-radio" value="AutomaticActivation" @((int)ViewBag.UserSettings == (int)ActivationType.AutomaticActivation ? "checked" : string.Empty) />
+                        <label for="automatic-account-activation" class="app-textbox-label notransition" id="labelautomatic">Automatic</label>
+                    </div>
+                    <div class="activation-mode col-lg-6" id="email">
+                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value="EmailActivation" @((int)ViewBag.UserSettings == (int)ActivationType.EmailActivation ? "checked" : string.Empty)/>
+                        <label for="email-account-activation" class="app-textbox-label notransition" id="labelemail">Email</label>
+                        <div class="col-lg-12 bg-danger email-settings-validation validation-errors hide"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin-page-actions col-lg-12 col-md-12">
+            <a href="/" class="secondary-button pull-right" id="cancel-user-settings" title="">Cancel</a>
+            <button type="button" title="" id="update-user-settings" name="UpdateUserSettings" class="primary-button pull-right">
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+}

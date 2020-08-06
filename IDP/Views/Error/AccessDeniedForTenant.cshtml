@@ -1,0 +1,42 @@
+﻿@{
+    Layout = null;
+    var email = ViewBag.Email;
+    var dns = ViewBag.DNS;
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>[[[Access Denied - ]]]@GlobalAppSettings.SystemSettings.OrganizationName</title>
+    @Styles.Render("~/styles/layout")
+    @Styles.Render("~/styles/oauth-authorization-error")
+    @Styles.Render("~/bundles/styles/error-page")
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="if (this.src != '@GlobalAppSettings.SystemSettings.CDNLink/images/application/@CloudAppConfig.AppBranding/@IconFileNames.LoginLogo') this.src = '@GlobalAppSettings.SystemSettings.CDNLink/images/application/@CloudAppConfig.AppBranding/@IconFileNames.LoginLogo';" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@GlobalAppSettings.CdnDomain/static/error-pages/v1/access-denied.svg" class="error-image-2">
+                </div>
+                <div class="error-type">[[[Access Denied]]]</div>
+                <div class="error-text">
+                    [[[You are logged in as ]]]<strong>@email</strong>[[[, but you do not have access to the site ]]]<strong>@dns</strong>[[[.]]]<br>
+                    [[[If you should have access to this site, contact your system administrator.]]]
+                </div>
+                <div class="take-me-back-to-home-page">
+                    <span class="error-page-cursor">
+                        <a class="error-to-beck-text-color" href="@Url.Action("Logout", "Accounts")">
+                            [[[Try a different account]]]
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.Partial("../Shared/_FooterOnPremise")
+</body>
+</html>

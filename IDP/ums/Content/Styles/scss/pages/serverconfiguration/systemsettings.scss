@@ -1,0 +1,604 @@
+﻿@import "../../global.scss";
+@import "../../core/_predefinedclasses.scss";
+@import "../../core/_resolution.scss";
+@import "../../components/_buttons.scss";
+@import "../../mixins/_checkbox.scss";
+
+$startup-header-height: 70px;
+$startup-element-border-radius: 6px;
+
+%form-field-container {
+    background: $white;
+    border-radius: $startup-element-border-radius;
+    box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.12);
+    padding: 0px 24px 16px 24px;
+    width: 550px;
+}
+
+%button-holder-style {
+    .btn-holder {
+        display: inline-block;
+        padding-top: 50px;
+        width: 100%;
+
+        .proceed-button {
+            @include button(32px, 100%);
+        }
+    }
+}
+
+%server-startup-first-content {
+    font-size: 24px;
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: 1.12px;
+}
+
+%server-startup-second-content {
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    color: $primary-black;
+}
+
+%need-help-content-styles {
+    display: block;
+    font-size: map-get($app-text-size, md);
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: 0.65px;
+}
+
+body {
+    background-color: $grey-100;
+    padding-bottom: $startup-header-height;
+    min-width: 950px;
+
+    header.startup-header {
+        display: table;
+        height: $startup-header-height;
+        width: 100%;
+
+        .startup-header-container {
+            display: table-cell;
+            vertical-align: middle;
+
+            img {
+                height: 30px;
+            }
+
+            img.boldbi-logo {
+                margin-left: 80px;
+            }
+
+            .footer-logo-container {
+                float: right;
+                margin-right: 80px;
+                width: 210px;
+
+                span {
+                    margin-right: 8px;
+                    color: $grey-700;
+                }
+            }
+        }
+    }
+
+    .system-startUp-settings-bg {
+        display: table;
+        height: 100%;
+        width: 100%;
+
+        .startup-page-conatiner {
+            display: table-cell;
+            vertical-align: middle;
+
+            #system-settings-general {
+                display: table;
+
+                #image-parent-container {
+                    float: none;
+                    display: table-cell;
+                    vertical-align: middle;
+
+                    .image-container {
+                        text-align: center;
+                        margin-top: -$startup-header-height;
+
+                        .startup-image {
+                            padding: 40px;
+                        }
+
+                        .startup-content {
+                            span {
+                                display: block;
+
+                                &.first-content {
+                                    @extend %server-startup-first-content;
+                                    color: $boldbi-brand;
+                                }
+
+                                &.second-content {
+                                    @extend %server-startup-second-content;
+                                    font-size: map-get($app-text-size, md);
+                                    letter-spacing: 0.65px;
+                                    margin-top: 18px;
+                                }
+                            }
+
+                            a {
+                                @extend %need-help-content-styles;
+                                margin-top: 16px;
+                            }
+                        }
+                    }
+                }
+
+                #system-settings-welcome-container {
+                    width: 100%;
+
+                    .welcome-content {
+                        hr {
+                            width: 112px;
+                            height: 1px;
+                            margin: 0px;
+                            border-color: $boldbi-brand;
+                            text-align: left;
+                        }
+
+                        span {
+                            display: block;
+
+                            &.first-content {
+                                @extend %server-startup-first-content;
+                                margin-top: 18px;
+
+                                span {
+                                    display: inline-block;
+                                    font-weight: bold;
+                                    color: $boldbi-brand;
+                                }
+                            }
+
+                            &.second-content {
+                                @extend %server-startup-second-content;
+                                letter-spacing: 0.84px;
+                                margin-top: 24px;
+                                font-size: 18px;
+                                line-height: 1.67;
+                            }
+                        }
+
+                        a {
+                            @extend %need-help-content-styles;
+                            margin-top: 24px;
+                        }
+
+                        .btn-holder {
+                            margin-top: 40px;
+
+                            .proceed-button {
+                                @include button(40px, 320px);
+                            }
+                        }
+                    }
+                }
+
+                #progress-parent-container {
+                    float: none;
+                    display: none;
+
+                    .image-container {
+                        text-align: center;
+                        margin-top: -$startup-header-height;
+                    }
+
+                    .progressBar-container {
+                        margin-top: 60px;
+
+                        .progress {
+                            width: 220px;
+                            height: 10px;
+                            margin: 0 auto;
+
+                            .progress-bar {
+                                background-color: $primary;
+                                border-radius: 5px;
+                            }
+                        }
+                    }
+
+                    .deployment-status {
+                        margin-top: 20px;
+                        display: block;
+                        letter-spacing: 0.65px;
+                        color: $grey-700;
+                    }
+                }
+
+                .system-settings-page-container {
+                    .validation-txt-errors {
+                        position: absolute;
+                    }
+
+                    .database-dropdown-margin {
+                        .btn-group {
+                            .dropdown-menu {
+                                li {
+                                    a[aria-disabled="true"] {
+                                        cursor: default !important;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    :disabled {
+                        cursor: default;
+                    }
+
+                    .new-db, .existing-db {
+                        input:disabled {
+                            + label {
+                                color: $grey-500;
+                                cursor: default;
+                            }
+                        }
+                    }
+
+                    .secure-sql {
+                        input:disabled {
+                            ~ label {
+                                color: $grey-500;
+                                cursor: default;
+                            }
+                        }
+                    }
+                }
+
+                .field-label {
+                    letter-spacing: 0.56px;
+                    margin-bottom: 8px;
+                }
+
+                .secure-sql {
+                    margin-top: 24px;
+
+                    &.material-checkbox label {
+                        &::before {
+                            top: 2px;
+                        }
+
+                        &::after {
+                            top: 5px;
+                        }
+                    }
+                }
+
+                #system-settings-db-selection-container {
+                    display: none;
+                    width: 100%;
+
+                    .system-settings-db-selection-field {
+                        @extend %form-field-container;
+
+                        .txt-holder {
+                            padding-top: 24px;
+                            position: relative;
+
+                            .new-db, .existing-db {
+                                display: inline-block;
+                            }
+
+                            .existing-db {
+                                margin-left: 100px;
+                            }
+                        }
+
+                        .sql-server-existing-db {
+                            #waiting-icon {
+                                position: absolute;
+                                right: 30px;
+                                bottom: 2px;
+                                z-index: 10;
+                            }
+
+                            .dropdown-menu.open {
+                                max-height: 230px !important;
+                            }
+
+                            .dropdown-menu .inner {
+                                max-height: 220px !important;
+                                overflow-y: auto;
+                            }
+                        }
+
+                        #no-need-datastore {
+                            display: none;
+                        }
+
+                        .skip-intermediate-db-container {
+                            margin-top: 24px;
+                            display: none;
+
+                            &.material-checkbox label {
+                                &::before {
+                                    top: 2px;
+                                }
+
+                                &::after {
+                                    top: 5px;
+                                }
+                            }
+                        }
+                    }
+
+                    @extend %button-holder-style;
+
+                    .sqlce-content {
+                        padding-top: 50px;
+                        text-align: center;
+                    }
+
+                    .database-error {
+                        a {
+                            color: $primary;
+                        }
+                    }
+                }
+            }
+
+            #system-settings-filestorage-container {
+                display: none;
+                @extend %form-field-container;
+
+                .database-types {
+                    padding-top: 24px;
+                    position: relative;
+
+                    .file-storage-align, .blob-storage-align {
+                        display: inline-block;
+                        margin-left: 90px;
+                        margin-bottom: 24px;
+                    }
+                }
+
+                .content-value {
+                    text-align: center;
+                    margin-bottom: 10px;
+                    padding-top: 24px;
+                }
+
+                .report-content {
+                    text-align: center;
+                    margin-bottom: 10px;
+                    padding-top: 24px;
+                }
+
+                .secure-sql {
+                    margin-top: 0px !important;
+
+                    &.material-checkbox label {
+                        &::before {
+                            top: 2px;
+                        }
+
+                        &::after {
+                            top: 5px;
+                        }
+                    }
+                }
+
+                .storage-block {
+                    .blob-error-message {
+                        color: #a94442;
+                        font-size: 12px;
+                    }
+
+                    #blob-storage-form {
+                        .connection-label {
+                            letter-spacing: 0.56px;
+                            margin-bottom: 8px;
+                        }
+
+                        .validation-txt-errors {
+                            font-size: 12px;
+                            color: #a94442;
+                        }
+
+                        .form-div {
+                            margin: 0px !important;
+                            padding-top: 24px;
+                            position: relative;
+                        }
+
+                        .custom-endpoint-form-element {
+                            margin: 0px !important;
+                            position: relative;
+                        }
+                    }
+                }
+
+                @extend %button-holder-style;
+            }
+
+            #system-settings-user-account-container {
+                #admin-account-fields-container {
+                    @extend %form-field-container;
+
+                    .form-group {
+                        margin: 0px !important;
+                        padding-top: 24px;
+                        position: relative;
+                    }
+
+                    @extend %button-holder-style;
+                }
+            }
+
+            .show-hide-password {
+                right: 15px;
+                bottom: 9px;
+            }
+        }
+    }
+}
+
+    @media all and (max-width: 1399px) {
+        .system-startUp-settings-bg {
+            .startup-page-conatiner {
+                #system-settings-general {
+                    #system-settings-db-selection-container {
+                        .system-settings-db-selection-field {
+                            width: 450px !important;
+                        }
+                    }
+
+                    #system-settings-user-account-container {
+                        #admin-account-fields-container {
+                            width: 450px !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #new-password + .popover {
+        background: $primary-black;
+        opacity: 0.8;
+        width: 210px;
+        top: -110px !important;
+
+        .arrow {
+            top: 80% !important;
+        }
+
+        .arrow::after {
+            border-left-color: $primary-black;
+            opacity: 0.8;
+        }
+
+        .popover-title {
+            background: $primary-black;
+            opacity: 0.8;
+            color: $white;
+            font-size: map-get($app-text-size, "sm");
+            letter-spacing: 0.3px;
+            line-height: 18px;
+            padding-bottom: 0px;
+            border: none;
+        }
+
+        .popover-content {
+            padding-top: 0px;
+            height: 175px;
+
+            ul {
+                list-style: none;
+                padding: 0px;
+
+                li {
+                    height: 20px;
+                    margin: 15px 15px 15px 10px;
+
+                    span.icon {
+                        height: 20px;
+                        width: 20px;
+                        margin: 0 auto;
+                        border-radius: 50%;
+                        border: 2px solid $white;
+                        display: inline-block;
+                        float: left;
+                    }
+
+                    span.content {
+                        color: $white;
+                        display: block;
+                        margin-left: 40px;
+                    }
+                }
+            }
+        }
+    }
+
+    #messageBox_wrapper {
+        border-radius: $startup-element-border-radius;
+
+        .e-dialog-scroller {
+            border-radius: $startup-element-border-radius;
+
+            #messageBox {
+                border-radius: $startup-element-border-radius;
+            }
+        }
+    }
+
+    #messageBox {
+        font-family: $primary-font !important;
+        padding: 0px !important;
+
+        .message-header {
+            font-size: map-get($app-text-size, md);
+            padding: 10px;
+            background-color: $grey-200;
+
+            span {
+                .su-login-error {
+                    color: $validation-text-color;
+                }
+            }
+
+            .modal-title {
+                margin-left: 10px;
+            }
+        }
+
+        .message-box-close {
+            color: $primary-black;
+            cursor: pointer;
+            font-size: 10px;
+            opacity: 0.7;
+            position: absolute;
+            right: 15px;
+            top: 13px;
+
+            &:hover {
+                color: $primary-btn-hover-color;
+            }
+        }
+
+        .message-content {
+            font-size: map-get($app-text-size, sm);
+            margin-top: 20px;
+            padding: 0px 15px;
+            text-align: left;
+
+            .list-area {
+                margin-top: 10px;
+                height: 160px;
+                overflow-y: scroll;
+            }
+        }
+
+        .message-box-btn-holder {
+            bottom: 0;
+            padding: 10px;
+            position: absolute;
+            right: 0;
+            width: 100%;
+            text-align: center;
+            background-color: $grey-200;
+
+            .secondary-button {
+                @include button(28px, 90px, "secondary");
+            }
+        }
+    }
