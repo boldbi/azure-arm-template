@@ -1811,7 +1811,7 @@ function dssystemsettings() {
         $("#blob-storage-form").hide();
         $("#report-storage").hide();
         if (isAzureApplication) {
-            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforAzure).slideDown();
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfig).slideDown();
         }
         else {
             $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforBoldbi).slideDown();
