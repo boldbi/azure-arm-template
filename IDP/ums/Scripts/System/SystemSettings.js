@@ -2015,10 +2015,8 @@ function validate_storage_type() {
 }
 
 function validate_report_storage() {
-    $(".blob-error-message").hide();
-    if (isBoldReports) {
-        showWaitingPopup($(".startup-page-conatiner"));
-    }   
+    $(".blob-error-message").hide();    
+    showWaitingPopup($(".startup-page-conatiner")); 
     var storageType = $("input[name='IsBlobStorage']:checked").val();    
     window.storageType = storageType;
     var azuredetails = "";
@@ -2074,7 +2072,9 @@ function validate_report_storage() {
                         if (typeof result.Data != "undefined") {
                             if (result.Data.Key.toString().toLowerCase() == "true") {
                                 hideWaitingPopup(".startup-page-conatiner");
-                                postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+				if (isBoldReports) {
+                                   postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+				}
                             } else {
                                 hideWaitingPopup(".startup-page-conatiner");
                                 $(".azure-validation,.blob-error-message").css("display", "block");
@@ -2091,7 +2091,9 @@ function validate_report_storage() {
             }
             else {
                 hideWaitingPopup(".startup-page-conatiner");
-                postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+                if (isBoldReports) {
+                     postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+                }
             }
         } else {
             hideWaitingPopup(".startup-page-conatiner");
@@ -2112,8 +2114,9 @@ function validate_report_storage() {
             systemSettingsDetails = getDatabaseFormValues();
         }
         hideWaitingPopup(".startup-page-conatiner");
-        postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
-       
+       if (isBoldReports) {
+             postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+	}
     }
 }
 
