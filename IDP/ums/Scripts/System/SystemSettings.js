@@ -1529,7 +1529,7 @@ function checkingExistingDB(element) {
                             delete window.databaseName;
                             delete window.sslEnabled;
                             if (element == null || element == "" || element == undefined) {
-                                if ((isAzureApplication && selfHosted) && $("#dialog-body-container").find(".storage-form").length <= 0) {
+                                if ((isAzureApplication && selfHosted) && $("#dialog-body-container").find(".storage-form").length <= 0 && checkStartupIntermediateDB != "intermediate-db") {
                                     $("#system-settings-db-selection-container").hide();
                                     $("#file-storage").prop("disabled", true);
                                     $("#blob-storage").prop("checked", true);
@@ -1734,7 +1734,7 @@ function connectDatabase(element, actionType) {
                         },
                         success: function (dataResult) {
                             if (dataResult.Data.key) {
-                                if ((isAzureApplication && selfHosted) && $("#dialog-body-container").find(".storage-form").length <= 0) {
+                                if ((isAzureApplication && selfHosted) && $("#dialog-body-container").find(".storage-form").length <= 0 && checkStartupIntermediateDB != "intermediate-db") {
                                     $("#system-settings-db-selection-container").hide();
                                     $("#file-storage").prop("disabled", true);
                                     $("#blob-storage").prop("checked", true);
@@ -1810,7 +1810,12 @@ function dssystemsettings() {
         $("#image-parent-container .startup-image").hide().attr("src", serverSetupImageUrl).fadeIn();
         $("#blob-storage-form").hide();
         $("#report-storage").hide();
-        $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforBoldbi).slideDown();
+        if (isAzureApplication) {
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforAzure).slideDown();
+        }
+        else {
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforBoldbi).slideDown();
+        }    
         $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.PullYourData + " " + dataConnectorsCount + "+ " + window.TM.App.LocalizationContent.DataConnectorsSaveOffline).slideDown();
         $(".startup-content a").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=8" : "https://redirect.boldbi.com?id=4024");
         $("#system-settings-db-selection-container").hide().slideDown("slow");
