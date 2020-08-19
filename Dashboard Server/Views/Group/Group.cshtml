@@ -1,8 +1,10 @@
+@using System.Web.Configuration;
 @{
     var globalAppSettings = new TenantHandler().GetTenantConfig();
 
     ViewBag.Title = "[[[Groups]]] - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageGroups);
+    var isAzureApplication = string.IsNullOrEmpty(WebConfigurationManager.AppSettings["IsAzureApplication"]) ? false : Convert.ToBoolean(WebConfigurationManager.AppSettings["IsAzureApplication"]);
 }
 
 @section styles{
@@ -22,19 +24,19 @@
 
     @Scripts.Render("~/bundles/scripts/groups")
 
-<script type="text/x-jsrender" id="group-profile-template">
-    <a class="item-name grid-content" title="{{:~renderDoubleQuotes(GroupName)}}" data-toggle="tooltip" href="@Url.Action("viewgroup", "group")/{{:GroupId}}">{{:GroupName}}</a>
+    <script type="text/x-jsrender" id="group-profile-template">
+        <a class="item-name grid-content" title="{{:~renderDoubleQuotes(GroupName)}}" data-toggle="tooltip" href="@Url.Action("viewgroup", "group")/{{:GroupId}}">{{:GroupName}}</a>
 
-    {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
-    <span title="Azure AD Group" class="su su-azure-ad grid-directory-icon"> </span>
-    {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
-    <span title="Windows AD Group" class="su su-windows-ad grid-directory-icon"> </span>
-    {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
-    <span class="su su-oauth grid-directory-icon"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span>
-    {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
-    <span class="su su-openid grid-directory-icon"> </span>
-    {{/if}}
-</script>
+        {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
+        <span title="Azure AD Group" class="su su-azure-ad grid-directory-icon"> </span>
+        {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
+        <span title="Windows AD Group" class="su su-windows-ad grid-directory-icon"> </span>
+        {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
+        <span class="su su-oauth grid-directory-icon"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span>
+        {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
+        <span class="su su-openid grid-directory-icon"> </span>
+        {{/if}}
+    </script>
     <script type="text/x-jsrender" id="group-description-template">
         <span class="grid-content" title="{{:~renderDoubleQuotes(GroupDescription)}}" data-toggle="tooltip">
             {{:GroupDescription}}
@@ -243,7 +245,7 @@
                                     <span>[[[Create Group]]]</span>
                                 </a>
                             </li>
-                            @if (ServerAppConfig.IsSelfHosted)
+                            @if (ServerAppConfig.IsSelfHosted && !isAzureApplication)
                             {
                                 <li>
                                     <a href="@Url.Action("ActiveDirectoryGroupImport", "group")" data-toggle="tooltip" data-placement="top" title="[[[Import groups from Active Directory]]]">
@@ -269,7 +271,7 @@
                                     <i class="su su-openid"></i>
                                     <span>[[[Import from OpenID]]]</span>
                                 </a>
-                            </li>                            
+                            </li>
                         </ul>
                     </li>
 
@@ -281,7 +283,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu" id="synchronize-dropdown-menu">
-                                @if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted)
+                                @if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication)
                                 {
                                     <li>
                                         <a class="dropdown-toggle" href="@Url.Action("ActiveDirectoryGroup", "Group")" data-toggle="tooltip" data-placement="left" title="[[[Synchronize groups with Active Directory]]]">

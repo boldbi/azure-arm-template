@@ -3517,6 +3517,18 @@
             </summary>
             <value>The message.</value>
         </member>
+        <member name="T:Microsoft.AnalysisServices.HttpRequestResponseExtensions">
+            <summary>
+            Extension methods for Http Request and Response
+            </summary>
+        </member>
+        <member name="M:Microsoft.AnalysisServices.HttpRequestResponseExtensions.GetResponseWithErrorHandling(System.Net.HttpWebRequest)">
+            <summary>
+            Gets response and handles error
+            </summary>
+            <param name="httpWebRequest">HttpWebRequest object to get the response for</param>
+            <returns></returns>
+        </member>
         <member name="T:Microsoft.AnalysisServices.HttpStream">
             <summary>
             Custom NetworkStream used for sending/receiving XML/A messages.
@@ -7556,6 +7568,20 @@
             <param name="dbStorageLocation">The storage location for the file to restore.</param>
             <param name="readWriteMode">The read/write mode of the database.</param>
         </member>
+        <member name="M:Microsoft.AnalysisServices.Core.Server.Restore(System.String,System.String,System.Boolean,Microsoft.AnalysisServices.RestoreLocation[],Microsoft.AnalysisServices.RestoreSecurity,System.String,System.String,Microsoft.AnalysisServices.ReadWriteMode,System.Boolean)">
+            <summary>
+            Restores an Analysis Services database from a backup file to the specified database, given a password, an overwrite flag, multiple remote servers, specifying security settings, password, storage location, and read\write mode.
+            </summary>
+            <param name="file">The name and location of the file to restore.</param>
+            <param name="databaseName">The database to restore to.</param>
+            <param name="allowOverwrite">true to indicate that the database will be overwritten, if it exists; otherwise, false.</param>
+            <param name="locations">An array of RestoreLocation objects, specifying multiple remote servers to restore to.</param>
+            <param name="security">A RestoreSecurity object that specifies the security settings for the restore.</param>
+            <param name="password">The password to use to decrypt the restoration file.</param>
+            <param name="dbStorageLocation">The storage location for the file to restore.</param>
+            <param name="readWriteMode">The read/write mode of the database.</param>
+            <param name="ignoreIncompatibilities">Whether ignore model incompatibilities.</param>
+        </member>
         <member name="M:Microsoft.AnalysisServices.Core.Server.Restore(Microsoft.AnalysisServices.RestoreInfo)">
             <summary>
             Restores an Analysis Services database from a backup file, using the options set on the provided RestoreInfo object.
@@ -9964,7 +9990,13 @@
             <summary>The value of the ApplicationContext XMLA property as provided by external applications to assist with end-to-end correlation of user activities.</summary>
         </member>
         <member name="F:Microsoft.AnalysisServices.TraceColumn.GraphCorrelationID">
-            <summary>Job graph ID; unique per graph.</summary>
+            <summary>Deprecated</summary>
+        </member>
+        <member name="F:Microsoft.AnalysisServices.TraceColumn.DatabaseFriendlyName">
+            <summary>User defined name of the database in which the statement of the user is running.</summary>
+        </member>
+        <member name="F:Microsoft.AnalysisServices.TraceColumn.Identity">
+            <summary>Identity information of current user</summary>
         </member>
         <member name="T:Microsoft.AnalysisServices.ErrorConfiguration">
             <summary>
@@ -12284,6 +12316,20 @@
             <param name="dbStorageLocation">The location of the database storage.</param>
             <param name="readWriteMode">An enumeration that describes the read/write state of the database.</param>
         </member>
+        <member name="M:Microsoft.AnalysisServices.RestoreInfo.#ctor(System.String,System.String,System.Boolean,Microsoft.AnalysisServices.RestoreLocation[],Microsoft.AnalysisServices.RestoreSecurity,System.String,System.String,Microsoft.AnalysisServices.ReadWriteMode,System.Boolean)">
+            <summary>
+            Initializes a new instance of RestoreInfo using the file to restore, database name , overwrite indicator, an array of restore locations, a security definition for the roles to be restored, password, the database storage location, and the read/write mode of the database.
+            </summary>
+            <param name="file">Name of the file for which information is to be restored.</param>
+            <param name="databaseName">Name of the database from which to extract the information to be restored.</param>
+            <param name="allowOverwrite">A Boolean value. If true, the file information can be overwritten; otherwise, false.</param>
+            <param name="locations">An array of RestoreLocations for the remote objects to restored.</param>
+            <param name="security">A RestoreSecurity enumeration value that specifies what is going to happen to the Roles objects being restored.</param>
+            <param name="password">A string with the password that is required to read the restored file.</param>
+            <param name="dbStorageLocation">The location of the database storage.</param>
+            <param name="readWriteMode">An enumeration that describes the read/write state of the database.</param>
+            <param name="ignoreIncompatibilities">Whether or not to ignore model incompatibilities during restore.</param>
+        </member>
         <member name="P:Microsoft.AnalysisServices.RestoreInfo.File">
             <summary>
             Gets or sets the UNC name of the File to restore.
@@ -12301,6 +12347,11 @@
             Gets or sets the AllowOverwrite aspect of RestoreInfo.
             </summary>
             <value>true if overwrite is allowed; otherise, false.</value>
+        </member>
+        <member name="P:Microsoft.AnalysisServices.RestoreInfo.IgnoreIncompatibilities">
+            <summary>
+            Gets or sets a flag indicating whether model incompatibilities should be ignored during restore.
+            </summary>
         </member>
         <member name="P:Microsoft.AnalysisServices.RestoreInfo.DatabaseReadWriteMode">
             <summary>

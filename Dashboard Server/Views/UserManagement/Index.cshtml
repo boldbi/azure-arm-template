@@ -1,7 +1,9 @@
-﻿@{
+﻿﻿@using System.Web.Configuration;
+@{
     var globalAppSettings = new TenantHandler().GetTenantConfig();
     ViewBag.Title = "[[[Users List]]] - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageUsers);
+    var isAzureApplication = string.IsNullOrEmpty(WebConfigurationManager.AppSettings["IsAzureApplication"]) ? false : Convert.ToBoolean(WebConfigurationManager.AppSettings["IsAzureApplication"]);
 }
 
 @section styles{
@@ -95,7 +97,7 @@
                 <i class="su su-eye"></i>
             </a>
             {{if Email == "@ViewBag.LoggedUser"}}
-            <a href="javascript:void(0);"title="[[[It's You]]]" data-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
+            <a href="javascript:void(0);" title="[[[It's You]]]" data-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
                 <i class="su su-delete disabled-icon-color"></i>
             </a>
             {{else}}
@@ -233,7 +235,7 @@
                                         <span>[[[Import from CSV]]]</span>
                                     </a>
                                 </li>
-                                @if (ServerAppConfig.IsSelfHosted)
+                                @if (ServerAppConfig.IsSelfHosted && !isAzureApplication)
                                 {
                                     <li>
                                         <a class="dropdown-toggle" href="@Url.Action("ActiveDirectoryUserImport", "UserManagement")" title="[[[Import users from Active Directory]]]" data-toggle="tooltip" data-placement="top">
@@ -266,7 +268,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu sync-user-dropdown multi-level" role="menu" id="dropdown-options">
-                                @if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted)
+                                @if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication)
                                 {
                                     <li>
                                         <a class="dropdown-toggle" href="@Url.Action("SynchronizeUsers", "UserManagement")" data-toggle="tooltip" data-placement="left" title="[[[Synchronize users with Active Directory]]]">
@@ -299,7 +301,7 @@
                     }
                     else
                     {
-                        if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted)
+                        if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication)
                         {
                             <li>
                                 <a href="@Url.Action("SynchronizeUsers", "UserManagement")" class="link-button synchronize-users" title="[[[Synchronize users with Active Directory]]]" data-toggle="tooltip" data-placement="left">[[[Active Directory Synchronization]]]</a>
@@ -364,5 +366,5 @@
     @Html.Partial("../UserManagement/_MultipleUserDeleteDialog")
     @Html.Partial("../UserManagement/_SingleUserDeleteDialog")
     @Html.Partial("../UserManagement/_LimitUserCreation")
-     @Scripts.Render("~/bundles/scripts/localizationcontent")
+    @Scripts.Render("~/bundles/scripts/localizationcontent")
 }

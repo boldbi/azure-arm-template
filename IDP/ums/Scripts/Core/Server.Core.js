@@ -919,44 +919,44 @@ $(document).ready(function (e) {
         $.ajax({
             type: "POST",
             url: isLicenseExpiredUrl,
-            success: function (data) {
-                if (data !== undefined) {
-                    $(".user-warning-content").text("");
-                    var isLicensePage = window.location.pathname.indexOf("administration/license-settings") > -1;
+            //// Commented this for Bold BI 3.3.40 Refrersh release to hide banner changes
+            ////success: function (data) {
+            ////    if (data !== undefined) {
+            ////        $(".user-warning-content").text("");
+            ////        var isLicensePage = window.location.pathname.indexOf("administration/license-settings") > -1;
 
-                    if (data.IsBoldBILicenseExpired && data.IsBoldReportsLicenseExpired) {
-                        if (isLicensePage) {
-                            warningContent = window.TM.App.LocalizationContent.BoldLicenseExpired + " " + window.TM.App.LocalizationContent.UpgardePlanOr + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
-                        }
-                        else {
-                            warningContent = window.TM.App.LocalizationContent.BoldLicenseExpired + " " + window.TM.App.LocalizationContent.Please + " " + "<a href= '" + manageLicenseUrl + "' >" + window.TM.App.LocalizationContent.UpgradeYourplan + "</a> " + window.TM.App.LocalizationContent.Or + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
-                        }
-                    }
-                    else if (data.IsBoldBILicenseExpired) {
-                        if (isLicensePage) {
-                            warningContent = window.TM.App.LocalizationContent.BoldBiLicenseExpired + " " + window.TM.App.LocalizationContent.UpgardePlanOr + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
-                        }
-                        else {
-                            warningContent = window.TM.App.LocalizationContent.BoldBiLicenseExpired + " " + window.TM.App.LocalizationContent.Please + " " + "<a href= '" + manageLicenseUrl + "?product=boldbi' >" + window.TM.App.LocalizationContent.UpgradeYourplan + "</a> " + window.TM.App.LocalizationContent.Or + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
-                        }
-                    }
-                    else if (data.IsBoldReportsLicenseExpired) {
-                        if (isLicensePage) {
-                            warningContent = window.TM.App.LocalizationContent.BoldReportsLicenseExpired + " " + window.TM.App.LocalizationContent.UpgardePlanOr + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
-                        }
-                        else {
-                            warningContent = window.TM.App.LocalizationContent.BoldReportsLicenseExpired + " " + window.TM.App.LocalizationContent.Please + " " + "<a href= '" + manageLicenseUrl + "?product=boldreports' >" + window.TM.App.LocalizationContent.UpgradeYourplan + "</a> " + window.TM.App.LocalizationContent.Or + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
-                        }
-                    }
+            ////        if (data.IsBoldBILicenseExpired && data.IsBoldReportsLicenseExpired) {
+            ////            if (isLicensePage) {
+            ////                warningContent = window.TM.App.LocalizationContent.BoldLicenseExpired + " " + window.TM.App.LocalizationContent.UpgardePlanOr + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
+            ////            }
+            ////            else {
+            ////                warningContent = window.TM.App.LocalizationContent.BoldLicenseExpired + " " + window.TM.App.LocalizationContent.Please + " " + "<a href= '" + manageLicenseUrl + "' >" + window.TM.App.LocalizationContent.UpgradeYourplan + "</a> " + window.TM.App.LocalizationContent.Or + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
+            ////            }
+            ////        }
+            ////        else if (data.IsBoldBILicenseExpired) {
+            ////            if (isLicensePage) {
+            ////                warningContent = window.TM.App.LocalizationContent.BoldBiLicenseExpired + " " + window.TM.App.LocalizationContent.UpgardePlanOr + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
+            ////            }
+            ////            else {
+            ////                warningContent = window.TM.App.LocalizationContent.BoldBiLicenseExpired + " " + window.TM.App.LocalizationContent.Please + " " + "<a href= '" + manageLicenseUrl + "?product=boldbi' >" + window.TM.App.LocalizationContent.UpgradeYourplan + "</a> " + window.TM.App.LocalizationContent.Or + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
+            ////            }
+            ////        }
+            ////        else if (data.IsBoldReportsLicenseExpired) {
+            ////            if (isLicensePage) {
+            ////                warningContent = window.TM.App.LocalizationContent.BoldReportsLicenseExpired + " " + window.TM.App.LocalizationContent.UpgardePlanOr + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
+            ////            }
+            ////            else {
+            ////                warningContent = window.TM.App.LocalizationContent.BoldReportsLicenseExpired + " " + window.TM.App.LocalizationContent.Please + " " + "<a href= '" + manageLicenseUrl + "?product=boldreports' >" + window.TM.App.LocalizationContent.UpgradeYourplan + "</a> " + window.TM.App.LocalizationContent.Or + " " + "<a href= '" + boldContactUrl + "' > " + window.TM.App.LocalizationContent.ContactUs + "</a>." + " <span class='close-user-warning-icons su-close'></span>";
+            ////            }
+            ////        }
 
-                    if (data.IsBoldBILicenseExpired || data.IsBoldReportsLicenseExpired) {
-                        $(".user-warning-content").append(warningContent);
-                        $(".user-warning").css("display", "block");
-                        $("#content-area").addClass("user-warning-space");
-                    }
-                }
-            }
+            ////        if (data.IsBoldBILicenseExpired || data.IsBoldReportsLicenseExpired) {
+            ////            $(".user-warning-content").append(warningContent);
+            ////            $(".user-warning").css("display", "block");
+            ////            $("#content-area").addClass("user-warning-space");
+            ////        }
+            ////    }
+            ////}
         });
     }
-
 });
