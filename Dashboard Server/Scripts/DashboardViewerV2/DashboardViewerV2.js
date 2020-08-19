@@ -221,7 +221,7 @@ function beforeWidgetIconRendered(event) {
         }
     }
 
-    if (enableComment.toLowerCase() == "true" && event.dashboardComment && embedConfig.HasWidgetComments) {
+    if (enableComment.toLowerCase() == "true" && event.dashboardComment && event.enableComment && embedConfig.HasWidgetComments) {
         event.iconsinformation.push({
             "class": event.enableComment ? commentedWidgets.includes(event.uniqueId) ? "su-with-comment su-icon" : "su-without-comment su-icon" : "",
             "name": "comment",

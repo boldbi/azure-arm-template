@@ -13,14 +13,14 @@ buyAdditionalStorage.controller('additionalStorageController', ["$scope", functi
 }]);
 
 $(document).ready(function () {
-    var licenseBodyWaitingPopupTemplateId = createLoader("body");
-    $("#body").ejWaitingPopup({ template: $("#" + licenseBodyWaitingPopupTemplateId) });
+    var licenseBodyWaitingPopupTemplateId = createLoader("#server-app-container");
+    $("#server-app-container").ejWaitingPopup({ template: $("#" + licenseBodyWaitingPopupTemplateId) });
     submitComment = renderMde("#comment");
     $("#general-feedback-popup").addClass("display-none");
 
     $("#send-button").on("click", function () {
         reason = [];
-        $("body").ejWaitingPopup("show");
+        $("#server-app-container").ejWaitingPopup("show");
         var commentText = submitComment.value();
 
         for (var i = 1; i <= $(".reason-checkbox").length; i++) {
@@ -36,13 +36,13 @@ $(document).ready(function () {
             CanContact: $("#cancel-subscription-feedback").is(":checked"),
             Comments: commentText
         };
-        $("body").ejWaitingPopup("show");
+        $("#server-app-container").ejWaitingPopup("show");
         $.ajax({
             type: "POST",
             url: cancelSubscriptionFeedbackUrl,
             data: { feedback: JSON.stringify(feedback) },
             success: function (result) {
-                $("body").ejWaitingPopup("hide");
+                $("#server-app-container").ejWaitingPopup("hide");
                 if (result.Status) {
                     cancelSubscription();
                 }
@@ -52,7 +52,7 @@ $(document).ready(function () {
             },
             error: function () {
                 WarningAlert(window.Server.App.LocalizationContent.CancelSubscription, window.Server.App.LocalizationContent.CancelSubscritpionFailure, 0);
-                $("body").ejWaitingPopup("hide");
+                $("#server-app-container").ejWaitingPopup("hide");
             }
         });
     });
@@ -273,7 +273,7 @@ $(document).on('mouseout', '#change-subscription-settings', function () {
 
 
 function openSubscriptionSettings() {
-    $("body").ejWaitingPopup("show");
+    $("#server-app-container").ejWaitingPopup("show");
     validateSubscriptionStatus();
     if (issubscriptioncancel) {
         $("#subscription-plan-container").removeClass("show-block").addClass("hide-block");
@@ -284,17 +284,17 @@ function openSubscriptionSettings() {
         $("#cancel-subscription-container").removeClass("hide-block").addClass("show-block");
         $("#reactivate-subscription-container").removeClass("show-block").addClass("hide-block");
     }
-    $("body").ejWaitingPopup("hide");
+    $("#server-app-container").ejWaitingPopup("hide");
     $("#server-app-container").scrollTop(0);
 }
 
 function activateSubscription() {
-    $("body").ejWaitingPopup("show");
+    $("#server-app-container").ejWaitingPopup("show");
     $.ajax({
         type: "POST",
         url: activateSubscriptionUrl,
         success: function (result) {
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
             if (result.Status) {
                 SuccessAlert(window.Server.App.LocalizationContent.ReactivateSubscription, window.Server.App.LocalizationContent.ReactivateSubscritpionSuccess, 7000);
                 window.location.reload();
@@ -305,7 +305,7 @@ function activateSubscription() {
         },
         error: function () {
             WarningAlert(window.Server.App.LocalizationContent.ReactivateSubscription, window.Server.App.LocalizationContent.ReactivateSubscritpionFailure, 0);
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
         }
     });
 }
@@ -344,7 +344,7 @@ function redirectToSubscriptionPlan() {
 }
 
 function openPlanPickupPartial() {
-    $("body").ejWaitingPopup("show");
+    $("#server-app-container").ejWaitingPopup("show");
     var planId = $("#currentPlanId").text();
     $.ajax({
         type: "GET",
@@ -358,10 +358,10 @@ function openPlanPickupPartial() {
             } else {
                 WarningAlert(window.Server.App.LocalizationContent.ChoosePlan, window.Server.App.LocalizationContent.GetUpdatePlanFailure, 0);
             }
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
         },
         error: function () {
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
             WarningAlert(window.Server.App.LocalizationContent.ChoosePlan, window.Server.App.LocalizationContent.GetUpdatePlanFailure, 0);
         }
     });
@@ -406,20 +406,20 @@ function updateNewPlan() {
     var selectedPlan = $(".selected-plan-button");
     var planId = selectedPlan.attr("data-plan-id");
     if (planId != "") {
-        $("body").ejWaitingPopup("show");
+        $("#server-app-container").ejWaitingPopup("show");
         $.ajax({
             type: "POST",
             url: updatePlanUrl,
             data: { planId: planId },
             success: function (result) {
-                $("body").ejWaitingPopup("hide");
+                $("#server-app-container").ejWaitingPopup("hide");
                 if (result.Status) {
                     SuccessAlert(window.Server.App.LocalizationContent.ChoosePlan, window.Server.App.LocalizationContent.UpdatedPlanSuccess, 7000);
                     window.location.reload();
                 } else if (result.IsCorporateEmail !== undefined && !result.IsCorporateEmail) {
                     WarningAlert(window.Server.App.LocalizationContent.ChoosePlan, window.Server.App.LocalizationContent.InvalidBusinessEmail, 0);
                 } else {
-                    $("body").ejWaitingPopup("hide");
+                    $("#server-app-container").ejWaitingPopup("hide");
                     WarningAlert(window.Server.App.LocalizationContent.ChoosePlan, window.Server.App.LocalizationContent.ChoosePlanFailure, 0);
                 }
             }
@@ -428,7 +428,7 @@ function updateNewPlan() {
 }
 
 function reloadSubscriptionPlan() {
-    $("body").ejWaitingPopup("show");
+    $("#server-app-container").ejWaitingPopup("show");
     $.ajax({
         type: "GET",
         url: getSubscriptionPlanUrl,
@@ -440,10 +440,10 @@ function reloadSubscriptionPlan() {
             } else {
                 WarningAlert(window.Server.App.LocalizationContent.SubscriptionPlan, window.Server.App.LocalizationContent.SubscriptionPlanFailure, 0);
             }
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
         },
         error: function () {
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
             WarningAlert(window.Server.App.LocalizationContent.SubscriptionPlan, window.Server.App.LocalizationContent.SubscriptionPlanFailure, 0);
         }
     });
@@ -465,7 +465,7 @@ function renderMde(id) {
 
 function cancelSubscription() {
     $("#cancel-subscription-feedback-popup").ejDialog("close");
-    $("body").ejWaitingPopup("show");
+    $("#server-app-container").ejWaitingPopup("show");
     var commentText = submitComment.value("");
     $(".reason-checkbox").prop("checked", false);
     $("#cancel-subscription-feedback").prop("checked", false);
@@ -476,7 +476,7 @@ function cancelSubscription() {
         type: "POST",
         url: cancelSubscriptionUrl,
         success: function (result) {
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
             if (result.Status) {
                 SuccessAlert(window.Server.App.LocalizationContent.CancelSubscription, window.Server.App.LocalizationContent.CancelSubscriptionSuccess, 7000);
                 window.location.reload();
@@ -487,7 +487,7 @@ function cancelSubscription() {
         },
         error: function () {
             WarningAlert(window.Server.App.LocalizationContent.CancelSubscription, window.Server.App.LocalizationContent.CancelSubscritpionFailure, 0);
-            $("body").ejWaitingPopup("hide");
+            $("#server-app-container").ejWaitingPopup("hide");
         }
     });
 }

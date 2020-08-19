@@ -13,7 +13,7 @@ if (!isSelfHosted) {
     serverApp.controller('LoginDisclaimerInfoCtrl', ["$scope", "$timeout", function ($scope, $timeout) {
         $scope.loginDisclaimerEnabled = loginDisclaimer.IsEnabled;
         $scope.consentContentEnabled = loginDisclaimer.IsConsentCheckboxEnabled;
-        $scope.consentContent = loginDisclaimer.ConsentContent === "" ? $scope.consentContentEnabled ? "I have read and accept the login disclaimer." : "By logging in you accept our login disclaimer." : loginDisclaimer.ConsentContent;
+        $scope.consentContent = loginDisclaimer.ConsentContent === "" || loginDisclaimer.ConsentContent == null ? $scope.consentContentEnabled ? "I have read and accept the login disclaimer." : "By logging in you accept our login disclaimer." : loginDisclaimer.ConsentContent;
         $scope.consentTitle = loginDisclaimer.Title;
 
         $scope.openConsentContentInfo = function () {
@@ -662,7 +662,7 @@ $(document).ready(function () {
 
     $(document).ready(function () {
         if ($("#active-directory-container").is(":visible")) {
-            if (location.href.match(/azure-ad/)) {
+            if (location.href.match(/azure-ad/) || (isSelfHosted && isAzureApplication)) {
                 $("#azure-ad").tab("show");
                 $("#update-active-dir-settings").hide();
                 $("#UpdateAzureADSettings-bottom").removeClass("hidden");

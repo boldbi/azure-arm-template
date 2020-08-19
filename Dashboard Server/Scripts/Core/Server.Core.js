@@ -1097,7 +1097,9 @@ $(window).load(function () {
                         }
                     }
 
-                    if (data.IsBoldBiTenant && (data.IsAuthorsExceed || data.IsLicenseExpired)) {
+                    // We are hiding this because it will be included in future release
+                    //if (data.IsBoldBiTenant && (data.IsAuthorsExceed || data.IsLicenseExpired)) {
+                    if (false) {
                         if (data.IsAuthorsExceed && data.IsLicenseExpired) {
                             warningContent = "Your site license has expired, and you have exceeded the dashboard creators limit.";
                         }

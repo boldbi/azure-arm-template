@@ -1108,7 +1108,6 @@ $(document).on("change", ".css-radio", function () {
             }
             break;
     }
-
 });
 
 $(document).on("click", ".databse-dropdown .dropdown-toggle", function () {
@@ -1534,7 +1533,7 @@ function checkingExistingDB(element) {
                                     $("#file-storage").prop("disabled", true);
                                     $("#blob-storage").prop("checked", true);
                                     $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
-                                    $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage2).slideDown();
+                                    $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage3).slideDown();
                                     $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
                                     $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
                                     $("#system-settings-filestorage-container").slideDown("slow");
@@ -1815,7 +1814,7 @@ function dssystemsettings() {
         }
         else {
             $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforBoldbi).slideDown();
-        }    
+        }
         $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.PullYourData + " " + dataConnectorsCount + "+ " + window.TM.App.LocalizationContent.DataConnectorsSaveOffline).slideDown();
         $(".startup-content a").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=8" : "https://redirect.boldbi.com?id=4024");
         $("#system-settings-db-selection-container").hide().slideDown("slow");
@@ -2020,8 +2019,8 @@ function validate_storage_type() {
 }
 
 function validate_report_storage() {
-    $(".blob-error-message").hide();    
-    showWaitingPopup($(".startup-page-conatiner")); 
+    $(".blob-error-message").hide();
+    showWaitingPopup($(".startup-page-conatiner"));
     var storageType = $("input[name='IsBlobStorage']:checked").val();    
     window.storageType = storageType;
     var azuredetails = "";
@@ -2077,9 +2076,9 @@ function validate_report_storage() {
                         if (typeof result.Data != "undefined") {
                             if (result.Data.Key.toString().toLowerCase() == "true") {
                                 hideWaitingPopup(".startup-page-conatiner");
-				if (isBoldReports) {
-                                   postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
-				}
+                                if (isBoldReports) {
+                                    postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+                                }
                             } else {
                                 hideWaitingPopup(".startup-page-conatiner");
                                 $(".azure-validation,.blob-error-message").css("display", "block");
@@ -2097,12 +2096,12 @@ function validate_report_storage() {
             else {
                 hideWaitingPopup(".startup-page-conatiner");
                 if (isBoldReports) {
-                     postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
-                }
+                    postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+                }  
             }
         } else {
-            hideWaitingPopup(".startup-page-conatiner");
-            changeFooterPostion();
+          hideWaitingPopup(".startup-page-conatiner");
+           changeFooterPostion();
             return false;
         }
     } else {
@@ -2119,9 +2118,9 @@ function validate_report_storage() {
             systemSettingsDetails = getDatabaseFormValues();
         }
         hideWaitingPopup(".startup-page-conatiner");
-       if (isBoldReports) {
-             postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
-	}
+        if (isBoldReports) {
+            postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+        }
     }
 }
 

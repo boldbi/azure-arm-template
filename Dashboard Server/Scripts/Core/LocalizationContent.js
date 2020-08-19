@@ -610,7 +610,7 @@
             SynchronizeConfirmation: "[[[Are you sure you want to synchronize the dashboard changes with other sites?]]]",
             SynchronizeSuccess: "[[[Published dashboard successfully synchronized.]]]",
             SynchronizeWarning: "[[[Published dashboard failed to synchronize.]]]",
-            PublishedItemName: "[[[Name]]]",
+            PublishedItemName: "[[[Published Dashboard Name]]]",
             PublishedItemSiteName: "[[[Site Name]]]",
             PublishedItemDashboard: "[[[Dashboard]]]",
             PublishedItemLastPublished: "[[[Last Published]]]",

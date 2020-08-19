@@ -1,4 +1,5 @@
 ﻿@using System.Configuration;
+@using System.Web.Configuration;
 @model List<LicensePlans>
 @{
     ViewBag.Title = "[[[Manage License - ]]]" + GlobalAppSettings.SystemSettings.OrganizationName;
@@ -6,6 +7,7 @@
     var boldReportsLicense = Model != null ? Model.Where(x => x.TenantType == TenantType.BoldReportsOnPremise).FirstOrDefault() : null;
     var isBoldBiLicenseAvailable = boldBiLicense != null;
     var isBoldReportsLicenseAvailable = boldReportsLicense != null;
+    var isAzureApplication = string.IsNullOrEmpty(WebConfigurationManager.AppSettings["IsAzureApplication"]) ? false : Convert.ToBoolean(WebConfigurationManager.AppSettings["IsAzureApplication"]);
 }
 
 @section styles{
@@ -78,20 +80,20 @@
                                             <button id="update-onpremise-plan" license-service-url="@boldBiLicense.UpdateLicenseUrl" class="primary-button pull-right">[[[Check License]]]</button>
                                             <div id="update-license-key-notification-loader" class="pull-right" style="display:none">
                                                 <svg x="0px" y="0px" width="24px" height="30px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-                                                    <rect x="0" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
-                                                        <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                                                <rect x="0" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                                                <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
                                                     </rect>
-                                                    <rect x="8" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
-                                                        <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                                                <rect x="8" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                                               <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
                                                     </rect>
-                                                    <rect x="16" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
-                                                        <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                                                <rect x="16" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                                                <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
                                                     </rect>
                                                 </svg>
                                             </div>
@@ -158,23 +160,26 @@
                                             </table>
                                         </div>
                                         <div class="col-xs-12 update-license-btn-holder">
-                                            <button id="update-onpremise-plan" license-service-url="@boldReportsLicense.UpdateLicenseUrl" class="primary-button pull-right">[[[Check License]]]</button>
+                                            @if (!isAzureApplication)
+                                            {
+                                                <button id="update-onpremise-plan" license-service-url="@boldReportsLicense.UpdateLicenseUrl" class="primary-button pull-right">[[[Check License]]]</button>
+                                            }
                                             <div id="update-license-key-notification-loader" class="pull-right" style="display:none">
                                                 <svg x="0px" y="0px" width="24px" height="30px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-                                                    <rect x="0" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
-                                                        <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                                                <rect x="0" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                                                <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
                                                     </rect>
-                                                    <rect x="8" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
-                                                        <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                                                <rect x="8" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                                                <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
                                                     </rect>
-                                                    <rect x="16" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
-                                                        <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
-                                                        <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                                                <rect x="16" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                                                <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                                                <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
                                                     </rect>
                                                 </svg>
                                             </div>
@@ -207,7 +212,7 @@
                             }
                             else
                             {
-                                <p class="no-license-info">[[[You do not have bold reports enterprise reporting license.]]]</p>
+                                <p class="no-license-info">[[[You do not have any Bold Reports Enterprise Reporting licenses.]]]</p>
                             }
                         </div>
                     </div>

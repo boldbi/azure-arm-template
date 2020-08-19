@@ -1,15 +1,17 @@
-﻿@{
+﻿﻿@using System.Web.Configuration;
+@{
     var globalAppSettings = new TenantHandler().GetTenantConfig();
     var ldapRegEx = @"/(?:ldap|http)s?:\/\/(?:(?!.*\d[\/?:])[a-z0-9\-._~%]+|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\[[a-z0-9\-._~%!$&'()*+,;=:]+\])(?::\d+)?(?:[\/?][\-A-Z0-9+&@#\/%?=~_|$!:,.;]*)?$/i";
     var oauthRegEx = @"/(?:^|[ \t])((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/";
     List<TenantAuthControl> authControl = null;
     TenantAuthControl cloudAuthControl = null;
 #if DashboardServerOnPremise
-    var authControl = ViewBag.AuthControl as List<TenantAuthControl>;
-    authControl = authControl != null && authControl.Count > 0 ? authControl : null;
+var authControl = ViewBag.AuthControl as List<TenantAuthControl>;
+authControl = authControl != null && authControl.Count > 0 ? authControl : null;
 #else
     cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
 #endif
+    var isAzureApplication = string.IsNullOrEmpty(WebConfigurationManager.AppSettings["IsAzureApplication"]) ? false : Convert.ToBoolean(WebConfigurationManager.AppSettings["IsAzureApplication"]);
 }
 
 <div id="active-directory-container" role="tabpanel" class="col-xs-12 admin-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")" aria-labelledby="active-directory-settings-link" ng-controller="adSettingsController">
@@ -25,7 +27,7 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu multi-level pull-right" role="menu" id="synchronization-options">
-                @if (ServerAppConfig.IsSelfHosted)
+                @if (ServerAppConfig.IsSelfHosted && !isAzureApplication)
                 {
                     <li>
                         <a href="@Url.Action("ScheduleSynchronization", "Administration")" data-toggle="tooltip" data-placement="left" data-container="body" title="[[[Synchronize Active Directory users and groups on a regular schedule]]]">
@@ -49,13 +51,13 @@
 
     <div>
         <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
-            @if (ServerAppConfig.IsSelfHosted)
+            @if (ServerAppConfig.IsSelfHosted && !isAzureApplication)
             {
                 <li role="presentation" class="active">
                     <a href="#windows-ad-tab" id="windows-ad" aria-controls="windows-ad-tab" role="tab" data-toggle="tab">[[[Windows Active Directory]]]</a>
                 </li>
             }
-            <li role="presentation" class="@(!ServerAppConfig.IsSelfHosted ? "active" : string.Empty )">
+            <li role="presentation" class="@(!ServerAppConfig.IsSelfHosted ? "active" : ServerAppConfig.IsSelfHosted && isAzureApplication ? "active" : string.Empty )">
                 <a href="#azure-ad-tab" id="azure-ad" aria-controls="azure-ad-tab" role="tab" data-toggle="tab">[[[Azure Active Directory]]]</a>
             </li>
             <li role="presentation">
@@ -73,7 +75,7 @@
         </ul>
 
         <div class="tab-content">
-            @if (ServerAppConfig.IsSelfHosted)
+            @if (ServerAppConfig.IsSelfHosted && !isAzureApplication)
             {
                 <div role="tabpanel" class="tab-pane active" id="windows-ad-tab">
                     <form autocomplete="off" class="active-directory-form col-lg-12 admin-page-body" name="windowsAdSettingsForm" enctype="multipart/form-data" id="active-directory-setting" method="post">
@@ -144,18 +146,18 @@
                             </div>
                         </div>
                         @*<div class="col-md-12 form-group">
-                            <div class="col-md-6 no-padding no-margin enablesslcontainer">
-                                @Html.Label("ad-group-user-import", "[[[Import users from groups]]]", new { @class = "app-textbox-label col-md-4 no-margin" })
+                        <div class="col-md-6 no-padding no-margin enablesslcontainer">
+                            @Html.Label("ad-group-user-import", "[[[Import users from groups]]]", new { @class = "app-textbox-label col-md-4 no-margin" })
 
-                                <div class="col-md-8 form-input-field pull-left switch-align">
-                                    <span class="material-switch text-left">
-                                        <input type="checkbox" id="import-ad-group-user" name="importadgroupuser" @((bool)ViewBag.SystemSettings.EnableGroupUserImport ? "checked" : string.Empty) />
-                                        <label for="import-ad-group-user" class="label-primary"></label>
-                                    </span>
-                                    <span class="validation-message"></span>
-                                </div>
+                            <div class="col-md-8 form-input-field pull-left switch-align">
+                                <span class="material-switch text-left">
+                                    <input type="checkbox" id="import-ad-group-user" name="importadgroupuser" @((bool)ViewBag.SystemSettings.EnableGroupUserImport ? "checked" : string.Empty) />
+                                    <label for="import-ad-group-user" class="label-primary"></label>
+                                </span>
+                                <span class="validation-message"></span>
                             </div>
-                        </div>*@
+                        </div>
+                    </div>*@
                         <div class="col-md-12 form-group">
                             <div class="col-md-6 no-margin no-padding">
                                 <input type="button" onclick="ActiveDirectoryFormValidate()" class="primary-button pull-right test-connection" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Test Active Directory Connection]]]" value="[[[Test Connection]]]" ng-disabled="windowsAdSettingsForm.$invalid" />
@@ -166,7 +168,7 @@
                     </form>
                 </div>
             }
-            <div role="tabpanel" class="tab-pane @(!ServerAppConfig.IsSelfHosted ? "active" : string.Empty)" id="azure-ad-tab">
+            <div role="tabpanel" class="tab-pane @(!ServerAppConfig.IsSelfHosted ? "active" : ServerAppConfig.IsSelfHosted && isAzureApplication ? "active" : string.Empty)" id="azure-ad-tab">
                 <form id="azure-ad-setting" name="azureAdSettingsForm" class="admin-page-body" method="post" enctype="multipart/form-data" autocomplete="off">
                     <div class="col-md-12 form-group">
                         <div class="col-md-6 no-padding no-margin">
@@ -841,7 +843,7 @@
                         </div>
                         <div id="openid-group-import" class="group-import">
                             @Html.Partial("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OpenIDSettings.OIDCAuthSettings.GroupImportSettings, new ViewDataDictionary { { "AuthType", AuthType.OIDC } })
-                        </div>                            
+                        </div>
                     </form>
                 </div>
             </div>
@@ -852,11 +854,14 @@
     {
     <div class="admin-page-actions col-lg-12 col-md-12">
         <a href="@Url.Action("Index","Home")" class="secondary-button pull-right" id="cancel-active-dir-settings" title="">[[[Cancel]]]</a>
-        <button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings  @(!ServerAppConfig.IsSelfHosted ? " hidden" : string.Empty )" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">[[[Save]]]</button>
+        @if (!isAzureApplication)
+        {
+        <button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">[[[Save]]]</button>
+        }
         <button type="submit" id="update-auth-control" class="primary-button pull-right">[[[Save]]]</button>
         <button type="submit" id="update-oauth-settings" class="primary-button pull-right update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">[[[Save]]]</button>
         <button type="submit" id="update-openid-settings" class="primary-button pull-right update-auth-settings" ng-disabled="openidSettingsForm.$invalid">[[[Save]]]</button>
-        <button type="button" title="" id="UpdateAzureADSettings-bottom" name="UpdateSystemSettings" class="primary-button pull-right @(ServerAppConfig.IsSelfHosted ? " hidden" : string.Empty )" ng-disabled="azureAdSettingsForm.$invalid" ng-click="">[[[Save]]]</button>
+        <button type="button" title="" id="UpdateAzureADSettings-bottom" name="UpdateSystemSettings" class="primary-button pull-right @(ServerAppConfig.IsSelfHosted && isAzureApplication ? string.Empty : ServerAppConfig.IsSelfHosted ? " hidden" : string.Empty )" ng-disabled="azureAdSettingsForm.$invalid" ng-click="">[[[Save]]]</button>
         <button type="button" title="" id="save-db-settings" disabled="disabled" name="UpdateSystemSettings" class="primary-button pull-right">[[[Save]]]</button>
         <button type="button" id="connect-database" class="primary-button pull-right connect-database-button" disabled="disabled">[[[Next]]]</button>
         <button type="button" id="change-connection" class="primary-button  pull-right">[[[Back]]]</button>
