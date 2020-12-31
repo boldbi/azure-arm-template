@@ -42,6 +42,7 @@
         HttpOnly = true,
         Expires = DateTime.UtcNow.AddYears(1)
     });
+    var bannerApiEndpoint = ConfigurationManager.AppSettings["boldbi:banner_api"];
 }
 <!DOCTYPE html>
 <html class="dashboard-server" lang="@globalAppSettings.SystemSettings.Language">
@@ -179,6 +180,11 @@
         var appBranding = "@GlobalAppSettings.Branding";
         var rootUrl = "@Url.Action("", "")";
         var rootUrlAction = "@Url.Action("", "")";
+        var bannerApiEndpoint = "@bannerApiEndpoint";
+
+        $(document).ready(function () {
+            generateProfileAvatar();
+        });
     </script>
     @if (isMobile)
     {
@@ -252,7 +258,6 @@
     {
         <script>
             $(document).ready(function () {
-                generateProfileAvatar();
                 $("#messageBox").ejDialog({
                     width: (window.innerWidth > 460) ? "450px" : (window.innerWidth - 10),
                     showOnInit: false,
@@ -399,6 +404,7 @@
         @Html.Partial("~/Views/Shared/_GeneralFeedback.cshtml")
         @Html.Partial("~/Views/Support/_ConciergeSupport.cshtml")
         @Scripts.Render("~/bundles/scripts/dashboard-feedback")
+        @Html.Partial("~/Views/Shared/_NotificationBanner.cshtml")
     }
 
     @Html.Partial("~/Views/DataSourceDesigner/_Connection.cshtml")

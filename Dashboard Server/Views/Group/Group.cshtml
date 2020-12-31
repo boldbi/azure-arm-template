@@ -39,7 +39,7 @@
     </script>
     <script type="text/x-jsrender" id="group-description-template">
         <span class="grid-content" title="{{:~renderDoubleQuotes(GroupDescription)}}" data-toggle="tooltip">
-            {{:GroupDescription}}
+            {{:~encodeString(GroupDescription)}}
         </span>
     </script>
     <script type="text/x-jsrender" id="actions-template">
@@ -48,11 +48,19 @@
                 <i class="su su-manage-permission"></i>
             </a>
             {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
-            <a href="javascript:void(0);" class="user-add-class" title="[[[You cannot add users to azure groups.]]]" data-toggle="tooltip" data-placement="left" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+            <a href="javascript:void(0);" class="user-add-class" title="[[[You cannot add users to Azure AD groups.]]]" data-toggle="tooltip" data-placement="left" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
                 <i class="su su-user-add disabled-icon-color"></i>
             </a>
             {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
-            <a href="javascript:void(0);" class="user-add-class" title="[[[You cannot add users to windows groups.]]]" data-toggle="tooltip" data-placement="left" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+            <a href="javascript:void(0);" class="user-add-class" title="[[[You cannot add users to Windows AD groups.]]]" data-toggle="tooltip" data-placement="left" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                <i class="su su-user-add disabled-icon-color"></i>
+            </a>
+            {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
+            <a href="javascript:void(0);" class="user-add-class" title="[[[You cannot add users to OAuth groups.]]]" data-toggle="tooltip" data-placement="left" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                <i class="su su-user-add disabled-icon-color"></i>
+            </a>
+            {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
+            <a href="javascript:void(0);" class="user-add-class" title="[[[You cannot add users to OpenID groups.]]]" data-toggle="tooltip" data-placement="left" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
                 <i class="su su-user-add disabled-icon-color"></i>
             </a>
             {{else}}
@@ -160,6 +168,12 @@
             $.views.helpers({
                 renderDoubleQuotes: function (inputString) {
                     return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                }
+            });
+
+            $.views.helpers({
+                encodeString: function (inputString) {
+                    return inputString.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 }
             });
 

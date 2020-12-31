@@ -487,7 +487,7 @@
             The: "[[[the]]] ",
             EffectiveFrom: " [[[effective from]]] ",
             EndsAfter: " [[[and ends after]]] ",
-            Occurrence: " [[[occurrences.]]]",
+            Occurrence: " [[[occurrences]]]",
             Until: " [[[until]]] ",
             Weeks: " [[[week(s)]]] ",
             DatasourceRefreshSettings: " [[[Refresh Schedule]]] ",
@@ -714,7 +714,7 @@
             ExternalRecipients: " [[[External Recipient(s)]]]",
             ConditionEvaluted: "[[[This condition will be evaluated ]]]",
             DataAlertConfigureSuccess: "[[[Data alert has been configured successfully.]]]",
-            DataAlertConfigureSuccessMessage: "[[[ , and the recipients will be notified when the condition has been satisfied.]]]",
+            DataAlertConfigureSuccessMessage: "[[[ and the recipients will be notified when the condition has been satisfied.]]]",
             DashboardScheduleSuccess: "[[[Dashboard has been scheduled successfully. ]]]",
             ScheduleUpdateSuccess: "[[[Schedule has been updated successfully. ]]]",
             SearchCategories: "[[[Search categories]]]",
@@ -986,13 +986,14 @@
             //Authentication Settings
             AuthControl: "[[[Authentication Control]]]",
             AuthControlUpdated: "[[[Authentication control settings have been updated.]]]",
-            AuthControlUpdatedError: "[[[Error while updating authentication control settings.]]]",
+            AuthControlUpdatedError: "[[[An error occurred while updating authentication control settings.]]]",
             AuthenticationSettings: "[[[Authentication Settings]]]",
             AuthSettingsUpdated: "[[[Authentication settings have been updated.]]]",
             AuthSettingsUpdatedError: "[[[Error while updating authentication settings.]]]",
             AuthImageAllowedFormat: "[[[JPG and PNG image formats are supported.]]]",
             AuthImageAllowedSize: "[[[Image size should be less than 500 KB.]]]",
             SelectAuthProviderLogo: "[[[Please select the provider logo.]]]",
+            SelectLoginProviders: "[[[Choose login providers]]]",
 
             //Embed Settings
             ResetHeader: "[[[Reset Secret]]]",
@@ -1052,7 +1053,17 @@
             RemoveCustomAttributeSuccess: "[[[Attribute has been removed successfully.]]]",
             RemoveCustomAttributeFailure: "[[[Failed to remove attribute.]]]",
             DeleteCustomAttribute: "[[[Delete Attribute]]]",
-            DeleteAttributeConfirm: "[[[Are you sure you want to delete the attribute - ]]]"
+            DeleteAttributeConfirm: "[[[Are you sure you want to delete the attribute - ]]]",
+
+            //CustomMenus
+            Dashboards: "[[[Dashboards]]]",
+            DataSources: "[[[Data Sources]]]",
+            Pinboards: "[[[Pinboards]]]",
+            Slideshows: "[[[Slideshows]]]",
+            Schedules: "[[[Schedules]]]",
+            Publish: "[[[Publish]]]",
+            Settings: "[[[Settings]]]",
+            UsersMenu: "[[[Users]]]"
         }
     }
 };

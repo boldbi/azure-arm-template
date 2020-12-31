@@ -1,9 +1,10 @@
-﻿@using System.Configuration
+﻿﻿@using System.Configuration
 @using Syncfusion.Server.Base.DataClasses;
 @{
     var userDetail = (User)ViewBag.UserDetail;
     var isWindowsAdUser = (DirectoryType)userDetail.DirectoryTypeId == DirectoryType.WindowsAD;
     var isAduser = ViewBag.IsAdUser;
+    var userId = (HttpContext.Current.User as ServerPrincipal).UserId;
     var showResendButton = !userDetail.IsActive && DateTime.UtcNow < userDetail.ActivationExpirationDate && !isAduser && GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "show" : "hide";
     var showActivationButton = !userDetail.IsActive && !isAduser && GlobalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation ? "show" : "hide";
     var showDropdown = userDetail.IsActive && userDetail.Email.ToLower() != ViewBag.LoggedUser.ToLower() && !ViewBag.isAdUser ? "show" : "hide";
@@ -14,14 +15,11 @@
     var idPUrl = CloudAppConfig.IdPUrl.TrimEnd('/');
     ViewBag.Title = "[[[User Profile - ]]]" + GlobalAppSettings.SystemSettings.OrganizationName;
 }
-
 @section styles{
     @Styles.Render("~/Styles/user-management-profile")
 }
-
 @section scripts{
     @Scripts.Render("~/Scripts/user-management-profile")
-
     <script type="text/javascript">
         var tanantManagementServerResourceUrl = "@GlobalAppSettings.SystemSettings.CDNLink";
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
@@ -82,28 +80,28 @@
         });
     </script>
 }
-
 @section MainSection {
     <div id="view-user-profile">
-    <div id="view-profile-info">
-        <span id="is-aduser">@ViewBag.IsAdUser</span>
-        <span id="logged-user">@ViewBag.LoggedUser</span>
-        <div id="edit-user-profile-master" role="tabpanel" class="admin-page-container user-permission">
-            <div class="col-lg-12 col-md-12 co-sm-12 col-xs-12 admin-page-header">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
-                    <a class="back-button pull-left" href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-original-title="[[[Users]]]" data-placement="bottom" data-container="body">
-                        <i class="su su-arrow-back back-navigaion img-size"> </i>
-                    </a>
-                    <hgroup>
-                        <h2 class="page-title no-margin" id="display-name">@ViewBag.UserDetail.DisplayName</h2>
-                    </hgroup>
+        <div id="view-profile-info">
+            <span id="is-aduser">@ViewBag.IsAdUser</span>
+            <span id="logged-user">@ViewBag.LoggedUser</span>
+            <div id="edit-user-profile-master" role="tabpanel" class="admin-page-container user-permission">
+                <div class="col-lg-12 col-md-12 co-sm-12 col-xs-12 admin-page-header">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
+                        <a class="back-button pull-left" href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-original-title="[[[Users]]]" data-placement="bottom" data-container="body">
+                            <i class="su su-arrow-back back-navigaion img-size"> </i>
+                        </a>
+                        <hgroup>
+                            <h2 class="page-title no-margin" id="display-name">@ViewBag.UserDetail.DisplayName</h2>
+                        </hgroup>
+                    </div>
                 </div>
-            </div>
-            <div class="user-profile-section col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
-                <div class="img-view-holder col-lg-12 col-md-12 col-sm-10 col-xs-12">
-                    <img id="user-profile-picture" rel="alternate" hreflang="en" href="@(EarlyUrlLocalizer.IgnoreLocalizationUrlPrefix)" src="@(idPUrl + Url.Content("/User/Avatar?id=" + userDetail.UserId + "&ImageSize=110"))"/>
-                    <span class="su su-edit-inverse profile-picture-edit-button" id="avatar-button-click" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Edit profile picture]]]"></span>
-                    <span class="su su-delete profile-picture-edit-button" id="avatar-delete-click" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Delete profile picture]]]"></span>
+                <div class="user-profile-section col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+                    <div class="img-view-holder col-lg-12 col-md-12 col-sm-10 col-xs-12" style="border-radius:50%">
+                        <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@userDetail.DisplayName" data-image-size="120" data-toggle="tooltip" title="@userDetail.DisplayName" data-placement="top" data-url="@idPUrl" style="position:relative;right:17%;border-radius:50%" />
+                        <span class="su su-edit-inverse profile-picture-edit-button" id="avatar-button-click" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Edit profile picture]]]"></span>
+                        <span class="su su-delete profile-picture-edit-button" id="avatar-delete-click" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Delete profile picture]]]"></span>
+                    </div>
                 </div>
                 <div id="edit-user-profile-form-div" class="col-xs-12 col-sm-7 col-md-7 col-lg-7 no-padding validation">
                     <form class="form-horizontal edit-user-profile-form" autocomplete="off">
@@ -154,21 +152,20 @@
                     </form>
                 </div>
                 @*@if (!ViewBag.IsAdUser)
-                {
-                    <div id="edit-button">
-                        <input type="button" class="secondary-button pull-right" id="edit" title="" value="Edit Profile">
-                        <input type="button" class="secondary-button pull-right popup-close" title="" id="cancel-button" value="Cancel">
-                        <input type="button" class="primary-button pull-right inactive-content" id="save-button" title="" onclick="SaveUserdetails()" value="Save">
-                    </div>
-                }*@
+                    {
+                        <div id="edit-button">
+                            <input type="button" class="secondary-button pull-right" id="edit" title="" value="Edit Profile">
+                            <input type="button" class="secondary-button pull-right popup-close" title="" id="cancel-button" value="Cancel">
+                            <input type="button" class="primary-button pull-right inactive-content" id="save-button" title="" onclick="SaveUserdetails()" value="Save">
+                        </div>
+                    }*@
                 <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3 no-padding" id="message">
                     <h5 id="updation-validation-message"></h5>
                 </div>
             </div>
+            <input type="hidden" id="image" value="" />
+            <input type="hidden" id="user-id" value="@ViewBag.UserDetail.UserId" />
         </div>
-        <input type="hidden" id="image" value=""/>
-        <input type="hidden" id="user-id" value="@ViewBag.UserDetail.UserId"/>
-    </div>
         @if (CloudAppConfig.IsSelfHosted && ViewBag.AdminType == AdminType.SuperAdmin && !ViewBag.IsAdUser && !isWindowsAdUser)
         {
             <div id="change-password" class="change-password-div">
@@ -231,13 +228,12 @@
             </div>
             <div class="col-xs-12 modal-footer">
                 <div class="col-xs-12 no-padding margin-top pull-right">
-                    <input type="button" id="delete-item" onclick="deleteSingleUser(@ViewBag.UserDetail.UserId)" class="critical-action-button margin-right" value="[[[Yes]]]" tabindex="1" autofocus/>
-                    <input type="button" onclick="onDeleteDialogClose()" class="secondary-button popup-close" value="[[[No]]]" tabindex="2"/>
+                    <input type="button" id="delete-item" onclick="deleteSingleUser(@ViewBag.UserDetail.UserId)" class="critical-action-button margin-right" value="[[[Yes]]]" tabindex="1" autofocus />
+                    <input type="button" onclick="onDeleteDialogClose()" class="secondary-button popup-close" value="[[[No]]]" tabindex="2" />
                 </div>
             </div>
         </div>
     </div>
-
     <span id="baseurl" data-url="@Url.Content("~/")"></span>
     @Html.Partial("_ProfilePictureUploadBox")
 }

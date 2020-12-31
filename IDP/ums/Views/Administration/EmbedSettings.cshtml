@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "[[[Embed Settings]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var embedEnabled = Convert.ToBoolean(ViewBag.EmbedSettings);
+    var embedSecretCode = GlobalAppSettings.SystemSettings.EmbedSecret;
+    var generateSecret = "[[[Generate Secret]]]";
+    var resetSecret = "[[[Reset Secret]]]";
+    var fileName = !string.IsNullOrEmpty(ViewBag.fileName) ? ViewBag.fileName : "[[[Browse file path (.json)]]]";
+    var showDownloadLink = embedEnabled ? "display:block" : "display:none";
+}
+
+@section styles{
+    @Styles.Render("~/styles/embed-settings")
+}
+
+@section scripts{
+    @Scripts.Render("~/scripts/embed-settings")
+}
+
+@section MainSection{
+    <script>
+        var embedSecretCode = "@embedSecretCode";
+        var isResetEmbedSecretUrl = "@Url.Action("ResetEmbedSecret", "Administration")";
+        var updateSystemSettingsValueUrl = "@Url.Action("UpdateSystemSettingValue", "Administration")";
+    </script>
+
+
+    @Html.Partial("_AdminMenu")
+
+    <div id="embed-settings-container" class="col-xs-12 admin-page-container @(ViewBag.Embed ? string.Empty : "unlock-enterprise-features blur-content")">
+        <div id="embed-settings-header" class="col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="h2 page-title">
+                    [[[EMBED SETTINGS]]]
+                </h1>
+                <h5 class="page-description">
+                    [[[Configuration for the Bold sites]]]
+                </h5>
+            </hgroup>
+        </div>
+        <div id="embed-settings-body" class="admin-page-body">
+            <div class="col-xs-8 embed-authentication">
+                <label class="col-md-4 app-textbox-label activation embed-enabled">
+                    [[[Enable embed authentication]]]
+                </label>
+                <div class="col-md-2 text-left switch-align embed-loader">
+                    <span class="material-switch text-left">
+                        <input type="checkbox" id="restrict-embed-enabled" @(embedEnabled ? "checked" : string.Empty) />
+                        <label for="restrict-embed-enabled" class="label-primary"></label>
+                    </span>
+                </div>
+            </div>
+            <form action="@Url.Action("PostEmbedSettings", "Administration")" method="post" onsubmit="" enctype="multipart/form-data">
+                <div class="col-xs-8 import-file">
+                    <label class="col-md-4 app-textbox-label activation embed-enabled">
+                        [[[Embed Configuration]]]
+                    </label>
+                    <div class="col-md-7 no-padding">
+                        <div class="col-xs-6">
+                            <input type="text" class="form-control col-md-6 no-margin @(embedEnabled ? string.Empty : "disabled")" id="filename" value="@fileName" readonly>
+                            <span id="trigger-file" class="input-group-addon btn popup no-left-border @(embedEnabled ? string.Empty : "disabled")">
+                                ...
+                            </span>
+                            <input type="file" accept=".json" name="csfile" id="csfile" class="btn popup upload-btn">
+                        </div>
+                        <input type="submit" class="primary-button" title="[[[Upload Embed Configuration File here]]]" id="cs-upload" disabled="" value="[[[Upload]]]" />
+
+                        <p class="col-lg-12">
+                            <a href="@Url.Action("DownloadTemplate", "Administration")" class="download-template" title="[[[Download sample template]]]" style="@showDownloadLink">[[[Download Template]]]</a>
+                            @if (ViewBag.result.ToLower() == "error")
+                            {
+                                <span id="import-validation-msg">[[[Please upload a valid json file.]]]</span>
+                            }
+                            else if (ViewBag.result.ToLower() == "invalid")
+                            {
+                                <span id="import-validation-msg">[[[Please select a json file with a valid format]]]</span>
+                            }
+                            else if (ViewBag.fileName.ToLower() == "success")
+                            {
+                                <span id=""></span>
+                            }
+                        </p>
+                    </div>
+
+                </div>
+            </form>
+            <div id="get-secret-code" class="row input-field-wrapper">
+                <div class="col-xs-8 field-container-dashboard">
+                    <label class="col-md-4 app-textbox-label activation">
+                        [[[Embed secret]]]
+                    </label>
+                    <div class="col-md-7 secret-code-container">
+                        <div id="secret-code-link" class="col-xs-6">
+                            <input type="text" id="secret-code" name="" class="form-control" placeholder="[[[Embed secret]]]" autocomplete="off" disabled="disabled" onClick="this.setSelectionRange(0, this.value.length)">
+                            <div class="form-control su su-copy text focus" id="secret-code-copy" disabled="disabled" data-original-title="[[[Click to copy]]]"></div>
+                        </div>
+                        <button type="button" title="" id="get-embed-code" onclick="getEmbedSecret();" class="primary-button" @(embedEnabled ? string.Empty : "disabled")>
+                            @if (string.IsNullOrWhiteSpace(embedSecretCode))
+                            {
+                                @generateSecret;
+                            }
+                            else
+                            {
+                                @resetSecret;
+                            }
+                        </button>
+                        <span id="embed-info" class="su su-info info-popup" data-toggle="popover" data-placement="bottom" data-html="true" data-content="[[[anyone with access to the secret key may create a url to access the dashboard, as any user, with any options. keep embed authentication disabled if you’re not using it.]]]"></span>
+                        <div class="col-lg-5 bg-warning secret-code-notification">
+                            [[[Store the secret key somewhere safe. As soon as you navigate away from this page, we will not be able to retrieve or restore this generated secret.]]]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!ViewBag.Embed)
+    {
+        @Html.Partial("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

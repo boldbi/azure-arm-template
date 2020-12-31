@@ -10,6 +10,7 @@ var authControl = ViewBag.AuthControl as List<TenantAuthControl>;
 authControl = authControl != null && authControl.Count > 0 ? authControl : null;
 #else
     cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
+    var loginOptions = globalAppSettings.SystemSettings.LoginOptions;
 #endif
     var isAzureApplication = string.IsNullOrEmpty(WebConfigurationManager.AppSettings["IsAzureApplication"]) ? false : Convert.ToBoolean(WebConfigurationManager.AppSettings["IsAzureApplication"]);
 }
@@ -66,12 +67,15 @@ authControl = authControl != null && authControl.Count > 0 ? authControl : null;
             <li role="presentation">
                 <a href="#auth-control-tab" id="auth-control" aria-controls="auth-control-tab" role="tab" data-toggle="tab">[[[Authentication Control]]]</a>
             </li>
-            <li role="presentation">
-                <a href="#oauth-settings-tab" id="oauth-settings" aria-controls="oauth-settings-tab" role="tab" data-toggle="tab">[[[OAuth 2.0]]]</a>
-            </li>
-            <li role="presentation">
-                <a href="#openid-settings-tab" id="openid-settings" aria-controls="openid-settings-tab" role="tab" data-toggle="tab">[[[OpenID Connect]]]</a>
-            </li>
+            @if (ServerAppConfig.IsSelfHosted)
+            {
+                <li role="presentation">
+                    <a href="#oauth-settings-tab" id="oauth-settings" aria-controls="oauth-settings-tab" role="tab" data-toggle="tab">[[[OAuth 2.0]]]</a>
+                </li>
+                <li role="presentation">
+                    <a href="#openid-settings-tab" id="openid-settings" aria-controls="openid-settings-tab" role="tab" data-toggle="tab">[[[OpenID Connect]]]</a>
+                </li>
+            }
         </ul>
 
         <div class="tab-content">
@@ -146,18 +150,18 @@ authControl = authControl != null && authControl.Count > 0 ? authControl : null;
                             </div>
                         </div>
                         @*<div class="col-md-12 form-group">
-                        <div class="col-md-6 no-padding no-margin enablesslcontainer">
-                            @Html.Label("ad-group-user-import", "[[[Import users from groups]]]", new { @class = "app-textbox-label col-md-4 no-margin" })
+                            <div class="col-md-6 no-padding no-margin enablesslcontainer">
+                                @Html.Label("ad-group-user-import", "[[[Import users from groups]]]", new { @class = "app-textbox-label col-md-4 no-margin" })
 
-                            <div class="col-md-8 form-input-field pull-left switch-align">
-                                <span class="material-switch text-left">
-                                    <input type="checkbox" id="import-ad-group-user" name="importadgroupuser" @((bool)ViewBag.SystemSettings.EnableGroupUserImport ? "checked" : string.Empty) />
-                                    <label for="import-ad-group-user" class="label-primary"></label>
-                                </span>
-                                <span class="validation-message"></span>
+                                <div class="col-md-8 form-input-field pull-left switch-align">
+                                    <span class="material-switch text-left">
+                                        <input type="checkbox" id="import-ad-group-user" name="importadgroupuser" @((bool)ViewBag.SystemSettings.EnableGroupUserImport ? "checked" : string.Empty) />
+                                        <label for="import-ad-group-user" class="label-primary"></label>
+                                    </span>
+                                    <span class="validation-message"></span>
+                                </div>
                             </div>
-                        </div>
-                    </div>*@
+                        </div>*@
                         <div class="col-md-12 form-group">
                             <div class="col-md-6 no-margin no-padding">
                                 <input type="button" onclick="ActiveDirectoryFormValidate()" class="primary-button pull-right test-connection" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Test Active Directory Connection]]]" value="[[[Test Connection]]]" ng-disabled="windowsAdSettingsForm.$invalid" />
@@ -535,7 +539,7 @@ authControl = authControl != null && authControl.Count > 0 ? authControl : null;
                         }
                         else
                         {
-                            <div class="col-md-12 form-group">
+                            <div class="col-md-12 form-group" style="display:none">
                                 <div class="col-md-12 no-padding no-margin enable-global-external-providers-label">
                                     @Html.Label("enable-global-external-providers", "[[[Enable Global External Providers]]]", new { @class = "app-textbox-label col-md-4 no-margin" })
                                     <div class="col-md-8 form-input-field pull-left switch-align">
@@ -544,6 +548,23 @@ authControl = authControl != null && authControl.Count > 0 ? authControl : null;
                                             <input type="checkbox" id="enable-global-external-providers" name="enableGlobalExternalProviders" @(cloudAuthControl == null || cloudAuthControl.Settings == null || (cloudAuthControl != null && cloudAuthControl.Settings.Where(x => x.Name == DirectoryType.All.ToString()).FirstOrDefault().IsEnabled) ? "checked" : string.Empty) />
                                             <label for="enable-global-external-providers" class="label-primary"></label>
                                         </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <div class="col-md-6 login-option-dropdown">
+                                    <label class="app-textbox-label col-md-4 no-margin">[[[Allowed login providers]]]</label>
+                                    <div class="col-xs-1 login-provider-info-tag">
+                                        <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                        <div class="col-xs-2 dropdown-menu common-tooltip-info" role="menu">
+                                            [[[Select the login providers that need to be shown in the login page.]]]
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 form-input-field">
+                                        <select id="login-options" class="selectpicker" title="[[[Choose login providers]]]" multiple="" style="display:none">
+                                            <option class="no-margin-dropdown-ul" @(!loginOptions.HideAzureADLogin ? "selected" : string.Empty)>[[[Azure AD]]]</option>
+                                            <option class="no-margin-dropdown-ul" @(!loginOptions.HideSyncfusionLogin ? "selected" : string.Empty)>[[[Syncfusion Login]]]</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -856,7 +877,7 @@ authControl = authControl != null && authControl.Count > 0 ? authControl : null;
         <a href="@Url.Action("Index","Home")" class="secondary-button pull-right" id="cancel-active-dir-settings" title="">[[[Cancel]]]</a>
         @if (!isAzureApplication)
         {
-        <button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">[[[Save]]]</button>
+            <button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings @(ServerAppConfig.IsSelfHosted ? string.Empty : " hidden" )" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">[[[Save]]]</button>
         }
         <button type="submit" id="update-auth-control" class="primary-button pull-right">[[[Save]]]</button>
         <button type="submit" id="update-oauth-settings" class="primary-button pull-right update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">[[[Save]]]</button>

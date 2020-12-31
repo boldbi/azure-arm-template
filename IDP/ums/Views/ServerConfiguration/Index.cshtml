@@ -55,6 +55,7 @@
         var accessKey = "@accessKey";
         var blobServiceEndpoint = "@blobServiceEndpoint";
         var containerName = "@containerName";
+        var helpUrl = "@(helpUrl + "?id=")";
 
         $(function () {
             // Declare a proxy to reference the hub.
@@ -90,7 +91,7 @@
                     <div class="image-container">
                         <img class="startup-image" src="@Url.Content(HttpRuntime.AppDomainAppVirtualPath + "/Content/images/" + GlobalAppSettings.Branding + "/application/server-welcome-screen.svg")" />
                         <div class="startup-content display-none">
-                            <span class="first-content">[[[Step 1: Let’s configure your server]]]</span>
+                            <span class="first-content">[[[Step 1: Let’s configure your Bold ID server]]]</span>
                             <span class="second-content">[[[This is where we store user identities and ]]]@displayName [[[sites.]]]</span>
                             <a id="help-link" href="@(helpUrl + (GlobalAppSettings.BrandingDisplayName == AppBranding.BoldBI.DisplayName ? "?id=5" : "?id=4021"))" target="_blank">[[[Need help?]]]</a>
                         </div>
@@ -130,6 +131,11 @@
                                         {
                                             <option class="no-margin-dropdown-ul" title="[[[Please install Npgsql client library to connect with PostgreSQL database.]]]" value="PostgreSQL" disabled>[[[Postgre SQL]]]</option>
                                         }
+
+                                        @if (!ViewBag.IsAzureApplication)
+                                        {
+                                            <option class="no-margin-dropdown-ul" value="MySQL">[[[MySQL]]]</option>
+                                        }
                                         <option class="no-margin-dropdown-ul hide" value="MSSQLCE">[[[Embedded SQL CE]]]</option>
                                     </select>
                                 </div>
@@ -139,25 +145,45 @@
                             <span>[[[This embedded SQL CE can be use only for testing purpose. Please choose the different database if you want to setup the application for production use.]]]</span>
                         </div>
                         <form id="db-content-holder" class="col-md-12 no-padding display-none content-display text-wrap show-sql-content" autocomplete="off">
-                            <div class="txt-holder center-align">
-                                <label class="field-label">[[[Server name]]]</label>
-                                <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Server name]]]" />
-                                <span class="startup-validation validation-txt-errors"></span>
+                            <div id="server-name-container" class="show">
+                                <div class="txt-holder center-align">
+                                    <label class="field-label">[[[Server name]]]</label>
+                                    <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Server name]]]" />
+                                    <span class="startup-validation validation-txt-errors"></span>
+                                </div>
                             </div>
-                            <div class="txt-holder center-align">
-                                <div id="auth-type-dropdown" class="hide">
+                            <div id="auth-type-dropdown" class="hide">
+                                <div class="txt-holder center-align">
+
                                     <label class="field-label">[[[Authentication type]]]</label>
                                     <select id="check-windows" class="selectpicker db-fields" data-width="100%">
                                         <option value="sql">[[[SQL authentication]]]</option>
                                         <option value="windows">[[[Windows authentication]]]</option>
                                     </select>
                                 </div>
+                               </div>
                                 <div id="port-number-dropdown" class="hide">
-                                    <label class="field-label">[[[Port number]]]</label>
-                                    <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Port number]]]" />
+                                    <div class="txt-holder center-align">
+                                        <label class="field-label">[[[Port number]]]</label>
+                                        <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Port number]]]" />
+                                        <span class="startup-validation validation-txt-errors"></span>
+                                    </div>
+                                </div>
+                                <input id="dsn-count" value="@ViewBag.DsnList.Count" type="hidden">
+                                <div id="mysql-odbc-dropdown" class="hide">
+                                    <div class="txt-holder center-align">
+                                        <label class="field-label">[[[MySQL ODBC DSN]]]</label>
+                                        <select id="mysql-odbc-dsn" name="mySqlDsn" class="selectpicker system-settings-startup-page-fields db-fields" data-width="100%" title="[[[Select MySQL ODBC DSN]]]">
+
+                                            @for (var dsn = 0; dsn < ViewBag.DsnList.Count; dsn++)
+                                            {
+                                                <option value="@ViewBag.DsnList[dsn]">@ViewBag.DsnList[dsn]</option>
+                                            }
+
+                                        </select>
+                                    </div>
                                     <span class="startup-validation validation-txt-errors"></span>
                                 </div>
-                            </div>
                             <div class="txt-holder center-align">
                                 <label class="field-label">[[[Username]]]</label>
                                 <input type="text" id="txt-login" name="username" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Username]]]" />

@@ -129,7 +129,7 @@ var Designer = {
                     radarPolarDataRequiredMessage: "Radar Polar Chart requires atleast 1 Value and 1 Column to render",
                     rangeSliderDataRequiredMessage: "Range Slider requires atleast 1 Column to render",
                     treeMapDataRequiredMessage: "TreeMap requires atleast 1 Value and 1 Column to render",
-                    bingMapDataRequiredMessage: "Bing Map requires atleast 1 Marker Latitude and 1 Marker Longitude to render"
+                    bingMapDataRequiredMessage: "Bing Map requires atleast 1 Marker Latitude and 1 Marker Longitude or 1 Address or 1 Postal Code to render"
                 },
                 widgetDataRequirements: {
                     chartsDataReq: "1 or more values and 1 or more columns.",
@@ -137,7 +137,7 @@ var Designer = {
                     bubbleMapDataReq: "1 value and 1 shape ID.",
                     choroplethMapDataReq: "1 value and 1 shape ID.",
                     mapDataReq: "1 value and 1 shape ID.",
-                    bingMapsDataReq: "1 latitude and 1 longidute.",
+                    bingMapsDataReq: "1 latitude and 1 longitude or 1 Address or 1 Postal Code.",
                     treeMapDataReq: "1 or more values and 1 or more group-by fields.",
                     cardDataReq: "1 actual/target value and 0 or 1 series.",
                     filtersDataReq: "1 column.",
@@ -181,6 +181,8 @@ var Designer = {
                 markerLongitude: "Marker Longitude",
                 markerTooltip: "Marker Tooltip",
                 markerImage: "Marker Image",
+                markerAddress: "Address",
+                markerPostalCode: "Postal Code",
                 value: "Value",
                 shape: "Shape",
                 tooltip: "Tooltip",
@@ -206,7 +208,8 @@ var Designer = {
                 hiddenColumn: "Hidden Column",
                 argument: "Argument",
                 dimension: "Dimension",
-                measure: "Measure"
+                measure: "Measure",
+                designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator."
             },
             propertyPanel: {
                 headerText: "Properties",
@@ -223,6 +226,8 @@ var Designer = {
                 basicSettingsText: "Basic Settings",
                 linkText: "Link",
                 filterText: "Filter",
+                headerSettingsText: "Header Settings",
+                valueSettingsText: "Content Settings",
                 columnSettingsText: "Column Settings",
                 formattingText: "Formatting",
                 forecastSettingsText: "Forecast Settings",
@@ -234,8 +239,10 @@ var Designer = {
                 backgroundText: "Background",
                 imageText: "Image",
                 animationText: "Animation Settings",
+                seriesSettingsCategory: "Series Settings",
                 cardTitleCategory: "Title",
                 cardMeasureCategory: "Measure",
+                cardAppearanceCategory: "Appearance Settings",
                 colorSettingsText: "Color Settings",
                 axisTypeSettingsText: "AxisType Settings",
                 filterCategoryText: "Filter",
@@ -292,7 +299,38 @@ var Designer = {
                         centerText: "Center",
                         leftText: "Left",
                         rightText: "Right"
-                    }
+                    },
+                    showBackgroundImage: "Show Background Image",
+                    backgroundImageMode: "Image Fit",
+                    backgroundImageSource: "Image Type",
+                    backgroundImageBrowse: "Image",
+                    backgroundImageURL: "Background Image URL",
+                    backgroundImagePattern: "Pattern",
+                    backgroundColor: "Background Color",
+                    transparency: "Transparency",
+                    backgroundMode: {
+                        default: "Default",
+                        fill: "Fill",
+                        uniform: "Uniform",
+                        uniformToFill: "Uniform To Fill"
+                    },
+                    backgroundSource: {
+                        local: "Local",
+                        url: "URL",
+                        parameterizedUrl: "Parameterized URL"
+                    },
+                    backgroundImage: {
+                        recommendedFiles: " Recommended files: ",
+                        files: " png, jpeg, jpg ",
+                        recommendedSizes: " Recommended size: ",
+                        size: " Maximum 5 MB ",                        
+                        initiatingUpload: "Initiating upload...",
+                        uploading: "Uploading...",
+                        uploadFailed: "Upload failed.",
+
+                    },
+                    widgetTitleAutoFontSize: "Title Auto Font Size",
+                    widgetSubTitleAutoFontSize: "Subtitle Auto Font Size"
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -309,9 +347,11 @@ var Designer = {
                     allowSortingText: "Allow Sorting",
                     allowResizeToFit: "Fit To Content",
                     allowTextWrap: "Text Wrap",
+                    valuesInRow: "Show Values In Row",
                     horizontalGridLine: "Horizontal Grid Lines",
                     verticalGridLine: "Vertical Grid Lines",
                     rowHeight: "Row Height",
+					headerHeight: "Header Line Height",
                     chartType: "Chart Type",
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
@@ -336,7 +376,7 @@ var Designer = {
                     highlightAvailableDates: "Highlight Available Dates",
                     mode: "Mode",
                     imageSource: "Image Source",
-                    labelColor: "Label Color",
+                    AxisLabelColor: "Axis Label Color",                    
                     enableDrillDown: "Enable Drill-Down",
                     showLabel: "Show Label",
                     cellRadius: "Cell Radius",
@@ -350,9 +390,11 @@ var Designer = {
                     backgroundColor: "Background Color",
                     valueColor: "Value Color",
                     labelColor: "Label Color",
+                    sliderColor: "Slider Color",
+                    color: "Color",
                     titleColor: "Title Color",
                     enableValueSorting: "Allow Value Sorting",
-                    expandAllNode: "Expand Nodes by Defaul",
+                    expandAllNode: "Expand Nodes by Default",
                     enablePersistence: "Save Nodes State",
                     allowTextWrap: "Allow Text Wrap",
                     allowColumnResize: "Allow Column Resize",
@@ -363,7 +405,24 @@ var Designer = {
                     shapeKind: "Shape Kind",
                     shapeData: "Shape Data",
                     titleCategoryText: "Title",
-                    dashboardExistsError: "A dashboard with the same name already exists in the category"
+                    dashboardExistsError: "A dashboard with the same name already exists in the category",
+                    enableAlternativeRow: "Enable Alternative Row",
+                    showHeader: "Show Header",
+                    border: "Show Border",
+                    alternativeRowForeground: "Alternative Foreground",
+                    alternativeRowBackground: "Alternative Background",
+                    valueForeground: "Foreground",
+                    valueBackground: "Background",
+                    chartLabelColor: "Color",
+                    autoFontSize: "Auto Font Size",
+                    fontSize: "Font Size",
+                    padding: "Padding"
+                },
+                fontSettings: {
+                    categoryDisplayName: "Font Settings",
+                    dashboardTitle: "Dashboard Title",
+                    widgetTitle: "Widget Title",
+                    widgetSubTitle: "Widget Subtitle"
                 },
                 forecastSettings: {
                     enable: "Enable",
@@ -377,6 +436,8 @@ var Designer = {
                     showAxisTitle: "Show Axis Title",
                     axisTitle: "Axis Title",
                     labelOverflowMode: "Label Overflow Mode",
+                    enableTrim: "Trim Axis Labels",
+                    maximumLabelWidth:"Maximum Label Width",
                     labelRotation: "Label Rotation",
                     showPrimaryValueAxis: "Show Primary Value Axis",
                     showAxisTitle: "Show Axis Title",
@@ -384,7 +445,9 @@ var Designer = {
                     axisType: "Axis Type",
                     showSecondaryValueAxis: "Show Secondary Value Axis",
                     showAxisTitle: "Show Axis Title",
-                    primaryAxisRange: "Primary Axis Range"
+                    primaryAxisRange: "Primary Axis Range",
+                    titleColor: "Title Color",
+                    labelColor: "Label Color"
                 },
                 gridLineSettings: {
                     primaryValueAxis: "Primary Value Axis",
@@ -454,11 +517,22 @@ var Designer = {
                     enableAnimation: "Enable Animation",
                     animationDuration: "Animation Duration",
                 },
+                appearanceSettings: {
+                    horizontalAlignment: "Horizontal Alignment",
+                    autoFontSize: "Auto Font Size",
+                    scalingFactor: "Scaling Factor",
+                },
+                seriesSettings: {
+                    fixedRowsAndColumnsText: "Fixed Rows and Columns",
+                    rowCountText: "Row Count",
+                    columnCountText: "Column Count"
+                },
                 cardTitleSettings: {
                     showTitle: "Show Title",
                     titleText: " ",
                     titleColor: "Color",
-                    titleFontSize: "Font Size"
+                    titleFontSize: "Font Size",
+                    titlePosition: "Position"
                 },
                 cardMeasureSettings: {
                     showMeasure: "Show Measure",
@@ -651,6 +725,15 @@ var Designer = {
                 userName: "User name",
                 passWord: "Password",
                 userNameOptional: "User Name (Optional)",
+                regionText: "Region Endpoint",
+                awsAccessKeyText: "AwsAccessKeyID",
+                secretKeyText: "AwsSecretKey",
+                outputLocationText: "S3 Output Location",
+                specifyAccessKey: "AWSAccessKeyId cannot be empty.",
+                specifySecretKey: "Secret Key cannot be empty.",
+                specifyOutputLocation: "Output location cannot be empty.",
+                athenaOutputLocationTooltip: "Example: S3://foldername/",
+                specifyRegion: "Region cannot be empty.",
                 advancedSettings: "Additional connection parameters (Optional)",
                 dynamicConnectionString: "Dynamic Connection String",
                 dynamicConnectionStringTitle: "Dynamic Connection String Configuration",
@@ -662,11 +745,9 @@ var Designer = {
                 fileSelectionInfo: "Please select a file",
                 x509authenticationInfo: "x.509 certificate authentication requires a secure TLS/SSL connection.",
                 fileUploadCompleted: "Upload completed.",
-                extractModeMessage: "<b>Note:</b> Initially it will extract {0} records. " +
-                    "Remaining records will be extracted based on configured refresh settings.",
+                extractModeMessage: "<b>Note:</b> Initially it will extract {0} records. Remaining records will be extracted based on configured refresh settings.",
                 extractModeMessageSqlite: "<b>Note:</b> It will extract {0} records only.",
-                liveWebModeMessage: "<b>Note:</b> For optimum performance in live mode Web API, records restricted to 5000 or less. " +
-                    "Use extract mode for more than 5000 records.",
+                liveWebModeMessage: "<b>Note:</b> For optimum performance in live mode Web API, records restricted to 5000 or less. Use extract mode for more than 5000 records.",
                 useAsWindowCredential: "Use as Window Credential",
                 impersonateAuthenticatedUserAfterConnecting: "Impersonate the authenticated user after connecting.",
                 promptForCredentials: "Prompt for credentials",
@@ -697,6 +778,7 @@ var Designer = {
                 datasourceNameLabelTxt: "Name",
                 connectTo: "Connect To ",
                 tokenLabel: "API Token",
+                personalAccessTokenLabel: "Personal Access Token",
                 refreshSettingsTooltipInfo: "to Enterprise plan to refresh your data at minimum intervals.",
                 GoogleBigQueryProjectsText: "Projects",
                 snowFlakeTooltip: "Example : accountname.region.snowflakecomputing.com",
@@ -714,10 +796,13 @@ var Designer = {
                 dynamicEmail: "Email",
                 dynamicModeInfo: "Configure the mode in which the Dynamic Connection String should function. The Dynamic Connection can be restricted to the embedded application or within the server or both. Also, configure the identity type to be passed to the custom API. ",
                 dynamicLearnMore: "Learn more",
+                externalAPI: "External API",
+                customAttribute: "Custom Attribute",
                 dsnName: "DSN",
                 driverName: "Driver",
                 driverNameText: "Driver Name",
                 odbcTypeText: "ODBC Connection Type",
+                customAttributeCheck: "Custom Attribute cannot be empty.",
                 dataSourceType: {
                     file: "File",
                     excel: "Excel",
@@ -736,6 +821,8 @@ var Designer = {
                     cdata: "CDATA",
                     presto: "Presto",
                     amazonAurora: "Amazon Aurora",
+                    amazonAthena: "Amazon Athena",
+                    elasticsearch: "Elastic Search",
                     googleCloud: "Google Cloud SQL",
                     amazonAuroraMySQL: "AmazonAuroraMySQL",
                     amazonAuroraPostgreSQL: "AmazonAuroraPostgreSQL",
@@ -745,6 +832,7 @@ var Designer = {
                     oracle: "Oracle",
                     snowflake: "Snowflake",
                     vertica: "Vertica",
+                    sparksql: "SparkSQL",
                     postgres: "PostgreSQL",
                     redshift: "Amazon Redshift",
                     influxdb: "InfluxDB",
@@ -773,11 +861,11 @@ var Designer = {
                             },
                             servicedesk: {
                                 name: "Service desks",
-                                desc: "Gets all (100) the service desksï¿½ details you have permission to access. You can use start and limit to filter information."
+                                desc: "Gets all (100) the service desks’ details you have permission to access. You can use start and limit to filter information."
                             },
                             cusIssuesinQ: {
                                 name: "Customer issues in queue",
-                                desc: "Gets all the customersï¿½ requests in queue for a given service desk. You can use start and limit to filter information."
+                                desc: "Gets all the customers’ requests in queue for a given service desk. You can use start and limit to filter information."
                             },
                             pendingCR: {
                                 name: "Pending Customer requests",
@@ -819,8 +907,8 @@ var Designer = {
                         name: "CallRail",
                         templates: {
                             todayscall: {
-                                name: "Todayï¿½s Call",
-                                desc: "Gets a list of todayï¿½s calls. For each call, measures include duration, customer phone number, name, city, state, name, and country."
+                                name: "Today’s Call",
+                                desc: "Gets a list of today’s calls. For each call, measures include duration, customer phone number, name, city, state, name, and country."
                             }
                         }
                     },
@@ -879,389 +967,401 @@ var Designer = {
                         name: "Chartbeat",
                         templates: {
                             projects: {
-                                name: "",
-                                desc: ""
+                                name: " ",
+                                desc: " "
                             }
                         }
                     },
                     flurry: {
                         name: "Flurry",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     freshdesk: {
                         name: "Freshdesk",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     fusebill: {
                         name: "Fusebill",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     goSquared: {
                         name: "GoSquared",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     harvest: {
                         name: "Harvest",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     helpScout: {
                         name: "Help Scout",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     insightly: {
                         name: "Insightly",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     intervals: {
                         name: "Intervals",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     keenIo: {
                         name: "Keen",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     kissMetrics: {
                         name: "Kissmetrics",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     wistia: {
                         name: "Wistia",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     gitlab: {
                         name: "GitLab",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     liveAgent: {
                         name: "LiveAgent",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     nicereply: {
                         name: "Nicereply",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     pipelineDeals: {
                         name: "PipelineDeals",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     pipedrive: {
                         name: "Pipedrive",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     prosperWorks: {
                         //  "ProsperWorks" is re-branded as "Copper" post release 2.1.5
                         name: "Copper",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     sendGrid: {
                         name: "SendGrid",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     newRelic: {
                         name: "New Relic",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     mixpanel: {
                         name: "Mixpanel",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     stripe: {
                         name: "Stripe",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     slack: {
                         name: "Slack",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     smartSheet: {
                         name: "Smartsheet",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     zohocrm: {
                         name: "Zoho CRM",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     zohoinvoice: {
                         name: "Zoho Invoice",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     zendesksunshine: {
                         name: "Zendesk Sunshine",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     kaizala: {
                         name: "Microsoft Kaizala",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     wordPress: {
                         name: "WordPress",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     fortytwomatters: {
                         name: "42matters",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     odata: {
                         name: "OData",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     zendesk: {
                         name: "Zendesk Support",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     surveygizmo: {
                         name: "SurveyGizmo",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     mailchimp: {
                         name: "Mailchimp",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     optimizely: {
                         name: "Optimizely",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     azureblob: {
                         name: "Azure Blob",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     basecrm: {
                         //  "BaseCRM" is re-branded as "Zendesk Sell" post release 2.1.5
                         name: "Zendesk Sell",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     sendible: {
                         name: "Sendible",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     chargebee: {
                         name: "Chargebee",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     github: {
                         name: "GitHub",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     activeCampaign: {
                         name: "ActiveCampaign",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     bitly: {
                         name: "Bitly",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     clubReady: {
                         name: "ClubReady",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
+                        ]
+                    },
+                    appFolio: {
+                        name: "AppFolio",
+                        templates: [
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     toggl: {
-                        name: "Toggl",
+                        name: "Toggl Track",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     basecamp3: {
                         name: "Basecamp3",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     lighthouse: {
                         name: "Lighthouse",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     freshsales: {
                         name: "Freshsales",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     freshservice: {
                         name: "Freshservice",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     servicenow: {
                         name: "ServiceNow",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     sparkpost: {
                         name: "SparkPost",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     seomonitor: {
                         name: "SEOmonitor",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     recurly: {
                         name: "Recurly",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     rssfeeds: {
                         name: "RSS Feeds",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     appAnnie: {
                         name: "App Annie",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     azuredevops: {
                         name: "Azure DevOps",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     redcap: {
                         name: "REDCap",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     azureSearch: {
                         name: "Azure Search",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     prometheus: {
                         name: "Prometheus",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     proofhub: {
                         name: "ProofHub",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     shopify: {
                         name: "Shopify",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     amazonMWS: {
                         name: "Amazon MWS",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     commvault: {
                         name: "Commvault",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { projects: { name: " ", desc: " " } }
+                        ]
+                    },
+                    trello: {
+                        name: "Trello",
+                        templates: [
+                            { projects: { name: " ", desc: " " } }
                         ]
                     },
                     surveymonkey: {
                         name: "SurveyMonkey",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            { projects: { name: ' ', desc: ' ' } }
                         ]
                     },
                     lessonly: {
                         name: "Lessonly",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            { projects: { name: ' ', desc: ' ' } }
                         ]
                     }
                 },
@@ -1381,6 +1481,7 @@ var Designer = {
                     marketing: "Marketing",
                     email: "Email",
                     advertising: "Advertising",
+                    management: "Management",
                     finance: "Finance",
                     projectManagement: "Project Management",
                     learning:"Learning",
@@ -1406,6 +1507,8 @@ var Designer = {
                     accountKeyText: "Account Key",
                     authenticationTypeText: "SharedKeyAuthentication",
                     storageAccountNameText: "Storage Account Name",
+                    clientIdText: "Client ID",
+                    clientSecretText: "Client Secret",
                     apiKeyText: "API Key",
                     apiPasswordText: "API Password",
                 },
@@ -1471,6 +1574,7 @@ var Designer = {
                 authenticationFailed: "Authentication failed for the request.",
                 invalidSession: "Please make sure that you have logged into the dashboard site and your session is valid.",
                 dataFetchingError: "An error occurred while fetching data",
+                abortOperation: "Operation was aborted successfully",
                 expressionParameterError: "Invalid parameter(s) used in the expression.",
                 invalidQueryError: "Error executing the database query statement.",
                 failedToConnectServer: "Dashboard Designer failed to retrieve the Resources from the Dashboard Server.",
@@ -1507,7 +1611,8 @@ var Designer = {
                 clientValuesNullForNonAdmin: "OAuth configuration is required for this connection. Please contact your System Administrator.",
                 setting: "settings",
                 noDashboard: "No dashboards in this list",
-                AccessDeniedText: "Access denied for the request"
+                AccessDeniedText: "Access denied for the request",
+                invalidCustomAttributeError: "Custom attribute is not valid."
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
@@ -1638,7 +1743,8 @@ var Designer = {
                 largeFileSizeMessage: "The selected file size is too large ",
                 largeFileSizeAlert: "MB. It will take some time to import the data. Do you want to continue?",
                 removeTableFromMergedDsMessage: "Removing this table will affect the data result. Do you want to continue?",
-                InfluxdbJoinMessage: "InfluxDB does not support join operation. Empty join window will appear."
+                InfluxdbJoinMessage: "InfluxDB does not support join operation. Empty join window will appear.",
+                ElasticsearchJoinMessage: "Elasticsearch does not support join operation. Empty join window will appear."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -1842,7 +1948,10 @@ var Designer = {
                 showDetailsText: "Show Details",
                 hideDetailsText: "Hide Details",
                 copyToClipboardBtnText: "Copy to Clipboard",
-                cancelBtnText: "Cancel"
+                cancelBtnText: "Cancel",
+                continueButtonText: "Continue",
+                retryButtonText: "Retry",
+                abortButtonText: "Abort",
             },
             measureFilterWindow: {
                 measureFilterTitle: "Measure Filter",
@@ -2020,6 +2129,283 @@ var Designer = {
                 allTimeEntries: "All Time Entries",
                 showTimeEntries: "Show Time Entries",
             },
+            pipeDriveDataSource: {
+                activities: "Activities",
+                allActivities: "All Activities",
+                viewActivity: "View Activity",
+                activityFields: "Activity Fields",
+                allActivityFields: "All Activity Fields",
+                activityTypes: "Activity Types",
+                allActivityTypes: "All Activity Types",
+                callLogs: "Call Logs",
+                allCallLogs: "All Call Logs",
+                currencies: "Currencies",
+                allSupportedCurrencies: "All Supported Currencies",
+                deals: "Deals",
+                allDeals: "All Deals",
+                viewDealsSummary: "View Deals Summary",
+                viewDeal: "View Deal",
+                dealActivities: "Deal Activities",
+                dealFiles: "Deal Files",
+                dealFlow: "Deal Flow",
+                dealFollowers: "Deal Followers",
+                dealMailMessages: "Deal Mail Messages",
+                dealParticipants: "Deal Participants",
+                dealsPermittedUsers: "Deals Permitted Users",
+                dealPersons: "Deal Persons",
+                dealProducts: "Deal Products",
+                dealFields: "Deal Fields",
+                allDealFields: "All Deal Fields",
+                viewDealField: "View Deal Field",
+                files: "Files",
+                allFiles: "All Files",
+                viewFile: "View File",
+                filters: "Filters",
+                allFilters: "All Filters",
+                allFilterHelpers: "All Filter Helpers",
+                viewFilter: "View Filter",
+                globalMessages: "Global Messages",
+                allGlobalMessages: "All Global Messages",
+                goals: "Goals",
+                goalsResults: "Goals Results",
+                leads: "Leads",
+                allLeads: "All Leads",
+                viewLead: "View Lead",
+                allLeadLabels: "All Lead Labels",
+                viewLeadLabel: "View Lead Label",
+                allLeadSources: "All Lead Sources",
+                mailMessages: "Mail Messages",
+                viewMailMessage: "View Mail Message",
+                mailThreads: "Mail Threads",
+                viewMailThreads: "View Mail Threads",
+                viewMailThread: "View Mail Thread",
+                mailThreadMailMessages: "Mail Thread Mail Messages",
+                notes: "Notes",
+                allNotes: "All Notes",
+                viewNote: "View Note",
+                noteFields: "Note Fields",
+                allNoteFields: "All Note Fields",
+                organizationFields: "Organization Fields",
+                allOrganizationFields: "All Organization Fields",
+                viewOrganizationField: "View Organization Field",
+                organizations: "Organizations",
+                allOrganizations: "All Organizations",
+                viewOrganizations: "View Organizations",
+                organizationActivities: "Organization Activities",
+                organizationDeals: "Organization Deals",
+                organizationFiles: "Organization Files",
+                organizationFlow: "Organization Flow",
+                organizationFollowers: "Organization Followers",
+                organizationMailMessages: "Organization Mail Messages",
+                organizationPermittedUsers: "Organization Permitted Users",
+                organizationPersons: "Organization Persons",
+                organizationsRelationships: "Organizations Relationships",
+                viewOrganizationRelationship: "View Organization Relationship",
+                permissionSets: "Permission Sets",
+                allPermissionSets: "All Permission Sets",
+                viewPermissionSet: "View Permission Set",
+                permissionSetAssignments: "Permission Set Assignments",
+                persons: "Persons",
+                allPersons: "All Persons",
+                viewPerson: "View Person",
+                personActivities: "Person Activities",
+                personDeals: "Person Deals",
+                personFiles: "Person Files",
+                personFlow: "Person Flow",
+                personFollowers: "Person Followers",
+                personMailMessages: "Person Mail Messages",
+                personsPermittedUsers: "Permitted Users",
+                personProducts: "Person Products",
+                personFields: "Person Fields",
+                allPersonFields: "All Person Fields",
+                viewPersonField: "View Person Field",
+                pipelines: "Pipelines",
+                allPipelines: "All Pipelines",
+                viewPipeline: "View Pipeline",
+                pipelineConversionStatistics: "Pipeline Conversion Statistics",
+                pipelineDeals: "Pipeline Deals",
+                pipelineMovementStatistics: "Pipeline Movement Statistics",
+                products: "Products",
+                allProducts: "All Products",
+                viewProduct: "View Product",
+                productDeals: "Product Deals",
+                productFiles: "Product Files",
+                productFollowers: "Product Followers",
+                productsPermittedUsers: "Products Permitted Users",
+                productFields: "Product Fields",
+                allProductField: "All Product Fields",
+                viewProductField: "View Product Field",
+                recents: "Recents",
+                viewRecents: "View Recents",
+                roles: "Roles",
+                allRoles: "All Roles",
+                viewRole: "View Role",
+                roleAssignments: "Role Assignments",
+                subRoles: "Sub-Roles",
+                roleSettings: "Role Settings",
+                stages: "Stages",
+                allStages: "All Stages",
+                viewStage: "View Stage",
+                stageDeals: "Stage Deals",
+                teams: "Teams",
+                allTeams: "All Teams",
+                viewTeam: "View Team",
+                teamUsers: "Team Users",
+                teamUser: "Team User",
+                users: "Users",
+                allUsers: "All Users",
+                viewCurrentUser: "View Current User",
+                viewUser: "View User",
+                userBlacklistedEmail: "User Blacklisted Email",
+                userFollowers: "User Followers",
+                userPermissions: "User Permissions",
+                userRoleAssignments: "User Role Assignments",
+                userRoleSettings: "User Role Settings",
+                userConnections: "User Connections",
+                allUserConnections: "All User Connections",
+                userSettings: "User Settings",
+                authorizedUserSettings: "Authorized User Settings",
+                webhooks: "Webhooks",
+                allWebhooks: "All Webhooks",
+            },
+            trelloDataSource: {
+                actions: "Actions",
+                applications: "Applications",
+                batch: "Batch",
+                boards: "Boards",
+                cards: "Cards",
+                checklists: "Checklists",
+                customFields: "CustomFields",
+                emoji: "Emoji",
+                enterprises: "Enterprises",
+                labels: "Labels",
+                lists: "Lists",
+                members: "Members",
+                notifications: "Notifications",
+                organizations: "Organizations",
+                plugins: "Plugins",
+                search: "Search",
+                tokens: "Tokens",
+                webhooks: "Webhooks",
+
+                showAction: "Show Action",
+                showSpecificfieldAction: "Show Specific field Action",
+                actionBoard: "Action Board",
+                actionCard: "Action Card",
+                actionList: "Action List",
+                actionMember: "Action Member",
+                actionMemberCreator: "Action Member Creator",
+                actionOrganization: "Action Organization",
+                actionReactions: "Action Reactions",
+                showActionReaction: "Show Action Reaction",
+                actionsummaryofReactions: "Action Summary of Reactions",
+                applicationScomplianceData: "Applications compliance Data",
+                batchRequests: "Batch Requests",
+                boardMemberships: "Board Memberships",
+                showBoard: "Show Board",
+                showFieldonBoard: "Show Field onBoard",
+                boardActions: "Board Actions",
+                showCardonBoard: "Show Card onBoard",
+                boardStarsonBoard: "Board Stars onBoard",
+                checkListsonBoard: "checkLists onBoard",
+                boardCards: "Board Cards",
+                showfilteredCardsonBoard: "Show filtered Cards onBoard",
+                boardCustomFields: "Board Custom Fields",
+                boardLabels: "Board Labels",
+                boardLists: "Board Lists",
+                showBoardfilteredLists: "Show Board filtered Lists",
+                boardMembers: "Board Members",
+                enabledPowerUpsonBoard: "Enabled PowerUps onBoard",
+                powerUpsonBoard: "PowerUps onBoard",
+                showCard: "Show Card",
+                showFieldonCard: "Show Field onCard",
+                cardActions: "card Actions",
+                cardAttachments: "card Attachments",
+                showCardAttachment: "Show Card Attachment",
+                cardBoard: "Card Board",
+                cardCheckItems: "Card Check Items",
+                cardCheckLists: "Card Check Lists",
+                showCardCheckItem: "Show Card CheckItem",
+                cardList: "Card List",
+                cardMembers: "Card Members",
+                cardMembersVoted: "Card Members Voted",
+                cardPluginData: "Card Plugin Data",
+                cardStickers: "Card Stickers",
+                showCardSticker: "Show Card Sticker",
+                cardCustomFieldItems: "Card Custom Field Items",
+                showChecklist: "Show Checklist",
+                showChecklistField: "Show Checklist Field",
+                checklistBoard: "Checklist Board",
+                checklistCards: "Checklist Cards",
+                checklistCheckitems: "Checklist Checkitems",
+                showChecklistCheckitem: "Show Checklist Check Item",
+                showCustomField: "Show Custom Field",
+                checkFieldOptions: "Check Field Options",
+                showCheckFieldOption: "Show Check Field Option",
+                allEmoji: "All Emoji",
+                showEnterprise: "Show Enterprise",
+                enterpriseAuditlog: "Enterprise Auditlog",
+                enterpriseAdmins: "Enterprise Admins",
+                enterpriseMembers: "Enterprise Members",
+                showEnterpriseMember: "Show Enterprise Member",
+                showEnterpriseOrganization: "Show Enterprise Organization",
+                showLabel: "Show Label",
+                showList: "Show List",
+                listActions: "list Actions",
+                listBoard: "List Board",
+                listCards: "List Cards",
+                showMember: "Show Member",
+                showMemberField: "Show Member Field",
+                memberActions: "Member Actions",
+                memberBoardBackgrounds: "Member Board Backgrounds",
+                showMemberBoardBackground: "Show Member Board Background",
+                memberBoardStars: "Member Board Stars",
+                showMemberBoardStar: "Show MemberBoard Star",
+                memberBoard: "Member Board",
+                memberBoardInvited: "Member Board Invited",
+                memberCards: "Member Cards",
+                memberCustomBoardBackgrounds: "Member Custom Board Backgrounds",
+                showMemberCustomBoardBackground: "Show Member Custom Board Background",
+                memberCustomEmoji: "Member Custom Emoji",
+                showMemberCustomEmoji: "Show Member Custom Emoji",
+                memberCustomStickers: "Member Custom Stickers",
+                showMemberCustomSticker: "Show Member Custom Sticker",
+                memberNotifications: "Member Notifications",
+                memberOrganizations: "Member Organizations",
+                memberOrganizationInvited: "Member Organization Invited",
+                memberSavedSearches: "Member Saved Searches",
+                showMemberSavedSearch: "Show Member Saved Search",
+                memberTokens: "Member Tokens",
+                showNotification: "Show Notification",
+                showNotificationField: "Show Notification Field",
+                notificationBoard: "Notification Board",
+                notificationCard: "Notification Card",
+                notificationList: "Notification List",
+                notificationMember: "Notification Member",
+                notificationMemberCreator: "Notification Member Creator",
+                notificationOragnization: "Notification Oragnization",
+                showOrganization: "Show Organization",
+                showOrganizationField: "Show Organization Field",
+                organizationActions: "Organization Actions",
+                organizationBoard: "Organization Board",
+                organizationExports: "Organization Exports",
+                organizationMembers: "Organization Members",
+                organizationMemberships: "Organization Memberships",
+                showOrganizationMembership: "Show Organization Membership",
+                organizationPluginData: "Organization Plugin Data",
+                organizationTags: "Organization Tags",
+                showOrganizationBillableGuest: "Show Organization Billable Guest",
+                showPlugin: "Show Plugin",
+                pluginMemberPrivacy: "Plugin Member Privacy",
+                allSearch: "All Search",
+                searchMembers: "Search Members",
+                showToken: "ShowToken",
+                tokenMembers: "Token Members",
+                tokenWebhooks: "Token Webhooks",
+                showTokenWebhook: "Show Token Webhook",
+                showWebhook: "Show Webhook",
+                showWebhookField: "Show Webhook Field",
+            },
             commvaultDataSource: {
                 clients: "Clients",
                 allClients: "All Clients",
@@ -2059,21 +2445,114 @@ var Designer = {
             webCustomDataSource: {
                 emptyUrlValidation: "Url should not be empty.",
                 hostNameDisplayText: "HostName",
-                apiKeyDisplayText: "ApiKey",
-                clubReadyChainIdDisplayText: "ChainId",
-                emptyApiKeyValidation: "Apikey should not be empty",
+                apiKeyDisplayText: "API Key",
+                apiTokenDisplayText: "API Token",
+                clubReadyChainIdDisplayText: "Chain Id",
+                emptyApiKeyValidation: "API Key should not be empty",
+                emptyApiTokenValidation: "API Token should not be empty",
                 emptyClubReadyChainIdValidation: "ChainId should not be empty",
+                quickBooksRealmIdDisplayText: "Realm ID",
+                emptyQuickBooksRealmIdValidation: "Realm ID should not be empty",
+                emptySOQLQueryValidation: "SOQL should not be empty",
+                salesforceDefaultHostName: "yourinstance.salesforce.com",
                 emptyHostNameValidation: "HostName/Domain should not be empty.",
+                errorHostNameValidation: "Error occurred while fetching the HostName",
+                incorrectHostName: "Please enter valid Hostname/Reconnect datasource",
                 customSettingCategory: "Custom Settings",
                 endpointDisplayText: "API Endpoints",
                 isCustomUrlDisplayText: "Custom Url",
                 urlDisplayText: "Url",
+                organizationsDisplayText: "Organizations",
+                resourcesDisplayText: "Resources",
             },
             asanaWebDataSource: {
-                projectsName: "Projects",
-                workspacesName: "WorkSpaces",
-                usersName: "Users",
-                tagsName: "Tags",
+                showAttachment: "Show Attachment",
+                taskAttachments: "Task Attachments",
+                showCustomField: "Show Custom Field",
+                workspaceCustomFields: "Workspace Custom Fields",
+                projectCustomFields: "Project Custom Fields",
+                portfolioCustomFields: "Portfolio Custom Fields",
+                allEvents: "All Events",
+                showJob: "Show Job",
+                showOrganizationExport: "Show Organization Export",
+                allPortfolios: "All Portfolios",
+                showPortfolio: "Show Portfolio",
+                portfolioItems: "Portfolio Items",
+                allPortfolioMemberships: "All Portfolio Memberships",
+                showPortfolioMembership: "Show Portfolio Membership",
+                membershipsfromPortfolio: "Memberships from Portfolio",
+                allProjects: "All Projects",
+                showProject: "Show Project",
+                projectsfromTask: "Projects from Task",
+                projectsfromTeam: "Projects from Team",
+                workspaceProjects: "Workspace Projects",
+                projectTaskCounts: "Project Task Counts",
+                showProjectMembership: "Show Project Membership",
+                projectfromMemberships: "Project from Memberships",
+                showProjectStatus: "Show Project Status",
+                statusesfromProject: "Statuses from Project",
+                showSection: "Show Section",
+                sessionsfromProject: "Sessions from Project",
+                showStory: "Show Story",
+                storiesfromTask: "Stories from Task",
+                allTags: "All Tags",
+                showTag: "Show Tag",
+                tagsfromTask: "Tags from Task",
+                workspaceTags: "Workspace Tags",
+                allTasks: "All Tasks",
+                showTask: "Show Task",
+                tasksfromProject: "Tasks from Project",
+                tasksfromSection: "Tasks from Section",
+                tasksfromTag: "Tasks from Tag",
+                tasksfromUserTask: "Tasks from User Task",
+                subTasksfromTask: "Sub Tasks from Task",
+                dependenciesfromTask: "Dependencies from Task",
+                dependentsfromTask: "Dependents from Task",
+                attachments: "Attachments",
+                customFields: "Custom Fields",
+                customFieldSettings: "Custom Field Settings",
+                events: "Events",
+                jobs: "Jobs",
+                organizationExports: "Organization Exports",
+                portfolios: "Portfolios",
+                portfolioMemberships: "Portfolio Memberships",
+                projects: "Projects",
+                projectMemberships: "Project Memberships",
+                projectStatuses: "Project Statuses",
+                sections: "Sections",
+                stories: "Stories",
+                tags: "Tags",
+                tasks: "Tasks",
+                showTeam: "Show Team",
+                teamsanOraganization: "Teams an Oraganization",
+                userTeams: "User Teams",
+                allTeamMemberships: "All Team Memberships",
+                showTeamMembership: "Show Team Membership",
+                membershipfromuser: "Membership from user",
+                membershipsformTeam: "Memberships form Team",
+                workspaceTypeaHead: "Workspace TypeaHead",
+                allUsers: "All Users",
+                showUser: "Show User",
+                userFavorites: "User Favorites",
+                usersinTeam: "Users in Team",
+                usersinWorkspaces: "Users in Workspaces",
+                showUserTaskList: "Show User Task List",
+                usersTaskList: "Users Task List",
+                teams: "Teams",
+                teamMemberships: "Team Memberships",
+                typeaHead: "TypeaHead",
+                users: "Users",
+                userTaskLists: "User Task Lists",
+                allWebhooks: "All Webhooks",
+                showWebhook: "Show Webhook",
+                allWorkspaces: "All Workspaces",
+                showWorkspaces: "Show Workspaces",
+                showWorkspaceMemberships: "Show Workspace Memberships",
+                userWorkspaceMemberships: "User Workspace Memberships",
+                workspacemembershipsforworkspace: "Workspace memberships for workspace",
+                webhooks: "Webhooks",
+                workspaces: "Workspaces",
+                workspaceMemberships: "Workspace Memberships",
             },
             clubReadyDataSource: {
                 club: "Club",
@@ -2216,6 +2695,46 @@ var Designer = {
                 payouts: "Payouts",
                 products: "Products",
                 refunds: "Refunds",
+            },
+            appFolioDataSource: {
+                activitiesSummary: "Activities Summary",
+                agedPayablesSummary: "Aged Payables Summary",
+                agedReceivableDetail: "Aged Receivable Detail",
+                billDetail: "Bill Detail",
+                chargeDetail: "Charge Detail",
+                chartofAccounts: "Chart of Accounts",
+                checkRegisterDetail: "Check Register Detail",
+                debtCollectionsStatus: "Debt Collections Status",
+                delinquency: "Delinquency",
+                depositRegister: "Deposit Register",
+                generalLedger: "General Ledger",
+                grossPotentialRent: "Gross Potential Rent",
+                guestCards: "Guest Cards",
+                homeownerDirectory: "Homeowner Directory",
+                homeownerVehicleInfo: "Homeowner Vehicle Info",
+                leaseExpirationDetailByMonth: "Lease Expiration Detail by Month",
+                leasingAgentPerformance: "Leasing Agent Performance",
+                ownerDirectory: "Owner Directory",
+                propertyBudget: "Property Budget",
+                propertyDirectory: "Property Directory",
+                propertyGroupDirectory: "Property Group Directory",
+                prospectSourceTracking: "Prospect Source Tracking",
+                purchaseOrder: "Purchase Order",
+                rentableItems: "Rentable Items",
+                rentRoll: "Rent Roll",
+                rentRollItemized: "Rent Roll Itemized",
+                rentalApplications: "Rental Applications",
+                surveySummary: "Survey Summary",
+                tenantDirectory: "Tenant Directory",
+                tenantTickler: "Tenant Tickler",
+                tenantVehicleInfo: "Tenant Vehicle Info",
+                trialBalance: "Trial Balance",
+                trustAccountBalance: "Trust Account Balance",
+                unitDirectory: "Unit Directory",
+                unitVacancyDetail: "Unit Vacancy Detail",
+                unitInspection: "Unit Inspection",
+                vendorDirectory: "Vendor Directory",
+                workOrder: "Work Order",
             },
             zendeskDataSource: {
                 allUsers: "All Users",
@@ -2661,6 +3180,184 @@ var Designer = {
                 widgets: "Widgets",
                 viewWidget: "View Widget",
                 viewWidgets: "View Widgets",
+            },
+            quickBooksOnlineDataSource: {
+                account: "Account",
+                queryAccount: "Query Account",
+                readAccount: "Read Account",
+                accountListDetail: "Account List Detail",
+                queryAccountListDetail: "Query Account List Detail",
+                apAgingDetail: "AP Aging Detail",
+                queryApAgingDetail: "Query Ap Aging Detail",
+                apAgingSummary: "AP Aging Summary",
+                queryApAgingSummary: "Query AP Aging Summary",
+                attachable: "Attachable",
+                queryAttachable: "Query Attachable",
+                readAttachable: "Read Attachable",
+                balanceSheet: "Balance Sheet",
+                queryBalanceSheet: "Query Balance Sheet",
+                bill: "Bill",
+                queryBill: "Query Bill",
+                readBill: "Read Bill",
+                billPayments: "Bill Payments",
+                queryBillPayments: "Query Bill Payments",
+                readBillPayments: "Read Bill Payments",
+                budget: "Budget",
+                queryBudget: "Query Budget",
+                cashFlow: "Cash Flow",
+                queryCashFlow: "Query Cash Flow",
+                changeDataCapture: "Change Data Capture",
+                getChangedEntries: "Changed Entries",
+                class: "Class",
+                queryClass: "Query Class",
+                readClass: "Read Class",
+                companyCurrency: "Company Currency",
+                queryCompanyCurrency: "Query Company Currency",
+                readCompanyCurrency: "Read Company Currency",
+                companyInfo: "Company Info",
+                queryCompanyInfo: "Query Company Info",
+                readCompanyInfo: "Read Company Info",
+                creditMemo: "Credit Memo",
+                queryCreditMemo: "Query Credit Memo",
+                readCreditMemo: "Read Credit Memo",
+                customer: "Customer",
+                queryCustomer: "Query Customer",
+                readCustomer: "Read Customer",
+                customerBalance: "Customer Balance",
+                queryCustomerBalance: "Query Customer Balance",
+                customerBalanceDetail: "Customer Balance Detail",
+                queryBalanceDetail: "Query Balance Detail",
+                customerIncome: "Customer Income",
+                queryCustomerIncome: "Query Customer Income",
+                customerType: "Customer Type",
+                queryCustomerType: "Query Customer Type",
+                readCustomerType: "Read Customer Type",
+                department: "Department",
+                queryDepartment: "Query Department",
+                readDepartment: "Read Department",
+                deposit: "Deposit",
+                queryDeposit: "Query Deposit",
+                readDeposit: "Read Deposit",
+                employee: "Employee",
+                queryEmployee: "Query Employee",
+                readEmployee: "Read Employee",
+                estimate: "Estimate",
+                queryEstimate: "Query Estimate",
+                readEstimate: "Read Estimate",
+                exchangerate: "Exchangerate",
+                exchangerateForIndividualCurrencyCode: "Exchangerate for Individual Currency Code",
+                queryExchangerate: "Query Exchangerate",
+                generalLedger: "General Ledger",
+                queryGeneralLedger: "Query General Ledger",
+                inventaryValuationSummary: "Inventary Valuation Summary",
+                queryInventaryValuationSummary: "Query Inventary Valuation Summary",
+                invoice: "Invoice",
+                queryInvoice: "Query Invoice",
+                readInvoice: "Read Invoice",
+                item: "Item",
+                queryItem: "Query Item",
+                readItem: "Read Item",
+                journalCode: "Journal Code",
+                queryJournalCode: "Query JournalCode",
+                readJournalCode: "Read Journal Code",
+                journalEntry: "Journal Entry",
+                queryJournalEntry: "Query Journal Entry",
+                readJournalEntry: "Read Journal Entry",
+                journalReport: "Journal Report",
+                queryJournalReport: "Query Journal Report",
+                journalReportFr: "Journal Report Fr",
+                queryJournalReportFR: "Query Journal Report FR",
+                payment: "Payment",
+                readPayment: "Read Payment",
+                queryPayment: "Query Payment",
+                paymentMethod: "Payment Method",
+                queryPaymentMethod: "Query Payment Method",
+                readPaymentMethod: "Read Payment Method",
+                preferences: "Preferences",
+                queryPreferences: "Query Preferences",
+                readPreferences: "Read Preferences",
+                profitAndLoss: "Profit And Loss",
+                queryProfitAndLoss: "Query Profit and Loss",
+                profitAndLossDetail: "Profit and Loss Detail",
+                queryProfitAndLossDetail: "Query Profit and Loss Detail",
+                purchase: "Purchase",
+                queryPurchase: "Query Purchase",
+                readPurchase: "Read Purchase",
+                purchaseOrder: "Purchase Order",
+                queryPurchaseOrder: "Query Purchase Order",
+                readPurchaseOrder: "Read Purchase Order",
+                refundReceipt: "Refund Receipt",
+                queryRefundReceipt: "Query Refund Receipt",
+                readRefundReceipt: "Read Refund Receipt",
+                salesByClassSummary: "Sales by ClassSummary",
+                queryClassSummarySales: "Query Sales by Class Summary",
+                salesByCustomer: "Sales by Customer",
+                queryCustomerSales: "Query Sales by Customer",
+                salesByDepartment: "Sales by Department",
+                queryDepartmentSales: "Query Sales by Department",
+                salesByProduct: "Sales by Product",
+                queryProductSales: "Query Sales by Product",
+                salesReceipt: "Sales Receipt",
+                querySalesReceipt: "Query Sales Receipt",
+                readSalesReceipt: "Read Sales Receipt",
+                taxClassification: "Tax Classification",
+                readTaxClassificationById: "Read Tax Classification by Id",
+                readTaxClassificationByParentId: "Read Tax Classification by Parent Id",
+                readAllTaxClassification: "Read All Tax Classification",
+                readTaxClassificationByLevel: "Read Tax Classification by Level",
+                taxCode: "Tax Code",
+                queryTaxCode: "Query Tax Code",
+                readTaxCode: "Read Tax Code",
+                taxPayment: "Tax Payment",
+                queryTaxPayment: "Query Tax Payment",
+                readTaxPayment: "Read Tax Payment",
+                taxRate: "Tax Rate",
+                queryTaxRate: "Query Tax Rate",
+                readTaxRate: "Read Tax Rate",
+                taxSummary: "Tax Summary",
+                queryTaxSummary: "Query Tax Summary",
+                taxAgency: "Tax Agency",
+                queryTaxAgency: "Query Tax Agency",
+                readTaxAgency: "Read Tax Agency",
+                term: "Term",
+                queryTerm: "Query Term",
+                readTerm: "Read Term",
+                timeActivity: "Time Activity",
+                queryTimeActivity: "Query Time Activity",
+                readTimeActivity: "Read Time Activity",
+                transactionList: "Transaction List",
+                queryTransactionList: "Query Transaction List",
+                transfer: "Transfer",
+                queryTransfer: "Query Transfer",
+                readTransfer: "Read Transfer",
+                trailBalance: "Trail Balance",
+                queryTrailBalance: "Query Trail Balance",
+                vendor: "Vendor",
+                queryVendor: "Query Vendor",
+                readVendor: "Read Vendor",
+                vendorBalance: "Vendor Balance",
+                queryVendorBalance: "Query Vendor Balance",
+                vendorBalanceDetail: "Vendor Balance Detail",
+                queryVendorBalanceDetail: "Query Vendor Balance Detail",
+                vendorCredit: "Vendor Credit",
+                queryVendorCredit: "Query Vendor Credit",
+                readVendorCredit: "Read Vendor Credit",
+                vendorExpenses: "Vendor Expenses",
+                queryVendorExpenses: "Query Vendor Expenses",
+            },
+            quickBooksPaymentsDataSource: {
+                bankAccounts: "Bank Accounts",
+                allBankAccounts: "All Bank Accounts",
+                viewBankAccount: "View Bank Account",
+                cards: "Cards",
+                customerCards: "All Cards",
+                viewCard: "View Card",
+                charges: "Charges",
+                viewRefund: "View Refund",
+                viewCharge: "View Charge",
+                eChecks: "EChecks",
+                viewRefundByECheck: "Refund by ECheck",
+                viewECheck: "View ECheck",
             },
             freshsalesDataSource: {
                 leads: "Leads",
@@ -3245,8 +3942,8 @@ var Designer = {
                     absDesc: "Returns the absolute value of the given expression.",
                     absEx: "ABS(numeric_expression)",
 
-                    aconsDesc: "Returns the inverse cosine (also known as arccosine) of the given numeric expression. Value should be between -1 and +1.",
-                    aconsEx: "ACOS(numeric_expression)",
+                    acosDesc: "Returns the inverse cosine (also known as arccosine) of the given numeric expression. Value should be between -1 and +1.",
+                    acosEx: "ACOS(numeric_expression)",
 
                     asinDesc: "Returns the inverse sine (also known as arcsine) of the given numeric expression. Value should be between - 1 and +1.",
                     asinEx: "ASIN(numeric_expression)",
@@ -3272,6 +3969,9 @@ var Designer = {
                     powerDesc: "Returns the value of the given expression (expression1) to the specified power (expression2).",
                     powerEx: "POWER(numeric_expression, numeric_expression)",
 
+                    percentageDesc: "Returns the percentage value for each row from the grand total of the given column.",
+                    percentageEx: "TOTALPERCENTAGE(numeric_expression)",
+
                     radDesc: "Returns the angle in radians for the one specified in degrees in the given numeric expression.",
                     radEx: "RADIANS(numeric_expression)",
 
@@ -3293,8 +3993,7 @@ var Designer = {
                     ifDesc: "Returns either true part or false part, depending upon the evaluation of the expression.",
                     ifEx: "IF(expression, true_part, false_part)",
 
-                    ifNullDesc: "If the expression is numeric/string/date, returns the first expression."
-                        + " If the first expression is NULL, returns the second expression.",
+                    ifNullDesc: "If the expression is numeric/string/date, returns the first expression. If the first expression is NULL, returns the second expression.",
                     ifNullEx: "IFNULL(expression1,expression2)",
 
                     isNotNullDesc: "If the numeric/ string / date_expression is NULL, returns a string representing false, otherwise represents true.",
@@ -3303,8 +4002,8 @@ var Designer = {
                     isNullDesc: "If the numeric/string/date_expression is NULL, returns a string representing true, otherwise represents false.",
                     isNullEx: "ISNULL(expression)",
 
-                    andDec: "Returns true if both the expressions evaluates to true.",
-                    andDec11: "(expression1) AND (expression2)",
+                    andDesc: "Returns true if both the expressions evaluates to true.",
+                    andEx: "(expression1) AND (expression2)",
 
                     notDesc: "Returns the reversal logical value of the expression being evaluated.",
                     notEx: "NOT(expression)",
@@ -3421,7 +4120,7 @@ var Designer = {
                     stdDevEx: "STDEV(numeric_expression)",
 
                     sumDesc: "Returns the sum of values in the given expression.",
-                    sumDescEx: "SUM(numeric_expression)",
+                    sumEx: "SUM(numeric_expression)",
 
                     varDesc: "Returns the varience of values in the given expression.",
                     varEx: "VAR(numeric_expression)",
@@ -3782,7 +4481,8 @@ var Designer = {
                 filedContainer: {
                     columnName: "Column",
                     hiddenColumnName: "Hidden Column",
-                    kpiColumnName: "KPIColumn"
+                    kpiColumnName: "KPIColumn",
+                    filterColumnTitle: "Filters",
                 },
                 menuItems: {
                     weightedScore: "Weighted Score...",
@@ -3820,7 +4520,9 @@ var Designer = {
                     relativeDateOptionsDisplayName: "Relative Dates",
                     nulldata: "(Null)",
                     measures: "measures",
-                    rename: "Rename"
+                    rename: "Rename",
+					first: "First",
+                    last: "Last"
                 },
                 numberFilterOption: {
                     equals: "Equals",
@@ -3954,7 +4656,7 @@ var Designer = {
             },
             popNotification: {
                 masterWidgetNoSlaveText: "There are no listener widgets for this period-over-period comparison. Please go to the Filter Configuration window to select listener widgets.",
-                slaveWidgetNoVirtualColumText: "The selected comparison periodï¿½s visualization will be shown in a preview or when published."
+                slaveWidgetNoVirtualColumText: "The selected comparison period\'s visualization will be shown in a preview or when published."
             },
             gridColumnCustomize: {
                 columnCustomize: "Column Settings",
@@ -3968,12 +4670,28 @@ var Designer = {
                 headerText: "Header Text",
                 headerAlignment: "Header Align",
                 contentAlignment: "Content Align",
+                columnWidth: "Column Width"
             },
             gridalignment: {
                 alignLeft: "Left",
                 alignCenter: "Center",
                 alignRight: "Right"
             },
+			gridBarCustomize: {	
+				dialogTitle: "Bar Settings",
+				hideBarText: "Hide Bar Text",
+				barText: "Bar Text",
+				positiveBar: "Positive Bar",
+				nagativeBar: "Negative Bar",
+				maximum: "Maximum",
+				minimum: "Minimum",
+				lowestValue: "Lowest Value",
+				highestValue: "Highest Value",
+				customValue: "Custom",
+				barStyle: "Bar Style",
+				cylinder: "Cylinder",
+				rectangle: "Rectangle"
+			},
             dateTime: {
                 jan: "January",
                 feb: "February",
@@ -4028,7 +4746,10 @@ var Designer = {
                 createExpression: "Create expression columns",
                 columnSelect: "Select Column",
                 addWhereCondition: "+ Add Where Condition",
-                addGlobalWhereCondition: "+ Add Global Where Condition"
+                addGlobalWhereCondition: "+ Add Global Where Condition",
+                selectTargetText: "Select Target",
+                selectConditionText: "Select Condition",
+                selectFormatText: "Select Format"
             },
             dataAlertExpression: {
                 dialogTitle: "Custom Expressions",
@@ -4182,6 +4903,52 @@ var Designer = {
                 allAssignments: "Assignments",
                 allAssignmentsv1_1: "Assignments in v1.1",
                 showAssignmentsByStatus: "Assignments by Status",
+            },
+            HubspotDataSource: {
+                cardsSampleResponse: "Cards Sample Response",
+                allCompanies: "All Companies",
+                showCompany: "Show Company",
+                companyAssociations: "Company Associations",
+                allContacts: "All Contacts",
+                showContact: "Show Contact",
+                contactAssociations: "Contact Associations",
+                allDeals: "All Deals",
+                showDeal: "Show Deal",
+                dealAssociations: "Deal Associations",
+                allLineItems: "All Line Items",
+                showLineItem: "Show Line Item",
+                lineItemAssociations: "Line Item Associations",
+                allProducts: "All Products",
+                showProduct: "Show Product",
+                productAssociations: "Product Associations",
+                allTickets: "All Tickets",
+                showTicket: "Show Ticket",
+                ticketAssociations: "Ticket Associations",
+                allQuotes: "All Quotes",
+                showQuote: "Show Quote",
+                quoteAssociations: "Quote Associations",
+                allImports: "All Imports",
+                showImport: "Show Import",
+                allOwners: "All Owners",
+                showOwner: "Show Owner",
+                allPipeLines: "All PipeLines",
+                showPipeLine: "Show PipeLine",
+                pipeLineStages: "PipeLine Stages",
+                showPipeLineStage: "Show PipeLine Stage",
+                allProperties: "All Properties",
+                showProperty: "Show Property",
+                cards: "Cards",
+                companies: "Companies",
+                contacts: "Contacts",
+                deals: "Deals",
+                lineItems: "Line Items",
+                products: "Products",
+                tickets: "Tickets",
+                quotes: "Quotes",
+                imports: "Imports",
+                owners: "Owners",
+                pipeLines: "PipeLines",
+                properties: "Properties",
             },
             surveyMonkeyDataSource: {
                 usersAndTeams: "Users And Teams",

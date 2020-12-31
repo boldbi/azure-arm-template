@@ -99,7 +99,7 @@ $(document).ready(function () {
         });
 
         consentContentInfoDialogObj.appendTo("#consent-content-dialog");
-    }
+        }
 
     if ($("#time_format").is(":checked")) {
         $(".time").html(window.Server.App.LocalizationContent.TimeFormat);
@@ -1008,7 +1008,9 @@ function SetCookie() {
             url: window.setLanguageUrl,
             data: { langtag: $("#language").val(), returnUrl: $("#return_url").val() + "/administration" },
             success: function (result) {
-                window.location.href = result.Data;
+                if (typeof($("#return_url").val()) != "undefined") {
+                    window.location.href = result.Data;
+                }
             }
         });
     }
@@ -1202,55 +1204,82 @@ $(document).ready(function () {
         };
 
         $(document).on("click", "#update-auth-control", function () {
-            var authControlData = "";
-            if ($(".enable-global-external-providers-label").length < 1) {
-                var authControl = [];
-                authControl.push(
-                    {
-                        auth_type: $("#oauth-control-type").val().trim(),
-                        is_enabled: $("#enable-global-oauth").is(":checked")
-                    },
-                    {
-                        auth_type: $("#openid-control-type").val().trim(),
-                        is_enabled: $("#enable-global-openid").is(":checked")
-                    }
-                );
+            if (isSelfHosted) {
+                var authControlData = "";
+                if ($(".enable-global-external-providers-label").length < 1) {
+                    var authControl = [];
+                    authControl.push(
+                        {
+                            auth_type: $("#oauth-control-type").val().trim(),
+                            is_enabled: $("#enable-global-oauth").is(":checked")
+                        },
+                        {
+                            auth_type: $("#openid-control-type").val().trim(),
+                            is_enabled: $("#enable-global-openid").is(":checked")
+                        }
+                    );
 
-                authControlData = JSON.stringify(authControl);
+                    authControlData = JSON.stringify(authControl);
+                }
+                else {
+                    var authControlSettings = [];
+                    authControlSettings.push(
+                        {
+                            name: $("#external-providers-type").val().trim(),
+                            is_enabled: $("#enable-global-external-providers").is(":checked")
+                        }
+                    );
+
+                    var authControl = {
+                        settings: authControlSettings
+                    };
+
+                    authControlData = JSON.stringify(authControl);
+                }
+
+                $.ajax({
+                    type: "POST",
+                url: window.updateauthcontrolUrl,
+                    data: { AuthControlData: authControlData },
+                    beforeSend: showWaitingPopup($("#server-app-container")),
+                    success: function (result) {
+                        hideWaitingPopup($("#server-app-container"));
+                        if (result.Status) {
+                            SuccessAlert(window.Server.App.LocalizationContent.AuthControl, window.Server.App.LocalizationContent.AuthControlUpdated, 7000);
+                        } else {
+                            WarningAlert(window.Server.App.LocalizationContent.AuthControl, window.Server.App.LocalizationContent.AuthControlUpdatedError + "<br/><br/>" + data.Message, 0);
+                        }
+                    },
+                    error: function () {
+                        hideWaitingPopup($("#server-app-container"));
+                    }
+                });
             }
             else {
-                var authControlSettings = [];
-                authControlSettings.push(
-                    {
-                        name: $("#external-providers-type").val().trim(),
-                        is_enabled: $("#enable-global-external-providers").is(":checked")
-                    }
-                );
-
-                var authControl = {
-                    settings: authControlSettings
-                };
-
-                authControlData = JSON.stringify(authControl);
-            }            
-
-            $.ajax({
-                type: "POST",
-                url: window.updateauthcontrolUrl,
-                data: { AuthControlData: authControlData },
-                beforeSend: showWaitingPopup($("#server-app-container")),
-                success: function (result) {
-                    hideWaitingPopup($("#server-app-container"));
-                    if (result.Status) {
-                        SuccessAlert(window.Server.App.LocalizationContent.AuthControl, window.Server.App.LocalizationContent.AuthControlUpdated, 7000);
-                    } else {
-                        WarningAlert(window.Server.App.LocalizationContent.AuthControl, window.Server.App.LocalizationContent.AuthControlUpdatedError + "<br/><br/>" + data.Message, 0);
-                    }
-                },
-                error: function () {
-                    hideWaitingPopup($("#server-app-container"));
+                var settingsKey = "LoginOptions";
+                var loginOptions = {
+                    HideAzureADLogin: isNullOrWhitespace($("#login-options").val()) || !$("#login-options").val().includes("Azure AD"),
+                    HideSyncfusionLogin: isNullOrWhitespace($("#login-options").val()) || !$("#login-options").val().includes("Syncfusion Login")
                 }
-            });
+
+                $.ajax({
+                    type: "POST",
+                    url: window.updateLoginOptionsUrl,
+                    data: { systemSettingValue: JSON.stringify(loginOptions), key: settingsKey },
+                    beforeSend: showWaitingPopup($("#server-app-container")),
+                    success: function (result) {
+                        hideWaitingPopup($("#server-app-container"));
+                        if (result.Status) {
+                            SuccessAlert(window.Server.App.LocalizationContent.AuthControl, window.Server.App.LocalizationContent.AuthControlUpdated, 7000);
+                        } else {
+                            WarningAlert(window.Server.App.LocalizationContent.AuthControl, window.Server.App.LocalizationContent.AuthControlUpdatedError, 7000);
+                        }
+                    },
+                    error: function () {
+                        hideWaitingPopup($("#server-app-container"));
+                    }
+                });
+            }
         });
 
         $(document).on("click", ".update-auth-settings", function () {
@@ -1514,5 +1543,12 @@ $(document).on("click", "#enablecheckboxconsent", function () {
     else {
         $("#image-container.disclaimer-content-container").addClass("hide-disclaimer-checkbox");
         $("#consent-content").val(window.Server.App.LocalizationContent.DisableConsentContent);
+    }
+});
+
+$(document).on("click", ".login-option-dropdown .bootstrap-select .dropdown-menu .selectpicker li a", function (e) {
+    e.stopPropagation();
+    if (isNullOrWhitespace($("#login-options").val())) {
+        $(".login-option-dropdown .filter-option").html(window.Server.App.LocalizationContent.SelectLoginProviders);
     }
 });

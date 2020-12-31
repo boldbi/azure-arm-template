@@ -58,6 +58,12 @@ $(document).on("click", "#delete-item", function (e) {
                     if (data.DashboardCount > 0 && data.DashboardCount != undefined) {
                         ResetItemList(ItemType.Dashboard);
                         ResetItemList(ItemType.Category);
+
+                        var iframeUrl = $("#dashboard-rendering-iframe").attr("src");
+                        if (typeof (iframeUrl) != "undefined" && iframeUrl.contains(itemId)) {
+                            parent.$("#body").ejWaitingPopup("show");
+                            location.reload();
+                        }
                     }
                     else {
                         parent.$("#body").ejWaitingPopup("show");

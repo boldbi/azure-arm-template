@@ -24,8 +24,10 @@
     @Styles.Render("~/styles/AddTenantIframe")
     @Scripts.Render("~/scripts/localizationcontent")
     @Scripts.Render("~/scripts/AddTenantIframe")
-    <script>
+    @Scripts.Render("~/bundles/scripts/ej2-dialog")
 
+    <script>
+        $.extend(ej, Syncfusion);
         var boldReportsUrl = "@CloudAppConfig.InternalAppReportUrl/@CloudAppConfig.TenantIdentifierPrefix/";
         var boldBIUrl = "@CloudAppConfig.InternalAppBIUrl/@CloudAppConfig.TenantIdentifierPrefix/";
         var item = "@item";
@@ -86,6 +88,13 @@
                                 <div class="circle"></div>
                                 <div class="hr-tag"> </div>
                             </div>
+                            @if (ViewBag.IsBoldBIMultiTenant)
+                            {
+                                <div class="selector-panel" id="selection-data-security">
+                                    <div class="circle"></div>
+                                    <div class="hr-tag"> </div>
+                                </div>
+                            }
                             <div class="selector-panel" id="selectionadmin">
                                 <div class="circle"></div>
                             </div>
@@ -98,6 +107,10 @@
                                 <span class="select-intermediate-database">[[[SELECT DATA STORE]]]</span>
                             }
                             <span class="select-storage">[[[SELECT STORAGE]]]</span>
+                            @if (ViewBag.IsBoldBIMultiTenant)
+                            {
+                                <span class="get-data-security">[[[DATA SECURITY]]]</span>
+                            }
                             <span class="administrator">[[[ADMINISTRATOR]]]</span>
                         </div>
                     </div>
@@ -192,7 +205,13 @@
                                             <span class="startup-validation validation-txt-errors" id="tenant-identifier-validation-error"></span>
                                             <span class="identifier-info">
                                                 [[[The site identifier should be unique, and it is part of your site URL.]]]
-                                                <div class="site-default-text text-content">[[[i.e. ]]]@baseUrl</div>
+                                                <div class="url-part">
+                                                <span>[[[i.e ]]]</span>
+                                                <span class="site-url no-padding" data-toggle="popover" data-html="true" data-placement="top" data-container="body" data-content="">
+                                                <span class="site-default-text text-content">@baseUrl</span>
+                                                <span class="site-id-name"></span>
+                                                </span>
+                                                    </div>
                                             </span>
                                         </div>
                                     </div>
@@ -209,6 +228,9 @@
                             </div>
                             <div class="storage-form hide">
                                 @Html.Action("StorageConfiguraton", "serverconfiguration")
+                            </div>
+                            <div class="data-security-form hide">
+                                @Html.Partial("_AddDataSecurity")
                             </div>
                             <div class="tenant-user-form hide">
                                 @Html.Partial("_TenantUserSelection")

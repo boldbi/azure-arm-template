@@ -31,7 +31,7 @@ var buttonValue = "";
 var filterContent = "";
 var designerServiceUrl = "";
 var dashboardServerUrl = "";
-var dataServiceUrl = "";
+var dataServiceUrlforDataAlert = "";
 var isCustomExpressionOpened = false;
 
 $(document).ready(function () {
@@ -39,7 +39,7 @@ $(document).ready(function () {
     timeFormat = $("#timeFormat").val();
     designerServiceUrl = $('meta[name="designer_service:url"]').attr("content");
     dashboardServerUrl = $('meta[name="dashboard_server:url"]').attr("content");
-    dataServiceUrl = $("meta[name='data_service:url']").attr("content");
+    dataServiceUrlforDataAlert = $("meta[name='data_service:url']").attr("content");
     $(".category-dropdown .bootstrap-select .bs-searchbox .input-block-level").attr("placeholder", window.Server.App.LocalizationContent.SearchCategories);
     $(".dashboard-dropdown .bootstrap-select .bs-searchbox .input-block-level").attr("placeholder", window.Server.App.LocalizationContent.SearchDashboards);
     $(".childdashboard-dropdown .bootstrap-select .bs-searchbox .input-block-level").attr("placeholder", window.Server.App.LocalizationContent.SearchTabs);
@@ -1137,18 +1137,31 @@ function onActionBegin(args) {
         $(".schedule-popup-title").html(" " + window.Server.App.LocalizationContent.Schedule + " - " + window.Server.App.LocalizationContent.CustomExpression);
         $("#schedule-next, #schedule-next-cancel").hide();
     }
+
+    if (args.eventType == "beforeOpenDaRelativeDateDialog") {
+        $("#schedule-back").prop('disabled', true);
+        $("#schedule-next").prop('disabled', true);
+        $("#schedule-next-cancel").prop('disabled', true);
+    }
 }
 
 
 function onActionComplete(args) {
+    if (args.eventType == "afterCloseDaRelativeDateDialog") {
+        $("#schedule-back").prop('disabled', false);
+        $("#schedule-next").prop('disabled', false);
+        $("#schedule-next-cancel").prop('disabled', false);
+    }
+
     parent.$("#popup-container_wrapper").ejWaitingPopup("hide");
     parent.$("#editpopup-container_wrapper").ejWaitingPopup("hide");
 }
 
 function dataAlertInitailization() {
+    currentTimeFormat = currentTimeFormat.toLowerCase() == "true" ? "HH:mm" : "hh:mm tt";
     var designerModel = {
         serviceUrl: designerServiceUrl,
-        dataServiceUrl: dataServiceUrl,
+        dataServiceUrl: dataServiceUrlforDataAlert,
         serverUrl: dashboardServerUrl,
         mode: ej.dashboardDesigner.mode.dataalert,
         itemId: createdItemId,
@@ -1161,6 +1174,11 @@ function dataAlertInitailization() {
         actionComplete: "onActionComplete",
         afterEvaluateDataAlert: "afterEvaluateDataAlert",
         renderDaExpression: "renderDaExpression",
+        localeSettings: {
+            culture: dataLanguage,
+            dateFormat: currentDateFormat,
+            timeFormat: currentTimeFormat
+        }
     };
     var designer = new ejDashboardDesigner($('#dataAlert'), designerModel);
     $("#dataAlert").css("height", $(".share-popup").innerHeight()); 

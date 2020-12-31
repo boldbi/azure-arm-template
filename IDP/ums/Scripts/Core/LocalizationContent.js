@@ -17,6 +17,7 @@
             UserNameValidator: "[[[Please enter username.]]]",
             PasswordValidator: "[[[Please enter password.]]]",
             BrowsePath: "[[[Browse file path]]]",
+            UseNumbersLetters: "[[[Please use numbers and letters only.]]]",
 
             //Authentication Settings
             OpenIDConnectSettings: "[[[OpenID Connect Settings]]]",
@@ -119,13 +120,20 @@
 
             //SysetmSettings.js
             SelectDatabase: "[[[Select a database]]]",
+            SiteValidation: "[[[Site name is too long. Must be fewer than 255 characters.]]]",
             YoureAnAdmin: "[[[Step 2: You’re an administrator]]]",
             YoureAnAdmin2:"[[[Step 3: You’re an administrator]]]",
             AdminHaveControl: "[[[Administrators have complete control over the application.]]]",
             YourStorage: "[[[Step 2: Your storage type]]]",
-            YourStorage2: "[[[Step 5: Your storage type]]]",
-            YourStorage3: "[[[Step 4: Your storage type]]]",
-            StorageMsg: "[[[The storage type is used to maintain your resources.]]]",
+            YourStorage2: "[[[Step 6: Your storage type]]]",
+            YourStorage3: "[[[Step 5: Your storage type]]]",
+            YourBIDatabase: "[[[Step 4: Bold BI Database server configuration]]]",
+            YourBIDatabase2: "[[[Step 5: Bold BI Database server configuration]]]",
+            YourDatabase: "[[[Step 4: Bold Reports Database server configuration]]]",
+            YourDatabase2: "[[[Step 5: Bold Reports Database server configuration]]]",
+            StorageMsg: "[[[The storage type is used to maintain your Bold ID resources.]]]",
+            StorageBIMsg: "[[[The storage type is used to maintain your Bold BI resources.]]]",
+            StorageReportsMsg: "[[[The storage type is used to maintain your Bold Reports resources.]]]",
             StorageAccount: "[[[Please enter storage account name]]]",
             EndPoint: "[[[Please enter blob service endpoint]]]",
             AccessKey: "[[[Please enter access key]]]",
@@ -163,10 +171,13 @@
             NoDatabase: "[[[No database found]]]",
             DatabaseType: "[[[Please select a database]]]",
             NoDsn: "[[[No DSN found]]]",
-            DataStoreConfig: "[[[Step 5: Data Store Configuration]]]",
-            DataStoreConfigforBoldbi: "[[[Step 6: Data Store Configuration]]]",
+            DataStoreConfig: "[[[Step 6: Data Store Configuration]]]",
+            DataStoreConfigforBoldbi: "[[[Step 7: Data Store Configuration]]]",
             PullYourData: "[[[Pull your data from]]]",
             DataConnectorsSaveOffline: "[[[data connectors and save it offline to access your dashboard quickly.]]]",
+            DatabaseMsg: "[[[This is where we store your dashboards, users, and their access permissions.]]]",
+            DatabaseReportsMsg: "[[[This is where we store your reports, users, and their access permissions.]]]",
+            DsnValidator: "[[[Please select DSN.]]]",
 
             //AddTenant.js
             BoldReportsMultiTenancy: "[[[Bold Reports multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]",
@@ -282,7 +293,14 @@
             SaveButton: "[[[Save]]]",
             CancelButton: "[[[Cancel]]]",
             DeleteCustomAttribute: "[[[Delete Attribute]]]",
-            DeleteAttributeConfirm: "[[[Are you sure you want to delete the attribute - ]]]"
+            DeleteAttributeConfirm: "[[[Are you sure you want to delete the attribute - ]]]",
+
+            //Embed Settings
+            ResetHeader: "[[[Reset Secret]]]",
+            ResetConfirmationMessage: "[[[Resetting the secret will break any embed dashboards using the old secret. Are you sure you want to reset the secret?]]]",
+            EmbedSettings: "[[[Embed Settings]]]",
+            ResetSecretSuccessAlert: "[[[Embed Secret has been updated successfully]]]",
+            EmbedInvalidMessage: "[[[The embed dashboard URL must be used in an iframe.]]]"
         }
     }
 };

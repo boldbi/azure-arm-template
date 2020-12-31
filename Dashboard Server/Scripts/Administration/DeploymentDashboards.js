@@ -388,15 +388,15 @@ function getDeploymentDashboardGrid() {
         toolbarSettings: { showToolbar: false, toolbarItems: [ej.Grid.ToolBarItems.Search] },
         searchSettings: { fields: ["DeploymentDashboardName", "CategoryName", "Name", "Status"], key: "", ignoreCase: false },
         columns: [
-            { field: 'DeploymentDashboardName', headerText: 'Name', width: 120, allowFiltering: true, allowSorting: false, allowGrouping: true },
-            { field: 'CategoryName', headerText: 'Category', width: 120, allowFiltering: true, allowSorting: true, allowGrouping: true },
-            { field: 'Name', headerText: 'Dashboard', templateID: "#dashboard-template", type: "string", width: 100, allowFiltering: false, allowSorting: true, allowGrouping: true },
-            { field: 'IsDashboardLocked', templateID: "#locked-template-dashboard", headerText: 'Edit Dashboard', width: 80, allowFiltering: false, allowSorting: true, allowGrouping: true },
-            { field: 'IsDatasourceLocked', templateID: "#locked-template-datasource", headerText: 'Edit Datasource', width: 80, allowFiltering: false, allowSorting: true, allowGrouping: true },
+            { field: 'DeploymentDashboardName', headerText: '[[[Name]]]', width: 120, allowFiltering: true, allowSorting: false, allowGrouping: true },
+            { field: 'CategoryName', headerText: '[[[Category]]]', width: 120, allowFiltering: true, allowSorting: true, allowGrouping: true },
+            { field: 'Name', headerText: '[[[Dashboard]]]', templateID: "#dashboard-template", type: "string", width: 100, allowFiltering: false, allowSorting: true, allowGrouping: true },
+            { field: 'IsDashboardLocked', templateID: "#locked-template-dashboard", headerText: '[[[Edit Dashboard]]]', width: 80, allowFiltering: false, allowSorting: true, allowGrouping: true },
+            { field: 'IsDatasourceLocked', templateID: "#locked-template-datasource", headerText: '[[[Edit Datasource]]]', width: 80, allowFiltering: false, allowSorting: true, allowGrouping: true },
             {
                 template: true,
                 allowSorting: false,
-                headerText: 'Action',
+                headerText: '[[[Action]]]',
                 templateID: "#actionstemplate",
                 width: 60,
                 allowFiltering: false

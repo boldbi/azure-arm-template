@@ -16,7 +16,6 @@
     @Scripts.Render("~/scripts/system-configuration")
     <script src="~/signalr/hubs"></script>
 
-
     <script>
         var setSystemSettingsUrl = "@Url.Action("AddTenant", "ServerConfiguration")";
         var connectDatabaseUrl = "@Url.Action("ConnectDatabaseForServer", "ServerConfiguration")";
@@ -27,6 +26,7 @@
         var generatePostgreSqlDatabaseUrl = "@Url.Action("GeneratePostgreSqlDatabase", "ServerConfiguration")";
         var getAllDatabaseUrl = "@Url.Action("GetAllDatabase", "ServerConfiguration")";
         var checkTableExistsUrl = "@Url.Action("CheckTableAlreadyExistsForServer", "ServerConfiguration")";
+        var checkTenantIdentifierExistUrl = "@Url.Action("CheckTenantNameIdentifierExist", "TenantsManagement")";
         var storageType = "@ViewBag.StorageType";
         var systemSetting =  @Html.Raw(Json.Encode(ViewBag.systemSetting));
         var blobExist = "@Url.Action("IsBlobExists", "ServerConfiguration")";
@@ -36,9 +36,13 @@
         var dataConnectorsCount = "@CloudAppConfig.DataConnectorsCount";
         var isBoldBI = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldBI.DisplayName)".toLowerCase() == "true";
         var storageUrl = "@Url.Content(HttpRuntime.AppDomainAppVirtualPath + "/Content/images/" + GlobalAppSettings.Branding + "/application/file-storage-image.svg")";
+        var serverDbImageUrl = "@Url.Content(HttpRuntime.AppDomainAppVirtualPath + "/Content/images/" + GlobalAppSettings.Branding + "/application/server-dashboard-setup.svg")";
         var isAzureApplication = ("@ViewBag.IsAzureApplication".toLowerCase() === "true");
         var isBoldReports = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldReports.DisplayName)".toLowerCase() == "true";
         var selfHosted = ("@ViewBag.selfHosted".toLowerCase() === "true");
+        var boldReportsUrl = "@CloudAppConfig.InternalAppReportUrl/@CloudAppConfig.TenantIdentifierPrefix/";
+        var boldBIUrl = "@CloudAppConfig.InternalAppBIUrl/@CloudAppConfig.TenantIdentifierPrefix/";
+        var helpUrl = "@(helpUrl + "?id=")";
         $(function () {
             // Declare a proxy to reference the hub.
             var statusTracker = $.connection.progressHub;
@@ -55,7 +59,8 @@
             $("#blob-storage-form").hide();
             $("#system-settings-filestorage-container").hide();
             $('#auth-type-dropdown').removeClass("hide").addClass("show");
-            $("#system-settings-db-selection-container").slideDown("slow");
+            $("#system-settings-db-selection-container").hide();
+            $("#system-settings-tenant-container").show();
             if (configuredDatabaseSettings != undefined && configuredDatabaseSettings != null) {
                 var serverType = "@((DatabaseType)ViewBag.ConfiguredDatabaseDetails.ServerType)";
                 switch (serverType) {
@@ -86,6 +91,18 @@
                         $("#txt-password-db").val(configuredDatabaseSettings.Password);
                         break;
 
+                    case "MySQL":
+                        $('#auth-type-dropdown, #port-number-dropdown').removeClass("show").addClass("hide");
+                        $("#mysql-odbc-dropdown").removeClass("hide").addClass("show");
+                        $("#database-type").val(serverType).selectpicker("refresh").trigger("change");
+                        $("#mysql-odbc-dsn").val(configuredDatabaseSettings.DSN).selectpicker("refresh").trigger("change");
+                        $("#txt-servername").val(configuredDatabaseSettings.ServerName);
+                        $("#txt-login").attr("disabled", false);
+                        $("#txt-password-db").attr("disabled", false);
+                        $("#txt-login").val(configuredDatabaseSettings.UserName);
+                        $("#txt-password-db").val(configuredDatabaseSettings.Password);
+                        break;
+
                     case "MSSQLCE":
                         $("#database-type").val(serverType).selectpicker("refresh").trigger("change");
                         break;
@@ -93,7 +110,36 @@
 
                 configuredDatabaseSettings = null;
             }
+
+            var sitenameText = isBoldBI ? "Bold BI Enterprise Dashboards" : "Bold Reports Enterprise Reporting";
+            $("#txt-site-name").val(sitenameText);
+            $("#txt-site-identifier").val('site1');
+            $(".site-default-text").html("site1");
+            $(".site-full-url").attr("data-content", $(".site-base-url").text() + $(".site-default-text").text());
+
             
+
+            $("[data-toggle='popover']").popover({
+                container: '#system-settings-tenant-container',
+                trigger: 'hover',
+                addClass: 'tenant-url'
+            });
+
+            $(".site-full-url").hover(function () {
+                $("#system-settings-tenant-container .arrow").css("left", "50%");
+                $("#system-settings-tenant-container .popover").css("left", "0");
+            });
+
+            $(document).on("keyup", "#txt-site-identifier", function (event) {
+                if (isBoldReports) {
+                    $(".site-default-text").html("").html($(this).val());
+                }
+                else if (isBoldBI) {
+                    $(".site-default-text").html("").html($(this).val());
+                }
+
+                $(".site-full-url").attr("data-content", $(".site-base-url").text() + $(".site-default-text").text());
+            });
 
             $(document).click(function (e) {
                 if (e.target.id != "info-icon") {
@@ -124,7 +170,7 @@
             <div id="system-settings-general" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7" id="image-parent-container">
                     <div class="image-container">
-                        <img class="startup-image" src="@Url.Content(HttpRuntime.AppDomainAppVirtualPath + "/Content/images/" + appBranding + "/application/server-dashboard-setup.svg")" />
+                        <img class="startup-image image-con-part" src="@Url.Content(HttpRuntime.AppDomainAppVirtualPath + "/Content/images/" + appBranding + "/application/site-name-configuration.svg")"/>
                         <div class="startup-content">
                             @if (ViewBag.IsAzureApplication)
                             {
@@ -134,11 +180,26 @@
                             {
                                 <span class="first-content">[[[Step 4: Let’s configure your site]]]</span>
                             }
-                            <span class="second-content">[[[This is where we store your ]]]@item,[[[ users, and their access permissions.]]]</span>
-                            <a id="help-link" href="@(helpUrl + (GlobalAppSettings.BrandingDisplayName == AppBranding.BoldBI.DisplayName ? "?id=7" : "?id=4023"))" target="_blank">[[[Need Help?]]]</a>
+
+                            @if (appBranding == AppBranding.BoldBI.Identifier)
+                            {
+                                <span class="second-content site-description">
+                                    Bold BI [[[multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="second-content site-description">
+                                    Bold Reports [[[multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]
+                                </span>
+                            }
+
+
+                            <a id="help-link" href='@(helpUrl.TrimEnd('/') + "?id=4045")' target="_blank">[[[Need Help?]]]</a>
                         </div>
                     </div>
                 </div>
+                @Html.Partial("_TenantConfiguration")
                 @Html.Partial("_DatabaseConfiguration")
                 @Html.Partial("_FileStorage")
             </div>

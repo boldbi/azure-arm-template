@@ -186,6 +186,44 @@ function onPictureCropEnd(coordinates) {
     $("input[name=width]").val(coordinates.w);
 }
 
+function saveModelLanguage() {
+    ShowWaitingProgress("#content-area", "show");
+    $.ajax({
+        type: "POST",
+        url: dataLanguageUrl,
+        data: { modelLanguage: $("#model-language").val() },
+        success: function (result) {
+            ShowWaitingProgress("#content-area", "hide");
+            if (result.Status) {
+                SuccessAlert(window.Server.App.LocalizationContent.UpdateProfile, result.Message, 7000);
+            } else {
+                WarningAlert(window.Server.App.LocalizationContent.UpdateProfile, result.Message, 7000);
+            }
+            $("#user-model-dropdown-container").removeClass("data-language-cloud");
+            $("#model-language").attr("disabled", true);
+            $("#cancel-model-language").hide();
+            $("#save-model-language").hide();
+            $("#edit-model-language").show();
+        }
+    });
+}
+
+$(document).on("click", "#edit-model-language", function (e) {
+    $("#user-model-dropdown-container").addClass("data-language-cloud");
+    $("#model-language").attr("disabled", false).selectpicker("refresh");
+    $("#edit-model-language").hide();
+    $("#cancel-model-language").show();
+    $("#save-model-language").show();
+});
+
+$(document).on("click", "#cancel-model-language", function (e) {
+    $("#user-model-dropdown-container").removeClass("data-language-cloud");
+    $("#model-language").attr("disabled", true);
+    $("#cancel-model-language").hide();
+    $("#save-model-language").hide();
+    $("#edit-model-language").show();
+});
+
 $(document).on("click", "#edit", function (e) {
     var isAdUser = $("#is-aduser").html().toLowerCase();
     $("#edit,#group-div").hide();

@@ -1,4 +1,4 @@
-﻿@model NotificationSettings
+﻿﻿@model NotificationSettings
 @{
     var userDetail = (User)ViewBag.UserDetail;
     var isWindowsAdUser = (DirectoryType)userDetail.DirectoryTypeId == DirectoryType.WindowsAD;
@@ -9,16 +9,15 @@
     var tenantHomePage = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/homepage";
     var idpUrl = @CloudAppConfig.IdPUrl;
 }
-
 @section styles{
     @Styles.Render("~/Styles/profile")
 }
 @section scripts{
     @Scripts.Render("~/Scripts/profile")
-
     <script type="text/javascript">
         var identityProviderResourceUrl = "@GlobalAppSettings.SystemSettings.CDNLink";
         var updateprofilepictureUrl = "@Url.Action("updateprofilepicture", "User")";
+        $(".edit-profile-field").attr("value", "updateUserProfileUrl");
         var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
         var avatarUrl = "@Url.Action("Avatar", "User")";
         var updateUserProfileUrl = "@Url.Action("UpdateUserProfile", "User")";
@@ -99,44 +98,42 @@
                         {
                             <a href="@Url.Action("EditPassword", "User")" class="link-button pull-right edit-password" title="">[[[Change password]]]</a>
                         }
-
                         <a href="@tenantHomePage" class="link-button pull-right" title="">[[[My Sites]]]</a>
-
                         @*<div class="pull-right">
-                        <button class="dropdown-toggle primary-button" data-toggle="dropdown">
-                            <span>Manage Account </span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" id="dropdown-options">
-                            @if (!ViewBag.IsAdUser && userDetail.DirectoryTypeId != DirectoryType.Syncfusion && returnUrl == null)
-                            {
-                                <li id="close-my-account" onclick="location.href='@Url.Action("EditPassword","User")'">
-                                    <a href="javascript:void(0)">
-                                        <span>Change password</span>
-                                    </a>
-                                </li>
-                            }
-                            @if (!DeviceDetection.IsMobile)
-                            {
-                                <li onclick="PrepareMyData()">
-                                    <a href="javascript:void(0)">
-                                        <span>Download Data</span>
-                                    </a>
-                                </li>
-                                <li id="close-my-account" onclick="location.href='@Url.Action("DeleteUserData", "User")'">
-                                    <a href="javascript:void(0)">
-                                        <span>Delete Account</span>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>*@
+                                <button class="dropdown-toggle primary-button" data-toggle="dropdown">
+                                    <span>Manage Account </span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" id="dropdown-options">
+                                    @if (!ViewBag.IsAdUser && userDetail.DirectoryTypeId != DirectoryType.Syncfusion && returnUrl == null)
+                                    {
+                                        <li id="close-my-account" onclick="location.href='@Url.Action("EditPassword","User")'">
+                                            <a href="javascript:void(0)">
+                                                <span>Change password</span>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (!DeviceDetection.IsMobile)
+                                    {
+                                        <li onclick="PrepareMyData()">
+                                            <a href="javascript:void(0)">
+                                                <span>Download Data</span>
+                                            </a>
+                                        </li>
+                                        <li id="close-my-account" onclick="location.href='@Url.Action("DeleteUserData", "User")'">
+                                            <a href="javascript:void(0)">
+                                                <span>Delete Account</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>*@
                     </div>
                 }
             </div>
             <div class="profile-section col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding admin-page-body">
                 <div class="img-view-holder col-lg-12 col-md-12 col-sm-10 col-xs-12" style="border:0px">
-                    <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@userDetail.DisplayName" data-image-size="120" style ="border-radius:50%" data-toggle="tooltip" title="@userDetail.DisplayName" data-placement="top" data-url="@idpUrl" style="margin-top:30px"></div>
+                    <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@userDetail.DisplayName" data-image-size="120" style="border-radius:50%" data-toggle="tooltip" title="@userDetail.DisplayName" data-placement="top" data-url="@idpUrl" style="margin-top:30px"></div>
                     <span class="su su-edit-inverse profile-picture-edit-button" id="avatar-button-click" title="[[[Edit profile picture]]]"></span>
                     <span class="su su-delete profile-picture-edit-button" id="avatar-delete-click" title="[[[Delete profile picture]]]"></span>
                 </div>
@@ -146,11 +143,11 @@
                 <div id="edit-profile-form-div" class="col-sm-6 col-xs-12 no-padding margin-top10">
                     <form class="form-horizontal edit-profile-form" autocomplete="off">
                         @*<div class="form-group no-padding">
-                        <label class="label-panel text-right app-textbox-label app-textbox-label">Username</label>
-                        <div class="col-sm-5 col-xs-12 group-list">
-                            @Html.TextBox("user-name", userDetail.UserName, new { id = "user-name", @class = "form-control content-size disable-content", disabled = "disabled" })
-                        </div>
-                    </div>*@
+                                <label class="label-panel text-right app-textbox-label app-textbox-label">Username</label>
+                                <div class="col-sm-5 col-xs-12 group-list">
+                                    @Html.TextBox("user-name", userDetail.UserName, new { id = "user-name", @class = "form-control content-size disable-content", disabled = "disabled" })
+                                </div>
+                            </div>*@
                         <div class="form-group no-padding line-spacing">
                             <label class="label-panel text-right app-textbox-label">[[[First name]]]<span class="mandatory">*</span> </label>
                             <div class="col-sm-5 col-xs-12 group-list">
@@ -184,13 +181,11 @@
                         </div>
                     </form>
                 </div>
-
                 <div id="edit-button" class="col-sm-3 col-xs-12 no-padding">
                     @if (userDetail.DirectoryTypeId == DirectoryType.Local)
                     {
                         <input type="button" class="secondary-button pull-right" id="edit" title="" value="[[[Edit profile]]]">
                     }
-
                     @if (returnUrl != null)
                     {
                         <a href="@returnUrl" class="link-button pull-right margin10" id="cancel-link-button" style="display: none;">[[[Cancel]]]</a>
@@ -200,14 +195,12 @@
                     {
                         <input type="button" class="secondary-button pull-right popup-close" title="" id="cancel-button" style="display: none;" value="[[[Cancel]]]">
                     }
-
                     <input type="button" class="primary-button pull-right inactive-content" id="save-button" title="" onclick="SaveProfile()" value="[[[Save]]]">
                 </div>
                 <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3 no-padding" id="message">
                     <h5 id="success-message"></h5>
                 </div>
             </div>
-
             @if (userDetail.DirectoryTypeId != DirectoryType.Local)
             {
                 <div id="azure-user-info" class="col-xs-12 no-padding">[[[* Editing user profile except the picture is not currently supported for Azure Active Directory, Office 365, database, OAuth, OpenID Connect and Syncfusion.com accounts.]]]</div>
@@ -215,7 +208,6 @@
             @*@Html.Partial("_UserNotificationPreference")*@
             <div class="profile-section col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
                 <div class="title col-lg-12 col-md-12 col-sm-12 col-xs-12 sub-section-heading">[[[Account Preferences]]]</div>
-
                 @if (CloudAppConfig.IsSelfHosted)
                 {
                     <div class="form-group col-xs-8 col-lg-8 col-md-8 col-sm-8">
@@ -234,27 +226,31 @@
                         </div>
                     </div>
                 }
-                <div class="form-group col-xs-8 col-lg-8 col-md-8 col-sm-8">
-                    <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3 app-textbox-label language-label">
-                        @Html.Label("model-language", "[[[Data language]]]", new { @class = "col-xs-10 no-padding" })
-                        <div class="col-xs-1">
-                            <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
-                            <div class="col-xs-2 dropdown-menu common-tooltip-info" role="menu">
-                                [[[The language used in date, number, and currency formats.]]]
+
+                @if (ViewBag.HaveBILicense)
+                {
+                    <div class="form-group col-xs-8 col-lg-8 col-md-8 col-sm-8">
+                        <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3 app-textbox-label language-label">
+                            @Html.Label("model-language", "[[[Data language]]]", new { @class = "col-xs-10 no-padding" })
+                            <div class="col-xs-1">
+                                <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                <div class="col-xs-2 dropdown-menu common-tooltip-info" role="menu">
+                                    @(ViewBag.HaveBILicense && ViewBag.HaveReportsLicense ? "[[[The language used in date, number, and currency formats(Applicable for Bold BI only).]]]" : "[[[The language used in date, number, and currency formats.]]]")
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="dropdown col-xs-5 no-padding language-dropdown" id="model-language-conainer">
-                        @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { id = "model-language", @class = "selectpicker form-control disable-content", disabled = "disabled", data_live_search = "true", data_size = 10 })
-                        <input type="hidden" id="model-lang_tag" value="@ViewBag.UserModelPreferenceLanguage">
-                    </div>
-                </div>
+                    
+						<div class="dropdown col-xs-5 no-padding language-dropdown" id="model-language-conainer">
+							@Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { id = "model-language", @class = "selectpicker form-control disable-content", disabled = "disabled", data_live_search = "true", data_size = 10 })
+							<input type="hidden" id="model-lang_tag" value="@ViewBag.UserModelPreferenceLanguage">
+						</div>
+					</div>
+                }
                 <div id="edit-button" class="col-sm-3 col-xs-12 no-padding">
                     @if (userDetail.DirectoryTypeId == DirectoryType.Local)
                     {
                         <input type="button" class="secondary-button pull-right" id="edit-language" title="" value="[[[Edit preference]]]">
                     }
-
                     @if (returnUrl != null)
                     {
                         <a href="@returnUrl" class="link-button pull-right margin10" id="language-cancel-link-button" style="display: none;">[[[Cancel]]]</a>
@@ -264,7 +260,6 @@
                     {
                         <input type="button" class="secondary-button pull-right" title="" id="language-cancel-button" style="display: none;" value="[[[Cancel]]]">
                     }
-
                     <input type="button" class="primary-button pull-right inactive-content" id="language-save-button" title="" onclick="SaveUserPreference()" value="[[[Save]]]">
                 </div>
                 <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3 no-padding" id="message">
@@ -283,13 +278,11 @@
                 <span class="PopupTitle">[[[Download Data]]]</span>
                 <a href="javascript:void(0);" title="Close" class="PopupClose" onclick="closeDownloadDataActionPopup()"><span class="su su-close"></span></a>
             </div>
-
             <div class="dialog-body col-xs-12 no-padding" id="download-data-form">
                 <div>
                     <div class="col-xs-12 padding20 no-bottom-padding" id="download-data-content">
                         <div class="col-xs-12 no-padding">[[[Your download has been started. Please use the below password to extract the archive.]]]</div>
                     </div>
-
                     <div class="col-xs-12 padding20 no-bottom-padding" id="download-data-password-section">
                         <div class="col-xs-2"></div>
                         <div class="col-xs-7">
