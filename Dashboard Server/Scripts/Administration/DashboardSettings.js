@@ -7,6 +7,10 @@ $(document).ready(function () {
     if (isSelfHosted.toLowerCase() == "false") {
         $("#dashboard-settings-body").addClass("border-class");
     }
+
+    if ($("#dashboards-tab-nav").children().length == 1) {
+        $("#dashboards-tab-nav").children().hide();
+    }
     var query = window.location.search;
     if (query.contains("?tab=dashboard-settings")) {
         $('a[href="#dashboard-settings-tab"]').tab("show");

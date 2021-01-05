@@ -3,7 +3,7 @@
         var id = $(this).attr("data-id");
         var imageSize = $(this).attr("data-image-size");
         var fontSize = imageSize / 3;
-        var displayName = $(this).attr("data-display-name")
+        var displayName = $(this).attr("data-display-name");
         var type = $(this).attr("data-type");
         var idpUrl = $(this).attr("data-url");
         $(this).html("");
@@ -54,7 +54,13 @@
             $(this).css("line-height", imageSize + "px");
             var nameLetters = displayName.toUpperCase().split(" ");
             var firstCharacter = $('<span id="first-letter">');
-            firstCharacter.text(nameLetters[0].charAt(0) + nameLetters[nameLetters.length - 1].charAt(0));
+            if(nameLetters.length <= 1) {
+                firstCharacter.text(nameLetters[0].charAt(0));
+            }
+            else {
+                firstCharacter.text(nameLetters[0].charAt(0) + nameLetters[nameLetters.length - 1].charAt(0));
+            }
+			
             firstCharacter.css("font-size", fontSize + "px");
             firstCharacter.css("color", "#333");
             firstCharacter.appendTo($(this));

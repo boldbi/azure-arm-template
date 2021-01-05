@@ -22,23 +22,39 @@
     var appLogo = (globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(IconFileNames.MainLogo) || globalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : globalAppSettings.SystemSettings.MainScreenLogo;
     var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
     var navigationUrl = Url.Action("Index", "Home");
-    var dashboardPageUrl = Url.Action("Dashboards", "Dashboards");
     var widgetsPageUrl = Url.Action("Widgets", "Widgets");
-    var dataSourcesPageUrl = Url.Action("DataSources", "DataSources");
-    var schedulePageUrl = Url.Action("Schedules", "Scheduler");
-    var PublishPageUrl = Url.Action("GetPublishedItems", "Publish");
     var profilePageUrl = Url.Action("Profilepage", "User");
-    var homepagePageUrl = Server.UrlDecode(Url.Action("Homepages", "Boards"));
-    var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     var itemPermissions = ViewBag.ItemPermission as Dictionary<ItemType, bool>;
     var isItemPageRequested = (HttpContext.Current.Request.Url.AbsolutePath == "/" || HttpContext.Current.Request.Url.AbsolutePath == Url.Content("~/") || HttpContext.Current.Request.Url.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 || HttpContext.Current.Request.Url.ToString().IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 || HttpContext.Current.Request.Url.ToString().IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 || HttpContext.Current.Request.Url.ToString().IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 || HttpContext.Current.Request.Url.ToString().IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0) && !isMobile;
     var showImport = HttpContext.Current.Request.Url.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards");
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink;
     var manageSitesUrl = idPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/sites";
-    var isMaster = globalAppSettings.SystemSettings.IsMaster;
 }
 
-<aside class="menu-bar" id="app-navigation">
+<head>
+    @Scripts.Render("~/bundles/scripts/custom-ui")
+    <script>
+        var dashboardPageUrl = "@Url.Action("Dashboards", "Dashboards")";
+        var dataSourcesPageUrl = "@Url.Action("DataSources", "DataSources")";
+        var schedulePageUrl = "@Url.Action("Schedules", "Scheduler")";
+        var PublishPageUrl = "@Url.Action("GetPublishedItems", "Publish")";
+        var profilePageUrl = "@Url.Action("Profilepage", "User")";
+        var homepagePageUrl = "@Server.UrlDecode(Url.Action("Homepages", "Boards"))";
+        var slideshowPageUrl = "@Url.Action("Slideshows", "Slideshow")";
+        var adminPageUrl = "@Url.Action("Administration", "Administration")";
+        var userPageurl = "@Url.Action("Index", "UserManagement")";
+        var groupPermissionUrl = "@Url.Action("grouppermission", "permission")";
+        var userPermissionUrl = "@Url.Action("userpermission", "permission")";
+        var currentUrlLocalPath = "@HttpContext.Current.Request.Url.LocalPath.ToLower()";
+        var isMobile = @Json.Encode(isMobile);
+        var isImageRequest = @Json.Encode(isImageRequest);
+        var isAdmin = @Json.Encode(Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]));
+        var customUI = @Html.Raw(Json.Encode(globalAppSettings.SystemSettings.CustomUI));
+        var isMaster = @Json.Encode(globalAppSettings.SystemSettings.IsMaster);
+    </script>
+</head>
+
+<aside class="menu-bar" id="app-navigation" ng-controller="CustomMenuCtrl">
     <nav id="main-nav" class="sf-nav-group">
         <a id="mobile-profile-picture" href="@profilePageUrl" class="mobile-visible">
             <div class="mobile-display-name">@displayName</div>
@@ -55,14 +71,14 @@
 
             </li>
             @*<li class="hidden mobile-hidden @(currentUrlLocalPath == "/" || currentUrlLocalPath == "HttpRuntime.AppDomainAppVirtualPath/" ? "active" : string.Empty )">
-                    <a class="sf-nav-link" href="@Url.Action("Index", "Home")">
-                        <span class="menu-icon-container">
-                            <i class="su su-nav-datasource"></i>
-                        </span>
-                        <i class="su su-nav-home"></i>
-                        <span class="menu-label">[[[Home]]]</span>
-                    </a>
-                </li>*@
+            <a class="sf-nav-link" href="@Url.Action("Index", "Home")">
+                <span class="menu-icon-container">
+                    <i class="su su-nav-datasource"></i>
+                </span>
+                <i class="su su-nav-home"></i>
+                <span class="menu-label">[[[Home]]]</span>
+            </a>
+        </li>*@
 
             @if (!ServerAppConfig.IsSelfHosted || (ServerAppConfig.IsSelfHosted && isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard]))
             {
@@ -75,69 +91,39 @@
                 </li>
             }
 
-            <li class="sf-nav-item @(currentUrlLocalPath.IndexOf(dashboardPageUrl, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
-                <a class="sf-nav-link" href="@dashboardPageUrl">
-                    <span class="menu-icon-container">
-                        <i class="su su-nav-dashboard"></i>
-                    </span>
-                    <span class="menu-label">[[[Dashboards]]]</span>
-                </a>
-            </li>
-            @if (!isMobile)
-            {
-                <li class="mobile-hidden sf-nav-item @(currentUrlLocalPath.IndexOf(dataSourcesPageUrl, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
-                    <a class="sf-nav-link" href="@dataSourcesPageUrl">
-                        <span class="menu-icon-container">
-                            <i class="su su-nav-datasource"></i>
-                        </span>
-
-                        <span class="menu-label">[[[Data Sources]]]</span>
-                    </a>
-                </li>
-                <li class="mobile-hidden sf-nav-separator">
-                </li>
-                    <li class="mobile-hidden sf-nav-item @(currentUrlLocalPath.IndexOf(homepagePageUrl, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
-                        <a class="sf-nav-link" href="@homepagePageUrl">
+            <li ng-repeat="items in menuList | orderBy:'Order' | filter:{ShowMenu:true} | filter: {Condition: true} as result" ng-init="count()" ng-if="items.Condition">
+                <ul class="default-lists" style="padding: 0; display:none">
+                    <li class="mobile-hidden sf-nav-separator" ng-show="{{currentCount == '3' || currentCount == '7' && result.length < 9 }}"></li>
+                    <li class="{{items.IsSelected}} {{items.MobileClassName}}" ng-class="$index > menuCount ? 'sf-nav-administration-item sf-nav-item' : 'sf-nav-item'" ng-show="{{result.length > 8 ? $index < 6 : $index < 8}}">
+                        <a class="sf-nav-link" href="{{items.OpenLink}}" target="{{items.OpenBehavior}}">
                             <span class="menu-icon-container">
-                                <i class="su su-pin"></i>
+                                <i class="{{items.ImageLink}} {{items.ImageClassName}}" ng-style="{'background-image': items.ImageClassName == 'custom-menu' ? 'url(' + items.ImageLink +')' : ''}"></i>
                             </span>
-                            <span class="menu-label">[[[Pinboards]]]</span>
+                            <span class="menu-label">{{items.Display}}</span>
                         </a>
                     </li>
-                <li class="mobile-hidden sf-nav-item @(currentUrlLocalPath.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
-                    <a class="sf-nav-link" href="@slideshowPageUrl">
-                        <span class="menu-icon-container">
-                            <i class="su su-tv"></i>
-                        </span>
-                        <span class="menu-label">[[[Slideshows]]]</span>
-                    </a>
-                </li>
-            }
-
-            <li class="sf-nav-item @(currentUrlLocalPath.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
-                <a class="sf-nav-link" href="@schedulePageUrl">
-                    <span class="menu-icon-container">
-                        <i class="su su-nav-schedule"></i>
-                    </span>
-                    <span class="menu-label">[[[Schedules]]]</span>
-                </a>
+                    <li class="sf-nav-administration-collapse-item dropup" ng-class="result.length < 9 ? 'menu-toggle' : ''" ng-if="$index > 5">
+                        <a class="dropdown-toggle mobile-hidden" data-toggle="dropdown" ng-show="{{$index == 6 && items.Condition}}">
+                            <span class="menu-icon-container">
+                                <i class="su su-dots-menu"></i>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu sub-menu" role="menu">
+                            <li ng-repeat="items in menuList | orderBy:'Order' | filter:{ShowMenu:true} | filter: {Condition: true}" class="sf-nav-item {{items.IsSelected}} {{items.MobileClassName}}" ng-if="$index > menuCount && items.Condition">
+                                <a class="sf-nav-link" href="{{items.OpenLink}}" target="{{items.OpenBehavior}}">
+                                    <span class="menu-icon-container">
+                                        <i class="{{items.ImageLink}} {{items.ImageClassName}}" ng-style="{'background-image': items.ImageClassName == 'custom-menu' ? 'url(' + items.ImageLink +')' : ''}"></i>
+                                    </span>
+                                    <span class="menu-label">{{items.Display}}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </li>
-            @if (!isMobile && isMaster)
-            {
-                <li class="mobile-hidden sf-nav-item @(currentUrlLocalPath.IndexOf(PublishPageUrl, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
-                    <a class="sf-nav-link" href="@PublishPageUrl">
-                        <span class="menu-icon-container">
-                            <i class="su su-publish"></i>
-                        </span>
-                        <span class="menu-label">[[[Publish]]]</span>
-                    </a>
-                </li>
-            }
             @if (!ServerAppConfig.IsSelfHosted)
             {
-                <li class="mobile-visible sf-nav-separator">
-
-                </li>
+                <li class="mobile-visible sf-nav-separator"></li>
                 <li class="mobile-visible sf-nav-item request-concierge-support">
                     <span class="sf-nav-link sf-menu-option-link">
                         <span class="menu-icon-container">
@@ -147,54 +133,6 @@
                     </span>
                 </li>
             }
-            @if (!isMobile && !isImageRequest && HttpContext.Current.Session["IsAdmin"] != null && Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]))
-            {
-                <li class="mobile-hidden sf-nav-separator">
-
-                </li>
-                <li class="mobile-hidden sf-nav-administration-collapse-item dropup">
-                    <a class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="menu-icon-container">
-                            <i class="su su-dots-menu"></i>
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu sub-menu" role="menu">
-                        <li class="sf-nav-item @(currentUrl.IndexOf(Url.Action("Administration", "Administration"), StringComparison.CurrentCultureIgnoreCase) > 0 && currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) < 0 && currentUrl.IndexOf(Url.Action("grouppermission", "permission"), StringComparison.CurrentCultureIgnoreCase) < 0 && currentUrl.IndexOf(Url.Action("userpermission", "permission"), StringComparison.CurrentCultureIgnoreCase) < 0 ? "active" : string.Empty)">
-                            <a class="sf-nav-link" href="@Url.Action("Administration", "Administration")">
-                                <span class="menu-icon-container">
-                                    <i class="su su-nav-settings"></i>
-                                </span>
-                                <span class="menu-label">[[[Settings]]]</span>
-                            </a>
-                        </li>
-                        <li class="sf-nav-item @(currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(Url.Action("grouppermission", "permission"), StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(Url.Action("userpermission", "permission"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)">
-                            <a class="sf-nav-link" href="@Url.Action("Index", "UserManagement")">
-                                <span class="menu-icon-container">
-                                    <i class="su su-group"></i>
-                                </span>
-                                <span class="menu-label">[[[Users]]]</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="mobile-hidden sf-nav-item sf-nav-administration-item @(currentUrl.IndexOf(Url.Action("Administration", "Administration"), StringComparison.CurrentCultureIgnoreCase) > 0 && currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) < 0 && currentUrl.IndexOf(Url.Action("grouppermission", "permission"), StringComparison.CurrentCultureIgnoreCase) < 0 && currentUrl.IndexOf(Url.Action("userpermission", "permission"), StringComparison.CurrentCultureIgnoreCase) < 0 ? "active" : string.Empty)">
-                    <a class="sf-nav-link" href="@Url.Action("Administration", "Administration")">
-                        <span class="menu-icon-container">
-                            <i class="su su-nav-settings"></i>
-                        </span>
-                        <span class="menu-label">[[[Settings]]]</span>
-                    </a>
-                </li>
-                <li class="mobile-hidden sf-nav-item sf-nav-administration-item @(currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(Url.Action("grouppermission", "permission"), StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(Url.Action("userpermission", "permission"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)">
-                    <a class="sf-nav-link" href="@Url.Action("Index", "UserManagement")">
-                        <span class="menu-icon-container">
-                            <i class="su su-group"></i>
-                        </span>
-                        <span class="menu-label">[[[Users]]]</span>
-                    </a>
-                </li>
-            }
-
             <li class="li-logout mobile-visible">
                 <img data-src="@(Model +"/images/divider_dark.png")" class="upper-divider" />
                 <a class="" href="@Url.Action("logout", "accounts")">

@@ -3,6 +3,8 @@
     var isPasswordSet = !string.IsNullOrWhiteSpace(userDetail.Password) ? "Change Password" : "Set Password";
     var saveUpdate = !string.IsNullOrWhiteSpace(userDetail.Password) ? "Update" : "Save";
     var isAduser = ViewBag.IsAdUser;
+    var userId = (HttpContext.Current.User as ServerPrincipal).UserId;
+    var idPUrl = CloudAppConfig.IdPUrl.TrimEnd('/');
     var showResendButton = (userDetail.Status.ToString() == "InActive" && DateTime.UtcNow < userDetail.ActivationExpirationDate && !isAduser && GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation) ? "show" : "hide";
     var showActivationButton = (userDetail.Status.ToString() == "InActive" && !isAduser && GlobalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation) ? "show" : "hide";
     var showDropdown = (userDetail.Status.ToString() == "Active" && userDetail.UserName.ToLower() != ViewBag.LoggedUser.ToLower() && !ViewBag.isAdUser) ? "show" : "hide";

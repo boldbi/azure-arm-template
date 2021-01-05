@@ -307,8 +307,15 @@ function showSavedAttributes(name) {
         $("#custom-attribute-value").val(attribute.Value);
     }
 
+    attribute.Description = htmlDecode(attribute.Description);
     $("#custom-attribute-descrition").val(attribute.Description);
     $("#encrypt-custom-attribute").prop("checked", attribute.CanEncrypt);
+}
+
+function htmlDecode(input) {
+    var e = document.createElement('textarea');
+    e.innerHTML = input;
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
 }
 
 function removeCustomAttribute(item) {

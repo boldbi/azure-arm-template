@@ -209,9 +209,20 @@ function validateDateTimePicker() {
     var startDate = $("#start-date").data("ejDateTimePicker");
     var endDate = $("#end-date").data("ejDateTimePicker");
     var startValue = $("#start-date").data("ejDateTimePicker").getValue();
-    var mindateVal = new Date(startValue);
+    var mindateVal = "";
+    if (dateFormat == "dd/MM/yyyy") {
+        var date = startValue.split('/');
+        var dd = date[0];
+        var mm = date[1];
+        var yyyy = date[2]
+        var newdate = mm + '/' + dd + '/' + yyyy;
+        mindateVal = new Date(newdate);
+    }
+    else {
+        mindateVal = new Date(startValue);
+    }
     var formattedString = "";
-    $("#end-date").ejDateTimePicker({ minDateTime: new Date(mindateVal.getFullYear(), mindateVal.getMonth(), mindateVal.getDate()), value: new Date(startValue) });
+    $("#end-date").ejDateTimePicker({ minDateTime: new Date(mindateVal.getFullYear(), mindateVal.getMonth(), mindateVal.getDate()), value: mindateVal });
     var hours = parseInt($("#hour-difference").val());
     var mins = parseInt($("#minute-difference").val());
     mindateVal.setHours(mindateVal.getHours() + hours);

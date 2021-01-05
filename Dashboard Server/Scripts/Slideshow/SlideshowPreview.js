@@ -29,8 +29,9 @@ $(document).ready(function () {
     }
 
     var iframes = document.getElementsByTagName("iframe");
-         applyScalingFactor(iframes);
-       
+    if (applyScaling) {
+        applyScalingFactor(iframes);
+    }   
 });
 
 $(document).on('dashboardRenderComplete', function () {
@@ -211,7 +212,9 @@ $(document).on("click", "#slide-maximize", function () {
 
     setTimeout(function () {
         var iframes = document.getElementsByTagName("iframe");
-        applyScalingFactor(iframes);
+        if (applyScaling) {
+            applyScalingFactor(iframes);
+        }   
     }, 2000);
 });
 

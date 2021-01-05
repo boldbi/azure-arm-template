@@ -32,7 +32,7 @@ function handleAuthorizeMessage(addButtonObj, evt) {
     if (typeof (evt.originalEvent.data) !== "undefined" && evt.originalEvent.data.isSuccess) {
         var authDashboardUrl = location.href + "&embed_user_token=" + evt.originalEvent.data.userToken;
         history.pushState({}, "", authDashboardUrl);
-        location.href.reload();
+        location.reload();
     }
     $(window).off('message', $.proxy(handleAuthorizeMessage, window, addButtonObj));
 }

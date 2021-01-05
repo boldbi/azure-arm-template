@@ -1,4 +1,9 @@
-﻿<div class="system-settings-page-container col-lg-5 col-md-5 col-sm-5 col-xs-5" id="system-settings-db-selection-container">
+﻿@using System.Web.Configuration;
+@{
+    var isAzureApplication = string.IsNullOrEmpty(WebConfigurationManager.AppSettings["IsAzureApplication"]) ? false : Convert.ToBoolean(WebConfigurationManager.AppSettings["IsAzureApplication"]);
+}
+
+<div class="system-settings-page-container col-lg-5 col-md-5 col-sm-5 col-xs-5" id="system-settings-db-selection-container">
     <div class="system-settings-db-selection-field">
         <input type="hidden" name="Ums_table_prefix" id="tenant-table-prefix" value="@DbTablePrefixes.DashboardServer" />
 
@@ -16,7 +21,16 @@
                         {
                             <option class="no-margin-dropdown-ul cursor-class" title="[[[Please install Npgsql client library to connect with PostgreSQL database.]]]" value="PostgreSQL" disabled>[[[Postgre SQL]]]</option>
                         }
-                        <option class="no-margin-dropdown-ul hide" value="MSSQLCE">[[[Embedded SQL CE]]]</option>
+
+                        @if (HttpContext.Current.Request.QueryString.Count != 0 && HttpContext.Current.Request.QueryString["actionType"].ToString() == "edit")
+                        {
+                            <option class="no-margin-dropdown-ul hide" value="MSSQLCE">[[[Embedded SQL CE]]]</option>
+                        }
+
+                        @if (!isAzureApplication)
+                        {
+                            <option class="no-margin-dropdown-ul my-sql-dropdown" value="MySQL">[[[MySQL]]]</option>
+                        }
                     </select>
                 </div>
             </div>
@@ -25,25 +39,48 @@
             <span>[[[This embedded SQL CE can be use only for testing purpose. Please choose the different database if you want to setup the application for production use.]]]</span>
         </div>
         <form id="db-content-holder" class="col-md-12 no-padding display-none content-display text-wrap show-sql-content" autocomplete="off">
-            <div class="txt-holder center-align">
-                <label class="field-label">[[[Server name]]]</label>
-                <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Server name]]]" />
-                <span class="startup-validation validation-txt-errors"></span>
+            <div id="server-name-container" class="show">
+                <div class="txt-holder center-align">
+                    <label class="field-label">[[[Server name]]]</label>
+                    <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Server name]]]" />
+                    <span class="startup-validation validation-txt-errors"></span>
+                </div>
             </div>
-            <div class="txt-holder center-align">
-                <div id="auth-type-dropdown" class="hide">
+            <div id="auth-type-dropdown" class="hide">
+                <div class="txt-holder center-align">
+
                     <label class="field-label">[[[Authentication type]]]</label>
-                    <select id="check-windows" class="selectpicker db-fields  full-width" data-width="100%">
+                    <select id="check-windows" class="selectpicker db-fields full-width" data-width="100%">
                         <option value="sql">[[[SQL authentication]]]</option>
                         <option value="windows">[[[Windows authentication]]]</option>
                     </select>
                 </div>
-                <div id="port-number-dropdown" class="hide">
+            </div>
+            <div id="port-number-dropdown" class="hide">
+                <div class="txt-holder center-align">
                     <label class="field-label">[[[Port number]]]</label>
                     <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Port number]]]" />
                     <span class="startup-validation validation-txt-errors"></span>
                 </div>
             </div>
+
+            <div id="mysql-odbc-dropdown" class="hide">
+                <input id="dsn-count" value="@ViewBag.DsnList.Count" type="hidden">
+                <div class="txt-holder center-align">
+                    <label class="field-label">[[[ODBC Connection]]]</label>
+                    <select id="mysql-odbc-dsn" name="mySqlDsn" class="selectpicker system-settings-startup-page-fields db-fields" data-width="100%" title="[[[Select MySQL ODBC DSN]]]">
+                        @if (ViewBag.DsnList != null)
+                        {
+                            for (var dsn = 0; dsn < ViewBag.DsnList.Count; dsn++)
+                            {
+                                <option id="dsn-count" class="no-margin-dropdown-ul" value="@ViewBag.DsnList[dsn]">@ViewBag.DsnList[dsn]</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <span class="startup-validation validation-txt-errors"></span>
+            </div>
+
             <div class="txt-holder center-align">
                 <label class="field-label">[[[Username]]]</label>
                 <input type="text" id="txt-login" name="username" class="form-control system-settings-startup-page-fields db-fields" placeholder="[[[Username]]]" />
@@ -88,7 +125,7 @@
                 <label for="secure-sql-connection" class="">[[[Enable SSL]]]</label>
             </div>
             <label id="no-need-datastore">[[[Data Store not available for Bold Reports]]]</label>
-            <div class="material-checkbox selfhosted skip-intermediate-db-container">
+            <div class="material-checkbox selfhosted skip-intermediate-db-container @(GlobalAppSettings.IsAzureApplication() ? "hide" : string.Empty)">
                 @Html.CheckBox("skip-intermediate-db", false)
                 <label for="skip-intermediate-db" class="">[[[I will configure the data store later.]]]</label>
             </div>

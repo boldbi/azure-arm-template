@@ -52,6 +52,7 @@
         var passwordFailureMessage = "@isPasswordUpdateFailure";
         var userPreferencesuccessMessage = "@isUserPreferenceSuccess";
         var userPreferenceFailureMessage = "@isUserPreferenceFailure";
+        var dataLanguageUrl = "@Url.Action("SaveDataLanguage", "User")";
 
         window.onload = function (e) {
             if (successMessage.toLowerCase() === "true" && successMessage != null) {
@@ -219,105 +220,122 @@
                 <div id="azure-user-info" class="col-xs-12 no-padding">[[[* Editing user profile except the picture is not currently supported for Azure Active Directory, Windows Active Directory, Office 365, database, OAuth and OpenID Connect accounts.]]]</div>
             }
 
-                <div class="profile-section account-preference-section-div col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin admin-page-body">
-                    <input type="hidden" class="page-title" data-page="ACCOUNT PREFERENCE">
-                    <div class="account-preference-heading-section col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding" id="section-heading">[[[Account Preferences]]]</div>
-                        @if (globalAppSettings.SystemSettings.IsSystemLanguagePreference)
-                        {
-                            <p class="note-content col-xs-12 no-padding text-warning">
-                                [[[* Some settings are managed by your administrator.]]]
-                            </p>
-                        }
-                    </div>
-                    @if (ServerAppConfig.IsSelfHosted)
-                    {
-                        <div class="account-preference-table col-sm-8 col-xs-12" cellpadding="20">
-                            <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 no-padding line-spacing">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 no-padding">
-                                    <div class="col-sm-5 text-right no-padding user-language-container">
-                                        <label class="col-xs-11 no-padding">[[[Application language]]]</label>
-                                        <div class="user-language-info-tag">
-                                            <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
-                                            <div class="col-xs-2 dropdown-menu common-tooltip-info language-tooltip-info" role="menu">
-                                                [[[The language used in the application user interface (such as menu items, dialog boxes, toolboxes, and more).]]]
-                                            </div>
-                                        </div>
+        <div class="profile-section account-preference-section-div col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin admin-page-body">
+            <input type="hidden" class="page-title" data-page="ACCOUNT PREFERENCE">
+            <div class="account-preference-heading-section col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding" id="section-heading">[[[Account Preferences]]]</div>
+                @if (globalAppSettings.SystemSettings.IsSystemLanguagePreference)
+                {
+                    <p class="note-content col-xs-12 no-padding text-warning">
+                        [[[* Some settings are managed by your administrator.]]]
+                    </p>
+                }
+            </div>
+            @if (ServerAppConfig.IsSelfHosted)
+            {
+                <div class="account-preference-table col-sm-8 col-xs-12" cellpadding="20">
+                    <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 no-padding line-spacing">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 no-padding">
+                            <div class="col-sm-5 text-right no-padding user-language-container">
+                                <label class="col-xs-11 no-padding">[[[Application language]]]</label>
+                                <div class="user-language-info-tag">
+                                    <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="col-xs-2 dropdown-menu common-tooltip-info language-tooltip-info" role="menu">
+                                        [[[The language used in the application user interface (such as menu items, dialog boxes, toolboxes, and more).]]]
                                     </div>
-                                    <div class="dropdown col-xs-4 language-group">
-                                        <div class="no-padding pull-left" id="language">
-                                            <button disabled class="btn btn-default dropdown-toggle pull-left" type="button" id="dropdown-lang" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="@nativeNameTitleCase">
-                                                <span class="lang-overflow">@nativeNameTitleCase</span>
-                                                <i class="su-dropdown-arrow arrow-margin"></i>
-                                            </button>
-                                            @{
-                                                int i;
-                                                var langs = LanguageHelpers.GetAppLanguages().OrderBy(x => x.Key).ToArray();
-                                                int cellcnt = langs.Length + 1;
-                                                int maxcols = langs.Length + 1;
-                                                for (i = 1; i < cellcnt;)
+                                </div>
+                            </div>
+                            <div class="dropdown col-xs-4 language-group">
+                                <div class="no-padding pull-left" id="language">
+                                    <button disabled class="btn btn-default dropdown-toggle pull-left" type="button" id="dropdown-lang" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="@nativeNameTitleCase">
+                                        <span class="lang-overflow">@nativeNameTitleCase</span>
+                                        <i class="su-dropdown-arrow arrow-margin"></i>
+                                    </button>
+                                    @{
+                                        int i;
+                                        var langs = LanguageHelpers.GetAppLanguages().OrderBy(x => x.Key).ToArray();
+                                        int cellcnt = langs.Length + 1;
+                                        int maxcols = langs.Length + 1;
+                                        for (i = 1; i < cellcnt;)
+                                        {
+                                            bool lastRow = i + maxcols >= cellcnt;
+                                            <ul class="@(Html.Raw((i % 2) == 0 ? "even" : "odd")) @(Html.Raw(lastRow ? "last" : "")) dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                @for (int j = 0; j < maxcols && i < cellcnt; ++i, ++j)
                                                 {
-                                                    bool lastRow = i + maxcols >= cellcnt;
-                                                    <ul class="@(Html.Raw((i % 2) == 0 ? "even" : "odd")) @(Html.Raw(lastRow ? "last" : "")) dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                        @for (int j = 0; j < maxcols && i < cellcnt; ++i, ++j)
-                                                        {
-                                                            string langtag;
-                                                            string title;
-                                                            string nativelangname;
-                                                            if (i == 0)
-                                                            {
-                                                                langtag = "";
-                                                                title = "Browser default language setting";
-                                                                nativelangname = "Auto ";
-                                                            }
-                                                            else
-                                                            {
-                                                                LanguageTag lt = langs[i - 1].Value;
-                                                                title = langtag = lt.ToString();
-                                                                nativelangname = lt.NativeNameTitleCase;
-                                                            }
-                                                        }
-                                                        @if (lastRow)
-                                                        {
-                                                            for (; i % maxcols != 0; ++i)
-                                                            {
-                                                                <li></li>
-                                                            }
-                                                        }
-                                                    </ul>
+                                                    string langtag;
+                                                    string title;
+                                                    string nativelangname;
+                                                    if (i == 0)
+                                                    {
+                                                        langtag = "";
+                                                        title = "Browser default language setting";
+                                                        nativelangname = "Auto ";
+                                                    }
+                                                    else
+                                                    {
+                                                        LanguageTag lt = langs[i - 1].Value;
+                                                        title = langtag = lt.ToString();
+                                                        nativelangname = lt.NativeNameTitleCase;
+                                                    }
                                                 }
-                                            }
-                                        </div>
-                                    </div>
+                                                @if (lastRow)
+                                                {
+                                                    for (; i % maxcols != 0; ++i)
+                                                    {
+                                                        <li></li>
+                                                    }
+                                                }
+                                            </ul>
+                                        }
+                                    }
                                 </div>
                             </div>
                         </div>
-                    }
-
-                    <div class="col-xs-8 no-padding" id="data-language-container">
-                        <div class="col-sm-5 text-right user-model-language-container">
-                            <label class="col-xs-11 no-padding user-model-language">[[[Data language]]]</label>
-                            <div class="model-language-info-tag">
-                                <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
-                                <div class="col-xs-2 dropdown-menu common-tooltip-info model-language-tooltip-info" role="menu">
-                                    [[[The language used in date, number, and currency formats.]]]
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xs-5 dropdown" id="user-model-dropdown-container">
-                            @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { @class = "selectpicker user-model-language-dropdown form-control pull-left", disabled = "disabled", data_live_search = "true", data_size = 10 })
-                        </div>
-                    </div>
-                    <div id="edit-button" class="col-sm-4 col-xs-12 no-padding">
-                        <span class="bg-info" id="id-account-link">
-                            [[[Update these details through your]]]
-                            <a hreflang="en" href="@(EarlyUrlLocalizer.IgnoreLocalizationUrlPrefix)@idpUserPreferenceUrl" id="edit-link"> @GlobalAppSettings.BrandingDisplayName [[[Account]]]</a>
-                        </span>
                     </div>
                 </div>
+            }
+
+            <div class="col-xs-8 no-padding" id="data-language-container">
+                <div class="col-sm-5 text-right user-model-language-container">
+                    <label class="col-xs-11 no-padding user-model-language">[[[Data language]]]</label>
+                    <div class="model-language-info-tag">
+                        <span class="dropdown-toggle cursor-type" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                        <div class="col-xs-2 dropdown-menu common-tooltip-info model-language-tooltip-info" role="menu">
+                            [[[The language used in date, number, and currency formats.]]]
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-5 dropdown" id="user-model-dropdown-container">
+                    @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { @class = "selectpicker user-model-language-dropdown form-control pull-left", disabled = "disabled", data_live_search = "true", data_size = 10 })
+                </div>
+            </div>
+            @if (ServerAppConfig.IsSelfHosted)
+            {
+                <div id="edit-button" class="col-sm-4 col-xs-12 no-padding">
+                    <span class="bg-info" id="id-account-link">
+                        [[[Update these details through your]]]
+                        <a hreflang="en" href="@(EarlyUrlLocalizer.IgnoreLocalizationUrlPrefix)@idpUserPreferenceUrl" id="edit-link"> @GlobalAppSettings.BrandingDisplayName [[[Account]]]</a>
+                    </span>
+                </div>
+            }
+            else
+            {
+                <div id="edit-button" class="col-sm-3 col-xs-12 no-padding">
+                    <input type="button" class="secondary-button pull-right" id="edit-model-language" title="" value="[[[Edit]]]">
+                    <input type="button" class="secondary-button pull-right popup-close" style="display: none;" title="" id="cancel-model-language" value="[[[Cancel]]]">
+                    <input type="button" class="primary-button pull-right inactive-content data-language-save" style="display: none;" id="save-model-language" title="" onclick="saveModelLanguage()" value="[[[Save]]]">
+                </div>
+                <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3 no-padding" id="message">
+                    <h5 id="success-message"></h5>
+                </div>
+            }
+        </div>
 
             <div class="profile-section profile-section-second-div col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding admin-page-body">
                 <div id="edit-profile-form-div" class="col-sm-6 col-xs-12 no-padding margin-top10">
+                    <div class="account-preference-heading-section col-lg-12 col-md-12 col-sm-12 col-xs-12 pinboards-header">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding" id="section-heading">[[[Pinboards]]]</div>
+                    </div>
                     <form class="form-horizontal edit-profile-form" autocomplete="off">
                         <div class="form-group no-padding" id="homepage-container">
                             <label class="col-xs-12 col-sm-5 col-md-6 col-lg-5 no-padding text-right top-align">

@@ -8,6 +8,8 @@
     var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
     var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
     var isMobile = DeviceDetection.IsMobile;
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var schemes = customUI != null && customUI.Profiles != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].Slideshows.Scheme).FirstOrDefault() : null;
 }
 
 @section styles{
@@ -118,25 +120,25 @@
             <div title="[[[Owner]]]">[[[Owner]]]</div>
         </script>
         <script type="text/x-jsrender" id="options">
-            <div class="dropdown">
+            <div class="dropdown @(schemes != null && !schemes.ContextMenu ? "hide" : string.Empty)">
                 <span class="dropdown-toggle option-icon" title="[[[Actions]]]" data-toggle="dropdown">
                     <span class="su su-options"> </span>
                 </span>
                 <ul class="dropdown-menu" role="menu">
-                    <li class="menu-group">
+                    <li class="menu-group @(schemes != null && !schemes.Open ? "hide" : string.Empty)">
                         <a href="{{:~slideshowUrl(Id, Name)}}" title="[[[Open]]]" target="_blank">
                             <i class="su su-open"><i class="su su-open path1"></i></i>
                             <span class="menu-text">[[[Open]]]</span>
                         </a>
                     </li>
-                    <li class="menu-group">
+                    <li class="menu-group @(schemes != null && !schemes.GetLink ? "hide" : string.Empty)">
                         <a href="javascript:void(0);" class="get-slideshow-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~slideshowUrl(Id, Name)}}" title="[[[Get Link]]]">
                             <i class="su su-link"></i>
                             <span class="menu-text">[[[Get Link]]]</span>
                         </a>
                     </li>
                     {{if CanWrite}}
-                    <li title="[[[Edit]]]">
+                    <li title="[[[Edit]]]" class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
                         <a href="javascript:void(0);" class="edit-slideshow" data-item-id="{{:Id}}" title="[[[Edit]]]">
                             <i class="su su-edit"></i>
                             <span class="menu-text">[[[Edit]]]</span>
@@ -144,7 +146,7 @@
                     </li>
                     {{/if}}
                     {{if CreatedById==@(userId) || @(Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]).ToString().ToLower()) == true}}
-                    <li class="menu-group">
+                    <li class="menu-group @(schemes != null && !schemes.Share ? "hide" : string.Empty)">
                         <a href="javascript:void(0);" class="item-permissions" data-item-id="{{:Id}}" title="[[[Sharing Permissions]]]">
                             <i class="su su-manage-permission"></i>
                             <span class="menu-text">[[[Sharing Permissions]]]</span>
@@ -152,7 +154,7 @@
                     </li>
                     {{/if}}
                     {{if CanDelete}}
-                    <li title="[[[Delete]]]">
+                    <li title="[[[Delete]]]" class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
                         <a href="javascript:void(0);" class="slideshow-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" title="[[[Delete]]]">
                             <i class="su su-delete"></i>
                             <span class="menu-text">[[[Delete]]]</span>

@@ -241,7 +241,7 @@ function beforeWidgetIconRendered(event) {
 }
 
 function beforeControlMenuOpen(args) {
-    if ($("#is_mobile").val() == "false") {
+    if ($("#is_mobile").val() == "false" && isUserAuthenticatedInCurrentTenant && !embedConfig.IsEmbedDashboard && !embedConfig.IsEmbedCode && !urlHasMultiTab) {
         var newOption = { id: "embed-widget", text: "Get Embed Code", parentId: null, sprite: "su su-embed" };
         args.menuItems.push(newOption);
     }

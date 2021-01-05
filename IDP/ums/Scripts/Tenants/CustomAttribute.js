@@ -1,6 +1,8 @@
 ﻿var isCustomAttributeBinded = false;
 var isAttributeEdit = false;
 var customAttributeInfo = "";
+var addSiteAttribute = [];
+var siteCreation = false;
 
 $(document).ready(function () {
     $("#custom-attribute-form").validate({
@@ -59,13 +61,20 @@ function isAttributeExist() {
     return !$("#custom-attribute-name").hasClass("has-error");
 }
 
-function openCustomAttributeDialog(attributeId) {
+function openCustomAttributeDialog(attributeId, name) {
     var dialogHeader = '<span class ="custom-dialog-header">' + window.TM.App.LocalizationContent.AddCustomAttribute + '</span>';
     if (!isCustomAttributeBinded) {
         var createDialogId = document.createElement("div");
         createDialogId.setAttribute("id", "custom-attribute-dialog");
-        var element = document.getElementById("content-area");
+        if (name == 'addtenant') {
+            var element = document.getElementById("popup-container");
+            siteCreation = true;
+        }
+        else {
+            var element = document.getElementById("content-area");
+        }
         element.appendChild(createDialogId);
+        $("#custom-attribute-dialog").css("height", $("#popup-container").height());
         var dialog = new ejs.popups.Dialog({
             header: dialogHeader,
             content: document.getElementById("custom-attribute-content"),
@@ -120,7 +129,7 @@ function openCustomAttributeDialog(attributeId) {
 }
 
 function showSavedAttributes() {
-    var attributeGridObj = $("#SiteAttributesGrid").data("ejGrid");
+    var attributeGridObj = siteCreation ? $("#AddSiteAttributesGrid").data("ejGrid") : $("#SiteAttributesGrid").data("ejGrid");
     customAttributeInfo = attributeGridObj.getCurrentViewData()[attributeGridObj.getIndexByRow($("tr.e-row[aria-selected *='true']"))];
     $("#custom-attribute-name").val(customAttributeInfo.Name);
     customAttributeInfo.CanEncrypt ? "" : $("#custom-attribute-value").val(customAttributeInfo.Value);
@@ -145,8 +154,14 @@ function saveCustomAttribute() {
         CreatedDate: new Date(),
         ModifiedDate: new Date()
     }
+
+    ShowWaitingProgress("#custom-attribute-dialog", "show");
+    if (siteCreation) {
+        addSiteLevelAttribute(customAttribute);
+        return;
+    }
+
     var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
-    ShowWaitingProgress("#custom-attribute-dialog", "show")
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     $.ajax({
         type: "POST",
@@ -182,7 +197,7 @@ $(document).on("keyup focusout", "#custom-attribute-name", function (e) {
     var name = $("#custom-attribute-name").val().toLowerCase().trim();
     if (e.type === "focusout") {
         if (!isEmptyOrWhitespace(name) && (isEmptyOrWhitespace(customAttributeInfo) || (!isEmptyOrWhitespace(customAttributeInfo) && customAttributeInfo.Name.toLowerCase() != name))) {
-            attributeNameCheck();
+            siteCreation ? nameCheckAtAddTenant() : attributeNameCheck();
         }
     } else {
         $("#custom-attribute-name").removeClass("has-error");
@@ -217,8 +232,12 @@ function updateCustomAttribute(attributeId) {
         CreatedDate: new Date(),
         ModifiedDate: new Date()
     }
-    var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
     ShowWaitingProgress("#custom-attribute-dialog", "show");
+    if (siteCreation) {
+        updateSiteLevelAttribute(customAttribute);
+        return;
+    }
+    var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     $.ajax({
         type: "POST",
@@ -268,10 +287,10 @@ function removeCustomAttribute(item) {
     });
 }
 
-function editCustomAttribute(item) {
+function editCustomAttribute(item, name) {
     var id = $(item).attr("data-id");
     isAttributeEdit = true;
-    openCustomAttributeDialog(id);
+    openCustomAttributeDialog(id, name);
 }
 
 function getSiteAttributes() {
@@ -316,4 +335,43 @@ function initialSiteGridCreate() {
     if (window.location.search.includes("tab=attributes")) {
         showWaitingPopup("SiteAttributesGrid");
     }
+}
+
+function addSiteLevelAttribute(customAttribute) {
+    var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
+    addSiteAttribute.push(customAttribute);
+    var siteAttributesGrid = $("#AddSiteAttributesGrid").data("ejGrid");
+    siteAttributesGrid.dataSource(addSiteAttribute);
+    siteAttributesGrid.refreshContent();
+    ShowWaitingProgress("#custom-attribute-dialog", "hide");
+    dialog[0].hide();
+}
+
+function nameCheckAtAddTenant() {
+    var attributeName = $("#custom-attribute-name").val().trim();
+    $.each(addSiteAttribute, function (index, value) {
+        if (value.Name == attributeName) {
+            $("#custom-attribute-name").addClass("has-error");
+        } else {
+            $("#custom-attribute-name").removeClass("has-error");
+        }
+        $("[name='custom-attribute-name']").valid();
+    });
+}
+
+function updateSiteLevelAttribute(customAttribute) {
+    var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
+    var siteAttributesGrid = $("#AddSiteAttributesGrid").data("ejGrid");
+    addSiteAttribute.splice(siteAttributesGrid.getIndexByRow($("tr.e-row[aria-selected *='true']")), 1);
+    addSiteAttribute.push(customAttribute);
+    siteAttributesGrid.refreshContent();
+    ShowWaitingProgress("#custom-attribute-dialog", "hide");
+    dialog[0].hide();
+}
+
+function removeSiteAttribute() {
+    var siteAttributesGrid = $("#AddSiteAttributesGrid").data("ejGrid");
+    addSiteAttribute.splice(siteAttributesGrid.getIndexByRow($("tr.e-row[aria-selected *='true']")));
+    siteAttributesGrid.refreshContent();
+
 }

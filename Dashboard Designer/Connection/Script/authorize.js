@@ -12,7 +12,9 @@ function authorize() {
         validateCredentials: '/v1.0/connection/validate-credentials',
         getAccountSettings: '/v1.0/connection/analytics/list-accounts',
         getWebProperties: '/v1.0/connection/analytics/list-properties',
-        getViews: '/v1.0/connection/analytics/list-views'
+        getViews: '/v1.0/connection/analytics/list-views',
+        getRepositories: '/v1.0/connection/github/list-repositories',
+        getXeroOrganizations: '/v1.0/connection/xero/list-organizations'
     };
     this.isOAuthConnection = false;
     this.accounts = [];
@@ -20,6 +22,7 @@ function authorize() {
     this.accountId = null;
     this.propertyId = null;
     this.viewId = null;
+    this.xeroOrganizationId = null;
     this.initialize = function () {
         this.disableContinueBtn();
         if (window.authData && typeof window.authData === "object") {
@@ -57,10 +60,17 @@ function authorize() {
         }
         this.wireEvents();
     };
+    this.defineHeader = function () {
+        $("#template-header").css("display", "block");
+        $("#template-connect-header").css("display", "block");
+        $("#template-repo-header").css("display", "none");
+        $("#template-repository-header").css("display", "none");
+    }
     this.init = function () {
         $(".e-auth-content-wrapper .e-auth-content-header .e-ds-icon").addClass(window.authData.service);
         $(".e-auth-content-wrapper .e-auth-content-header .e-ds-name").html(this.getServiceName(window.authData.provider, window.authData.service));
         $('.e-auth-content-wrapper .e-auth-content').html(this.getTemplate(this.getServiceName(window.authData.provider, window.authData.service)));
+        this.defineHeader();
     }
     this.wireEvents = function () {
         $('.e-auth-content-wrapper .e-auth-content-footer .e-ok-btn').on('click', $.proxy(this.onOkBtnClick, this));
@@ -148,8 +158,7 @@ function authorize() {
         this.removeErrorNotification();
         this.hideErrorMsg();
         var serviceName = window.authData.service;
-        var type = window.authData.type;
-        if (serviceName !== undefined && serviceName.toLowerCase() === 'analytics' || serviceName.toUpperCase() === 'GOOGLEADS' && $('#account-settings-container').css('display') === "none") {
+        if (serviceName !== undefined && (serviceName.toLowerCase() === 'analytics' || serviceName.toUpperCase() === 'ADS') && $('#account-settings-container').css('display') === "none") {
             if (args === null) {
                 this.init();
                 this.getAccountsForProvider();
@@ -159,6 +168,16 @@ function authorize() {
                 }
                 this.wireGASettings();
                 this.getAccountsSettings();
+            }
+        } else if (serviceName !== undefined && (serviceName.toLowerCase() === 'xero') && $('#account-settings-container').css('display') === "none") {
+            if (args === null) {
+                this.init();
+                this.getAccountsForProvider();
+            } else {
+                if ($("#account-settings-container").find('.e-account-settings-content-wrapper').length <= 0) {
+                    $("#account-settings-container").append(this.renderXeroOrganizationsSettings());
+                }
+                this.getOrganizationsSettings();
             }
         } else if (serviceName !== undefined && serviceName.toLowerCase() === 'azuredevops' && $('#account-settings-container').css('display') === "none") {
             if (args === null) {
@@ -181,6 +200,19 @@ function authorize() {
                 }
                 $('.e-auth-content, .e-new-account').css('display', 'none');
                 $('#account-settings-container, .e-back-btn-div').css('display', 'inline');
+            }
+        } else if (serviceName !== undefined && serviceName.toUpperCase() === 'GITHUB' && $('#account-settings-container').css('display') === "none") {
+            if (args === null) {
+                this.init();
+            } else {
+                if (!($("#username").val().trim() === '' || $("#password").val().trim() === '')) {
+                    if ($("#account-settings-container").find('.e-account-settings-content-wrapper').length <= 0) {
+                        $("#account-settings-container").append(this.renderGithubRepositorySettings());
+                    }
+                    $('.e-auth-content, .e-new-account').css('display', 'none');
+                    $('#account-settings-container, .e-back-btn-div').css('display', 'inline');
+                    this.getGithubRepositories();
+                }
             }
         }
         else {
@@ -205,6 +237,13 @@ function authorize() {
                     $('#devops-project').removeClass('e-req-error');
                     this.accountId = $("#devops-account").val().trim();
                     this.propertyId = $("#devops-project").val().trim();
+                    this.validateConnectionInfo();
+                }
+            } else if (serviceName !== undefined && serviceName.toUpperCase() === 'GITHUB') {
+                if ($('#list-repositories input[name="repository"]').length <= 0) {
+                    $('#list-repositories').addClass('e-req-error');
+                } else {
+                    $('#list-repositories').removeClass('e-req-error');
                     this.validateConnectionInfo();
                 }
             } else if (serviceName !== undefined && serviceName.toLowerCase() === 'freshbooks') {
@@ -239,11 +278,13 @@ function authorize() {
         switch (provider) {
             case "jira":
                 return "Jira";
+            case "xero":
+                return "Xero";
             case "google":
                 if (service === 'youtube') {
                     return "YouTube";
                 }
-                else if (service === 'googleads') {
+                else if (service === 'ads') {
                     return "Google Ads";
                 }
                 else {
@@ -289,6 +330,7 @@ function authorize() {
             case 'azuredevops':
             case 'freshbooks':
             case 'infusionsoft':
+            case 'xero':
                 this.validateOAuthConnection();
                 break;
             case 'mailchimp':
@@ -324,6 +366,7 @@ function authorize() {
             case 'Azure DevOps':
             case 'FreshBooks':
             case 'Infusionsoft':
+            case 'Xero':
                 this.isOAuthConnection = true;
                 $('.e-new-account').css('display', 'inline-block');
                 return this.getOAuthTemplate();
@@ -353,9 +396,16 @@ function authorize() {
         if ($("#password").val().trim() !== '') {
             data.password = $('#password').val().trim();
         }
-        if ($('#repositoryname').length) {
-            if ($("#repositoryname").val().trim() !== '') {
-                data.repositoryURL = $('#repositoryname').val().trim();
+
+        if ($("#list-repositories").length > 0) {
+            var repos = [];
+            $.each($("input[name='repository']:checked"), function () {
+                repos.push($(this).val());
+            });
+            if (repos.length > 0) {
+                data.repositoryURL = repos.join(',');
+            } else {
+                isRequiredFieldEmpty = true;
             }
         }
        
@@ -445,7 +495,7 @@ function authorize() {
             if (this.selectedAccount !== null || this.selectedAccount !== undefined) {
                 obj.status = true;
                 var serviceName = window.authData.service;
-                if (serviceName !== undefined && serviceName.toLowerCase() === 'analytics') {
+                if (serviceName !== undefined && (serviceName.toLowerCase() === 'analytics' || serviceName.toLowerCase() === 'ads')) {
                     obj.data = JSON.stringify({
                         serviceId: this.selectedAccount.Id,
                         accountId: this.accountId,
@@ -457,6 +507,11 @@ function authorize() {
                         serviceId: this.selectedAccount.Id,
                         accountId: this.accountId,
                         propertyId: this.propertyId
+                    });
+                } else if (serviceName !== undefined && serviceName.toLowerCase() === 'xero') {
+                    obj.data = JSON.stringify({
+                        serviceId: this.selectedAccount.Id,
+                        accountId: this.xeroOrganizationId
                     });
                 } else if (serviceName !== undefined && serviceName.toLowerCase() === 'freshbooks') {
                     obj.data = JSON.stringify({
@@ -550,12 +605,6 @@ function authorize() {
                     ' </div>';
             case 'Github':
                 return '<div class="e-div">' +
-                    '<span>' +
-                    ' <label>Repository Name</label>' +
-                    '</span>' +
-                    ' <input type="text" style="font-size:12px;" class="e-domain-repository e-required" id="repositoryname" placeholder="owner name/repository name"/>' +
-                    '</div>' +
-                    '<div class="e-div">' +
                     '<span>' +
                     '<label>Username</label>' +
                     '</span>' +
@@ -680,6 +729,15 @@ function authorize() {
                  '<select id="list-views" class="e-account-settings"></select>' + '</div>' + '</div>' + '</div>';
 	}
 
+    this.renderXeroOrganizationsSettings = function () {
+        return '<div class="e-account-settings-content-wrapper">' +
+            '<div class="e-account-settings-content">' +
+            '<div class="e-account-settings-dropdown-div">' +
+            '<div class="e-account-settings-dropdown-label-div"><label>Organizations :</label></div>' +
+            '<select id="list-orgs" class="e-account-settings"></select>' +
+            '</div>' + '</div>' + '</div>';
+    };
+
     this.renderAzureDevOpsAccountSettings = function () {
         var parentDiv = '<div class="e-account-settings-content-wrapper">' +
             '<div class = "e-account-settings-content">';
@@ -699,7 +757,8 @@ function authorize() {
             '<input type="text" class="e-required e-account-settings" id="devops-project" placeholder="Repository Name"/>' +
             '</div>';
         var endTag = '</div>' + '</div>';
-        if (type != null) {
+        var type = window.authData.type;
+        if (type !== null) {
             return $(parentDiv).append(accountName, projectName, repositoryName, endTag);
         } else {
             return $(parentDiv).append(accountName, projectName, endTag);
@@ -716,6 +775,15 @@ function authorize() {
             '</div></div></div>';
     };
 
+    this.renderGithubRepositorySettings = function () {
+        return '<div class="e-account-settings-content-wrapper">' +
+            '<div class="e-account-settings-content">' +
+            '<div class="e-account-settings-dropdown-div">' +
+            '<div class="e-account-settings-dropdown-label-div"><label>Repositories :</label></div>' +
+            '<div class="e-repositories" id="list-repositories"></div>' +
+            '</div><div><label id="items-count"> 0 item(s) selected</div>';
+    };
+
     this.getAccountsSettings = function (args) {
         var id = 'list-accounts';
         var request = {
@@ -723,6 +791,28 @@ function authorize() {
             serviceId: this.selectedAccount.Id,
         };
         this.AjaxPost('POST', window.authData.designerService + this.api.getAccountSettings, request, this.onFetchGASettings, id);
+    }
+
+    this.getOrganizationsSettings = function (args) {
+        var id = 'list-orgs';
+        var request = {
+            provider: window.authData.provider,
+            serviceId: this.selectedAccount.Id,
+        };
+        this.AjaxPost('POST', window.authData.designerService + this.api.getXeroOrganizations, request, this.onFetchXeroOrganizationSettings, id);
+    }
+
+    this.getGithubRepositories = function (args) {
+        var id = 'list-repositories';
+        $("#template-header").css("display", "none");
+        $("#template-repo-header").css("display", "block");
+        $("#template-connect-header").css("display", "none");
+        $("#template-repository-header").css("display", "block");
+        var request = {
+            username: $("#username").val(),
+            personalAccessToken: $("#password").val()
+        };
+        this.AjaxPost('POST', window.authData.designerService + this.api.getRepositories, request, this.onFetchGitHubRepositorySettings, id);
     }
 
     this.onAccSelection = function (args) {
@@ -754,6 +844,11 @@ function authorize() {
         var value = args.currentTarget.value;
         this.viewId = $(args.currentTarget).find('option[value=' + value + ']').data('data').id;
     }
+
+    this.onOrganizationSelection = function (args) {
+        var value = args.currentTarget.value;
+        this.xeroOrganizationId = $(args.currentTarget).find('option[value=' + value + ']').data('data').TenantId;
+    };
 
     this.onFetchGASettings = function (data, id, args) {
         var accList = $('#' + id);
@@ -802,8 +897,120 @@ function authorize() {
         }      
     }
 
+    this.onFetchXeroOrganizationSettings = function (data, id, args) {
+        var orgList = $('#' + id);
+        var optionList = [];
+        if (args.Status) {
+            if (args.Data && args.Data.length !== 0) {
+                data = JSON.parse(args.Data);
+                if (data.orgList.length !== 0) {
+                    orgList.html('');
+                    for (var i = 0; i < data.orgList.length; i++) {
+                        optionList.push($('<option>').html($('<div>').html(data.orgList[i].OrganizationName)).data('data', data.orgList[i]).attr('value', data.orgList[i].TenantId));
+                    }
+                    orgList.append(optionList);
+                    switch (id) {
+                        case 'list-orgs':
+                            this.onOrganizationSelection({ currentTarget: orgList[0] });
+                            $('.e-auth-content, .e-new-account').css('display', 'none');
+                            $('#account-settings-container, .e-back-btn-div').css('display', 'inline');
+                            this.hideLoader();
+                            $('#error-msg').html('');
+                            break;
+                    }
+                }
+                else {
+                    this.hideLoader();
+                    $('#error-msg').html('');
+                    this.showErrorMsg('You may not have any Organizations in your Xero account.');
+                }
+            }
+        } else {
+            this.hideLoader();
+            $('#error-msg').html('');
+            var errorMsg = null;
+            try {
+                errorMsg = JSON.parse(args.Message).error.message;
+            }
+            catch (e) {
+                errorMsg = args.Message;
+            }
+            this.showErrorMsg(errorMsg);
+        }
+    };
+
+    this.onFetchGitHubRepositorySettings = function (data, id, args) {
+        var reposList = $('#' + id);
+        if (args.Status) {
+            if (args.Data && args.Data.length !== 0) {
+                data = JSON.parse(args.Data);
+                if (data.repoList.length !== 0) {
+                    reposList.html('');
+                    var repoSearchElem = '<div class="e-search-panel"><input type="text" id="search" class="e-searchbox" name="search"><img class="search-icon" src="/Connection/Content/Images/search-icon.png"><input type="checkbox" id="selectAll" class="e-select-all" name="selectAll"><label for="selectAll"> Select All</label></div>';
+                    reposList.append(repoSearchElem);
+                    $('#search').on('keyup', $.proxy(this.searchRepos, this));
+                    $('#selectAll').on('change', $.proxy(this.checkUncheckAll, this));
+                    for (var i = 0; i < data.repoList.length; i++) {
+                        var repoDivElem = '<div class="repo-div"><label><input type="checkbox" class="e-repos" name="repository" value="' + data.repoList[i].FullName + '">' + data.repoList[i].FullName + '</label></div>';
+                        reposList.append(repoDivElem);
+                    }
+                    if (data.repoList.length > 0) {
+                        $('.e-repos').on('change', $.proxy(this.getItemsCountText, this));
+                    }
+                    switch (id) {
+                        case 'list-repositories':
+                            $('.e-auth-content, .e-new-account').css('display', 'none');
+                            $('#account-settings-container, .e-back-btn-div').css('display', 'inline');
+                            this.hideLoader();
+                            $('#error-msg').html('');
+                            break;
+                    }
+                }
+                else {
+                    this.hideLoader();
+                    $('#error-msg').html('');
+                    this.showErrorMsg('Provided account does not have any repository.');
+                }
+            }
+        } else {
+            this.hideLoader();
+            $('#error-msg').html('');
+            var errorMsg = null;
+            try {
+                errorMsg = JSON.parse(args.Message).error.message;
+            }
+            catch (e) {
+                errorMsg = args.Message;
+            }
+            this.showErrorMsg(errorMsg);
+        }
+    }
+
+    this.getItemsCountText = function (args) {
+        $("#items-count").text($("input[name='repository']:checked").length + " item(s) selected");
+    }
+
+    this.checkUncheckAll = function (args) {
+        var checkboxState = $("input#selectAll.e-select-all").is(":checked");
+        $('.e-repos').each(function () {
+            var $this = $(this);
+            $this[0].checked = checkboxState;
+        });
+        this.getItemsCountText();
+    }
+
+    this.searchRepos = function () {
+        var searchedKey = $('.e-searchbox').val();
+        $('.repo-div').each(function () {
+            var $this = $(this);
+            $this[0].style.display = (searchedKey === '' || $this[0].innerText.toUpperCase().startsWith(searchedKey.toUpperCase())) ? 'block' : 'none';
+        });
+    }
+
     this.onBackBtnClick = function () {
         $('.e-auth-content,.e-new-account').css('display', 'inline');
+        $('.e-new-account').css('display', (window.authData.service.toUpperCase() === "GITHUB") ? 'none' : 'inline');
+        this.defineHeader();
         $('#account-settings-container,.e-back-btn-div').css('display', 'none');
     }
 

@@ -4,6 +4,8 @@
     var userId = (HttpContext.Current.User as ServerPrincipal).UserId;
     var globalAppSettings = new TenantHandler().GetTenantConfig();
     var isMobile = DeviceDetection.IsMobile;
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var schemes = customUI != null && customUI.Profiles != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].DataSources.Scheme).FirstOrDefault() : null;
 }
 <script>
     var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
@@ -102,7 +104,10 @@
         {{else ItemType=="1"}}
         <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:Name}}" target="_blank">{{:Name}}</a></span>
         @*{{else ItemType=="@((int)ItemType.File)"}}
-            <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" target="_blank">{{:Name}}</a></span>*@
+        <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" target="_blank">{{:Name}}</a></span>*@
+        {{else ItemType=="@((int)ItemType.Datasource)" && IsDraft}}
+        <span class="datasource-name">{{:Name}}</span>
+        <span class="badge badge-secondary">[[[Draft]]]</span>
         {{else}}
         <span>{{:Name}}</span>
         {{/if}}
@@ -111,7 +116,7 @@
 </script>
 
 <script type="text/x-jsrender" id="options">
-    <div class="dropdown">
+    <div class="dropdown @(schemes != null && !schemes.ContextMenu ? "hide" : string.Empty)">
         <span class="dropdown-toggle option-icon" title="[[[Actions]]]" data-toggle="dropdown">
             <i class="su su-options"></i>
         </span>
@@ -150,33 +155,35 @@
             {{/if}}
 
             {{if ~checkMobile()}}
-            {{if @(permissionData[ItemType.Dashboard].ToString().ToLower()) == true}}
-            <li>
+            {{if @(permissionData[ItemType.Dashboard].ToString().ToLower()) == true && !IsDraft}}
+            <li class="@(schemes != null && !schemes.CreateDashboard ? "hide" : string.Empty)">
                 <a href="@Url.Action("DashboardDesigner", "Designer")?datasourceId={{:Id}}" target="_blank" class="create-dashboard-using-datasource" title="[[[Create dashboard using this Data Source]]]" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-nav-dashboard"></i>
                     <span>[[[Create Dashboard]]]</span>
                 </a>
             </li>
-            <li role="separator" class="divider"></li>
+            <li role="separator" class="divider @(schemes != null && !schemes.CreateDashboard ? "hide" : string.Empty)"></li>
             {{/if}}
             {{/if}}
 
             {{if CanWrite}}
             {{if ~checkMobile()}}
             {{if ItemType == "@((int)ItemType.Datasource)"}}
-            <li>
+            <li class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
                 <a href="@Url.Action("Index", "DataSourceDesigner")?datasourceId={{:Id}}" title="" target="_blank">
                     <i class="su su-edit"></i>
                     <span>[[[Edit Data Source]]]</span>
                 </a>
             </li>
-            <li role="separator" class="divider"></li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Edit ? "hide" : string.Empty)"></li>
+            {{/if}}
             {{/if}}
             {{/if}}
             {{/if}}
 
-            {{if ItemType == "@((int)ItemType.Datasource)"}}
-            <li>
+            {{if ItemType == "@((int)ItemType.Datasource)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.Preview ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" id="item-preview" data-item-id="{{:Id}}">
                     <i class="su su-data-preview" style="padding: 0px 8px;">
                         <span class="su su-data-preview path1" style="font-size:14px"></span>
@@ -184,13 +191,13 @@
                     <span>[[[Preview Data]]]</span>
                 </a>
             </li>
-            <li role="separator" class="divider"></li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Preview ? "hide" : string.Empty)"></li>
             {{/if}}
 
             {{if CanWrite}}
             {{if ~checkMobile()}}
-            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)"}}
-            <li>
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.RefreshData ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" class="refresh-data" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-refresh"></i>
                     <span>[[[Refresh Data]]]</span>
@@ -202,14 +209,14 @@
 
             {{if CanWrite}}
             {{if ~checkMobile()}}
-            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)"}}
-            <li>
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.RefreshSetting ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" class="edit-schedule" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-nav-schedule"></i>
                     <span>[[[Refresh Setting]]]</span>
                 </a>
             </li>
-            <li role="separator" class="divider"></li>
+            <li role="separator" class="divider @(schemes != null && !schemes.RefreshSetting ? "hide" : string.Empty)"></li>
             {{/if}}
             {{/if}}
             {{/if}}
@@ -217,25 +224,25 @@
             {{if !IsLocked}}
             {{if ~checkMobile()}}
             {{if CanCopy}}
-            {{if DatasourceType=="@((int)ConnectionMode.Live)"}}
-            <li>
+            {{if DatasourceType=="@((int)ConnectionMode.Live)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.Copy ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" class="copyItem" data-action='Copy' data-itemId="{{:Id}}" data-itemname="{{:Name}}">
                     <i class="su su-copy"></i>
                     <span>[[[Copy Data Source]]]</span>
                 </a>
             </li>
-            <li role="separator" class="divider"></li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Copy ? "hide" : string.Empty)"></li>
             {{/if}}
             {{/if}}
             {{/if}}
             {{/if}}
 
             {{if ~checkMobile()}}
-            {{if CreatedById==@(userId) || @(Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]).ToString().ToLower()) == true}}
+            {{if (CreatedById==@(userId) || @(Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]).ToString().ToLower()) == true) && !IsDraft}}
             {{if ItemType=="@((int)ItemType.File)"}}
-            <li role="separator" class="divider"></li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Share ? "hide" : string.Empty)"></li>
             {{/if}}
-            <li>
+            <li class="@(schemes != null && !schemes.Share ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" class="item-permissions" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-manage-permission"></i>
                     <span>[[[Sharing Permissions]]]</span>
@@ -245,16 +252,20 @@
             {{/if}}
 
             {{if @*CanDownload ||*@ CreatedById==@(userId) || @(Convert.ToBoolean(HttpContext.Current.Session["IsAdmin"]).ToString().ToLower()) == true}}
-            <li role="separator" class="divider"></li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.VersionHistory ? "hide" : string.Empty)"></li>
+            {{/if}}
             {{/if}}
 
             {{if ~checkMobile()}}
-            <li>
+            {{if !IsDraft}}
+            <li class="@(schemes != null && !schemes.VersionHistory ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" class="version-button" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-versions"></i>
                     <span>[[[Version History]]]</span>
                 </a>
             </li>
+            {{/if}}
             {{/if}}
             {{if ~checkMobile()}}
             {{if CanWrite || CanDelete || ItemType=="@((int)ItemType.Report)"}}
@@ -263,8 +274,8 @@
             {{if CanWrite}}
             {{if ~checkMobile()}}
             {{if ItemType=="@((int)ItemType.Dashboard)"}}
-            <li role="separator" class="divider"></li>
-            <li>
+            <li role="separator" class="divider @(schemes != null && !schemes.UpdateDashboard ? "hide" : string.Empty)"></li>
+            <li class="@(schemes != null && !schemes.UpdateDashboard ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" class="item-edit" data-item-id="{{:Id}}">
                     <i class="su su-edit"></i>
                     <span>[[[Update Dashboard]]]</span>
@@ -295,8 +306,8 @@
 
             {{if ~checkMobile()}}
             {{if CanDelete}}
-            <li role="separator" class="divider"></li>
-            <li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Delete ? "hide" : string.Empty)"></li>
+            <li class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
                 {{if ItemType=="@((int)ItemType.Datasource)"}}
                 <a href="javascript:void(0);" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-datasource-type="{{:DatasourceType}}">
                     <i class="su su-delete"></i>
@@ -349,6 +360,19 @@
             <div>
                 <span data-toggle="tooltip" data-placement="top" title="[[[No successful refreshes]]]">
                     [[[No successful refreshes]]]
+                </span>
+            </div>
+            {{/if}}
+        </div>
+        {{else ScheduleStatus=="@((int)ScheduleStatus.Run)"}}
+        <div>
+            <span data-toggle="tooltip" data-placement="top" title="[[[Refresh Started]]]">
+                [[[Refresh Started]]]
+            </span>
+            {{if LastSuccessfulAttemptAt != null}}
+            <div>
+                <span data-toggle="tooltip" data-placement="top" title="[[[Last successful at]]] {{:LastSuccessfulAttemptAt}}">
+                    [[[Last successful at]]] {{:LastSuccessfulAttemptAt}}
                 </span>
             </div>
             {{/if}}

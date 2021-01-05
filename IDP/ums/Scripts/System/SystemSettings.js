@@ -17,6 +17,10 @@ $(document).ready(function () {
     $("#system-settings-filestorage-container").hide();
     isToGetIntermediateDbDetails = ($("#get-intermediate-db-configuration").val() === "true");
 
+    $('[data-id="database-type"]').click(function () {
+        $("#database-type-dropdown .dropdown-menu").css("min-height", "auto");
+    });
+
     $("#messageBox").ejDialog({
         width: "450px",
         height: "180px",
@@ -40,6 +44,68 @@ $(document).ready(function () {
 
     changeFooterPostion();
 
+    $("#tenant-content-holder").validate({
+        errorElement: "span",
+        onkeyup: function (element, event) {
+            if (event.keyCode != 9) {
+                isKeyUp = true;
+                $(element).valid();
+                isKeyUp = false;
+            }
+            else
+                true;
+        },
+        onfocusout: function (element) { $(element).valid(); },
+        rules: {
+            sitename: {
+                isRequired: true,
+                isValidName: true,
+                maxlength: 255
+            },
+            siteidentifier: {
+                required: true,
+                isValidIdentifier: true,
+                maxlength: 255
+            }
+        },
+        highlight: function (element) {
+            $(element).closest(".txt-holder").addClass("has-error");
+            $(element).closest(".text-holder").addClass("has-error");
+            $(element).parent().find(".startup-validation").show();
+        },
+        unhighlight: function (element) {
+            $(element).closest(".txt-holder").removeClass("has-error");
+            $(element).closest(".text-holder").removeClass("has-error");
+            $(element).parent().find(".startup-validation").hide();
+        },
+        errorPlacement: function (error, element) {
+            $(element).parent().find(".startup-validation").html(error.html());
+        },
+        messages: {
+            sitename: {
+                isRequired: window.TM.App.LocalizationContent.SiteNameValidator,
+                isValidName: window.TM.App.LocalizationContent.AvoidSpecailCharacters,
+                maxlength: window.TM.App.LocalizationContent.SiteValidation
+            },
+            siteidentifier: {
+                required: window.TM.App.LocalizationContent.SiteIdentifierValidator,
+                isValidIdentifier: window.TM.App.LocalizationContent.UseNumbersLetters,
+                maxlength: window.TM.App.LocalizationContent.SiteValidation
+            }
+        }
+    });
+
+    $.validator.addMethod("isValidIdentifier", function (value, element) {
+        return IsValidIdentifier(value);
+    }, window.TM.App.LocalizationContent.UseNumbersLetters);
+
+    $(document).on("click", "#tenant-config-submit", function () {
+        if ($("#tenant-content-holder").valid()) {
+            showWaitingPopup($(".startup-page-container-body"));
+            isValidTenantNameIdentifer($("#txt-site-name").val(), $("#txt-site-identifier").val());
+        }
+    });
+
     $(document).on("click", "#welcome-page-proceed", function () {
         $("#image-parent-container .startup-image").hide().attr("src", serverSetupImageUrl).fadeIn();
         $(".startup-content").fadeIn();
@@ -61,6 +127,8 @@ $(document).ready(function () {
             case "mssql":
                 $('#port-number-dropdown').removeClass("show").addClass("hide");
                 $('#auth-type-dropdown').removeClass("hide").addClass("show");
+                $('#server-name-container').removeClass("hide").addClass("show");
+                $('#mysql-odbc-dropdown').removeClass("show").addClass("hide");
 
                 var isWindowsAuth = $("#check-windows").val() === "windows";
                 $("#txt-login").attr("disabled", isWindowsAuth);
@@ -84,14 +152,21 @@ $(document).ready(function () {
                 $("#move-to-next,.sqlce-content").removeClass("hide").addClass("show");
                 break;
             case "mysql":
-                $("#mysql-odbc-dsn>option:eq(0)").prop("selected", true);
-                $("#mysql-odbc-dsn").selectpicker("refresh");
-                $(".database-dropdown-mysql ul").html("");
-                $("#database-name-mysql").html("<option value='' class='display-none'>" + window.TM.App.LocalizationContent.SelectDatabase + "</option>");
-                $("#database-name-mysql").selectpicker("refresh");
-                $("#new-db-mysql").prop("checked", true).trigger("change");
+                $('#auth-type-dropdown').removeClass("show").addClass("hide");
+                $('#port-number-dropdown').removeClass("show").addClass("hide");
+                $('#server-name-container').removeClass("hide").addClass("show");
+                $('#mysql-odbc-dropdown').removeClass("hide").addClass("show");
+                $('#db-content-holder').css("display", "block");
+                $("#txt-login").attr("disabled", false);
+                $("#txt-password-db").attr("disabled", false);
+                $('#db-config-submit,#sql-existing-db-submit').removeClass("hide");
+                $("#move-to-next,.sqlce-content").removeClass("show").addClass("hide");
+                $("#new-db").prop("checked", true).trigger("change");
+                $(".database-dropdown ul").html("");
+                $("#database-name").html("<option value='' class='display-none'>Select a database</option>");
+                $("#database-name").selectpicker("refresh");
                 $(".content-display").hide();
-                $(".show-mysql-content").slideDown("slow");
+                $(".show-sql-content").slideDown("slow");
                 $("div.placeholder").remove();
                 DomResize();
                 break;
@@ -110,6 +185,8 @@ $(document).ready(function () {
             case "postgresql":
                 $('#auth-type-dropdown').removeClass("show").addClass("hide");
                 $('#port-number-dropdown').removeClass("hide").addClass("show");
+                $('#server-name-container').removeClass("hide").addClass("show");
+                $('#mysql-odbc-dropdown').removeClass("show").addClass("hide");
                 $('#db-content-holder').css("display", "block");
                 $("#txt-login").attr("disabled", false);
                 $("#txt-password-db").attr("disabled", false);
@@ -129,6 +206,12 @@ $(document).ready(function () {
         $(".system-settings-db-selection-field .txt-holder input[type='text'],.system-settings-db-selection-field .txt-holder input[type='password']").val("");
         addPlacehoder("#system-settings-db-selection-container");
         changeFooterPostion();
+    });
+
+    $(document).on("click", ".file-storage-submit", function () {
+        if (!$("#skip-intermediate-db").is(":visible")) {
+            enableOrDisableDatabaseFormElements($(this).is(":checked"));
+        }
     });
 
     $("#check-windows").on("click change", function () {
@@ -214,6 +297,11 @@ $(document).ready(function () {
         changeFooterPostion();
     });
 
+    $("#mysql-odbc-dsn").change(function () {
+        $(this).closest(".txt-holder").removeClass("has-error");
+        $(this).parents("#mysql-odbc-dropdown").find(".startup-validation").hide();
+    });
+
     $("#db-config-submit").on("click", function () {
         $(".has-error").removeClass("has-error");
         $(".validation-txt-errors").hide();
@@ -227,6 +315,7 @@ $(document).ready(function () {
             window.serverName = $("#txt-servername").val();
             window.portNumber = $("#txt-portnumber").val();
             window.IsWindowsAuthentication = $("#check-windows").val() == "windows";
+            window.dsn = $("#mysql-odbc-dsn").val();
             window.login = $("#txt-login").val();
             window.password = $("#txt-password-db").val();
             var databaseType = $("#database-type").val();
@@ -234,14 +323,14 @@ $(document).ready(function () {
             window.sslEnabled = $("#secure-sql-connection").is(":checked");
             doAjaxPost("POST", connectDatabaseUrl,
                 {
-                    data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: true })
+                    data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: true })
                 },
                 function (result) {
                     if (result.Data.key) {
                         var databaseType = $("#database-type").val();
                         doAjaxPost("POST", generateDatabaseUrl,
                             {
-                                data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: true  })
+                                data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: true })
                             },
                             function (result) {
                                 hideWaitingPopup($(".startup-page-container-body"));
@@ -254,6 +343,7 @@ $(document).ready(function () {
                                     $("#txt-username").focus();
                                     delete window.serverName;
                                     delete window.portNumber;
+                                    delete window.dsn;
                                     delete window.login;
                                     delete window.password;
                                     delete window.databaseName;
@@ -284,7 +374,7 @@ $(document).ready(function () {
                                         $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
                                         $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage).slideDown();
                                         $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
-                                        $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
+                                        $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "59" : "4022"));
                                         $("#system-settings-filestorage-container").slideDown("slow");
                                         $(".custom-endpoint-form-element, .report-content").hide();
                                         $("#blob-storage-form").hide();
@@ -357,6 +447,7 @@ $(document).ready(function () {
                     changeFooterPostion();
                     delete window.serverName;
                     delete window.portNumber;
+                    delete window.dsn;
                     delete window.login;
                     delete window.password;
                     delete window.databaseName;
@@ -707,6 +798,9 @@ $(document).ready(function () {
             portnumber: {
                 isRequired: true
             },
+            mySqlDsn: {
+                isRequired: true
+            },
             username: {
                 required: true,
                 sqlUsernamevalidation: true
@@ -731,6 +825,9 @@ $(document).ready(function () {
             $(element).closest(".txt-holder").addClass("has-error");
             $(element).closest(".text-holder").addClass("has-error");
             $(element).parent().find(">.startup-validation").show();
+            if ($("#database-type").val().toLowerCase() === "mysql") {
+                $(element).parents("#mysql-odbc-dropdown").find(".startup-validation").show();
+            }
             if (element.id === "txt-dbname") {
                 $(".database-name .database-error").html("").hide();
             }
@@ -743,10 +840,17 @@ $(document).ready(function () {
             $(element).closest(".txt-holder").removeClass("has-error");
             $(element).closest(".text-holder").removeClass("has-error");
             $(element).parent().find(">.startup-validation").hide();
+            if ($("#database-type").val().toLowerCase() === "mysql") {
+                $(element).parents("#mysql-odbc-dropdown").find(".startup-validation").hide();
+            }
             changeFooterPostion();
         },
         errorPlacement: function (error, element) {
             $(element).parent().find(">.startup-validation").html(error.html());
+            if ($("#database-type").val().toLowerCase() === "mysql") {
+                $(element).parents("#mysql-odbc-dropdown").find(".startup-validation").html(error.html());
+            }
+
             changeFooterPostion();
         },
         messages: {
@@ -755,6 +859,9 @@ $(document).ready(function () {
             },
             portnumber: {
                 isRequired: window.TM.App.LocalizationContent.PortValidator
+            },
+            mySqlDsn: {
+                isRequired: window.TM.App.LocalizationContent.DsnValidator
             },
             username: {
                 required: window.TM.App.LocalizationContent.UserNameValidator
@@ -920,7 +1027,7 @@ function addTitleForDropdown(className) {
     var selecterPickerList = $(className + " .btn-group .selectpicker option");
     for (var i = 0; i < selecterPickerList.length; i++) {
         var hoveredtext = selecterPickerList.eq(i).attr("title");
-        if (typeof(hoveredtext) !== "undefined") {
+        if (typeof (hoveredtext) !== "undefined") {
             $(className + " .btn-group .dropdown-menu li").eq(i).find("a").attr("title", hoveredtext).attr("data-toggle", "tooltip").attr("data-placement", "left").attr("data-container", "body");
         }
     }
@@ -998,8 +1105,8 @@ function getFormData() {
                 var databaseName = $("#new-db").is(":checked") ? $("#txt-dbname").val() : $("#databaseName").val();
                 break;
             case "mysql":
-                var prefix = ($("#table-prefix-mysql").val() === "" || $("#new-db-mysql").is(":checked")) ? $("#tenant-table-prefix").val() : $("#table-prefix-mysql").val();
-                var databaseName = $("#new-db-mysql").is(":checked") ? "`" + $("#mysql-database-name").val() + "`" : "`" + $("#database-name-mysql").val() + "`";
+                var prefix = ($("#table-prefix").val() === "" || $("#new-db").is(":checked")) ? $("#tenant-table-prefix").val() : $("#table-prefix").val();
+                var databaseName = $("#new-db").is(":checked") ? $("#txt-dbname").val() : $("#database-name").val();
                 break;
             case "oracle":
                 var prefix = ($("#table-prefix-oracle").val() === "" || $("#new-db-oracle").is(":checked")) ? $("#tenant-table-prefix").val() : $("#table-prefix-oracle").val();
@@ -1107,6 +1214,21 @@ $(document).on("change", ".css-radio", function () {
                 DomResize();
             }
             break;
+        case "mysql":
+            if ($("input[name='databaseType']:checked").val() === "1") {
+                $(".sql-server-existing-db, #sql-existing-db-submit, #sql-existing-ds-db-submit").show();
+                $(".database-name, #db-config-submit,  #ds-db-config-submit").hide();
+                changeFooterPostion();
+                DomResize();
+            } else {
+                $(".sql-server-existing-db, #sql-existing-db-submit,  #sql-existing-ds-db-submit").hide();
+                $(".database-name, #db-config-submit, #ds-db-config-submit").show();
+                $(".databse-dropdown ul").html("");
+                $("#database-name").html("<option value='' class='display-none'>Select a database</option>").selectpicker("refresh");
+                changeFooterPostion();
+                DomResize();
+            }
+            break;
     }
 });
 
@@ -1208,6 +1330,7 @@ $(document).on("click", "#sql-existing-db-submit", function () {
         window.serverName = $("#txt-servername").val();
         window.portNumber = $("#txt-portnumber").val();
         window.IsWindowsAuthentication = $("#check-windows").val() == "windows";
+        window.dsn = $("#mysql-odbc-dsn").val();
         window.login = $("#txt-login").val();
         window.password = $("#txt-password-db").val();
         var databaseType = $("#database-type").val();
@@ -1217,14 +1340,14 @@ $(document).on("click", "#sql-existing-db-submit", function () {
         window.sslEnabled = $("#secure-sql-connection").is(":checked");
         doAjaxPost("POST", connectDatabaseUrl,
             {
-                data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: false })
+                data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: false })
             },
             function (result) {
                 if (result.Data.key) {
                     var databaseType = $("#database-type").val();
                     doAjaxPost("POST", checkTableExistsUrl,
                         {
-                            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, Prefix: prefix, sslEnabled: window.sslEnabled, TenantType: tenantype, IsNewDatabase: false })
+                            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, Prefix: prefix, sslEnabled: window.sslEnabled, TenantType: tenantype, IsNewDatabase: false })
                         },
                         function (result) {
                             var items = result.Data.value;
@@ -1242,7 +1365,7 @@ $(document).on("click", "#sql-existing-db-submit", function () {
                             } else if (!result.Data.key && items.length <= 0) {
                                 doAjaxPost("POST", generateSQLTablesUrl,
                                     {
-                                        data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, Prefix: prefix, IsNewDatabase: false })
+                                        data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, Prefix: prefix, IsNewDatabase: false })
                                     },
                                     function (result) {
                                         hideWaitingPopup($(".startup-page-container-body"));
@@ -1255,6 +1378,7 @@ $(document).on("click", "#sql-existing-db-submit", function () {
                                             $("#txt-username").focus();
                                             delete window.serverName;
                                             delete window.portNumber;
+                                            delete window.dsn;
                                             delete window.login;
                                             delete window.password;
                                             delete window.databaseName;
@@ -1285,7 +1409,7 @@ $(document).on("click", "#sql-existing-db-submit", function () {
                                                 $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
                                                 $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage).slideDown();
                                                 $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
-                                                $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
+                                                $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "59" : "4022"));
                                                 $("#system-settings-filestorage-container").slideDown("slow");
                                                 $(".custom-endpoint-form-element, .report-content").hide();
                                                 $("#blob-storage-form").hide();
@@ -1303,7 +1427,7 @@ $(document).on("click", "#sql-existing-db-submit", function () {
                                         }
                                     }
                                 );
-                                $(".db-connect-outer-container").find(".title").html(window.TM.App.LocalizationContent.DatabaseCreation+ "!");
+                                $(".db-connect-outer-container").find(".title").html(window.TM.App.LocalizationContent.DatabaseCreation + "!");
                                 $("#database-name").focus();
                             } else {
                                 hideWaitingPopup($(".startup-page-container-body"));
@@ -1455,6 +1579,7 @@ function checkingExistingDB(element) {
     window.serverName = $("#txt-servername").val();
     window.portNumber = $("#txt-portnumber").val();
     window.IsWindowsAuthentication = $("#check-windows").val() == "windows";
+    window.dsn = $("#mysql-odbc-dsn").val();
     window.login = $("#txt-login").val();
     window.password = $("#txt-password-db").val();
     var databaseType = $("#database-type").val();
@@ -1474,7 +1599,7 @@ function checkingExistingDB(element) {
         url: connectDatabaseUrl,
         async: false,
         data: {
-            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: false })
+            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: false })
         },
         success: function (result) {
             if (result.Data.key) {
@@ -1485,7 +1610,7 @@ function checkingExistingDB(element) {
                     url: checkTableExistsUrl,
                     async: false,
                     data: {
-                        data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, Prefix: prefix, sslEnabled: window.sslEnabled, TenantType: tenantype, IsNewDatabase: false })
+                        data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, Dsn: window.dsn, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, Prefix: prefix, sslEnabled: window.sslEnabled, TenantType: tenantype, IsNewDatabase: false })
                     },
                     success: function (result) {
                         var items = result.Data.value;
@@ -1534,8 +1659,12 @@ function checkingExistingDB(element) {
                                     $("#blob-storage").prop("checked", true);
                                     $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
                                     $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage3).slideDown();
-                                    $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
-                                    $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
+                                    if (isBoldBI) {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageBIMsg).slideDown();
+                                    } else {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageReportsMsg).slideDown();
+                                    }
+                                    $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "59" : "4022"));
                                     $("#system-settings-filestorage-container").slideDown("slow");
                                     $(".custom-endpoint-form-element, .content-value").hide();
                                     $("#file-storage").parent().hide();
@@ -1550,8 +1679,12 @@ function checkingExistingDB(element) {
                                     $("#system-settings-db-selection-container").hide();
                                     $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
                                     $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage2).slideDown();
-                                    $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
-                                    $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
+                                    if (isBoldBI) {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageBIMsg).slideDown();
+                                    } else {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageReportsMsg).slideDown();
+                                    }
+                                    $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "59" : "4022"));
                                     $("#system-settings-filestorage-container").slideDown("slow");
                                     $(".custom-endpoint-form-element, .content-value").hide();
                                     $(".report-content").slideDown("slow");
@@ -1654,6 +1787,7 @@ function checkingNewDBConnection(element, actionType) {
     if (result.Data != undefined && result.Data.key) {
         delete window.serverName;
         delete window.portNumber;
+        delete Window.dns;
         delete window.login;
         delete window.password;
         delete window.databaseName;
@@ -1703,6 +1837,7 @@ function connectDatabase(element, actionType) {
     window.serverName = $("#txt-servername").val();
     window.portNumber = $("#txt-portnumber").val();
     window.IsWindowsAuthentication = $("#check-windows").val() == "windows";
+    window.dsn = $("#mysql-odbc-dsn option:selected").text();
     window.login = $("#txt-login").val();
     window.password = $("#txt-password-db").val();
     var databaseType = $("#database-type").val();
@@ -1716,7 +1851,7 @@ function connectDatabase(element, actionType) {
         url: connectDatabaseUrl,
         async: false,
         data: {
-            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: isNewDatabase })
+            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Dsn: window.dsn, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, sslEnabled: window.sslEnabled, IsNewDatabase: true })
         },
         success: function (serverResult) {
             if (serverResult.Data.key) {
@@ -1729,7 +1864,7 @@ function connectDatabase(element, actionType) {
                         url: checkDatabaseExistForServerUrl,
                         async: false,
                         data: {
-                            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: true })
+                            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Dsn: window.dsn, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: true })
                         },
                         success: function (dataResult) {
                             if (dataResult.Data.key) {
@@ -1739,8 +1874,13 @@ function connectDatabase(element, actionType) {
                                     $("#blob-storage").prop("checked", true);
                                     $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
                                     $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage3).slideDown();
-                                    $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
-                                    $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
+                                    if (isBoldBI) {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageBIMsg).slideDown();
+                                    } else {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageReportsMsg).slideDown();
+                                    }
+
+                                    $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "59" : "4022"));
                                     $("#system-settings-filestorage-container").slideDown("slow");
                                     $(".custom-endpoint-form-element, .content-value").hide();
                                     $("#file-storage").parent().hide();
@@ -1756,8 +1896,12 @@ function connectDatabase(element, actionType) {
                                     $("#system-settings-db-selection-container").hide();
                                     $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
                                     $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage2).slideDown();
-                                    $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageMsg).slideDown();
-                                    $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=59" : "https://redirect.boldbi.com?id=4022");
+                                    if (isBoldBI) {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageBIMsg).slideDown();
+                                    } else {
+                                        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.StorageReportsMsg).slideDown();
+                                    }
+                                    $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "59" : "4022"));
                                     $("#system-settings-filestorage-container").slideDown("slow");
                                     $(".custom-endpoint-form-element, .content-value").hide();
                                     $(".report-content").slideDown("slow");
@@ -1766,9 +1910,25 @@ function connectDatabase(element, actionType) {
                                     $("#tenant-storage").hide();
                                     $("#report-storage").show();
                                 }
-                               else {
+                                else {
                                     result = dataResult;
                                 }
+                            }
+                            else {
+                                if (element == null || element == "" || element == undefined) {
+                                    hideWaitingPopup($(".startup-page-container-body"));
+                                    $("#db-config-submit, #ds-db-config-submit").show();
+                                    $("#db-config-submit, #ds-db-config-submit").prop("disabled", false);
+                                } else {
+                                    hideWaitingPopup(element);
+                                    $('#details-next').removeAttr("disabled");
+                                }
+                                $("#db_config_generate").hide();
+                                $("#db_loader").hide();
+                                if (dataResult.Data != undefined) {
+                                    errorContent = dataResult.Data.value;
+                                }
+                                $(".database-name .database-error").html(databaseValidationMessage).show();
                             }
                         }
                     });
@@ -1798,6 +1958,11 @@ function connectDatabase(element, actionType) {
 function dssystemsettings() {
     var isIntermediateDatabaseFormSubmit = $("#ds-db-config-submit").data("form") === "intermediate-db";
     if (isIntermediateDatabaseFormSubmit) {
+        var tenantDetails = {
+            TenantName: $("#txt-site-name").val(),
+            TenantIdentifier: $("#txt-site-identifier").val(),
+            TenantType: isBoldBI ? "BoldBIOnPremise" : "BoldReportsOnPremise",
+        };
         intermediateDbDetails = getDatabaseFormValues(true);
     }
     else {
@@ -1816,7 +1981,7 @@ function dssystemsettings() {
             $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.DataStoreConfigforBoldbi).slideDown();
         }
         $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.PullYourData + " " + dataConnectorsCount + "+ " + window.TM.App.LocalizationContent.DataConnectorsSaveOffline).slideDown();
-        $(".startup-content a").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=8" : "https://redirect.boldbi.com?id=4024");
+        $(".startup-content a").attr("href", helpUrl + (isBoldBI ? "8" : "4024"));
         $("#system-settings-db-selection-container").hide().slideDown("slow");
         $(".database-name #txt-dbname").val("");
         $("#new-db").trigger("click");
@@ -1829,7 +1994,7 @@ function dssystemsettings() {
         $("#db-config-submit, #ds-db-config-submit").prop("disabled", false);
     }
     else {
-        postSystemSettingsData(systemSettingsDetails, azureDataforBoldbi, intermediateDbDetails);
+        postSystemSettingsData(systemSettingsDetails, azureDataforBoldbi, intermediateDbDetails, null, isIntermediateDatabaseFormSubmit ? tenantDetails : null);
     }
 }
 
@@ -1844,7 +2009,7 @@ function getDatabaseFormValues(intermediateDb) {
         authenticationType = 1;
 
     if (intermediateDb) {
-        if ($("#skip-intermediate-db").is(":checked")) {
+        if ($("#skip-intermediate-db").is(":visible") && $("#skip-intermediate-db").is(":checked")) {
             return formData;
         }
 
@@ -1869,6 +2034,12 @@ function getDatabaseFormValues(intermediateDb) {
                 Prefix: prefix
             },
             StorageType: $("input[name='IsBlobStorage']:checked").val(),
+            TenantIsolation:
+            {
+                IsEnabled: $("#isolation-enable-switch").is(":checked"),
+                IsolationCode: $("#site-isolation-code").val()
+            },
+            CustomAttribute: [],
         };
     }
 
@@ -1888,7 +2059,7 @@ function postSystemSettingsData(systemSettingsDetails, azuredetails, intermediat
     var userEmailData = (userEmail != undefined && userEmail != null) ? JSON.stringify(userEmail) : $("#tenant-email").val();
     var tenantDetailsData = (tenantDetails != undefined && tenantDetails != null) ? JSON.stringify(tenantDetails) : null;
     var intermediateDbData = (intermediateDbDetails != undefined && intermediateDbDetails != null) ? JSON.stringify(intermediateDbDetails) : null;
-    setSystemSettingsData = { systemSettingsData: JSON.stringify(systemSettingsDetails), azureData: JSON.stringify(azuredetails), userEmail: userEmailData, tenantDetails: tenantDetailsData, intermediateDatabaseDetails: intermediateDbData, isNewDatabase : isNewDatabase, isNewImDatabase : isNewImDatabase };
+    setSystemSettingsData = { systemSettingsData: JSON.stringify(systemSettingsDetails), azureData: JSON.stringify(azuredetails), userEmail: userEmailData, tenantDetails: tenantDetailsData, intermediateDatabaseDetails: intermediateDbData, isNewDatabase: isNewDatabase, isNewImDatabase: isNewImDatabase };
     $.ajax({
         type: "POST", url: setSystemSettingsUrl, data: setSystemSettingsData,
         success: function (setSystemSettingsResponse) {
@@ -1915,24 +2086,25 @@ function postSystemSettingsData(systemSettingsDetails, azuredetails, intermediat
 }
 
 function enableOrDisableDatabaseFormElements(isToDisable) {
-    if ($("#details-next").hasClass("intermediate-db") || (!$(this).hasClass("intermediate-db") && $(this).hasClass("database")) || ($(this).hasClass("intermediate-db") && !$(this).hasClass("database")) ) {
-    if ($("#database-type").val().toLowerCase() === "postgresql") {
-        $("#database-type").val("PostgreSQL");
-    }
-    else {
-        $("#database-type").val($("#database-type option:first").val());
-    }
-	
+    if ($("#details-next").hasClass("intermediate-db") || (!$(this).hasClass("intermediate-db") && $(this).hasClass("database")) || ($(this).hasClass("intermediate-db") && !$(this).hasClass("database"))) {
+        if ($("#database-type").val().toLowerCase() === "postgresql") {
+            $("#database-type").val("PostgreSQL");
+        }
+        else {
+            $("#database-type").val($("#database-type option:first").val());
+        }
+
         $("#check-windows").val($("#check-windows option:first").val());
         $("#database-name").val($("#database-name option:first").val());
         $("#txt-servername, #txt-portnumber, #txt-login, #txt-password-db, #txt-dbname").val("");
         $("#secure-sql-connection").attr("checked", false);
     }
+
     $(".tenant-intermediate-database-form .validation-txt-errors").hide();
     $(".tenant-intermediate-database-form .has-error").removeClass("has-error");
-    $("#database-type, #check-windows, #database-name").attr("disabled", isToDisable).selectpicker("refresh");
+    $("#database-type, #check-windows, #database-name, #mysql-odbc-dsn").attr("disabled", isToDisable).selectpicker("refresh");
     $("#txt-servername, #txt-portnumber, #txt-dbname, #new-db, #existing-db, #secure-sql-connection").attr("disabled", isToDisable);
-
+    $("a.my-sql-dropdown").parent().hide();
     var isWindowsAuth = $("#check-windows").val() === "windows";
     $("#txt-login").attr("disabled", isWindowsAuth || isToDisable);
     $("#txt-password-db").attr("disabled", isWindowsAuth || isToDisable);
@@ -1965,8 +2137,8 @@ function validate_storage_type() {
             $.ajax({
                 type: "POST",
                 url: blobExist,
-                data:{ connectionString: connectionString, containerName: window.containername },
-                success:function(result) {
+                data: { connectionString: connectionString, containerName: window.containername },
+                success: function (result) {
                     if (typeof result.Data != "undefined") {
                         if (result.Data.Key.toString().toLowerCase() == "true") {
                             window.azureconnectionString = result.Data.ConnectionString;
@@ -1978,9 +2150,9 @@ function validate_storage_type() {
                             else {
                                 $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YoureAnAdmin2).slideDown();
                             }
-                            
+
                             $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.AdminHaveControl).slideDown();
-                            $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=6" : "https://redirect.boldbi.com?id=4022");
+                            $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "6" : "4022"));
                             $("#system-settings-user-account-container").slideDown("slow");
                             hideWaitingPopup(".startup-page-conatiner");
                             changeFooterPostion();
@@ -2010,7 +2182,7 @@ function validate_storage_type() {
         $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
         $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YoureAnAdmin2).slideDown();
         $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.AdminHaveControl).slideDown();
-        $(".startup-content a#help-link").attr("href", isBoldBI ? "https://redirect.boldbi.com?id=6" : "https://redirect.boldbi.com?id=4022");
+        $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "6" : "4022"));
         $("#system-settings-user-account-container").slideDown("slow");
         $("body").removeClass("startup-page-container-body");
         changeFooterPostion();
@@ -2021,9 +2193,14 @@ function validate_storage_type() {
 function validate_report_storage() {
     $(".blob-error-message").hide();
     showWaitingPopup($(".startup-page-conatiner"));
-    var storageType = $("input[name='IsBlobStorage']:checked").val();    
+    var storageType = $("input[name='IsBlobStorage']:checked").val();
     window.storageType = storageType;
     var azuredetails = "";
+    var tenantDetails = {
+        TenantName: $("#txt-site-name").val(),
+        TenantIdentifier: $("#txt-site-identifier").val(),
+        TenantType: isBoldBI ? "BoldBIOnPremise" : "BoldReportsOnPremise",
+    };
     if (storageType == "1") {
         if ($("#blob-storage-form").valid()) {
             window.accountname = $("#txt-accountname").val();
@@ -2031,12 +2208,12 @@ function validate_report_storage() {
             window.accesskey = $("#txt-accesskey").val();
             window.containername = $("#txt-containername").val();
             window.storageenable = $(".storage-checkbox").is(":checked");
-            
+
             var blobUrl = $("#txt-bloburl").val();
             var connectionType = $("input[name='Connection']:checked").val();
             var connectionString = "";
             var storageEndPoint = $("#txt-endpoint").val();
-           
+
 
             if (connectionType == "http" || connectionType == "https") {
                 connectionString = "DefaultEndpointsProtocol=" + connectionType + ";AccountName=" + window.accountname + ";AccountKey=" + window.accesskey;
@@ -2077,7 +2254,7 @@ function validate_report_storage() {
                             if (result.Data.Key.toString().toLowerCase() == "true") {
                                 hideWaitingPopup(".startup-page-conatiner");
                                 if (isBoldReports) {
-                                    postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+                                    postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails, null, tenantDetails);
                                 }
                             } else {
                                 hideWaitingPopup(".startup-page-conatiner");
@@ -2096,12 +2273,12 @@ function validate_report_storage() {
             else {
                 hideWaitingPopup(".startup-page-conatiner");
                 if (isBoldReports) {
-                    postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
-                }  
+                    postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails, null, tenantDetails);
+                }
             }
         } else {
-          hideWaitingPopup(".startup-page-conatiner");
-           changeFooterPostion();
+            hideWaitingPopup(".startup-page-conatiner");
+            changeFooterPostion();
             return false;
         }
     } else {
@@ -2119,9 +2296,85 @@ function validate_report_storage() {
         }
         hideWaitingPopup(".startup-page-conatiner");
         if (isBoldReports) {
-            postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails);
+            postSystemSettingsData(systemSettingsDetails, azuredetails, intermediateDbDetails, null, tenantDetails);
         }
     }
+
+    if (isBoldBI && $("#database-type").val().toLowerCase() === "mysql") {
+        $("#database-type").val($("#database-type option:first").val()).selectpicker("refresh").trigger("change");
+        $("#txt-login").attr("disabled", $("#skip-intermediate-db").is(":checked"));
+        $("#txt-password-db").attr("disabled", $("#skip-intermediate-db").is(":checked"));
+        $("#txt-site-name").val(tenantDetails.TenantName);
+        $("#txt-site-identifier").val(tenantDetails.TenantIdentifier);
+    }
+}
+
+function goToDatabasePart() {
+    $("#system-settings-tenant-container").hide();
+    $("#system-settings-db-selection-container").slideDown("slow");
+    $(".startup-image").removeClass("image-con-part");
+    $(".second-content").removeClass("site-description");
+    $("#image-parent-container .startup-image").hide().attr("src", serverDbImageUrl).fadeIn();
+    $(".startup-content a#help-link").attr("href", helpUrl + (isBoldBI ? "7" : "4023"));
+    if (isAzureApplication) {
+        if (isBoldBI) {
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourBIDatabase).slideDown();
+        }
+        else {
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourDatabase).slideDown();
+        }
+    }
+    else {
+        if (isBoldBI) {
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourBIDatabase2).slideDown();
+        }
+        else {
+            $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourDatabase2).slideDown();
+        }
+    }
+
+    if (isBoldBI) {
+        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.DatabaseMsg).slideDown();
+    }
+    else {
+        $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.DatabaseReportsMsg).slideDown();
+    }
+}
+
+function isValidTenantNameIdentifer(tenantName, tenantIdentifier) {
+    if (IsValidIdentifier($.trim(tenantIdentifier))) {
+        $.ajax({
+            type: "POST",
+            url: checkTenantIdentifierExistUrl,
+            data: { tenantName: tenantName, tenantIdentifier: tenantIdentifier },
+            async: false,
+            success: function (data) {
+                hideWaitingPopup($(".startup-page-container-body"));
+                if (data.Result || data.ResultIdentifier) {
+                    if (data.Value != null && data.ResultIdentifier) {
+                        $("#txt-site-identifier").closest(".txt-holder").addClass("has-error");
+                        $("#txt-site-identifier").parent().find(".startup-validation").html(data.Value).show();
+                    }
+                    else {
+                        $("#txt-site-identifier").closest(".txt-holder").removeClass("has-error");
+                        $("#txt-site-identifier").parent().find(".startup-validation").html("").hide();
+                        goToDatabasePart();
+                    }
+                } else {
+                    $("#txt-site-identifier").closest(".txt-holder").removeClass("has-error");
+                    $("#txt-site-identifier").parent().find(".startup-validation").html("").hide();
+                    goToDatabasePart();
+                }
+            }
+        });
+    } else {
+        hideWaitingPopup($(".startup-page-container-body"));
+    }
+}
+
+function IsValidIdentifier(inputString) {
+    var regex = /^[a-zA-Z0-9-]+$/;
+    return regex.test(inputString);
 }
 
 $(document).on("change", ".storage-checkbox", function () {

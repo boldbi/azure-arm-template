@@ -309,7 +309,7 @@ CREATE TABLE SyncDS_ScheduleLog(
 	ScheduleId uuid NOT NULL,
 	ExecutedDate timestamp NOT NULL,
 	ModifiedDate timestamp NOT NULL,
-	Message varchar(255) NULL,
+	Message text NULL,
 	IsOnDemand smallint NOT NULL DEFAULT (0),
 	IsActive smallint NOT NULL)
 ;
@@ -317,7 +317,7 @@ CREATE TABLE SyncDS_ScheduleLog(
 CREATE TABLE SyncDS_SystemSettings(
 	Id SERIAL PRIMARY KEY NOT NULL,
 	Key varchar(255) NOT NULL,
-	Value varchar(4000) NULL,
+	Value text NULL,
 	ModifiedDate timestamp NOT NULL,
 	IsActive smallint NOT NULL,
 	CONSTRAINT UK_SyncDS_SystemSettings_Key UNIQUE(Key))

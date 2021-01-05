@@ -372,6 +372,7 @@ $(document).on("click", "#schedule-submit", function () {
                 parent.$("#editpopup-container_wrapper").ejWaitingPopup("hide");
                 var scheduleName = $(".schedule-popup-title").text();
                 closePopupContainer();
+                alertmessage = alertmessage == "" ? "." : alertmessage;
                 var messageBody = successMessage + scheduleMessage + scheduleDetail + alertmessage;
                 var popupClass = messageBody.length > 140 ? "success-message-large" : "success-message-small";
                 parent.messageBox("su-calendar-1", scheduleName, messageBody, "success", function () {
