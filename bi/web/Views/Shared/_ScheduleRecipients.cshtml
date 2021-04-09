@@ -1,0 +1,108 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardExportScheduleFailure);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+    <script>
+        var getActiveandInactiveUserUrl = "@Url.Action("getallactivegroupsandusers", "accounts")";
+        var updateScheduleUrl = "@Url.Action("UpdateSchedule", "scheduler")";
+        var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
+        var canExport = @Html.Raw(Json.Serialize(ViewBag.CanExport));
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecipients.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecipients.min.js"></script>
+    </environment>
+</head>
+<body>
+    <div class="col-sm-12 col-xs-12 no-padding subscribe-popup-body" id="subscribers-panel">
+        <div class="col-sm-12 col-xs-12 bottom-margin no-padding">
+            <div id="user-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
+                <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="[[[No results match]]]" data-live-search-placeholder="[[[Search]]]" title="[[[Select Users]]]" data-hide-disabled="true" multiple="" data-actions-box="true"></select>
+            </div>
+            <div id="group-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
+                <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="[[[No results match]]]" data-live-search-placeholder="[[[Search]]]" title="[[[Select Groups]]]" data-hide-disabled="true" multiple="" data-actions-box="true"></select>
+            </div>
+            <form id="email-form" class="col-sm-4 col-xs-4 no-margin">
+                <div class="inner-addon right-addon has-feedback">
+                    <input id="external-email" type="text" class="form-control" placeholder="[[[External Recipients]]] ([[[Email address]]])">
+                    <span id="external-submit" class="su-add form-control-feedback" title="[[[Add external recipients]]]"></span>
+                </div>
+                <span id="external-email-validation" class="alertMessages"></span>
+            </form>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding" id="selected-users-container">
+            <div class="col-sm-3 col-xs-3 selected-recipients" id="selected-users"></div>
+            <div class="col-sm-2 col-xs-3 export-format" id="export-format-container">
+                <div class="col-sm-12 col-xs-12 export-format" id="export-header">
+                    <label class="clslab">[[[Format]]]</label>
+                    @if (!ViewBag.CanExport.Pdf || !ViewBag.CanExport.Excel || !ViewBag.CanExport.Image)
+                    {
+                        <span class="dropdown-toggle cursor-type export-format-info-margin" data-toggle="dropdown">
+                            <span class="su su-info" title=""></span>
+                        </span>
+                        <div class="col-xs-2 dropdown-menu" id="export-format-message" role="menu">
+                            [[[Please contact your administrator to enable these export formats.]]]
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-12 col-xs-12 export-format" id="imageFormat">
+                    <div>
+                        <input type="radio" id="image-export" class="css-radio" value="[[[Image]]]" name="exportFormats" @(ViewBag.CanExport.Image ? string.Empty : "disabled") />
+                        <label for="image-export" class="pointer normal-font notransition @(ViewBag.CanExport.Image ? string.Empty : "disabled-lable-color")">[[[Image]]]</label>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-xs-12 export-format" id="pdfFormat">
+                    <div>
+                        <input type="radio" id="pdf-export" class="css-radio" value="[[[PDF]]]" name="exportFormats" @(ViewBag.CanExport.Pdf ? string.Empty : "disabled") />
+                        <label for="pdf-export" class="pointer normal-font notransition @(ViewBag.CanExport.Pdf ? string.Empty : "disabled-lable-color")">[[[PDF]]]</label>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-xs-12 export-format" id="excelFormat">
+                    <div>
+                        <input type="radio" id="excel-export" class="css-radio" value="[[[Excel]]]" name="exportFormats" />
+                        <label for="excel-export" class="pointer normal-font notransition">[[[Excel]]]</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="selected-users-validation">[[[Select a user, group, or type an email address in the external recipient to schedule]]]</div>
+        <div id="selected-users-info" class="col-sm-5 col-xs-5 no-margin i-search-fields"></div>
+        <div id="failure-notification" class="col-sm-12 col-xs-12  no-margin">
+            <div id="enable-checkbox">
+                @Html.CheckBox("enable-notification-to-owner", new { @class = "material-checkbox", @id = "enable-notification-to-owner" })
+                @Html.Label("enable-notification-to-owner", "[[[Send failure notification to schedule owner]]]")
+            </div>
+            <div id="enable-checkbox">
+                @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox", @id = "enable-notification-to-recipient" })
+                @Html.Label("enable-notification-to-recipient", "[[[Send failure notification to recipient]]]")
+            </div>
+        </div>
+        <div id="note-message" class="col-sm-12 col-xs-12  no-margin">
+            <b>[[[Note: ]]]</b>
+            @(String.Format("[[[The application deactivates your schedule after {0} consecutive failures.]]]", Convert.ToInt32(ServerAppConfig.FailureOccurrence)))
+            @if (!@ServerAppConfig.IsHideHelpLink)
+            {
+                <span>[[[To learn more, click]]] <a href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + @helpSiteUrl)" title="help" target="_blank">[[[here.]]]</a></span>
+            }
+        </div>
+
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>
