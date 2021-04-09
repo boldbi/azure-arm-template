@@ -1,0 +1,47 @@
+﻿<div role="tabpanel" class="tab-pane" id="tenant-log-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+        <div class="logdetails">
+            @{
+                foreach (var tenantlog in ViewBag.TenantLogs)
+                {
+                    <div class="row">
+                        <div class="col-xs-3 date">
+                            <i class="e-icon e-calendar" aria-hidden="true"></i>
+                            @tenantlog.Time
+                            <br />
+                            <small class="text-green">@tenantlog.Date</small>
+                        </div>
+
+                        <div class="col-xs-9 content no-top-border">
+                            <b class="logtype">@tenantlog.LogType</b>
+                            <br />
+                            <p>
+                                <strong>
+                                    <span>Updated</span>
+                                    <span> by </span>
+                                    @if (!string.IsNullOrWhiteSpace(tenantlog.CreatedByName))
+                                    {
+                                        <span>@tenantlog.CreatedByName</span>
+                                    }
+                                    else
+                                    {
+                                        <span>System</span>
+                                    }
+                                </strong>
+                                <br />
+                                @tenantlog.LogComments
+                            </p>
+                            <div>
+                                @Html.Raw(tenantlog.OptionalData)
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div>
+            <input type="button" id="add-logs-button" value="Add Log">
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_TenantLogDialog")

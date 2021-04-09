@@ -1,0 +1,130 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@using Syncfusion.Server.Base.Middlewares;
+@using Syncfusion.Server.IdentityProvider.Models;
+@using Microsoft.AspNetCore.Http;
+@using System.Security.Claims;
+
+@{
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+    var isToRemoveUserProfile = ViewBag.RemoveUserProfile != null ? ViewBag.RemoveUserProfile : false;
+    var headerTitle = ViewBag.HeaderTitle != null ? ViewBag.HeaderTitle : (GlobalAppSettings.Branding == AppBranding.Bold.Identifier ? "Bold ID" : GlobalAppSettings.BrandingCompanyName);
+    var currentUserId = Guid.Parse(GlobalAppSettings.HttpContextAccessor.HttpContext.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+}
+
+<div class="header-bar col-lg-12 col-md-12 col-sm-12">
+    <div class="main-screen-logo mobile-hidden">
+        <a href="/" class="home-link" data-container="body">
+            @if (!CloudAppConfig.IsSelfHosted)
+            {
+                <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.MainLogo" />
+            }
+            else
+            {
+                <img alt="Application Logo" id="application-logo" src="@GlobalAppSettings.CdnDomain/static/company/@(GlobalAppSettings.Branding == AppBranding.Bold.Identifier ? "boldid" : GlobalAppSettings.Branding)/logo/v1/@IconFileNames.MainLogo" />
+            }
+        </a>
+    </div>
+    @if (!isToRemoveUserProfile)
+    {
+        if (!string.IsNullOrWhiteSpace(displayName) && !string.IsNullOrWhiteSpace(emailAddress))
+        {
+            <div class="user-account">
+                <div id="account-profile" class="dropdown no-padding">
+                    <span class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="profile-picture">
+                            <img alt="[[[Profile Picture]]]" src="@Url.Content("~/User/Avatar?id=" + currentUserId + "&ImageSize=64")" />
+                        </span>
+                    </span>
+                    <div class="dropdown-menu" id="profile-info-section" role="menu">
+                        <div class="profile-info col-lg-12">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td class="profile-picture-area">
+                                            <img alt="[[[Profile Picture]]]" src="@Url.Content("~/User/Avatar?id=" + currentUserId + "&ImageSize=64")" />
+                                        </td>
+                                        <td class="profile-info-area">
+                                            <ul class="no-margin no-padding">
+                                                <li id="profile-name">@displayName</li>
+                                                <li id="profile-email">@emailAddress</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="profile-buttons">
+                            <a href="@Url.Action("Profilepage", "User")" class="profile-menu-action col-lg-6" data-toggle="tooltip" data-placement="top" data-container="body" title="View my profile">
+                                [[[PROFILE]]]
+                            </a>
+                            <a href="@Url.Action("logout", "accounts")" class="profile-menu-action col-lg-6" data-toggle="tooltip" data-placement="top" data-container="body" title="Log Out">
+                                [[[LOG OUT]]]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="login-account">
+                <a href="@Url.Action("Login", "Accounts")">[[[LOG IN]]]</a>
+            </div>
+        }
+    }
+    <div class="org-name-wrapper">
+        <h5 class="header-org-name">@headerTitle</h5>
+    </div>
+
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        @if (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier)
+        {
+            <a class="syncfusion-cloud-home" href="@CloudAppConfig.SyncfusionCloudHomeUrl">
+                <span>@(DeviceDetection.IsMobile ? "Home" : "Syncfusion Home")</span>
+            </a>
+        }
+        else
+        {
+            if (DeviceDetection.IsMobile)
+            {
+                <a class="syncfusion-cloud-home" href="@CloudAppConfig.SyncfusionCloudHomeUrl">
+                    <span>Home</span>
+                </a>
+            }
+            else
+            {
+            <div class="dropdown-styles">
+                <div class="dropdown no-padding">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                        Bold Reports
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="https://boldreports.com" target="_blank">Products</a></li>
+                        <li><a href="https://www.boldreports.com/account/downloads" target="_blank">Downloads</a></li>
+                        <li><a href="https://documentation.boldreports.com/on-premise/getting-started/" target="_blank">Getting started</a></li>
+                        @*<li><a href="https://www.boldreports.com/videos" target="_blank">Videos</a></li>*@
+                    </ul>
+                </div>
+            </div>
+            <div class="dropdown-styles">
+                <div class="dropdown no-padding">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                        Bold BI
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="https://boldbi.com" target="_blank">Products</a></li>
+                        <li><a href="https://www.boldbi.com/account/downloads" target="_blank">Downloads</a></li>
+                        <li><a href="https://help.boldbi.com/getting-started" target="_blank">Getting started</a></li>
+                        <li><a href="https://www.boldbi.com/videos" target="_blank">Videos</a></li>
+                    </ul>
+                </div>
+            </div>
+            }
+        }
+    }
+</div>

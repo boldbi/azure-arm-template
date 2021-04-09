@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Tenant Details | Syncfusion Cloud Management";
+    var priorityOrderId = Model.LicenseSettings != null ? (int)Model.LicenseSettings.PriorityOrder : 0;
+}
+
+@model TenantInfo
+
+@section styles{
+    <link rel="stylesheet" href="~/bundle/css/tenant-view-page" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/bundle/css/site-settings" asp-append-version="true"/>
+}
+@section scripts{
+    <script src="~/bundle/js/tenant-view-page" asp-append-version="true"></script>
+}
+@section MainSection{
+    <div id="application-information-container" class="col-xs-12 admin-page-container">
+        <input type="hidden" value="@priorityOrderId" id="plan-priority-id" />
+        <div id="application-information-header" class="col-xs-12 admin-page-header">
+            <a class="back-button pull-left" href="/tenants">
+                <i class="su su-arrow-back back-navigaion img-size"> </i>
+            </a>
+            <hgroup>
+                <h1 class="h2 page-title col-xs-3 col-sm-4 col-md-4 col-lg-4">@Model.Tenant.DNS</h1>
+            </hgroup>
+        </div>
+        <div class="tab-area" id="payment-tenant-info-id" data-tenant-info-id="@Model.TenantInfoId" data-tenant-dns="@Model.Tenant.DNS">
+            <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active" id="info">
+                    <a href="#tenant-info-tab" id="tenant-info" title="" aria-controls="tenant-info-tab" role="tab" data-toggle="tab">General</a>
+                </li>
+                <li role="presentation" id="plan">
+                    <a href="#tenant-plan-tab" id="tenant-plan" aria-controls="tenant-plan-tab" role="tab" data-toggle="tab">Plan</a>
+                </li>
+                <li role="presentation" id="payment">
+                    <a href="#payment-activity-tab" id="payment-activity" aria-controls="payment-activity-tab" role="tab" data-toggle="tab">Payments</a>
+                </li>
+                <li role="presentation" id="log">
+                    <a href="#tenant-log-tab" id="tenant-log" aria-controls="tenant-log-tab" role="tab" data-toggle="tab">Logs</a>
+                </li>
+
+                @*@if (ViewBag.TenantTypeId == (int)TenantType.BoldBI)
+                    {
+                        <li role="presentation" id="previewfeature">
+                            <a href="#tenant-previewfeature-tab" aria-controls="tenant-previewfeature-tab" role="tab" data-toggle="tab">Preview Features</a>
+                        </li>
+                    }*@
+
+                @if (ViewBag.TenantTypeId == (int)TenantType.BoldBI)
+                {
+                    <li role="presentation" id="concierge">
+                        <a href="#tenant-concierge-tab" id="concierge-user" aria-controls="tenant-concierge-tab" role="tab" data-toggle="tab">Concierge Access</a>
+                    </li>
+                }
+
+                @if (ViewBag.TenantTypeId == (int)TenantType.BoldBI || ViewBag.TenantTypeId == (int)TenantType.BoldReports)
+                {
+                    <li role="presentation" id="resources">
+                        <a href="#tenant-resources-tab" id="tenant-resources" aria-controls="tenant-resources-tab" role="tab" data-toggle="tab">Resources</a>
+                    </li>
+                    <li role="presentation" id="activity">
+                        <a href="#tenant-activity-tab" id="tenant-activity" aria-controls="tenant-activity-tab" role="tab" data-toggle="tab">Activity</a>
+                    </li>
+                }
+                <li id="refresh-resources">
+                    <span>Refresh</span>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            @await Html.PartialAsync("_TenantInfo")
+            @await Html.PartialAsync("_TenantPlan")
+            @await Html.PartialAsync("_PaymentActivity")
+            @await Html.PartialAsync("_TenantLog")
+
+            @if (ViewBag.TenantTypeId == (int)TenantType.BoldBI)
+            {
+                @*@Html.Partial("_TenantPreviewFeature")*@
+                @await Html.PartialAsync("_ConciergeUser")
+            }
+            @if (ViewBag.TenantTypeId == (int)TenantType.BoldBI || ViewBag.TenantTypeId == (int)TenantType.BoldReports)
+            {
+                @await Html.PartialAsync("_TenantActivity")
+                @await Html.PartialAsync("_TenantResources")
+            }
+            <div id="plan-detail-dialog" style="display:none">
+                @await Html.PartialAsync("../Register/_PlanDetails", (List<SaaSPlanDetail>)ViewBag.PlansList, new ViewDataDictionary(ViewData) { { "PriorityOrderId", priorityOrderId }, { "TenantId", Model.Tenant.TenantId } })
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("_PlanUpgradeConfirm")
+}

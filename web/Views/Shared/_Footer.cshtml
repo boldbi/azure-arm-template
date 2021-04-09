@@ -1,0 +1,50 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    var isLayoutFooter = ViewBag.IsLayoutFooter != null ? ViewBag.IsLayoutFooter : false;
+    var domain = System.Configuration.ConfigurationManager.AppSettings["syncfusion:product_home"];
+}
+
+<footer class="col-xs-12 col-md-12 col-sm-12 col-lg-12 no-padding layout-footer no-margin">
+    @if (Context.Request.Cookies["cookie-consent"] == null)
+    {
+        <div class="cookie-notification">
+            <div class="container">
+                <div class="row" style="color:#ffffff;font-size:13px;padding:0px 50px 0px 30px">
+                    <div class="col-lg-11 col-md-9 col-sm-10 col-xs-12 content-small vcenter" style="font-family:RobotoRegular;font-size:13px !important;line-height: 1.7em; width: 86%;">
+                        [[[We use cookies to give you the best experience on our website. If you continue to browse, then you agree to our ]]]<a href="https://www.@(GlobalAppSettings.BrandingDomain)/privacy" target="_blank" style="text-decoration:underline;" class="privacy-link">[[[privacy policy]]]</a> and <a href="https://www.@(GlobalAppSettings.BrandingDomain)/cookie-policy" target="_blank" style="text-decoration:underline;" class="privacy-link">[[[cookie policy]]]</a>.
+                    </div>
+                    <div class="col-lg-offset-0 col-lg-1 vcenter agreebutton">
+                        <button id="cookiesubs" type="button" class="btn  btn--stack  btn--primary" style="background:#0565ff; color:white;display: inline-block;font-size:13px;padding: 3px 25px;border-radius: 3px;cursor:pointer">
+                            <span class="btn--text" style="font-family:RobotoRegular;font-size:13px;font-weight: bold;">OK</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="footer-copy-right pull-left">
+        <a href="@domain/copyright" target="_blank">Copyright © 2001 - @DateTime.UtcNow.Year Syncfusion Inc. All Rights Reserved.</a>
+    </div>
+    <div class="footer-link @(isLayoutFooter ? "layout" : string.Empty) pull-right">
+        <a href="@domain/privacy" target="_blank">[[[Privacy Policy]]]</a><a href="@domain/cookie-policy" target="_blank">[[[Cookie policy]]]</a><a href="@domain/terms-of-use" target="_blank">[[[Terms of Use]]]</a>
+    </div>
+</footer>
+<script>
+    var setCookieConsentUrl = "@Url.Action("SetCookieConsent", "Authorization")";
+    $(document).ready(function (e) {
+        $('#cookiesubs').on('click', function () {
+            $(".cookie-notification").remove();
+            SetCookie();
+        });
+
+        function SetCookie() {
+            $.ajax({
+                type: "POST",
+                url: window.setCookieConsentUrl,
+            });
+        }
+
+    });
+</script>

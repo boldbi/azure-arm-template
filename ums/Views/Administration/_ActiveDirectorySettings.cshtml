@@ -1,0 +1,74 @@
+﻿<div id="active-directory-container" role="tabpanel" class="row admin-page-container" aria-labelledby="active-directory-settings-link" ng-controller="adSettingsController">
+
+    <div class="col-md-12 import-area admin-page-header">
+        <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+            <h1 class="h2 page-title">AZURE ACTIVE DIRECTORY SETTINGS</h1>
+            <h5 class="page-description">Configuration for connecting to Azure Active Directory</h5>
+        </hgroup>
+        @*<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+            <a class="primary-button pull-right" href="@Url.Action("ScheduleAzureSynchronization", "Administration")" title="Synchronize Azure AD users and groups on a regular schedule">
+                <span>Azure AD Schedule Synchronization</span>
+            </a>
+        </div>*@
+    </div>
+
+    <div>
+
+        <div class="">
+            <div role="tabpanel" class="tab-pane" id="azure-ad-tab">
+                <form id="azure-ad-setting" name="azureAdSettingsForm" class="admin-page-body" method="post" enctype="multipart/form-data" autocomplete="off">
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            <label class="app-textbox-label col-md-4 no-margin">Tenant Name</label>
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(azureAdSettingsForm.tenantName.$dirty && azureAdSettingsForm.tenantName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" ng-model="azureTenantName" ng-init="azureTenantName='@ViewBag.AzureADSetting.TenantName'" name="tenantName" placeholder="example.onmicrosoft.com" id="tenantName" ng-pattern="regex" required/>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.tenantName.$error.required && azureAdSettingsForm.tenantName.$dirty ">Please enter tenant name</span>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.tenantName.$error.pattern ">Please enter valid URL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            <label class="app-textbox-label col-md-4 no-margin">Client Id</label>
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(azureAdSettingsForm.clientId.$dirty && azureAdSettingsForm.clientId.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control col-md-6 no-margin" ng-model="azureClientId" name="clientId" ng-init="azureClientId='@ViewBag.AzureADSetting.ClientId'" placeholder="Client Id" id="clientId" required/>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.clientId.$dirty && azureAdSettingsForm.clientId.$invalid">Please enter client id</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <div class="col-md-6 no-padding no-margin">
+                            <label class="app-textbox-label col-md-4 no-margin">Client Secret Code</label>
+                            <div class="col-md-8 no-margin form-input-field" ng-class="(azureAdSettingsForm.clientKey.$dirty && azureAdSettingsForm.clientKey.$invalid) ? 'has-error' : ''">
+                                <input type="text" style="display: none;">
+                                <input style="visibility: hidden; position: absolute; left: -99999px" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
+                                <input type="password" class="form-control col-md-6 no-margin" value="" ng-model="azureClientKey" name="clientKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" id="clientKey" required/>
+                                <div class="show-hide-password su su-eye"></div>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.clientKey.$dirty && azureAdSettingsForm.clientKey.$invalid">Please enter client key</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-6 no-padding no-margin">
+                            <input type="button" id="testAzureConnection" ng-disabled="azureAdSettingsForm.$invalid" onclick="AzureADFormValidate()" class="primary-button test-connection pull-right" title="Test Azure Active Directory Connection" value="Test Connection"/>
+                        </div>
+                        <div class="col-md-6 error-message" style="display: none"></div>
+                        <div class="col-md-6 success-message" style="display: none"></div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="admin-page-actions col-lg-12 col-md-12">
+        <a href="@Url.Content("~/")" class="secondary-button pull-right" id="cancel-active-dir-settings" title="">Cancel</a>
+        @*<button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">Save</button>*@
+        <button type="button" title="" id="UpdateAzureADSettings-bottom" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings" ng-disabled="azureAdSettingsForm.$invalid" ng-click="">Save</button>
+        @*<button type="button" title="" id="save-db-settings" disabled="disabled" name="UpdateSystemSettings" class="primary-button pull-right">Save</button>
+        <button type="button" id="connect-database" class="primary-button pull-right connect-database-button" disabled="disabled">Next</button>
+        <button type="button" id="change-connection" class="primary-button  pull-right">Back</button>*@
+    </div>
+
+</div>

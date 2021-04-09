@@ -1,0 +1,136 @@
+﻿@using Syncfusion.Server.Base
+@using Syncfusion.Server.Base.DataClasses
+@using Microsoft.AspNetCore.Http
+@using System.Security.Claims;
+
+@model List<TenantDetail>
+@{
+    ViewBag.Title = "Sites | " + (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier ? "Syncfusion.io" : "Boldbi.com");
+    var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+  
+    var tenantIdentifierPrefix = CloudAppConfig.TenantIdentifierPrefix;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/profile.css" asp-append-version="true"/>
+}
+@section scripts{
+    <script src="~/bundles/js/domain-list.js" asp-append-version="true"></script>
+}
+@section MainSection{
+    <div id="user-dns-list" class="col-lg-12 col-sm-12 col-md-12 col-xs-12 no-padding admin-page-container">
+        <div class="col-lg-12 col-md-12 co-sm-12 col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="col-xs-3 col-sm-4 col-md-4 col-lg-4 section-heading page-title header">MY SITES</h1>
+            </hgroup>
+        </div>
+        @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+        {
+            <div>
+                <ul id="site-tab-nav" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#cloud-sites-tab" id="cloud-sites" aria-controls="cloud-sites-tab" role="tab" data-toggle="tab">Bold BI Cloud</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#on-premise-sites-tab" id="on-premise-sites" aria-controls="on-premise-sites-tab" role="tab" data-toggle="tab">Bold BI Enterprise</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#bold-reports-on-premise-tab" id="bold-reports-on-premise" aria-controls="bold-reports-on-premise-tab" role="tab" data-toggle="tab">Bold Reports Enterprise Reporting</a>
+                    </li>
+                </ul>
+            </div>
+        }
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="cloud-sites-tab">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                    @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldBI))
+                    {
+                        for (var i = 0; i < Model.Count; i++)
+                        {
+                            if (Model[i].TenantTypeId == (int)TenantType.BoldBI)
+                            {
+                                <div class="user-dns-data col-xs-4">
+                                    <a class="dns-link app-hyperlink" href="https://@Model[i].DNS" target="_blank">
+                                        <div class="user-dns">
+                                            <img class="dns-data-image" src="@Model[i].LoginLogoUrl" />
+                                            <span class="dns-org-name align-middle col-xs-12">
+                                                @Model[i].OrganizationName
+                                            </span>
+                                            <span class="dns-name align-middle col-xs-12">
+                                                @Model[i].DNS
+                                            </span>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-site-info">No sites found.</div>
+                    }
+                </div>
+            </div>
+            @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+            {
+                <div role="tabpanel" class="tab-pane" id="on-premise-sites-tab">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                        @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldBIOnPremise))
+                        {
+                            for (var i = 0; i < Model.Count; i++)
+                            {
+                                if (Model[i].TenantTypeId == (int)TenantType.BoldBIOnPremise)
+                                {
+                                    <div class="user-dns-data col-xs-4">
+                                        <a class="dns-link app-hyperlink" href="@Url.Action("LicenseSettings", "Subscription", new {id= Model[i].Id})" target="_blank">
+                                            <div class="user-dns">
+                                                <img class="dns-data-image" src="@Model[i].LoginLogoUrl" />
+                                                <span class="dns-org-name align-middle col-xs-12">
+                                                    @Model[i].OrganizationName
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <div class="no-site-info">No portals found.</div>
+                        }
+                    </div>
+                </div>
+            }
+            @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+            {
+                <div role="tabpanel" class="tab-pane" id="bold-reports-on-premise-tab">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                        @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldReportsOnPremise))
+                        {
+                            for (var i = 0; i < Model.Count; i++)
+                            {
+                                if (Model[i].TenantTypeId == (int)TenantType.BoldReportsOnPremise)
+                                {
+                                    <div class="user-dns-data col-xs-4">
+                                        <a class="dns-link app-hyperlink" href="@Url.Action("LicenseSettings", "Subscription", new {id= Model[i].Id})" target="_blank">
+                                            <div class="user-dns">
+                                                <img class="dns-data-image" src="@Model[i].LoginLogoUrl" />
+                                                <span class="dns-org-name align-middle col-xs-12">
+                                                    @Model[i].OrganizationName
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <div class="no-site-info">No portals found.</div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

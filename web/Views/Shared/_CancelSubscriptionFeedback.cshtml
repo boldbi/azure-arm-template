@@ -1,0 +1,82 @@
+﻿@using Syncfusion.Server.Base.DataClasses
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <script>
+        $(document).ready(function () {
+            $("#cancel-subscription-feedback-popup").ejDialog({
+                height: '566px',
+                width: '520px',
+                showOnInit: false,
+                allowDraggable: false,
+                enableResize: false,
+                showHeader: false,
+                enableModal: true,
+            });
+        });
+    </script>
+</head>
+<body>
+    
+    <div id="cancel-subscription-feedback-popup" class="fluent-popup display-none">
+        <input id="cancel-subscription-feedback-form-id" type="hidden" value="@FeedbackFormId.CancelSubscriptionFeedback">
+        <div class="fluent-popup-header">
+            <h4 class="popup-title">
+                <span>[[[Cancel subscription]]]</span>
+                <button type="button" class="close popup-close" title="Close" aria-label="Close" onclick="cancelSubscription()">
+                    <span class="su su-close"></span>
+                </button>
+                
+            </h4>
+        </div>
+        <div id="cancel-subscription-feedback-container" class="fluent-popup-body">
+            <label class="popup-label">[[[Sorry to see you go. Please give us some feedback so that we can improve.]]]</label>
+            <div class="feedback-reason-container">
+                <div class="reason-one">
+                    @Html.CheckBox("DifficultToUse", new { @class = "material-checkbox reason-checkbox checkbox1", @value = CancelSubscriptionReason.DifficultToUse, @onchange = "onChangeReason()" })
+                    @Html.Label("DifficultToUse", "[[[Difficult to use]]]", new { @class = "toggle-space reason-lable" })
+
+                </div>
+                <div class="reason-two">
+                    @Html.CheckBox("NotEnoughConnectors", new { @class = "material-checkbox reason-checkbox checkbox2", @value = CancelSubscriptionReason.NotEnoughConnectors, @onchange = "onChangeReason()" })
+                    @Html.Label("NotEnoughConnectors", "[[[Not enough connectors]]]", new { @class = "toggle-space reason-lable" })
+                </div>
+                <div class="reason-three">
+                    @Html.CheckBox("IDidNotGetAroundToTrying", new { @class = "material-checkbox reason-checkbox checkbox3", @value = CancelSubscriptionReason.IDidNotGetAroundToTrying, @onchange = "onChangeReason()" })
+                    @Html.Label("IDidNotGetAroundToTrying", "[[[I didn't get around to trying]]]", new { @class = "toggle-space reason-lable" })
+                </div>
+                <div class="reason-four">
+                    @Html.CheckBox("FoundAnotherProduct", new { @class = "material-checkbox reason-checkbox checkbox4", @value = CancelSubscriptionReason.FoundAnotherProduct, @onchange = "onChangeReason()" })
+                    @Html.Label("FoundAnotherProduct", "[[[Found another product]]]", new { @class = "toggle-space reason-lable" })
+                </div>
+                <div class="reason-five">
+                    @Html.CheckBox("Other", new { @class = "material-checkbox reason-checkbox checkbox5", @value = CancelSubscriptionReason.Other, @onchange = "onChangeReason()" })
+                    @Html.Label("Other", "[[[Other]]]", new { @class = "toggle-space reason-lable" })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="popup-label" for="comment">[[[We appreciate any additional details you can provide]]]</label>
+                <textarea class="form-control textarea" maxlength="255" rows="5" id="comment"></textarea>
+            </div>
+            <span class="error-message"></span>
+            <div id="cancel-subscription-feedback-checkbox">
+                @Html.CheckBox("cancel-subscription-feedback", true, new { @class = "material-checkbox" })
+                @Html.Label("cancel-subscription-feedback", "[[[May we contact you to follow up on your feedback?]]]", new { @class = "toggle-space reason-lable" })
+            </div>
+        </div>
+        <div id="cancel-subscription-feedback-button" class="fluent-popup-footer">
+            <div id="button-container" class="col-xs-12">
+                <button type="button" id="ignore-button" class="app-button app-secondary-button cookie-button pull-right" onclick="cancelSubscription()">[[[Ignore]]]</button>
+                <button type="button" id="send-button" class="app-button app-primary-button pull-right" disabled="disabled">[[[Submit]]]</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

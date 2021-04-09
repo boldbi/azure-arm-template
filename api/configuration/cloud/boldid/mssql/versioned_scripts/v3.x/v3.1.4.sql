@@ -1,0 +1,1 @@
+﻿UPDATE [TenantInvoiceDetails] SET [Amount]=[Amount]*100

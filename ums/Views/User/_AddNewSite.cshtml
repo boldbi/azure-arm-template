@@ -1,0 +1,20 @@
+﻿@{
+    var name = ViewBag.TenantType == TenantType.BoldBI || ViewBag.TenantType == TenantType.BoldReports ? "sites" : "portals";
+    var currentUserEmail = (Context.User.Identity).Name;
+}
+<script>
+    var addOnPremisePortalUrl = "@Url.Action("AddOnPremisePortal", "Home")";
+</script>
+<div id="no-sites-found-container">
+    <div class="no-sites-found-data">
+        <img class="no-sites-margin" alt="No_Sites_Found" src="@GlobalAppSettings.CdnDomain/static/sites/v1/no-sites-found.svg" onerror="this.onerror=null;this.src='@Url.Content("~/content/images/common/application/no-sites-found.svg")';">
+        <h1 class="no-sites-margin">No @name found</h1>
+
+        @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+        {
+            <button data-url="@(ViewBag.TenantType != null ? CloudAppConfig.GetTenantRegistartionUrl(ViewBag.TenantType) : string.Empty)" data-is-cloud="@(ViewBag.IsCloudTenant != null ? ViewBag.IsCloudTenant : false)" data-tenant-type="@ViewBag.TenantType" class="add-site-action-button no-sites-margin">Start Trial</button>
+        }
+
+        <p class="no-sites-margin">You were signed in as <b>@currentUserEmail</b>. If this wasn't the account you intended to use, please <a href="@Url.Action("logout", "accounts")">sign out and sign in</a> again using the intended account.</p>
+    </div>
+</div>

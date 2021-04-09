@@ -1,0 +1,357 @@
+﻿@{
+    var showSyncfusionBrand = GlobalAppSettings.SystemSettings.IsShowPoweredBySyncfusion ? "form-group" : "form-group hide";
+
+    var protocolTypes = new List<SelectListItem>
+{
+new SelectListItem
+{
+    Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+},
+new SelectListItem
+{
+    Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+}
+};
+}
+
+<div id="look-and-feel-container" class="admin-page-container">
+    <div id="organization-block" class="col-xs-12 no-padding">
+        <div class="col-md-12 import-area admin-page-header">
+            <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                <h1 class="h2 page-title">[[[SITE SETTINGS]]]</h1>
+                <h5 class="page-description">[[[Configure general settings of the application]]]</h5>
+            </hgroup>
+        </div>
+
+        <form id="look-and-feel-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+
+            <div class="general-sub-section admin-page-body">
+                <h3 class="title col-lg-12 sub-section-heading">[[[General]]]</h3>
+                <div class="form-group">
+                    @Html.Label("site-orgname", "[[[Organization name]]]", new
+                    {
+                        @class = "col-xs-2 app-textbox-label"
+                    })
+                    <div class="col-xs-4">
+                        <input type="text" id="site-orgname" class="form-control site-orgname-fields" placeholder="[[[Enter your Organization Name]]]" value="@ViewBag.SystemSettings.OrganizationName" data-original-value="@ViewBag.SystemSettings.OrganizationName" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label("enable-ssl", "[[[Site URL]]]", new
+                    {
+                        @class = "col-xs-2 app-textbox-label"
+                    })
+
+                    <div id="ssl-selectpicker" class="input-group col-xs-4">
+                        <div class="input-group-addon">
+                            @Html.DropDownList("enableSsl", protocolTypes, new
+                            {
+                                id = "enable-ssl",
+                                @class = "selectpicker",
+                                data_live_search = "false"
+                            })
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="[[[Enter your URL]]]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+                        </div>
+                    </div>
+                    @if (!CloudAppConfig.IsSelfHosted)
+                    {
+                        <div class="col-xs-6" id="help_text" style="display: @ViewBag.icon">
+                            <span id="error_icon" class="su su-info cursor-type" title=""></span>
+                            <div class="col-xs-2 dropdown-menu" id="ssl-help-message" style="display: none">
+                                [[[This application needs to be hosted in IIS with a valid SSL certificate assigned. Click]]] <a href="@CloudAppConfig.DocumentationUrl/dashboard-platform/dashboard-server/installation-and-deployment#host-in-iis">[[[here]]]</a> [[[for more details.]]]
+                            </div>
+                        </div>
+                    }
+
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-2"></div>
+                        <span class="validation-errors col-xs-4" id="site-url-validation"></span>
+                    </div>
+                    <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
+                </div>
+            </div>
+
+            <div class="col-lg-12 admin-page-body">
+                <h3 class="title col-lg-12 sub-section-heading">[[[Display]]]</h3>
+                <div class="form-group">
+                    @Html.Label("time-zone", "[[[Time Zone]]]", new
+                    {
+                        @class = "app-textbox-label col-lg-2"
+                    })
+                    <div class="dropup col-lg-4 time-zone-container">
+                        @Html.DropDownList("timezone", ViewBag.listTimeZone as IEnumerable<SelectListItem>, new
+                        {
+                            id = "time-zone",
+                            @class = "selectpicker form-control",
+                            data_none_results_text = "No results match",
+                            data_size = "10",
+                            title = "Select Timezone",
+                            data_live_search = "true",
+                            data_live_search_placeholder = "Search"
+                        })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label("ejMM_DD_YYYY", "[[[Date format]]]", new
+                    {
+                        @class = "app-textbox-label col-lg-2"
+                    })
+
+                    <div class="col-lg-10 top-padding">
+                        <div class="col-sm-3 no-padding">
+                            <input type="radio" class="css-radio" id="MM_DD_YYYY" name="date_format" value="MM/dd/yyyy" @(ViewBag.SystemSettings.DateFormat == "MM/dd/yyyy" ? "checked" : string.Empty) />
+                            <label for="MM_DD_YYYY">[[[MM/DD/YYYY]]]</label>
+                        </div>
+                        <div class="col-sm-3 no-padding">
+                            <input type="radio" class="css-radio" id="DD_MM_YYYY" name="date_format" value="dd/MM/yyyy" @(ViewBag.SystemSettings.DateFormat == "dd/MM/yyyy" ? "checked" : string.Empty) />
+                            <label for="DD_MM_YYYY">[[[DD/MM/YYYY]]]</label>
+                        </div>
+                        <div class="col-sm-3 no-padding">
+                            <input type="radio" class="css-radio" id="DD_MMM_YYYY" name="date_format" value="d MMM, yyyy" @(ViewBag.SystemSettings.DateFormat == "d MMM, yyyy" ? "checked" : string.Empty) />
+                            <label for="DD_MMM_YYYY">[[[DD MMM YYYY]]]</label>
+                        </div>
+                        <div class="col-sm-3 no-padding">
+                            <input type="radio" class="css-radio" id="MMM_DD_YYYY" name="date_format" value="MMM d, yyyy" @(ViewBag.SystemSettings.DateFormat == "MMM d, yyyy" ? "checked" : string.Empty) />
+                            <label for="MMM_DD_YYYY">[[[MMM DD YYYY]]]</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label("Use 24-hour format", "[[[Use 24-hour format]]]", new
+                    {
+                        @class = "app-textbox-label col-xs-2"
+                    })
+                    <div class="col-xs-4 timeformat switch-align">
+                        <span class="material-switch text-left">
+                            <input type="checkbox" id="time_format" name="enablefooter" @((bool)ViewBag.SystemSettings.TimeFormat ? "checked" : string.Empty) />
+                            <label for="time_format" class="label-primary"></label>
+                        </span>
+                        <div class="time">
+                            13.00
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-2"></div>
+                            <span class="validation-message col-xs-4" message=13></span>
+                        </div>
+
+                    </div>
+                </div>
+                @if (CloudAppConfig.IsSelfHosted)
+                {
+                    <div class="form-group">
+                        @Html.Label("language", "[[[Application language]]]", new { @class = "col-xs-2 app-textbox-label" })
+                        <div class="dropdown col-xs-3 language-group">
+                            @Html.DropDownList("language", ViewBag.languageList as IEnumerable<SelectListItem>, new { id = "language", @class = "selectpicker form-control pull-left", data_live_search = "false" })
+                            <input type="hidden" id="lang_tag" value="@ViewBag.systemLanguage">
+                            <input type="hidden" id="return_url" value="@ViewBag.SystemSettings.BaseUrl">
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-xs-12 sub-section admin-page-body @(ViewBag.ThirdPartyLogins ||  ViewBag.WhiteLabel || ViewBag.CustomDomain ? string.Empty : "unlock-enterprise-features")">
+                <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content">[[[Branding]]]</h3>
+
+                <div class="col-xs-6 no-margin no-padding blur-whitelable-content" style="height:auto">
+                    <div class="form-group highlight-image" data-image="login-screen">
+                        @Html.Label("login-screen-image", "[[[Log in screen]]]", new
+                        {
+                            @class = "col-xs-4 app-textbox-label"
+                        })
+                        <div class="col-xs-8">
+                            <div class="input-group">
+                                <input type="text" id="upload-login-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
+                                <div id="upload-login-image-addon" title="Upload" class="input-group-addon">
+                                    <div id="upload-login-image" class="settings-upload-button">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="info-text">
+                                [[[*200x40 pixels preferred]]]
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group highlight-image" data-image="header-logo">
+                        <label class="col-xs-4 app-textbox-label">[[[Header Logo]]]</label>
+                        <div class="col-xs-8">
+                            <div class="input-group">
+                                <input type="text" id="upload-main-screen-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
+                                <span id="upload-main-screen-image-addon" title="Upload" class="input-group-addon">
+                                    <div id="upload-Main-screen-image" class="settings-upload-button"></div>
+                                </span>
+                            </div>
+
+                            <span class="info-text">
+                                [[[*40x40 pixels preferred]]]
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group highlight-image" data-image="favicon">
+                        <label class="col-xs-4 app-textbox-label">[[[Favicon]]]</label>
+                        <div class="col-xs-8">
+                            <div class="input-group">
+                                <input type="text" id="upload-favicon-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
+                                <span id="upload-favicon-image-addon" title="Upload" class="input-group-addon">
+                                    <div id="upload-favicon-image" class="settings-upload-button"></div>
+                                </span>
+                            </div>
+                            <span class="info-text">
+                                [[[*40x40 pixels preferred]]]
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group highlight-image" data-image="email-logo">
+                        <label class="col-xs-4 app-textbox-label">[[[Email logo]]]</label>
+                        <div class="col-xs-8">
+                            <div class="input-group">
+                                <input type="text" id="upload-emaillogo-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
+                                <span id="upload-emaillogo-image-addon" class="input-group-addon">
+                                    <div id="upload-emaillogo-image" class="settings-upload-button"></div>
+                                </span>
+                            </div>
+                            <span class="info-text">
+                                *[[[200x40 pixels preferred]]]
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-6 text-center blur-whitelable-content" style="height: 290px;">
+                    <div id="image-container" class="center-img" style="height: 230px;">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" class="login-img">
+                                        <span title="Log in screen" data-toggle="tooltip" data-animation="true" class="tooltip-container" data-image="login-screen">
+                                            @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                                            {
+                                                if (CloudAppConfig.IsSelfHosted)
+                                                {
+                                                    <img id="display-login-logo" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.LoginLogo)';" width="200" height="44" alt="Login Logo" />
+                                                }
+                                                else
+                                                {
+                                                    <img id="display-login-logo" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.LoginLogo" width="200" height="44" alt="Login Logo" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <img id="display-login-logo" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.LoginLogo)';" width="200" height="44" alt="Login Logo" />
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="app-img-container favicon tooltip-container" title="Favicon" data-toggle="tooltip" data-animation="true" data-image="favicon">
+                                            @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                                            {
+                                                if (CloudAppConfig.IsSelfHosted)
+                                                {
+                                                    <img id="favicon_logo_img" src="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.Favicon)';" width="16" height="16" alt="Favicon" />
+                                                }
+                                                else
+                                                {
+                                                    <img id="favicon_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.FavIcon" width="16" height="16" alt="Favicon" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <img id="favicon_logo_img" src="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.Favicon)';" width="16" height="16" alt="Favicon" />
+                                            }
+                                        </span>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="separator-img no-padding">
+                                        <img src="@GlobalAppSettings.SystemSettings.CDNLink/images/common/divider_light.png" )" alt="divider" />
+                                    </td>
+                                    <td colspan="2" class="separator-img no-padding">
+                                        <img src="@GlobalAppSettings.SystemSettings.CDNLink/images/common/divider_light.png" )" alt="divider" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <span class="app-img-container header-icon tooltip-container" title="Header Logo" data-toggle="tooltip" data-animation="true" data-image="header-logo">
+                                            @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                                            {
+                                                if (CloudAppConfig.IsSelfHosted)
+                                                {
+                                                    <img id="mainscreen_logo_img" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.MainLogo)';" width="40" height="40" alt="Main Screen Logo" />
+                                                }
+                                                else
+                                                {
+                                                    <img id="mainscreen_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.MainScreenLogo" width="40" height="40" alt="Main Screen Logo" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <img id="mainscreen_logo_img" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.MainLogo)';" width="40" height="40" alt="Main Screen Logo" />
+                                            }
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="app-img-container email-icon tooltip-container" title="Email Logo" data-toggle="tooltip" data-animation="true" data-image="email-logo">
+                                            @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                                            {
+                                                if (CloudAppConfig.IsSelfHosted)
+                                                {
+                                                    <img id="email_logo_img" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.EmailLogo)';" height="40" max-width="40" alt="Email Logo" />
+                                                }
+                                                else
+                                                {
+                                                    <img id="email_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.EmailLogo" height="40" max-width="40" alt="Email Logo" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <img id="email_logo_img" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.EmailLogo)';" max-height="40" max-width="200" alt="Email Logo" />
+                                            }
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="@showSyncfusionBrand blur-whitelable-content powered-by-syncfusion">
+                    @Html.Label("enablepoweredbysyncfusion", "[[[Show powered by Syncfusion]]]", new
+                    {
+                        @class = "app-textbox-label col-xs-2"
+                    })
+                    <div class="col-xs-4 enablepoweredbysyncfusion switch-align">
+                        <span class="material-switch text-left">
+                            <input type="checkbox" id="enablepoweredbysyncfusion" name="enablefooter" @((bool)ViewBag.SystemSettings.IsEnablePoweredBySyncfusion ? "checked" : string.Empty) />
+                            <label for="enablepoweredbysyncfusion" class="label-primary"></label>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group blur-whitelable-content">
+                    @Html.Label("enablecopyrightinfo", "[[[Show copyright information]]]", new
+                    {
+                        @class = "app-textbox-label col-xs-2"
+                    })
+                    <div class="col-xs-4 enablecopyrightinfo switch-align">
+                        <span class="material-switch text-left">
+                            <input type="checkbox" id="enablecopyrightinfo" name="enablefooter" @((bool)ViewBag.SystemSettings.IsEnableCopyrightInfo ? "checked" : string.Empty) />
+                            <label for="enablecopyrightinfo" class="label-primary"></label>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+        <a href="@Url.Content("~/")" class="secondary-button pull-right" id="cancel-site-settings" title="">[[[Cancel]]]</a>
+        <button type="button" title="" id="update-mail-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings">
+            [[[Save]]]
+        </button>
+    </div>
+</div>
+<script>
+    var isSitesPage = "true";
+</script>
