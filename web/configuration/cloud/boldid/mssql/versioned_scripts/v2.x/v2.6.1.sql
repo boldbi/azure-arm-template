@@ -1,0 +1,53 @@
+﻿Update [dbo].[SystemSettings] set [SystemValue] = '<?xml version="1.0" encoding="UTF-8"?><NotificationInfo><Notification><ScheduleType>AccountActivationReminder</ScheduleType><Intervals><Days>1</Days></Intervals><ExpireDays>2</ExpireDays></Notification><Notification><ScheduleType>PaymentDetailsUpdateReminder</ScheduleType><Intervals><Days>10</Days><Days>8</Days><Days>5</Days><Days>2</Days><Days>1</Days></Intervals><ExpireDays>30</ExpireDays></Notification><Notification><ScheduleType>MarkForSuspensionReminder</ScheduleType><Intervals><Days>31</Days></Intervals><ExpireDays>31</ExpireDays></Notification><Notification><ScheduleType>SuspendGraceReminder</ScheduleType><Intervals><Days>2</Days><Days>4</Days><Days>6</Days></Intervals><ExpireDays>7</ExpireDays></Notification><Notification><ScheduleType>DeletionGraceReminder</ScheduleType><Intervals><Days>5</Days><Days>10</Days><Days>15</Days><Days>19</Days><Days>20</Days><Days>21</Days><Days>22</Days></Intervals><ExpireDays>23</ExpireDays></Notification><Notification><ScheduleType>ResourceDeletionGraceReminder</ScheduleType><Intervals><Days>15</Days><Days>29</Days></Intervals><ExpireDays>30</ExpireDays></Notification></NotificationInfo>' where id='39'
+Go
+
+INSERT [dbo].[SourceType] ([Name] ,[URL] ,[ModifiedDate], [IsActive]) VALUES (N'Identity Provider', N'https://id.boldbi.com', GetDate(), 1)
+Go
+
+INSERT [dbo].[SaaSPlan] ([Name], [PlanSchema], [TrialDays], [PriorityOrder], [TenantTypeId], [ModifiedDate], [IsInternal], [IsActive]) values (N'Business 10', N'jOS8fQeRafN+OmuhkdZzib0vs/mdtxFFcqEvSrU+Pgx2QJF/USUQO+x5MbgT4GUjq4oAyDjZDnf5Z4UM9QDqnazGmJw+/45VCpaPCbEnwVa+f1wsm7TbmoaIi/8oRq7HTQTtxYgE86RQgdJyA4/XT/Om0Fv+GPZJt7mOZTqzqXVMKcHzoxQsQgQOTM6x1T+J+ntEcyO4HcUpEqqPg7vrKj2zIpyUTvDr34WDI9bwRtVlrOQoWiUT3ExL68RVcUq6rnR+7Xt8h5A2rQ/Q7CMo5+s8w3arhaP/mn8r7f0sHkfWDaDOvlNdB8qNlOMB7iY3SOPLINIaNn3B6G7Yq5EbEtS4yb63k+DFUSrl5iDVJ1171RfbY7yTQns6xZHISkF0fQyEYcpYoUK1+68MLkrz3O7eHMLMbiutXP179LCVJn3rKcIuz/lqsnzDVCrVHwLrbM+C7mUZcseMwcdp1FsCloDn22KLiDZVSf8kSOC1hWtm6lzKtcn6jEyTyanqKdqU4tk67GR/okSoaPtBHsakgHMkqnJLPNkJL34MhJdpOwjlOlwMZZGCHI6PUhgyK1jR6zG25dZqDRSFjbj/nffezsLoLhsYH8S4wli1nPTOVRR6V+0IwSlR+s9Jh4BzfQYC1976CGwqF0wapx3+VO85K5neXcXxax6pZO/fRTv2FyIfUVSyWFbK1pUkOVpN536vaJc58jBd3P6AXDzFEQ/+tch4jYOVJINMei+WHkCzG8SvpictqXZ2Shq7J6qDE2lJB3j84XfkXo1BdZWTLPu1qhqNLzP82hVVzBJAN5ja/YwZjOO+E9NJrLjW3j6l3Mw0+itKSKOES+Jtin83w2KYAP9ro6qGjzdavylRa7R6GLB+QE14MlQSI7x16hf4jsvVjeO1yejyJNTknSBf2wpQYA==', 15, 1, 4, GETDATE(), 0, 1)
+GO
+INSERT [dbo].[SaaSPlan] ([Name], [PlanSchema], [TrialDays], [PriorityOrder], [TenantTypeId], [ModifiedDate], [IsInternal], [IsActive]) values (N'Business 25', N'jOS8fQeRafN+OmuhkdZzib0vs/mdtxFFcqEvSrU+Pgx2QJF/USUQO+x5MbgT4GUjq4oAyDjZDnf5Z4UM9QDqnazGmJw+/45VCpaPCbEnwVa+f1wsm7TbmoaIi/8oRq7HTQTtxYgE86RQgdJyA4/XT/Om0Fv+GPZJt7mOZTqzqXVMKcHzoxQsQgQOTM6x1T+J+ntEcyO4HcUpEqqPg7vrKj2zIpyUTvDr34WDI9bwRtVlrOQoWiUT3ExL68RVcUq6rnR+7Xt8h5A2rQ/Q7CMo5+s8w3arhaP/mn8r7f0sHkfWDaDOvlNdB8qNlOMB7iY3SOPLINIaNn3B6G7Yq5EbEtS4yb63k+DFUSrl5iDVJ1171RfbY7yTQns6xZHISkF0fQyEYcpYoUK1+68MLkrz3O7eHMLMbiutXP179LCVJn3rKcIuz/lqsnzDVCrVHwLrbM+C7mUZcseMwcdp1FsCloDn22KLiDZVSf8kSOC1hWtm6lzKtcn6jEyTyanqKdqU4tk67GR/okSoaPtBHsakgHMkqnJLPNkJL34MhJdpOwjlOlwMZZGCHI6PUhgyK1jRmwxiRXe77A1eUrEYHIqkTmHkLvqbAD+sJOjxGl64p5IZyBiPHpO+RRjfqc56GUtK5z3oWsxOHMf/2WyaCuvYYIOnBi/rCFlaZw5bThY7oPKBMSUT69p19DewTnzVSlXeBXPdxhndwpYG4APT3IixBhqybhEESeOQpZicxhVvacZPlkHvoNx+L+ywKOiiWyt0alptE2hlinGQraeS8fP//DxUvHcvvX4we9GsePULxRqNbMYTHrtyln5C2z/8KOD8lVeAoMnVApMQadEOBiZIaIKPDDgzvstXoiBow7Ivn8Scanps0SmXWaHzNq/aSJJAlVMSJ7SM43EQdNIpQZ9oQA==', 15, 2, 4, GETDATE(), 0, 1)
+GO
+INSERT [dbo].[SaaSPlan] ([Name], [PlanSchema], [TrialDays], [PriorityOrder], [TenantTypeId], [ModifiedDate], [IsInternal], [IsActive]) values (N'Business 50', N'jOS8fQeRafN+OmuhkdZzib0vs/mdtxFFcqEvSrU+Pgx2QJF/USUQO+x5MbgT4GUjq4oAyDjZDnf5Z4UM9QDqnazGmJw+/45VCpaPCbEnwVa+f1wsm7TbmoaIi/8oRq7HTQTtxYgE86RQgdJyA4/XT/Om0Fv+GPZJt7mOZTqzqXVMKcHzoxQsQgQOTM6x1T+J+ntEcyO4HcUpEqqPg7vrKj2zIpyUTvDr34WDI9bwRtVlrOQoWiUT3ExL68RVcUq6rnR+7Xt8h5A2rQ/Q7CMo5+s8w3arhaP/mn8r7f0sHkfWDaDOvlNdB8qNlOMB7iY3SOPLINIaNn3B6G7Yq5EbEtS4yb63k+DFUSrl5iDVJ1171RfbY7yTQns6xZHISkF0fQyEYcpYoUK1+68MLkrz3O7eHMLMbiutXP179LCVJn3rKcIuz/lqsnzDVCrVHwLrbM+C7mUZcseMwcdp1FsCloDn22KLiDZVSf8kSOC1hWtm6lzKtcn6jEyTyanqKdqU4tk67GR/okSoaPtBHsakgHMkqnJLPNkJL34MhJdpOwjlOlwMZZGCHI6PUhgyK1jRZd9JTlRNIseMAg24hiLFnlcZZH/eQOJNRD6qx4qVOlERJRKApyD9MuQlfav2wSWAp6fzSJ/iwSHx0CA5KRXQbzgZB/370szlkpV/SfVO0YCIyLehUsTvuZrbDYsIFnVy0zbHGtNiHf8d7V41zWCkDJgOmzmDOqQaHYc6Q39K85Rt7x3RwpKTiy37LHzb3RdXnLv7vwBlH93ojkxZyrizBAiD7GzH7sea7qg2m7T5oU7QDBpbpCy6T8718lt8z5bSdJBGLgYcmbv6RJ/Ee9jTYdWCUWiTTF3onKPIVY0iTAhRuoO2jYQiki/D2lAEUKXrLLksiLiOawHlYFSd420zmQ==', 15, 3, 4, GETDATE(), 0, 1)
+GO
+INSERT [dbo].[SaaSPlan] ([Name], [PlanSchema], [TrialDays], [PriorityOrder], [TenantTypeId], [ModifiedDate], [IsInternal], [IsActive]) values (N'Enterprise', N'jOS8fQeRafN+OmuhkdZzib0vs/mdtxFFcqEvSrU+Pgx2QJF/USUQO+x5MbgT4GUjq4oAyDjZDnf5Z4UM9QDqnazGmJw+/45VCpaPCbEnwVa+f1wsm7TbmoaIi/8oRq7HTQTtxYgE86RQgdJyA4/XT/Om0Fv+GPZJt7mOZTqzqXVMKcHzoxQsQgQOTM6x1T+J+ntEcyO4HcUpEqqPg7vrKj2zIpyUTvDr34WDI9bwRtVlrOQoWiUT3ExL68RVcUq6rnR+7Xt8h5A2rQ/Q7CMo5+s8w3arhaP/mn8r7f0sHkfWDaDOvlNdB8qNlOMB7iY3SOPLINIaNn3B6G7Yq5EbEtS4yb63k+DFUSrl5iDVJ1171RfbY7yTQns6xZHISkF0fQyEYcpYoUK1+68MLkrz3O7eHMLMbiutXP179LCVJn3rKcIuz/lqsnzDVCrVHwLrbM+C7mUZcseMwcdp1FsCloDn22KLiDZVSf8kSOC1hWtm6lzKtcn6jEyTyanqKdqUPIvcVFkcEiEzXQ8u5QWAFgopEH0dF7sCO2fCTGa670aPW4KSpQxiJ/hFUc59ehNILeOEGSpFy71XWGo47+ufTeuRdzvb1QxXW9jiB9O6RnWxy5UzmG6cK0EhMjcaB8fpGiaH8HZ4/9uzGtOhC1OIxdC3kH0QEqMaZAkOPJ/q5D1iJu0xmlXu8oVhS7Tt9bnD/mVYjF5f6Lvm6wApq7pSbZ6S93ypvCQ2wtvxhSR4tNToaXkqSFPE7MxDPUD/xhB53tQ8eWBQ5wt4FBLD1Cb9Rg/TpIGn5fjJJqAPcvLKUbS/fnszqHaBn6EjpcjqHR1xypUo1QX1Ueos3r1bb7sA0svSE8jzpDqbcFduukaE4bFoCaeA8p2ZGElU0ylD6rPYcTe8pbwY7MDpPptfzp5MNw==', 15, 4, 4, GETDATE(), 0, 1)
+GO
+INSERT [dbo].[SaaSPlan] ([Name], [PlanSchema], [TrialDays], [PriorityOrder], [TenantTypeId], [ModifiedDate], [IsInternal], [IsActive]) values (N'Custom', N'jOS8fQeRafN+OmuhkdZzib0vs/mdtxFFcqEvSrU+Pgx2QJF/USUQO+x5MbgT4GUjq4oAyDjZDnf5Z4UM9QDqnazGmJw+/45VCpaPCbEnwVa+f1wsm7TbmoaIi/8oRq7HTQTtxYgE86RQgdJyA4/XT/Om0Fv+GPZJt7mOZTqzqXVMKcHzoxQsQgQOTM6x1T+J+ntEcyO4HcUpEqqPg7vrKj2zIpyUTvDr34WDI9bwRtVlrOQoWiUT3ExL68RVcUq6rnR+7Xt8h5A2rQ/Q7CMo5+s8w3arhaP/mn8r7f0sHkfWDaDOvlNdB8qNlOMB7iY3SOPLINIaNn3B6G7Yq5EbEtS4yb63k+DFUSrl5iDVJ1171RfbY7yTQns6xZHISkF0fQyEYcpYoUK1+68MLkrz3O7eHMLMbiutXP179LCVJn3rKcIuz/lqsnzDVCrVHwLrbM+C7mUZcseMwcdp1FsCloDn22KLiDZVSf8kSOC1hWtm6lzKtcn6jEyTyanqKdqUPIvcVFkcEiEzXQ8u5QWAFgopEH0dF7sCO2fCTGa670aPW4KSpQxiJ/hFUc59ehNILeOEGSpFy71XWGo47+ufTXuiYHOaO26IX6H5ROhOz/udIYR+ogFDrjr4m/6SxgqjhQ+1wzkiPImXL+Ar74SNW7rlBJS6p08twrCpZlvEiHKZq0Kn07YPvPEK2rH8iPp21ryHomMhxpGNKm+Odi8+bjQKhEBR4PP+uyh60JCvPpOiT0e6Kw+/Tubba9LoNOQjJJQ3ftw+eq2FR+ORF8rvAzyfnWckuqckDk+sBwgO+9Y8MLi2a0AkMdRU5JxMQBPFG3utpJyziz4aXhNut3i3FFDpdtYOVyfkRj17ikgOjqa94lFlP+sdsqhZ90LCQEtu', 15, 5, 4, GETDATE(), 1, 1)
+GO
+
+INSERT INTO [ProductVersion] ([Major],[Minor],[Patch],[DisplayVersion],[ProductTypeId],[ReleaseTypeId],[ReleaseDate],[IsLatest],[IsActive]) VALUES (N'1',N'1',N'17',N'1.1.17',N'4',N'1',GETDATE(),1,1)
+GO
+
+-- For staging
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7878, N'BoldReportsOnPremiseSingleTenantBusiness10', 1, 29, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7879, N'BoldReportsOnPremiseSingleTenantBusiness10Subscription', 2, 29, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7880, N'BoldReportsOnPremiseSingleTenantBusiness25', 1, 30, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7881, N'BoldReportsOnPremiseSingleTenantBusiness25Subscription', 2, 30, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7882, N'BoldReportsOnPremiseSingleTenantBusiness50', 1, 31, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7883, N'BoldReportsOnPremiseSingleTenantBusiness50Subscription', 2, 31, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7884, N'BoldReportsOnPremiseSingleTenantEnterprise', 1, 32, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7885, N'BoldReportsOnPremiseSingleTenantEnterpriseSubscription', 2, 32, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7886, N'BoldReportsOnPremiseSingleTenantEnterprise', 1, 32, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7887, N'BoldReportsOnPremiseSingleTenantEnterpriseSubscription', 2, 32, 1)
+
+-- For production
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7885, N'BoldReportsOnPremiseSingleTenantBusiness10', 1, 29, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7886, N'BoldReportsOnPremiseSingleTenantBusiness10Subscription', 2, 29, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7887, N'BoldReportsOnPremiseSingleTenantBusiness25', 1, 30, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7888, N'BoldReportsOnPremiseSingleTenantBusiness25Subscription', 2, 30, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7889, N'BoldReportsOnPremiseSingleTenantBusiness50', 1, 31, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7890, N'BoldReportsOnPremiseSingleTenantBusiness50Subscription', 2, 31, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7891, N'BoldReportsOnPremiseSingleTenantEnterprise', 1, 32, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7892, N'BoldReportsOnPremiseSingleTenantEnterpriseSubscription', 2, 32, 1)
+
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7893, N'BoldReportsOnPremiseSingleTenantEnterprise', 1, 33, 1)
+INSERT [dbo].[IntranetProductType] ([ProductId], [ProductName], [OrderTypeId], [PlanId], [IsActive]) VALUES (7894, N'BoldReportsOnPremiseSingleTenantEnterpriseSubscription', 2, 33, 1)
