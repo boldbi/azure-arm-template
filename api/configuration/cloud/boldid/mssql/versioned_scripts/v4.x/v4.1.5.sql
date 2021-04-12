@@ -1,1 +1,0 @@
-﻿INSERT [dbo].[TenantLogType] ([Name], [IsActive]) VALUES (N'ConciergeSupport', 1)
