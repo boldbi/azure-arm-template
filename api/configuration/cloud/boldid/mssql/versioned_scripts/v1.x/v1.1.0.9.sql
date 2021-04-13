@@ -1,0 +1,1 @@
+﻿ALTER TABLE [Tenant] ADD [IsInternal] bit NOT NULL DEFAULT 0
