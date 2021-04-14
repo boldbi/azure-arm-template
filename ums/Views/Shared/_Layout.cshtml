@@ -3,7 +3,7 @@
 
     var currentUserId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
 
-    var showMenuBar = Context.User.Identity.IsAuthenticated && (ViewBag.ShowMenuBar == null || ViewBag.ShowMenuBar) && new GlobalAppSettings().IsAdmin(Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value)) || new UserManagement().IsTenantMangementUser(currentUserId);
+    var showMenuBar = Context.User.Identity.IsAuthenticated && (ViewBag.ShowMenuBar == null || ViewBag.ShowMenuBar) && Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) || new UserManagement().IsTenantMangementUser(currentUserId);
 
     var helpSiteBaseUrl = GlobalAppSettings.Configuration.GetSection("AppSettings")["documentation:base_url"];
     var isMobile = DeviceDetection.IsMobile;
