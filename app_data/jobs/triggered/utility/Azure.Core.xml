@@ -410,7 +410,12 @@
         </member>
         <member name="P:Azure.Core.HttpHeader.Names.ContentDisposition">
             <summary>
-            Returns <code>"Content-Disposition"</code>
+            Returns <code>"Content-Disposition"</code>.
+            </summary>
+        </member>
+        <member name="P:Azure.Core.HttpHeader.Names.WwwAuthenticate">
+            <summary>
+            Returns <code>"WWW-Authenticate"</code>.
             </summary>
         </member>
         <member name="T:Azure.Core.HttpHeader.Common">
@@ -498,7 +503,7 @@
         </member>
         <member name="M:Azure.Core.HttpMessage.ExtractResponseContent">
             <summary>
-            Returns the response content stream and releases it ownership to the caller. After calling this methods using <see cref="P:Azure.Response.ContentStream" /> would result in exception.
+            Returns the response content stream and releases it ownership to the caller. After calling this methods using <see cref="P:Azure.Response.ContentStream" /> or <see cref="P:Azure.Response.Content" /> would result in exception.
             </summary>
             <returns>The content stream or null if response didn't have any.</returns>
         </member>
@@ -682,6 +687,13 @@
              </code>
              </example>
         </member>
+        <member name="M:Azure.Core.Pipeline.HttpPipeline.CreateHttpMessagePropertiesScope(System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Creates a scope in which all <see cref="T:Azure.Core.HttpMessage" />s would have provided properties.
+            </summary>
+            <param name="messageProperties">Properties to be added to <see cref="T:Azure.Core.HttpMessage" />s</param>
+            <returns>The <see cref="T:System.IDisposable" /> instance that needs to be disposed when properties shouldn't be used anymore.</returns>
+        </member>
         <member name="T:Azure.Core.Pipeline.HttpPipelineBuilder">
             <summary>
             Factory for creating instances of <see cref="T:Azure.Core.Pipeline.HttpPipeline" /> populated with default policies.
@@ -743,6 +755,11 @@
         <member name="T:Azure.Core.Pipeline.HttpPipelineSynchronousPolicy">
             <summary>
             Represents a <see cref="T:Azure.Core.Pipeline.HttpPipelinePolicy" /> that doesn't do any asynchronous or synchronously blocking operations.
+            </summary>
+        </member>
+        <member name="M:Azure.Core.Pipeline.HttpPipelineSynchronousPolicy.#ctor">
+            <summary>
+            Initializes a new instance of <see cref="T:Azure.Core.Pipeline.HttpPipelineSynchronousPolicy" />
             </summary>
         </member>
         <member name="M:Azure.Core.Pipeline.HttpPipelineSynchronousPolicy.Process(Azure.Core.HttpMessage,System.ReadOnlyMemory{Azure.Core.Pipeline.HttpPipelinePolicy})">
@@ -984,6 +1001,41 @@
             </summary>
             <param name="bytes">The <see cref="T:System.Buffers.ReadOnlySequence`1" /> to use.</param>
             <returns>An instance of <see cref="T:Azure.Core.RequestContent" /> that wraps a <see cref="T:System.Buffers.ReadOnlySequence`1" />.</returns>
+        </member>
+        <member name="M:Azure.Core.RequestContent.Create(System.String)">
+            <summary>
+            Creates a RequestContent representing the UTF-8 Encoding of the given <see cref="T:System.String" />/
+            </summary>
+            <param name="content">The <see cref="T:System.String" /> to use.</param>
+            <returns>An instance of <see cref="T:Azure.Core.RequestContent" /> that wraps a <see cref="T:System.String" />.</returns>
+            <remarks>The returned content represents the UTF-8 Encoding of the given string.</remarks>
+        </member>
+        <member name="M:Azure.Core.RequestContent.Create(System.BinaryData)">
+            <summary>
+            Creates an instance of <see cref="T:Azure.Core.RequestContent" /> that wraps a <see cref="T:System.BinaryData" />.
+            </summary>
+            <param name="content">The <see cref="T:System.BinaryData" /> to use.</param>
+            <returns>An instance of <see cref="T:Azure.Core.RequestContent" /> that wraps a <see cref="T:System.BinaryData" />.</returns>
+        </member>
+        <member name="M:Azure.Core.RequestContent.Create(System.Object,Azure.Core.Serialization.ObjectSerializer)">
+            <summary>
+            Creates an instance of <see cref="T:Azure.Core.RequestContent" /> that wraps a serialized version of an object.
+            </summary>
+            <param name="serializable">The <see cref="T:System.Object" /> to serialize.</param>
+            <param name="serializer">The <see cref="T:Azure.Core.Serialization.ObjectSerializer" /> to use to convert the object to bytes. If not provided, <see cref="T:Azure.Core.Serialization.JsonObjectSerializer" /> is used.</param>
+            <returns>An instance of <see cref="T:Azure.Core.RequestContent" /> that wraps a serialized version of the object.</returns>
+        </member>
+        <member name="M:Azure.Core.RequestContent.op_Implicit(System.String)~Azure.Core.RequestContent">
+            <summary>
+            Creates a RequestContent representing the UTF-8 Encoding of the given <see cref="T:System.String" />.
+            </summary>
+            <param name="content">The <see cref="T:System.String" /> to use.</param>
+        </member>
+        <member name="M:Azure.Core.RequestContent.op_Implicit(System.BinaryData)~Azure.Core.RequestContent">
+            <summary>
+            Creates a RequestContent that wraps a <see cref="T:System.BinaryData" />.
+            </summary>
+            <param name="content">The <see cref="T:System.BinaryData" /> to use.</param>
         </member>
         <member name="M:Azure.Core.RequestContent.WriteToAsync(System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
@@ -1410,6 +1462,11 @@
             A <see cref="T:Azure.Core.Serialization.JsonObjectSerializer" /> implementation that uses <see cref="T:System.Text.Json.JsonSerializer" /> to for serialization/deserialization.
             </summary>
         </member>
+        <member name="P:Azure.Core.Serialization.JsonObjectSerializer.Default">
+            <summary>
+            A shared instance of <see cref="T:Azure.Core.Serialization.JsonObjectSerializer" />, initialized with the default options.
+            </summary>
+        </member>
         <member name="M:Azure.Core.Serialization.JsonObjectSerializer.#ctor">
             <summary>
             Initializes new instance of <see cref="T:Azure.Core.Serialization.JsonObjectSerializer" />.
@@ -1457,6 +1514,24 @@
             <param name="stream">The <see cref="T:System.IO.Stream" /> to read from.</param>
             <param name="returnType">The type of the object to convert to and return.</param>
             <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during deserialization.</param>
+        </member>
+        <member name="M:Azure.Core.Serialization.JsonObjectSerializer.Serialize(System.Object,System.Type,System.Threading.CancellationToken)">
+            <summary>
+            Convert the provided value to it's binary representation and return it as a <see cref="T:System.BinaryData" /> instance.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <param name="inputType">The type to use when serializing <paramref name="value" />. If omitted, the type will be determined using <see cref="M:System.Object.GetType" />().</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during serialization.</param>
+            <returns>The object's binary representation as <see cref="T:System.BinaryData" />.</returns>
+        </member>
+        <member name="M:Azure.Core.Serialization.JsonObjectSerializer.SerializeAsync(System.Object,System.Type,System.Threading.CancellationToken)">
+            <summary>
+            Convert the provided value to it's binary representation and return it as a <see cref="T:System.BinaryData" /> instance.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <param name="inputType">The type to use when serializing <paramref name="value" />. If omitted, the type will be determined using <see cref="M:System.Object.GetType" />().</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during serialization.</param>
+            <returns>The object's binary representation as <see cref="T:System.BinaryData" />.</returns>
         </member>
         <member name="M:Azure.Core.Serialization.JsonObjectSerializer.Azure#Core#Serialization#IMemberNameConverter#ConvertMemberName(System.Reflection.MemberInfo)">
             <summary>
@@ -1507,6 +1582,238 @@
             <param name="returnType">The type of the object to convert to and return.</param>
             <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during deserialization.</param>
         </member>
+        <member name="M:Azure.Core.Serialization.ObjectSerializer.Serialize(System.Object,System.Type,System.Threading.CancellationToken)">
+            <summary>
+            Convert the provided value to it's binary representation and return it as a <see cref="T:System.BinaryData" /> instance.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <param name="inputType">The type to use when serializing <paramref name="value" />. If omitted, the type will be determined using <see cref="M:System.Object.GetType" />().</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during serialization.</param>
+            <returns>The object's binary representation as <see cref="T:System.BinaryData" />.</returns>
+        </member>
+        <member name="M:Azure.Core.Serialization.ObjectSerializer.SerializeAsync(System.Object,System.Type,System.Threading.CancellationToken)">
+            <summary>
+            Convert the provided value to it's binary representation and return it as a <see cref="T:System.BinaryData" /> instance.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <param name="inputType">The type to use when serializing <paramref name="value" />. If omitted, the type will be determined using <see cref="M:System.Object.GetType" />().</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during serialization.</param>
+            <returns>The object's binary representation as <see cref="T:System.BinaryData" />.</returns>
+        </member>
+        <member name="T:Azure.Core.SyncAsyncEventHandler`1">
+             <summary>
+             Represents a method that can handle an event and execute either
+             synchronously or asynchronously.
+             </summary>
+             <typeparam name="T">
+             Type of the event arguments deriving or equal to
+             <see cref="T:Azure.SyncAsyncEventArgs" />.
+             </typeparam>
+             <param name="e">
+             An <see cref="T:Azure.SyncAsyncEventArgs" /> instance that contains the event
+             data.
+             </param>
+             <returns>
+             A task that represents the handler.  You can return
+             <see cref="P:System.Threading.Tasks.Task.CompletedTask" /> if implementing a sync handler.
+             Please see the Remarks section for more details.
+             </returns>
+             <example>
+             <para>
+             If you're using the synchronous, blocking methods of a client (i.e.,
+             methods without an Async suffix), they will raise events that require
+             handlers to execute synchronously as well.  Even though the signature
+             of your handler returns a <see cref="T:System.Threading.Tasks.Task" />, you should write regular
+             sync code that blocks and return <see cref="P:System.Threading.Tasks.Task.CompletedTask" /> when
+             finished.
+             <code snippet="Snippet:Azure_Core_Samples_EventSamples_SyncHandler">
+             var client = new AlarmClient();
+             client.Ring += (SyncAsyncEventArgs e) =&gt;
+             {
+                 Console.WriteLine("Wake up!");
+                 return Task.CompletedTask;
+             };
+            
+             client.Snooze();
+             </code>
+             If you need to call an async method from a synchronous event handler,
+             you have two options.  You can use <see cref="M:System.Threading.Tasks.Task.Run(System.Action)" /> to
+             queue a task for execution on the ThreadPool without waiting on it to
+             complete.  This "fire and forget" approach may not run before your
+             handler finishes executing.  Be sure to understand
+             <see href="https://docs.microsoft.com/dotnet/standard/parallel-programming/exception-handling-task-parallel-library">
+             exception handling in the Task Parallel Library</see> to avoid
+             unhandled exceptions tearing down your process.  If you absolutely need
+             the async method to execute before returning from your handler, you can
+             call <c>myAsyncTask.GetAwaiter().GetResult()</c>.  Please be aware
+             this may cause ThreadPool starvation.  See the sync-over-async note in
+             Remarks for more details.
+             </para>
+             <para>
+             If you're using the asynchronous, non-blocking methods of a client
+             (i.e., methods with an Async suffix), they will raise events that
+             expect handlers to execute asynchronously.
+             <code snippet="Snippet:Azure_Core_Samples_EventSamples_AsyncHandler">
+             var client = new AlarmClient();
+             client.Ring += async (SyncAsyncEventArgs e) =&gt;
+             {
+                 await Console.Out.WriteLineAsync("Wake up!");
+             };
+            
+             await client.SnoozeAsync();
+             </code>
+             </para>
+             <para>
+             The same event can be raised from both synchronous and asynchronous
+             code paths depending on whether you're calling sync or async methods
+             on a client.  If you write an async handler but raise it from a sync
+             method, the handler will be doing sync-over-async and may cause
+             ThreadPool starvation.  See the note in Remarks for more details.  You
+             should use the <see cref="P:Azure.SyncAsyncEventArgs.IsRunningSynchronously" />
+             property to check how the event is being raised and implement your
+             handler accordingly.  Here's an example handler that's safe to invoke
+             from both sync and async code paths.
+             <code snippet="Snippet:Azure_Core_Samples_EventSamples_CombinedHandler">
+             var client = new AlarmClient();
+             client.Ring += async (SyncAsyncEventArgs e) =&gt;
+             {
+                 if (e.IsRunningSynchronously)
+                 {
+                     Console.WriteLine("Wake up!");
+                 }
+                 else
+                 {
+                     await Console.Out.WriteLineAsync("Wake up!");
+                 }
+             };
+            
+             client.Snooze(); // sync call that blocks
+             await client.SnoozeAsync(); // async call that doesn't block
+             </code>
+             </para>
+             </example>
+             <example>
+             </example>
+             <exception cref="T:System.AggregateException">
+             Any exceptions thrown by an event handler will be wrapped in a single
+             AggregateException and thrown from the code that raised the event.  You
+             can check the <see cref="P:System.AggregateException.InnerExceptions" /> property
+             to see the original exceptions thrown by your event handlers.
+             AggregateException also provides
+             <see href="https://docs.microsoft.com/en-us/archive/msdn-magazine/2009/brownfield/aggregating-exceptions">
+             a number of helpful methods</see> like
+             <see cref="M:System.AggregateException.Flatten" /> and
+             <see cref="M:System.AggregateException.Handle(System.Func{System.Exception,System.Boolean})" /> to make
+             complex failures easier to work with.
+             <code snippet="Snippet:Azure_Core_Samples_EventSamples_Exceptions">
+             var client = new AlarmClient();
+             client.Ring += (SyncAsyncEventArgs e) =&gt;
+                 throw new InvalidOperationException("Alarm unplugged.");
+            
+             try
+             {
+                 client.Snooze();
+             }
+             catch (AggregateException ex)
+             {
+                 ex.Handle(e =&gt; e is InvalidOperationException);
+                 Console.WriteLine("Please switch to your backup alarm.");
+             }
+             </code>
+             </exception>
+             <remarks>
+             <para>
+             Most Azure client libraries for .NET offer both synchronous and
+             asynchronous methods for calling Azure services.  You can distinguish
+             the asynchronous methods by their Async suffix.  For example,
+             BlobClient.Download and BlobClient.DownloadAsync make the same
+             underlying REST call and only differ in whether they block.  We
+             recommend using our async methods for new applications, but there are
+             perfectly valid cases for using sync methods as well.  These dual
+             method invocation semantics allow for flexibility, but require a little
+             extra care when writing event handlers.
+             </para>
+             <para>
+             The SyncAsyncEventHandler is a delegate used by events in Azure client
+             libraries to represent an event handler that can be invoked from either
+             sync or async code paths.  It takes event arguments deriving from
+             <see cref="T:Azure.SyncAsyncEventArgs" /> that contain important information for
+             writing your event handler:
+             <list type="bullet">
+             <item>
+             <description>
+             <see cref="P:Azure.SyncAsyncEventArgs.CancellationToken" /> is a cancellation
+             token related to the original operation that raised the event.  It's
+             important for your handler to pass this token along to any asynchronous
+             or long-running synchronous operations that take a token so cancellation
+             (via something like
+             <c>new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token</c>,
+             for example) will correctly propagate.
+             </description>
+             </item>
+             <item>
+             <description>
+             <see cref="P:Azure.SyncAsyncEventArgs.IsRunningSynchronously" /> is a flag indicating
+             whether your handler was invoked synchronously or asynchronously.  If
+             you're calling sync methods on your client, you should use sync methods
+             to implement your event handler (you can return
+             <see cref="P:System.Threading.Tasks.Task.CompletedTask" />).  If you're calling async methods on
+             your client, you should use async methods where possible to implement
+             your event handler.  If you're not in control of how the client will be
+             used or want to write safer code, you should check the
+             <see cref="P:Azure.SyncAsyncEventArgs.IsRunningSynchronously" /> property and call
+             either sync or async methods as directed.
+             </description>
+             </item>
+             <item>
+             <description>
+             Most events will customize the event data by deriving from
+             <see cref="T:Azure.SyncAsyncEventArgs" /> and including details about what
+             triggered the event or providing options to react.  Many times this
+             will include a reference to the client that raised the event in case
+             you need it for additional processing.
+             </description>
+             </item>
+             </list>
+             </para>
+             <para>
+             When an event using SyncAsyncEventHandler is raised, the handlers will
+             be executed sequentially to avoid introducing any unintended
+             parallelism.  The event handlers will finish before returning control
+             to the code path raising the event.  This means blocking for events
+             raised synchronously and waiting for the returned <see cref="T:System.Threading.Tasks.Task" /> to
+             complete for events raised asynchronously.
+             </para>
+             <para>
+             Any exceptions thrown from a handler will be wrapped in a single
+             <see cref="T:System.AggregateException" />.  If one handler throws an exception,
+             it will not prevent other handlers from running.  This is also relevant
+             for cancellation because all handlers are still raised if cancellation
+             occurs.  You should both pass <see cref="P:Azure.SyncAsyncEventArgs.CancellationToken" />
+             to asynchronous or long-running synchronous operations and consider
+             calling <see cref="M:System.Threading.CancellationToken.ThrowIfCancellationRequested" />
+             in compute heavy handlers.
+             </para>
+             <para>
+             A <see href="https://github.com/Azure/azure-sdk-for-net/blob/master/sdk/core/Azure.Core/samples/Diagnostics.md#distributed-tracing">
+             distributed tracing span</see> is wrapped around your handlers using
+             the event name so you can see how long your handlers took to run,
+             whether they made other calls to Azure services, and details about any
+             exceptions that were thrown.
+             </para>
+             <para>
+             Executing asynchronous code from a sync code path is commonly referred
+             to as sync-over-async because you're getting sync behavior but still
+             invoking all the async machinery. See
+             <see href="https://docs.microsoft.com/archive/blogs/vancem/diagnosing-net-core-threadpool-starvation-with-perfview-why-my-service-is-not-saturating-all-cores-or-seems-to-stall">
+             Diagnosing.NET Core ThreadPool Starvation with PerfView</see>
+             for a detailed explanation of how that can cause serious performance
+             problems.  We recommend you use the
+             <see cref="P:Azure.SyncAsyncEventArgs.IsRunningSynchronously" /> flag to avoid
+             ThreadPool starvation.
+             </para>
+             </remarks>
+        </member>
         <member name="T:Azure.Core.TokenCredential">
             <summary>
             Represents a credential capable of providing an OAuth token.
@@ -1540,6 +1847,14 @@
             <param name="scopes">The scopes required for the token.</param>
             <param name="parentRequestId">The <see cref="P:Azure.Core.Request.ClientRequestId" /> of the request requiring a token for authentication, if applicable.</param>
         </member>
+        <member name="M:Azure.Core.TokenRequestContext.#ctor(System.String[],System.String,System.String)">
+            <summary>
+            Creates a new TokenRequest with the specified scopes.
+            </summary>
+            <param name="scopes">The scopes required for the token.</param>
+            <param name="parentRequestId">The <see cref="P:Azure.Core.Request.ClientRequestId" /> of the request requiring a token for authentication, if applicable.</param>
+            <param name="claims">Additional claims to be included in the token.</param>
+        </member>
         <member name="P:Azure.Core.TokenRequestContext.Scopes">
             <summary>
             The scopes required for the token.
@@ -1548,6 +1863,11 @@
         <member name="P:Azure.Core.TokenRequestContext.ParentRequestId">
             <summary>
             The <see cref="P:Azure.Core.Request.ClientRequestId" /> of the request requiring a token for authentication, if applicable.
+            </summary>
+        </member>
+        <member name="P:Azure.Core.TokenRequestContext.Claims">
+            <summary>
+            Additional claims to be included in the token. See <see href="https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter">https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter</see> for more information on format and content.
             </summary>
         </member>
         <member name="T:Azure.Core.Argument">
@@ -1626,6 +1946,47 @@
             <param name="maximum">The maximum value to compare.</param>
             <param name="name">The name of the parameter.</param>
         </member>
+        <member name="T:Azure.Core.AuthorizationChallengeParser">
+            <summary>
+            A helper class for parsing Authorization challenge headers.
+            </summary>
+        </member>
+        <member name="M:Azure.Core.AuthorizationChallengeParser.GetChallengeParameterFromResponse(Azure.Response,System.String,System.String)">
+            <summary>
+            Parses the specified parameter from a challenge hearder found in the specified <see cref="T:Azure.Response" />.
+            </summary>
+            <param name="response">The <see cref="T:Azure.Response" /> to parse.</param>
+            <param name="challengeScheme">The challenge scheme containing the <paramref name="challengeParameter" />. For example: "Bearer"</param>
+            <param name="challengeParameter">The parameter key name containing the value to return.</param>
+            <returns>The value of the parameter name specified in <paramref name="challengeParameter" /> if it is found in the specified <paramref name="challengeScheme" />.</returns>
+        </member>
+        <member name="M:Azure.Core.AuthorizationChallengeParser.TryGetNextChallenge(System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@)">
+            <summary>
+            Iterates through the challenge schemes present in a challenge header.
+            </summary>
+            <param name="headerValue">
+            The header value which will be sliced to remove the first parsed <paramref name="challengeKey" />.
+            </param>
+            <param name="challengeKey">The parsed challenge scheme.</param>
+            <returns>
+            <c>true</c> if a challenge scheme was successfully parsed.
+            The value of <paramref name="headerValue" /> should be passed to <see cref="M:Azure.Core.AuthorizationChallengeParser.TryGetNextParameter(System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.Char)" /> to parse the challenge parameters if <c>true</c>.
+            </returns>
+        </member>
+        <member name="M:Azure.Core.AuthorizationChallengeParser.TryGetNextParameter(System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.Char)">
+            <summary>
+            Iterates through a challenge header value after being parsed by <see cref="M:Azure.Core.AuthorizationChallengeParser.TryGetNextChallenge(System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@)" />.
+            </summary>
+            <param name="headerValue">The header value after being parsed by <see cref="M:Azure.Core.AuthorizationChallengeParser.TryGetNextChallenge(System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@)" />.</param>
+            <param name="paramKey">The parsed challenge parameter key.</param>
+            <param name="paramValue">The parsed challenge parameter value.</param>
+            <param name="separator">The challenge parameter key / value pair separator. The default is '='.</param>
+            <returns>
+            <c>true</c> if the next available challenge parameter was successfully parsed.
+            <c>false</c> if there are no more parameters for the current challenge scheme or an additional challenge scheme was encountered in the <paramref name="headerValue" />.
+            The value of <paramref name="headerValue" /> should be passed again to <see cref="M:Azure.Core.AuthorizationChallengeParser.TryGetNextChallenge(System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@)" /> to attempt to parse any additional challenge schemes if <c>false</c>.
+            </returns>
+        </member>
         <member name="M:Azure.Core.AzureKeyCredentialPolicy.#ctor(Azure.AzureKeyCredential,System.String)">
             <summary>
             Initializes a new instance of the <see cref="T:Azure.Core.AzureKeyCredentialPolicy" /> class.
@@ -1670,6 +2031,65 @@
             <summary>Encode a string as a Base64URL encoded string.</summary>
             <param name="value">String input buffer.</param>
             <returns>The UTF8 bytes for the string, encoded as a Base64URL string.</returns>
+        </member>
+        <member name="T:Azure.Core.DictionaryHeaders">
+            <summary>
+            An implementation for manipulating headers on <see cref="T:Azure.Core.Request" />.
+            </summary>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.#ctor">
+            <summary>
+            Initializes an instance of <see cref="T:Azure.Core.DictionaryHeaders" />
+            </summary>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.AddHeader(System.String,System.String)">
+            <summary>
+            Adds a header value to the header collection.
+            </summary>
+            <param name="name">The header name.</param>
+            <param name="value">The header value.</param>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.TryGetHeader(System.String,System.String@)">
+            <summary>
+            Returns header value if the header is stored in the collection. If the header has multiple values they are going to be joined with a comma.
+            </summary>
+            <param name="name">The header name.</param>
+            <param name="value">The reference to populate with value.</param>
+            <returns><c>true</c> if the specified header is stored in the collection, otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.TryGetHeaderValues(System.String,System.Collections.Generic.IEnumerable{System.String}@)">
+            <summary>
+            Returns header values if the header is stored in the collection.
+            </summary>
+            <param name="name">The header name.</param>
+            <param name="values">The reference to populate with values.</param>
+            <returns><c>true</c> if the specified header is stored in the collection, otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.ContainsHeader(System.String)">
+            <summary>
+            Returns <c>true</c> if the header is stored in the collection.
+            </summary>
+            <param name="name">The header name.</param>
+            <returns><c>true</c> if the specified header is stored in the collection, otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.SetHeader(System.String,System.String)">
+            <summary>
+            Sets a header value the header collection.
+            </summary>
+            <param name="name">The header name.</param>
+            <param name="value">The header value.</param>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.RemoveHeader(System.String)">
+            <summary>
+            Removes the header from the collection.
+            </summary>
+            <param name="name">The header name.</param>
+        </member>
+        <member name="M:Azure.Core.DictionaryHeaders.EnumerateHeaders">
+            <summary>
+            Returns an iterator enumerating <see cref="T:Azure.Core.HttpHeader" /> in the request.
+            </summary>
+            <returns>The <see cref="T:System.Collections.Generic.IEnumerable`1" /> enumerating <see cref="T:Azure.Core.HttpHeader" /> in the response.</returns>
         </member>
         <member name="T:Azure.Core.HashCodeBuilder">
             <summary>
@@ -1828,6 +2248,58 @@
             <exception cref="T:System.ArgumentException">
             Thrown when the <paramref name="key" /> is empty.
             </exception>
+        </member>
+        <member name="T:Azure.AzureNamedKeyCredential">
+            <summary>
+            Credential allowing a named key to be used for authenticating to an Azure Service.
+            It provides the ability to update the key without creating a new client.
+            </summary>
+        </member>
+        <member name="P:Azure.AzureNamedKeyCredential.Name">
+            <summary>
+            Name of the key used to authenticate to an Azure service.
+            </summary>
+        </member>
+        <member name="M:Azure.AzureNamedKeyCredential.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Azure.AzureNamedKeyCredential" /> class.
+            </summary>
+            <param name="name">The name of the <paramref name="key" />.</param>
+            <param name="key">The key to use for authenticating with the Azure service.</param>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown when the <paramref name="name" /> or <paramref name="key" /> is null.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            Thrown when the <paramref name="name" /> or <paramref name="key" /> is empty.
+            </exception>
+        </member>
+        <member name="M:Azure.AzureNamedKeyCredential.Update(System.String,System.String)">
+            <summary>
+            Updates the named key.  This is intended to be used when you've regenerated your
+            service key and want to update long-lived clients.
+            </summary>
+            <param name="name">The name of the <paramref name="key" />.</param>
+            <param name="key">The key to use for authenticating with the Azure service.</param>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown when the <paramref name="name" /> or <paramref name="key" /> is null.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            Thrown when the <paramref name="name" /> or <paramref name="key" /> is empty.
+            </exception>
+        </member>
+        <member name="M:Azure.AzureNamedKeyCredential.Deconstruct(System.String@,System.String@)">
+            <summary>
+            Allows deconstruction of the credential into the associated name and key as an atomic operation.
+            </summary>
+            <param name="name">The name of the <paramref name="key" />.</param>
+            <param name="key">The key to use for authenticating with the Azure service.</param>
+            <example>
+            <code snippet="Snippet:AzureNamedKeyCredential_Deconstruct">
+            var credential = new AzureNamedKeyCredential("SomeName", "SomeKey");
+            (string name, string key) = credential;
+            </code>
+            </example>
+            <seealso href="https://docs.microsoft.com/dotnet/csharp/deconstruct">Deconstructing tuples and other types</seealso>
         </member>
         <member name="T:Azure.AzureSasCredential">
             <summary>
@@ -2120,17 +2592,228 @@
             Optionally limit requests to resources that do not match the ETag.
             </summary>
         </member>
-        <member name="T:Azure.Operation`1">
+        <member name="T:Azure.Messaging.CloudEvent">
+            <summary> Represents a CloudEvent conforming to the 1.0 schema. This type has built-in serialization using System.Text.Json.</summary>
+        </member>
+        <member name="M:Azure.Messaging.CloudEvent.#ctor(System.String,System.String,System.Object,System.Type)">
+            <summary> Initializes a new instance of the <see cref="T:Azure.Messaging.CloudEvent" /> class. </summary>
+            <param name="source"> Identifies the context in which an event happened. The combination of id and source must be unique for each distinct event. </param>
+            <param name="type"> Type of event related to the originating occurrence. For example, "Contoso.Items.ItemReceived". </param>
+            <param name="jsonSerializableData"> Event data specific to the event type. </param>
+            <param name="dataSerializationType">The type to use when serializing the data.
+            If not specified, <see cref="M:System.Object.GetType" /> will be used on <paramref name="jsonSerializableData" />.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="source" /> or <paramref name="type" /> was null.
+            </exception>
+        </member>
+        <member name="M:Azure.Messaging.CloudEvent.#ctor(System.String,System.String,System.BinaryData,System.String,Azure.Messaging.CloudEventDataFormat)">
+            <summary> Initializes a new instance of the <see cref="T:Azure.Messaging.CloudEvent" /> class using binary event data.</summary>
+            <param name="source"> Identifies the context in which an event happened. The combination of id and source must be unique for each distinct event. </param>
+            <param name="type"> Type of event related to the originating occurrence. For example, "Contoso.Items.ItemReceived". </param>
+            <param name="data"> Binary event data specific to the event type. </param>
+            <param name="dataContentType"> Content type of the payload. A content type different from "application/json" should be specified if payload is not JSON. </param>
+            <param name="dataFormat">The format that the data of a <see cref="T:Azure.Messaging.CloudEvent" /> should be sent in
+            when using the JSON envelope format.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="source" /> or <paramref name="type" /> was null.
+            </exception>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.Data">
+            <summary>
+            Gets or sets the event data as <see cref="T:System.BinaryData" />. Using BinaryData,
+            one can deserialize the payload into rich data, or access the raw JSON data using <see cref="M:System.BinaryData.ToString" />.
+            </summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.Id">
+            <summary>
+            Gets or sets an identifier for the event. The combination of <see cref="P:Azure.Messaging.CloudEvent.Id" /> and <see cref="P:Azure.Messaging.CloudEvent.Source" /> must be unique for each distinct event.
+            If not explicitly set, this will default to a <see cref="T:System.Guid" />.
+            </summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.Source">
+            <summary>Gets or sets the context in which an event happened. The combination of <see cref="P:Azure.Messaging.CloudEvent.Id" />
+            and <see cref="P:Azure.Messaging.CloudEvent.Source" /> must be unique for each distinct event.</summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.Type">
+            <summary>Gets or sets the type of event related to the originating occurrence.</summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.SpecVersion">
+            <summary>
+            The spec version of the cloud event.
+            </summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.Time">
+            <summary>
+            Gets or sets the time (in UTC) the event was generated, in RFC3339 format.
+            If not explicitly set, this will default to the time that the event is constructed.
+            </summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.DataSchema">
+            <summary>Gets or sets the schema that the data adheres to.</summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.DataContentType">
+            <summary>Gets or sets the content type of the data.</summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.Subject">
+            <summary>Gets or sets the subject of the event in the context of the event producer (identified by source). </summary>
+        </member>
+        <member name="P:Azure.Messaging.CloudEvent.ExtensionAttributes">
+            <summary>
+            Gets extension attributes that can be additionally added to the CloudEvent envelope.
+            </summary>
+        </member>
+        <member name="M:Azure.Messaging.CloudEvent.ParseMany(System.BinaryData,System.Boolean)">
+            <summary>
+            Given JSON-encoded events, parses the event envelope and returns an array of CloudEvents.
+            If the specified event is not valid JSON an exception is thrown.
+            By default, if the event is missing required properties, an exception is thrown though this can be relaxed
+            by setting the <paramref name="skipValidation" /> parameter.
+            </summary>
+            <param name="json">An instance of <see cref="T:System.BinaryData" /> containing the JSON for one or more CloudEvents.</param>
+            <param name="skipValidation">Set to <see langword="true" /> to allow missing or invalid properties to still parse into a CloudEvent.
+            In particular, by setting strict to <see langword="true" />, the source, id, specversion and type properties are no longer required
+            to be present in the JSON. Additionally, the casing requirements of the extension attribute names are relaxed.
+            </param>
+            <returns> An array of <see cref="T:Azure.Messaging.CloudEvent" /> instances.</returns>
+        </member>
+        <member name="M:Azure.Messaging.CloudEvent.Parse(System.BinaryData,System.Boolean)">
+            <summary>
+            Given a single JSON-encoded event, parses the event envelope and returns a <see cref="T:Azure.Messaging.CloudEvent" />.
+            If the specified event is not valid JSON an exception is thrown.
+            By default, if the event is missing required properties, an exception is thrown though this can be relaxed
+            by setting the <paramref name="skipValidation" /> parameter.
+            </summary>
+            <param name="json">An instance of <see cref="T:System.BinaryData" /> containing the JSON for the CloudEvent.</param>
+            <param name="skipValidation">Set to <see langword="true" /> to allow missing or invalid properties to still parse into a CloudEvent.
+            In particular, by setting strict to <see langword="true" />, the source, id, specversion and type properties are no longer required
+            to be present in the JSON. Additionally, the casing requirements of the extension attribute names are relaxed.
+            </param>
+            <returns> A <see cref="T:Azure.Messaging.CloudEvent" />. </returns>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="json" /> contained multiple events. <see cref="M:Azure.Messaging.CloudEvent.ParseMany(System.BinaryData,System.Boolean)" /> should be used instead.
+            </exception>
+        </member>
+        <member name="T:Azure.Messaging.CloudEventConverter">
+            <summary>
+            A custom converter that attributes the <see cref="T:Azure.Messaging.CloudEvent" /> type.
+            This allows System.Text.Json to serialize and deserialize CloudEvents by default.
+            </summary>
+        </member>
+        <member name="M:Azure.Messaging.CloudEventConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Gets or sets the serializer to use for the data portion of the <see cref="T:Azure.Messaging.CloudEvent" />. If not specified,
+            JsonObjectSerializer is used.
+            </summary>
+            <param name="reader">The reader.</param><param name="typeToConvert">The type to convert.</param><param name="options">An object that specifies serialization options to use.</param><returns>The converted value.</returns>
+        </member>
+        <member name="M:Azure.Messaging.CloudEventConverter.Write(System.Text.Json.Utf8JsonWriter,Azure.Messaging.CloudEvent,System.Text.Json.JsonSerializerOptions)">
+            <summary>Writes a specified value as JSON.</summary><param name="writer">The writer to write to.</param><param name="value">The value to convert to JSON.</param><param name="options">An object that specifies serialization options to use.</param>
+        </member>
+        <member name="T:Azure.Messaging.CloudEventDataFormat">
+            <summary>
+            Specifies the format that the data of a <see cref="T:Azure.Messaging.CloudEvent" /> should be sent in
+            when using the JSON envelope format for a <see cref="T:Azure.Messaging.CloudEvent" />.
+            <see href="https://github.com/cloudevents/spec/blob/v1.0/json-format.md#31-handling-of-data" />.
+            </summary>
+        </member>
+        <member name="F:Azure.Messaging.CloudEventDataFormat.Binary">
+            <summary>
+            Indicates the <see cref="P:Azure.Messaging.CloudEvent.Data" /> should be serialized as binary data.
+            This data will be included as a Base64 encoded string in the "data_base64"
+            field of the JSON payload.
+            </summary>
+        </member>
+        <member name="F:Azure.Messaging.CloudEventDataFormat.Json">
+            <summary>
+            Indicates the <see cref="P:Azure.Messaging.CloudEvent.Data" /> should be serialized as JSON.
+            The data will be included in the "data" field of the JSON payload.
+            </summary>
+        </member>
+        <member name="T:Azure.Operation">
             <summary>
             Represents a long-running operation.
             </summary>
-            <typeparam name="T">The final result of the long-running operation.</typeparam>
         </member>
-        <member name="P:Azure.Operation`1.Id">
+        <member name="P:Azure.Operation.Id">
             <summary>
             Gets an ID representing the operation that can be used to poll for
             the status of the long-running operation.
             </summary>
+        </member>
+        <member name="M:Azure.Operation.GetRawResponse">
+            <summary>
+            The last HTTP response received from the server.
+            </summary>
+            <remarks>
+            The last response returned from the server during the lifecycle of this instance.
+            An instance of <see cref="T:Azure.Operation`1" /> sends requests to a server in UpdateStatusAsync, UpdateStatus, and other methods.
+            Responses from these requests can be accessed using GetRawResponse.
+            </remarks>
+        </member>
+        <member name="P:Azure.Operation.HasCompleted">
+            <summary>
+            Returns true if the long-running operation completed.
+            </summary>
+        </member>
+        <member name="M:Azure.Operation.UpdateStatusAsync(System.Threading.CancellationToken)">
+            <summary>
+            Calls the server to get updated status of the long-running operation.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the service call.</param>
+            <returns>The HTTP response received from the server.</returns>
+            <remarks>
+            This operation will update the value returned from GetRawResponse and might update HasCompleted, HasValue, and Value.
+            </remarks>
+        </member>
+        <member name="M:Azure.Operation.UpdateStatus(System.Threading.CancellationToken)">
+            <summary>
+            Calls the server to get updated status of the long-running operation.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the service call.</param>
+            <returns>The HTTP response received from the server.</returns>
+            <remarks>
+            This operation will update the value returned from GetRawResponse and might update HasCompleted, HasValue, and Value.
+            </remarks>
+        </member>
+        <member name="M:Azure.Operation.WaitForCompletionResponseAsync(System.Threading.CancellationToken)">
+            <summary>
+            Periodically calls the server till the long-running operation completes.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the periodical service calls.</param>
+            <returns>The last HTTP response received from the server.</returns>
+            <remarks>
+            This method will periodically call UpdateStatusAsync till HasCompleted is true, then return the final response of the operation.
+            </remarks>
+        </member>
+        <member name="M:Azure.Operation.WaitForCompletionResponseAsync(System.TimeSpan,System.Threading.CancellationToken)">
+            <summary>
+            Periodically calls the server till the long-running operation completes.
+            </summary>
+            <param name="pollingInterval">
+            The interval between status requests to the server.
+            The interval can change based on information returned from the server.
+            For example, the server might communicate to the client that there is not reason to poll for status change sooner than some time.
+            </param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the periodical service calls.</param>
+            <returns>The last HTTP response received from the server.</returns>
+            <remarks>
+            This method will periodically call UpdateStatusAsync till HasCompleted is true, then return the final response of the operation.
+            </remarks>
+        </member>
+        <member name="M:Azure.Operation.Equals(System.Object)">
+            <summary>Determines whether the specified object is equal to the current object.</summary><param name="obj">The object to compare with the current object.</param><returns><see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
+        </member>
+        <member name="M:Azure.Operation.GetHashCode">
+            <summary>Serves as the default hash function.</summary><returns>A hash code for the current object.</returns>
+        </member>
+        <member name="M:Azure.Operation.ToString">
+            <summary>Returns a string that represents the current object.</summary><returns>A string that represents the current object.</returns>
+        </member>
+        <member name="T:Azure.Operation`1">
+            <summary>
+            Represents a long-running operation that returns a value when it completes.
+            </summary>
+            <typeparam name="T">The final result of the long-running operation.</typeparam>
         </member>
         <member name="P:Azure.Operation`1.Value">
             <summary>
@@ -2139,21 +2822,6 @@
             <remarks>
             This property can be accessed only after the operation completes successfully (HasValue is true).
             </remarks>
-        </member>
-        <member name="M:Azure.Operation`1.GetRawResponse">
-            <summary>
-            The last HTTP response received from the server.
-            </summary>
-            <remarks>
-            The last response returned from the server during the lifecycle of this instance.
-            An instance of Operation<typeparamref name="T" /> sends requests to a server in UpdateStatusAsync, UpdateStatus, and other methods.
-            Responses from these requests can be accessed using GetRawResponse.
-            </remarks>
-        </member>
-        <member name="P:Azure.Operation`1.HasCompleted">
-            <summary>
-            Returns true if the long-running operation completed.
-            </summary>
         </member>
         <member name="P:Azure.Operation`1.HasValue">
             <summary>
@@ -2185,34 +2853,30 @@
             This method will periodically call UpdateStatusAsync till HasCompleted is true, then return the final result of the operation.
             </remarks>
         </member>
-        <member name="M:Azure.Operation`1.UpdateStatusAsync(System.Threading.CancellationToken)">
+        <member name="M:Azure.Operation`1.WaitForCompletionResponseAsync(System.Threading.CancellationToken)">
             <summary>
-            Calls the server to get updated status of the long-running operation.
+            Periodically calls the server till the long-running operation completes.
             </summary>
-            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the service call.</param>
-            <returns>The HTTP response received from the server.</returns>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the periodical service calls.</param>
+            <returns>The last HTTP response received from the server.</returns>
             <remarks>
-            This operation will update the value returned from GetRawResponse and might update HasCompleted, HasValue, and Value.
+            This method will periodically call UpdateStatusAsync till HasCompleted is true, then return the final response of the operation.
             </remarks>
         </member>
-        <member name="M:Azure.Operation`1.UpdateStatus(System.Threading.CancellationToken)">
+        <member name="M:Azure.Operation`1.WaitForCompletionResponseAsync(System.TimeSpan,System.Threading.CancellationToken)">
             <summary>
-            Calls the server to get updated status of the long-running operation.
+            Periodically calls the server till the long-running operation completes.
             </summary>
-            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the service call.</param>
-            <returns>The HTTP response received from the server.</returns>
+            <param name="pollingInterval">
+            The interval between status requests to the server.
+            The interval can change based on information returned from the server.
+            For example, the server might communicate to the client that there is not reason to poll for status change sooner than some time.
+            </param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> used for the periodical service calls.</param>
+            <returns>The last HTTP response received from the server.</returns>
             <remarks>
-            This operation will update the value returned from GetRawResponse and might update HasCompleted, HasValue, and Value.
+            This method will periodically call UpdateStatusAsync till HasCompleted is true, then return the final response of the operation.
             </remarks>
-        </member>
-        <member name="M:Azure.Operation`1.Equals(System.Object)">
-            <summary>Determines whether the specified object is equal to the current object.</summary><param name="obj">The object to compare with the current object.</param><returns><see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
-        </member>
-        <member name="M:Azure.Operation`1.GetHashCode">
-            <summary>Serves as the default hash function.</summary><returns>A hash code for the current object.</returns>
-        </member>
-        <member name="M:Azure.Operation`1.ToString">
-            <summary>Returns a string that represents the current object.</summary><returns>A string that represents the current object.</returns>
         </member>
         <member name="T:Azure.Page`1">
             <summary>
@@ -2448,6 +3112,14 @@
             Get the HTTP response headers.
             </summary>
         </member>
+        <member name="P:Azure.Response.Content">
+            <summary>
+            Gets the contents of HTTP response, if it is available.
+            </summary>
+            <remarks>
+            Throws <see cref="T:System.InvalidOperationException" /> when <see cref="P:Azure.Response.ContentStream" /> is not a <see cref="T:System.IO.MemoryStream" />.
+            </remarks>
+        </member>
         <member name="M:Azure.Response.Dispose">
             <summary>
             Frees resources held by this <see cref="T:Azure.Response" /> instance.
@@ -2529,6 +3201,117 @@
         <member name="M:Azure.Response`1.ToString">
             <summary>Returns a string that represents the current object.</summary><returns>A string that represents the current object.</returns>
         </member>
+        <member name="T:Azure.AzureCoreExtensions">
+            <summary>
+            Extensions that can be used for serialization.
+            </summary>
+        </member>
+        <member name="M:Azure.AzureCoreExtensions.ToObject``1(System.BinaryData,Azure.Core.Serialization.ObjectSerializer,System.Threading.CancellationToken)">
+             <summary>
+             Converts the <see cref="T:System.BinaryData" /> to the specified type using
+             the provided <see cref="T:Azure.Core.Serialization.ObjectSerializer" />.
+             </summary>
+             <typeparam name="T">The type that the data should be
+             converted to.</typeparam>
+             <param name="data">The <see cref="T:System.BinaryData" /> instance to convert.</param>
+             <param name="serializer">The serializer to use
+             when deserializing the data.</param>
+             <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during deserialization.</param>
+            <returns>The data converted to the specified type.</returns>
+        </member>
+        <member name="M:Azure.AzureCoreExtensions.ToObjectAsync``1(System.BinaryData,Azure.Core.Serialization.ObjectSerializer,System.Threading.CancellationToken)">
+             <summary>
+             Converts the <see cref="T:System.BinaryData" /> to the specified type using
+             the provided <see cref="T:Azure.Core.Serialization.ObjectSerializer" />.
+             </summary>
+             <typeparam name="T">The type that the data should be
+             converted to.</typeparam>
+             <param name="data">The <see cref="T:System.BinaryData" /> instance to convert.</param>
+             <param name="serializer">The serializer to use
+             when deserializing the data.</param>
+             <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken" /> to use during deserialization.</param>
+            <returns>The data converted to the specified type.</returns>
+        </member>
+        <member name="T:Azure.SyncAsyncEventArgs">
+            <summary>
+            Provides data for <see cref="T:Azure.Core.SyncAsyncEventHandler`1" />
+            events that can be invoked either synchronously or asynchronously.
+            </summary>
+        </member>
+        <member name="P:Azure.SyncAsyncEventArgs.IsRunningSynchronously">
+             <summary>
+             Gets a value indicating whether the event handler was invoked
+             synchronously or asynchronously.  Please see
+             <see cref="T:Azure.Core.SyncAsyncEventHandler`1" /> for more details.
+             </summary>
+             <remarks>
+             <para>
+             The same <see cref="T:Azure.Core.SyncAsyncEventHandler`1" />
+             event can be raised from both synchronous and asynchronous code
+             paths depending on whether you're calling sync or async methods on
+             a client.  If you write an async handler but raise it from a sync
+             method, the handler will be doing sync-over-async and may cause
+             ThreadPool starvation.  See
+             <see href="https://docs.microsoft.com/archive/blogs/vancem/diagnosing-net-core-threadpool-starvation-with-perfview-why-my-service-is-not-saturating-all-cores-or-seems-to-stall">
+             Diagnosing .NET Core ThreadPool Starvation with PerfView</see> for
+             a detailed explanation of how that can cause ThreadPool starvation
+             and serious performance problems.
+             </para>
+             <para>
+             You can use this <see cref="P:Azure.SyncAsyncEventArgs.IsRunningSynchronously" /> property to check
+             how the event is being raised and implement your handler
+             accordingly.  Here's an example handler that's safe to invoke from
+             both sync and async code paths.
+             <code snippet="Snippet:Azure_Core_Samples_EventSamples_CombinedHandler">
+             var client = new AlarmClient();
+             client.Ring += async (SyncAsyncEventArgs e) =&gt;
+             {
+                 if (e.IsRunningSynchronously)
+                 {
+                     Console.WriteLine("Wake up!");
+                 }
+                 else
+                 {
+                     await Console.Out.WriteLineAsync("Wake up!");
+                 }
+             };
+            
+             client.Snooze(); // sync call that blocks
+             await client.SnoozeAsync(); // async call that doesn't block
+             </code>
+             </para>
+             </remarks>
+        </member>
+        <member name="P:Azure.SyncAsyncEventArgs.CancellationToken">
+            <summary>
+            Gets a cancellation token related to the original operation that
+            raised the event.  It's important for your handler to pass this
+            token along to any asynchronous or long-running synchronous
+            operations that take a token so cancellation (via something like
+            <code>
+            new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token
+            </code>
+            for example) will correctly propagate.
+            </summary>
+        </member>
+        <member name="M:Azure.SyncAsyncEventArgs.#ctor(System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Azure.SyncAsyncEventArgs" />
+            class.
+            </summary>
+            <param name="isRunningSynchronously">
+            A value indicating whether the event handler was invoked
+            synchronously or asynchronously.  Please see
+            <see cref="T:Azure.Core.SyncAsyncEventHandler`1" /> for more details.
+            </param>
+            <param name="cancellationToken">
+            A cancellation token related to the original operation that raised
+            the event.  It's important for your handler to pass this token
+            along to any asynchronous or long-running synchronous operations
+            that take a token so cancellation will correctly propagate.  The
+            default value is <see cref="P:System.Threading.CancellationToken.None" />.
+            </param>
+        </member>
         <member name="T:System.Diagnostics.CodeAnalysis.AllowNullAttribute">
             <summary>Specifies that null is allowed as an input even if the corresponding type disallows it.</summary>
         </member>
@@ -2594,6 +3377,9 @@
             <summary>Gets the condition parameter value.</summary>
         </member>
         <member name="M:Azure.Pageable`1.System#Collections#IEnumerable#GetEnumerator">
+            <summary>Returns an enumerator that iterates through a collection.</summary><returns>An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.</returns>
+        </member>
+        <member name="M:Azure.Messaging.CloudEventExtensionAttributes`2.System#Collections#IEnumerable#GetEnumerator">
             <summary>Returns an enumerator that iterates through a collection.</summary><returns>An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.</returns>
         </member>
         <member name="M:Azure.Core.Pipeline.TaskExtensions.Enumerable`1.System#Collections#Generic#IEnumerable{T}#GetEnumerator">
