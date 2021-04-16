@@ -1010,7 +1010,7 @@ function IsValidEndPoint(domainName) {
 
 function IsCustomEndPoint(fieldValue, element) {
     var connectionType = $("input[name='Connection']:checked").val();
-    if (connectionType == "custom-endpoint") {
+    if (connectionType == "customendpoint") {
         if (fieldValue == "")
             return false;
         else
@@ -1023,7 +1023,7 @@ function IsCustomEndPoint(fieldValue, element) {
 function IsValidCustomEndPoint(fieldValue, element) {
     var connectionType = $("input[name='Connection']:checked").val();
     var accountname = $("#txt-accountname").val();
-    if (connectionType == "custom-endpoint") {
+    if (connectionType == "customendpoint") {
         var accountName = $("#txt-accountname").val();
         var elementDomainName = $(element).val().split(".");
         var subdomain = elementDomainName.shift();

@@ -33,10 +33,10 @@ $(document).ready(function () {
         },
         unhighlight: function (element) {
             $(element).closest("div").removeClass("has-error");
-            $(element).parent().find("div.validation-errors").html("");
+            $(element).parent().find("div.custom-attr-validation-errors").html("");
         },
         errorPlacement: function (error, element) {
-            $(element).parent().find("div.validation-errors").html(error);
+            $(element).parent().find("div.custom-attr-validation-errors").html(error);
         },
         messages: {
             "custom-attribute-name": {

@@ -1,5 +1,6 @@
 ﻿@{
     var appBranding = GlobalAppSettings.Branding;
+    var storageType = ViewBag.StorageType != null ? ViewBag.StorageType : 0;
 }
 <div class="system-settings-page-container" id="system-settings-filestorage-container">
     <div class="database-types">
@@ -51,10 +52,15 @@
         </span>
     }
 
-    <div class="storage-checkbox secure-sql material-checkbox selfhosted center-align">
+   
+<div class="storage-checkbox secure-sql material-checkbox selfhosted center-align">
+    @if ((StorageType)storageType == StorageType.AzureBlob)
+    {
         @Html.CheckBox("storage-checkbox", false)
         <label for="storage-checkbox" class="">[[[Use the same blob used for tenant registration.]]]</label>
+    }
     </div>
+
     <div class="storage-block">
         <div class="azure-validation display-none">
             <span class="blob-error-message">[[[Invalid Azure Blob storage]]]</span>
@@ -62,18 +68,18 @@
         <form id="blob-storage-form" onsubmit="return validate_storage_type();" autocomplete="off">
             <div>
                 <div class="form-div form-group">
-                    <label class="field-label">[[[Storage Account name]]]</label>
+                    <label class="field-label">[[[Storage account name]]]</label>
                     <input type="text" tabindex="1" id="txt-accountname" name="accountname" value="@ViewBag.AccountName" class="form-control" placeholder="[[[Storage account name]]]" />
                     <span class="startup-validation txt-accountname validation-txt-errors"></span>
                 </div>
                 <div class="form-div form-group">
-                    <label class="field-label">[[[Blob Service endpoint]]]</label>
+                    <label class="field-label">[[[Blob service endpoint]]]</label>
                     <input type="text" tabindex="2" id="txt-endpoint" name="endpoint" value="@ViewBag.ServiceEndPoint" class="form-control" placeholder="[[[Blob service endpoint]]]" />
                     <span class="text-caption">(For example : http://****.blob.core.windows.net)</span><br />
                     <span class="startup-validation txt-endpoint validation-txt-errors"></span>
                 </div>
                 <div class="form-div form-group">
-                    <label class="field-label">[[[Accesskey]]]</label>
+                    <label class="field-label">[[[Access key]]]</label>
                     <input type="text" tabindex="3" id="txt-accesskey" class="form-control" value="@ViewBag.AccessKey" placeholder="[[[Access key]]]" name="accesskey" />
                     <span class="startup-validation txt-accesskey validation-txt-errors"></span>
                 </div>
@@ -99,9 +105,10 @@
                 </div>
                 <div class="custom-endpoint-form-element">
                     <div class="form-div form-group">
+                        <label class="field-label">[[[Blob URL]]]</label>
                         <input type="text" tabindex="6" id="txt-bloburl" class="form-control" value="@ViewBag.BlobUrl" placeholder="[[[Blob URL]]]" name="bloburl" autocomplete="off" />
                         <span class="text-caption">(For example : http://****.example.net)</span><br />
-                        <span class="startup-validation txt-containername validation-txt-errors"></span>
+                        <span class="startup-validation txt-bloburl validation-txt-errors"></span>
                     </div>
                 </div>
                 <div class="form-div form-group">
