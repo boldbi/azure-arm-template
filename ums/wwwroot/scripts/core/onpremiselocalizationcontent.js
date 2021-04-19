@@ -98,9 +98,9 @@
             LastPage: "[[[Go to last page]]]",
             NextPage: "[[[Go to next page]]]",
             PreviousPage: "[[[Go to previous page]]]",
-            BoldLicenseExpired: "[[[Your Bold BI and Bold Reports license has expired.]]]",
-            BoldBiLicenseExpired: "[[[Your Bold BI license has expired.]]]",
-            BoldReportsLicenseExpired: "[[[Your Bold Reports license has expired.]]]",
+            BoldLicenseExpired: "[[[Your Embedded BI and Enterprise Reporting license has expired.]]]",
+            BoldBiLicenseExpired: "[[[Your Embedded BI license has expired.]]]",
+            BoldReportsLicenseExpired: "[[[Your Enterprise Reporting license has expired.]]]",
             UpgardePlanOr: "[[[Please upgrade your plan or]]]",
             Please: "[[[Please]]]",
             ContactUs: "[[[contact us]]]",
@@ -188,8 +188,8 @@
             DatabaseReportsMsg: "[[[This is where we store your reports, users, and their access permissions.]]]",
 
             //AddTenant.js
-            BoldReportsMultiTenancy: "[[[Bold Reports multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]",
-            BoldBiMultiTenancy: "[[[Bold BI multi-tenancy can host multiple sites on a single instance by isolating the database and the resources for each site.]]]",
+            BoldReportsMultiTenancy: "[[[Using a multitenant solution, you can host multiple Enterprise Reporting sites on a single instance by isolating the database and resources for each site.]]]",
+            BoldBiMultiTenancy: "[[[Using a multitenant solution, you can host multiple Embedded BI sites on a single instance by isolating the database and resources for each site.]]]",
             SiteIdentifierValidator: "[[[Please enter site identifier.]]]",
             SiteNameValidator: "[[[Please enter site name.]]]",
             SelectSiteAdmin: "[[[Select Site Administrator]]]",

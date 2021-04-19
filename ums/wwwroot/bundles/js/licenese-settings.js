@@ -1,24 +1,40 @@
 var windowRef;
 
 $(document).ready(function () {
-    if (location.href.match(/boldbi/) != null && isBoldBiLicenseAvailable.toLowerCase() == "true") {
+    if (location.href.match(/boldbi/) != null) {
+        history.pushState(null, '', '?product=embedded-bi');
         $("#bold-bi").tab("show");
     }
-    else if (location.href.match(/boldreports/) != null && isBoldReportsLicenseAvailable.toLowerCase() == "true") {
+
+    else if (location.href.match(/boldreports/) != null) {
+        history.pushState(null, '', '?product=enterprise-reporting');
         $("#bold-reports").tab("show");
     }
 
-    if (location.href.match(/boldbi/) == null && location.href.match(/boldreports/) == null) {
+    else if (location.href.match(/embedded-bi/) != null) {
+        history.pushState(null, '', '?product=enterprise-bi');
+        $("#bold-bi").tab("show");
+    }
+
+    else if (location.href.match(/enterprise-reporting/) != null) {
+        history.pushState(null, '', '?product=enterprise-reporting');
+        $("#bold-reports").tab("show");
+    }
+
+    else if (location.href.match(/boldbi/) == null && location.href.match(/boldreports/) == null && location.href.match(/boldbi/) == null && location.href.match(/boldbi/) == null) {
+        
         if (isBoldBiLicenseAvailable.toLowerCase() == "true" && isBoldReportsLicenseAvailable.toLowerCase() == "true") {
-            history.pushState(null, '', '?product=boldbi');
+            history.pushState(null, '', '?product=embedded-bi');
             $("#bold-bi").tab("show");
         }
+        
         else if (isBoldBiLicenseAvailable.toLowerCase() == "true" && isBoldReportsLicenseAvailable.toLowerCase() == "false") {
-            history.pushState(null, '', '?product=boldbi');
+            history.pushState(null, '', '?product=embedded-bi');
             $("#bold-bi").tab("show");
         }
+
         else if (isBoldBiLicenseAvailable.toLowerCase() == "false" && isBoldReportsLicenseAvailable.toLowerCase() == "true") {
-            history.pushState(null, '', '?product=boldreports');
+            history.pushState(null, '', '?product=enterprise-reporting');
             $("#bold-reports").tab("show");
         }
     }
@@ -28,14 +44,14 @@ $(document).ready(function () {
 
         switch ($(this).attr("id")) {
             case "bold-bi":
-                if (query !== "?product=boldbi") {
-                    history.pushState(null, '', '?product=boldbi');
+                if (query !== "?product=embedded-bi" || query !== "?product=boldbi") {
+                    history.pushState(null, '', '?product=embedded-bi');
                 }
                 break;
 
             case "bold-reports":
-                if (query !== "?product=boldreports") {
-                    history.pushState(null, '', '?product=boldreports');
+                if (query !== "?product=enterprise-reporting" || query !== "?product=boldreports") {
+                    history.pushState(null, '', '?product=enterprise-reporting');
                 }
                 break;
         }

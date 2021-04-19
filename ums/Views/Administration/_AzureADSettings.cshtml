@@ -1,4 +1,7 @@
-﻿<div role="tabpanel" class="tab-pane" id="azure-ad-settings-tab">
+﻿@{
+    var appBranding = GlobalAppSettings.Branding;
+}
+<div role="tabpanel" class="tab-pane" id="azure-ad-settings-tab">
     <div id="azure-ad-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body no-padding">
         <form id="saml-setting" name="ssoSettingsForm" class="saml-form auth-settings-form col-lg-12 col-md-12 col-sm-12" method="post" enctype="multipart/form-data" autocomplete="off">
             <input type="hidden" name="azureADAuthenticationProvider" value="@ViewBag.AzureAdSettings.AuthProvider">
@@ -10,11 +13,11 @@
                             <span class="material-switch text-left">
                                 @if ((bool)ViewBag.AzureAdSettings.IsEnabled)
                                 {
-                                    <input type="checkbox" id="enable-sso" name="enable-sso" ng-model="ssoSettings.IsEnabled" ng-init="ssoSettings.IsEnabled=true" ng-click="hideValidationMessage(ssoSettings.IsEnabled, 'azuread')" ng-checked=true />
+                                <input type="checkbox" id="enable-sso" name="enable-sso" ng-model="ssoSettings.IsEnabled" ng-init="ssoSettings.IsEnabled=true" ng-click="hideValidationMessage(ssoSettings.IsEnabled, 'azuread')" ng-checked=true />
                                 }
                                 else
                                 {
-                                    <input type="checkbox" id="enable-sso" name="enable-sso" ng-model="ssoSettings.IsEnabled" ng-init="ssoSettings.IsEnabled=false" ng-click="hideValidationMessage(ssoSettings.IsEnabled, 'azuread')" ng-checked=false />
+                                <input type="checkbox" id="enable-sso" name="enable-sso" ng-model="ssoSettings.IsEnabled" ng-init="ssoSettings.IsEnabled=false" ng-click="hideValidationMessage(ssoSettings.IsEnabled, 'azuread')" ng-checked=false />
                                 }
 
                                 <label for="enable-sso" class="label-primary"></label>
@@ -30,7 +33,13 @@
                             <input type="text" class="form-control no-margin" ng-model="ApplicationId" ng-init="ApplicationId='@ViewBag.AzureAdSettings.SAMLSettings.ApplicationId'" name="ApplicationId" placeholder="[[[Application Id]]]" id="application-id" data-ng-disabled="!ssoSettings.IsEnabled" required />
                             <span class="validation-message top-padding" ng-show="ssoSettingsForm.ApplicationId.$error.required && ssoSettingsForm.ApplicationId.$dirty ">[[[Please enter Application Id]]]</span>
                         </div>
-                        <span id="uri-info" tabindex="0" class="info-popup su su-info" role="button" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="[[[A unique identifier used to register the]]] @GlobalAppSettings.BrandingDisplayName [[[web app in ADFS]]]"></span>
+                        @if (appBranding == AppBranding.Bold.Identifier)
+                        {
+                        <span id="uri-info" tabindex="0" class="info-popup su su-info" role="button" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="[[[A unique identifier used to register the Embedded BI web app in ADFS]]]"></span>
+                        }
+                        else{
+                        <span id="uri-info" tabindex="0" class="info-popup su su-info" role="button" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="[[[A unique identifier used to register the Enterprise Reporting web app in ADFS]]]"></span>
+                        }
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 no-padding">
@@ -60,7 +69,13 @@
                         <div class="col-lg-10 col-md-10 no-margin">
                             <input type="text" class="form-control no-margin" ng-model="MobileApplicationId" ng-init="MobileApplicationId='@ViewBag.AzureAdSettings.SAMLSettings.MobileApplicationId'" name="MobileApplicationId" placeholder="[[[Mobile App Client Id]]]" id="mobile-app-id" data-ng-disabled="!ssoSettings.IsEnabled" />
                         </div>
-                        <span id="mobile-clientId-info" tabindex="0" class="info-popup su su-info" role="button" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="[[[A unique identifier used to register the]]] @GlobalAppSettings.BrandingDisplayName [[[mobile app in ADFS]]]"></span>
+                        @if (appBranding == AppBranding.Bold.Identifier)
+                        {
+                        <span id="mobile-clientId-info" tabindex="0" class="info-popup su su-info" role="button" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="[[[A unique identifier used to register the Embedded BI mobile app in ADFS]]]"></span>
+                        }
+                        else{
+                        <span id="mobile-clientId-info" tabindex="0" class="info-popup su su-info" role="button" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="[[[A unique identifier used to register the Enterprise Reporting mobile app in ADFS]]]"></span>
+                        }
                     </div>
                 </div>
             </div>
