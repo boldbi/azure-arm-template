@@ -174,6 +174,20 @@ $(document).ready(function () {
             });
         }
     }
+
+    setClientLocaleCookie("boldservice.client.locale", 365);
+
+    function setClientLocaleCookie(name, exdays) {
+        var value = {
+            Locale: navigator.language,
+            TimeZoneOffset: new Date().getTimezoneOffset()
+        };
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + exdays++);
+        var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+        document.cookie = name + "=" + cookie_value + ";path=/";
+    }
+
 });
 
 $(document).on("keyup", "textarea", function (event) {
@@ -372,6 +386,10 @@ function redirect(url, interval) {
         window.location.assign(url);
 };
 
+function checkMonthFormat(value, format) {
+    return value.includes(format);
+}
+
 function DateCustomFormat(formatString, dateValue) {
     var yyyy, yy, MMMM, MMM, MM, M, dddd, ddd, dd, d, hhh, hh, h, mm, m, ss, s, ampm, AMPM, dMod, th;
     var dateObject = new Date(dateValue);
@@ -382,7 +400,28 @@ function DateCustomFormat(formatString, dateValue) {
     dd = (d = dateObject.getDate()) < 10 ? ("0" + d) : d;
     ddd = (dddd = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObject.getDay()]).substring(0, 3);
     th = (d >= 10 && d <= 20) ? "th" : ((dMod = d % 10) == 1) ? "st" : (dMod == 2) ? "nd" : (dMod == 3) ? "rd" : "th";
-    formatString = formatString.replace("yyyy", yyyy).replace("yy", yy).replace("MMMM", MMMM).replace("MMM", MMM).replace("MM", MM).replace("dddd", dddd).replace("ddd", ddd).replace("dd", dd).replace("d", d).replace("th", th);
+    formatString = formatString.replace("yyyy", yyyy).replace("yy", yy).replace("dddd", dddd).replace("ddd", ddd).replace("dd", dd).replace("d", d).replace("th", th);
+    switch (true) {
+        case checkMonthFormat(formatString, "MMMM"):
+            formatString = formatString.replace("MMMM", MMMM);
+            break;
+        case checkMonthFormat(formatString, "MMM"):
+            formatString = formatString.replace("MMM", MMM);
+            break;
+        case checkMonthFormat(formatString, "MM"):
+            formatString = formatString.replace("MM", MM);
+            break;
+        case checkMonthFormat(formatString, "M "):
+            formatString = formatString.replace("M ", M + " ");
+            break;
+        case checkMonthFormat(formatString, "M,"):
+            formatString = formatString.replace("M,", M + ",");
+            break;
+        case checkMonthFormat(formatString, "M"):
+            formatString = formatString.replace("M", M);
+            break;
+    }
+
 
     h = (hhh = dateObject.getHours());
     if (h == 0) h = 24;

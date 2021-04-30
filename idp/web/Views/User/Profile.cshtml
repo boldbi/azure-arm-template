@@ -30,6 +30,7 @@
     var isEditLanguage = (bool)ViewBag.EditLanguage;
     var tenantSitesUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/sites";
     var isEmailActivation = GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation;
+    var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
 }
 
 @section styles{
@@ -76,8 +77,8 @@
             }
             $('[data-toggle="tooltip"]').tooltip();
             var fulldata = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.ProfileDetail)));
-            window.dateFormat = "@GlobalAppSettings.SystemSettings.DateFormat";
-            editUser(fulldata, "@GlobalAppSettings.SystemSettings.DateFormat");
+             window.dateFormat = "@dateFormat";
+            editUser(fulldata, "@dateFormat");
 
             $(document).on("click", ".popup-close", function (e) {
                 //$(".edit-profile-field").attr("value",updateUserProfileUrl);

@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "[[[API Keys]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/api-keys.css" asp-append-version="true" />
+}
+@section scripts{
+    <meta name="show-client-secret" content="@ViewBag.ApiClientSecret.ToString()" />
+    <script src="~/bundles/js/api-keys.js" asp-append-version="true"></script>
+
+    <script type="text/javascript">
+    var clientSecret = $('meta[name="show-client-secret"]').attr("content");
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div id="api-keys-container" class="col-xs-12 admin-page-container">
+        <div id="api-keys-header" class="col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="h2 page-title">
+                    [[[API Keys]]]
+                </h1>
+                <h5 class="page-description">
+                    [[[Client id and secret for REST API authentication]]]
+                </h5>
+            </hgroup>
+        </div>
+        <div id="api-keys-body" class="admin-page-body">
+            <form class="row admin-page-form" autocomplete="off">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("api-client-id", "Client id", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 id">
+                        <input type="text" class="client-values" id="myApiId" readonly="" value="@ViewBag.ApiClientId.ToString()" />
+                        <button class="su su-copy copy-client-values" id="api-copy-client-id" onclick="fnCopyClientCredentials('#myApiId','#api-copy-client-id')" data-toggle="tooltip" data-original-title="Click to copy"></button>
+                    </div>
+
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("api-client-secret", "Client secret", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 secret">
+                        <input type="password" id="my-api-secret" readonly="" class="client-values my-secret" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="" />
+                        <button class="su su-copy copy-client-values" id="api-copy-client-secret" onclick="fnCopyClientCredentials('#my-api-secret','#api-copy-client-secret')" data-toggle="tooltip" data-original-title="Click to copy"></button>
+                        <button class="su su-show copy-client-values show-client-secret" id="show-api-client-secret" data-toggle="tooltip" data-original-title="Click to view"></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}

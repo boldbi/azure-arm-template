@@ -2,7 +2,7 @@ $(document).ready(function () {
 
     var outlineEmail = new ejs.inputs.TextBox({
         cssClass: 'e-outline',
-        floatLabelType: 'Auto',
+        floatLabelType: 'Always',
     });
     outlineEmail.appendTo('#login-email');
     outlineEmail.appendTo('#login-password');

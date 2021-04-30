@@ -414,6 +414,10 @@ function redirect(url, interval) {
         window.location.assign(url);
 };
 
+function CheckMonthFormat(value, format) {
+    return value.includes(format);
+}
+
 function DateCustomFormat(formatString, dateValue, isTimeFormat) {
     var yyyy, yy, MMMM, MMM, MM, M, dddd, ddd, dd, d, hhh, hh, h, mm, m, ss, s, ampm, AMPM, dMod, th, HH;
     var dateObject = new Date(dateValue);
@@ -425,25 +429,49 @@ function DateCustomFormat(formatString, dateValue, isTimeFormat) {
     dd = (d = dateObject.getDate()) < 10 ? ("0" + d) : d;
     ddd = (dddd = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObject.getDay()]).substring(0, 3);
     th = (d >= 10 && d <= 20) ? "th" : ((dMod = d % 10) == 1) ? "st" : (dMod == 2) ? "nd" : (dMod == 3) ? "rd" : "th";
-    formatString = formatString.replace("yyyy", yyyy).replace("yy", yy).replace("MMMM", MMMM).replace("MMM", MMM).replace("MM", MM).replace("dddd", dddd).replace("ddd", ddd).replace("dd", dd).replace("d", d).replace("th", th);
+    formatString = formatString.replace("yyyy", yyyy).replace("yy", yy).replace("dddd", dddd).replace("ddd", ddd).replace("dd", dd).replace("d", d).replace("th", th);
+    switch (true) {
+        case CheckMonthFormat(formatString, "MMMM"):
+            formatString = formatString.replace("MMMM", MMMM);
+            break;
+        case CheckMonthFormat(formatString, "MMM"):
+            formatString = formatString.replace("MMM", MMM);
+            break;
+        case CheckMonthFormat(formatString, "MM"):
+            formatString = formatString.replace("MM", MM);
+            break;
+        case CheckMonthFormat(formatString, "M "):
+            formatString = formatString.replace("M ", M + " ");
+            break;
+        case CheckMonthFormat(formatString, "M,"):
+            formatString = formatString.replace("M,", M + ",");
+            break;
+        case CheckMonthFormat(formatString, "M"):
+            formatString = formatString.replace("M", M);
+            break;
+    }
     if (isTimeFormat == "True") {
         h = (hhh = dateObject.getHours());
-        HH = h;
-        mm = (m = dateObject.getMinutes()) < 10 ? ("0" + m) : m;
-        ss = (s = dateObject.getSeconds()) < 10 ? ("0" + s) : s;
-        datetime = formatString.replace("HH", HH).replace("mm", mm).replace("ss", ss);
+        HH = h < 10 ? ("0" + h) : h;
+        var lastPage = difference % pageSize === 0 ? difference / pageSize : Math.floor((difference / pageSize) + 1);
+        if (currentPage > lastPage) {
+            return lastPage;
+        } else {
+            return currentPage;
+        }
     }
+
     else {
-        h = (hhh = dateObject.getHours());
-        if (h == 0) h = 24;
-        if (h > 12) h -= 12;
-        hh = h < 10 ? ("0" + h) : h;
-        AMPM = (ampm = hhh < 12 ? "am" : "pm").toUpperCase();
-        mm = (m = dateObject.getMinutes()) < 10 ? ("0" + m) : m;
-        ss = (s = dateObject.getSeconds()) < 10 ? ("0" + s) : s;
-        datetime = formatString.replace("hhh", hhh).replace("hh", hh).replace("h", h).replace("mm", mm).replace("m", m).replace("ss", ss).replace("s", s).replace("ampm", ampm).replace("AMPM", AMPM);
-    }
-    return datetime;
+    h = (hhh = dateObject.getHours());
+    if (h == 0) h = 24;
+    if (h > 12) h -= 12;
+    hh = h < 10 ? ("0" + h) : h;
+    AMPM = (ampm = hhh < 12 ? "am" : "pm").toUpperCase();
+    mm = (m = dateObject.getMinutes()) < 10 ? ("0" + m) : m;
+    ss = (s = dateObject.getSeconds()) < 10 ? ("0" + s) : s;
+    datetime = formatString.replace("hhh", hhh).replace("hh", hh).replace("h", h).replace("mm", mm).replace("m", m).replace("ss", ss).replace("s", s).replace("ampm", ampm).replace("AMPM", AMPM);
+}
+return datetime;
 }
 
 function isNumberKey(evt) {
@@ -1000,12 +1028,26 @@ $(document).ready(function (e) {
         SetCookie();
     });
 
+    setClientLocaleCookie("boldservice.client.locale", 365);
+
     function SetCookie() {
         $.ajax({
             type: "POST",
             url: window.setPermissionUrl,
         });
     }
+
+    function setClientLocaleCookie(name, exdays) {
+        var value = {
+            Locale: navigator.language,
+            TimeZoneOffset: new Date().getTimezoneOffset()
+        };
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + exdays++);
+        var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+        document.cookie = name + "=" + cookie_value + ";path=/";
+    }
+
 
 });
 

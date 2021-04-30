@@ -10,8 +10,9 @@
     var ssoSettingsUrl = Url.Action("SAMLSettings", "Administration");
     var authSettingsUrl = Url.Action("AuthenticationSettings", "Administration");
     var isSelfHosted = CloudAppConfig.IsSelfHosted;
-    var isBoldBIOnPremise = new GlobalAppSettings().GetLicenseSettings().Products.Any(x => x.TenantType == TenantType.BoldBIOnPremise);
+    var isBoldBIOnPremise = new GlobalAppSettings().GetLicenseSettings(_clientDateTimeInfo).Products.Any(x => x.TenantType == TenantType.BoldBIOnPremise);
     var embedSettingsUrl = Url.Action("EmbedSettings", "Administration");
+    var apiKeysUrl = Url.Action("ApiKeys", "Administration");
 }
 
 <nav id="admin-nav">
@@ -53,6 +54,12 @@
             <a id="oauth-settings-link" class="admin-menu-item @(currentUrl.IndexOf(authSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@authSettingsUrl" role="tab">
                 <i class="su su-lock"></i>
                 <span>[[[Authentication]]]</span>
+            </a>
+        </li>
+        <li>
+            <a id="api-keys-link" class="admin-menu-item @(currentUrl.IndexOf(apiKeysUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@apiKeysUrl" role="tab">
+                <i class="su su-single-sign-on"></i>
+                <span>[[[API Keys]]]</span>
             </a>
         </li>
         <li>

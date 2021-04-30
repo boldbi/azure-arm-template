@@ -986,30 +986,3 @@ $(document).on("focusin keyup", "#isolation-code", function (e) {
 $(document).on("click", "#data-security", function (e) {
     enableIsolationCode();
 });
-
-function fnCopyClientCredentials(inputId, buttonId) {
-    var copyText = $(inputId);
-    copyText.select();
-    document.execCommand("copy");
-    if (copyText.val() == "") {
-        navigator.clipboard.writeText(clientSecret);
-    }
-    setTimeout(function () {
-        $(buttonId).attr("data-original-title", "Copied");
-        $(buttonId).tooltip('show');
-    }, 200);
-    setTimeout(function () {
-        $(buttonId).attr("data-original-title", "Click to Copy");
-        $(buttonId).tooltip();
-    }, 3000);
-}
-
-$(document).on("mousedown", ".show-hide-password", function () {
-    $(this).siblings("input").attr('type', 'text');
-    $("#mySecret").val(clientSecret);
-});
-
-$(document).on("mouseup", ".show-hide-password", function () {
-    $("#mySecret").val("");
-});
-

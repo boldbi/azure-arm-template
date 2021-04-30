@@ -316,7 +316,11 @@ var TM = {
             ResetConfirmationMessage: "[[[Resetting the secret will break any embed dashboards using the old secret. Are you sure you want to reset the secret?]]]",
             EmbedSettings: "[[[Embed Settings]]]",
             ResetSecretSuccessAlert: "[[[Embed Secret has been updated successfully]]]",
-            EmbedInvalidMessage: "[[[The embed dashboard URL must be used in an iframe.]]]"
+            EmbedInvalidMessage: "[[[The embed dashboard URL must be used in an iframe.]]]",
+
+            //Api keys
+            ClicktoView: "[[[Click to view]]]",
+            ClicktoHide: "[[[Click to hide]]]"
         }
     }
 };

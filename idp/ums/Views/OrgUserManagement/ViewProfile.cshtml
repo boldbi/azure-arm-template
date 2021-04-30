@@ -12,6 +12,7 @@
     ViewBag.Title = "Organization | User | Profile | Bold IAM";
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var idpChangePasswordUrl = CloudAppConfig.IdPUrl + "/profile/change-password?return_url=" + requestUrl.AbsoluteUri;
+    var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
 }
 
 @section styles{
@@ -44,9 +45,9 @@
             $("#avatar-button-click, #avatar-delete-click").css("display", "none");
             $("#status-dom").hide();
 
-            window.dateFormat = "@GlobalAppSettings.SystemSettings.DateFormat";
+            window.dateFormat = "@dateFormat";
             var fulldata = @Html.Raw(Json.Serialize(ViewBag.UserDetail));
-            editUser(fulldata, "@GlobalAppSettings.SystemSettings.DateFormat");
+            editUser(fulldata, "@dateFormat");
             if (@ViewBag.EditUserProfile > 0) {
                 $("#edit").trigger("click");
                 if (showDropdown == "show") {
