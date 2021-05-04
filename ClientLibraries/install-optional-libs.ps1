@@ -6,8 +6,8 @@
 [CmdletBinding()]
 Param(	
 	[string]$ClientLibraries,
-	[string]$clientlibraryextractpath = "clientlibrary",
-	[string]$pluginpath = "Plugins/connections"
+	[string]$clientlibraryextractpath = "Libraries",
+	[string]$pluginpath = "../bi/dataservice/Plugins/connections"
 	
 )
 
