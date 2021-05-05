@@ -1,0 +1,307 @@
+@model List<TenantInfo>
+
+@{
+    ViewBag.Title = "Tenants | Syncfusion Cloud Management";
+
+    var startTimeQuery = Context.Request.Query["startdt"];
+    var endTimeQuery = Context.Request.Query["enddt"];
+    var tenantStatusQuery = Context.Request.Query["appstatus"];
+    var dateTypeQuery = Context.Request.Query["datetype"];
+
+    var startTime = string.Empty;
+    var endTime = string.Empty;
+    var tenantStatus = TenantStatus.Active;
+    var dateType = DateType.CreatedDate;
+    var SelectedAppStatus = "";
+
+    if (!string.IsNullOrWhiteSpace(startTimeQuery) && !string.IsNullOrWhiteSpace(endTimeQuery))
+    {
+        startTime = DateTimeHelper.ConvertDateTimeToString(DateTimeHelper.ConvertEpochMillisecToUtcDate(startTimeQuery));
+        endTime = DateTimeHelper.ConvertDateTimeToString(DateTimeHelper.ConvertEpochMillisecToUtcDate(endTimeQuery));
+    }
+
+    if (!string.IsNullOrWhiteSpace(tenantStatusQuery))
+    {
+        Enum.TryParse<TenantStatus>(tenantStatusQuery, out tenantStatus);
+    }
+
+    SelectedAppStatus = tenantStatus == TenantStatus.Active && string.IsNullOrWhiteSpace(tenantStatusQuery) ? ((int)TenantStatus.Active + "," + (int)TenantStatus.ActiveBenefits + "," + (int)TenantStatus.Trial + "," + (int)TenantStatus.TrialNotStarted + "," + (int)TenantStatus.ActivePaymentRequired + "," + (int)TenantStatus.ActiveDTPayment).ToString() : ((int)tenantStatus).ToString();
+
+    if (!string.IsNullOrWhiteSpace(dateTypeQuery))
+    {
+        Enum.TryParse<DateType>(dateTypeQuery, out dateType);
+    }
+
+    //dateType = dateType == 0 ? DateType.CreatedDate : dateType;
+    dateType = DateType.CreatedDate;
+
+    var isBoldBi = GlobalAppSettings.Branding == AppBranding.Bold.Identifier;
+
+}
+
+@section styles
+{
+    <link rel="stylesheet" href="~/bundles/css/tenants-page.css" asp-append-version="true"/>
+}
+
+@section scripts
+{
+    <script src="~/bundles/js/tenants-page.js" asp-append-version="true"></script>
+}
+
+@section MainSection
+{
+    <script>
+
+        var isBoldBi = "@isBoldBi";
+        var appStatus = [
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.Active)", value: @((int)TenantStatus.Active) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.ActiveBenefits)", value: @((int)TenantStatus.ActiveBenefits) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.Trial)", value: @((int) TenantStatus.Trial) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.TrialNotStarted)", value: @((int) TenantStatus.TrialNotStarted) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.ActivePaymentRequired)", value: @((int) TenantStatus.ActivePaymentRequired) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.ActiveDTPayment)", value: @((int)TenantStatus.ActiveDTPayment) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.AccountActivationPending)", value: @((int) TenantStatus.AccountActivationPending) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.Suspended)", value: @((int) TenantStatus.Suspended) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.SubscriptionCreationFailed)", value: @((int) TenantStatus.SubscriptionCreationFailed) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.SubscriptionCancelled)", value: @((int) TenantStatus.SubscriptionCancelled) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.DeploymentPending)", value: @((int) TenantStatus.DeploymentPending) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.SubscriptionCreationInProgress)", value: @((int) TenantStatus.SubscriptionCreationInProgress) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.DBDeploymentInProgress)", value: @((int) TenantStatus.DBDeploymentInProgress) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.ServerDeploymentInProgress)", value: @((int) TenantStatus.ServerDeploymentInProgress) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.StorageDeploymentInProgress)", value: @((int) TenantStatus.StorageDeploymentInProgress) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.DBDeploymentFailed)", value: @((int) TenantStatus.DBDeploymentFailed) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.StorageDeploymentFailed)", value: @((int) TenantStatus.StorageDeploymentFailed) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.ServerDeploymentFailed)", value: @((int) TenantStatus.ServerDeploymentFailed) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.DeploymentFailed)", value: @((int) TenantStatus.DeploymentFailed) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.MarkedForSuspension)", value: @((int) TenantStatus.MarkedForSuspension) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.MarkedForDeletion)", value: @((int) TenantStatus.MarkedForDeletion) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.SubscriptionDeleted)", value: @((int) TenantStatus.SubscriptionDeleted) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.DBDeleted)", value: @((int) TenantStatus.DBDeleted) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.StorageDeleted)", value: @((int) TenantStatus.StorageDeleted) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.Deleted)", value: @((int) TenantStatus.Deleted) },
+            { status: "@GlobalAppSettings.GetDescription(TenantStatus.Expired)", value: @((int) TenantStatus.Expired) }
+        ];
+
+        var paymentStatus = [
+            { status: "@PaymentStatus.Success", value: @((int)PaymentStatus.Success) },
+            { status: "@PaymentStatus.Failure", value: @((int) PaymentStatus.Failure) },
+            { status: "@PaymentStatus.Refund", value: @((int) PaymentStatus.Refund) },
+            { status: "@PaymentStatus.Cancel", value: @((int) PaymentStatus.Cancel) }
+        ];
+
+        if (isBoldBi.toLowerCase() == "true")
+        {
+            var plans = [
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Business10)", value: @((int)SaaSPlan.Business10), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Business25)", value: @((int)SaaSPlan.Business25), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Business50)", value: @((int)SaaSPlan.Business50), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.SingleUserPlan)", value: @((int)SaaSPlan.SingleUserPlan), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Custom_OnPremise)", value: @((int)SaaSPlan.BoldBI), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Business_10_OnPremise)", value: @((int)SaaSPlan.Business_10_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Business_25_OnPremise)", value: @((int)SaaSPlan.Business_25_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Business_50_OnPremise)", value: @((int)SaaSPlan.Business_50_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Enterprise_OnPremise)", value: @((int)SaaSPlan.Enterprise_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Startup_OnPremise)", value: @((int)SaaSPlan.Startup_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.SmallBusiness_OnPremise)", value: @((int)SaaSPlan.SmallBusiness_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Enterprise_MultiTenant_OnPremise)", value: @((int)SaaSPlan.Enterprise_MultiTenant_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Startup_MultiTenant_OnPremise)", value: @((int)SaaSPlan.Startup_MultiTenant_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.SmallBusiness_MultiTenant_OnPremise)", value: @((int)SaaSPlan.SmallBusiness_MultiTenant_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Custom_OnPremise)", value: @((int)SaaSPlan.Custom_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Embedded_OnPremise)", value: @((int)SaaSPlan.Embedded_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Startup_Embedded_OnPremise)", value: @((int)SaaSPlan.Startup_Embedded_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.SmallBusiness_Embedded_OnPremise)", value: @((int)SaaSPlan.SmallBusiness_Embedded_OnPremise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Enterprise)", value: @((int)SaaSPlan.Enterprise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Embedded)", value: @((int)SaaSPlan.Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.StartupEmbedded)", value: @((int)SaaSPlan.StartupEmbedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.SmallBusinessEmbedded)", value: @((int)SaaSPlan.SmallBusinessEmbedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Business10)", value: @((int)SaaSPlan.BoldReports_OnPremise_Business10), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Business25)", value: @((int)SaaSPlan.BoldReports_OnPremise_Business25), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Business50)", value: @((int)SaaSPlan.BoldReports_OnPremise_Business50), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Enterprise)", value: @((int)SaaSPlan.BoldReports_OnPremise_Enterprise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Embedded)", value: @((int)SaaSPlan.BoldReports_OnPremise_Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Startup)", value: @((int)SaaSPlan.BoldReports_OnPremise_Startup), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_SmallBusiness)", value: @((int)SaaSPlan.BoldReports_OnPremise_SmallBusiness), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Startup_Embedded)", value: @((int)SaaSPlan.BoldReports_OnPremise_Startup_Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_SmallBusiness_Embedded)", value: @((int)SaaSPlan.BoldReports_OnPremise_SmallBusiness_Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Enterprise_MultiTenant)", value: @((int)SaaSPlan.BoldReports_OnPremise_Enterprise_MultiTenant), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Startup_MultiTenant)", value: @((int)SaaSPlan.BoldReports_OnPremise_Startup_MultiTenant), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_SmallBusiness_MultiTenant)", value: @((int)SaaSPlan.BoldReports_OnPremise_SmallBusiness_MultiTenant), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReportsViewerSDK)", value: @((int)SaaSPlan.BoldReportsViewerSDK), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_ViewerSDK_Custom)", value: @((int)SaaSPlan.BoldReports_ViewerSDK_Custom), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_Annual)", value: @((int)SaaSPlan.BoldBI_Custom_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_Annual)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_Annual)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_ViewerSDK_Custom_Annual)", value: @((int)SaaSPlan.BoldReports_ViewerSDK_Custom_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_HalfYearly)", value: @((int)SaaSPlan.BoldBI_Custom_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_HalfYearly)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_HalfYearly)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_ViewerSDK_Custom_HalfYearly)", value: @((int)SaaSPlan.BoldReports_ViewerSDK_Custom_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_Quarterly)", value: @((int)SaaSPlan.BoldBI_Custom_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_Quarterly)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_Quarterly)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_ViewerSDK_Custom_Quarterly)", value: @((int)SaaSPlan.BoldReports_ViewerSDK_Custom_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_Embedded)", value: @((int)SaaSPlan.BoldBI_Custom_Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_Embedded_Annual)", value: @((int)SaaSPlan.BoldBI_Custom_Embedded_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_Embedded_HalfYearly)", value: @((int)SaaSPlan.BoldBI_Custom_Embedded_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Custom_Embedded_Quarterly)", value: @((int)SaaSPlan.BoldBI_Custom_Embedded_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_Embedded)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_Embedded_Annual)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_Embedded_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_Embedded_HalfYearly)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_Embedded_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Custom_Embedded_Quarterly)", value: @((int)SaaSPlan.BoldBI_OnPremise_Custom_Embedded_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_Embedded)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_Embedded), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_Embedded_Annual)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_Embedded_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_Embedded_HalfYearly)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_Embedded_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Custom_Embedded_Quarterly)", value: @((int)SaaSPlan.BoldReports_OnPremise_Custom_Embedded_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Cloud_Business5)", value: @((int)SaaSPlan.BoldBI_Cloud_Business5), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_Cloud_Premium)", value: @((int)SaaSPlan.BoldBI_Cloud_Premium), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBI)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_SingleUserPlan)", value: @((int)SaaSPlan.BoldReports_Cloud_SingleUserPlan), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Business5)", value: @((int)SaaSPlan.BoldReports_Cloud_Business5), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Business10)", value: @((int)SaaSPlan.BoldReports_Cloud_Business10), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Premium)", value: @((int)SaaSPlan.BoldReports_Cloud_Premium), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Custom)", value: @((int)SaaSPlan.BoldReports_Cloud_Custom), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_Standard)", value: @((int)SaaSPlan.BoldBI_OnPremise_Standard), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_Standard)", value: @((int)SaaSPlan.BoldReports_OnPremise_Standard), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Custom_Annual)", value: @((int)SaaSPlan.BoldReports_Cloud_Custom_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Custom_HalfYearly)", value: @((int)SaaSPlan.BoldReports_Cloud_Custom_HalfYearly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_Cloud_Custom_Quarterly)", value: @((int)SaaSPlan.BoldReports_Cloud_Custom_Quarterly), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReports)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldBI_OnPremise_EmbeddedSetup)", value: @((int)SaaSPlan.BoldBI_OnPremise_EmbeddedSetup), type: "@GlobalAppSettings.GetDescription(TenantType.BoldBIOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldReports_OnPremise_EmbeddedSetup)", value: @((int)SaaSPlan.BoldReports_OnPremise_EmbeddedSetup), type: "@GlobalAppSettings.GetDescription(TenantType.BoldReportsOnPremise)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Solo)", value: @((int)SaaSPlan.BoldSign_Solo), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Enterprise)", value: @((int)SaaSPlan.BoldSign_Enterprise), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Professional)", value: @((int)SaaSPlan.BoldSign_Professional), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Business)", value: @((int)SaaSPlan.BoldSign_Business), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Custom)", value: @((int)SaaSPlan.BoldSign_Custom), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Enterprise_Annual) Annual", value: @((int)SaaSPlan.BoldSign_Enterprise_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Professional_Annual) Annual", value: @((int)SaaSPlan.BoldSign_Professional_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Business_Annual) Annual", value: @((int)SaaSPlan.BoldSign_Business_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.BoldSign_Custom_Annual) Annual", value: @((int)SaaSPlan.BoldSign_Custom_Annual), type: "@GlobalAppSettings.GetDescription(TenantType.BoldSign)" }
+
+            ];
+        }
+        else
+        {
+                var plans = [
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Starter)", value: @((int)SaaSPlan.Starter) },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Mars)", value: @((int)SaaSPlan.Mars) },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Venus)", value: @((int)SaaSPlan.Venus) },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Neptune)", value: @((int)SaaSPlan.Neptune) },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.Uranus)", value: @((int)SaaSPlan.Uranus) },
+                { status: "@GlobalAppSettings.GetDescription(SaaSPlan.KcBenefits)", value: @((int)SaaSPlan.KcBenefits) }
+            ];
+        }
+
+        var dateType = [
+            { status: "@DateType.CreatedDate", value: @((int)DateType.CreatedDate) },
+            { status : "@DateType.ModifiedDate", value: @((int)DateType.ModifiedDate) },
+            { status : "@DateType.StatusUpdatedDate", value: @((int)DateType.StatusUpdatedDate) },
+        ];
+
+        var tenantType = [
+            { status: "@TenantType.BoldBI", value: @((int)TenantType.BoldBI) },
+            { status: "@TenantType.BoldReports", value: @((int)TenantType.BoldReports) },
+            { status: "@TenantType.BoldBIOnPremise", value: @((int)TenantType.BoldBIOnPremise) },
+            { status: "@TenantType.BoldReportsOnPremise", value: @((int)TenantType.BoldReportsOnPremise) },
+            { status: "@TenantType.BoldSign", value: @((int)TenantType.BoldSign) }
+        ];
+
+        var selectedAppStatus = "@SelectedAppStatus";
+        var filterStartTime = "@startTime";
+        var filterEndTime = "@endTime";
+    </script>
+    <div id="item-grid-container" data-grid-name="files" class="row admin-page-container">
+        <input type="hidden" class="page-name" data-content="Tenants">
+        <div class="import-area admin-page-header">
+            <h2 class="page-title">Tenants</h2>
+
+            <div id="timezone-container" class="pull-right filter-container">
+                <label class="app-textbox-label">Time Zone</label>
+                <input type="text" id="timezone-filter" />
+            </div>
+        </div>
+        <div class="admin-page-body">
+            <div id="search-area" class="" style="margin-left:0px">
+
+
+                @*<div class="pull-right" style="width: 180px;">
+                        <button id="more-filters-button" class="secondary-button pull-left no-margin col-xs-3">
+                            More Filters <span class="su su-dropdown-arrow"></span>
+                        </button>
+
+                        <div id="more-filters-container" style="display:none">
+                            <div id="filter-header">
+                                <strong>DateTime Filters</strong>
+                                <span class="su su-reset" id="reset-filters"></span>
+                            </div>
+                            <div class="col-xs-12 no-padding filter-row">
+                                <label class="col-xs-6" id="filter-startdate">Select Date Type</label>
+                                <div class="col-xs-6 no-padding">
+                                    <input type="text" id="datetype" />
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding filter-row">
+                                <label class="col-xs-6" id="filter-startdate">Start Date :</label>
+                                <div class="col-xs-6 no-padding">
+                                    <input type="text" id="start-timepicker" />
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding filter-row">
+                                <label class="col-xs-6" id="filter-enddate">End Date :</label>
+                                <div class="col-xs-6 no-padding">
+                                    <input type="text" id="end-timepicker" />
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding filter-row pull-right">
+                                <div class="col-xs-3 no-padding filter-action secondary-button" id="close-filter">
+                                    Close
+                                </div>
+                                <div class="col-xs-3 no-padding filter-action primary-button" id="apply-filter">
+                                    Apply Here
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+                <div class="other-filters-collection">
+                    <div class="col-xs-12 other-filters-collection-container">
+
+                        <div id="search-container" class="filter-container">
+                            <input type="text" id="search-items" class="pull-left no-margin col-xs-3" placeholder="Search Tenants" style="margin-top: 32px !important; width: 90.5%; height: 30px !important" />
+                            <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" data-toggle="tooltip" data-placement="left" style="margin-top: 32px !important; width: 9.5%; height: 30px !important; font-size: 12px" title="Clear search"></span>
+                            <span class="su su-search search-item pull-left no-margin" data-toggle="tooltip" data-placement="top" title="Search Tenants" style="margin-top: 32px !important; width: 9.5%; height: 30px !important; font-size: 12px"></span>
+                        </div>
+
+                        <div id="app-selection-container" class="filter-container">
+                            <label class="app-textbox-label">App Status</label>
+                            <input type="text" id="appstatus" />
+                        </div>
+
+                        <div id="plan-selection-container" class="filter-container">
+                            <label class="app-textbox-label">Plan</label>
+                            <input type="text" id="plan-filter" />
+                        </div>
+
+                        <div class="date-range-picker filter-container">
+                            <label class="app-textbox-label">Created Date</label>
+                            <input type="text" id="tenant-daterange" />
+                            <input type="text" id="datetype" value="@((int)dateType)" style="display:none" />
+                        </div>
+
+                        <div id="tenant-type-selection-container" class="filter-container">
+                            <label class="app-textbox-label">Product Type</label>
+                            <input type="text" id="tenant-type-filter" />
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="modifiedDate" data-content="@((int)DateType.ModifiedDate)">
+                <input type="hidden" id="statusUpdatedDate" data-content="@((int)DateType.StatusUpdatedDate)">
+
+            </div>
+            <div class="grid-container grid">
+                @await Html.PartialAsync("_TenantsGrid", new ViewDataDictionary(ViewData) { { "gridName", "TenantsManagement" } })
+            </div>
+        </div>
+    </div>
+    1.
+    @await Html.PartialAsync("_TenantDialog")
+}

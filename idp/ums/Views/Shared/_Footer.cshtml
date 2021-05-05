@@ -1,0 +1,36 @@
+﻿@if (CloudAppConfig.IsSelfHosted)
+{
+        var isLayoutFooter = ViewBag.IsLayoutFooter != null ? ViewBag.IsLayoutFooter : false;
+        var domain = System.Configuration.ConfigurationManager.AppSettings["syncfusion:product_home"];
+
+    <footer class="col-xs-12 col-md-12 col-sm-12 col-lg-12 no-padding layout-footer no-margin">
+        <div class="footer-image">
+            <img src="@GlobalAppSettings.SystemSettings.CDNLink/images/@GlobalAppSettings.Branding/application/@(isLayoutFooter ? "footer_logo_black.svg" : "syncfusion_logo_white.svg")" alt="[[[Syncfusion]]]" width="110px" height="25px">
+        </div>
+        <div class="footer-link @(isLayoutFooter ? "layout" : string.Empty)">
+            <a href="@domain/copyright" target="_blank">[[[Copyright © 2001 - ]]]@DateTime.UtcNow.Year [[[Syncfusion Inc. All Rights Reserved.]]]</a> | <a href="@domain/privacy" target="_blank">[[[Privacy Policy]]]</a> | <a href="@domain/cookie-policy" target="_blank">[[[Cookie Policy]]]</a>  | <a href="@domain/terms-of-use" target="_blank">[[[Terms of Use]]]</a>
+        </div>
+    </footer>
+}
+else
+{
+    <div id="base-footer-div">
+        <footer>
+            <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 no-padding layout-footer no-margin">
+                <div class="copyright-poweredby">
+                    <div class="col-xs-6 col-md-9 col-sm-9 col-lg-9 dropup no-padding language-area pull-left no-margin no-padding">
+                        <div class="no-padding pull-left" id="lang_menu">
+                            <p class="no-margin pull-left show" id="copyrightinfo"> @Html.Raw(GlobalAppSettings.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</p>
+                        </div>
+                    </div>
+                    <div class="col-xs-5 col-md-3 col-sm-3 col-lg-3 no-padding no-margin pull-right" id="enablefooter">
+                        <div class="lazyload name-loader" data-id="footerlogo" data-src="@(GlobalAppSettings.SystemSettings.CDNLink + "/images/" + CloudAppConfig.AppBranding + "/application/footer_logo.svg")" data-alt="Syncfusion" data-width="110px" data-height="25px"></div>
+                        <p class="no-margin pull-right pow show" id="poweredbysyncfusion">
+                            Powered by
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+}

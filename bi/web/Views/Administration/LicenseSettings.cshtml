@@ -1,0 +1,55 @@
+﻿@model Syncfusion.Server.Base.DataClasses.Subscription
+
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = "[[[Subscriptions]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var priorityOrderId = @Model.PlanId;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SubscriptionSiteSettings);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/license-settings.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/license-settings.min.css" />
+    </environment>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        var cancelSubscriptionUrl = "@Url.Action("CancelSubscription", "Payment")";
+        var activateSubscriptionUrl = "@Url.Action("ActivateSubscription", "Payment")";
+        var getSubscriptionPlanUrl = "@Url.Action("GetSubscriptionPlan", "Administration")";
+        var cancelSubscriptionFeedbackUrl = "@Url.Action("AddUserFeedback", "FeedBack")";
+        var getPlansUrl = "@Url.Action("GetPlans", "Payment")";
+        var updatePlanUrl = "@Url.Action("UpdatePlan", "Payment")";
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/license-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/license-settings.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <div id="license-settings-container">
+        <div id="subscription-plan-dialog">
+            @await Html.PartialAsync("../Administration/_SubscriptionPlan", @Model)
+            @await Html.PartialAsync("../Shared/_CancelSubscriptionFeedback")
+        </div>
+        <div id="choose-plan-dialog">
+            @await Html.PartialAsync("../Administration/_UpgradePlans", (List<SaaSPlanDetail>)ViewBag.PlansList, new ViewDataDictionary(ViewData) { { "PriorityOrderId", priorityOrderId } })
+        </div>
+    </div>
+}

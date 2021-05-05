@@ -1,0 +1,36 @@
+﻿@{
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var requestUrl = new Uri(this.Context.Request.GetDisplayUrl()).ToString();
+
+}
+
+<aside class="menu-bar" id="app-navigation">
+    <nav id="main-nav">
+        <a id="mobile-profile-picture" href="@Url.Action("ProfilePage", "User")" class="mobile-visible">
+            <div class="mobile-display-name">@displayName</div>
+            <img class="profile-picture" src="@Url.Content("/en-us/User/Avatar?id=" + Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value + "&ImageSize=64")" alt="[[[Profile]]]" />
+        </a>
+        <ul id="items-menu">
+           <li class="sf-nav-item @(requestUrl.IndexOf("/ums/homepage", StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
+                <a href="/ums/homepage">
+                    <span class="menu-label">[[[My Sites]]]</span>
+                </a>
+            </li>
+            <li class="sf-nav-item @(requestUrl.IndexOf("/en-us/user/profile", StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
+                <a href="/en-us/user/profile">
+                    <span class="menu-label">[[[My Profile]]]</span>
+                </a>
+            </li>
+            <li class="sf-nav-item @(requestUrl.IndexOf("/en-us/profile/change-password", StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
+                <a href="/en-us/profile/change-password">
+                    <span class="menu-label">[[[Change Password]]]</span>
+                </a>
+            </li>
+            <li class="li-logout mobile-visible">
+                <a class="" href="@Url.Action("logout", "accounts")">
+                    <span class="menu-log-label">[[[Log Out]]]</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>

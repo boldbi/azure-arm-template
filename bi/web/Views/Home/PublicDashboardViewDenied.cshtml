@@ -1,0 +1,81 @@
+﻿@inject ServerPrincipal _identityResponse
+@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+
+    ViewBag.Title = "[[[DashboardView Denied]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.PublicView = false;
+    if (_identityResponse != null && _identityResponse.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+        ViewBag.isAdmin = _identityResponse.IsAdmin;
+        ViewBag.PublicView = true;
+    }
+    else
+    {
+        Layout = null;
+        ViewBag.PublicViewOnNoAuth = true;
+    }
+}
+
+
+@await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+
+@if (ViewBag.PublicView)
+{
+    @section scripts{
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/js/bootstrap/bootstrapjs.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/js/bootstrap/bootstrapjs.min.js"></script>
+        </environment>
+
+        <script type="text/javascript">
+            function IframeLoad() {
+                var parentRefUrl = (window.location != window.parent.location) ? document.referrer : document.location.href.replace(document.location.pathname + document.location.search, "");
+                if (parentRefUrl == "") {
+                    var parentUrl = "";
+                }
+                else {
+                    var parentUrl = parentRefUrl.match(/:\/\/(.[^/]+)/)[1];
+                }
+                var iframeRefUrl = window.location.href;
+                var iframeUrl = iframeRefUrl.match(/:\/\/(.[^/]+)/)[1];
+                if (iframeUrl == parentUrl) {
+                    if (window.parent.$("#item-viewer").data("ejWaitingPopup") != undefined) {
+                        window.parent.$("#item-viewer").ejWaitingPopup("hide");
+                    }
+                }
+                if (self != top) {
+                    $("#header-area,#menu-area,.message-box-btn-holder").css("display", "none");
+                } else {
+                    $(".message-box-btn-holder").css("display", "none");
+                }
+            }
+
+            $(document).ready(function () {
+                IframeLoad();
+            });
+        </script>
+    }
+
+    @section MainSection{
+
+        <div class="dashboard-server">
+            <div class="col-md-12">
+                @if (ViewBag.IsAdmin == true)
+                {
+                    <div class="col-xs-12 text-center" style="color: #ff0000; margin-top: 60px; font-size: 30px">
+                        [[[ Public Dashboards are disabled in ]]] <a href="@Url.Action("DashboardSettings", "Administration")">[[[dashboard settings.</a>]]]
+                    </div>
+                }
+                else
+                {
+                    <div class="col-xs-12 text-center" style="color: #ff0000; margin-top: 60px; font-size: 30px">[[[Public Dashboards are disabled by the system administrator. Please contact your system administrator to enable this.]]]</div>
+                }
+            </div>
+        </div>
+    }
+}

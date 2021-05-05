@@ -1,0 +1,81 @@
+﻿@model TenantInfo
+@{
+    var tenantImageType = (TenantType)Model.TenantTypeId == TenantType.BoldBIOnPremise ? AppBranding.Bold.Identifier : AppBranding.BoldReports.Identifier;
+    var reportsStorageType = (TenantType)Model.TenantTypeId == TenantType.BoldReportsOnPremise ? true : false;
+    var activeTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "general") ? "active" : string.Empty;
+}
+
+<script type="text/javascript">
+    var clientSecret = $('meta[name="show-client-secret"]').attr("content");
+    var refreshclientsecretUrl = "@Url.Action("RegenerateClientSecret", "TenantsManagement")";
+</script>
+
+
+<div role="tabpanel" class="tab-pane @activeTab" id="application-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+        <div class="img-view-holder col-lg-2 col-md-2 col-sm-12 col-xs-12">
+            <div data-id="application-logo" class="lazyload img-loader" data-src="@Url.Content(Model.Tenant.DNS + "/" + CloudAppConfig.TenantIdentifierPrefix + "/" + Model.Tenant.TenantIdentifier + "/get-client-logo")" data-alt="boldbilogo" data-default="this.onerror=null;this.src='/images/@tenantImageType/application/@IconFileNames.LoginLogo'" data-width="110px" data-height="25px"></div>
+        </div>
+        <div id="edit-application-form-div" class="col-lg-10 col-md-10 col-sm-12 col-xs-12 no-padding margin-top10">
+            <form class="row admin-page-form" autocomplete="off">
+                @Html.HiddenFor(tenantInfo => tenantInfo.TenantInfoId, new { id = "application-id" })
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+                    @Html.Label("application-name", "[[[Site name]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-name">
+                        @Html.DisplayFor(tenantInfo => tenantInfo.Tenant.TenantName)
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("application-url", "[[[Site URL]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-url active ">
+                        <a title=@Html.Raw(Model.Tenant.DNS + "/" + CloudAppConfig.TenantIdentifierPrefix + "/" + Model.Tenant.TenantIdentifier) data-toggle="tooltip" href=@Html.Raw(Model.Tenant.DNS + "/" + CloudAppConfig.TenantIdentifierPrefix + "/" + Model.Tenant.TenantIdentifier)>@Html.Raw(Model.Tenant.DNS + "/" + CloudAppConfig.TenantIdentifierPrefix + "/" + Model.Tenant.TenantIdentifier) </a>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("client-id", "Client id", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 id">
+                        <input type="text" class="client-values" id="myId" readonly="" value="@Html.DisplayFor(tenantInfo => tenantInfo.TenantInfoId)" />
+                        <button class="su su-copy copy-client-values" id="copy-client-id" onclick="fnCopyClientCredentials('#myId','#copy-client-id')" data-toggle="tooltip" data-original-title="Click to copy"></button>
+                    </div>
+
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("client-secret", "Client secret", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 secret">
+                        <input type="password" id="mySecret" readonly="" class="client-values my-secret" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="" />
+                        <button class="su su-copy copy-client-values" id="copy-client-secret" onclick="fnCopyClientCredentials('#mySecret','#copy-client-secret')" data-toggle="tooltip" data-original-title="Click to copy"></button>
+                        <button class="su su-show copy-client-values show-client-secret" id="show-secret" data-toggle="tooltip" data-original-title="Click to view"></button>
+                        @*<button class="su su-sync text focus" id="generate-client-secret" onclick="onRegenerateClientSecretDialogOpen()" data-toggle="tooltip" data-original-title="Click to Regenerate"></button>*@
+                    </div>
+                </div>
+                @if (reportsStorageType)
+                {
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                        @Html.Label("Storage Type", "Storage Type", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                        <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 storage-type ">
+                            @if (Model.BlobConnectionString == "" || Model.BlobConnectionString == null)
+                            {
+                                <div>
+                                    [[[File Storage]]]
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    [[[Blob Storage]]]
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+    <div id="dialog" class="custom-template"></div>
+    <div id="dlgContent" style="visibility: hidden" class="dialogContent">
+        <span class="dialogText">
+            <span class="su su-warning-alt" id="warning-icon"></span>
+            <span class="dialog-text-text">[[[Beware Any script or application using this client secret need to be updated]]]</span>
+        </span>
+    </div>
+</div>

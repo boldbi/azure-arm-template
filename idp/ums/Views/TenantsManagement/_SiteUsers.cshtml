@@ -1,0 +1,104 @@
+﻿@model TenantInfo
+@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"] == "users") ? "active" : string.Empty;
+}
+
+<script type="text/javascript">
+    var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+    var isPresentUserNameAndEmailId = "@Url.Action("isPresentUserNameAndEmailId", "UserManagement")";
+    var addUserUrl = "@Url.Action("AddUser", "TenantsManagement")";
+    var isEmailRequired = @Json.Serialize(GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.Required);
+</script>
+
+<div role="tabpanel" class="tab-pane @activeTab" id="users-tab">
+    <div id="user-list-container" class="list col-xs-12 admin-page-body">
+        <div class="col-lg-12 short-description no-padding pull-left">
+            <span>
+                [[[The following users have access to the site.]]]
+            </span>
+        </div>
+        <div id="search-area" class="pull-right">
+            <input type="text" class="pull-left" id="search-app-users" placeholder="[[[Search users]]]" />
+            <span class="su su-inner-close close-icon pull-left" id="clear-search" title="[[[Clear search]]]"></span>
+            <span class="su su-search search-user pull-left" title="[[[Search]]]"></span>
+        </div>
+        <div id="new-user-button" class="pull-right">
+            <button class="primary-button" id="new-user-dropdown" title="[[[Add new user]]]" data-toggle="tooltip" onclick="onUserAddDialogOpen()">
+                [[[Add User]]]
+            </button>
+        </div>
+        <div id="add-users-button" class="pull-right">
+            <button class="primary-button">[[[Grant access]]]</button>
+        </div>
+        <div id="remove-users-button" class="pull-right hide">
+            <button class="critical-action-button remove-button">[[[Revoke access]]]</button>
+        </div>
+        <div class="col-xs-12 no-padding">
+            <div id="users_grid">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal no-padding" id="add-users-dialog" tabindex="-1" role="dialog">
+        <div class="col-lg-12 modal-dialog no-padding" role="document">
+            <div class="col-lg-12 modal-content no-padding" autocomplete="off">
+                <div class="col-md-12 modal-header">
+                    <div class="col-xs-8 no-padding">
+                        <i class="su head-icon"></i>
+                        <span class="modal-title">[[[Grant Access to users ]]]&mdash; @Model.Tenant.TenantName</span>
+                    </div>
+                    <div class="col-xs-4 no-padding">
+                        <a href="javascript:void(0);" onclick="onAddUsersDialogClose()" class="close"><i class="su su-close"></i></a>
+                    </div>
+                    <div class="col-xs-12 no-padding description pull-left">
+                        <span>
+                            [[[Select the users who would be granted site access.]]]
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-body col-xs-12">
+                    <div id="add-user-search-area" class="pull-right">
+                        <input type="text" class="pull-left" id="add-user-search" placeholder="[[[Search users]]]" />
+                        <span class="su su-inner-close close-icon pull-left" id="add-user-clear-search" title="[[[Clear search]]]"></span>
+                        <span class="su su-search search-icon pull-left" title="[[[Search]]]"></span>
+                    </div>
+                    <div class="col-xs-12 no-padding">
+                        <div id="add_users_grid">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 modal-footer add-user-dialog-footer no-right-padding no-left-padding">
+                    <input type="hidden" value="">
+                    <input type="button" onclick="provideAccesstoUsers()" class="primary-button" id="provide-access-button" value="[[[Grant access]]]" />
+                    <input type="button" onclick="onAddUsersDialogClose()" class="secondary-button popup-close" value="[[[Cancel]]]" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal no-padding" id="user-remove-confirmation" tabindex="-1" role="dialog">
+        <div class="col-lg-12 modal-dialog no-padding" role="document">
+            <div class="col-lg-12 modal-content no-padding" autocomplete="off">
+                <div class="col-md-12 modal-header">
+                    <div class="col-xs-8 no-padding">
+                        <i class="su su-delete head-icon"></i>
+                        <span class="modal-title">[[[Revoke User(s) Access]]]</span>
+                    </div>
+                    <div class="col-xs-4 no-padding">
+                        <a href="javascript:void(0);" onclick="onUserRemoveDialogClose()" class="close"><i class="su su-close"></i></a>
+                    </div>
+                </div>
+                <div class="modal-body col-xs-12 no-padding">
+                    <div class="col-xs-12 no-left-padding no-bottom-padding no-right-padding">
+                        <div class="delete-msg">[[[Are you sure you want to revoke access for the selected user(s)?]]]</div>
+                    </div>
+                </div>
+                <div class="col-xs-12 modal-footer  no-right-padding no-left-padding">
+                    <input type="button" class="critical-action-button remove-confirm-button" value="[[[Yes]]]" />
+                    <input type="button" onclick="onUserRemoveDialogClose()" class="secondary-button popup-close" value="[[[No]]]" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("../UserManagement/_UserAddDialog")

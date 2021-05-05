@@ -1,0 +1,79 @@
+﻿@{
+    var isAccountActivationAlreadySent = ViewBag.IsAccountActivationMailAlreadySent != null ? (bool)ViewBag.IsAccountActivationMailAlreadySent : false;
+    var tenantEmail = ViewBag.Email;
+    var activationCode = ViewBag.ActivationCode;
+    var resendActivationCode = ViewBag.IsResendActivationCode != null ? (bool)ViewBag.IsResendActivationCode : false;
+    var isAccountActivated = ViewBag.AccountActivated != null ? (bool)ViewBag.AccountActivated : false;
+    var isAccountAlreadyActivated = ViewBag.AccountAlreadyActivated != null ? (bool)ViewBag.AccountAlreadyActivated : false;
+    var linkExpired = ViewBag.LinkExpired != null ? (bool)ViewBag.LinkExpired : false;
+    var linkInvalid = ViewBag.InvalidLink != null ? (bool)ViewBag.InvalidLink : false;
+    var planId = ViewBag.PlanId;
+    var tenantId = ViewBag.TenantId;
+    Layout = null;
+}
+
+<script>
+    activationCode = "@activationCode";
+    plan = "@planId";
+    tenantId = "@tenantId";
+</script>
+<div class="activate-tenant-bg">
+    @if (!linkExpired || !linkInvalid)
+    {
+        <div class="icon-container">
+            <div class="su su-tick"></div>
+        </div>
+    }
+    else
+    {
+        <div class="icon-container"><span class="su su-warning-alt"></span></div>
+    }
+
+    <div class="heading text-h4">Email Verification</div>
+    @if (resendActivationCode)
+    {
+        <div class="status-message text-body">Email resent successfully.</div>
+        <div class="text-body resend-verification">Please check your spam or junk folder for the verification email. If it does not arrive, <a class="link-hover text-primary" id="mail-resend">click here </a>to resend or please contact <a href='mailto:sales@syncfusion.com' class="link-hover text-primary">sales@syncfusion.com</a></div>
+        <div class="divider-light"></div>
+        <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">The verification link expires in 2 days!</span></div>
+    }
+    else if (isAccountActivated)
+    {
+        <div class="status-message text-body">Account verification successful.</div>
+        <input type="hidden" value="@ViewBag.TenantInfoId" name="tenantId" />
+        <div class="btn-holder text-body" id="payment-container">
+            <a href="/register/planchooser/@ViewBag.TenantInfoId" tabindex="1" id="payment-button" class="proceed-button primary-button">Make Payment</a>
+        </div>
+    }
+    else if (linkExpired || linkInvalid)
+    {
+        <div class="status-message text-body">The verification link is invalid or expired.</div>
+    }
+    else if (isAccountActivationAlreadySent)
+    {
+        <div class="status-message text-body">An email with instructions on how to verify your account has been already sent to <a id="tenant-email" href='mailto:  @tenantEmail'>@tenantEmail</a></div>
+        <div class="text-body resend-verification">Please check your spam or junk folder for the verification email. If it does not arrive, <a class="link-hover text-primary" id="mail-resend">click here </a>to resend or please contact <a href='mailto:sales@syncfusion.com' class="link-hover text-primary">sales@syncfusion.com</a></div>
+        <div class="divider-light"></div>
+        <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">The verification link expires in 2 days!</span></div>
+    }
+    else if (isAccountAlreadyActivated)
+    {
+        <div class="status-message text-body">Your account has been already activated.</div>
+    }
+    else
+    {
+        <div class="status-message text-body">We need to verify your email address. We have sent an email to <a id="tenant-email" href='mailto:  @tenantEmail'>@tenantEmail</a> to verify it. <span>Please click the link in the email or enter the verification code below to continue the registration.</span></div>
+        <div class="verification-contianer">
+            <div id="verifiation-error"></div>
+            <div style="margin: 0% 20%;">
+                <input type="text" id="account-verification-code" value="" autofocus name="account-verification-code" maxlength="6" class="form-control text account-verification-code" tabindex="1">
+                <div class="btn-holder text-body">
+                    <button id="verify-code-button" class="proceed-button primary-button">Verify</button>
+                </div>
+            </div>
+        </div>
+        <div class="text-body resend-verification">Please check your spam or junk folder for the verification email. If you do not receive, <a class="link-hover text-primary" id="mail-resend">click here </a> to resend or please contact <a href='mailto:sales@syncfusion.com' class="link-hover text-primary">sales@syncfusion.com</a></div>
+        <div class="divider-light"></div>
+        <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">The verification link expires in 2 days!</span></div>
+    }
+</div>

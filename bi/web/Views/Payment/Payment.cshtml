@@ -1,0 +1,130 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = "[[[Payments]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    var cardDetail = ViewBag.CardDetail;
+    ViewBag.MessageBox = false;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.Payments);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-card.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-card.min.css" />
+    </environment>
+}
+
+
+@section scripts{
+    <script src="https://js.stripe.com/v3/"></script>
+    <script type="text/javascript">
+        var updateCardUrl = "@Url.Action("UpdateCard", "Payment")";
+        var retryPaymentUrl = "@Url.Action("RetryPayment", "Payment")";
+        var updateBillingAddressUrl = "@Url.Action("UpdateBillingAddress", "Payment")";
+        var tenantInfoId = "@globalAppSettings.SystemSettings.TenantId";
+        var idpReferrenceId = '@Context.Session.GetString("idpReferenceId")';
+        var cardUrl = "@Url.Action("UpdateCardPopup", "Payment")";
+        var createSubscriptionCardUrl = "@Url.Action("AddPaymentDetail", "Payment")";
+        var isCardExist = @Json.Serialize(ViewBag.IsCardExist);
+    </script>
+    @if ((TenantStatus)ViewBag.TenantStatus != TenantStatus.ActiveDTPayment)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-card.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-card.min.js"></script>
+        </environment>
+    }
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    @if ((TenantStatus)ViewBag.TenantStatus == TenantStatus.ActiveDTPayment)
+    {
+        @await Html.PartialAsync("../Payment/_NotAllowed")
+    }
+    else
+    {
+        <div id="stripePublicKey" style="display:none">
+            @ServerAppConfig.AppSettings.Subscription.StripeKey
+        </div>
+
+        <div id="update-card-container" class="col-xs-12 admin-page-container">
+            <div id="update-card-header" class="col-xs-12 admin-page-header">
+                <hgroup class="update-card-title">
+                    <h1 class="page-title">[[[PAYMENTS]]]</h1>
+                    @if (!ViewBag.IsCardExist)
+                    {
+                        <h5 class="page-description">[[[Add payment details to continue your subscription.]]]</h5>
+                    }
+                    else
+                    {
+                        <h5 class="page-description">[[[Update card and billing address to use for the subscription payment.]]]</h5>
+                    }
+                </hgroup>
+            </div>
+            @if (ViewBag.IsCardExist)
+            {
+                @await Html.PartialAsync("../Payment/_Card", new ViewDataDictionary(ViewData) { { "TenantStatus", ViewBag.TenantStatus }, { "BrandName", ViewBag.BrandName }, { "CardNum", ViewBag.CardNum }, { "ExpiresIn", ViewBag.ExpiresIn }, { "ExpireDate", ViewBag.ExpireDate } })
+            }
+            <div id="update-billing-body" class="admin-page-body pay-form-info">
+                @if (!ViewBag.IsCardExist)
+                {
+                <div id="add-card-details" class="col-xs-5">
+                    <hgroup class="add-card-container-title">
+                        <h1 class="card-title sub-section-heading">[[[Credit/Debit Card]]]</h1>
+                        <h5 class="card-description">[[[This is the card used for your subscription renewals.]]]</h5>
+                    </hgroup>
+                    @await Html.PartialAsync("../Payment/_UpdateCard")
+                </div>
+                }
+                else
+                {
+            <div id="card-details-popup">
+                @await Html.PartialAsync("../Payment/_UpdateCard")
+            </div>
+                }
+
+            <form class="card-form no-padding col-xs-12" id="card-form-id">
+                <div class="address-section-title">
+                    <label class="control-label sub-section-heading">[[[Billing Address]]]</label>
+                </div>
+                @await Html.PartialAsync("../Payment/_BillingAddressInputElements")
+                <div class="col-xs-12 col-md-12 no-padding">
+                    <div class="col-xs-5 col-md-5 no-padding" id="validation-detail">
+                        <span class="validation-error text"></span>
+                    </div>
+                    <div class="col-xs-2 col-md-2" id="billing-details-update">
+                        @if (ViewBag.IsCardExist)
+                        {
+                            <button class="primary-button update-billing-address">[[[Update]]]</button>
+                        }
+                    </div>
+                </div>
+            </form>
+            </div>
+
+            @if (!ViewBag.IsCardExist)
+            {
+                <div class="admin-page-actions col-xs-12 col-md-12">
+                    <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button pull-right" id="cancel-dashboard-settings" title="">[[[Cancel]]]</a>
+                    <input type="button" title="" id="payment-submit" class="primary-button pull-right" value="[[[Save]]]" />
+                </div>
+            }
+        </div>
+
+
+
+        <input type="hidden" value="@ViewBag.TenantStatus" id="tenant-status">
+        <div id="messageBox">
+            <div class="message-header"></div>
+            <div class="message-box-close"></div>
+            <div class="message-content text-center"></div>
+            <div class="message-box-btn-holder"></div>
+        </div>
+    }
+}
+

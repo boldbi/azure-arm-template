@@ -1,0 +1,56 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    ViewBag.IncludeHeader = false;
+    ViewBag.RemoveUserProfile = Context.User.Identity.IsAuthenticated ? !Context.User.Identity.IsAuthenticated : true;
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    ViewBag.Title = "[[[Privacy Policy Confirmation | ]]]" + CloudAppConfig.AccountTitle;
+    var domain = System.Configuration.ConfigurationManager.AppSettings["syncfusion:product_home"];
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/privacy-policy-confirmation.css" asp-append-version="true"/>
+}
+@section scripts{
+    <script src="~/bundles/js/privacy-policy-confirmation.js" asp-append-version="true"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#agreement").on("change", function () {
+                if ($("#agreement").is(":checked")) {
+                    $(".proceed-button").removeAttr("disabled");
+                } else {
+                    $(".proceed-button").attr("disabled", "disabled");
+                }
+            });
+        });
+    </script>
+}
+@section MainSection{
+    <div class="privacy-policy-wrapper">
+        <div class="privacy-policy-body">
+            <div class="form-name text-h1">[[[Privacy Policy Confirmation]]]</div>
+            <form id="privacy-policy-form" name="privacypolicyform" action="@Url.Action("Privacy", "Accounts", new { userid = ViewBag.UserId, token = ViewBag.Token, subdomain = ViewBag.SubDomain, returnurl = ViewBag.ReturnUrl })" method="post">
+                <input type="hidden" value="@ViewBag.HttpHeaders" name="httpHeaders" />
+                <input type="hidden" value="@ViewBag.RequestUrl" name="requestUrl" />
+                <div class="agreement-wrapper">
+                    <div class="agreement-div material-checkbox">
+                        @Html.CheckBox("agreement", false, new { @required = "required", id = "agreement", tabindex = "1" })
+
+                        @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+                        {
+                            <label for="agreement">[[[I have read and agree to Syncfusion's ]]]<a href="@domain/privacy" target="_blank" tabindex="7">[[[privacy policy]]]</a>[[[, ]]] <a href="@domain/cookie-policy" target="_blank" tabindex="7">[[[cookie policy]]]</a>[[[ and Bold enterprise solutions ]]]<a href="@domain/terms-of-use" target="_blank" tabindex="7">[[[terms of use]]]</a>[[[. ]]]<a href="#" style="padding-right: 5px;" data-toggle="popover" data-placement="right" data-container='body' data-trigger="focus" data-content="[[[I understand I will receive transactional emails relating to my account, including invoices, and documentation.]]]" data-original-title="" title="">[[[Read More]]]</a></label>
+                        }
+                        else
+                        {
+                            <label for="agreement">[[[I have read and agree to Syncfusion's ]]]<a href="@domain/privacy" target="_blank" tabindex="7">[[[privacy policy]]]</a>[[[, ]]]<a href="@domain/cookie-policy" target="_blank" tabindex="7">[[[cookie policy]]]</a> and <a href="@domain/terms-of-use" target="_blank" tabindex="7">[[[terms of use]]]</a>. <a href="#" style="padding-right: 5px;" data-toggle="popover" data-placement="right" data-container='body' data-trigger="focus" data-content="[[[I understand I will receive transactional emails relating to my account, including invoices, and documentation.]]]" data-original-title="" title="">[[[Read More]]]</a></label>
+                        }
+                    </div>
+                </div>
+                <button class="proceed-button" type="submit" disabled name="Submit">
+                    [[[Continue]]]
+                </button>
+            </form>
+        </div>
+    </div>
+}

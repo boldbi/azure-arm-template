@@ -1,0 +1,76 @@
+﻿@model TenantInfo
+
+@{
+    var statusClass = (GlobalAppSettings.GetDescription(Model.TenantStatus)).ToLower().Replace(" ", "-");
+}
+
+<div role="tabpanel" class="tab-pane active" id="tenant-info-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+            @Html.Label("application-name", "First name", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 customer-first-name">
+                @Html.DisplayFor(application => application.User.FirstName)
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+            @Html.Label("application-name", "Last name", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 customer-last-name">
+                @Html.DisplayFor(application => application.User.LastName)
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+            @Html.Label("application-type", "Email", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 customer-email">
+                @Html.DisplayFor(application => application.User.Email)
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+            @Html.Label("application-url", "DNS", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-url active ">
+                <a href="https://@Model.Tenant.DNS" target="_blank">@Model.Tenant.DNS</a>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group tenant-status">
+            @Html.Label("application-type", "Tenant Status", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-type status-button @statusClass">
+                @GlobalAppSettings.GetDescription(Model.TenantStatus)
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+            @Html.Label("application-type", "Plan", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-type" id="plan-tab-ref">
+                @if (Model.SaaSPlanId != 0)
+                {
+                    <a href="#tenant-plan-tab" aria-controls="tenant-plan-tab" role="tab" data-toggle="tab">@GlobalAppSettings.GetDescription(Model.SaaSPlanId)</a>
+                }
+                else
+                {
+                    <div>No Plan Selected</div>
+                }
+
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group payment-status">
+            @Html.Label("application-type", "Payment Status", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+            @if (!string.IsNullOrWhiteSpace(Model.PaymentStatus))
+            {
+                <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-type">
+                    @if (Model.IsTrialExpired)
+                    {
+                        <span class="status-button @Model.PaymentStatus.ToString().ToLower()" style="margin-left: 0px;">@Model.PaymentStatus</span>
+                    }
+                    else
+                    {
+                        <span> In 30 days trial</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-type">
+                    Not Available
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    var userEmail = ViewBag.Email;
+    var activationCode = ViewBag.ActivationCode;
+    var isAccountAlreadyActivated = ViewBag.AccountAlreadyActivated != null ? (bool)ViewBag.AccountAlreadyActivated : false;
+    var userId = ViewBag.UserId;
+    var returnActionUrl = Url.Action("Login", "Accounts");
+    ViewBag.Title = "Account Verification | Bold ID";
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/bundles/css/account-user-activation.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script src="~/bundles/js/accounts-activation-code.js" asp-append-version="true"></script>
+
+    <script>
+    var activationCode = "@activationCode";
+    var userId = "@userId";
+    var userActivated = "@Url.Action("UserActivated", "Accounts")";
+    var userProfileUrl="@Url.Action("Profilepage","User")";
+    var resendActivationUrl = "@Url.Action("ResendActivationCode", "Accounts")";
+    var checkVerificationCodeUrl = "@Url.Action("CheckVerificationCode", "Accounts")";
+    </script>
+}
+
+@section MainSection{
+
+    <div class="activate-user-bg">
+        <div id="tick-icon" class="icon-success">
+            <div class="su su-tick"></div>
+        </div>
+        <div id="warning-icon" class="icon-failure hide"><span class="su su-warning-alt"></span></div>
+        <div id="account-active" class="status-message text-body hide">Your account has been already activated.</div>
+        <div id="account-expired" class="status-message text-body hide">Your verification link has expired.</div>
+        <form action="@returnActionUrl" method="post" id="login-button" class="hide">
+            <input type="submit" class="btn-holder proceed-button" value="Proceed to log in">
+        </form>
+        <div id="user-verification-box">
+            <div class="status-message text-body">We need to verify your email address. We have sent an email to <a id="user-email" href='mailto:  @userEmail'>@userEmail</a> to verify it. <span>Please click the link in the email or enter the verification code below to continue the registration.</span></div>
+            <div class="verification-contianer">
+                <div id="verifiation-error"></div>
+                <div style="margin: 0% 20%;">
+                    <input type="text" id="account-verification-code" value="" autofocus name="account-verification-code" maxlength="6" class="form-control text account-verification-code" tabindex="1">
+                    <div class="btn-holder text-body">
+                        <button id="verify-code-button" class="proceed-button primary-button" disabled>Verify</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-body resend-verification">Please check your spam or junk folder for the verification email. If you do not receive, <a class="link-hover text-primary" id="mail-resend">click here </a> to resend or please contact <a href='mailto:sales@syncfusion.com' class="link-hover text-primary">sales@syncfusion.com</a></div>
+            <div class="divider-light"></div>
+            <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">The verification link expires in 2 days!</span></div>
+        </div>
+    </div>
+}
+
+
+
+
+
