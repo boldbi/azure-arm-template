@@ -51,3 +51,31 @@ To get better performance, can scale up the App Service plan from Basic to Stand
 Scale-up: https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-scale
 
 Scale-out: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/insights-how-to-scale
+
+# Install Client libraries 
+
+Bold BI Enterprise Edition uses client libraries such as Oracle, MySQL, Snowflake, and MongoDB to connect with their respective SQL database variants. You need to read and accept client library license to install client libraries. 
+
+Please follow the below step to install client libraries.  
+
+1. Open kudu PowerShell console for Bold BI Azure App service. We can access the Kudu service through the portal by navigating to Web App dashboard > Advanced Tools > Click on Go. 
+
+  ![Advanced tool - kudu](images/Advancetool.png)
+
+2. Select PowerShell console  
+
+![Kudu powershell window](images/Kudu-Powershell.png)
+ 
+
+3. Go to client library location 
+```
+    {drive}\home\site\wwwroot\ClientLibraries 
+```
+4. Here, you can see the client library consent document consent-to-deploy-client-libraries.txt. Read client libraries LICENSE details and execute the following command to install client libraries. 
+```
+  .\install-optional-libs.ps1 “npgsql,mongodb,influxdb,snowflake,mysql,oracle” 
+  ```
+
+![client-lib-install-command](images/client-lib-install-command.png)
+ 
+
