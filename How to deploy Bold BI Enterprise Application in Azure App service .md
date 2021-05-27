@@ -72,8 +72,9 @@ Please follow the below step to install client libraries.
                {drive}\home\site\wwwroot\ClientLibraries 
 
 4. Here, you can see the client library consent document consent-to-deploy-client-libraries.txt. Read client libraries LICENSE details and execute the following command to install client libraries. 
-
-5. .\install-optional-libs.ps1 “npgsql,mongodb,influxdb,snowflake,mysql,oracle” 
+```
+  .\install-optional-libs.ps1 “npgsql,mongodb,influxdb,snowflake,mysql,oracle” 
+  ```
 
 ![client-lib-install-command](images/client-lib-install-command.png)
  
