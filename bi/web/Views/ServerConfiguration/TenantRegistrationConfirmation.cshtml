@@ -3,42 +3,57 @@
     var token = ViewBag.Token;
     var cdnLink = GlobalAppSettings.CdnDomain;
     var dashboardServerResourceUrl = ViewBag.appsettings.SystemSettings.CDNLink.TrimEnd('/');
+    var favLogo = string.Empty;
+    var orgName = string.Empty;
     var headerLogo = string.Empty;
     if (!string.IsNullOrWhiteSpace(ViewBag.appsettings.SystemSettings.LoginLogo))
     {
-        headerLogo = ViewBag.appsettings.SystemSettings.LoginLogo;
+        headerLogo = new Uri(ViewBag.appsettings.SystemSettings.LoginLogo).PathAndQuery;
+        favLogo = new Uri(ViewBag.appsettings.SystemSettings.FavIcon).PathAndQuery + "&ramd=" + Syncfusion.Server.Base.Helpers.DateTimeHelper.DateTimeToUnixTimeStamp(DateTime.Now);
+        orgName = ViewBag.appsettings.SystemSettings.OrganizationName;
     }
     else
     {
-        headerLogo = dashboardServerResourceUrl  + "/cdn/images/application/boldbi/deployment_header_logo.svg";
+        headerLogo = dashboardServerResourceUrl + "/cdn/images/application/boldbi/deployment_header_logo.svg";
+        favLogo = dashboardServerResourceUrl + "/cdn/images/application/boldbi/favicon.ico";
+        orgName = @GlobalAppSettings.BrandingDisplayName + " Enterprise";
     }
     var pathbase = Context.Request.PathBase;
     var tenantId = ViewBag.TenantInfoId;
+    var baseUrl = ViewBag.BaseUrl;
+    var isFirstTenant = ViewBag.IsFirstTenant;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Registration - @GlobalAppSettings.BrandingDisplayName Enterprise Dashboards</title>
+    <title>Registration - @orgName Dashboards</title>
+    <link rel="icon" href="@favLogo" />
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr/signalr.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tenant-registration-page.css" />
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.min.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr/signalr.min.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tenant-registration-page.min.css" />
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <script>
         var statusTracker;
         var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
         var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
         var idpUrl = "@ServerAppConfig.InternalAppIdpUrl";
+        var isFirstTenant = @Json.Serialize(isFirstTenant);
+        var siteRegistrationCompleted = false;
         $(function() {
             setTimeout(function () {
                 $('#circle').circleProgress('value', 0.18);
@@ -47,34 +62,44 @@
 
             $('#circle').circleProgress('value', 0.05);
             setInterval(function () {
-                $.ajax({
-                    type: "POST",
-                    url: progressStatusUrl,
-                data: {
-                    tenantId: "@tenantId"
-                },
-                success: function (result) {
-                    var circleValue = $('#circle').circleProgress('value');
-                    if ((result.Percentage / 100) > circleValue) {
-                        $('#circle').circleProgress('value', result.Percentage / 100);
+                if (!siteRegistrationCompleted) {
+                    $.ajax({
+                        type: "POST",
+                        url: progressStatusUrl,
+                    data: {
+                        tenantId: "@tenantId"
+                    },
+                    success: function (result) {
+                        var circleValue = $('#circle').circleProgress('value');
+                        if ((result.Percentage / 100) > circleValue) {
+                            $('#circle').circleProgress('value', result.Percentage / 100);
+                        }
+
+                        if (result.Message != undefined && result.Message != null && result.Status) {
+                            $("#deployment-status").text(result.Message + "...");
+                        }
+
+                        if (typeof (result.AdditionalData) != "undefined" && result.AdditionalData != null && result.Percentage == 100) {
+                            siteRegistrationCompleted = true;
+                            if (typeof (result.AdditionalData.RedirectUrl) != "undefined" && !isNullOrWhitespace(result.AdditionalData.RedirectUrl) && isFirstTenant) {
+                                $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
+                                $("body").addClass("welcome-page-footer-alignment");
+                                $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");
+                                $(".user-name span").text(result.AdditionalData.DisplayName);
+                                $(".profile-pic-tag").attr({
+                                    "data-id": result.AdditionalData.UserId,
+                                    "data-display-name": result.AdditionalData.DisplayName
+                                });
+
+                                generateProfileAvatar();
+                                $(".dashboard-parent-container > a, #close-welcome-page").attr("href", result.AdditionalData.RedirectUrl);
+                            } else {
+                                window.location = "@baseUrl";
+                            }
+                        }
                     }
-
-                    if (result.Message != undefined && result.Message != null) {
-                        $("#deployment-status").text(result.Message + "...");
-                    }    
-
-                    if (result.AdditionalData != undefined && result.AdditionalData != null) {
-                        $(".user-name span").text(result.AdditionalData.DisplayName);
-                        $(".profile-pic-tag").attr({
-                            "data-id": result.AdditionalData.UserId,
-                            "data-display-name": result.AdditionalData.DisplayName
-                        });
-
-                        generateProfileAvatar();
-                        $(".dashboard-parent-container > a, #close-welcome-page").attr("href", result.AdditionalData.RedirectUrl);
-                    }
-                }
-            });                
+                });
+              }
             }, 3000);
         });
 
@@ -102,14 +127,18 @@
                     token: "@token"
                 },
                 success: function (result) {
-                    if (result.isDefaultTenant) {
-                        $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
-                        $("body").addClass("welcome-page-footer-alignment");
-                        $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");                        
+                    if (result.deploymentFailed) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        if (result.isDefaultTenant) {
+                            $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
+                            $("body").addClass("welcome-page-footer-alignment");
+                            $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");
+                        }
+                        else {
+                            window.location = result.redirectUrl
+                        }
                     }
-                    else {
-                        window.location = result.redirectUrl
-                    }                    
                 }
             });
         }
@@ -119,7 +148,7 @@
     <div class="deploy-tenant-parent">
         <div class="deploy-tenant-child">
             <div class="deployment-page-image">
-                <img class="boldbi-logo" src="@headerLogo"/>
+                <img class="boldbi-logo" src="@headerLogo" />
             </div>
             <div class="deploy-tenant-bg">
                 <div class="text-h1 deployment-content">[[[Registering your site...]]]</div>
@@ -136,13 +165,16 @@
             </div>
         </div>
     </div>
-    <footer class="deployment-footer">
-        <span class="footer-content">[[[Powered by]]]</span><img class="footer-logo" src="@dashboardServerResourceUrl/cdn/images/application/boldbi/footer_logo.svg" />
-    </footer>
+    @if (ViewBag.appsettings.SystemSettings.IsEnablePoweredBySyncfusion) 
+    {
+        <footer class="deployment-footer">
+            <span class="footer-content">[[[Powered by]]]</span><img class="footer-logo" src="@dashboardServerResourceUrl/cdn/images/application/boldbi/footer_logo.svg" />
+        </footer>
+    }
 
     <header class="deployment-header hide">
         <div class="deployment-header-container">
-            <img class="boldbi-logo" src="@headerLogo"/>
+            <img class="boldbi-logo" src="@headerLogo" />
             <a id="close-welcome-page" class="su-close"></a>
         </div>
     </header>

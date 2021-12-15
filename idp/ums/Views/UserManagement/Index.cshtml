@@ -81,12 +81,15 @@
         <span class="grid-content" title="{{:Email}}" data-toggle="tooltip">@string.Empty</span>
         {{/if}}
     </script>
-    <script type="text/x-jsrender" id="status-description-template">
-        {{if IsActive}}
-        Active
+    <script type="text/x-jsrender" id="email-verification-template">
+        {{if EmailVerified}}
+        Completed
         {{else}}
-        Inactive
+        Pending
         {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="status-description-template">
+        {{:UserStatus}}
     </script>
     <script type="text/x-jsrender" id="filter-template">
         <span>
@@ -109,10 +112,13 @@
     <script type="text/x-jsrender" id="status-header">
         <div class="item-header">[[[Status]]]</div>
     </script>
+    <script type="text/x-jsrender" id="email-verification-header">
+        <div class="item-header">[[[Email Verification]]]</div>
+    </script>
     <script type="text/x-jsrender" id="role-header">
         <div class="item-header">[[[Role]]]</div>
     </script>
-    <script type="text/x-jsrender" id="filter-header">
+    @*<script type="text/x-jsrender" id="filter-header">
         <div>
             <span>
                 <a class="e-filtericon e-icon e-filterset" id="role-filter-option" href="javascript:void(0);">
@@ -134,7 +140,7 @@
                 <input type="button" id="cancel" class="secondary-button popup-close" onclick="resetFilter()" value="Clear" />
             </div>
         </div>
-    </script>
+    </script>*@
 
     <script type="text/x-jsrender" id="options">
         <div class="dropdown">
@@ -198,7 +204,7 @@
                 allowSorting: true,
                 allowSearching: true,
                 allowSelection: true,
-                allowFiltering: true,
+                allowFiltering: false,
                 pageSettings: { pageSize: 20 },
                 filterSettings: { filterType: "menu" },
                 selectionType: ej.Grid.SelectionType.Multiple,
@@ -225,6 +231,7 @@
                 columns: [
                     {
                         template: true,
+                        allowFiltering: false,
                         allowSorting: true,
                         templateID: "#user-profile-template",
                         headerText: "[[[Name]]]",
@@ -235,6 +242,7 @@
                     },
                     {
                         template: true,
+                        allowFiltering: false,
                         allowSorting: true,
                         field: "Username",
                         templateID: "#user-username-template",
@@ -245,6 +253,7 @@
                     },
                     {
                         field: "Email",
+                        allowFiltering: false,
                         templateID: "#user-email-template",
                         headerText: "[[[Email Address]]]",
                         headerTemplateID: "#email-header",
@@ -259,17 +268,25 @@
                         width: 80,
                         allowFiltering: false,
                     },
-                    {
-                        headerTemplateID: "#filter-header",
-                        width: 15,
-                        allowFiltering: false
-                    },
+                    //{
+                    //    headerTemplateID: "#filter-header",
+                    //    width: 15,
+                    //    allowFiltering: false
+                    //},
                     {
                         field: "StatusDescription",
                         headerText: "[[[Status]]]",
                         headerTemplateID: "#status-header",
                         templateID: "#status-description-template",
-                        width: 60,
+                        width: 80,
+                        allowFiltering: false
+                    },
+                    {
+                        field: "IsActivated",
+                        headerText: "[[[Email Verification]]]",
+                        headerTemplateID: "#email-verification-header",
+                        templateID: "#email-verification-template",
+                        width: 90,
                         allowFiltering: false
                     },
                     {
@@ -298,7 +315,7 @@
             <div class="col-xs-12 no-padding" id="application-title">
                 <h1 class="pull-left col-xs-6 col-sm-6 col-md-6 col-lg-6 no-padding page-title">
                     <input type="hidden" id="user-count-text" value="@ViewBag.UserCount">
-                    USERS (<span id="user-count" value="@ViewBag.UserCount">@ViewBag.UserCount</span>)
+                    [[[USERS]]] (<span id="user-count" value="@ViewBag.UserCount">@ViewBag.UserCount</span>)
                 </h1>
 
                 <ul class="pull-right col-lg-6 no-margin no-padding" id="user-management-options">
@@ -317,7 +334,7 @@
                         }
                         else
                         {
-                            <button class="dropdown-toggle primary-button" data-toggle="dropdown" id="new-user-dropdown" title="[[[Add new user]]]">
+                            <button class="dropdown-toggle primary-button" data-toggle="dropdown" data-placement="left" id="new-user-dropdown" title="[[[Add new user]]]">
                                 <span>[[[New User]]] </span>
                                 <span class="caret"></span>
                             </button>
@@ -344,8 +361,8 @@
         <div id="user-list-container" class="list col-xs-12 admin-page-body">
             <div id="search-area" class="pull-right">
                 <input type="text" class="pull-left" id="search-users" placeholder="[[[Search users]]]" />
-                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="Clear search"></span>
-                <span class="su su-search search-user pull-left" title="Search"></span>
+                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="[[[Clear search]]]"></span>
+                <span class="su su-search search-user pull-left" title="[[[Search]]]"></span>
             </div>
             <div class="col-xs-12 no-padding ">
                 <div id="user_grid">

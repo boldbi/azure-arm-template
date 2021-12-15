@@ -1,4 +1,5 @@
-﻿@{
+﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
     var globalAppSettings = _globalAppSettings;
 
     ViewBag.Title = "[[[Groups]]] - " + globalAppSettings.SystemSettings.OrganizationName;
@@ -6,8 +7,9 @@
     var isGeneralTab = ViewBag.ActiveTab == null || ViewBag.ActiveTab == "general" ? "active" : string.Empty;
     var isAttributeTab = ViewBag.ActiveTab != null && ViewBag.ActiveTab == "attributes" ? "active" : string.Empty;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isAdmin = _identityResponse.IsAdmin;
 }
-
 
 @section scripts{
     <environment include="Development,CloudDevelopment">
@@ -70,7 +72,8 @@
                         templateID: "#UsernameTemplate",
                         headerTemplateID: "#UsernameHeader",
                         type: "string",
-                        allowFiltering: true
+                        allowFiltering: true,
+                        visible: isSelfHosted
                     },
                     {
                         field: "Email",
@@ -150,9 +153,16 @@
     <script type="text/x-jsrender" id="attribute-value-template">
         <span class="grid-content" title="{{:Value}}" data-toggle="tooltip">{{:Value}}</span>
     </script>
-    <script type="text/x-jsrender" id="NameTemplate">
-        <span class="item-name" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
-    </script>
+    <feature name=@FeatureManagement.Yokogawa>
+        <script type="text/x-jsrender" id="NameTemplate">
+            <a class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}">{{:DisplayName}}</a>
+        </script>
+    </feature>
+    <feature name=@FeatureManagement.Yokogawa negate="true">
+        <script type="text/x-jsrender" id="NameTemplate">
+            <span class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
+        </script>
+    </feature>
     <script type="text/x-jsrender" id="UsernameTemplate">
         <span class="grid-content" title="{{:Username}}" data-toggle="tooltip">{{:Username}}</span>
     </script>
@@ -190,13 +200,16 @@
                 <h2 class="page-title"><span ng-bind="allGroupDetails.GroupName" title="{{allGroupDetails.GroupName}}"></span></h2>
             </hgroup>
             <div class="col-md-6 col-xs-12 group-buttons pull-right no-padding">
-                <a type="button" class="link-button manage-permissions" title="" href="@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId">[[[Manage Permissions]]]</a>
-                <a type="button" class="link-button" href="@Url.Action("editgroup","group")?groupId=@ViewBag.groupId">[[[Edit Group]]]</a>
-                <input type="button" class="primary-button pull-right" id="add-custom-attribute" title="" value="[[[Add Attribute]]]" data-id="@ViewBag.groupId" onclick="addCustomAttribute('group')">
-
-                @if (ViewBag.groupId != 1)
+                @if (isAdmin || granularPermissions[PermissionEntity.AllPermissions] || granularPermissions[PermissionEntity.SpecificPermissions])
                 {
-                    <input type="button" class="critical-action-button delete-group delete" title="" data-groupid="@ViewBag.groupId" value="[[[Delete Group]]]" data-groupname="{{allGroupDetails.GroupName}}" />
+                    <a type="button" class="link-button app-btn-link manage-permissions" title="" href="@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId">[[[Manage Permissions]]]</a>
+                }
+                <a type="button" class="link-button app-btn-link" href="@Url.Action("editgroup","group")?groupId=@ViewBag.groupId" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">[[[Edit Group]]]</a>
+                <input type="button" class="primary-button app-btn-primary pull-right" id="add-custom-attribute" title="" value="[[[Add Attribute]]]" data-id="@ViewBag.groupId" onclick="addCustomAttribute('group')">
+
+                @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup]) && ViewBag.groupId != 1)
+                {
+                    <input type="button" class="critical-action-button app-btn-danger delete-group delete" title="" data-groupid="@ViewBag.groupId" value="[[[Delete Group]]]" data-groupname="{{allGroupDetails.GroupName}}" />
                 }
             </div>
         </div>

@@ -14,8 +14,8 @@
     ItemDetail itemDetail = ViewBag.itemDetail;
     var isAuthenticated = "false";
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && itemDetail.IsPublic ? "true" : "false";
-    ViewBag.DateFormat = globalAppSettings.SystemSettings.DateFormat;
-    ViewBag.TimeFormat = globalAppSettings.SystemSettings.TimeFormat ? "HH:mm" : "hh:mm tt";
+    ViewBag.DateFormat = _clientDateTimeInfo.ClientDateTime.DateFormat;
+    ViewBag.TimeFormat = BooleanHelper.ToBoolean(_clientDateTimeInfo.ClientDateTime.TimeFormat) ? "HH:mm" : "hh:mm tt";
     var accessToken = ViewBag.accessToken;
     var externalLogin = Context.Request.Query["externallogin"].ToString();
     var hasSSO = Context.Request.Query["hassso"].ToString();
@@ -78,7 +78,7 @@
         }
 
             #widget_WaitingPopup .e-image {
-                background: url('@(globalAppSettings.SystemSettings.CDNLink + "/images/waitingpopup.gif")') no-repeat scroll 0px 18px transparent;
+                background: url('@(globalAppSettings.SystemSettings.CDNLink + "/cdn/images/waitingpopup.gif")') no-repeat scroll 0px 18px transparent;
                 top: 350px !important;
             }
 
@@ -130,10 +130,10 @@
 
 <body style="width: 100%; height: 100%;">
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
     </environment>
     <div id="widget" style="width: 100%; height: 100%;"></div>
 
@@ -177,7 +177,7 @@
     <input id="widget_Comment" class="displayNone" data-item-id="@ViewBag.ItemId">
     <input id="dashboard_Comment" class="displayNone" data-item-id="@Guid.Empty">
     <input id="is_mobile" type="hidden" value="@isMobile.ToString().ToLower()">
-    <div id="commentModuleContainer" class="displayNone" style="background-image: url('@(globalAppSettings.SystemSettings.CDNLink + "/images/waitingpopup.gif")'); background-color: #fff; background-repeat: no-repeat; background-position: 50% 50%;">
+    <div id="commentModuleContainer" class="displayNone" style="background-image: url('@(globalAppSettings.SystemSettings.CDNLink + "/cdn/images/waitingpopup.gif")'); background-color: #fff; background-repeat: no-repeat; background-position: 50% 50%;">
         <iframe id="commentModuleContainer_iframe" class="comment-popup-frame" src="@Url.Action("IndividualWidgetCommentPartialView", "Comments" )?itemId=@ViewBag.ItemId" style="height: 100%; width: 100%; "></iframe>
     </div>
 

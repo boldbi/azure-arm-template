@@ -1,4 +1,4 @@
-CREATE TABLE SyncDS_User(
+﻿CREATE TABLE SyncDS_User(
 	Id SERIAL primary key NOT NULL,
 	UserName varchar(100) NOT NULL,
 	FirstName varchar(255) NOT NULL,

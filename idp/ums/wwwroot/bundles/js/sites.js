@@ -423,7 +423,7 @@ $(document).ready(function () {
     $(document).on('click', "input#add-user", function () {
         var firstName = $("#firstname").val().trim();
         var userName = $("#username").val().trim().toLowerCase();
-        var password = $("#user-password").val();
+        var password = $("#new-password").val();
         var emailid = $('#mailid').val().trim();       
         var tenantId = $("#myId").val();
         var isValid = $("#dialog-container").valid();
@@ -507,7 +507,7 @@ $(document).ready(function () {
                     $('#mailid').closest('div').addClass("has-error");
                     $("#invalid-email").html(window.TM.App.LocalizationContent.IsMailExist).css("display", "block");
                     $("#firstname").parent('div').removeClass("has-error");
-                    $("#user-password").parent('div').removeClass("has-error");
+                    $("#new-password").parent('div').removeClass("has-error");
                     isEmailExist = false;
                 }
             }
@@ -708,7 +708,7 @@ function getAppUsers() {
         enableAltRow: false,
         allowSearching: true,
         allowSelection: true,
-        allowFiltering: true,
+        allowFiltering: false,
         pageSettings: { pageSize: 20 },
         filterSettings: { filterType: "menu" },
         selectionType: ej.Grid.SelectionType.Multiple,
@@ -733,6 +733,7 @@ function getAppUsers() {
         columns: [
             {
                 template: true,
+                allowFiltering: false,
                 templateID: "#user-profile-template",
                 width: 115,
                 headerTemplateID: "#username-header",
@@ -741,6 +742,7 @@ function getAppUsers() {
             },
             {
                 field: "Username",
+                allowFiltering: false,
                 templateID: "#user-username-template",
                 headerTemplateID: "#user-username-header",
                 type: "string",
@@ -748,6 +750,7 @@ function getAppUsers() {
             },
             {
                 field: "Email",
+                allowFiltering: false,
                 templateID: "#user-email-template",
                 headerTemplateID: "#email-header",
                 type: "string",
@@ -755,6 +758,7 @@ function getAppUsers() {
             },
             {
                 field: "IsActive",
+                allowFiltering: false,
                 templateID: "#user-status-template",
                 headerTemplateID: "#status-header",
                 type: "string",
@@ -763,6 +767,7 @@ function getAppUsers() {
             {
                 template: true,
                 allowSorting: false,
+                allowFiltering: false,
                 templateID: "#commandstemplate",
                 headerTemplateID: "#actionsheader",
                 width: (window.innerWidth > 1024) ? 40 : 80
@@ -813,6 +818,7 @@ function getUsersWithoutAccess() {
                 },
                 {
                     template: true,
+                    allowFiltering: false,
                     templateID: "#user-name-template",
                     width: 115,
                     headerTemplateID: "#user-name-header",
@@ -821,6 +827,7 @@ function getUsersWithoutAccess() {
                 },
                 {
                     template: true,
+                    allowFiltering: false,
                     field: "Email",
                     templateID: "#email-template",
                     headerTemplateID: "#user-email-header",
@@ -1295,7 +1302,7 @@ $(document).ready(function () {
 
     $.validator.addMethod("isValidUsername", function (value, element) {
         return IsValidUsername(value);
-    }, window.TM.App.LocalizationContent.InvalidUsername);
+    }, window.TM.App.LocalizationContent.UserNameSpecialCharacterValicator);
 
     $.validator.addMethod("isValidUsernameLength", function (value, element) {
         return IsValidUsernameLength(value);
@@ -1430,14 +1437,14 @@ $(document).ready(function () {
         $(".useradd-validation-messages").css("display", "none");
     });
 
-    $(document).on("keyup", "#user-password", function () {
+    $(document).on("keyup", "#new-password", function () {
         createPasswordPolicyRules();
-        $("#user-password").valid();
+        $("#new-password").valid();
     });
 
     function createPasswordPolicyRules() {
-        if ($("#user-password").val() != '' && $("#user-password").next("ul").length == 0) {
-            $("#user-password").after("<ul id='password_policy_rules'></ul>");
+        if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
+            $("#new-password").after("<ul id='password_policy_rules'></ul>");
             $("#password_policy_rules").append("<li id='p_policy_heading'><p>" + window.TM.App.LocalizationContent.PasswordRule1 + "</p></li>");
             $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule2 + "</li>");
             $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule3 + "</li>");
@@ -1448,8 +1455,8 @@ $(document).ready(function () {
             $(".button-section").css("margin-top", "-20px");
             $(".button-section").addClass("top-margin");
         }
-        if ($("#user-password").val() == '' && $("#user-password").next("ul").length != 0) {
-            $("#user-password").next("ul").remove();
+        if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
+            $("#new-password").next("ul").remove();
             $("#confirm-password-section").css("margin-top", "25px")
             $(".button-section").css("margin-top", "20px");
         }
@@ -1471,9 +1478,14 @@ function onUserAddDialogClose() {
 }
 
 function onUserAddDialogOpen() {
+    $("#add-user").removeAttr("disabled");
     $(".dropdown").removeClass("open");
     $("#user-add-dialog").ejDialog("open");
+    $("#new-password").val("");
+    $(".show-hide-password").removeClass("su-hide").addClass("su-show");
     $(".e-dialog-icon").attr("title", "Close");
+    $(".validation").closest("div").removeClass("has-error");
+    $(".useradd-validation-messages").css("display", "none");
     CheckMailSettingsAndNotify(window.TM.App.LocalizationContent.ToSendAccountActivation, $(".validation-message"), "");
 }
 var validateUserpassword = {
@@ -1511,19 +1523,19 @@ var validateUserpassword = {
 
 function passwordBoxHightlight(element) {
     var rules = "";
-    $(element).closest('div').addClass("has-error");
+    $(element).closest('div').addClass("e-error");
     var isPopoverPasswordPolicy = $("#new-password").data("toggle") === "popover";
     var passwordPolicyElement = !isPopoverPasswordPolicy ? $('#password_policy_rules').find('li>span') : $('#password_policy_rules').find('li>span:not(.content)');
     var passwordPolicyClass = !isPopoverPasswordPolicy ? "su-tick" : "su-password-tick";
     if ($(element).attr('id') == "new-password") {
         for (var i = 0; i < passwordPolicyElement.length; i++) {
             if ($(passwordPolicyElement[i]).attr('class') == passwordPolicyClass)
-                $(element).closest('div').removeClass("has-error");
+                $(element).closest('div').removeClass("e-error");
             else
                 rules = "[[[unsatisfied-rule]]]";
         }
         if (rules != "" && rules != undefined) {
-            $(element).closest('div').addClass("has-error");
+            $(element).closest('div').addClass("e-error");
             rules = "";
         }
     }
@@ -1531,7 +1543,7 @@ function passwordBoxHightlight(element) {
 
 function passwordBoxUnhightlight(element) {
     var rules = "";
-    $(element).closest('div').removeClass('has-error');
+    $(element).closest('div').removeClass('e-error');
     var isPopoverPasswordPolicy = $("#new-password").data("toggle") === "popover";
     var passwordPolicyElement = !isPopoverPasswordPolicy ? $('#password_policy_rules').find('li>span') : $('#password_policy_rules').find('li>span:not(.content)');
     var passwordPolicyClass = !isPopoverPasswordPolicy ? "su-tick" : "su-password-tick";
@@ -1541,10 +1553,10 @@ function passwordBoxUnhightlight(element) {
             if ($(passwordPolicyElement[i]).attr('class') != passwordPolicyClass)
                 rules = "[[[unsatisfied-rule]]]";
             if ($(passwordPolicyElement[i]).attr('class') == passwordPolicyClass)
-                $(element).closest('div').removeClass("has-error");
+                $(element).closest('div').removeClass("e-error");
         }
         if (rules != "" && rules != undefined) {
-            $(element).closest('div').addClass("has-error");
+            $(element).closest('div').addClass("e-error");
             rules = "";
         }
     }
@@ -1638,21 +1650,16 @@ function passwordPolicyPopover(element, value) {
     });
 }
 $(document).on("ready", function () {
-    $(".show-hide-password").on("mousedown", function () {
+    $(".show-hide-password").on("click", function () {
         if ($(this).siblings("input").is(":password")) {
-            $(this).siblings("input").attr('type', 'text');
+            $(this).siblings("input").attr('type', 'text').val();
+            $(this).removeClass('su-show').addClass('su-hide').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoHide);
+            $(this).tooltip('show');
         }
         else {
             $(this).siblings("input").attr('type', 'password');
-        }
-    });
-
-    $(".show-hide-password").on("mouseup", function () {
-        if ($(this).siblings("input").is(":password")) {
-            $(this).siblings("input").attr('type', 'text');
-        }
-        else {
-            $(this).siblings("input").attr('type', 'password');
+            $(this).removeClass('su-hide').addClass('su-show').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoView);
+            $(this).tooltip('show');
         }
     });
 
@@ -1674,11 +1681,9 @@ $(document).on("ready", function () {
         }
     });
 
-    $(".show-hide-password").mouseleave(function () {
-        $(this).siblings("input").attr('type', 'password');
-    });
-
+  
     if (window.innerWidth < 1041) {
+
         $(".show-hide-password").on("click", function () {
             if ($(this).siblings("input").is(":password")) {
                 $(this).siblings("input").attr('type', 'text');
@@ -1688,19 +1693,48 @@ $(document).on("ready", function () {
             }
         });
     }
+
+
+    //Ej2 inputbox show/hide password
+    $(".show-hide-password-ej2").on("click", function () {
+        if ($(this).siblings().find("input").is(":password")) {
+            $(this).siblings().find("input").attr('type', 'text');
+            $(this).removeClass('su-show').addClass('su-hide').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoHide);
+            $(this).tooltip('show');
+        }
+        else {
+            $(this).siblings().find("input").attr('type', 'password');
+            $(this).removeClass('su-hide').addClass('su-show').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoView);
+            $(this).tooltip('show');
+        }
+    });
+
+    $(".show-hide-password-ej2").bind("touch", function () {
+        if ($(this).siblings().find("input").is(":password")) {
+            $(this).siblings().find("input").attr('type', 'text');
+            $(this).removeClass('su-show');
+            $(this).addClass('su-hide');
+
+        }
+        else {
+            $(this).siblings().find("input").attr('type', 'password');
+            $(this).removeClass('su-hide');
+            $(this).addClass('su-show');
+
+        }
+    });
 });
 $(function () {
     $('[data-toggle="popover"]').popover();
 
     $(".show-client-secret").on("click", function () {
         if ($(".my-secret").is(":password")) {
-            $(".my-secret").attr('type', 'text').val(clientSecret);
+            $(".my-secret").attr('type', 'text').val();
             $(this).removeClass('su-show').addClass('su-hide').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoHide);
             $(this).tooltip('show');
         }
         else {
             $(".my-secret").attr('type', 'password');
-            $(".my-secret").val("");
             $(this).removeClass('su-hide').addClass('su-show').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoView);
             $(this).tooltip('show');
         }
@@ -1719,11 +1753,17 @@ $(function () {
 });
 
 function fnCopyClientCredentials(inputId, buttonId) {
-    var copyText = $(inputId);
-    copyText.select();
-    document.execCommand("copy");
-    if (copyText.val() == "") {
-        navigator.clipboard.writeText(clientSecret);
+    if (typeof (navigator.clipboard) != 'undefined') {
+        var value = $(inputId).val();
+        navigator.clipboard.writeText(value)
+    }
+    else {
+        var copyText = $(inputId);
+        copyText.attr("type", "text").select();
+        document.execCommand("copy");
+        if (buttonId == "#api-copy-client-secret" || buttonId == "#copy-client-secret") {
+            copyText.attr("type", "password");
+        }
     }
     setTimeout(function () {
         $(buttonId).attr("data-original-title", window.TM.App.LocalizationContent.Copied);

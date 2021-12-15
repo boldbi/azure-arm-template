@@ -3,15 +3,9 @@
     var globalAppSettings = _globalAppSettings;
     var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
     var showSyncfusionBrand = globalAppSettings.SystemSettings.IsShowPoweredBySyncfusion ? "form-group" : "form-group hide";
-    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
     var appLogo = (globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(IconFileNames.MainLogo) || globalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : globalAppSettings.SystemSettings.MainScreenLogo;
-    var protocolTypes = new List<SelectListItem>
-{
-        new SelectListItem { Text = "http", Value = "http", Selected = !globalAppSettings.SystemSettings.IsSecureConnection },
-        new SelectListItem { Text = "https", Value = "https", Selected = globalAppSettings.SystemSettings.IsSecureConnection }
-    };
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DomainBinding);
-    var isWindowsPlatform = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 }
 <script>
     var isSitesPage = "true";
@@ -40,32 +34,14 @@
                         @Html.Label("enable-ssl", "[[[Site URL]]]", new { @class = "col-xs-2 app-textbox-label" })
 
                         <div id="ssl-selectpicker" class="input-group col-xs-4">
-                            <div class="input-group-addon">
-                                @Html.DropDownList("enableSsl", protocolTypes, new { id = "enable-ssl", @class = "selectpicker", data_live_search = "false" })
-                            </div>
                             <div class="col-xs-12 no-padding">
-                                <input type="text" id="site-base-url" name="site-base-url" class="form-control site-url-fields" placeholder="[[[Enter your URL]]]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+                                <input type="text" id="site-base-url" name="site-base-url" class="form-control site-url-fields" placeholder="[[[Enter your URL]]]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" disabled/>
                             </div>
                         </div>
-                        @if (isWindowsPlatform)
-                        {
-                            <div class="col-xs-6" id="help_text" style="display: @ViewBag.icon">
-                                <span id="error_icon" class="su su-info info-settings" title=""></span>
-                                <div class="col-xs-2 dropdown-menu" id="ssl-help-message" style="display: none">
-                                    [[[The server needs to be hosted in IIS with a valid SSL certificate assigned to it.]]]
-
-                                    @if (!@ServerAppConfig.IsHideHelpLink)
-                                    {
-                                        <span>[[[Click]]] <a href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + @helpSiteUrl)" target="_blank">[[[here]]]</a> [[[for more details.]]]</span>
-                                    }
-                                </div>
-                            </div>
-                        }
                         <div class="col-xs-12 no-padding">
                             <div class="col-xs-2"></div>
                             <span class="validation-errors col-xs-4" id="site-url-validation"></span>
                         </div>
-                        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
                     </div>
                     @*<div class="form-group">
                             @Html.Label("login-welcome-text", "[[[Welcome note]]]", new { @class = "col-xs-2 app-textbox-label" })
@@ -99,7 +75,7 @@
                                 @if (!ViewBag.IsCustomDomain)
                                 {
                                     <span>[[[Now, you can use your own domain]]]</span>
-                                    <button type="button" title="" id="add-custom-domain" class="app-button app-secondary-button custom-domain-btn">
+                                    <button type="button" title="" id="add-custom-domain" class="app-button app-secondary-button app-btn-secondary custom-domain-btn">
                                         [[[Use custom domain]]]
                                     </button>
                                 }
@@ -116,7 +92,6 @@
                             </div>
                         </div>
 
-                        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
                     </div>
                 }
 
@@ -301,6 +276,7 @@
                         <div class="col-xs-6 text-center blur-whitelable-content" ng-if="loginDisclaimerEnabled">
                             <div id="image-container" class="center-img disclaimer-content-container">
                                 @Html.CheckBox("content-disclaimer-checkbox", true, new { @class = "material-checkbox" })
+                                @Html.Hidden("content-disclaimer-checkbox")
                                 <label class="content-disclaimer-name"></label>
                             </div>
                         </div>
@@ -318,7 +294,7 @@
                                 </div>
                             </div>
                             <div class="fluent-popup-footer text-center no-padding col-xs-12">
-                                <button class="app-button app-secondary-button" ng-click="closeConsentContentInfo()" title="Close">[[[Close]]]</button>
+                                <button class="app-button app-secondary-button app-btn-secondary" ng-click="closeConsentContentInfo()" title="Close">[[[Close]]]</button>
                             </div>
                         </div>
                     </div>
@@ -328,8 +304,8 @@
     </div>
 
     <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
-        <a href="@Url.Action("Index","Home")" class="secondary-button pull-right" id="cancel-site-settings" title="">[[[Cancel]]]</a>
-        <button type="button" title="" id="update-mail-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings">
+        <a href="@Url.Action("Index","Home")" class="secondary-button  app-btn-secondary pull-right" id="cancel-site-settings" title="">[[[Cancel]]]</a>
+        <button type="button" title="" id="update-mail-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right update-system-settings">
             [[[Save]]]
         </button>
     </div>

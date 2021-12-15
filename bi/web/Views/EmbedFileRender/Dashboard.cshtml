@@ -20,8 +20,8 @@
     var isAuthenticated = "false";
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && itemDetail.IsPublic ? "true" : "false";
     var _itemId = ViewBag.IsMultiDashboard ? parentId : itemId;
-    ViewBag.DateFormat = globalAppSettings.SystemSettings.DateFormat;
-    ViewBag.TimeFormat = globalAppSettings.SystemSettings.TimeFormat ? "HH:mm" : "hh:mm tt";
+    ViewBag.DateFormat = _clientDateTimeInfo.ClientDateTime.DateFormat;
+    ViewBag.TimeFormat = BooleanHelper.ToBoolean(_clientDateTimeInfo.ClientDateTime.TimeFormat) ? "HH:mm" : "hh:mm tt";
     var enableView = "true";
     var accessToken = ViewBag.AccessToken;
     var iframeLoaded = "false";
@@ -32,6 +32,11 @@
     var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isUnlisted = itemDetail.IsUnlisted ? "true" : "false";
+    var unlistedcode = itemDetail.UnlistedCode;
+    var currentUserId = identityResponse.User != null ? identityResponse.User.UserId : 0;
+    var isOwner = itemDetail.CreatedById == currentUserId ? "true" : "false";
+
 }
 <!DOCTYPE html>
 <head>
@@ -135,7 +140,7 @@
         }
 
          #dashboard_WaitingPopup .e-image {
-            background: url('@(globalAppSettings.SystemSettings.CDNLink + "/images/waitingpopup.gif")') no-repeat scroll 0px 18px transparent;
+            background: url('@(globalAppSettings.SystemSettings.CDNLink + "/cdn/images/waitingpopup.gif")') no-repeat scroll 0px 18px transparent;
             top : 350px !important;
         }
 
@@ -143,7 +148,7 @@
 
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
-    <script>
+<script>
     var itemViewShareIframeUrl = "@Url.Action("shareItemView", "items")";
     var favoriteItemUrl = "@Url.Action("MakeFavorite", "Items")";
     var addViewUrl = "@Url.Action("onfiltersave", "DashboardViews")";
@@ -160,7 +165,10 @@
     var embeddedLoginUrl = "@Url.Action("EmbeddedLogin", "Accounts")";
 	var sso = "@hasSSO";
 	var comment = "";
-	var view = "";
+    var view = "";
+    var isUnlisted = @itemDetail.IsUnlisted.ToString().ToLower();
+    var unlistedCode = "@itemDetail.UnlistedCode";
+    var isOwner = @isOwner;
     var commentSettings = {
             isDashboardCommented: @Html.Raw(ViewBag.IsDashboardCommented),
             widgets: [@Html.Raw(ViewBag.CommentedWidgets)]
@@ -175,7 +183,7 @@
             $("#commentImage_popup").ejDialog("close");
             $("#commentImage_popup_image").attr('src', "");
         }
-    </script>
+</script>
     @{
         if (!string.IsNullOrWhiteSpace(Context.Request.Query["hascomments"]) && Context.Request.Query["hascomments"].ToString().ToLower() == "true")
         {
@@ -203,10 +211,10 @@
 </head>
 <body style="width: 100%; height: 100%; overflow: hidden">
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
     </environment>
     <input id="favorite_Item" type="hidden" data-item-id="@ViewBag.ItemId" data-parent-id="@ViewBag.ParentId" data-favorite-value="@ViewBag.IsFavorite">
     <input id="dashboard_Comment" type="hidden" data-item-id="@ViewBag.ItemId">
@@ -267,12 +275,12 @@
     }
     @await Html.PartialAsync("_DashboardViews")
 
-    <div id="commentModuleContainer" class="displayNone" style="background-image: url('@(globalAppSettings.SystemSettings.CDNLink + "/images/waitingpopup.gif")'); background-color: #fff; background-repeat: no-repeat; background-position: 50% 50%;">
+    <div id="commentModuleContainer" class="displayNone" style="background-image: url('@(globalAppSettings.SystemSettings.CDNLink + "/cdn/images/waitingpopup.gif")'); background-color: #fff; background-repeat: no-repeat; background-position: 50% 50%;">
         <iframe id="commentModuleContainer_iframe" class="comment-popup-frame" data-item-id="@ViewBag.ItemId" style="height: 100%; width: 100%;"></iframe>
     </div>
     <iframe id="delete_popup_iframe" class="comment-popup-frame displayNone" allowtransparency="true" style="position: absolute;"></iframe>
 
-    <div id="widgetCommentModuleContainer" class="displayNone" style="background-image: url('@(globalAppSettings.SystemSettings.CDNLink + "/images/waitingpopup.gif")'); background-color: #fff; background-repeat: no-repeat; background-position: 50% 50%; z-index: 1000001;">
+    <div id="widgetCommentModuleContainer" class="displayNone" style="background-image: url('@(globalAppSettings.SystemSettings.CDNLink + "/cdn/images/waitingpopup.gif")'); background-color: #fff; background-repeat: no-repeat; background-position: 50% 50%; z-index: 1000001;">
         <iframe id="widgetCommentModuleContainer_iframe" class="comment-popup-frame" style="height: 100%; width: 100%;"></iframe>
     </div>
 
@@ -340,7 +348,7 @@ else
 }
 @if (!Context.User.Identity.IsAuthenticated)
 {
-    <script>
+<script>
             $(document).ready(function () {
                 if (externalLogin != null && externalLogin.toLowerCase() == "windowsad" &&
 				sso != null && sso.toLowerCase() == "true") {
@@ -367,7 +375,7 @@ else
 						renderDashboard(comment,view);
 						}
 						else{
-						if(@isPublic == true){
+						if(@isPublic == true || @isUnlisted == true){
 						enableComment = "false";
 		                enableView = "false";
 		                renderDashboard(comment,view);
@@ -380,7 +388,7 @@ else
                   });
                 }
             });
-    </script>
+</script>
 }
 else
 {
@@ -505,7 +513,7 @@ else
                                     }
                                 }
                                 else{
-                                    if(@isPublic == true && isAuthenticated.toLowerCase() == "false")
+                                    if(@isPublic == true || @isUnlisted == true && isAuthenticated.toLowerCase() == "false")
                                     {
                                         enableComment = "false";
                                         enableView = "false";
@@ -536,7 +544,7 @@ else
                 renderDashboard(comment,view);
             }
             else{
-                if(@isPublic == true)
+                if(@isPublic == true || @isUnlisted == true)
                 {
                     enableComment = "false";
                     enableView = "false";
@@ -555,7 +563,7 @@ else
                 renderDashboard(comment,view);
             }
             else{
-                if(@isPublic == true && isAuthenticated.toLowerCase() == "false"){
+                if(@isPublic == true || @isUnlisted == true && isAuthenticated.toLowerCase() == "false"){
                     enableComment = "false";
                     enableView = "false";
                     renderDashboard(comment,view);

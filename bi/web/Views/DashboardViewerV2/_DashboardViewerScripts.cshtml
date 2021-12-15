@@ -8,10 +8,11 @@
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var isMultiTab = ViewBag.MultiTabId != null && ViewBag.MultiTabId.ToString() != string.Empty;
 }
 
 
-<script asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion"></script>
+<script asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 
 @if (isMobile)
 {
@@ -33,10 +34,12 @@ else
 
 }
 <environment include="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
     <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-component.css" />
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
     <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-component.min.css" />
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
 </environment>
@@ -52,30 +55,64 @@ else
 {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
 }
+else
+{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+    </environment>
+}
 
 @if (isMobile)
 {
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-mobile-v2.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-mobile-v2.min.js"></script>
-    </environment>
+    if (isMultiTab)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer-mobile.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer-mobile.min.js"></script>
+        </environment>
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-mobile-v2.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-mobile-v2.min.js"></script>
+        </environment>
+    }
 
 }
 else
-{ <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-v2.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-v2.min.js"></script>
-    </environment>
+{
+    if (isMultiTab)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer.min.js"></script>
+        </environment>
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-v2.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-v2.min.js"></script>
+        </environment>
+    }
 
 }
 
 <environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 </environment>

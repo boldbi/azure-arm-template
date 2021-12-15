@@ -25,8 +25,8 @@
 
 @section MainSection{
     @await Html.PartialAsync("_AdminMenu")
-    <input type="hidden" value="@globalAppSettings.SystemSettings.TimeFormat.ToString()" id="timeFormat" />
-    <input type="hidden" value="@globalAppSettings.SystemSettings.DateFormat" id="dateFormat" />
+    <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.TimeFormat" id="timeFormat" />
+    <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.DateFormat" id="dateFormat" />
     <div id="schedule-synchronization-container" class="admin-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")">
         <div id="schedule-header" class="col-md-12 import-area admin-page-header pull-left">
             <a href="@Url.Action("Administration","Administration")/user-directory-settings" data-toggle="tooltip" data-placement="top" title="[[[Active Directory Settings]]]" class="back-button pull-left">
@@ -247,8 +247,8 @@
         @if (ViewBag.ThirdPartyLogins)
         {
             <div class="admin-page-actions col-xs-12 col-md-12">
-                <a href="@Url.Action("Index","Home")" class="secondary-button pull-right" id="cancel-schedule-synchronization" title="">[[[Cancel]]]</a>
-                <input type="button" title="" id="update-schedule-synchronization-bottom" class="primary-button pull-right" value="[[[Save]]]" />
+                <a href="@Url.Action("Index","Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-schedule-synchronization" title="">[[[Cancel]]]</a>
+                <input type="button" title="" id="update-schedule-synchronization-bottom" class="primary-button app-btn-primary pull-right" value="[[[Save]]]" />
             </div>
         }
     </div>
@@ -257,9 +257,9 @@
         @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
     }
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 }

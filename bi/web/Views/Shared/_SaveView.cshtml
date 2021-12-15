@@ -7,7 +7,8 @@
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var defaultViewHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DefaultViews);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var rootUrl = (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/');
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : Context.Request.PathBase.ToString();
+    var settingsPagePermission = ViewBag.GranularPermissions as Dictionary<object, bool>;
 }
 
 <!DOCTYPE html>
@@ -18,10 +19,14 @@
 
 
     <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/save-view.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/save-view.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
     </environment>
 
     @if (ViewBag.ViewerType == "v2")
@@ -45,11 +50,12 @@
 
     }
 
-    <script type="text/javascript">
+<script type="text/javascript">
         var rootUrlAction = "@rootUrl";
         var addViewUrl = { "web": "@Url.Action("onfiltersave", "DashboardViews")", "api": "/items/views/add" };
         var getSavedViewUrl = { "web": "@Url.Action("GetViews", "DashboardViews")", "api": "/items/views/get-by-item-id" };
         var viewUrl = "@ViewBag.ViewUrl";
+		var cdnLink = "@dashboardServerResourceUrl";
         var sameOrigin;
         try {
             sameOrigin = window.parent.location.host == window.location.host;
@@ -57,7 +63,7 @@
         catch (e) {
             sameOrigin = false;
         }
-    </script>
+</script>
 </head>
 <body id="save-view-dialog" class="no-margin">
     <div id="save-view-container" class="dialog">
@@ -96,7 +102,7 @@
                                     <label for="default-view" class="label-primary"></label>
                                 }
                             </span>
-                            @if (ViewBag.IsAdmin == true)
+                            @if (ViewBag.IsAdmin == true || settingsPagePermission[SettingsScopes.All] || settingsPagePermission[SettingsScopes.DashboardSettings])
                             {
                                 if (!isDefaultView)
                                 {
@@ -154,23 +160,23 @@
         </form>
         <div class="col-xs-12 dialog-footer no-right-padding no-left-padding" id="action-button-division">
             <div class="rightAlign">
-                <input type="button" title="" id="save-button" class="btn primary-button" value=[[[Save]]] />
-                <input type="button" id="cancel-button" title="" class="btn secondary-button" value="[[[Cancel]]]" onclick="closeSaveViewPopup()" />
+                <input type="button" title="" id="save-button" class="btn primary-button app-btn-primary" value=[[[Save]]] />
+                <input type="button" id="cancel-button" title="" class="btn secondary-button app-btn-secondary" value="[[[Cancel]]]" onclick="closeSaveViewPopup()" />
             </div>
         </div>
     </div>
     <script>
         $(document).ready(function () {
             var dashboardViewWaitingPopupTemplateId = createLoader("dashboard-view-toogle");
-            parent.$("#dashboard-view-toogle").ejWaitingPopup({ template: $("#" + dashboardViewWaitingPopupTemplateId) });
-            parent.$("#save-view-popup_wrapper").ejWaitingPopup("hide");
+            parent.$("#dashboard-view-toogle").BoldBIDashboardWaitingPopup({ template: $("#" + dashboardViewWaitingPopupTemplateId) });
+            parent.$("#save-view-popup_wrapper").BoldBIDashboardWaitingPopup("hide");
         });
     </script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 </body>
 </html>

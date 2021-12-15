@@ -206,6 +206,13 @@ $(document).ready(function () {
         }
         $(this).parent().find("div.lazyload").remove();
     }
+
+    if (typeof (isLicenseExpiredUrl) !== "undefined") {
+        $.ajax({
+            type: "POST",
+            url: isLicenseExpiredUrl,
+        });
+    }
 });
 
 $(document).on("keyup", "textarea", function (event) {
@@ -241,6 +248,34 @@ function convertToBoolean(value) {
     }
 }
 
+function parseURL(str) {
+    var o = parseURL.options,
+        m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
+        uri = {},
+        i = 14;
+
+    while (i--) uri[o.key[i]] = m[i] || "";
+
+    uri[o.q.name] = {};
+    uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
+        if ($1) uri[o.q.name][$1] = $2;
+    });
+
+    return uri;
+};
+
+parseURL.options = {
+    strictMode: true,
+    key: ["source", "protocol", "authority", "userInfo", "user", "password", "host", "port", "relative", "path", "directory", "file", "query", "anchor"],
+    q: {
+        name: "queryKey",
+        parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+    },
+    parser: {
+        strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+        loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+    }
+};
 //Handles Ajax error
 function handleAjaxError() {
 }
@@ -458,16 +493,16 @@ function DateCustomFormat(formatString, dateValue, isTimeFormat) {
     }
 
     else {
-    h = (hhh = dateObject.getHours());
-    if (h == 0) h = 24;
-    if (h > 12) h -= 12;
-    hh = h < 10 ? ("0" + h) : h;
-    AMPM = (ampm = hhh < 12 ? "am" : "pm").toUpperCase();
-    mm = (m = dateObject.getMinutes()) < 10 ? ("0" + m) : m;
-    ss = (s = dateObject.getSeconds()) < 10 ? ("0" + s) : s;
-    datetime = formatString.replace("hhh", hhh).replace("hh", hh).replace("h", h).replace("mm", mm).replace("m", m).replace("ss", ss).replace("s", s).replace("ampm", ampm).replace("AMPM", AMPM);
-}
-return datetime;
+        h = (hhh = dateObject.getHours());
+        if (h == 0) h = 24;
+        if (h > 12) h -= 12;
+        hh = h < 10 ? ("0" + h) : h;
+        AMPM = (ampm = hhh < 12 ? "am" : "pm").toUpperCase();
+        mm = (m = dateObject.getMinutes()) < 10 ? ("0" + m) : m;
+        ss = (s = dateObject.getSeconds()) < 10 ? ("0" + s) : s;
+        datetime = formatString.replace("hhh", hhh).replace("hh", hh).replace("h", h).replace("mm", mm).replace("m", m).replace("ss", ss).replace("s", s).replace("ampm", ampm).replace("AMPM", AMPM);
+    }
+    return datetime;
 }
 
 function isNumberKey(evt) {
@@ -489,8 +524,10 @@ function validateUserName(userName) {
 }
 
 function isValidUrl(url) {
-    var regexExpression = /^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$/gm;
-    if (!regexExpression.test(url)) {
+    var regexExpression = /^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(!\/[a-zA-Z0-9-]+[a-zA-Z0-9-]*(\.[a-z]{2,8})?)*?$/gm;
+    var ipAddressRegexExpression = /^(?:(?:2[0-4]\d|25[0-5]|1\d{2}|[1-9]?\d)\.){3}(?:2[0-4]\d|25[0-5]|1\d{2}|[1-9]?\d)(?:\:(?:\d|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?$/;
+
+    if (!regexExpression.test(url) && !url.match(ipAddressRegexExpression)) {
         return false;
     } else {
         return true;
@@ -704,8 +741,9 @@ function GridLocalization() {
 $(document).on("keyup", "#SearchCategory, #search-groups, #search-group-users, #ad-user-import, #userSearchKey,#groupSearchKey, #ad-group-import, #searchItems, #search-schedules, #search-users, #search-ad-users, #search-ad-groups, #search-user-permission, #search-group-permission, #search-database-users,#search-tree, #search-home-page, #search-items, .search-user-holder, .tree-view-search-holder, #search-tenants, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search", function (e) {
     var element = "#" + this.id;
     if ($(element).val() != "") {
-        if (element == "#search-home-page") {
+        if (element == "#search-home-page" || element == "#search-tenant-users") {
             $(element).parent().siblings("span.close-icon").css("display", "block");
+            $(element).parent().siblings("span.search-icon").css("display", "none");
         }
         else {
             $(element).siblings("span.close-icon").css("display", "block");
@@ -719,7 +757,8 @@ $(document).on("keyup", "#SearchCategory, #search-groups, #search-group-users, #
             $(element).siblings("span.search-application").css("display", "none");
         }
     } else {
-        if (element == "#search-home-page") {
+        if (element == "#search-home-page" || element == "#search-tenant-users") {
+            $(element).parent().siblings("span.close-icon").css("display", "none");
             $(element).parent().siblings("span.su-search").css("display", "block");
         }
         else {
@@ -1036,7 +1075,7 @@ $(document).ready(function (e) {
     function setClientLocaleCookie(name, exdays) {
         var value = {
             Locale: navigator.language,
-            TimeZoneOffset: new Date().getTimezoneOffset()
+            TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
         };
         var exdate = new Date();
         exdate.setDate(exdate.getDate() + exdays++);
@@ -1107,15 +1146,35 @@ function getCurrentPageNumber(pageSize, selectedRecordsCount, totalRecordsCount,
     }
 }
 
-if (typeof (isLicenseExpiredUrl) !== "undefined") {
-    $.ajax({
-        type: "POST",
-        url: isLicenseExpiredUrl,
-    });
+function copyToClipboard(inputId, buttonId) {
+    if (typeof (navigator.clipboard) != 'undefined') {
+        var value = "";
+        if (inputId === "#subscription-id-bi" || inputId == "#subscription-id-reports") {
+            value = $(inputId).text();
+        }
+        else {
+            value = $(inputId).val();
+        }
+        var copyText = $(inputId);
+        copyText.attr("type", "text").select();
+        navigator.clipboard.writeText(value)
+    }
+    else {
+        var copyText = $(inputId);
+        copyText.attr("type", "text").select();
+        document.execCommand("copy");
+        if (buttonId == "#api-copy-client-secret" || buttonId == "#copy-client-secret") {
+            copyText.attr("type", "password");
+        }    }
+    setTimeout(function () {
+        $(buttonId).attr("data-original-title", window.TM.App.LocalizationContent.Copied);
+        $(buttonId).tooltip('show');
+    }, 200);
+    setTimeout(function () {
+        $(buttonId).attr("data-original-title", window.TM.App.LocalizationContent.ClickToCopy);
+        $(buttonId).tooltip();
+    }, 3000);
 }
-
-
-
 var gridObj;
 var selectedgroupIdValues = [];
 var selectedActivedirectorygroupIdValues = [];

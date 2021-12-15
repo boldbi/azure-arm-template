@@ -41,7 +41,8 @@
     var isExludeEjDialog = ViewBag.IsExludeEjDialog != null ? ViewBag.IsExludeEjDialog : false;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
-    var rootUrl = (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/');
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : Context.Request.PathBase.ToString();
+    var isSlideshow = url.Query.ToLower().Contains("isslideshow");
 }
 @{
     var preloadScriptsFiles = new string[]
@@ -81,7 +82,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     @if (!isSelfHosted && !globalAppSettings.SystemSettings.IsDebug)
     {
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     }
 
     @RenderSection("meta", false)
@@ -104,6 +105,27 @@
         }
     </style>
 
+
+    @if (!ServerAppConfig.IsCustomThemeForMenu)
+    {
+        <style>
+            :root {
+                     --nav-menu-bg-color: var(--white); --nav-menu-text-color: var(--primary-black); --nav-menu-text-sec-color: var(--grey-700); --nav-menu-content-color: var(--grey-800); --nav-menu-active-color: var(--blue-lighter); --nav-menu-active-text-color: var(--blue); --nav-menu-active-sec-color: var(--blue); --nav-menu-active-content-color: var(--grey-800); --nav-menu-hover-color: var(--grey-300); --nav-menu-hover-text-color: var(--primary-black); --nav-menu-hover-text-sec-color: var(--grey-700); --nav-menu-hover-content-color: var(--grey-800); --nav-menu-create-icon-bgcolor: var(--blue); --nav-menu-separtor-icon-color: var(--grey-400); --item-menu-hover-bg-color: var(--white); --item-menu-hover-border-color: var(--blue); --item-menu-section-bg-color: var(--blue-lighten); --item-menu-bg-color: var(--nav-menu-bg-color); --item-menu-title-color: var(--nav-menu-text-color); --item-menu-descrip-color: var(--nav-menu-text-sec-color); --nav-menu-create-item-icon-border-normal-color: var(--create-item-icon-border-normal); --item-menu-hover-title-color: var(--nav-menu-hover-text-color); --item-menu-hover-descrip-color: var(--nav-menu-hover-text-sec-color); --nav-notification-menu-bg-color: var(--nav-menu-bg-color); --nav-notification-items-hover-bg-color: var(--nav-menu-hover-color); --nav-notification-heading-text-color: var(--nav-menu-text-color); --nav-notification-sub-heading-text-color: var(--nav-menu-text-sec-color); --nav-notification-content-text-color: var(--nav-menu-content-color); --nav-notification-time-text-color: var(--nav-menu-text-sec-color); --nav-notification-content-hover-text-color: var(--nav-menu-hover-content-color); --nav-notification-time-hover-text-color: var(--nav-menu-hover-text-sec-color);
+                  }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+
+                    @ServerAppConfig.ThemeStyle
+                    --item-menu-bg-color: var(--nav-menu-bg-color); --nav-menu-create-item-icon-border-normal-color: var(--nav-menu-create-icon-bgcolor); --item-menu-section-bg-color: var(--nav-menu-bg-color); --item-menu-title-color: var(--nav-menu-text-color); --item-menu-descrip-color: var(--nav-menu-text-sec-color); --item-menu-hover-bg-color: var( --nav-menu-hover-color); --item-menu-hover-border-color: var( --nav-menu-hover-color); --item-menu-hover-title-color: var(--nav-menu-hover-text-color); --item-menu-hover-descrip-color: var(--nav-menu-hover-text-sec-color); --nav-notification-menu-bg-color: var(--nav-menu-bg-color); --nav-notification-items-hover-bg-color: var(--nav-menu-hover-color); --nav-notification-heading-text-color: var(--nav-menu-text-color); --nav-notification-sub-heading-text-color: var(--nav-menu-text-sec-color); --nav-notification-content-text-color: var(--nav-menu-content-color); --nav-notification-time-text-color: var(--nav-menu-text-sec-color); --nav-notification-content-hover-text-color: var(--nav-menu-hover-content-color); --nav-notification-time-hover-text-color: var(--nav-menu-hover-text-sec-color);
+                  }
+        </style>
+    }
+
+
     <link href="https://fonts.googleapis.com/css?family=Heebo:400,500,700" rel="stylesheet">
 
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
@@ -113,10 +135,22 @@
     <!--Prefetch viewer & designer resources-->
     @if (!isSelfHosted)
     {
-    <link rel="prefetch" href="@ServerAppConfig.InternalAppDataServiceUrl">
+        <link rel="prefetch" href="@ServerAppConfig.InternalAppDataServiceUrl/health-check">
     }
     <script>
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+		var cdnLink = "@dashboardServerResourceUrl";
+        SetClientLocaleCookie("boldservice.client.locale", 365);
+            function SetClientLocaleCookie(name, exdays) {
+            var value = {
+                Locale: navigator.language,
+                TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+                var exdate = new Date();
+                exdate.setDate(exdate.getDate() + exdays++);
+                var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+                document.cookie = name + "=" + cookie_value + ";path=/";
+            }
         window.onload = function () {
             var preloadScripts = @Json.Serialize(preloadScriptsFiles);
             var preloadStyles = @Json.Serialize(preloadStylesFiles);
@@ -135,14 +169,18 @@
         </svg>
     </div>
     }
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
-    </environment>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+</environment>
 
     @RenderSection("styles", false)
     @if (!isMobile)
@@ -181,7 +219,7 @@
         $.extend(ej, Syncfusion);
         var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
         var isAdmin = "@isAdmin";
-        var manageLicenseUrl = "@(ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl + "/" + ServerAppConfig.TenantManagementHostName + "/administration/license-settings" : Url.Action("LicenseSettings", "Administration"))";
+        var manageLicenseUrl = "@(ServerAppConfig.IsSelfHosted ? globalAppSettings.SystemSettings.IDPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/administration/license-settings" : Url.Action("LicenseSettings", "Administration"))";
 		var contactUsUrl = "https://www.@(GlobalAppSettings.BrandingDomain)/contact";
         var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
         var paymentPageUrl = "@Url.Action("GetCardDetail", "Payment")";
@@ -196,6 +234,7 @@
         var rootUrl = "@rootUrl";
         var rootUrlAction = "@rootUrl";
         var bannerApiEndpoint = "@bannerApiEndpoint";
+        var isMobile = @Json.Serialize(isMobile);
 
         $(document).ready(function () {
             generateProfileAvatar();
@@ -320,16 +359,17 @@
             @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "GlobalAppSettings", globalAppSettings }, { "ItemPermission", ViewBag.ItemAddOptions != null ? ViewBag.ItemAddOptions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>() } })
         </section>
             }
-            else
+            else if (!isSlideshow)
             {
         <section id="menu-area">
             @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "GlobalAppSettings", globalAppSettings }, { "ItemPermission", ViewBag.ItemAddOptions != null ? ViewBag.ItemAddOptions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>() } })
         </section>
             }
         }
-        <div id="content-area" class="clearfix col-xs-12">
+        <div id="content-area" class="clearfix col-xs-12 @(isSlideshow ? "no-padding" : string.Empty)">
             <div class="suspension-warning" style="display:none">
                 <div class="warning-content"></div>
+                <div class="close-warning-icons su-close"></div>
             </div>
             @if (!isMobile)
             {
@@ -392,13 +432,13 @@
                 </svg>
             </div>
         </div>
-        <div id="loader_text" align="center" style="font-family:Segoe UI,SegoeUI,Helvetica Neue,Helvetica,Arial,sans-serif;position:relative;top: 42%;font-size:21px;font-weight:400;"></div>
+        <div id="loader_text" align="center" style="font-family:@globalAppSettings.SystemSettings.FontPreference,Segoe UI,SegoeUI,Helvetica Neue,Helvetica,Arial,sans-serif;position:relative;top: 42%;font-size:21px;font-weight:400;"></div>
     </div>
     <div class="page-additional-navigation">
         <input id="userName" type="hidden" value="@identityResponse.User.Email" />
         <input id="BaseUrlHidden" type="hidden" value="/" />
         <input id="baseurl" name="baseurl" type="hidden" value="" />
-        <input id="DateFormat" name="DateFormat" type="hidden" value="@globalAppSettings.SystemSettings.DateFormat" />
+        <input id="DateFormat" name="DateFormat" type="hidden" value="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
         <input id="DesignerName" name="DesignerName" type="hidden" value="@(globalAppSettings.SystemSettings.InstallationFolder + "dashboarddesigner")" />
     </div>
     <div id="alert-notification">
@@ -424,12 +464,15 @@
         @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
         @await Html.PartialAsync("~/Views/Support/_ConciergeSupport.cshtml")
         <environment include="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css" />
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css" />
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
         </environment>
-        @await Html.PartialAsync("~/Views/Shared/_NotificationBanner.cshtml")
+        if (!isMobile)
+        {
+            @await Html.PartialAsync("~/Views/Shared/_NotificationBanner.cshtml")
+        }
     }
 
     @await Html.PartialAsync("~/Views/DataSourceDesigner/_Connection.cshtml")
@@ -449,8 +492,9 @@
     }
     @if (!isMobile)
     {
-    @await Html.PartialAsync("~/Views/Items/_CreateItemMenu.cshtml", ViewBag.ItemAddOptions != null ? ViewBag.ItemAddOptions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>())
-    @await Html.PartialAsync("~/Views/Notification/_UserNotificationPartial.cshtml")
+        @await Html.PartialAsync("~/Views/Items/_CreateItemMenu.cshtml", ViewBag.ItemAddOptions != null ? ViewBag.ItemAddOptions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>())
+        @await Html.PartialAsync("~/Views/Notification/_UserNotificationPartial.cshtml")
+        @await Html.PartialAsync("~/Views/Shared/_Toast.cshtml")
     }
 </body>
 </html>

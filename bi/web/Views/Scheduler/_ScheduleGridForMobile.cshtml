@@ -116,8 +116,6 @@
 <script>
     var gridNamejs = "schedules";
     $(".grid-container").css("margin-top", "0");
-    var schedules = @Html.Raw(Json.Serialize(Model));
-    schedules = ej.parseJSON(schedules);
     var gridHeight = $(window).height() - ($("#header-area").outerHeight() + 62);
     var pageSize = gridHeight > 700 ? Math.round(gridHeight / 35) : 20;
 
@@ -128,7 +126,7 @@
                 $("#search-schedules").val("");
                 $('#scheduleGrid')
                     .ejGrid({
-                        dataSource: schedules,
+                        dataSource: ej.DataManager({ url: "@Url.Action("getschedules", "scheduler")", adaptor: "UrlAdaptor" }),
                         gridLines: ej.Grid.GridLines.Horizontal,
                         toolbarSettings: {
                             showToolbar: true,

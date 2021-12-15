@@ -7,7 +7,7 @@
     var itemPermissions = Model as Dictionary<ItemType, bool>;
     var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
     var showUpload = GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier || emailAddress.EndsWith("@syncfusion.com", StringComparison.OrdinalIgnoreCase) || emailAddress.Equals(ServerAppConfig.AppSettings.Syncfusion.Support.ConciergeEmail);
-    var showImport = requestUrl.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards");
+    var isDashboardTab = requestUrl.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards");
     var userdashboardsCount = itemsCount != null ? itemsCount.ContainsKey(ItemType.Dashboard) ? itemsCount[ItemType.Dashboard] : 0 : 0;
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -19,7 +19,7 @@
     var sharableDashboardsCount = "@ViewBag.SharableDashboardsCount";
 </script>
 
-<div id="create-item-container">
+<div id="create-item-container" style="display:none">
     <aside class="create-menu create-menu-effect">
         <div class="create-dashboard-section col-xs-12">
             <div class="create-dashboard-header-section col-xs-12 no-padding">
@@ -76,7 +76,7 @@
                             </li>
                         }
 
-                        if (ServerAppConfig.IsSelfHosted && isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard] && showImport)
+                        if (ServerAppConfig.IsSelfHosted && isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard] && isDashboardTab)
                         {
                             <li class="deploy-template-dashboard add-sample-button">
                                 <div class="create-item-list-section">
@@ -110,7 +110,7 @@
                     @if (!ServerAppConfig.IsSelfHosted)
                     {
                         <li class="request-concierge-support">
-                            <div class="create-item-list-section">
+                            <a class="create-item-list-section" href="@ServerAppConfig.AppSettings.Syncfusion.Support.CreateTicket" target="_blank">
                                 <div class="create-item-list-icon" style="float: left;">
                                     <img id="templates-img" class="smiley" src="@(GlobalAppSettings.CdnDomain)/static/sidebar/v1/support.svg">
                                 </div>
@@ -118,7 +118,7 @@
                                     <label>[[[Support]]]</label><br>
                                     <span>[[[Having trouble? Contact our dedicated support team now]]]</span>
                                 </div>
-                            </div>
+                            </a>
                         </li>
                     }
                 </ul>
@@ -173,7 +173,21 @@
                             </div>
                         </li>
                     }
-                </ul>
+                    @if (isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Category) && itemPermissions[ItemType.Category] && isDashboardTab)
+                    {
+                        <li id="create_Category">
+                            <div class="create-item-list-section">
+                                <div class="create-item-list-icon" style="float: left;">
+                                    <img id="templates-img" class="smiley" src="@(GlobalAppSettings.CdnDomain)/static/sidebar/v1/create-category.svg">
+                                </div>
+                                <div class="create-item-list-title">
+                                    <label>[[[Category]]]</label><br>
+                                    <span>[[[Create category]]]</span>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                    </ul>
             </div>
         </div>
     </aside>

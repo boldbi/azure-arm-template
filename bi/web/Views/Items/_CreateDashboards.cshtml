@@ -33,18 +33,19 @@
         window.templatedashboardsList = @Html.Raw(Json.Serialize(@data));
         var dataServiceUrl = "@ServerAppConfig.InternalAppDataServiceUrl.TrimEnd('/')";
         window.canCreateDataSource = "@Json.Serialize(permissions[ItemType.Datasource])";
+        var serverAppPathBase = "@Context.Request.PathBase";
     </script>
 
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr/signalr.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr-bundle.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr/signalr.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr-bundle.min.js"></script>
     </environment>
 </head>
@@ -97,18 +98,18 @@
                                 <div class="col-xs-6 template-dashboard-content">
                                     <h4 class="template-dashboard-name">{{dashboard.ShowCaseName}}</h4>
                                     <p class="template-dashboard-description">{{dashboard.Description}}</p>
-                                    <img class="service-image" title="{{datasource.Name}}" data-toggle="tooltip" ng-src="@globalAppSettings.SystemSettings.CDNLink/css/designer/images/datasource/{{datasource.Provider | lowercase}}/{{datasource.Service | lowercase}}.png" />
+                                    <img class="service-image" title="{{datasource.Name}}" data-toggle="tooltip" ng-src="@globalAppSettings.SystemSettings.CDNLink.TrimEnd('/')/cdn/css/designer/images/datasource/{{datasource.Provider | lowercase}}/{{datasource.Service | lowercase}}.png" />
                                     <div class="template-dashboard-buttons-div">
-                                        <button ng-if="canCreateDataSource && !IsNullorWhitespace(dashboard.Type)" data-authorize-url="@ServerAppConfig.InternalAppDataServiceUrl.TrimEnd('/')/v1.0/connection/authorize?provider={{datasource.Provider}}&service={{datasource.Service}}&type={{dashboard.Type}}&token={{accessToken}}&server=@(new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl())"
-                                                class="template-dashboard-add-button primary-button" data-access-token="{{accessToken}}"
+                                        <button ng-if="canCreateDataSource && !IsNullorWhitespace(dashboard.Type)" data-authorize-url="@ServerAppConfig.InternalAppDataServiceUrl.TrimEnd('/')/v1.0/connection/authorize?provider={{datasource.Provider}}&service={{datasource.Service}}&type={{dashboard.Type}}&token={{accessToken}}&server=@(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl())"
+                                                class="template-dashboard-add-button primary-button app-btn-primary" data-access-token="{{accessToken}}"
                                                 data-category-name="{{datasource.Provider}}" data-template-filename="{{dashboard.FileName}}"
                                                 data-template-description="{{dashboard.Description}}" data-template-name="{{dashboard.Name}}"
                                                 data-connection-provider="{{datasource.Provider}}" data-connection-service="{{datasource.Service}}"
                                                 data-type="{{dashboard.Type}}" type="button">
                                             [[[Connect your data]]]
                                         </button>
-                                        <button ng-if="canCreateDataSource && IsNullorWhitespace(dashboard.Type)" data-authorize-url="@ServerAppConfig.InternalAppDataServiceUrl.TrimEnd('/')/v1.0/connection/authorize?provider={{datasource.Provider}}&service={{datasource.Service}}&token={{accessToken}}&server=@(new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl())"
-                                                class="template-dashboard-add-button primary-button" data-access-token="{{accessToken}}"
+                                        <button ng-if="canCreateDataSource && IsNullorWhitespace(dashboard.Type)" data-authorize-url="@ServerAppConfig.InternalAppDataServiceUrl.TrimEnd('/')/v1.0/connection/authorize?provider={{datasource.Provider}}&service={{datasource.Service}}&token={{accessToken}}&server=@(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl())"
+                                                class="template-dashboard-add-button primary-button app-btn-primary" data-access-token="{{accessToken}}"
                                                 data-category-name="{{datasource.Provider}}" data-template-filename="{{dashboard.FileName}}"
                                                 data-template-description="{{dashboard.Description}}" data-template-name="{{dashboard.Name}}"
                                                 data-connection-provider="{{datasource.Provider}}" data-connection-service="{{datasource.Service}}"
@@ -116,12 +117,12 @@
                                             [[[Connect your data]]]
                                         </button>
 
-                                        <button ng-show="!canCreateDataSource" class="template-dashboard-add-button primary-button disabled-template-button" type="button" disabled
+                                        <button ng-show="!canCreateDataSource" class="template-dashboard-add-button primary-button app-btn-primary disabled-template-button" type="button" disabled
                                                 title="[[[You need permission to create a new data source to connect your data.]]]" data-toggle="tooltip" data-container="body">
                                             [[[Connect your data]]]
                                         </button>
 
-                                        <button class="add-sample-data-dashboard" ng-class="canCreateDataSource ? 'secondary-button' : 'primary-button'" data-category-name="{{datasource.Provider}}"
+                                        <button class="add-sample-data-dashboard" ng-class="canCreateDataSource ? 'secondary-button app-btn-secondary' : 'primary-button app-btn-primary'" data-category-name="{{datasource.Provider}}"
                                                 data-template-filename="{{dashboard.FileName}}" data-access-token="{{accessToken}}"
                                                 data-template-description="{{dashboard.Description}}" data-template-name="{{dashboard.Name}}"
                                                 data-connection-provider="{{datasource.Provider}}" data-connection-service="{{datasource.Service}}"
@@ -129,7 +130,8 @@
                                             [[[Load with sample data]]]
                                         </button>
                                     </div>
-                                    <span class="process-notify display-none">[[[Waiting for authorization...]]]</span>
+                                    <span id="connect-data" class="process-notify display-none">[[[Waiting for authorization...]]]</span>
+                                    <span id="load-sample-data" class="process-notify display-none">[[[Your dashboard is being prepared. We will notify you once the dashboard is ready.]]]</span>
                                 </div>
                             </div>
                         </div>

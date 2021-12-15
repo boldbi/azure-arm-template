@@ -17,10 +17,12 @@
 
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
-    <script>
+<script>
          var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceType", "scheduler")";
-         var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "scheduler")";
-    </script>
+        var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "scheduler")";
+        var timeZone = "@globalAppSettings.SystemSettings.TimeZone";
+        var clientTimeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+</script>
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecurrence.js"></script>
     </environment>
@@ -216,7 +218,14 @@
                 <div class="pull-left"><input type="text" class="form-control full-width" name="" id="start-date"></div>
             </div>
             <input type="hidden" />
-            <div class="col-sm-7 col-xs-7 " id="system-time">([[[Your time will be : ]]]<label class="normal-font" id="time"></label> - <label class="normal-font" id="zone"></label>)</div>
+            @if (!string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.TimeZone))
+            {
+                <div class="col-sm-7 col-xs-7 " id="system-time">([[[Your time will be :]]] - <label class="normal-font" id="zone"></label>)</div>
+            }
+            else
+            {
+                <div class="col-sm-7 col-xs-7 " id="system-time">([[[Time Zone]]] - <label class="normal-font" id="zone"></label>)</div>
+            }
             <input type="hidden" id="hour-difference" />
             <input type="hidden" id="minute-difference" />
             <div class="col-sm-12 col-xs-12 validate-error" id="start-date-error-container">
@@ -225,7 +234,11 @@
             </div>
 
         </div>
-        <div id="time-zone" class="col-sm-12 col-xs-12">([[[Application Time Zone:]]] @globalAppSettings.SystemSettings.TimeZone)</div>
+        @if (!string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.TimeZone))
+        {
+            <div id="time-zone" class="col-sm-12 col-xs-12">([[[Application Time Zone:]]] @globalAppSettings.SystemSettings.TimeZone)</div>
+        }
+
         <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row" id="no-view-end">
             <div class="col-sm-1 col-xs-1 no-padding ends-label align-center margin-issue"><label>[[[Ends]]]</label></div>
             <div id="schedule-end-type" class="col-sm-10 col-xs-10 no-padding no-margin">
@@ -255,10 +268,10 @@
         <div class="col-sm-10 col-xs-10" id="schedule-message-container"><span class="su su-info"></span><span id="schedule-message"></span></div>
     </div>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 
 </body>

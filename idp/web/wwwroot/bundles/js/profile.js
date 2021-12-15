@@ -136,7 +136,7 @@ $(document).ready(function () {
         close: "DialogBoxClose",
         closeOnEscape: true
     });
-
+    $('[data-toggle="popover"]').popover();
     $.validator.addMethod("isValidEmail", function (value, element) {
         return IsEmail(value);
     }, window.Server.App.LocalizationContent.IsValidEmailAddress);
@@ -258,7 +258,7 @@ $(document).ready(function () {
                     cache: false,
                     success: function (result) {
                         if (window.location.toString().includes("return_url")) {
-                            var redirectTo = window.location.toString().split("&return_url=")[1];
+                            var redirectTo = window.location.toString().split("return_url=")[1];
                             window.location.href = redirectTo;
                         }
                         else {
@@ -529,7 +529,7 @@ function SaveProfile() {
     if (isValid) {
         ShowWaitingProgress("#content-area", "show");
         doAjaxPost('POST',
-            "/user/updateuserprofile",
+            updateUserProfile,
             {
                 username: $('#user-username').val(),
                 email: $("#user-email").val(),
@@ -561,11 +561,11 @@ function SaveProfile() {
                     } else {
                         ShowWaitingProgress("#content-area", "hide");
                         var updateddetails = result.Data.profileinfo;
-                        var updatedfirstname = (updateddetails.firstName != null) ? $("#user-firstname").val(updateddetails.firstName) : $("#user-firstname").val(updateddetails.previousFirstName);
-                        var updatedlastname = (updateddetails.lastName != null) ? $("#user-lastname").val(updateddetails.lastName) : $("#user-lastname").val(updateddetails.previousLastName);
-                        var updatedusername = (updateddetails.userName != null) ? $("#user-username").val(updateddetails.userName) : $("#user-username").val(updateddetails.previousUserName);
-                        var updatedemail = (updateddetails.email != null) ? $("#user-email").val(updateddetails.email) : $("#user-email").val(updateddetails.previousMail);
-                        var updatedmobile = (updateddetails.mobile != null) ? $("#user-phonenumber").val(updateddetails.mobile) : $("#user-phonenumber").val(updateddetails.previousMobile);
+                        var updatedfirstname = $("#user-firstname").val(updateddetails.FirstName);
+                        var updatedlastname = $("#user-lastname").val(updateddetails.LastName);
+                        var updatedusername = $("#user-username").val(updateddetails.Username);
+                        var updatedemail = $("#user-email").val(updateddetails.Email);
+                        var updatedmobile = $("#user-phonenumber").val(updateddetails.Contact);
                         userDetails = {
                             FirstName: updatedfirstname.val(),
                             LastName: updatedlastname.val(),
@@ -664,12 +664,13 @@ function SaveUserPreference() {
                         $("<form action='" + result.Data.returnUrl + "'><input type='hidden' name='token' value='" + result.Data.token + "'></form>").appendTo('body').submit().remove();
                     } else {
                         ShowWaitingProgress("#content-area", "hide");
-                        SetCookie();
                         SuccessAlert(window.Server.App.LocalizationContent.UpdateAccountPreference, result.Data.value, 7000);
+                        location.reload();
                     }
                 } else {
                     ShowWaitingProgress("#content-area", "hide");
                     WarningAlert(window.Server.App.LocalizationContent.UpdateAccountPreference, result.Data.value, 7000);
+                    location.reload();
                 }
             }
         );

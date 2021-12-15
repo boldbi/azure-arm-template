@@ -9,15 +9,20 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var customUI = globalAppSettings.SystemSettings.CustomUI;
     var schemes = customUI?.Profiles != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].Schedules.Scheme).FirstOrDefault() : null;
+    var userId = _identityResponse.User.UserId;
 }
 @model List<ScheduleViewModel>
 
 @section styles{
     <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedules.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedules.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
     </environment>
 }
 
@@ -56,13 +61,19 @@
                             (window.innerWidth > 1040));
                         }
                     });
+                    if (window.location.search.length > 0) {
+                        var query = decodeURIComponent(window.location.search.split('?')[1]);
+                        query = query.replace('=', ':');
+                        searchValue = query.split('&');
+                        $("#search-schedules").val(searchValue[0]);
+                        var searchEvent = $.Event('keydown');
+                        $("#search-schedules").trigger(searchEvent);
+                    }
                     addPlacehoder("#search-area");
-                    var schedules = @Html.Raw(Json.Serialize(Model));
-                    schedules = ej.parseJSON(schedules);
                     ej.support.enableLocalizedSort = true;
                     $("#scheduleGrid")
                         .ejGrid({
-                            dataSource: schedules,
+                            dataSource: ej.DataManager({ url: "@Url.Action("getschedules", "scheduler")", adaptor: "UrlAdaptor" }),
                             allowPaging: true,
                             pageSettings: { pageSize: 20 },
                             allowSorting: true,
@@ -79,9 +90,11 @@
                                 $('[data-toggle="tooltip"]').tooltip();
                                 if (args.model.currentViewData.length === 0) {
                                     rowBound();
+                                    showOrHideLastRun();
                                 }
 
                                 showOrHideGridPager("#scheduleGrid");
+                                $("#scheduleGrid").ejWaitingPopup("hide");
                             },
                             rowDataBound: function() {
                                 var height = $(".e-gridcontent").height();
@@ -156,14 +169,6 @@
                                 }
                             ]
                         });
-                    if (window.location.search.length > 0) {
-                        var query = decodeURIComponent(window.location.search.split('?')[1]);
-                        query = query.replace('=', ':');
-                        searchValue = query.split('&');
-                        $("#search-schedules").val(searchValue[0]);
-                        var searchEvent = $.Event('keydown');
-                        $("#search-schedules").trigger(searchEvent);                                                                              
-                    }
                 });
         </script>
     }
@@ -199,9 +204,17 @@
                     {{if IsScheduledItemDeleted}}
                     <span class="schedule-deleted-name">{{:DeletedItemName}}</span><span class="badge badge-secondary">Deleted</span>
                     {{else MultiDashboardName}}
+                    {{if IsUnlisted && ItemCreatedId != @userId}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}&unlistedCode={{:UnlistedCode}}" " target="_blank">{{:ItemName}}</a></span>
+                    {{else}}
                     <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{/if}}
+                    {{else}}
+                    {{if IsUnlisted && ItemCreatedId != @userId}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?unlistedCode={{:UnlistedCode}}" target="_blank">{{:ItemName}}</a></span>
                     {{else}}
                     <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{/if}}
                     {{/if}}
                 </div>
             </script>
@@ -253,6 +266,13 @@
                             </a>
                         </li>
                         <li class="divider"></li>
+                        <li class="menu-group @(schemes != null && !schemes.Info ? "hide" : string.Empty)">
+                            <a href="javascript:void(0);" title="[[[Info]]]" class="item-info">
+                                <i class="su su-info"></i>
+                                <span class="menu-text">[[[Info]]]</span>
+                            </a>
+                        </li>
+                        <li class="divider @(schemes != null && !schemes.Info ? "hide" : string.Empty)"></li>
                         {{if Status=="Active"}}
                         {{if !IsScheduledItemDeleted}}
                         <li class="menu-group @(schemes != null && !schemes.Disable ? "hide" : string.Empty)">
@@ -306,7 +326,7 @@
                     </h1>
                     @if (itemPermissions[ItemType.Schedule])
                     {
-                        <button type="button" class="create-schedule pull-right primary-button">[[[Create Schedule]]]</button>
+                        <button type="button" class="create-schedule pull-right primary-button app-btn-primary">[[[Create Schedule]]]</button>
                     }
                 </div>
 
@@ -337,6 +357,7 @@
         @await Html.PartialAsync("../Items/_AddItems")
         @await Html.PartialAsync("../Items/_ItemVersion")
         @await Html.PartialAsync("../Scheduler/_ScheduleHistory")
+        @await Html.PartialAsync("../Items/_ItemInfo")
     }
 
     <div id="popup-container" style="display:none;">
@@ -354,9 +375,9 @@
     </div>
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 }

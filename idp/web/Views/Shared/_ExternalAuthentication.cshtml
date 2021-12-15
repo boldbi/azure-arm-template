@@ -4,12 +4,11 @@
 @using Microsoft.Extensions.DependencyInjection;
 @using Microsoft.AspNetCore.Authentication;
 @using System.Net;
-@using System.Runtime.InteropServices;
+@using Syncfusion.Server.Base.Helpers; 
 
 @{
     var schemes = Context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
     var loginProviders = (from scheme in await schemes.GetAllSchemesAsync() where !string.IsNullOrEmpty(scheme.DisplayName) select scheme).ToList();
-    bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     if (!ViewBag.IsADFSEnabled)
     {
         loginProviders = loginProviders.Where(x => x.DisplayName.ToLower() != "azure adfs").ToList();
@@ -30,17 +29,18 @@
     string oauthLoginUrl = Url.Action("OAuthLogin", "accounts");
     string jwtLoginUrl = Url.Action("JwtLogin", "accounts");
 }
-@if (showExternalAuthentication || showAuthLogin || isWindows)
+@if (showExternalAuthentication || showAuthLogin)
 {
     <div class="external-container">
         <div class="divider-container col-xs-12">
-            <hr class="connect-line-left"><div class="content text-body">or Connect with</div><hr class="connect-line-right">
+            <hr class="connect-line-left"><div class="content text-body">[[[or Connect with]]]</div><hr class="connect-line-right">
         </div>
         <div id="alternative-login">
             <div class="page-wrapper">
                 @if (controllerName.ToLower() == "authorization")
                 {
-<input id="external-authentication-client-id" type="hidden" name="clientId" value="@ViewBag.ClientId" />                }
+                    <input id="external-authentication-client-id" type="hidden" name="clientId" value="@ViewBag.ClientId" />
+                }
 
                 <div class="col-xs-12 no-padding">
                     @if (showExternalAuthentication)
@@ -74,23 +74,22 @@
                         }
                     }
 
-                    @if (CloudAppConfig.IsSelfHosted && !GlobalAppSettings.IsAzureApplication && isWindows)
-                    {
-                        <form id="login-button-windows" class="external-login-buttons">
-                            @*@Html.AntiForgeryToken()*@
-                            <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
-                                <i class="su su-ms-adfs"></i>
-                                <span class="windows-ad-login-text">[[[Windows AD]]]</span>
-                                <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
-                            </button>
-                        </form>
-                    }
-
                     @if (showAuthLogin)
                     {
                         foreach (var auth in authSettings)
                         {
-                            if (auth.AuthProvider != AuthProvider.AzureAD)
+                            if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication )
+                            {
+                                <form id="login-button-windows" class="external-login-buttons">
+                                    <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
+                                        <i class="su su-ms-adfs"></i>
+                                        <span class="windows-ad-login-text">[[[Windows AD]]]</span>
+                                        <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
+                                    </button>
+                                </form>
+                            }
+
+                            if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD)
                             {
                                 <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
                                     <input type="hidden" value="@ViewBag.ReturnURL" id="authReturnUrl" name="authReturnUrl" />

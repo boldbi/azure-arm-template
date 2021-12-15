@@ -1,4 +1,5 @@
 ﻿@inject ServerPrincipal _identityResponse
+@using Newtonsoft.Json
 @{
     var globalAppSettings = _globalAppSettings;
 
@@ -12,6 +13,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var customUI = globalAppSettings.SystemSettings.CustomUI;
     var schemes = customUI?.Profiles != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].Slideshows.Scheme).FirstOrDefault() : null;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
 }
 
 @section scripts{
@@ -138,6 +140,12 @@
                             <span class="menu-text">[[[Open]]]</span>
                         </a>
                     </li>
+                    <li class="menu-group @(schemes != null && !schemes.Info ? "hide" : string.Empty)">
+                        <a href="javascript:void(0);" class="item-info" title="[[[Info]]]">
+                            <i class="su su-info"></i>
+                            <span class="menu-text">[[[Info]]]</span>
+                        </a>
+                    </li>
                     <li class="menu-group @(schemes != null && !schemes.GetLink ? "hide" : string.Empty)">
                         <a href="javascript:void(0);" class="get-slideshow-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~slideshowUrl(Id, Name)}}" title="[[[Get Link]]]">
                             <i class="su su-link"></i>
@@ -152,7 +160,7 @@
                         </a>
                     </li>
                     {{/if}}
-                    {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+                    {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Slideshow].ToString().ToLower()) == true}}
                     <li class="menu-group @(schemes != null && !schemes.Share ? "hide" : string.Empty)">
                         <a href="javascript:void(0);" class="item-permissions" data-item-id="{{:Id}}" title="[[[Sharing Permissions]]]">
                             <i class="su su-manage-permission"></i>
@@ -178,7 +186,7 @@
                 </h1>
                 @if (itemPermissions[ItemType.Slideshow])
                 {
-                    <button type="button" class="create-presentation pull-right primary-button">[[[Create Slideshow]]]</button>
+                    <button type="button" class="create-presentation pull-right primary-button app-btn-primary">[[[Create Slideshow]]]</button>
                 }
             </div>
             <div id="slideshows-grid-container" class="col-lg-12 admin-page-body">
@@ -202,6 +210,7 @@
         @await Html.PartialAsync("../Items/_AddItems")
         @await Html.PartialAsync("../Items/_ItemVersion")
         @await Html.PartialAsync("../Items/_SharePermission")
+        @await Html.PartialAsync("../Items/_ItemInfo")
     }
 
     <div id="popup-container" style="display:none" class="no-padding">
@@ -209,9 +218,9 @@
     </div>
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 }

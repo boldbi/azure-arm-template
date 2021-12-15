@@ -12,6 +12,8 @@ new SelectListItem
     Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
 }
 };
+    var siteUrl = Url.Action("Sites", "TenantsManagement");
+    var existingDomainUrl = GlobalAppSettings.SystemSettings.BaseUrl + siteUrl + "?searchKey=" + GlobalAppSettings.SystemSettings.BaseUrl;
 }
 
 <div id="look-and-feel-container" class="admin-page-container">
@@ -55,6 +57,17 @@ new SelectListItem
                             <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="[[[Enter your URL]]]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
                         </div>
                     </div>
+                    <div class="col-xs-10 exist-domain-info hide">
+                        @Html.CheckBox("DomainInfo", true, new
+                        {
+                        id = "domain-change"
+                        })
+                        <label class="app-textbox-label">[[[Update the URL of the ]]]<a target="_blank" href="@existingDomainUrl">[[[sites]]]</a>[[[ that are deployed to the same URL.]]]</label>
+                    </div>
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-2"></div>
+                        <span class="validation-errors col-xs-4" id="site-url-validation"></span>
+                    </div>
                     @if (!CloudAppConfig.IsSelfHosted)
                     {
                         <div class="col-xs-6" id="help_text" style="display: @ViewBag.icon">
@@ -64,17 +77,15 @@ new SelectListItem
                             </div>
                         </div>
                     }
-
-                    <div class="col-xs-12 no-padding">
-                        <div class="col-xs-2"></div>
-                        <span class="validation-errors col-xs-4" id="site-url-validation"></span>
-                    </div>
                     <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
                 </div>
             </div>
-
             <div class="col-lg-12 admin-page-body">
                 <h3 class="title col-lg-12 sub-section-heading">[[[Display]]]</h3>
+                <div class="info-container">
+                    <span class="info-icon su su-info"></span>
+                    [[[If Inherit from user’s browser locale/timezone is selected, the displayed date, time, and time zone will be based on the user’s browser settings.]]]
+                </div>
                 <div class="form-group">
                     @Html.Label("time-zone", "[[[Time Zone]]]", new
                     {
@@ -87,7 +98,7 @@ new SelectListItem
                             @class = "selectpicker form-control",
                             data_none_results_text = "No results match",
                             data_size = "10",
-                            title = "Select Timezone",
+                            title = "[[[Select Timezone]]]",
                             data_live_search = "true",
                             data_live_search_placeholder = "Search"
                         })
@@ -98,51 +109,23 @@ new SelectListItem
                     {
                         @class = "app-textbox-label col-lg-2"
                     })
+                    <div class="site-settings-drop-down col-lg-4">
+                        @Html.DropDownList("dateformat", ViewBag.DateFormat as IEnumerable<SelectListItem>, new { id = "date-format", @class = "selectpicker form-control", data_none_results_text = "[[[No results match]]]", data_size = "10", title = "[[[Select DateFormat]]]", data_live_search = "true", data_live_search_placeholder = "[[[Search]]]" })
 
-                    <div class="col-lg-10 top-padding">
-                        <div class="col-sm-3 no-padding">
-                            <input type="radio" class="css-radio" id="MM_DD_YYYY" name="date_format" value="MM/dd/yyyy" @(ViewBag.SystemSettings.DateFormat == "MM/dd/yyyy" ? "checked" : string.Empty) />
-                            <label for="MM_DD_YYYY">[[[MM/DD/YYYY]]]</label>
-                        </div>
-                        <div class="col-sm-3 no-padding">
-                            <input type="radio" class="css-radio" id="DD_MM_YYYY" name="date_format" value="dd/MM/yyyy" @(ViewBag.SystemSettings.DateFormat == "dd/MM/yyyy" ? "checked" : string.Empty) />
-                            <label for="DD_MM_YYYY">[[[DD/MM/YYYY]]]</label>
-                        </div>
-                        <div class="col-sm-3 no-padding">
-                            <input type="radio" class="css-radio" id="DD_MMM_YYYY" name="date_format" value="d MMM, yyyy" @(ViewBag.SystemSettings.DateFormat == "d MMM, yyyy" ? "checked" : string.Empty) />
-                            <label for="DD_MMM_YYYY">[[[DD MMM YYYY]]]</label>
-                        </div>
-                        <div class="col-sm-3 no-padding">
-                            <input type="radio" class="css-radio" id="MMM_DD_YYYY" name="date_format" value="MMM d, yyyy" @(ViewBag.SystemSettings.DateFormat == "MMM d, yyyy" ? "checked" : string.Empty) />
-                            <label for="MMM_DD_YYYY">[[[MMM DD YYYY]]]</label>
-                        </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    @Html.Label("Use 24-hour format", "[[[Use 24-hour format]]]", new
-                    {
-                        @class = "app-textbox-label col-xs-2"
-                    })
-                    <div class="col-xs-4 timeformat switch-align">
-                        <span class="material-switch text-left">
-                            <input type="checkbox" id="time_format" name="enablefooter" @((bool)ViewBag.SystemSettings.TimeFormat ? "checked" : string.Empty) />
-                            <label for="time_format" class="label-primary"></label>
-                        </span>
-                        <div class="time">
-                            13.00
-                        </div>
-                        <div class="col-xs-12 no-padding">
-                            <div class="col-xs-2"></div>
-                            <span class="validation-message col-xs-4" message=13></span>
-                        </div>
-
+                    @Html.Label("Use 24-hour format", "[[[Time format]]]", new { @class = "app-textbox-label col-lg-2" })
+                    <div class="site-settings-drop-down col-lg-4">
+                        @Html.DropDownList("timeformat", ViewBag.TimeFormat as IEnumerable<SelectListItem>, new { id = "time_format", @class = "selectpicker form-control", data_none_results_text = "[[[No results match]]]", data_size = "10", title = "[[[Select TimeFormat]]]", data_live_search = "true", data_live_search_placeholder = "[[[Search]]]" })
                     </div>
                 </div>
+
                 @if (CloudAppConfig.IsSelfHosted)
                 {
                     <div class="form-group">
-                        @Html.Label("language", "[[[Application language]]]", new { @class = "col-xs-2 app-textbox-label" })
-                        <div class="dropdown col-xs-3 language-group">
+                        @Html.Label("language", "[[[Application language]]]", new { @class = "col-lg-2 app-textbox-label" })
+                        <div class="col-lg-4 language-group">
                             @Html.DropDownList("language", ViewBag.languageList as IEnumerable<SelectListItem>, new { id = "language", @class = "selectpicker form-control pull-left", data_live_search = "false" })
                             <input type="hidden" id="lang_tag" value="@ViewBag.systemLanguage">
                             <input type="hidden" id="return_url" value="@ViewBag.SystemSettings.BaseUrl">
@@ -150,7 +133,7 @@ new SelectListItem
                     </div>
                 }
             </div>
-            <div class="col-xs-12 sub-section admin-page-body @(ViewBag.ThirdPartyLogins ||  ViewBag.WhiteLabel || ViewBag.CustomDomain ? string.Empty : "unlock-enterprise-features")">
+            <div class="col-xs-12 sub-section admin-page-body @(ViewBag.ThirdPartyLogins ||  ViewBag.WhiteLabel || ViewBag.CustomDomain ? string.Empty : " unlock-enterprise-features")">
                 <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content">[[[Branding]]]</h3>
 
                 <div class="col-xs-6 no-margin no-padding blur-whitelable-content" style="height:auto">
@@ -162,7 +145,7 @@ new SelectListItem
                         <div class="col-xs-8">
                             <div class="input-group">
                                 <input type="text" id="upload-login-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
-                                <div id="upload-login-image-addon" title="Upload" class="input-group-addon">
+                                <div id="upload-login-image-addon" title="[[[Upload]]]" class="input-group-addon">
                                     <div id="upload-login-image" class="settings-upload-button">
                                     </div>
                                 </div>
@@ -194,7 +177,7 @@ new SelectListItem
                         <div class="col-xs-8">
                             <div class="input-group">
                                 <input type="text" id="upload-favicon-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
-                                <span id="upload-favicon-image-addon" title="Upload" class="input-group-addon">
+                                <span id="upload-favicon-image-addon" title="[[[Upload]]]" class="input-group-addon">
                                     <div id="upload-favicon-image" class="settings-upload-button"></div>
                                 </span>
                             </div>
@@ -218,47 +201,98 @@ new SelectListItem
                             </span>
                         </div>
                     </div>
+                    @if(ViewBag.IsBoldReportsOnPremise)
+                    {
+                        <div class="form-group highlight-image" data-image="powered-logo">
+                            <label class="col-xs-4 app-textbox-label">[[[Powered by logo]]]</label>
+                            <div class="col-xs-8">
+                                <div class="input-group">
+                                    <input type="text" id="upload-poweredlogo-image-textbox" class="form-control filename-text" value="[[[Browse file path]]]" disabled>
+                                    <span id="upload-powered-image-addon" class="input-group-addon">
+                                        <div id="upload-poweredlogo-image" class="settings-upload-button"></div>
+                                    </span>
+                                </div>
+                                <span class="info-text">
+                                    *[[[200x40 pixels preferred]]]
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("site-copyinfo", "[[[Site copyright information]]]", new
+                            {
+                                @class = "col-xs-4 app-textbox-label"
+                            })
+                            <div class="col-xs-8">
+                                <input type="text" id="site-copyright" class="form-control site-copyright-fields" name="copy_right_info" placeholder="[[[Enter copyright information]]]" value="@ViewBag.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString())" data-original-value="@ViewBag.SystemSettings.CopyrightInformation" @((bool)ViewBag.SystemSettings.IsEnableCopyrightInfo ? string.Empty : "disabled" ) />
+                                <span class="validation-errors"></span>
+                            </div>
+                        </div>              
+                    }
+                    <div class="@showSyncfusionBrand blur-whitelable-content powered-by-syncfusion">
+                        @Html.Label("enablepoweredbysyncfusion", "[[[Show powered by Syncfusion]]]", new
+                        {
+                            @class = "app-textbox-label col-xs-4"
+                        })
+                        <div class="col-xs-8 enablepoweredbysyncfusion switch-align">
+                            <span class="material-switch text-left">
+                                <input type="checkbox" id="enablepoweredbysyncfusion" name="enablefooter" @((bool)ViewBag.SystemSettings.IsEnablePoweredBySyncfusion ? "checked" : string.Empty) />
+                                <label for="enablepoweredbysyncfusion" class="label-primary"></label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group blur-whitelable-content">
+                        @Html.Label("enablecopyrightinfo", "[[[Show copyright information]]]", new
+                        {
+                            @class = "app-textbox-label col-xs-4"
+                        })
+                        <div class="col-xs-8 enablecopyrightinfo switch-align">
+                            <span class="material-switch text-left">
+                                <input type="checkbox" id="enablecopyrightinfo" name="enablefooter" @((bool)ViewBag.SystemSettings.IsEnableCopyrightInfo ? "checked" : string.Empty) />
+                                <label for="enablecopyrightinfo" class="label-primary"></label>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-xs-6 text-center blur-whitelable-content" style="height: 290px;">
-                    <div id="image-container" class="center-img" style="height: 230px;">
+                <div class="col-xs-6 text-center blur-whitelable-content" style="height: 390px;">
+                    <div id="image-container" class="center-img" style="height: auto;">
                         <table>
                             <tbody>
                                 <tr>
                                     <td colspan="2" class="login-img">
-                                        <span title="Log in screen" data-toggle="tooltip" data-animation="true" class="tooltip-container" data-image="login-screen">
+                                        <span title="[[[Log in screen]]]" data-toggle="tooltip" data-animation="true" class="app-img-container tooltip-container" data-image="login-screen">
                                             @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
                                             {
                                                 if (CloudAppConfig.IsSelfHosted)
                                                 {
-                                                    <img id="display-login-logo" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.LoginLogo)';" width="200" height="44" alt="Login Logo" />
+                                                    <img id="display-login-logo" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.LoginLogo)';" alt="[[[Login Logo]]]" />
                                                 }
                                                 else
                                                 {
-                                                    <img id="display-login-logo" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.LoginLogo" width="200" height="44" alt="Login Logo" />
+                                                    <img id="display-login-logo" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.LoginLogo" alt="[[[Login Logo]]]" />
                                                 }
                                             }
                                             else
                                             {
-                                                <img id="display-login-logo" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.LoginLogo)';" width="200" height="44" alt="Login Logo" />
+                                                <img id="display-login-logo" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.LoginLogo)';" alt="[[[Login Logo]]]" />
                                             }
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="app-img-container favicon tooltip-container" title="Favicon" data-toggle="tooltip" data-animation="true" data-image="favicon">
+                                        <span class="app-img-container favicon tooltip-container" title="[[[Favicon]]]" data-toggle="tooltip" data-animation="true" data-image="favicon">
                                             @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
                                             {
                                                 if (CloudAppConfig.IsSelfHosted)
                                                 {
-                                                    <img id="favicon_logo_img" src="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.Favicon)';" width="16" height="16" alt="Favicon" />
+                                                    <img id="favicon_logo_img" src="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.Favicon)';" alt="[[[Favicon]]]" />
                                                 }
                                                 else
                                                 {
-                                                    <img id="favicon_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.FavIcon" width="16" height="16" alt="Favicon" />
+                                                    <img id="favicon_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.FavIcon" alt="[[[Favicon]]]" />
                                                 }
                                             }
                                             else
                                             {
-                                                <img id="favicon_logo_img" src="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.Favicon)';" width="16" height="16" alt="Favicon" />
+                                                <img id="favicon_logo_img" src="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.Favicon)';" alt="[[[Favicon]]]" />
                                             }
                                         </span>
                                     </td>
@@ -273,72 +307,80 @@ new SelectListItem
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">
-                                        <span class="app-img-container header-icon tooltip-container" title="Header Logo" data-toggle="tooltip" data-animation="true" data-image="header-logo">
+                                    <td colspan="2" class="header-img">
+                                        <span class="app-img-container header-icon tooltip-container" title="[[[Header Logo]]]" data-toggle="tooltip" data-animation="true" data-image="header-logo">
                                             @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
                                             {
                                                 if (CloudAppConfig.IsSelfHosted)
                                                 {
-                                                    <img id="mainscreen_logo_img" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.MainLogo)';" width="40" height="40" alt="Main Screen Logo" />
+                                                    <img id="mainscreen_logo_img" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.MainLogo)';" alt="[[[Main Screen Logo]]]" />
                                                 }
                                                 else
                                                 {
-                                                    <img id="mainscreen_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.MainScreenLogo" width="40" height="40" alt="Main Screen Logo" />
+                                                    <img id="mainscreen_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.MainScreenLogo" alt="[[[Main Screen Logo]]]" />
                                                 }
                                             }
                                             else
                                             {
-                                                <img id="mainscreen_logo_img" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.MainLogo)';" width="40" height="40" alt="Main Screen Logo" />
+                                                <img id="mainscreen_logo_img" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.MainLogo)';" alt="[[[Main Screen Logo]]]" />
                                             }
                                         </span>
                                     </td>
 
                                     <td>
-                                        <span class="app-img-container email-icon tooltip-container" title="Email Logo" data-toggle="tooltip" data-animation="true" data-image="email-logo">
+                                        <span class="app-img-container email-icon tooltip-container" title="[[[Email Logo]]]" data-toggle="tooltip" data-animation="true" data-image="email-logo">
                                             @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
                                             {
                                                 if (CloudAppConfig.IsSelfHosted)
                                                 {
-                                                    <img id="email_logo_img" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.EmailLogo)';" height="40" max-width="40" alt="Email Logo" />
+                                                    <img id="email_logo_img" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.EmailLogo)';" alt="[[[Email Logo]]]" />
                                                 }
                                                 else
                                                 {
-                                                    <img id="email_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.EmailLogo" height="40" max-width="40" alt="Email Logo" />
+                                                    <img id="email_logo_img" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.EmailLogo" alt="[[[Email Logo]]]" />
                                                 }
                                             }
                                             else
                                             {
-                                                <img id="email_logo_img" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/boldid/application/" + IconFileNames.EmailLogo)';" max-height="40" max-width="200" alt="Email Logo" />
+                                                <img id="email_logo_img" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.EmailLogo)';" alt="[[[Email Logo]]]" />
                                             }
                                         </span>
                                     </td>
                                 </tr>
+                                @if(ViewBag.IsBoldReportsOnPremise)
+                                {
+                                    <tr>
+                                        <td colspan="2" class="separator-img no-padding">
+                                            <img src="@GlobalAppSettings.SystemSettings.CDNLink/images/common/divider_light.png" )" alt="divider" />
+                                        </td>
+                                        <td colspan="2" class="separator-img no-padding">
+                                            <img src="@GlobalAppSettings.SystemSettings.CDNLink/images/common/divider_light.png" )" alt="divider" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="powered-img">
+                                            <span class="app-img-container header-icon tooltip-container" title="[[[Powered by logo]]]" data-toggle="tooltip" data-animation="true" data-image="powered-logo">
+                                                @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                                                    {
+                                                        if (CloudAppConfig.IsSelfHosted)
+                                                        {
+                                                <img id="display-powered-logo" src="@GlobalAppSettings.SystemSettings.PoweredByLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.PoweredByLogo)';" alt="[[[Powered by logo]]]" />
+                                                        }
+                                                        else
+                                                        {
+                                                <img id="display-powered-logo" src="@GlobalAppSettings.AzureBlob.AzureBlobStorageUri/@GlobalAppSettings.AzureBlob.AzureBlobStorageContainerName/@GlobalAppSettings.GetStorageMode()/content/images/@GlobalAppSettings.Branding/application/@ViewBag.SystemSettings.PoweredByLogo" alt="[[[Powered by logo]]]" />
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                <img id="display-powered-logo" src="@GlobalAppSettings.SystemSettings.PoweredByLogo" onerror="this.onerror=null;this.src='@Url.Content(" ~ /images/boldid/application/" + IconFileNames.PoweredByLogo)';" alt="[[[Powered by logo]]]" />
+                                                    }
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
-                    </div>
-                </div>
-                <div class="@showSyncfusionBrand blur-whitelable-content powered-by-syncfusion">
-                    @Html.Label("enablepoweredbysyncfusion", "[[[Show powered by Syncfusion]]]", new
-                    {
-                        @class = "app-textbox-label col-xs-2"
-                    })
-                    <div class="col-xs-4 enablepoweredbysyncfusion switch-align">
-                        <span class="material-switch text-left">
-                            <input type="checkbox" id="enablepoweredbysyncfusion" name="enablefooter" @((bool)ViewBag.SystemSettings.IsEnablePoweredBySyncfusion ? "checked" : string.Empty) />
-                            <label for="enablepoweredbysyncfusion" class="label-primary"></label>
-                        </span>
-                    </div>
-                </div>
-                <div class="form-group blur-whitelable-content">
-                    @Html.Label("enablecopyrightinfo", "[[[Show copyright information]]]", new
-                    {
-                        @class = "app-textbox-label col-xs-2"
-                    })
-                    <div class="col-xs-4 enablecopyrightinfo switch-align">
-                        <span class="material-switch text-left">
-                            <input type="checkbox" id="enablecopyrightinfo" name="enablefooter" @((bool)ViewBag.SystemSettings.IsEnableCopyrightInfo ? "checked" : string.Empty) />
-                            <label for="enablecopyrightinfo" class="label-primary"></label>
-                        </span>
                     </div>
                 </div>
             </div>

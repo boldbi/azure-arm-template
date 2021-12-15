@@ -127,7 +127,7 @@
                                                     <tr>
                                                         <td style="font-size: 16px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align: right; height: 40px;vertical-align:bottom;">
                                                             <span>
-                                                                <a href="@Model.BaseUrl/login" target='' style="text-decoration: none; color: #3f3f3f; font-weight: normal;">Login</a>
+                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/login")" target='' style="text-decoration: none; color: #3f3f3f; font-weight: normal;">Login</a>
                                                             </span>
                                                         </td>
                                                     </tr>
@@ -169,9 +169,30 @@
                                             <tbody>
                                                 <tr>
                                                     <td style=" padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;">
-                                                        <span>
-                                                            A @Model.ItemType has been shared with you
-                                                        </span>
+                                                        @if (Model.ItemType == "Settings")
+                                                        {
+                                                            <span>
+                                                                You have been given access to @Model.ItemType
+                                                            </span>
+                                                        }
+                                                        else if (Model.ItemType == "UserManagement")
+                                                        {
+                                                            <span>
+                                                                You have been given access to a group
+                                                            </span>
+                                                        }
+                                                        else if (Model.ItemType == "Permissions")
+                                                        {
+                                                            <span>
+                                                                You have given access to manage @Model.ItemName @(Model.ItemType)
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                A @Model.ItemType has been shared with you
+                                                            </span>
+                                                        }
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -227,11 +248,39 @@
                                         <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
                                             <tbody>
                                                 <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
-                                                        <span>
-                                                            @Model.Admin has shared the @Model.ItemType - '@Model.ItemName' with you.
-                                                        </span>
-                                                    </td>
+                                                    @if (Model.ItemType == "Settings")
+                                                    {
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                            <span>
+                                                                @Model.Admin has given you access to the @Model.ItemType - '@Model.ItemName'.
+                                                            </span>
+                                                        </td>
+                                                    }
+                                                    else if (Model.ItemType == "UserManagement")
+                                                    {
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                            <span>
+                                                                @Model.Admin has given you access to the group - '@Model.ItemName'.
+                                                            </span>
+                                                        </td>
+                                                    }
+                                                    else if (Model.ItemType == "Permissions")
+                                                    {
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                            <span>
+                                                                @Model.Admin has given you access to manage '@Model.ItemName' @(Model.ItemType).
+                                                            </span>
+                                                        </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                            <span>
+                                                                @Model.Admin has shared the @Model.ItemType - '@Model.ItemName' with you.
+                                                            </span>
+                                                        </td>
+                                                    }
+
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -258,7 +307,7 @@
                                                 <tr>
                                                     <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
                                                         <span style="color: #3f3f3f;">
-                                                            <a href="@Model.BaseUrl/@Model.ItemUrl" target='' style="text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;">@Model.ItemName</a>
+                                                            <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style="text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;">@Model.ItemName</a>
                                                         </span>
                                                     </td>
                                                 </tr>

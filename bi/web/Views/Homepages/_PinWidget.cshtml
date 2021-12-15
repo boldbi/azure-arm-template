@@ -21,11 +21,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-viewer-page.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-viewer-page.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.min.js"></script>
     </environment>
 
@@ -43,9 +47,10 @@
             parent.$("#pin-widget-popup-iframe").contents().find("#widget-name").val(widgetName);
             $("#filter-info").popover();
             parent.$('#success-alert, #warning-alert').fadeOut();
-            parent.$("#pin-widget-popup_wrapper").ejWaitingPopup("hide");
-            // Need to check for cloud
-            //parent.$(".e-dashboardviewer").ejDashboardViewer("instance").isWidget ? $("#filter-container").remove() : null;
+            parent.$("#pin-widget-popup_wrapper").BoldBIDashboardWaitingPopup("hide");
+            if (parent.dashboardItemDetail.Extension != ".sydj") {
+                parent.$(".e-dashboardviewer").ejDashboardViewer("instance").isWidget ? $("#filter-container").remove() : null;
+            }
             var itemName = parent.window.IsDashboard ? "[[[Dashboard]]]" : "[[[Widget]]]";
             $("#item-name").text(itemName);
             if(@userHomepage.Count == 0){
@@ -90,7 +95,7 @@
             <div class="col-xs-12 dialog-footer rightAlign no-right-padding no-left-padding">
                 <div class="pull-right"></div>
                 <div class="no-padding centerAlign validationArea" id="close">
-                    <input title="" type="button" id="version-Alert-button" class="btn secondary-button PopupClose" value="[[[OK]]]" onclick="onAlertDialogClose()" />
+                    <input title="" type="button" id="version-Alert-button" class="btn secondary-button app-btn-secondary PopupClose" value="[[[OK]]]" onclick="onAlertDialogClose()" />
                 </div>
             </div>
         }
@@ -139,18 +144,18 @@
                 </div>
                 <div id="pin-widget-button">
                     <div id="button-container">
-                        <input type="button" id="save-button" class="btn primary-button" value="[[[Pin]]]">
-                        <input type="button" id="cancel-button" class="btn secondary-button" value="[[[Cancel]]]" onclick="closePinWidgetPopup()">
+                        <input type="button" id="save-button" class="btn primary-button app-btn-primary" value="[[[Pin]]]">
+                        <input type="button" id="cancel-button" class="btn secondary-button app-btn-secondary" value="[[[Cancel]]]" onclick="closePinWidgetPopup()">
                     </div>
                 </div>
             </div>
         }
     </form>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 </body>
 </html>

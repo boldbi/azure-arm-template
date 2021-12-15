@@ -17,7 +17,7 @@
     <meta name="add-ump-app-users-link" content="@Url.Action("GetUsersForTenantAccess", "TenantsManagement")?tenantInfoId=" />
     <meta name="provide-app-access-link" content="@Url.Action("GrantUserAccessforTenant", "TenantsManagement")?tenantInfoId=" />
     <meta name="remove-app-access-link" content="@Url.Action("RemoveUserAccessfromTenant", "TenantsManagement")?tenantInfoId=" />
-    <meta name="show-client-secret" content="@Model.ClientSecret.ToString()" />
+    <meta name="isolation-code" content="@Model.TenantIsolation.IsolationCode" />
 
     <script src="~/bundles/js/sites.js" asp-append-version="true"></script>
     <script type="text/x-jsrender" id="commandstemplate">
@@ -164,14 +164,17 @@
                     <li role="presentation" class="@isGeneralTab" id="application">
                         <a href="#application-tab" aria-controls="application-tab" role="tab" data-toggle="tab">[[[General]]]</a>
                     </li>
-                    <li role="presentation" class="@isUsersTab" id="users">
-                        <a href="#users-tab" aria-controls="users-tab" role="tab" data-toggle="tab">[[[Users]]]</a>
-                    </li>
-                    @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
+                    @if (Model.TenantStatus == TenantStatus.Active)
                     {
-                        <li role="presentation" class="@isIsolationCodeTab" id="data-security">
-                            <a href="#data-security-tab" aria-controls="data-security-tab" role="tab" data-toggle="tab">[[[Isolation Code]]]</a>
+                        <li role="presentation" class="@isUsersTab" id="users">
+                            <a href="#users-tab" aria-controls="users-tab" role="tab" data-toggle="tab">[[[Users]]]</a>
                         </li>
+                        @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
+                        {
+                            <li role="presentation" class="@isIsolationCodeTab" id="data-security">
+                                <a href="#data-security-tab" aria-controls="data-security-tab" role="tab" data-toggle="tab">[[[Isolation Code]]]</a>
+                            </li>
+                        }
                         <li role="presentation" class="@isAttributesTab" id="custom-attribute">
                             <a href="#custom-attribute-tab" aria-controls="custom-attribute-tab" role="tab" data-toggle="tab">[[[Attributes]]]</a>
                         </li>

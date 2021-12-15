@@ -15,14 +15,24 @@
 
 <html>
 <head>
-    <title>[[[Homepage]]] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
+    <meta charset="utf-8">
+    <title>[[[Home]]] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
     <link rel="icon" href="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon';" />
-    <link rel="stylesheet" href="~/bundles/css/homepage.css" asp-append-version="true"/>
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    
+    <link rel="stylesheet" href="~/bundles/css/homepage.css" asp-append-version="true" />
 </head>
 
 <body>
+    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
     <script src="~/bundles/js/homepage.js" asp-append-version="true"></script>
-
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
+    </script>
+    <div id="site-down-alert"></div>
+    @await Html.PartialAsync("_SiteDownAlert")
     <div id="header-container">
         <img class="boldbi-logo" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + @GlobalAppSettings.Branding + "/application/email_logo.png")';" alt="[[[Bold BI logo]]]">
         <div class="logout-container">
@@ -61,17 +71,17 @@
                 {
                     for (var i = 0; i < Model.Count; i++)
                     {
-                        <a class="dns-link site-row-container" rel="alternate" hreflang="en" href="@Model[i].DNS/@tenantIdentifierPrefix/@Model[i].TenantIdentifier" target="_blank">
+                        <a class="dns-link site-row-container" rel="alternate" hreflang="en" href="@Model[i].SiteUrl" target="_blank">
                             <div class="user-dns">
                                 <div class="image-div site-logo-container">
-                                    <div class="lazyload img-loader" data-class="site-logo" data-id="homepagelogo" data-src="@Url.Content(Model[i].DNS + "/" + tenantIdentifierPrefix + "/" + Model[i].TenantIdentifier + "/get-client-logo")" data-alt="boldbi" data-width="110px" data-height="25px" data-default="this.onerror=null;this.src='/images/@GlobalAppSettings.Branding/application/@IconFileNames.LoginLogo'"></div>
+                                    <div class="lazyload img-loader" data-class="site-logo" data-id="homepagelogo" data-src="@Url.Content(Model[i].SiteUrl + "/get-client-logo")" data-alt="boldbi" data-width="110px" data-height="25px" data-default="this.onerror=null;this.src='/images/@GlobalAppSettings.Branding/application/@IconFileNames.LoginLogo'"></div>
                                 </div>
                                 <div class="dns-org-name site-name" title="@Model[i].TenantName" data-toggle="tooltip">
                                     @Model[i].TenantName
                                 </div>
                                 <div class="site-url-container">
-                                    <div class="dns-name site-url" title="@Model[i].DNS/@tenantIdentifierPrefix/@Model[i].TenantIdentifier" data-toggle="tooltip">
-                                        @Model[i].DNS/@tenantIdentifierPrefix/@Model[i].TenantIdentifier
+                                    <div class="dns-name site-url" title="@Model[i].SiteUrl" data-toggle="tooltip">
+                                        @Model[i].SiteUrl
                                     </div>
                                 </div>
                             </div>
@@ -88,7 +98,7 @@
         </div>
         <div class="footer-logo-container" style="display:@poweredbyClass">
             <div class="powered-by">[[[Powered by]]]</div>
-            <img class="footer-logo" src="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/footer_logo_black.svg")" alt="[[[footer logo]]]">
+            <img class="footer-logo" src="@GlobalAppSettings.SystemSettings.PoweredByLogo" alt="[[[footer logo]]]">
         </div>
     </div>
 

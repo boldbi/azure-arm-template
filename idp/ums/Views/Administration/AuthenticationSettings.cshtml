@@ -6,11 +6,6 @@
 @section styles{
     <link rel="stylesheet" href="~/bundles/css/auth-settings-page.css" asp-append-version="true" />
 }
-
-@section meta{
-    <meta name="show-signing-key" content="@ViewBag.JwtSettings.JwtSettings.SigningKey" />
-}
-
 @section scripts{
     <script src="~/bundles/js/auth-settings-page.js" asp-append-version="true"></script>
     <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
@@ -23,7 +18,6 @@
         var refreshSigningKeyUrl = "@Url.Action("RegenerateSigningKey", "Administration")";
         var updateauthsettingsUrl = "@Url.Action("UpdateAuthSettings", "Administration")";
         var defaultauthsettingsUrl = "@Url.Action("EnableDefaultauth", "Administration")";
-        var signingKey = $('meta[name="show-signing-key"]').attr("content");
         var providerNameCount = @defaultSettingsCount;
         var defaultAuthentication = "@(ViewBag.DefaultAuthenticationSettings.EnabledProviderName == 0 ? "" : ViewBag.DefaultAuthenticationSettings.EnabledProviderName)";
         var baseRootUrl = "@Url.Content("~/")";
@@ -50,21 +44,25 @@
                     <a href="#default-authentication-settings-tab" id="default-authentication-settings" aria-controls="default-authentication-settings" role="tab" data-toggle="tab">[[[General]]]</a>
                 </li>
                 <li role="presentation">
-                    <a href="#azure-ad-settings-tab" id="azure-ad-settings" aria-controls="azure-ad-settings-tab" role="tab" data-toggle="tab">[[[Azure AD]]]</a>
+                    <a href="#windows-ad-settings-tab" id="windows-ad-settings" class="@((CloudAppConfig.IsSelfHosted && !GlobalAppSettings.IsAzureApplication && EnvironmentHelper.IsWindows()) ? string.Empty : "hide")" aria-controls="windows-ad-settings-tab" role="tab" data-toggle="tab">[[[Windows AD]]]</a>
                 </li>
                 <li role="presentation">
-                    <a href="#oauth-settings-tab" id="oauth-settings" aria-controls="oauth-settings-tab" role="tab" data-toggle="tab">[[[OAuth 2.0]]]</a>
+                    <a href="#azure-ad-settings-tab" id="azure-ad-settings" aria-controls="azure-ad-settings-tab" role="tab" data-toggle="tab">Azure AD</a>
                 </li>
                 <li role="presentation">
-                    <a href="#openid-settings-tab" id="openid-settings" aria-controls="openid-settings-tab" role="tab" data-toggle="tab">[[[OpenID Connect]]]</a>
+                    <a href="#oauth-settings-tab" id="oauth-settings" aria-controls="oauth-settings-tab" role="tab" data-toggle="tab">OAuth 2.0</a>
                 </li>
                 <li role="presentation">
-                    <a href="#jwt-settings-tab" id="jwt-settings" aria-controls="jwt-settings-tab" role="tab" data-toggle="tab">[[[JWT]]]</a>
+                    <a href="#openid-settings-tab" id="openid-settings" aria-controls="openid-settings-tab" role="tab" data-toggle="tab">OpenID Connect</a>
+                </li>
+                <li role="presentation">
+                    <a href="#jwt-settings-tab" id="jwt-settings" aria-controls="jwt-settings-tab" role="tab" data-toggle="tab">JWT</a>
                 </li>
             </ul>
 
             <div class="tab-content">
                 @await Html.PartialAsync("_DefaultAuthentication")
+                @await Html.PartialAsync("_WindowsADSettings")
                 @await Html.PartialAsync("_AzureADSettings")
                 @await Html.PartialAsync("_OAuthSettings")
                 @await Html.PartialAsync("_OpenIdConnectSettings")
@@ -79,6 +77,7 @@
             <button type="submit" id="update-defaultauthlogin-settings" class="primary-button pull-right update-defaultauth-settings @(ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0 ? "display-none" : string.Empty)" ng-disabled>[[[Save]]]</button>
             <button type="submit" id="update-oauth-settings" class="primary-button pull-right update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">[[[Save]]]</button>
             <button type="submit" id="update-openid-settings" class="primary-button pull-right update-auth-settings" ng-disabled="openidSettingsForm.$invalid">[[[Save]]]</button>
+            <button type="submit" id="update-windowsad-settings" class="primary-button pull-right update-auth-settings" ng-disabled="windowsadSettingsForm.$invalid">[[[Save]]]</button>
         </div>
     </div>
     <div id="dialog" class="custom-template"></div>

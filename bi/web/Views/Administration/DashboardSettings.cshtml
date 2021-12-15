@@ -19,6 +19,7 @@
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var deploymentDashboard = ViewBag.DeploymentDashboard;
     var isMaster = globalAppSettings.SystemSettings.IsMaster;
+    var usageAnalytics = Convert.ToBoolean(ViewBag.UsageAnalytics);
 }
 
 @section scripts{
@@ -31,7 +32,7 @@
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.min.js"></script>
     </environment>
     <script>
-          var isSelfHosted = "@isSelfHosted";
+        var isSelfHosted =  @Json.Serialize(isSelfHosted);
     </script>
 }
 
@@ -61,7 +62,7 @@
                 </hgroup>
             </div>
             <div id="deployment-button" class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
-                <button class="primary-button pull-right" id="add-dashboard" title="[[[Add Dashboard]]]">
+                <button class="primary-button app-btn-primary pull-right" id="add-dashboard" title="[[[Add Dashboard]]]">
                     <span>[[[Add Dashboard]]] </span>
                 </button>
             </div>
@@ -78,7 +79,7 @@
                 </hgroup>
             </div>
             <div id="add-attribute-button" class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
-                <button class="primary-button pull-right" id="add-custom-attribute" title="[[[Add Attribute]]]" onclick="addCustomAttribute('site')">
+                <button class="primary-button app-btn-primary pull-right" id="add-custom-attribute" title="[[[Add Attribute]]]" onclick="addCustomAttribute('site')">
                     <span>[[[Add Attribute]]] </span>
                 </button>
             </div>
@@ -217,6 +218,28 @@
                             </div>
                         </div>
 
+                        <div class="row admin-options">
+                            <div class="col-xs-8 field-container-dashboard">
+                                <label class="col-md-4 app-textbox-label activation">
+                                    [[[Usage analytics]]]
+                                </label>
+
+                                <div class="col-md-2 text-center switch-align">
+                                    <span class="material-switch text-left">
+                                        <input type="checkbox" id="usage-analytics-setting" @(usageAnalytics ? "checked" : string.Empty) />
+
+                                        <label for="usage-analytics-setting" class="label-primary"></label>
+                                    </span>
+                                    <div class="tool-tip col-xs-1">
+                                        <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                        <div class="dropdown-menu" role="menu">
+                                            [[[This setting allows you to hide or show usage analytics dashboards in the dashboard listing page]]].
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row admin-options" style="display:none">
                             <div class="col-xs-8 field-container-dashboard">
                                 <label class="col-md-4 app-textbox-label activation">
@@ -237,8 +260,8 @@
                     </div>
                 </div>
                 <div class="admin-page-actions col-xs-12 col-md-12">
-                    <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button pull-right" id="cancel-dashboard-settings" title="">[[[Cancel]]]</a>
-                    <input type="button" title="" data-url="@Url.Action("updatedashboardsettings", "administration")" id="update-dashboard-settings" class="primary-button pull-right" value="[[[Save]]]" />
+                    <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-dashboard-settings" title="">[[[Cancel]]]</a>
+                    <input type="button" title="" data-url="@Url.Action("updatedashboardsettings", "administration")" id="update-dashboard-settings" class="primary-button app-btn-primary pull-right" value="[[[Save]]]" />
                 </div>
             </div>
 
@@ -251,9 +274,9 @@
         @await Html.PartialAsync("../CustomAttribute/_CustomAttribute")
     </div>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 }

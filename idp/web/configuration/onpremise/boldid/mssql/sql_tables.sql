@@ -107,9 +107,10 @@ CREATE TABLE [BOLDTC_Tenant] (
 	Id uniqueidentifier NOT NULL,
 	DNS nvarchar(255) NOT NULL,
 	Subdomain nvarchar(255) NULL,
-	TenantIdentifier nvarchar(255) NOT NULL,
+	TenantIdentifier nvarchar(255) NULL,
 	TenantName nvarchar(255)NOT NULL,
 	CustomDomain nvarchar(255) NULL,
+	UseSiteIdentifier bit NOT NULL DEFAULT 1,
 	UserId uniqueidentifier NOT NULL,
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
@@ -445,6 +446,7 @@ CREATE TABLE [BOLDTC_TenantInfo] (
 	DatabaseType int Default 0,
 	BlobConnectionString nvarchar(max),
 	ConnectionString nvarchar(max),
+	AdditionalParameters nvarchar(max),
 	MaintenanceDatabase nvarchar(255) NULL,
 	TenantSQLServerId int,
 	ElasticPoolId int,
@@ -453,6 +455,7 @@ CREATE TABLE [BOLDTC_TenantInfo] (
 	ImDbSqlServerId int,
 	ImDbElasticPoolId int,
 	ImDbMaintenanceDatabase nvarchar(255) NULL,
+	ImDbAdditionalParameters nvarchar(max),
 	TenantStatus int NOT NULL,
 	BillingAddressId uniqueidentifier,
 	StatusUpdatedDate datetime NOT NULL,
@@ -464,6 +467,9 @@ CREATE TABLE [BOLDTC_TenantInfo] (
 	IsMaster bit NOT NULL,
 	IsolationCode nvarchar(4000),
 	IsTenantIsolationCodeEnabled bit NOT NULL DEFAULT '0',
+	UseCustomBranding bit NOT NULL,
+	IsNewImDbDatabase bit NOT NULL,
+	IsNewDatabase bit NOT NULL,
   CONSTRAINT [PK_BOLDTC_TENANTINFO] PRIMARY KEY CLUSTERED
   (
   [Id] ASC
@@ -639,9 +645,12 @@ CREATE TABLE [BOLDTC_SqlServerType] (
 )
 ;
 CREATE TABLE [dbo].[BOLDTC_OAuthToken](
+    [Id] int IDENTITY(1,1) NOT NULL,
 	[Token] [nvarchar](max) NULL,
 	[Ticket] [nvarchar](max) NULL,
-	[ModifiedDate] [datetime] NULL
+	[ModifiedDate] [datetime] NULL,
+	CONSTRAINT [PK_BOLDTC_OAUTHTOKEN] PRIMARY KEY CLUSTERED
+	  (  [Id] ASC  ) WITH (IGNORE_DUP_KEY = OFF)
 )
 ;
 CREATE TABLE [dbo].[BOLDTC_InternalApps](
@@ -774,11 +783,14 @@ CREATE TABLE [BOLDTC_Support] (
 CREATE TABLE [BOLDTC_TenantActivity] (
 	Id int IDENTITY(1,1) NOT NULL,
 	ItemId uniqueidentifier NULL,
+	ChildId nvarchar(max) NULL,
 	TenantInfoId uniqueidentifier NOT NULL,
 	UserId uniqueidentifier NOT NULL,
 	ItemType nvarchar(max) NOT NULL,
 	ItemSubType nvarchar(max) NOT NULL,
 	Action nvarchar(max) NOT NULL,
+	DetailActionId int NOT NULL DEFAULT 0,
+	ActivityLogInfo nvarchar(max) NULL,
 	LoggedDate datetime NOT NULL,
 	IsActive bit NOT NULL,
   CONSTRAINT [PK_BOLDTC_TenantActivity] PRIMARY KEY CLUSTERED
@@ -917,8 +929,8 @@ CREATE TABLE [BOLDTC_AuthSettings] (
     AuthProviderId int NOT NULL,
     Settings nvarchar(max),
     IsEnabled bit NOT NULL,
-    CreatedBy uniqueidentifier NOT NULL,
-    ModifiedBy uniqueidentifier NOT NULL,
+    CreatedBy uniqueidentifier NULL,
+    ModifiedBy uniqueidentifier NULL,
     CreatedDate datetime NOT NULL,
     ModifiedDate datetime NOT NULL,
 	IsDefaultAuthentication bit NOT NULL Default 0,
@@ -942,6 +954,25 @@ CREATE TABLE [BOLDTC_UserLog] (
 	IsActive bit NOT NULL,
 	AdditionalData nvarchar(max) NULL,
   CONSTRAINT [PK_BOLDTC_UserLog] PRIMARY KEY CLUSTERED
+  (
+  [Id] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+)
+;
+
+CREATE TABLE [BOLDTC_AzureBlob] (
+	Id int IDENTITY(1,1) NOT NULL,
+	TenantInfoId uniqueidentifier NOT NULL,
+	AccountName nvarchar(max) NOT NULL,
+	AccessKey nvarchar(max) NOT NULL,
+	Uri nvarchar(max) NOT NULL,
+	ContainerName nvarchar(max) NOT NULL,
+	ConnectionType nvarchar(max) NOT NULL,
+	ConnectionString nvarchar(max) NOT NULL,
+	CreatedDate datetime NOT NULL,
+	ModifiedDate datetime NOT NULL,
+	IsActive bit NOT NULL,
+  CONSTRAINT [PK_BOLDTC_AzureBlob] PRIMARY KEY CLUSTERED
   (
   [Id] ASC
   ) WITH (IGNORE_DUP_KEY = OFF)
@@ -1078,11 +1109,13 @@ INSERT [BOLDTC_AuthType] ([Name], [ModifiedDate], [IsActive]) VALUES ( N'OIDC', 
 INSERT [BOLDTC_AuthType] ([Name], [ModifiedDate], [IsActive]) VALUES ( N'SAML', GETUTCDATE(), 1);
 INSERT [BOLDTC_AuthType]([Name],[ModifiedDate],[IsActive])VALUES( N'DefaultAuth', GETUTCDATE(), 1);
 INSERT [BOLDTC_AuthType]([Name],[ModifiedDate],[IsActive])VALUES( N'JWTSSO', GETUTCDATE(), 1);
+INSERT [BOLDTC_AuthType]([Name],[ModifiedDate],[IsActive])VALUES( N'WindowsAD', GETUTCDATE(), 1);
 
 INSERT [BOLDTC_AuthProvider] ([Name], [AuthTypeId], [ModifiedDate], [IsActive]) VALUES ( N'CustomOAuth', 1, GETUTCDATE(), 1);
 INSERT [BOLDTC_AuthProvider] ([Name], [AuthTypeId], [ModifiedDate], [IsActive]) VALUES ( N'CustomOIDC', 2, GETUTCDATE(), 1);
 INSERT [BOLDTC_AuthProvider] ([Name], [AuthTypeId], [ModifiedDate], [IsActive]) VALUES ( N'AzureAD', 3, GETUTCDATE(), 1);
 INSERT [BOLDTC_AuthProvider] ([Name], [AuthTypeId], [ModifiedDate], [IsActive]) VALUES ( N'JWTSSO', 5, GETUTCDATE(), 1);
+INSERT [BOLDTC_AuthProvider] ([Name], [AuthTypeId], [ModifiedDate], [IsActive]) VALUES ( N'WindowsAD', 6, GETUTCDATE(), 1);
 
 
 ALTER TABLE [BOLDTC_CouponLog] WITH CHECK ADD CONSTRAINT [BOLDTC_CouponLog_fk0] FOREIGN KEY ([CouponLogTypeId]) REFERENCES [BOLDTC_CouponLogType]([Id])
@@ -1370,4 +1403,7 @@ ALTER TABLE [BOLDTC_UserLog] CHECK CONSTRAINT [BOLDTC_UserLog_fk1]
 ALTER TABLE [BOLDTC_UserLog] WITH CHECK ADD CONSTRAINT [BOLDTC_UserLog_fk2] FOREIGN KEY ([RequestedById]) REFERENCES [BOLDTC_User]([Id])
 ;
 ALTER TABLE [BOLDTC_UserLog] CHECK CONSTRAINT [BOLDTC_UserLog_fk2]
+;
+
+ALTER TABLE [BOLDTC_AzureBlob] WITH CHECK ADD CONSTRAINT [BOLDTC_AzureBlob_fk0] FOREIGN KEY ([TenantInfoId]) REFERENCES [BOLDTC_TenantInfo]([Id])
 ;

@@ -69,7 +69,7 @@ $(document).ready(function () {
         cssClass: 'e-outline',
         floatLabelType: 'Auto',
     });
-    outlineEditPassword.appendTo('#old-password');
+    outlineEditPassword.appendTo('#current-password');
     outlineEditPassword.appendTo('#new-password');
     outlineEditPassword.appendTo('#confirm-password');
 
@@ -95,7 +95,7 @@ $(document).ready(function () {
         createPasswordPolicyRules();
     });
 
-    $('#old-password').keyup(function () {
+    $('#current-password').keyup(function () {
         $(".validation-message").css("display", "none");
     });
 
@@ -150,7 +150,7 @@ $(document).ready(function () {
         },
         onfocusout: function (element) { $(element).valid(); $("#success-message").html(""); },
         rules: {
-            "old-password": {
+            "current-password": {
                 required: true
             },
             "new-password": {
@@ -196,11 +196,9 @@ $(document).ready(function () {
         },
         errorPlacement: function (error, element) {
             $(element).closest(".e-outline").siblings(".validation-message").css("display", "block").html(error.html());
-
-            //$(element).closest('div').find(".password-validate-holder").html(error.html());
         },
         messages: {
-            "old-password": {
+            "current-password": {
                 required: window.Server.App.LocalizationContent.OldPasswordValidator
             },
             "new-password": {
@@ -220,19 +218,24 @@ $('#new-password').on("change", function () {
 });
 
 function createPasswordPolicyRules() {
-    if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
-        $("#new-password").after("<ul id='password_policy_rules'></ul>");
-        $("#password_policy_rules").append("<li id='p_policy_heading'>" + window.Server.App.LocalizationContent.PasswordRule1 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule2 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule3 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_lowercase'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule4 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_number'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule5 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_specialcharacter'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule6 + "</li>")
+    var newPasswordObj = $("#new-password");
+
+    if (newPasswordObj.val() != '' && newPasswordObj.next("ul").length == 0) {
+        newPasswordObj.after("<ul id='password_policy_rules'></ul>");
+
+        var passwordPolicyRules = $("#password_policy_rules");
+        passwordPolicyRules.append("<li id='p_policy_heading'>" + window.Server.App.LocalizationContent.PasswordRule1 + "</li>")
+        passwordPolicyRules.append("<li id='p_policy_length'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule2 + "</li>")
+        passwordPolicyRules.append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule3 + "</li>")
+        passwordPolicyRules.append("<li id='p_policy_lowercase'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule4 + "</li>")
+        passwordPolicyRules.append("<li id='p_policy_number'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule5 + "</li>")
+        passwordPolicyRules.append("<li id='p_policy_specialcharacter'><span class='su su-close'></span>" + window.Server.App.LocalizationContent.PasswordRule6 + "</li>")
         $(".button-section").addClass("top-margin");
         $("#confirm-password-section").css("margin-top", "-47px")
     }
-    if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
-        $("#new-password").next("ul").remove();
+
+    if (newPasswordObj.val() == '' && newPasswordObj.next("ul").length != 0) {
+        newPasswordObj.next("ul").remove();
         $("#confirm-password-section").css("margin-top", "25px")
         $(".button-section").css("margin-top", "20px");
     }
@@ -255,18 +258,21 @@ function onChangePasswordClick() {
     }
 
     ShowWaitingProgress("#content-area", "show");
-    doAjaxPost('POST', "/user/updatepassword", { oldpassword: $("#old-password").val(), newpassword: $("#new-password").val(), confirmpassword: $("#confirm-password").val(), returnurl: $("#hidden-return-url").val() },
-        function(result) {
-            $("#old-password").val("");
+    doAjaxPost('POST', updatepasswordUrl, { oldpassword: $("#current-password").val(), newpassword: $("#new-password").val(), confirmpassword: $("#confirm-password").val(), returnurl: $("#hidden-return-url").val() },
+        function (result) {
+            $("#current-password").val("");
+            $("#current-password").closest("div").removeClass("e-valid-input").addClass("e-input-focus");
             $("#new-password").val("");
+            $("#new-password").closest("div").removeClass("e-valid-input").addClass("e-input-focus");
             $("#confirm-password").val("");
+            $("#confirm-password").closest("div").removeClass("e-valid-input").addClass("e-input-focus");
             $("#password_policy_rules").remove();
             $("#confirm-password-section").removeAttr("style");
             $("#change-password-btn").css("margin-top", "0px");
             if (!result.Data.status && result.Data.key == "password") {
                 ShowWaitingProgress("#content-area", "hide");
-                $("#old-password-validate").html(result.Data.value);
-                $("#old-password-validate").closest("div").prev("div").addClass("has-error");
+                $("#old-password-validate").html(result.Data.value).css("display", "block")
+                $("#current-password").closest("div").addClass("e-error");
             }
             else if (!result.Data.status && result.Data.key == "error") {
                 ShowWaitingProgress("#content-area", "hide");
@@ -287,13 +293,13 @@ $(document).on("ready", function () {
     $(".show-hide-password").on("click", function () {
         if ($(this).siblings().find("input").is(":password")) {
             $(this).siblings().find("input").attr('type', 'text');
-            $(this).removeClass('su-show');
-            $(this).addClass('su-hide');
+            $(this).removeClass('su-show').addClass('su-hide').attr("data-original-title", window.Server.App.LocalizationContent.ClicktoHide);
+            $(this).tooltip('show');
         }
         else {
             $(this).siblings().find("input").attr('type', 'password');
-            $(this).removeClass('su-hide');
-            $(this).addClass('su-show');
+            $(this).removeClass('su-hide').addClass('su-show').attr("data-original-title", window.Server.App.LocalizationContent.ClicktoView);
+            $(this).tooltip('show');
         }
     });
 

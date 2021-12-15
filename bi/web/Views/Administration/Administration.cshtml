@@ -1,4 +1,5 @@
-﻿@{
+﻿@using Newtonsoft.Json
+@{
     var globalAppSettings = _globalAppSettings;
 
     ViewBag.Title = "[[[Administration]]] - " + globalAppSettings.SystemSettings.OrganizationName;
@@ -13,6 +14,7 @@
     var loginDisclaimerObject = ServerAppConfig.IsSelfHosted ? string.Empty : ViewBag.SystemSettings.LoginDisclaimer;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var isAzureApplication = ServerAppConfig.IsAzureApplication;
+    var isAdmin = _identityResponse.IsAdmin;
 }
 
 @section styles{
@@ -40,28 +42,9 @@
     var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
     var SystemSettingsProperties = @Html.Raw(Json.Serialize(ViewBag.SystemSettings));
     var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
-    var updateSystemSettingsUrl = "@Url.Action("UpdateSystemSettings", "Administration")";
-    var updateAdSettingsUrl = "@Url.Action("UpdateActiveDirectorySettings", "Administration")";
-    var adTestconnectionUrl = "@Url.Action("activedirectorytestconnection", "Administration")";
-    var azureadTestconnectionUrl = "@Url.Action("AzureADTestConnection", "Administration")";
+    var updateSiteSettingsUrl = "@Url.Action("UpdateSiteSettings", "Administration")";
     var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
-    var updateAzureADSettingsUrl = "@Url.Action("UpdateAzureADSettings", "Administration")";
-    var saveDbSettingsUrl = "@Url.Action("SaveDatabaseSettings", "Administration")";
-    var testConnectionUrl = "@Url.Action("TestDatabaseConnection", "UserManagement")";
-    var connectDatabaseUrl = "@Url.Action("ConnectDatabaseToImport", "UserManagement")";
-    var getDatabaseUrl = "@Url.Action("GetDatabaseList", "UserManagement")";
-    var getTableRelationUrl = "@Url.Action("GetTableRelation", "UserManagement")";
-    var addUserDirectoryLogUrl = "@Url.Action("AddSystemLogForUserDirectory", "Administration")";
-    var userDirectoryAzure = helpSiteBaseUrl + "/site-settings/azure-active-directory";
-    var userDirectoryDatabase = helpSiteBaseUrl + "/site-settings/database-settings";
-    var userDirectoryWindows = helpSiteBaseUrl + "/site-settings/windows-ad-settings";
-    var userDirectoryAuthControl = helpSiteBaseUrl + "/site-settings/authentication-control";
-    var userDirectoryOauth = helpSiteBaseUrl + "/site-settings/oauth-settings";
-    var userDirectoryOpenid = helpSiteBaseUrl + "/site-settings/openid-settings";
-    var updateauthsettingsUrl = "@Url.Action("UpdateAuthenticationSettings", "Administration")";
-    var updateauthcontrolUrl = "@Url.Action("UpdateAuthControl", "Administration")";
     var updateLoginOptionsUrl = "@Url.Action("UpdateLoginOptions", "Administration")";
-    var defaultauthsettingsUrl = "@Url.Action("UpdateDefaultAuthentication", "Administration")";
     var isAzureApplication = @Json.Serialize(isAzureApplication);
     var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
 
@@ -72,89 +55,6 @@
             }
         });
     });
-    </script>
-
-    <script type="text/javascript">
-
-        $(document)
-            .ready(function () {
-                var section = window.location.href;
-                $(".system-settings-sidebar li").hide();
-
-                if (section.toLowerCase().indexOf("groups") > 0 ||
-                    section.toLowerCase().indexOf("users") > 0 ||
-                    section.toLowerCase().indexOf("user-management") > 0) {
-                    $("li[data-current-content='groups'],li[data-current-content='users']").show();
-                } else {
-                    $("li[data-current-content='emailsettings'],li[data-current-content='usersettings'],li[data-current-content='general'],li[data-current-content='activedirectorysettings'],li[data-current-content='notificationsettings'],li[data-current-content='usersettings'],li[data-current-content='databasesettings'],li[data-current-content='licensesettings']").show();
-                }
-                if (section.toLowerCase().indexOf("groups") > 0) {
-                    $("li[data-current-content='groups'] a").addClass('active');
-                } else if (section.toLowerCase().indexOf("users") > 0 ||
-                    section.toLowerCase().indexOf("user-management") > 0) {
-                    $("li[data-current-content='users'] a").addClass('active');
-                } else if (section.toLowerCase().indexOf("e-mail-settings") > 0) {
-
-                    $("li[data-current-content='emailsettings'] a").addClass('active');
-                    $("#look-and-feel-container, #active-directory-container, #database-settings-container, #user-settings-container").hide();
-                    $("#mail-settings-container").show();
-                } else if (section.toLowerCase().indexOf("user-directory-settings") > 0) {
-                    $("li[data-current-content='activedirectorysettings'] a").addClass('active');
-                    $("#look-and-feel-container, #mail-settings-container,#database-settings-container, #user-settings-container").hide();
-                    $("#active-directory-container").show();
-                } else if (section.toLowerCase().indexOf("notification-settings") > 0) {
-                    $("li[data-current-content='notificationsettings'] a").addClass('active');
-                } else if (section.toLowerCase().indexOf("user-settings") > 0) {
-                    $("li[data-current-content='usersettings'] a").addClass('active');
-                    $("#look-and-feel-container, #active-directory-container, #database-settings-container, #mail-settings-container").hide();
-                    $("#user-settings-container").show();
-                } else if (section.toLowerCase().indexOf("database-settings") > 0) {
-                    $("li[data-current-content='databasesettings'] a").addClass('active');
-                } else if (section.toLowerCase().indexOf("license-settings") > 0) {
-                    $("li[data-current-content='licensesettings'] a").addClass('active');
-                    $("#mail-settings-container, #active-directory-container, #user-settings-container").hide();
-                } else {
-                    $("li[data-current-content='general'] a").addClass('active');
-                    $("#look-and-feel-container").show();
-                    $("#mail-settings-container, #active-directory-container, #database-settings-container, #user-settings-container").hide();
-                    addUserDirectoryLog("site");
-                }
-            });
-
-        function addUserDirectoryLog(tabName) {
-            var resultName = "";
-            switch (tabName) {
-                case "site":
-                    resultName = "SiteSettings";
-                    break;
-                case "windows":
-                    resultName = "UserDirectory.Windows";
-                    break;
-                case "azure":
-                    resultName = "UserDirectory.Azure";
-                    break;
-                case "database":
-                    resultName = "UserDirectory.Database";
-                    break;
-                case "oauth":
-                    resultName = "UserDirectory.OAuth2";
-                    break;
-                case "openid":
-                    resultName = "UserDirectory.OpenIDConnect";
-                    break;
-                case "auth-control":
-                    resultName = "UserDirectory.AuthControl";
-                    break;
-                default:
-                    resultName = "";
-            }
-
-            $.ajax({
-                type: "POST",
-                url: addUserDirectoryLogUrl,
-                data: { tabName: resultName }
-            });
-        }
     </script>
 
     <environment include="Development,CloudDevelopment">
@@ -188,9 +88,9 @@
     }
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 }

@@ -3,7 +3,7 @@
     var globalAppSettings = _globalAppSettings;
     var isEdit = ViewBag.ScheduleItem != null ? true : false;
     var itemName = ViewBag.ScheduleItem != null && !string.IsNullOrWhiteSpace(ViewBag.ScheduleItem.ItemName) ? ViewBag.ScheduleItem.ItemName : ViewBag.ItemName;
-    var manageLicenseSettingsUrl = ServerAppConfig.InternalAppIdpUrl + "/" + ServerAppConfig.TenantManagementHostName + "/administration/license-settings";
+    var manageLicenseSettingsUrl = _globalAppSettings.SystemSettings.IDPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/administration/license-settings";
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var isSelfHosted = ServerAppConfig.IsSelfHosted;
@@ -15,39 +15,46 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasourcerecurrencedependency.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerrecurrence.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasourcerecurrence.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasourcerecurrencedependency.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerrecurrence.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasourcerecurrence.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
     </environment>
 
 
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.min.js"></script>
     </environment>
     <script>
         var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceTypeForDatasourceSchedule", "DataSources")";
         var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "Scheduler")";
         var updateScheduleInfoUrl = "@Url.Action("UpdateDataSourceRefreshSettings", "DataSources")";
-        var dateFormat = "@globalAppSettings.SystemSettings.DateFormat";
-        var timeFormat = "@globalAppSettings.SystemSettings.TimeFormat.ToString()";
+        var dateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+        var timeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
         var isServer = @Json.Serialize(ViewBag.IsServer);
         var actionType = "@ViewBag.ActionType";
-        var timeZone = "@globalAppSettings.SystemSettings.TimeZone";
+        var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
         var editScheduleItem = "@isEdit.ToString().ToLower()" == "true" ? @Html.Raw(Json.Serialize(ViewBag.ScheduleItem)) : "";
         var itemName = "@itemName";
         var createdItemId = "@ViewBag.DatasourceId";
         var isAdmin = @Json.Serialize(isAdmin);
+        var clientDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+        var timezone = "@globalAppSettings.SystemSettings.TimeZone";
+        var clientTimeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
     </script>
 
 </head>
@@ -58,7 +65,7 @@
             {
                 <div id="datasource-header">
                     <span><i class="su su-nav-schedule"></i></span>
-                    @itemName — [[[Refresh Setting]]]
+                    @itemName — [[[Refresh Settings]]]
                     <span><i class="su su-close" id="refresh-schedule-close-icon" title="[[[Close]]]"></i></span>
                 </div>
             }
@@ -67,7 +74,7 @@
                 <div id="datasource-header">
                     <span><i class="su su-nav-schedule"></i></span>
                     <span><i class="su su-close" id="refresh-schedule-close-icon" title="[[[Close]]]"></i></span>
-                    [[[Refresh Setting]]]
+                    [[[Refresh Settings]]]
                 </div>
             }
 
@@ -257,7 +264,14 @@
                     <div class="pull-left"><input type="text" class="form-control full-width" name="" id="start-date"></div>
                 </div>
                 <input type="hidden" />
-                <div class="col-sm-7 col-xs-7 " id="system-time">([[[Your time will be : ]]]<label class="normal-font" id="time"></label> - <label class="normal-font" id="zone"></label>)</div>
+                @if (!string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.TimeZone))
+                {
+                    <div class="col-sm-7 col-xs-7 " id="system-time">([[[Your time will be :]]] - <label class="normal-font" id="zone"></label>)</div>
+                }
+                else
+                {
+                    <div class="col-sm-7 col-xs-7 " id="system-time">([[[Time Zone]]] - <label class="normal-font" id="zone"></label>)</div>
+                }
                 <input type="hidden" id="hour-difference" />
                 <input type="hidden" id="minute-difference" />
                 <div class="col-sm-12 col-xs-12 validate-error" id="start-date-error-container">
@@ -266,12 +280,13 @@
                 </div>
 
             </div>
-
-            <div class="col-sm-12 col-xs-12 no-padding time-zone">
-                <div class="col-sm-1 col-xs-1"></div>
-                <div class="col-xs-10" id="time-zone">([[[Application Time Zone:]]] @globalAppSettings.SystemSettings.TimeZone)</div>
-            </div>
-
+            @if (!string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.TimeZone))
+            {
+                <div class="col-sm-12 col-xs-12 no-padding time-zone">
+                    <div class="col-sm-1 col-xs-1"></div>
+                    <div class="col-xs-10" id="time-zone">([[[Application Time Zone:]]] @globalAppSettings.SystemSettings.TimeZone)</div>
+                </div>
+             }
             <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row" id="no-view-end">
                 <div class="col-sm-1 col-xs-1 no-padding ends-label align-center margin-issue"><label>[[[Ends]]]</label></div>
                 <div id="schedule-end-type" class="col-sm-10 col-xs-10 no-padding no-margin">
@@ -329,7 +344,7 @@
                     else if (!isSelfHosted && isAdmin)
                     {
                         <span class="admin-refresh-interval-hours-warning-message" id="refresh-interval-warning-message" style="display:none">
-                            [[[Your minimum data refresh interval is ]]] @minimumTime[0] [[[hour. Please]]] <a class="request-concierge-support" href="javascript:void(0)">[[[contact us]]]</a> [[[to reduce the data refresh interval.]]]
+                            [[[Your minimum data refresh interval is ]]] @minimumTime[0] [[[hour. Please]]] <a class="request-concierge-support" target="_blank" href="https://www.@(GlobalAppSettings.BrandingDomain)/contact">[[[contact us]]]</a> [[[to reduce the data refresh interval.]]]
                         </span>
                     }
                     else
@@ -350,7 +365,7 @@
                     else if (!isSelfHosted && isAdmin)
                     {
                         <span class="admin-refresh-interval-warning-message" id="refresh-interval-warning-message" style="display:none">
-                            [[[Your minimum data refresh interval is ]]] @minimumTime[1] [[[minutes. Please]]] <a class="request-concierge-support" href="javascript:void(0)">[[[contact us]]]</a> [[[to reduce the data refresh interval.]]]
+                            [[[Your minimum data refresh interval is ]]] @minimumTime[1] [[[minutes. Please]]] <a class="request-concierge-support" target="_blank" href="https://www.@(GlobalAppSettings.BrandingDomain)/contact">[[[contact us]]]</a> [[[to reduce the data refresh interval.]]]
                         </span>
                     }
                     else
@@ -370,16 +385,16 @@
                 </div>
                 <div id="note-message" class="col-sm-12 col-xs-12 note no-margin">
                     <b>[[[Note: ]]]</b>
-                    @(String.Format("[[[The application deactivates your refresh after {0} consecutive failures.]]]", Convert.ToInt32(ServerAppConfig.FailureOccurrence)))
+                    @(String.Format("[[[The application deactivates your refresh after {0} consecutive failures.]]]", ServerAppConfig.FailureOccurrence))
                     @if (!@ServerAppConfig.IsHideHelpLink)
                     {
                         <span>[[[To learn more, click]]] <a href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + @helpSiteUrl)" title="help" target="_blank">[[[here.]]]</a></span>
                     }
                 </div>
-            </div>            
+            </div>
             <div id="submit-container" class="col-sm-12 col-xs-4 no-margin">
-                <input id="schedule-submit-cancel" title="[[[Cancel]]]" type="button" value="[[[Cancel]]]" tabindex="5" class="secondary-button leftmargin pull-right button-right">
-                <input id="schedule-submit" title="[[[Schedule]]]" type="button" value="[[[Schedule]]]" tabindex="4" class="primary-button pull-right button-right">
+                <input id="schedule-submit-cancel" title="[[[Cancel]]]" type="button" value="[[[Cancel]]]" tabindex="5" class="secondary-button app-btn-secondary leftmargin pull-right button-right">
+                <input id="schedule-submit" title="[[[Schedule]]]" type="button" value="[[[Schedule]]]" tabindex="4" class="primary-button app-btn-primary pull-right button-right">
             </div>
         </div>
         <environment include="Development,CloudDevelopment">
