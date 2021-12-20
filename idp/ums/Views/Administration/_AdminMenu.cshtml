@@ -11,8 +11,11 @@
     var authSettingsUrl = Url.Action("AuthenticationSettings", "Administration");
     var isSelfHosted = CloudAppConfig.IsSelfHosted;
     var isBoldBIOnPremise = new GlobalAppSettings().GetLicenseSettings(_clientDateTimeInfo).Products.Any(x => x.TenantType == TenantType.BoldBIOnPremise);
+    var isBoldReportsOnPremise = new GlobalAppSettings().GetLicenseSettings(_clientDateTimeInfo).Products.Any(x => x.TenantType == TenantType.BoldReportsOnPremise);
     var embedSettingsUrl = Url.Action("EmbedSettings", "Administration");
     var apiKeysUrl = Url.Action("ApiKeys", "Administration");
+    var lookandfeelUrl = Url.Action("LookandFeel", "Administration");
+    var additionalSettingsUrl = Url.Action("AdditionalSettings", "Administration");
 }
 
 <nav id="admin-nav">
@@ -23,12 +26,25 @@
                 <span>[[[Site]]]</span>
             </a>
         </li>
+        @if(isBoldReportsOnPremise)
+        {
+            <li>
+                <a id="site-settings-link" class="admin-menu-item @(currentUrl.IndexOf(lookandfeelUrl, StringComparison.CurrentCultureIgnoreCase) > -1  ? "active" : string.Empty)" href="@lookandfeelUrl" role="tab">
+                    <i class="su su-look-and-feel"></i>
+                    <span>[[[Look and Feel]]]</span>
+                </a>
+            </li>
+        }
+
+        @if (isBoldBIOnPremise)
+        {
         <li>
             <a id="embed-settings-link" class="admin-menu-item @(currentUrl.IndexOf(embedSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@embedSettingsUrl" role="tab">
                 <i class="su su-embed"></i>
                 <span>[[[Embed]]]</span>
             </a>
         </li>
+        }
         <li>
             <a id="email-settings-link" class="admin-menu-item @(currentUrl.IndexOf(emailSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@emailSettingsUrl" role="tab">
                 <i class="su su-e-mail"></i>
@@ -74,5 +90,13 @@
                 <span>Active Directory</span>
             </a>
         </li>*@
+        @if(additionalSettingsUrl == currentUrl){
+        <li>
+            <a id="additional-settings-link" class="admin-menu-item @(currentUrl.IndexOf(additionalSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@additionalSettingsUrl" role="tab">
+                <i class="su su-nav-settings"></i>
+                <span>[[[Configuration]]]</span>
+            </a>
+        </li>
+        }
     </ul>
 </nav>

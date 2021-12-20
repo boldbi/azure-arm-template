@@ -1,4 +1,5 @@
 ﻿@using Syncfusion.Server.Base.DataClasses.Core;
+@using TimeZoneConverter;
 @model ManageLicense
 @{
     ViewBag.Title = "[[[Manage License - ]]]" + GlobalAppSettings.SystemSettings.OrganizationName;
@@ -18,6 +19,10 @@
 @section scripts{
     <script src="~/bundles/js/licenese-settings.js" asp-append-version="true"></script>
     <script src="~/bundles/js/offline-license-update.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        $.extend(ej, Syncfusion);
+    </script>
     <script>
         var updateLicenseKeyUrl = "@Url.Action("ApplyLicenseKey", "Administration")";
         var isBoldBiLicenseAvailable = "@isBoldBiLicenseAvailable";
@@ -89,7 +94,8 @@
                                                     <td>
                                                         <p class="display-none">@boldBiLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-bi"><a class="subscription-link" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldBiLicense.SubscriptionInfo.TenantId)" target="_blank">@boldBiLicense.SubscriptionInfo.TenantId</a></p>
-                                                        <img data-toggle="tooltip" data-original-title="[[[Click to copy]]]" onclick="copyToClipboard('subscription-id-bi')" id="subscription-copy-bi" src="~/images/common/copy.svg" />
+                                                        <img data-toggle="tooltip" data-original-title="[[[Click to copy]]]" onclick="copyToClipboard('#subscription-id-bi', '#subscription-copy-bi')" id="subscription-copy-bi" src="~/images/common/copy.svg" />
+                                                        <button class="pull-right secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}")" data-offlinelicense-url="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">[[[Change]]]</button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -100,10 +106,13 @@
                                                     <td>[[[Plan]]]</td>
                                                     <td>@boldBiLicense.SubscriptionInfo.Plan.PlanName</td>
                                                 </tr>
-                                                <tr>
-                                                    <td>[[[Expiry Date]]]</td>
-                                                    <td>@(new GlobalAppSettings().GetDateTimeFormat(boldBiLicense.SubscriptionInfo.ExpiryDate, _clientDateTimeInfo))</td>
-                                                </tr>
+                                                @if (!boldBiLicense.SubscriptionInfo.IsPerpetualLicense)
+                                                {
+                                                    <tr>
+                                                        <td>[[[Expiry Date]]]</td>
+                                                        <td>@boldBiLicense.SubscriptionInfo.ExpiryDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                                    </tr>
+                                                }
                                                 <tr>
                                                     <td>[[[License Version]]]</td>
                                                     <td>@boldBiLicense.SubscriptionInfo.Version</td>
@@ -128,16 +137,13 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                @if (!string.IsNullOrWhiteSpace(boldBiLicense.SubscriptionInfo.TenantStatus) && boldBiLicense.SubscriptionInfo.TenantStatus == GlobalAppSettings.GetDescription(TenantStatus.Active))
-                                                {
-                                                    <div class="offline-renewal col-xs-12 no-margin no-padding">
-                                                        <h3 class="title col-xs-12">From License File</h3>
-                                                        <div class="col-xs-12 no-margin no-padding">
-                                                            <p class="col-xs-6 no-margin no-padding">If you’re behind a firewall, please upload the license file downloaded from the Bold BI website. If you don’t have the license file, download it <a target="_blank" href="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)">here</a>.</p>
-                                                            <button id="offline-update-bi" data-offlinelicense-url="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)" class="col-xs-6 no-padding secondary-button pull-left">[[[Upload]]]</button>
-                                                        </div>
+                                                <div class="offline-renewal col-xs-12 no-margin no-padding">
+                                                    <h3 class="title col-xs-12">From License File</h3>
+                                                    <div class="col-xs-12 no-margin no-padding">
+                                                        <p class="col-xs-6 no-margin no-padding">If you’re behind a firewall, please upload the license file downloaded from the Bold BI website. If you don’t have the license file, download it <a target="_blank" href="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)">here</a>.</p>
+                                                        <button id="offline-update-bi" data-offlinelicense-url="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)" class="col-xs-6 no-padding secondary-button pull-left">[[[Upload]]]</button>
                                                     </div>
-                                                }
+                                                </div>
                                             </div>
                                         </div>}
                                 </form>
@@ -146,7 +152,7 @@
                             {
                                 <div class="new-start-container">
                                     <div class="new-start-container-bg">
-                                        <span class="first-content">[[[Welcome to ]]]<span>Embedded BI</span>Server</span>
+                                        <span class="first-content">[[[Welcome to ]]]<span>Embedded BI</span> Server</span>
                                         <span class="second-content">
                                             [[[See Clearly. Act Boldly.]]]
                                         </span>
@@ -214,7 +220,8 @@
                                                     <td>
                                                         <p class="display-none">@boldReportsLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-reports"><a class="subscription-link" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldReportsLicense.SubscriptionInfo.TenantId)" target="_blank">@boldReportsLicense.SubscriptionInfo.TenantId</a></p>
-                                                        <img data-toggle="tooltip" data-original-title="[[[Click to copy]]]" onclick="copyToClipboard('subscription-id-reports')" id="subscription-copy-reports" src="~/images/common/copy.svg" />
+                                                        <img data-toggle="tooltip" data-original-title="[[[Click to copy]]]" onclick="copyToClipboard('#subscription-id-reports','#subscription-copy-reports')" id="subscription-copy-reports" src="~/images/common/copy.svg" />
+                                                        <button class="pull-right secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}")" data-offlinelicense-url="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">[[[Change]]]</button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -225,10 +232,13 @@
                                                     <td>[[[Plan]]]</td>
                                                     <td>@boldReportsLicense.SubscriptionInfo.Plan.PlanName</td>
                                                 </tr>
-                                                <tr>
-                                                    <td>[[[Expiry Date]]]</td>
-                                                    <td>@(new GlobalAppSettings().GetDateTimeFormat(boldReportsLicense.SubscriptionInfo.ExpiryDate, _clientDateTimeInfo))</td>
-                                                </tr>
+                                                @if (!boldReportsLicense.SubscriptionInfo.IsPerpetualLicense)
+                                                {
+                                                    <tr>
+                                                        <td>[[[Expiry Date]]]</td>
+                                                        <td>@boldReportsLicense.SubscriptionInfo.ExpiryDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                                    </tr>
+                                                }
                                                 <tr>
                                                     <td>[[[License Version]]]</td>
                                                     <td>@boldReportsLicense.SubscriptionInfo.Version</td>
@@ -253,16 +263,13 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                @if (!string.IsNullOrWhiteSpace(boldReportsLicense.SubscriptionInfo.TenantStatus) && boldReportsLicense.SubscriptionInfo.TenantStatus == GlobalAppSettings.GetDescription(TenantStatus.Active))
-                                                {
-                                                    <div class="offline-renewal col-xs-12 no-margin no-padding">
-                                                        <h3 class="title col-xs-12">[[[From License File]]]</h3>
-                                                        <div class="col-xs-12 no-margin no-padding">
-                                                            <p class="col-xs-6 no-margin no-padding">[[[If you’re behind a firewall, please upload the license file downloaded from the]]] Bold Reports [[[website. If you don’t have the license file, download it]]] <a target="_blank" href="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)">[[[here]]]</a>.</p>
-                                                            <button id="offline-update-reports" data-offlinelicense-url="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)" class="col-xs-6 no-padding secondary-button pull-left">[[[Upload]]]</button>
-                                                        </div>
+                                                <div class="offline-renewal col-xs-12 no-margin no-padding">
+                                                    <h3 class="title col-xs-12">[[[From License File]]]</h3>
+                                                    <div class="col-xs-12 no-margin no-padding">
+                                                        <p class="col-xs-6 no-margin no-padding">[[[If you’re behind a firewall, please upload the license file downloaded from the]]] Bold Reports [[[website. If you don’t have the license file, download it]]] <a target="_blank" href="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)">[[[here]]]</a>.</p>
+                                                        <button id="offline-update-reports" data-offlinelicense-url="@HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)" class="col-xs-6 no-padding secondary-button pull-left">[[[Upload]]]</button>
                                                     </div>
-                                                }
+                                                </div>
                                             </div>
                                         </div>
                                     }
@@ -272,7 +279,7 @@
                             {
                                 <div class="new-start-container">
                                     <div class="new-start-container-bg">
-                                        <span class="first-content">[[[Welcome to ]]]<span>Enterprise Reporting</span>Server</span>
+                                        <span class="first-content">[[[Welcome to ]]]<span>Enterprise Reporting</span> Server</span>
                                         <span class="second-content">
                                             [[[See Clearly. Act Boldly.]]]
                                         </span>
@@ -309,6 +316,21 @@
                     [[[License details not found.]]]
                 </p>
             }
+        </div>
+    </div>
+    <div id="change-subscription-content" class="custom-template"></div>
+    <div id="change-subscription-dialog" class="change-subscription-dialog-content" style="visibility: hidden">
+        <div class="col-xs-6 no-margin online-change-subscription-content">
+            <h3 class="title col-xs-12">[[[From Online]]]</h3>
+            <p class="col-xs-12 no-margin">[[[Log into your account portal to change the subscription.]]]</p>
+            <button id="online-license-bi" license-service-url="" class="online-change-subscription col-xs-12 no-padding">[[[Log in]]]</button>
+        </div>
+        <div class="seperator"></div>
+        <div class="offline-change-subscription-content col-xs-6 no-margin">
+            <h3 class="title col-xs-12">[[[From License File]]]</h3>
+            <p class="col-xs-12 no-margin">[[[If you’re behind a firewall, please upload the offline license file.]]] </p>
+            <button id="offline-update-bi" data-offlinelicense-url="" data-tenant-type="" class="offline-change-subscription col-xs-12 no-padding">[[[Upload]]]</button>
+            <div class="col-xs-12 no-margin help-container">If you don’t have the license file, download it <a id="change-subscription-help" target="_blank" href="">[[[here]]]</a>.</div>
         </div>
     </div>
     @await Html.PartialAsync("_offlinelicenseupdate")

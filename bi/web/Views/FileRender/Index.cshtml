@@ -20,8 +20,8 @@
     var isUserAuthenticated = "false";
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && itemDetail.IsPublic ? "true" : "false";
     var _itemId = ViewBag.IsMultiDashboard ? parentId : itemId;
-    ViewBag.DateFormat = globalAppSettings.SystemSettings.DateFormat;
-    ViewBag.TimeFormat = globalAppSettings.SystemSettings.TimeFormat ? "HH:mm" : "hh:mm tt";
+    ViewBag.DateFormat = _clientDateTimeInfo.ClientDateTime.DateFormat;
+    ViewBag.TimeFormat = BooleanHelper.ToBoolean(_clientDateTimeInfo.ClientDateTime.TimeFormat) ? "HH:mm" : "hh:mm tt";
     var accessToken = ViewBag.AccessToken;
     var iframeLoaded = "false";
     var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
@@ -44,7 +44,7 @@
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var userId = 0;
     var userName = "";
-    if (_identityResponse!=null && _identityResponse.User != null && _identityResponse.IsAuthenticated && isUserAuthenticatedInCurrentTenant)
+    if (_identityResponse != null && _identityResponse.User != null && _identityResponse.IsAuthenticated && isUserAuthenticatedInCurrentTenant)
     {
         enableComment = ViewBag.IsSlideshow ? "false" : "true";
         isUserAuthenticated = "true";
@@ -69,13 +69,13 @@
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/designer/dashboard-designer.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/designer/dashboard-designer-component.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/signalr-bundle.min.js")
-    };
+            };
     var preloadStyleFiles = new string[]
     {
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/css/designer/dashboard-designer-component.min.css"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.min.css"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/css/designer/dashboard-designer.min.css")
-    };
+            };
 }
 
 <!DOCTYPE html>
@@ -93,12 +93,9 @@
     <link rel="icon" href="@faviconLogo" onerror="if (this.href != '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon') this.href = '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon';" />
 
     <title>@ViewBag.Title</title>
-    @if (System.Diagnostics.Debugger.IsAttached)
-    {
-        <link rel="stylesheet" type="text/css" href="@(dashboardServiceResourceUrl + "/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.min.css")" />
-    }
+
     <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.min.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.min.css" />
@@ -126,23 +123,23 @@
     }
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/share-permission.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-dependency.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-dependency.min.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/share-permission.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-common-all.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/ej.dashboard.ejcommon.all.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.min.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/share-permission.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-dependency.min.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/share-permission.min.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-common-all.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/ej.dashboard.ejcommon.all.min.js"></script>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.min.js"></script>
     </environment>
 
     @if (isMobile)
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-mobile-utilities.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-mobile-utilities.min.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-mobile-utilities.min.js"></script>
@@ -152,7 +149,7 @@
     else
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-utilities.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-utilities.min.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-utilities.min.js"></script>
@@ -183,7 +180,7 @@
         }
 
         .e-dbrd-banner-text-icon {
-            font-family: 'Roboto' !important;
+            font-family: var(--font-family) !important;
         }
     </style>
 
@@ -195,7 +192,7 @@
     var itemViewShareIframeUrl = "@Url.Action("shareItemView", "items")";
     var favoriteItemUrl = "@Url.Action("MakeFavorite", "Items")";
     var addViewUrl = "@Url.Action("onfiltersave", "DashboardViews")";
-    var getSavedViewUrl = "@Url.Action("GetViews", "DashboardViews")";
+    var getSavedViewUrl = { "web": "@Url.Action("GetViews", "DashboardViews")", "api": "/items/views/get-by-item-id" };
     var getViewParameterUrl = "@Url.Action("GetDashboardViewParameter", "DashboardViews")";
     var deleteViewUrl = "@Url.Action("DeleteView", "DashboardViews")";
     var updateViewUrl = "@Url.Action("UpdateView", "DashboardViews")";
@@ -210,6 +207,7 @@
     var viewUrl = "@Url.Action("Dashboards", "Dashboards")";
     var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
     var dataServiceUrl = "@dataServiceUrl";
+    var isUserAuthenticated = "@ViewBag.IsUserAuthenticatedInCurrentTenant".toLowerCase();
     var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
         var commentSettings = {
             isDashboardCommented: @Html.Raw(ViewBag.IsDashboardCommented),
@@ -238,16 +236,16 @@
 
     @if (!isSelfHosted)
     {
-        <link rel="prefetch" href="@dataServiceUrl">
+        <link rel="prefetch" href="@dataServiceUrl/health-check">
     }
 </head>
 
-<body id="body" style="width: 100%; height: 100%; overflow: hidden" data-slideshow-mode="@ViewBag.IsSlideshow">
+<body id="body" style="width: 100%; height: 100%; overflow: hidden" ng-app="serverApp" data-slideshow-mode="@ViewBag.IsSlideshow">
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture" defer></script>
     </environment>
     <input id="favorite_Item" type="hidden" data-item-id="@ViewBag.ItemId" data-parent-id="@ViewBag.ParentId" data-favorite-value="@ViewBag.IsFavorite">
     <input id="dashboard_Comment" type="hidden" data-item-id="@ViewBag.ItemId" data-category-name="@ViewBag.itemDetail.CategoryName" data-item-name="@ViewBag.itemDetail.Name">
@@ -272,13 +270,13 @@
         <div class="pull-right" id="sample-data-notification" style="display:none">
             @if (canEdit && permissions[ItemType.Datasource])
             {
-                <button id="sample-data-button" type="button" data-placement="bottom" title="[[[This dashboard contains sample data.]]]" data-toggle="tooltip" class="sample-data primary-button" data-access-token="@accessToken" data-dashboard-id="@itemDetail.Id" data-dashboard-name="@itemDetail.Name" data-dashboard-version="@ViewBag.VersionNumber" data-authorize-url="@dataServiceUrl/v1.0/connection/authorize?provider=@(provider)&service=@(service)&token=@(accessToken)&server=@globalAppSettings.SystemSettings.BaseUrl">
+                <button id="sample-data-button" type="button" data-placement="bottom" title="[[[This dashboard contains sample data.]]]" data-toggle="tooltip" class="sample-data primary-button app-btn-primary" data-access-token="@accessToken" data-dashboard-id="@itemDetail.Id" data-dashboard-name="@itemDetail.Name" data-dashboard-version="@ViewBag.VersionNumber" data-authorize-url="@dataServiceUrl/v1.0/connection/authorize?provider=@(provider)&service=@(service)&token=@(accessToken)&server=@globalAppSettings.SystemSettings.BaseUrl">
                     [[[Connect Your Data]]]
                 </button>
             }
             else
             {
-                <button type="button" data-placement="bottom" data-html="true" title="[[[This dashboard contains sample data. </br>You need permission to edit this dashboard and create a new data source to connect your data.]]]" data-toggle="tooltip" class="sample-data primary-button disabled-template-button">
+                <button type="button" data-placement="bottom" data-html="true" title="[[[This dashboard contains sample data. </br>You need permission to edit this dashboard and create a new data source to connect your data.]]]" data-toggle="tooltip" class="sample-data primary-button app-btn-primary disabled-template-button">
                     [[[Connect Your Data]]]
                 </button>
             }
@@ -325,7 +323,11 @@
         </nav>
     }
     @await Html.PartialAsync("_DashboardViews")
-    @await Html.PartialAsync("../Items/_SharePermission")
+
+    @if (isUserAuthenticatedInCurrentTenant && !isMobile)
+    {
+        await Html.PartialAsync("../Items/_SharePermission");
+    }
 
     @if (Context.User.Identity.IsAuthenticated && Context.User != null && Context.User.Identity != null && isUserAuthenticatedInCurrentTenant)
     {
@@ -397,7 +399,7 @@
                 <div class="col-xs-12 dialog-footer rightAlign no-right-padding no-left-padding" style="position:relative !important;">
                     <div class="pull-right"></div>
                     <div class="no-padding centerAlign validationArea" id="close">
-                        <input title="" type="button" id="version-Alert-button" class="btn secondary-button PopupClose" value="[[[OK]]]" onclick="onAlertDialogClose()" />
+                        <input title="" type="button" id="version-Alert-button" class="btn secondary-button app-btn-secondary PopupClose" value="[[[OK]]]" onclick="onAlertDialogClose()" />
                     </div>
                 </div>
             }
@@ -434,8 +436,8 @@
                     </div>
                     <div id="dashboard-homepage-button">
                         <div id="button-container">
-                            <input type="button" id="dashboard-homepage-save-button" class="btn primary-button" value="[[[Save]]]">
-                            <input type="button" id="dashboard-homepage-cancel-button" class="btn secondary-button" value="[[[Cancel]]]" onclick="closeDashboardHomepagePopup()">
+                            <input type="button" id="dashboard-homepage-save-button" class="btn primary-button app-btn-primary" value="[[[Save]]]">
+                            <input type="button" id="dashboard-homepage-cancel-button" class="btn secondary-button app-btn-secondary" value="[[[Cancel]]]" onclick="closeDashboardHomepagePopup()">
                         </div>
                     </div>
                 </div>
@@ -648,7 +650,7 @@
                             serviceUrl: "@dashboardServiceUrl",
                             serverUrl: baseUrl,
                             _enableHyperLinkOnErrorMessage: false,
-                            cdnFilePath: "@globalAppSettings.SystemSettings.UseCDN.ToString().ToLower()" == "true" ? "@cdnLink" + "/scripts/viewer" : "",
+                            cdnFilePath: "@globalAppSettings.SystemSettings.UseCDN.ToString().ToLower()" == "true" ? "@cdnLink" + "/cdn/scripts/viewer" : "",
                             dashboardPath: "@_itemId/@ViewBag.Version",
                             reportName: ReportName,
                             //enableDashboardScaling: isSlideshow, // Enable scaling when dashboards rendering from slideshow
@@ -862,7 +864,7 @@
                     serviceUrl: "@dashboardServiceUrl",
                     serverUrl: baseUrl,
                     _enableHyperLinkOnErrorMessage: false,
-                    cdnFilePath: "@globalAppSettings.SystemSettings.UseCDN.ToString().ToLower()" == "true" ? "@cdnLink" + "/scripts/viewer" : "",
+                    cdnFilePath: "@globalAppSettings.SystemSettings.UseCDN.ToString().ToLower()" == "true" ? "@cdnLink" + "/cdn/scripts/viewer" : "",
                     dashboardPath: "@_itemId/@ViewBag.Version",
                     reportName: ReportName,
                     reportDescription: ReportDescription,
@@ -1160,17 +1162,8 @@
         var bodyWaitingPopup = $("#body_WaitingPopup");
         bodyWaitingPopup.addClass("bg-color-white").css("opacity", "1");
         bodyWaitingPopup.find("#body-loader-icon").css("top", "39%");
-        bodyWaitingPopup.find(".e-text").css("top", "39%").css("margin-top", "30px").css("font-size", "21px").css("font-family", "Roboto");
+        bodyWaitingPopup.find(".e-text").css("top", "39%").css("margin-top", "30px").css("font-size", "21px");
     }
 
-    //prefetching designer resources
-     window.onload = function () {
-         var preloadScripts = @Json.Serialize(preloadScriptFiles);
-        var preloadStyles =  @Json.Serialize(preloadStyleFiles);
-        preloadScripts.push("@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js");
-        preloadScripts.push("@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js");
-        PreloadResources(preloadScripts, "script");
-        PreloadResources(preloadStyles, "style");
-        }
-        </script>
-    </html>
+</script>
+</html>

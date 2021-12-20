@@ -12,7 +12,7 @@
     <script>
 
         var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
-        var addTenantUrl = "@Url.Action("AddTenants", "TenantsManagement")"
+        var addTenantUrl = "@Url.Action("AddTenants", "TenantsManagement")";
         var baseRootUrl = "@Url.Content("~/")";
         var activateTenantUrl = "@Url.Action("ActivateTenant", "TenantsManagement")";
         var suspendTenantUrl = "@Url.Action("SuspendTenant", "TenantsManagement")";
@@ -23,7 +23,7 @@
         <a class="item-name grid-content" title="{{:TenantName}}" data-toggle="tooltip" href="@Url.Action("ViewSite","TenantsManagement")/{{:Id}}">{{:TenantName}}</a>
     </script>
     <script type="text/x-jsrender" id="application-url-template">
-        <a class="grid-content" title="{{:DNS}}/@CloudAppConfig.TenantIdentifierPrefix/{{:TenantIdentifier}}" data-toggle="tooltip" href="{{:DNS}}/@CloudAppConfig.TenantIdentifierPrefix/{{:TenantIdentifier}}">{{:DNS}}/@CloudAppConfig.TenantIdentifierPrefix/{{:TenantIdentifier}}</a>
+        <a class="grid-content" title="{{:SiteUrl}}" data-toggle="tooltip" href="{{:SiteUrl}}">{{:SiteUrl}}</a>
     </script>
     <script type="text/x-jsrender" id="statusTemplate">
         {{if TenantStatus == "@((int)TenantStatus.DeploymentPending)"}}
@@ -38,9 +38,9 @@
     </script>
     <script type="text/x-jsrender" id="application-tenant-template">
         {{if TenantType == "@((int)TenantType.BoldBIOnPremise)"}}
-        <span>[[[Embedded BI]]]</span>
+        <span>Embedded BI</span>
         {{else TenantType == "@((int)TenantType.BoldReportsOnPremise)"}}
-    <span>[[[Enterprise Reporting]]]</span>
+        <span>Enterprise Reporting</span>
         {{/if}}
     </script>
 
@@ -102,7 +102,13 @@
     </script>
     <script type="text/javascript">
         $(function () {
-            $("#search-tenants").val("");
+            var searchQuery = window.location.href.slice(window.location.href.indexOf('?') + 1).split('=');
+            if (searchQuery[0] == "searchKey") {
+                $("#search-tenants").val(searchQuery[1]);
+            }
+            else {
+                $("#search-tenants").val();
+            }
             var data = ej.DataManager({
                 url: "@Url.Action("GetItems", "TenantsManagement")",
                 adaptor: new ej.UrlAdaptor()
@@ -147,6 +153,7 @@
                     },
                     {
                         template: true,
+                        allowFiltering: false,
                         allowSorting: true,
                         templateID: "#application-name-template",
                         headerText: "[[[Application Name]]]",
@@ -157,6 +164,7 @@
                     },
                     {
                         template: true,
+                        allowFiltering: false,
                         templateID: "#application-url-template",
                         headerText: "[[[Application URL]]]",
                         width: 150,
@@ -189,6 +197,7 @@
                         headerText: "[[[Status]]]",
                         width: 110,
                         allowFiltering: false,
+                        allowSorting: false,
                         field: "IsActive"
                     },
                     @if (adminType == AdminType.SuperAdmin)

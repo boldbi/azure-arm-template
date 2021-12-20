@@ -8,9 +8,10 @@
     var connectedAccountPageUrl = Url.Action("ConnectedAccounts", "User");
     var supportTicketsUrl = Url.Action("TicketList", "Support");
     var connectedSitesPageUrl = Url.Action("ConnectedSites", "User");
+    var isMobile = new DeviceDetection(Context).IsMobile;
 }
 
-<nav id="admin-nav">
+<nav id="admin-nav" class="@(isMobile ? "mobile-profile-menu" : string.Empty)">
     <ul>
         <li>
             <a id="site-settings-link" class="admin-menu-item @(currentUrl.IndexOf(profilePageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(profilePageUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)" href="@profilePageUrl" role="tab">
@@ -24,28 +25,22 @@
                 <span>[[[My Permissions]]]</span>
             </a>
         </li>
-        <li>
-            <a id="active-directory-settings-link" class="admin-menu-item @(currentUrl.IndexOf(connectedAccountPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@connectedAccountPageUrl" role="tab">
-                <i class="su su-link"></i>
-                <span>[[[Connected Accounts]]]</span>
-            </a>
-        </li>
-        @if (ServerAppConfig.IsSelfHosted)
+        @if (!isMobile)
+        {
+            <li>
+                <a id="active-directory-settings-link" class="admin-menu-item @(currentUrl.IndexOf(connectedAccountPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@connectedAccountPageUrl" role="tab">
+                    <i class="su su-link"></i>
+                    <span>[[[Connected Accounts]]]</span>
+                </a>
+            </li>
+        }
+
+        @if (ServerAppConfig.EnablePublishModule)
         {
             <li>
                 <a id="connected-sites-settings-link" class="admin-menu-item @(currentUrl.IndexOf(connectedSitesPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@connectedSitesPageUrl" role="tab">
                     <i class="su su-connected"></i>
                     <span>[[[Connected Sites]]]</span>
-                </a>
-            </li>
-        }
-
-        @if (!ServerAppConfig.IsSelfHosted)
-        {
-            <li>
-                <a id="ticket-listing-link" class="admin-menu-item @(currentUrl.IndexOf(supportTicketsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@supportTicketsUrl" role="tab">
-                    <i class="su su-concierge-support"></i>
-                    <span>[[[Support Incidents]]]</span>
                 </a>
             </li>
         }

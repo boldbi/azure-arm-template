@@ -5,6 +5,7 @@
 }
 <script>
     var removeItemPublicUrl = "@Url.Action("RemoveItemPublic", "items")";
+    var removeItemUnlistUrl = "@Url.Action("RemoveItemUnlist", "items")";
 
     function load() {
         if (($(parent.window).width()) > 1400) {
@@ -56,14 +57,22 @@
             <div class="col-xs-3"></div>
 
             <div id="remove-select-area" class="col-xs-9 no-padding rightAlign validationArea">
+            @{
+                    if (ViewBag.IsUnlisted == true)
+                    {
+                        <input type="button" class="app-button app-primary-button app-btn-primary rightAlign" value="[[[Make Private]]]" id="remove-unlist" data-item-id="@ViewData["ItemId"]" data-item-type="@itemTypeName" tabindex="1" autofocus />
+                    }
 
-                <input type="button" class="app-button app-primary-button rightAlign" value="[[[Make Private]]]" id="remove-public" data-item-id="@ViewData["ItemId"]" data-itemtype="" tabindex="1" autofocus />
-
-                <input type="button" id="Cancel" class="app-button app-secondary-button PopupClose no" value="[[[No]]]" onclick="onRemovePublicDialogClose()" tabindex="2" />
+                    else
+                    {
+                        <input type="button" class="app-button app-primary-button app-btn-primary rightAlign" value="[[[Make Private]]]" id="remove-public" data-item-id="@ViewData["ItemId"]" data-item-type="@itemTypeName" tabindex="1" autofocus />
+                    }
+            }
+            <input type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose no" value="[[[No]]]" onclick="onRemovePublicDialogClose()" tabindex="2" />
             </div>
             <div class="col-xs-8 no-padding centerAlign validationArea" id="remove-close" style="display:none">
 
-                <input title="" type="button" id="Cancel" class="app-button app-secondary-button PopupClose" value="[[[Close]]]" onclick="onRemovePublicDialogClose()" tabindex="3" autofocus />
+                <input title="" type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose" value="[[[Close]]]" onclick="onRemovePublicDialogClose()" tabindex="3" autofocus />
             </div>
         </div>
     </div>

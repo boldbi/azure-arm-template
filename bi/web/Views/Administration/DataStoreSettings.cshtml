@@ -6,13 +6,19 @@
     var dbDetails = ViewBag.DBConfig as DatabaseConfiguration;
     ViewBag.dbType = dbDetails.ServerType == DatabaseType.MSSQL ? "MSSQL" : dbDetails.ServerType == DatabaseType.PostgreSQL ? "PostgreSQL" : dbDetails.ServerType == DatabaseType.MySQL ? "MySQL" : "SQLite";
     ViewBag.authorizationType = !string.IsNullOrEmpty(dbDetails.UserName) ? "SQL" : "windows";
-    ViewBag.serverName = !string.IsNullOrEmpty(dbDetails.ServerName) ? dbDetails.ServerName : string.Empty;
-    ViewBag.portNumber = !string.IsNullOrEmpty(dbDetails.Port) ? dbDetails.Port : string.Empty;
-    ViewBag.databaseName = !string.IsNullOrEmpty(dbDetails.DatabaseName) ? dbDetails.DatabaseName : string.Empty;
-    ViewBag.username = !string.IsNullOrEmpty(dbDetails.UserName) ? dbDetails.UserName : string.Empty;
+    ViewBag.serverName = dbDetails.ServerType != DatabaseType.MySQL && !string.IsNullOrEmpty(dbDetails.ServerName) ? dbDetails.ServerName : string.Empty;
+    ViewBag.postgrePortNumber = !string.IsNullOrEmpty(dbDetails.Port) && dbDetails.ServerType == DatabaseType.PostgreSQL ? dbDetails.Port : "5432";
+    ViewBag.mysqlPortNumber = dbDetails.ServerType != DatabaseType.MySQL && !string.IsNullOrEmpty(dbDetails.Port) && dbDetails.ServerType == DatabaseType.MySQL ? dbDetails.Port : "3306";
+    ViewBag.databaseName = dbDetails.ServerType != DatabaseType.MySQL && !string.IsNullOrEmpty(dbDetails.DatabaseName) ? dbDetails.DatabaseName : string.Empty;
+    ViewBag.additionalParameter = dbDetails.ServerType != DatabaseType.MySQL && !string.IsNullOrEmpty(dbDetails.ImDbAdditionalParameters) ? dbDetails.ImDbAdditionalParameters : string.Empty;
+    ViewBag.username = dbDetails.ServerType != DatabaseType.MySQL && !string.IsNullOrEmpty(dbDetails.UserName) ? dbDetails.UserName : string.Empty;
     ViewBag.maintenanceDatabase = !string.IsNullOrEmpty(dbDetails.MaintenanceDatabase) ? dbDetails.MaintenanceDatabase : "postgres";
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DataStoreSettings);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var mssqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MSSQLConnectionParameters);
+    var mysqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MySQLConnectionParameters);
+    var postgresqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQLConnectionParameters);
 }
 
 @section scripts{
@@ -28,12 +34,17 @@
     </environment>
 
     <script>
-    var getAllDatabaseUrl = "@Url.Action("GetAllDatabase", "InterMediateDB")";
-    var updateIntermediateDBUrl = "@Url.Action("UpdateIntermediateDB", "InterMediateDB")";
-    var connectDatabaseUrl = "@Url.Action("ConnectDatabase", "InterMediateDB")";
-    var generateIntermediateDatabaseUrl = "@Url.Action("GenerateIntermediateDatabase", "InterMediateDB")";
-    var isSelfHosted = "@ServerAppConfig.IsSelfHosted";
-    var maintenanceDb = "@ViewBag.maintenanceDatabase";
+        var getAllDatabaseUrl = "@Url.Action("GetAllDatabase", "InterMediateDB")";
+        var updateIntermediateDBUrl = "@Url.Action("UpdateIntermediateDB", "InterMediateDB")";
+        var connectDatabaseUrl = "@Url.Action("ConnectDatabase", "InterMediateDB")";
+        var generateIntermediateDatabaseUrl = "@Url.Action("GenerateIntermediateDatabase", "InterMediateDB")";
+        var isSelfHosted = @Json.Serialize(@ServerAppConfig.IsSelfHosted);
+        var maintenanceDb = "@ViewBag.maintenanceDatabase";
+        var postgrePortNumber = "@ViewBag.postgrePortNumber";
+        var mysqlPortNumber = "@ViewBag.mysqlPortNumber";
+        var mssqlConnectionParameterHelpLink = "@mssqlConnectionParameterHelpLink";
+        var mysqlConnectionParameterHelpLink =  "@mysqlConnectionParameterHelpLink";
+        var postgresqlConnectionParameterHelpLink = "@postgresqlConnectionParameterHelpLink";
     </script>
 }
 
@@ -77,8 +88,8 @@
 
                             <form id="db-content-holder" class="no-padding @(ViewBag.dbType == "MSSQL" ? string.Empty : "display-none") content-display text-wrap show-sql-content" autocomplete="off">
                                 <div class="col-lg-12 form-group e-hide">
-                                    @Html.Label("intermediate-db", "[[[Server Type]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 txt-holder center-align">
+                                    @Html.Label("intermediate-db", "[[[Server Type]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 txt-holder center-align">
                                         <div id="database-type-dropdown" class="system-settings-startup-page-fields txt-holder database-dropdown-margin">
                                             <select id="database-type" class="selectpicker system-settings-startup-page-fields db-fields" data-width="100%">
                                                 <option class="no-margin-dropdown-ul" value="MSSQL" selected="@(ViewBag.dbType == "MSSQL")">[[[SQL Server]]]</option>
@@ -89,15 +100,15 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-12 form-group">
-                                    @Html.Label("intermediate-db", "[[[Server Name]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 txt-holder center-align input-alignment">
+                                    @Html.Label("intermediate-db", "[[[Server Name]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 txt-holder center-align input-alignment">
                                         <input type="text" id="txt-servername" name="servername" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.serverName" placeholder="[[[Server name]]]" autocomplete="off">
                                         <span class="startup-validation validation-txt-errors"></span>
                                     </div>
                                 </div>
                                 <div id="authentication-dropdown" class="col-lg-12 form-group hide">
-                                    @Html.Label("intermediate-db", "[[[Authentication Mode]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 txt-holder center-align">
+                                    @Html.Label("intermediate-db", "[[[Authentication Mode]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 txt-holder center-align">
                                         <div id="auth-type-dropdown" class="system-settings-startup-page-fields">
                                             <select id="check-windows" class="selectpicker db-fields  full-width">
                                                 <option value="sql" selected="@(ViewBag.authorizationType == "SQL")">[[[SQL Authentication]]]</option>
@@ -107,43 +118,43 @@
                                     </div>
                                 </div>
                                 <div id="port-number-dropdown" class="col-lg-12 form-group hide">
-                                    @Html.Label("intermediate-db", "[[[Port number ]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 txt-holder center-align input-alignment">
-                                        <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.portNumber" placeholder="[[[Port number]]]" autocomplete="off">
+                                    @Html.Label("intermediate-db", "[[[Port number ]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 txt-holder center-align input-alignment">
+                                        <input type="text" id="txt-portnumber" name="portnumber" class="form-control system-settings-startup-page-fields db-fields" value="@(ViewBag.dbType == "MySQL" ? ViewBag.mysqlPortNumber : ViewBag.postgrePortNumber)" placeholder="[[[Port number]]]" autocomplete="off">
                                         <span class="startup-validation validation-txt-errors"></span>
                                     </div>
                                 </div>
-                                <div id="maintenance-db-dropdown" class="col-lg-12 form-group hide">
-                                    <div class="col-lg-2">
-                                        @Html.Label("intermediate-db", "[[[Maintenance Database]]]", new { @class = "app-textbox-label col-lg-10" })
-                                        <div class="tool-tip col-xs-1">
+                                <div id="maintenance-db-dropdown" class="col-lg-12 datastore-settings-label-tooltip form-group hide">
+                                    <div class="col-lg-3">
+                                        @Html.Label("intermediate-db", "[[[Maintenance Database]]]", new { @class = "app-textbox-label col-lg-11" })
+                                        <div class="tool-tip col-xs-1 no-padding">
                                             <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
                                             <div class="dropdown-menu" role="menu">[[[The maintenance DB is a default database for users and applications to connect to. On PostgreSQL 8.1 and above, the maintenance DB is normally called ‘postgres’, and on earlier versions, ‘template1’.]]]</div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-10 txt-holder center-align input-alignment">
+                                    <div class="col-lg-9 txt-holder center-align input-alignment">
                                         <input type="text" id="txt-maintenancedb" name="maintenancedatabase" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.maintenanceDatabase" placeholder="[[[Maintenance Database]]]" autocomplete="off">
                                         <span class="startup-validation validation-txt-errors"></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 form-group">
-                                    @Html.Label("intermediate-db", "[[[Username]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 txt-holder center-align">
+                                    @Html.Label("intermediate-db", "[[[Username]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 txt-holder center-align">
                                         <input type="text" id="txt-login" name="username" class="form-control system-settings-startup-page-fields db-fields" value="@ViewBag.username" placeholder="[[[Username]]]" autocomplete="off" @(ViewBag.authorizationType == "windows" ? "disabled" : string.Empty)>
                                         <span class="startup-validation validation-txt-errors"></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 form-group">
-                                    @Html.Label("intermediate-db", "[[[Password]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 txt-holder center-align">
+                                    @Html.Label("intermediate-db", "[[[Password]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 txt-holder center-align">
                                         <input type="password" id="txt-password-db" name="password" class="form-control system-settings-startup-page-fields db-fields" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" @(ViewBag.authorizationType == "windows" ? "disabled" : string.Empty)>
                                         <span id="password-field" class="startup-validation validation-txt-errors"></span>
                                         <div class="su su-eye show-hide-password"></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 form-group-radio">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-10 txt-holder center-align system-settings-startup-page-fields" style="width:auto">
+                                    <div class="col-lg-3"></div>
+                                    <div class="col-lg-9 txt-holder center-align system-settings-startup-page-fields" style="width:auto">
                                         <div class="new-db">
                                             <input type="radio" id="new-db" class="css-radio" name="databaseType" value="0" @(ViewBag.databaseName != string.Empty ? string.Empty : "checked")>
                                             <label for="new-db"><span class="text">[[[New Database]]]</span></label>
@@ -155,8 +166,8 @@
                                     </div>
                                 </div>
                                 <div id="new-db-form" class="col-lg-12 form-group @(ViewBag.databaseName != string.Empty ? "display-none" : string.Empty)">
-                                    @Html.Label("intermediate-db", "[[[Database Name]]]", new { @class = "app-textbox-label col-lg-2" })
-                                    <div class="col-lg-10 sql-server-new-db center-align">
+                                    @Html.Label("intermediate-db", "[[[Database Name]]]", new { @class = "app-textbox-label col-lg-3" })
+                                    <div class="col-lg-9 sql-server-new-db center-align">
                                         <div class="txt-holder database-name center-align system-settings-startup-page-fields">
                                             <input type="text" id="txt-dbname" name="dbname" class="form-control system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.databaseName" placeholder="[[[Database name]]]" autocomplete="off">
                                             <span class="startup-validation validation-txt-errors"></span>
@@ -165,14 +176,55 @@
                                     </div>
                                 </div>
                                 <div id="existing-db-form" class="col-lg-12 form-group @(ViewBag.databaseName != string.Empty ? string.Empty : " display-none" )">
-                                    @Html.Label("intermediate-db", "[[[Database Name]]]", new { @class = "app-textbox-label col-lg-2" })
+                                    @Html.Label("intermediate-db", "[[[Database Name]]]", new { @class = "app-textbox-label col-lg-3" })
                                     <div class="col-lg-4 sql-server-existing-db center-align">
                                         <input type="text" id="database-name" name="dbname" class="form-control system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.databaseName" placeholder="[[[Existing Database name]]]" autocomplete="off">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 form-group">
-                                    @Html.Label("secure-sql-connection", "[[[Enable SSL]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
-                                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 switch-align">
+                                <div class="col-lg-12 form-group datastore-settings-label-tooltip">
+                                    <div class="col-lg-3">
+                                        @Html.Label("intermediate-db", "[[[Additional Parameters (Optional)]]]", new { @class = "app-textbox-label col-lg-11" })
+                                        <div class="tool-tip col-xs-1 no-padding">
+                                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                            <span class="dropdown-menu" role="menu">
+                                                [[[Additional parameters override input values in the above form.]]]
+                                                @if (!@ServerAppConfig.IsHideHelpLink)
+                                                {
+                                                    <span>
+                                                        [[[Please refer to ]]]
+                                                        @if (ViewBag.dbType == "MSSQL")
+                                                        {
+                                                            <a class="app-hyperlink redirect-link" href="@mssqlConnectionParameterHelpLink" target="_blank">[[[this]]]</a>
+                                                        }
+                                                        else if (ViewBag.dbType == "PostgreSQL")
+                                                        {
+                                                            <a class="app-hyperlink redirect-link" href="@postgresqlConnectionParameterHelpLink" target="_blank">[[[this]]]</a>
+                                                        }
+                                                        else if (ViewBag.dbType == "MySQL")
+                                                        {
+                                                            <a class="app-hyperlink redirect-link" href="@mysqlConnectionParameterHelpLink" target="_blank">[[[this]]]</a>
+                                                        }
+                                                        [[[documentation for connection string parameters.]]]
+                                                    </span>
+                                                }
+                                            </span>
+                                            </div>
+                                        </div>
+                                    <div class="col-lg-9 txt-holder center-align">
+                                        <input type="text" id="additional-db-parameter" name="db-add-parameter" class="form-control system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.additionalParameter" placeholder="[[[Additional Parameters]]]" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group datastore-settings-label-tooltip">
+                                    <div class="col-lg-3">
+                                        @Html.Label("secure-sql-connection", "[[[Enable SSL]]]", new { @class = "app-textbox-label col-lg-11" })
+                                        <div class="tool-tip col-xs-1 no-padding">
+                                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                            <span class="dropdown-menu" role="menu">
+                                                [[[Enable this if the database server is SSL configured. It uses SSL encryption for all data transmitted between the client and the server.]]]
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-input-field col-lg-9 col-md-5 col-sm-6 col-xs-8 switch-align">
                                         <span class="material-switch text-left">
                                             <input type="checkbox" id="secure-sql-connection" name="secure-sql-connection" @((bool)dbDetails.SslEnabled ? "checked" : string.Empty) />
                                             <label for="secure-sql-connection" class="label-primary"></label>
@@ -180,8 +232,8 @@
                                     </div>
                                 </div>
                                 <div id="connection-validation" class="col-lg-12 form-group">
-                                    <span class="col-lg-2"></span>
-                                    <div class="validation-errors col-lg-10"></div>
+                                    <span class="col-lg-3"></span>
+                                    <div class="validation-errors col-lg-9"></div>
                                 </div>
                             </form>
                         </div>
@@ -192,8 +244,8 @@
 
 
         <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
-            <a href="@Url.Action("Index", "Home")" class="secondary-button pull-right" id="cancel-site-settings" title="">[[[Cancel]]]</a>
-            <button type="button" title="" id="update-datastore-settings" name="UpdateSystemSettings" class="primary-button pull-right update-system-settings">
+            <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-site-settings" title="">[[[Cancel]]]</a>
+            <button type="button" title="" id="update-datastore-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right update-system-settings">
                 [[[Save]]]
             </button>
         </div>

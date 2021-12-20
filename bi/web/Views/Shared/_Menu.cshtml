@@ -24,9 +24,9 @@
                  currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                  currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
 
-    var idPUrl = ServerAppConfig.InternalAppIdpUrl;
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     var isMobile = new DeviceDetection(Context).IsMobile;
-    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
     var appLogo = (globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(IconFileNames.MainLogo) || globalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : globalAppSettings.SystemSettings.MainScreenLogo;
     var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
     var navigationUrl = Url.Action("Index", "Home");
@@ -39,6 +39,7 @@
     var manageSitesUrl = idPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/sites";
     var allItemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
     var userPermissionItem = JsonConvert.SerializeObject(ViewBag.ItemAddOptions);
+    var hasOwnedDashboard = ViewBag.HasOwnedDashboard;
     if (allItemsCount == null && ServerAppConfig.IsUserBasedMenu)
     {
         var itemtypeList = new List<ItemType>
@@ -100,7 +101,7 @@
             <li ng-repeat="items in menuList | orderBy:'Order' | filter:{ShowMenu:true} | filter: {Condition: true} as result" ng-init="count()" ng-if="items.Condition">
                 <ul class="default-lists" style="padding: 0; display:none">
                     <li class="mobile-hidden sf-nav-separator" ng-show="{{currentCount == '3' || currentCount == '7' && result.length < 9 }}"></li>
-                    <li class="{{items.IsSelected}} {{items.MobileClassName}}" ng-class="$index > menuCount ? 'sf-nav-administration-item sf-nav-item' : 'sf-nav-item'" ng-show="{{result.length > 8 ? $index < 6 : $index < 8}}">
+                    <li class="{{items.IsSelected}} {{items.MobileClassName}}" ng-class="{{$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)}} ? 'sf-nav-administration-item sf-nav-item' : 'sf-nav-item'" ng-show="{{result.length > 8 ? $index < 6 : $index < 8}}">
                         <a class="sf-nav-link" href="{{items.OpenLink}}" target="{{items.OpenBehavior}}">
                             <span class="menu-icon-container">
                                 <i class="{{items.ImageLink}} {{items.ImageClassName}}" ng-style="{'background-image': items.ImageClassName == 'custom-menu' ? 'url(' + items.ImageLink +')' : ''}"></i>
@@ -108,7 +109,7 @@
                             <span class="menu-label">{{items.Display}}</span>
                         </a>
                     </li>
-                    <li class="sf-nav-administration-collapse-item dropup" ng-class="result.length < 9 ? 'menu-toggle' : ''" ng-if="$index > 5">
+                    <li class="sf-nav-administration-collapse-item dropup" ng-class="result.length < 9 ? 'menu-toggle' : ''" ng-if="$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)">
                         <a class="dropdown-toggle mobile-hidden" data-toggle="dropdown" ng-show="{{$index == 6 && items.Condition}}">
                             <span class="menu-icon-container">
                                 <i class="su su-dots-menu"></i>
@@ -254,12 +255,12 @@
                         {
                             <li class="sub-menu-item sub-menu-profile" id="user-sites">
                                 <div class="sub-menu-profile-text-padding">[[[Your Sites]]]</div>
-                                <img class='loader-sites-gif' src="@dashboardServerResourceUrl/images/waitingpopup.gif" style="display:block; margin: auto; height:30px; width:30px;" />
+                                <img class='loader-sites-gif' src="@dashboardServerResourceUrl/cdn/images/waitingpopup.gif" style="display:block; margin: auto; height:30px; width:30px;" />
                             </li>
                             <li id="more-sites-id">
                             </li>
-                            <li class="sf-sub-menu-separator"></li>
-                            <li class="sub-menu-item sub-menu-profile">
+                            <li class="sf-sub-menu-separator admin-privilege" style="display: none;"></li>
+                            <li class="sub-menu-item sub-menu-profile admin-privilege" style="display: none;">
                                 <a rel="alternate" hreflang="en" href="@manageSitesUrl" target="_blank">
                                     <div class="manage-site">[[[Manage sites (Admin access)]]]</div>
                                 </a>
@@ -279,12 +280,12 @@
                         {
                             <li class="sf-sub-menu-separator"></li>
                             <li class="sub-menu-item">
-                                <a class="request-concierge-support" href="javascript:void(0)">
+                                <a class="request-concierge-support" href="@ServerAppConfig.AppSettings.Syncfusion.Support.CreateTicket" target="_blank">
                                     [[[Create Incidents]]]
                                 </a>
                             </li>
                             <li class="sub-menu-item">
-                                <a href="@Url.Action("TicketList", "Support")">
+                                <a href="@ServerAppConfig.AppSettings.Syncfusion.Support.ListTicket" target="_blank">
                                     [[[My Incidents]]]
                                 </a>
                             </li>
@@ -305,7 +306,7 @@
 <script>
     var userTenantsUrl = "@Url.Action("GetUserTenants", "User")";
     var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
-    var idpUrl = "@ServerAppConfig.InternalAppIdpUrl";
+    var idpUrl = "@idPUrl";
     var dashboardPageUrl = "@Url.Action("Dashboards", "Dashboards")";
     var dataSourcesPageUrl = "@Url.Action("DataSources", "DataSources")";
     var schedulePageUrl = "@Url.Action("Schedules", "Scheduler")";
@@ -326,5 +327,7 @@
     var isMaster = @Json.Serialize(globalAppSettings.SystemSettings.IsMaster);
     var userPermissionItem = @Html.Raw(userPermissionItem);
     var isUserBasedMenu = @Json.Serialize(ServerAppConfig.IsUserBasedMenu);
+    var enablePublishModule = @Json.Serialize(ServerAppConfig.EnablePublishModule);
     var allItemsCount = @Html.Raw(JsonConvert.SerializeObject(allItemsCount));
+    var hasOwnedDashboard = @Json.Serialize(hasOwnedDashboard);
 </script>

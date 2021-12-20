@@ -122,7 +122,7 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("In", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to NULL.
         /// </summary>
@@ -1589,6 +1589,15 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("StoredProcedureWithOutParameter", resourceCulture);
             }
         }
+		
+		/// <summary>
+        ///   Looks up a localized string similar to (SELECT TOP {4} * FROM OPENQUERY([{0}],&apos;EXEC [{1}].[{2}].[{3}]&apos;)) [{3}].
+        /// </summary>
+        internal static string StoredProcedureWithOutParameterforDataSampling {
+            get {
+                return ResourceManager.GetString("StoredProcedureWithOutParameterforDataSampling", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to (SELECT * FROM OPENQUERY([{0}],&apos;EXEC [{1}].[{2}].[{3}]  {4}&apos;)) [{3}].
@@ -1600,11 +1609,11 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to (SELECT TOP {5} * FROM OPENQUERY([{0}],&apos;EXEC [{1}].[{2}].[{3}]  {4}&apos;)) [{3}].
         /// </summary>
-        internal static string String1 {
+        internal static string StoredProcedureWithParameterforDataSampling {
             get {
-                return ResourceManager.GetString("String1", resourceCulture);
+                return ResourceManager.GetString("StoredProcedureWithParameterforDataSampling", resourceCulture);
             }
         }
         

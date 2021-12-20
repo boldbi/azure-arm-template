@@ -1,10 +1,10 @@
 $(document).ready(function () {
     
-    //var outlineEmail = new ejs.inputs.TextBox({
-    //    cssClass: 'e-outline',
-    //    floatLabelType: 'Auto',
-    //});
-    //outlineEmail.appendTo('#key-input');
+    var outlineEmail = new ejs.inputs.TextBox({
+        cssClass: 'e-outline e-input-focus',
+        floatLabelType: 'Auto',
+    });
+    outlineEmail.appendTo('#key-input');
 
     $("#key-input").val(localStorage.getItem(window.location.hostname + "_email"));
     localStorage.removeItem(window.location.hostname + "_email");
@@ -18,7 +18,7 @@ $(document).ready(function () {
             $(element).valid();
         },
         rules: {
-            "key": {
+            "userName": {
                 required: true
             }
         },
@@ -33,8 +33,8 @@ $(document).ready(function () {
             $(element).parent().find("p.validation-holder").html(error);
         },
         messages: {
-            "key": {
-                required: window.Server.App.LocalizationContent.EmailValidator
+            "userName": {
+                required: window.Server.App.LocalizationContent.LoginUsernameEmailValidator
             }
         }
     });

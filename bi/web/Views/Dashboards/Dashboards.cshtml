@@ -89,6 +89,7 @@
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var absolutePath = requestUrl.AbsolutePath;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageDashboards);
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
 }
 
 @section styles{
@@ -477,7 +478,7 @@
                 <span class="su su-arrow-back col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" id="back-icon" title="[[[Back]]]" ng-click="onBackButtonClick()" style="display: @backButton"></span>
                 @if (sectionName != null)
                 {
-                    if (isMarkItemsPublic == false && isAdmin == true)
+                    if (isMarkItemsPublic == false && isAdmin == true || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings])
                     {
                         <div class="tool-tip col-lg-1 col-md-1 col-sm-1 col-xs-1" style="display:none; padding-left: 7px; cursor:pointer">
                             <span class="dropdown-toggle" style="display:block; padding-top:8px; " data-toggle="dropdown" id="help-text-default"><span id="error_icon" class="su su-warning-alt" title="" style="color:yellow;"></span></span>
@@ -977,6 +978,8 @@
     <div id="make_item_public" class="no-padding pull-left" style="display:none"></div>
 
     <div id="remove_item_public" class="no-padding" style="display:none"></div>
+
+    <div id="make_item_unlist" class="no-padding pull-left" style="display:none"></div>
     @await Html.PartialAsync("../Items/_AddItems")
     @await Html.PartialAsync("../Items/_ItemVersion")
     @if (new DeviceDetection(Context).IsMobile)

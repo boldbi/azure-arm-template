@@ -45,6 +45,11 @@
                 <div id="publish-plugin-validation" class="validation-message text"></div>
                 <label>[[[Dashboard name]]]</label>
                 <input id="publish-dashboard-name" class="form-control" maxlength="253" ng-model="PublishedItems.Name" disabled>
+                <div id="use-source-name-checkbox">
+                    <input type="checkbox" id="use-source-name" class="material-checkbox" />
+                    <input name="use-source-name" type="hidden" value="false">
+                    <label for="use-source-name" data-toggle="tooltip" data-placement="bottom" data-container="#use-source-name-checkbox" title="[[[On enabling this, if a dashboard or data source with the same name exists in the destination site, the publishing will fail.]]]">[[[Use source dashboard and data source name.]]]</label>
+                </div>
                 <label>[[[Dashboard description]]]</label>
                 <textarea id="publish-dashboard-descrition" autocomplete="off" class="form-control" placeholder="[[[Write description of dashboard.]]]" ng-model="PublishedItems.Description" maxlength="1024" rows="3"> </textarea>
                 <div id="publish-dashboard-checkbox" ng-if="publishType == '@PublishType.Internal.ToString()'">
@@ -54,6 +59,10 @@
                 <div id="publish-datasource-checkbox" ng-if="publishType == '@PublishType.Internal.ToString()'">
                     @Html.CheckBox("publish-datasource-edit", new { @class = "material-checkbox" })
                     @Html.Label("publish-datasource-edit", "[[[Lock data source editing in published site.]]]", new { @class = "toggle-space" })
+                </div>
+                <div id="make-public-checkbox">
+                    @Html.CheckBox("make-public", new { @class = "material-checkbox" })
+                    @Html.Label("make-public", "[[[Make dashboard as public in published site.]]]", new { @class = "toggle-space" })
                 </div>
             </div>
             <div class="col-xs-6 publish-info">
@@ -87,6 +96,11 @@
                 <div id="advanced-plugin-validation" class="validation-message text"></div>
                 <label>[[[Dashboard name]]]</label>
                 <input ng-model="p.PublishItem.Name" id="advanced-dashboard-name" class="form-control" maxlength="253" disabled>
+                <div id="advanced-source-name-checkbox">
+                    <input type="checkbox" id="advanced-source-name" class="material-checkbox" ng-model="p.UseSourceItemName" />
+                    <input name="advanced-source-name" type="hidden" value="false" ng-model="p.UseSourceItemName">
+                    <label for="advanced-source-name" data-toggle="tooltip" data-placement="bottom" title="[[[On enabling this, if a dashboard or data source with the same name exists in the destination site, the publishing will fail.]]]">[[[Use source dashboard and data source name.]]]</label>
+                </div>
                 <label>[[[Dashboard description]]]</label>
                 <textarea ng-model="p.PublishItem.Description" id="advanced-dashboard-descrition" autocomplete="off" class="form-control" placeholder="[[[Write description of dashboard.]]]" maxlength="1024"></textarea>
                 <div ng-if="publishType == '@PublishType.Internal.ToString()'">
@@ -95,6 +109,13 @@
                         <input name="advanced-dashboard-edit" type="hidden" value="false" ng-model="p.PublishItem.IsLocked">
                         <label for="advanced-dashboard-edit">[[[Lock dashboard editing in published site]]] </label>
                     </div>
+                </div>
+                <div id="advanced-make-public-checkbox">
+                    <input type="checkbox" id="advanced-make-public" class="material-checkbox" ng-model="p.PublishItem.IsPublic" />
+                    <input name="advanced-make-public" type="hidden" value="false" ng-model="p.PublishItem.IsPublic">
+                    <label for="advanced-make-public">[[[Make dashboard as public in published site.]]] </label>
+                </div>
+                <div ng-if="publishType == '@PublishType.Internal.ToString()'">
                     <label>[[[Select data sources that you want to lock from editing in the destination site.]]]</label>
                     <div id="selected-datasources" class="selectpicker dropup">
                         <select id="datasource-list-dropdown" class="form-control selectpicker" title="[[[Select data sources]]]" multiple="" data-size="5" data-actions-box="true" data-live-search="true" style="display: none"></select>

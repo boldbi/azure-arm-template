@@ -1,4 +1,5 @@
-﻿@{
+﻿@using Newtonsoft.Json
+@{
     Layout = null;
     var globalAppSettings = _globalAppSettings;
     ViewBag.Title = ViewBag.ItemName + " - " + globalAppSettings.SystemSettings.OrganizationName;
@@ -8,7 +9,7 @@
     var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
-    var idPUrl = ServerAppConfig.InternalAppIdpUrl;
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
     var enableComment = "false";
@@ -23,11 +24,12 @@
     var provider = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : ViewBag.DataSourceProviders[0].Provider) : string.Empty;
     var service = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : (ViewBag.DataSourceProviders[0] == null ? string.Empty : ViewBag.DataSourceProviders[0].Service[0])) : string.Empty;
     var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
-    var faviconFallbackUrl = globalAppSettings.SystemSettings.CDNLink + "/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.Favicon;
+    var faviconFallbackUrl = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.Favicon;
     var isUserAuthenticatedInCurrentTenant = ViewBag.IsUserAuthenticatedInCurrentTenant;
     bool isSlideshow = ViewBag.IsSlideshow == null ? false : Convert.ToBoolean(ViewBag.IsSlideshow);
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
@@ -40,8 +42,12 @@
     var widgetId = ViewBag.WidgetId;
     var pinWidget = ViewBag.IsPinWidgetMode;
     var bodyClass = pinWidget ? "pin-widget" : "";
-    var rootUrl = (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/');
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : Context.Request.PathBase.ToString();
     var multiTabUrl = ViewBag.MultiTabDashboardDetails != null ? Url.Action("Dashboards", "Dashboards") + "/" + ViewBag.MultiTabDashboardDetails.Id + "/" + ViewBag.MultiTabDashboardDetails.CategoryName + "/" + ViewBag.MultiTabDashboardDetails.Name : string.Empty;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isUsageAnalytics = ViewBag.IsUsageAnalytics != null;
+    var isUnlisted = itemDetail.IsUnlisted;
+    var unlistedCode = itemDetail.UnlistedCode;
 }
 <!DOCTYPE html>
 
@@ -65,13 +71,13 @@
     <meta name="dashboard:id" content="@ViewBag.ItemId" />
     <meta name="dashboard:name" content="@ViewBag.ItemName" />
     <meta name="category:name" content="@itemDetail.CategoryName" />
-    <meta name="dashboard:description" content="@ViewBag.ItemDescription" />
+    <meta name="dashboard:description" content="@Html.Raw(ViewBag.ItemDescription)" />
     <meta name="datasource:version" content="@ViewBag.DatasourceVersion" />
     <meta name="datasource:id" content="@ViewBag.DatasourceId" />
     <meta name="isdraft" content="false" />
     <meta name="user:culture" content="@ViewBag.Culture" />
-    <meta name="globalization:date_format" content="@globalAppSettings.SystemSettings.DateFormat" />
-    <meta name="globalization:time_format" content="@globalAppSettings.SystemSettings.TimeFormat.ToString()" />
+    <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
+    <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
 
     <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href != '@faviconFallbackUrl') this.href = '@faviconFallbackUrl';" />
 
@@ -150,13 +156,13 @@
         var isUserAutosaveFilter = @Html.Raw(Json.Serialize(ViewBag.IsUserAutosaveFilter));
         var hasDefaultView = @Json.Serialize(ViewBag.HasDefaultView);
         var dashboardServerApiUrl = "@dashboardServerApiUrl";
-        var filterQuery = "@filterQuery";
+        var filterQuery = @Html.Raw(Json.Serialize(filterQuery));
         var dashboardTheme = "@ViewBag.Theme";
         var isDefaultView =  @Json.Serialize(ViewBag.IsDefaultView);
         var isWidgetRequest = @Json.Serialize(pinWidget);
         var widgetId = "@widgetId";
         var multiTabUrl = "@multiTabUrl";
-        var urlHasMultiTab = @Json.Serialize(ViewBag.UrlHasMultiTab);
+        var isMultiTab  = @Json.Serialize(ViewBag.UrlHasMultiTab);
         var multiTabId = "@ViewBag.MultiTabId";
         var isSelfHosted = @Json.Serialize(isSelfHosted);
         var modelLanguage = "@ViewBag.ModelLanguage";
@@ -164,10 +170,18 @@
         var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
         var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
         var custombrandName = "@ServerAppConfig.CustomBrandName";
+        var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+        var serverAppPathBase = "@Context.Request.PathBase";
+        var isUsageAnalytics = @Json.Serialize(isUsageAnalytics);
+        var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+        var isUnlisted = @Json.Serialize(isUnlisted);
+        var unlistedCode = "@unlistedCode";
+        var parentItemId = "@ViewBag.ParentItemId";
+        var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
 </script>
     <style>
         #warning-alert, #success-alert {
-            font-family: roboto;
+            font-family: var(--font-family);
         }
 
         .viewer-blue-loader {
@@ -201,25 +215,17 @@
     <div id="dashboard" class="ng-non-bindable"></div>
     @if (isMobile)
     {
-        <script>
-            $(document)
-                .ready(function () {
-                    //Remove side bar
-                    $("#filter-view").css("display", "none");
-                    $("#dashboard-view-toogle").css("display", "none");
-                });
-        </script>
-        if (!embedConfig.IsEmbedDashboard || embedConfig.HasViews || embedConfig.HasDashboardComments)
+        if (!isUsageAnalytics && (!embedConfig.IsEmbedDashboard || embedConfig.HasViews || embedConfig.HasDashboardComments))
         {
             <nav id="server-mobile-navbar" class="navbar navbar-inverse custom-bootstrap-styles">
                 <div class="container-fluid">
                     <ul class="nav navbar-nav col-xs-12 no-padding no-margin">
-                        <li class="@(embedConfig.HasViews && embedConfig.HasDashboardComments ? "col-xs-4":"col-xs-6") icon">
+                        <li class="@(enableComment.ToLower() == "true" && embedConfig.HasViews && embedConfig.HasDashboardComments ? "col-xs-4":"col-xs-6") icon">
                             <a href="javascript:void(0)" class="su su-nav-dashboard active">
                                 <span class="nav-menu-label">[[[Dashboard]]]</span>
                             </a>
                         </li>
-                        @if (!embedConfig.IsEmbedDashboard || embedConfig.HasDashboardComments)
+                        @if (enableComment.ToLower() == "true" && (!embedConfig.IsEmbedDashboard || embedConfig.HasDashboardComments))
                         {
                             <li class="@(embedConfig.HasViews ? "col-xs-4":"col-xs-6") icon" id="comment-li">
                                 @if (ViewBag.IsDashboardCommented == "true")
@@ -239,7 +245,7 @@
 
                         @if (!embedConfig.IsEmbedDashboard || embedConfig.HasViews)
                         {
-                            <li class="@(embedConfig.HasDashboardComments ? "col-xs-4":"col-xs-6") icon" id="view-li">
+                            <li class="@(embedConfig.HasDashboardComments && enableComment.ToLower() == "true" ? "col-xs-4":"col-xs-6") icon" id="view-li">
                                 <a href="javascript:void(0)" class="su-view">
                                     <span class="nav-menu-label">[[[Views]]]</span>
                                 </a>
@@ -316,13 +322,13 @@
         <div class="pull-right" id="sample-data-notification" style="display:none">
             @if (itemDetail.CanWrite && permissions[ItemType.Datasource])
             {
-                <button id="sample-data-button" type="button" data-placement="bottom" title="[[[This dashboard contains sample data.]]]" data-toggle="tooltip" class="sample-data primary-button" data-access-token="@ViewBag.AccessToken" data-dashboard-id="@itemDetail.Id" data-dashboard-name="@itemDetail.Name" data-dashboard-version="@ViewBag.VersionNumber" data-authorize-url="@dataServiceUrl/v1.0/connection/authorize?provider=@(provider)&service=@(service)&token=@(ViewBag.AccessToken)&server=@(new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl())">
+                <button id="sample-data-button" type="button" data-placement="bottom" title="[[[This dashboard contains sample data.]]]" data-toggle="tooltip" class="sample-data primary-button app-btn-primary" data-access-token="@ViewBag.AccessToken" data-dashboard-id="@itemDetail.Id" data-dashboard-name="@itemDetail.Name" data-dashboard-version="@ViewBag.VersionNumber" data-authorize-url="@dataServiceUrl/v1.0/connection/authorize?provider=@(provider)&service=@(service)&token=@(ViewBag.AccessToken)&server=@(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl())">
                     [[[Connect Your Data]]]
                 </button>
             }
             else
             {
-                <button type="button" data-placement="bottom" data-html="true" title="[[[This dashboard contains sample data. </br>You need permission to edit this dashboard and create a new data source to connect your data.]]]" data-toggle="tooltip" class="sample-data primary-button disabled-template-button">
+                <button type="button" data-placement="bottom" data-html="true" title="[[[This dashboard contains sample data. </br>You need permission to edit this dashboard and create a new data source to connect your data.]]]" data-toggle="tooltip" class="sample-data primary-button app-btn-primary disabled-template-button">
                     [[[Connect Your Data]]]
                 </button>
             }

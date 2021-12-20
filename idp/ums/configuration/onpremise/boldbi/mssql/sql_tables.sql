@@ -117,7 +117,9 @@ CREATE TABLE [BOLDBI_Item](
 	[IsPublic] [bit] NOT NULL DEFAULT 0,
 	[IsDraft] [bit] NULL DEFAULT 0,
 	[IsLocked] [bit] NULL DEFAULT 0,
-	[IsActive] [bit] NULL)
+	[IsActive] [bit] NULL,
+	[IsUnlisted] [bit] NOT NULL DEFAULT 0,
+	[UnlistedCode] [nvarchar](20) NULL)
 ;
 
 CREATE TABLE [BOLDBI_ItemView](
@@ -174,6 +176,7 @@ CREATE TABLE [BOLDBI_ItemLog](
 	[ItemId] [uniqueidentifier] NOT NULL,
 	[ItemVersionId] [int] NOT NULL,
 	[SourceTypeId] [int] NOT NULL,
+	[EventTypeId] [int] NULL,
 	[ParentId] [uniqueidentifier] NULL,
 	[FromCategoryId] [uniqueidentifier] NULL,
 	[ToCategoryId] [uniqueidentifier] NULL,
@@ -196,6 +199,9 @@ CREATE TABLE [BOLDBI_UserPermission](
 	[PermissionEntityId] [int] NOT NULL,
 	[ItemId] [uniqueidentifier] NULL,
 	[UserId] [int] NOT NULL,
+	[SettingsTypeId] [int]  NULl,
+	[ScopeGroupId] [int] NULl,
+	[ItemTypeId] [int] NULl,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -205,6 +211,9 @@ CREATE TABLE [BOLDBI_GroupPermission](
 	[PermissionEntityId] [int] NOT NULL,
 	[ItemId] [uniqueidentifier] NULL,
 	[GroupId] [int] NOT NULL,
+	[SettingsTypeId] [int]  NULl,
+	[ScopeGroupId] [int] NULl,
+	[ItemTypeId] [int] NULl,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -240,6 +249,7 @@ CREATE TABLE [BOLDBI_ScheduleDetail](
 	[ModifiedById] [int] NOT NULL,
 	[CreatedDate] [datetime] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
+	[ScheduleExportInfo] [nvarchar](max) NULL,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -341,6 +351,7 @@ CREATE TABLE [BOLDBI_Comment](
     [ItemId] [uniqueidentifier] NOT NULL,
     [UserId] [int] NOT NULL,
     [ParentId] [int] NULL,
+    [ParentItemId] [uniqueidentifier] NULL,
     [CreatedDate] [datetime] NOT NULL,
     [ModifiedDate] [datetime] NOT NULL,
     [ModifiedById] [int] NOT NULL,
@@ -350,6 +361,7 @@ CREATE TABLE [BOLDBI_Comment](
 CREATE TABLE [BOLDBI_ItemWatch](
 	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
 	[ItemId] [uniqueidentifier] NOT NULL,
+	[ParentItemId] [uniqueidentifier] NULL,
 	[UserId] [int] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
 	[IsWatched] [bit] NOT NULL,
@@ -711,6 +723,7 @@ CREATE TABLE [BOLDBI_DeploymentDashboards](
     [Description] [nvarchar](1026) NULL,
 	[IsDashboardLocked] [bit] NOT NULL,
     [IsDatasourceLocked] [bit] NOT NULL,
+    [ItemInfo] [nvarchar](max) NOT NULL,
     [CreatedById] [int] NOT NULL,
     [CreatedDate] [datetime] NOT NULL,
     [ModifiedDate] [datetime] NOT NULL,
@@ -777,6 +790,12 @@ CREATE TABLE [BOLDBI_ExternalSites](
 	[IsActive] [bit] NOT NULL)
 ;
 
+CREATE TABLE [BOLDBI_SettingsType](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[Name] [nvarchar](255) NOT NULL UNIQUE,
+	[IsActive] [bit] NOT NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into [BOLDBI_ItemType] (Name,IsActive) VALUES (N'Category',1)
@@ -797,7 +816,42 @@ insert into [BOLDBI_ItemType] (Name,IsActive) values (N'Widget',1)
 ;
 insert into [BOLDBI_ItemType] (Name,IsActive) values (N'ItemView',1)
 ;
-Insert INTO [BOLDBI_ItemType] ([Name], [IsActive]) Values ('Slideshow',1)
+Insert INTO [BOLDBI_ItemType] (Name, IsActive) Values ('Slideshow',1)
+;
+INSERT INTO [BOLDBI_ItemType] (Name, IsActive) Values (N'Settings',1)
+; 
+INSERT INTO [BOLDBI_ItemType] (Name, IsActive) Values (N'User Management',1)
+;
+INSERT INTO [BOLDBI_ItemType] (Name, IsActive) Values (N'Permissions',1)
+;
+
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Site Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Dashboard Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Embed Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Data Store Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Connectors',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Email Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) VALUES (N'Accounts Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) values (N'User Directory Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) values (N'Authentication Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Notification Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Manage License',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Support Settings',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Subscription',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Payments',1)
 ;
 
 INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Added',1)
@@ -902,6 +956,20 @@ INSERT into [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VAL
 ;
 INSERT into [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Slideshow',1,10,1)
 ;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Specific Settings',0,11,1)
+;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Settings',1,11,1)
+;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Specific Group',0,12,1)
+;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Users and Groups',1,12,1)
+;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Specific Permissions',0,13,1)
+;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Permissions',1,13,1)
+;
+INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Groups',1,12,1)
+;
 
 INSERT into [BOLDBI_Group] (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',null,GETDATE(), 1, 1)
 ;
@@ -978,6 +1046,8 @@ INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId
 ;
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,1,1)
 ;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (29,1,1)
+;
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,2,1)
 ;																									  
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (5,2,1)
@@ -1037,6 +1107,18 @@ INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (21,3,1)
 ;
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,3,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (23,3,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (24,3,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (25,3,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (26,3,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (27,3,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (28,3,1)
 ;
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,4,1)
 ;																									  
@@ -1320,6 +1402,8 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'SiteSettings',N'SiteSettings',GETDATE(),1)
 ;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'DashboardSettings.UsageAnalytics',N'DashboardSettings.UsageAnalytics',GETDATE(),1)
+;
 
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (11,N'Contact',N'Contact',GETDATE(),1)
 ;
@@ -1591,12 +1675,24 @@ ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLD
 ;
 ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
 ;
+ALTER TABLE [BOLDBI_UserPermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id) 
+;
+ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
+;
+ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([ItemTypeId]) REFERENCES [BOLDBI_ItemType] ([Id])
+;
 
 ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([PermissionEntityId]) REFERENCES [BOLDBI_PermissionEntity] ([Id])
 ;
 ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
+;
+ALTER TABLE [BOLDBI_GroupPermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id)
+;
+ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
+;
+ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([ItemTypeId]) REFERENCES [BOLDBI_ItemType] ([Id])
 ;
 
 ALTER TABLE [BOLDBI_ScheduleDetail]  ADD FOREIGN KEY([ScheduleId]) REFERENCES [BOLDBI_Item] ([Id])
@@ -1662,11 +1758,15 @@ ALTER TABLE [BOLDBI_Comment] ADD FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] 
 ALTER TABLE [BOLDBI_Comment] ADD FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
 ;
 ALTER TABLE [BOLDBI_Comment] ADD FOREIGN KEY([ModifiedById]) REFERENCES [BOLDBI_User] ([Id])
-; 
+;
+ALTER TABLE [BOLDBI_Comment] ADD FOREIGN KEY([ParentItemId]) REFERENCES [BOLDBI_Item] ([Id])
+;
  
 ALTER TABLE [BOLDBI_ItemWatch] ADD FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_ItemWatch] ADD FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
+;
+ALTER TABLE [BOLDBI_ItemWatch] ADD FOREIGN KEY([ParentItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 
 ALTER TABLE [BOLDBI_Homepage]  ADD FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
@@ -1696,8 +1796,6 @@ ALTER TABLE [BOLDBI_DashboardWidget]  ADD FOREIGN KEY([WidgetItemId]) REFERENCES
 ALTER TABLE [BOLDBI_DashboardDataSource]  ADD FOREIGN KEY([DashboardItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_DashboardDataSource]  ADD FOREIGN KEY([DataSourceItemId]) REFERENCES [BOLDBI_Item] ([Id])
-;
-ALTER TABLE [BOLDBI_DashboardDataSource]  ADD FOREIGN KEY([VersionNumber]) REFERENCES [BOLDBI_ItemVersion] ([Id])
 ;
 
 ALTER TABLE [BOLDBI_HomepageItemFilter]  ADD FOREIGN KEY([HomepageId]) REFERENCES [BOLDBI_Homepage] ([Id])

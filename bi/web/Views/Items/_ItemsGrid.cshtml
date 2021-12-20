@@ -1,4 +1,5 @@
 ﻿@inject ServerPrincipal _identityResponse
+@using Newtonsoft.Json
 @{
     var gridName = ViewBag.gridName;
     var permissionData = ViewBag.Permissions;
@@ -8,6 +9,7 @@
     var query = ViewBag.SearchQuery;
     var customUI = globalAppSettings.SystemSettings.CustomUI;
     var schemes = customUI?.Profiles != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].DataSources.Scheme).FirstOrDefault() : null;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
 }
 <script>
     var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
@@ -18,11 +20,12 @@
     var editFilePopupUrl = "@Url.Action("getfiledetails", "files")";
     var makePublicUrl = "@Url.Action("makeitempublic", "items")";
     var removePublicUrl = "@Url.Action("RemovePublic", "items")";
-    var designerUrl = "@Url.Action(globalAppSettings.SystemSettings.InstallationFolder+ "dashboarddesigner.exe", "dashboarddesigner")";
+    var designerUrl = "@Url.Action(globalAppSettings.SystemSettings.InstallationFolder + "dashboarddesigner.exe", "dashboarddesigner")";
     var favoriteItemUrl = "@Url.Action("MakeFavorite", "items")";
     var addWidgetUrl = "@Url.Action("addwidget", "widgets")";
     var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
     var checkDashboardCreationLimit = "@Url.Action("CheckDashboardCreationLimit", "Designer")";
+    var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
     var i_am_ie9 = false;
 </script>
 <!--[if LT IE  10]>
@@ -184,6 +187,16 @@
             {{/if}}
             {{/if}}
 
+            <li class="@(schemes != null && !schemes.Info ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="item-info">
+                    <i class="su su-info"></i>
+                    <span>[[[Info]]]</span>
+                </a>
+            </li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Info ? "hide" : string.Empty)"></li>
+            {{/if}}
+
             {{if ItemType == "@((int)ItemType.Datasource)" && !IsDraft}}
             <li class="@(schemes != null && !schemes.Preview ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" id="item-preview" data-item-id="{{:Id}}">
@@ -215,7 +228,7 @@
             <li class="@(schemes != null && !schemes.RefreshSetting ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" class="edit-schedule" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-nav-schedule"></i>
-                    <span>[[[Refresh Setting]]]</span>
+                    <span>[[[Refresh Settings]]]</span>
                 </a>
             </li>
             {{/if}}
@@ -238,12 +251,33 @@
             {{/if}}
             {{/if}}
 
+            @*{{if !IsDraft}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)"}}
+            <li>
+                <a href="javascript:void(0);" title="" class="view-linked-dashboard" data-itemname="{{:Name}}">
+                    <i class="su su-view-linked-dashboard"></i>
+                    <span>[[[View Linked Dashboards]]]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}}*@
+
             {{if !IsLocked}}
             {{if ~checkMobile()}}
             {{if CanCopy}}
             {{if DatasourceType=="@((int)ConnectionMode.Live)" && !IsDraft}}
             <li class="@(schemes != null && !schemes.Copy ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" title="" class="copyItem" data-action='Copy' data-itemId="{{:Id}}" data-itemname="{{:Name}}">
+                    <i class="su su-copy"></i>
+                    <span>[[[Copy Data Source]]]</span>
+                </a>
+            </li>
+            {{else !IsDraft}}
+            <li class="@(schemes != null && !schemes.Copy ? "hide" : string.Empty)">
+                <a title="[[[Only available for live connections]]]" class="copy-disable" onclick="event.stopPropagation()" data-toggle="tooltip" data-placement="top">
                     <i class="su su-copy"></i>
                     <span>[[[Copy Data Source]]]</span>
                 </a>
@@ -255,7 +289,7 @@
             {{/if}}
 
             {{if ~checkMobile()}}
-            {{if (CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true) && !IsDraft}}
+            {{if (CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Datasource].ToString().ToLower()) == true) && !IsDraft}}
             {{if ItemType=="@((int)ItemType.File)"}}
             <li role="separator" class="divider @(schemes != null && !schemes.Share ? "hide" : string.Empty)"></li>
             {{/if}}
@@ -360,24 +394,18 @@
         {{if ScheduleStatus=="@((int)ScheduleStatus.Success)"}}
         <div>
             <span data-toggle="tooltip" data-placement="top" title="[[[Successful at]]] {{:LastAttemptAt}}">
-                [[[Successful at]]] {{:LastAttemptAt}}
+                <span class="success data-refresh-status su su-schedule-status"></span><span>[[[Successful at]]] {{:LastAttemptAt}}</span>
             </span>
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.Fail)"}}
         <div>
             <span data-toggle="tooltip" data-placement="top" title="[[[Failure at]]] {{:LastAttemptAt}}">
-                [[[Failure at]]] {{:LastAttemptAt}}
+                <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span><span>[[[Failure at]]] {{:LastAttemptAt}}</span>
             </span>
             {{if LastSuccessfulAttemptAt != null}}
             <div>
-                <span data-toggle="tooltip" data-placement="top" title="[[[Last successful at]]] {{:LastSuccessfulAttemptAt}}">
+                <span class="last-successful" data-toggle="tooltip" data-placement="top" title="[[[Last successful at]]] {{:LastSuccessfulAttemptAt}}">
                     [[[Last successful at]]] {{:LastSuccessfulAttemptAt}}
-                </span>
-            </div>
-            {{else}}
-            <div>
-                <span data-toggle="tooltip" data-placement="top" title="[[[No successful refreshes]]]">
-                    [[[No successful refreshes]]]
                 </span>
             </div>
             {{/if}}
@@ -385,35 +413,45 @@
         {{else ScheduleStatus=="@((int)ScheduleStatus.Run)"}}
         <div>
             <span data-toggle="tooltip" data-placement="top" title="[[[Refresh Started]]]">
-                [[[Refresh Started]]]
+                <span class="refresh-started data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span><span>[[[Refresh Started]]]</span>
             </span>
             {{if LastSuccessfulAttemptAt != null}}
             <div>
-                <span data-toggle="tooltip" data-placement="top" title="[[[Last successful at]]] {{:LastSuccessfulAttemptAt}}">
+                <span class="last-successful" data-toggle="tooltip" data-placement="top" title="[[[Last successful at]]] {{:LastSuccessfulAttemptAt}}">
                     [[[Last successful at]]] {{:LastSuccessfulAttemptAt}}
                 </span>
             </div>
             {{/if}}
         </div>
+        {{else !IsScheduleConfigured}}
+        <div>
+            <span data-toggle="tooltip" data-placement="top" title="[[[Refresh schedule not configured]]]">
+                <span class="not-refreshed data-refresh-status su su-schedule-status"></span><span>[[[Refresh schedule not configured]]]</span>
+            </span>
+        </div>
         {{else}}
         <div>
             <span data-toggle="tooltip" data-placement="top" title="[[[Not refreshed yet]]]">
-                [[[Not refreshed yet]]]
+                <span class="not-refreshed data-refresh-status su su-schedule-status"></span><span>[[[Not refreshed yet]]]</span>
             </span>
         </div>
         {{/if}}
     </div>
     {{else DatasourceType=="@((int)ConnectionMode.ExtractWithoutRefresh)"}}
     <div>
-        <span class="label label-default live-connection">[[[NA]]]</span>
+        <span class="not-applicable data-refresh-status su su-schedule-status"></span><span>[[[NA]]]</span>
     </div>
     {{else DatasourceType=="@((int)ConnectionMode.MergeDataSource)"}}
     <div>
-        <span class="label label-default live-connection">[[[Combined Data Source]]]</span>
+        <span class="not-applicable data-refresh-status su su-schedule-status"></span><span>[[[Combined Data Source]]]</span>
+    </div>
+    {{else DatasourceType=="@((int)ConnectionMode.Live)"}}
+    <div>
+        <span class="live-connection data-refresh-status su-schedule-status"></span><span>[[[Live Connection]]]</span>
     </div>
     {{else}}
     <div>
-        <span class="label label-success live-connection">[[[Live Connection]]]</span>
+        <span class="failed data-refresh-status su-schedule-status"></span><span>[[[Failed to fetch]]]</span>
     </div>
     {{/if}}
 </script>
@@ -565,3 +603,5 @@
         });
     });
 </script>
+
+@await Html.PartialAsync("../Items/_ItemInfo")

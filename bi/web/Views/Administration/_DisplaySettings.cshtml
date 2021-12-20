@@ -4,7 +4,7 @@
 }
 
 <div class="col-lg-12 admin-page-body">
-    <h3 class="title col-lg-12 sub-section-heading">[[[Display]]]</h3>
+    <h3 class="title col-lg-12 sub-section-heading">[[[Date and Time]]]</h3>
     <div class="form-group">
         @Html.Label("time-zone", "[[[Time Zone]]]", new { @class = "app-textbox-label col-lg-2" })
         <div class="dropdown site-settings-drop-down col-lg-4">
@@ -13,43 +13,19 @@
     </div>
     <div class="form-group">
         @Html.Label("ejMM_DD_YYYY", "[[[Date format]]]", new { @class = "app-textbox-label col-lg-2" })
-
-        <div class="col-lg-10 top-padding">
-            <div class="col-sm-3 no-padding">
-                <input type="radio" class="css-radio" id="MM_DD_YYYY" name="date_format" value="MM/dd/yyyy" @(ViewBag.SystemSettings.DateFormat == "MM/dd/yyyy" ? "checked" : string.Empty) />
-                <label for="MM_DD_YYYY">MM/DD/YYYY</label>
-            </div>
-            <div class="col-sm-3 no-padding">
-                <input type="radio" class="css-radio" id="DD_MM_YYYY" name="date_format" value="dd/MM/yyyy" @(ViewBag.SystemSettings.DateFormat == "dd/MM/yyyy" ? "checked" : string.Empty) />
-                <label for="DD_MM_YYYY">DD/MM/YYYY</label>
-            </div>
-            <div class="col-sm-3 no-padding">
-                <input type="radio" class="css-radio" id="DD_MMM_YYYY" name="date_format" value="d MMM, yyyy" @(ViewBag.SystemSettings.DateFormat == "d MMM, yyyy" ? "checked" : string.Empty) />
-                <label for="DD_MMM_YYYY">DD MMM YYYY</label>
-            </div>
-            <div class="col-sm-3 no-padding">
-                <input type="radio" class="css-radio" id="MMM_DD_YYYY" name="date_format" value="MMM d, yyyy" @(ViewBag.SystemSettings.DateFormat == "MMM d, yyyy" ? "checked" : string.Empty) />
-                <label for="MMM_DD_YYYY">MMM DD YYYY</label>
-            </div>
+        <div class="dropdown site-settings-drop-down col-lg-4">
+            @Html.DropDownList("dateformat", ViewBag.DateFormat as IEnumerable<SelectListItem>, new { id = "date-format", @class = "selectpicker form-control", data_none_results_text = "[[[No results match]]]", data_size = "10", title = "[[[Select DateFormat]]]", data_live_search = "true", data_live_search_placeholder = "[[[Search]]]" })
         </div>
     </div>
     <div class="form-group">
-        @Html.Label("Use 24-hour format", "[[[Use 24-hour format]]]", new { @class = "app-textbox-label col-xs-2" })
-        <div class="col-xs-4 timeformat switch-align">
-            <span class="material-switch text-left">
-                <input type="checkbox" id="time_format" name="enablefooter" @((bool)ViewBag.SystemSettings.TimeFormat ? "checked" : string.Empty) />
-                <label for="time_format" class="label-primary"></label>
-            </span>
-            <div class="time">
-                [[[13.00]]]
-            </div>
-            <div class="col-xs-12 no-padding">
-                <div class="col-xs-2"></div>
-                <span class="validation-message col-xs-4" message=13></span>
-            </div>
-
+        @Html.Label("Use 24-hour format", "[[[Time format]]]", new { @class = "app-textbox-label col-xs-2" })
+        <div class="dropdown site-settings-drop-down col-lg-4">
+            @Html.DropDownList("timeformat", ViewBag.TimeFormat as IEnumerable<SelectListItem>, new { id = "time_format", @class = "selectpicker form-control", data_none_results_text = "[[[No results match]]]", data_size = "10", title = "[[[Select TimeFormat]]]", data_live_search = "true", data_live_search_placeholder = "[[[Search]]]" })
         </div>
     </div>
+</div>
+<div class="col-lg-12 admin-page-body">
+    <h3 class="title col-lg-12 sub-section-heading">[[[Language]]]</h3>
     @if (ServerAppConfig.IsSelfHosted)
     {
         <div class="form-group">
@@ -63,7 +39,7 @@
                         @if (!@ServerAppConfig.IsHideHelpLink)
                         {
                             <br><br>
-                            <span>[[[Click]]] <a href = "@(helpSiteBaseUrl + localizationHelpSiteUrl)" target="_blank" >[[[here]]]</a> [[[to learn how to add new localization in Bold BI.]]]</span>
+                            <span>[[[Click]]] <a href="@(helpSiteBaseUrl + localizationHelpSiteUrl)" target="_blank">[[[here]]]</a> [[[to learn how to add new localization in Bold BI.]]]</span>
                         }
                     </div>
                 </div>
@@ -75,7 +51,6 @@
             </div>
         </div>
     }
-
     <div class="form-group">
         <div class="col-xs-2 user-model-language-container">
             <label class="col-xs-11 app-textbox-label" id="user-model-language">[[[Data language]]]</label>
@@ -100,3 +75,17 @@
         </div>
     </div>
 </div>
+@*Designer implementation is still pending  so that, we have hidden this*@
+@*<div class="col-lg-12 admin-page-body">
+    <h3 class="title col-lg-12 sub-section-heading">[[[Look and Feel]]]</h3>
+    @if (ServerAppConfig.IsSelfHosted)
+    {
+        <div class="form-group">
+            @Html.Label("application-font", "[[[Application font]]]", new { @class = "app-textbox-label col-xs-2 user-model-language-container" })
+            <div class="dropdown col-xs-4">
+                @Html.DropDownList("application-font", ViewBag.CustomFontList as IEnumerable<SelectListItem>, new { id = "application-font", @class = "selectpicker form-control", data_live_search = "false" })
+                <input type="hidden" id="app_font" value="@ViewBag.SystemSettings.FontPreference">
+            </div>
+        </div>
+    }
+</div>*@

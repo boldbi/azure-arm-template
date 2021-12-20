@@ -8,6 +8,7 @@
     var IsMarkItemsPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic;
     ViewBag.isAdmin = _identityResponse.IsAdmin;
     var isMobile = new DeviceDetection(Context).IsMobile;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
 }
 
 @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
@@ -63,13 +64,12 @@
                 <div class="col-xs-3"></div>
 
                 <div class="col-xs-9 no-padding rightAlign validationArea" id="select-area">
+                    <input type="button" class="app-button app-primary-button app-btn-primary rightAlign" value="[[[Make Public]]]" data-item-type="@(itemTypeName)" id="make-item-public" data-name="@ViewData["ItemName"]" data-item-id="@ViewData["ItemId"]" data-ispublic="@ViewData["IsPublic"]" data-isunlisted="@ViewData["IsUnlisted"]" tabindex="1" autofocus />
 
-                    <input type="button" class="app-button app-primary-button rightAlign" value="[[[Make Public]]]" data-item-type="@(itemTypeName)" id="make-public" data-name="@ViewData["ItemName"]" data-item-id="@ViewData["ItemId"]" tabindex="1" autofocus />
-
-                    <input type="button" id="Cancel" class="app-button app-secondary-button PopupClose no" value="[[[No]]]" onclick="onMakePublicDialogClose()" tabindex="2" />
+                    <input type="button" id="Cancel" class=" app-button app-secondary-button app-btn-secondary PopupClose no" value="[[[No]]]" onclick="onMakePublicDialogClose()" tabindex="2" />
                 </div>
                 <div class="col-xs-8 no-padding centerAlign validationArea" id="close" style="display:none">
-                    <input title="" type="button" id="Cancel" class="app-button app-secondary-button PopupClose" value="[[[Close]]]" onclick="onMakePublicDialogClose()" tabindex="3" autofocus />
+                    <input title="" type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose" value="[[[Close]]]" onclick="onMakePublicDialogClose()" tabindex="3" autofocus />
                 </div>
             </div>
         </div>
@@ -87,7 +87,7 @@
 
                     <div class="deleteItem" id="makepublicitem">
 
-                        @if (ViewBag.IsAdmin == true)
+                        @if (ViewBag.IsAdmin == true || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings])
                         {
                             if ((int)itemType == ((int)ItemType.Dashboard))
                             {
@@ -130,10 +130,10 @@
                 <div class="col-xs-3"></div>
 
                 <div class="col-xs-9 no-padding centerAlign validationArea" id="select-area">
-                    <input type="button" id="Cancel" class="app-button app-secondary-button PopupClose no" value="[[[Close]]]" onclick="onMakePublicDialogClose()" tabindex="2" />
+                    <input type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose no" value="[[[Close]]]" onclick="onMakePublicDialogClose()" tabindex="2" />
                 </div>
                 <div class="col-xs-8 no-padding centerAlign validationArea" id="close" style="display:none">
-                    <input id="Cancel" class="app-button app-secondary-button PopupClose" type="button" autofocus="" tabindex="3" onclick="onRemovePublicDialogClose()" value="[[[Close]]]" title="">
+                    <input id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose" type="button" autofocus="" tabindex="3" onclick="onRemovePublicDialogClose()" value="[[[Close]]]" title="">
 
                 </div>
             </div>

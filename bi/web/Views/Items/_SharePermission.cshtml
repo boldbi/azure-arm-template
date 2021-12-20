@@ -1,4 +1,5 @@
 ﻿@inject ServerPrincipal _identityResponse
+@using Newtonsoft.Json
 @{
     Layout = null;
     var dashboardType = (int)ItemType.Dashboard;
@@ -7,30 +8,39 @@
     var categoryType = (int)ItemType.Category;
     var widgetType = (int)ItemType.Widget;
     var datasourceType = (int)ItemType.Datasource;
+    var userManagement = (int)ItemType.UserManagement;
     var globalAppSettings = _globalAppSettings;
     var currentUserId = _identityResponse.User.UserId;
     var data = new List<ItemUsers>();
     var accessModeDetail = new List<Syncfusion.Server.Dashboards.Models.SearchObject>();
-    var idPUrl = ServerAppConfig.InternalAppIdpUrl;
+    var idPUrl = globalAppSettings.SystemSettings.IDPUrl;
     var IsMarkItemsPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic;
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var specificGroupEntity = (int)PermissionEntity.SpecificGroup;
+    var currentuserId = _identityResponse.User.UserId;
 }
 
 <script>
     var makeItemPublicUrl = "@Url.Action("MakePublicItem", "items")";
     var removeItemPublicUrl = "@Url.Action("RemoveItemPublic", "items")";
+    var makeItemUnlistedUrl = "@Url.Action("MakeUnlistItem", "items")";
+    var removeItemUnlistedUrl = "@Url.Action("RemoveItemUnlist", "items")";
     var getShareItemPermissionUrl = "@Url.Action("ShareItemPermission", "items")";
     var sharepermissionUrl = "@Url.Action("AddItemPermission", "Permission")";
     var updateBulkItemPermissionUrl = "@Url.Action("AddBulkItemPermission", "Permission")";
     var editUserPermissionUrl = "@Url.Action("userpermission", "permission")";
     var editGroupPermissionUrl = "@Url.Action("grouppermission", "permission")";
     var slideShowUrl = "@Url.Action("SlideshowPreview", "Slideshow")";
+    var getGroupOwnersUrl = "@Url.Action("GetGroupOwners", "Group")";
+    var addGroupOwnerPermissionUrl = "@Url.Action("AddGroupOwnerPermission","Permission")";
     var idpUrl = "@idPUrl";
     var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
     var isMarkItemsPublic = @Json.Serialize(globalAppSettings.SystemSettings.IsMarkItemsPublic);
     window.currentUserId = "@currentUserId";
     window.sharedUserGroupList = @Html.Raw(Json.Serialize(@data));
     window.accessModeList = @Html.Raw(Json.Serialize(@data));
+    var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
 </script>
 
 <div id="share-permission-popup" class="fluent-popup custom-bootstrap-styles" style="display:none;">
@@ -83,25 +93,44 @@
                     </div>
                 </div>
             </div>
+            @*<div class="share-permission-unlisted-section" style="display:none;" >
+            <div class="col-xs-2 public-private-icon-section" ng-if="currentItemType == @dashboardType">
+                <div class="public-private-icon">
+                    <i class="su su-unlisted-eye"></i>
+                </div>
+            </div>
+            <div class="col-xs-8 public-private-content-section">
+                <div class="public-private-content">
+                    <div class="private-public-label">[[[Unlisted]]]</div>
+                    <div class="private-public-description" ng-if="currentItemType == @dashboardType">[[[Dashboards marked as unlisted are accessible to anyone with a link to them. No sign-in is required. Only dashboard owners can see them in their dashboards list.]]]</div>
+                </div>
+            </div>
+            <div class="col-xs-2 public-private-change-section">
+                <div class="public-private-change-action">
+                    <a href="javascript:void(0)" onclick="changeAccessMode()" id="access-mode-change-link" class="app-hyperlink">[[[Change]]]</a>
+                </div>
+            </div>
+        </div>*@
+
             <div class="share-permission-dashboard-setting-section" style="display:none;" ng-show="currentItemType != @itemViewType">
                 <div class="col-xs-12 public-private-content-section">
-                    <div class="public-private-content" ng-show="isAdmin">
+                    <div class="public-private-content" ng-show="hasDashboardSettingsPermission">
                         <div class="private-public-description"><span class="bg-warning text-warning">[[[Public Dashboards are disabled in ]]]<a class="app-hyperlink" target="_blank" href="@Url.Action("DashboardSettings", "Administration")">[[[dashboard settings.]]]</a></span></div>
-                    </div>
-                    <div class="public-private-content" ng-show="!isAdmin">
+                    </div>                    
+                    <div class="public-private-content" ng-show="!hasDashboardSettingsPermission">
                         <div class="private-public-description"><span class="bg-warning text-warning">[[[Public dashboards are disabled by the system administrator. Please contact your system administrator to enable this.]]]</span></div>
                     </div>
                 </div>
             </div>
-            <div class="get-item-link-section" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType">
+            <div class="get-item-link-section" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType !=@userManagement">
                 <input onClick="this.setSelectionRange(0, this.value.length)" id="item-url" class="form-control" readonly />
                 <div class="form-control text focus" id="item-url-copy" readonly="" data-original-title="[[[Click to copy]]]">[[[Copy link]]]</div>
             </div>
-            <div class="get-item-embed-link-section col-xs-12 no-padding" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType != @slideShowType">
+            <div class="get-item-embed-link-section col-xs-12 no-padding" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType != @slideShowType && currentItemType !=@userManagement">
                 <a class="get-embed-link app-hyperlink pull-left" href="javascript:void(0)" onclick="getEmbedCode()">&lt;/&gt; [[[Get Embed code]]]</a>
             </div>
             <div class="share-with-label slideshow-note" ng-if="currentItemType == @slideShowType"><b>[[[Note: ]]]</b>[[[Anyone can navigate to this link, but only users with the appropriate permissions will be able to view items in the slideshow.]]]</div>
-            <hr class="divider-cls col-xs-12 no-padding" ng-if="currentItemType != @categoryType && currentItemType != @datasourceType">
+            <hr class="divider-cls col-xs-12 no-padding" ng-if="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType !=@userManagement">
             <div id="assign-user-group-container">
                 <div class="share-user-group-permission-section">
                     <div class="share-with-label" ng-if="currentItemType == @dashboardType">[[[Select one or more users and groups you would like to share this dashboard with.]]]</div>
@@ -109,12 +138,13 @@
                     <div class="share-with-label" ng-if="currentItemType == @slideShowType">[[[Select the users and groups with whom you would like to share this slideshow.]]]</div>
                     <div class="share-with-label" ng-if="currentItemType == @datasourceType">[[[Select the users and groups with whom you would like to share this datasource.]]]</div>
                     <div class="share-with-label" ng-if="currentItemType == @categoryType">[[[Select the users and groups with whom you would like to share this category.]]]</div>
+                    <div class="share-with-label" ng-if="currentItemType == @userManagement">[[[Select the users and groups you would like to make owners for this group.]]]</div>
                     <div class="col-xs-12 share-user-group-segment no-padding">
                         <input type="text" id="share-hidden-input" hidden />
-                        <div id="user-group-search-container" class="col-xs-8 no-padding" ng-class="{ 'itemview-user-group-container' : currentItemType == @itemViewType }">
+                        <div id="user-group-search-container" class="col-xs-8 no-padding" ng-class="{ 'itemview-user-group-container' : currentItemType == @itemViewType || currentItemType == @userManagement  }">
                             @await Html.PartialAsync("../AutoComplete/_AccessibleUserGroupSuggestion")
                         </div>
-                        <div id="access-mode-selection-container" class="col-xs-4 no-padding" ng-show="currentItemType != @itemViewType">
+                        <div id="access-mode-selection-container" class="col-xs-4 no-padding" ng-show="currentItemType != @itemViewType && currentItemType != @userManagement ">
                             <select id="access-mode-selection" class="selectpicker" data-size="5" title="[[[Select Access]]]"></select>
                         </div>
                     </div>
@@ -129,7 +159,7 @@
                     </div>
                 </a>
             </div>
-            <div id="manage-user-group-container" style="display:none;">
+            <div id="manage-user-group-container" style="display: none";>
                 <div class="manage-user-group-section">
                     <div class="manage-user-group-header-section">
                         <span class="col-xs-9">[[[People]]]</span>
@@ -232,14 +262,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="access-mode-change-unlisted-section" style="display:none;">
+                    @*<div class="access-mode-change-unlisted-section" ng-if="currentItemType == @dashboardType">
                         <div class="col-xs-1 radio-btn">
                             @Html.RadioButton("access-mode", "unlisted", new { @class = "css-radio", @id = "unlisted-access-mode" })
                             @Html.Label("unlisted-access-mode", " ", new { @class = "pointer normal-font pull-left notransition" })
                         </div>
                         <div class="col-xs-1 unlisted-icon-section">
                             <div class="unlisted-icon">
-                                <i class="su su-eye"></i>
+                                <i class="su su-unlisted-eye"></i>
                             </div>
                         </div>
                         <div class="col-xs-10 unlisted-content-section">
@@ -249,7 +279,7 @@
                                 <div class="unlisted-description description-segment" ng-if="currentItemType == @itemViewType">[[[Dashboard views marked as unlisted are accessible to anyone with a link to them. No sign-in is required. Only dashboard views owners can see them in their dashboard views list.]]]</div>
                             </div>
                         </div>
-                    </div>
+                    </div>*@
                 </form>
             </div>
             @if (!@ServerAppConfig.IsHideHelpLink)
@@ -346,16 +376,19 @@
 
     <div class="fluent-popup-footer">
         <div id="button-container" class="col-lg-12 col-md-12">
-            <button type="button" id="manage-access-button" class="app-button app-secondary-button pull-left">[[[Manage Access]]]</button>
-            <button type="button" id="manage-access-back-button" class="app-button app-secondary-button pull-left" style="display: none;">[[[Back]]]</button>
-            <button type="button" id="share-done-popup-button" class="app-button app-secondary-button pull-right">[[[Done]]]</button>
-            <button type="button" id="manage-access-cancel-button" class="app-button app-secondary-button pull-right" style="display: none;">[[[Cancel]]]</button>
-            <button type="button" id="share-permission-button" class="app-button app-primary-button pull-right" onclick="saveItemPermission()" style="display: none;">[[[Share]]]</button>
-            <button type="button" id="manage-access-save-button" class="app-button app-primary-button pull-right" style="display: none;">[[[Save]]]</button>
-            <button type="button" id="access-mode-cancel-button" class="app-button app-secondary-button pull-right" style="display: none;">[[[Cancel]]]</button>
-            <button type="button" id="access-mode-change-button" class="app-button app-primary-button pull-right" style="display: none;" disabled="disabled">[[[Change]]]</button>
-            <button type="button" id="copy-embed-code-done-button" class="app-button app-secondary-button pull-right" style="display: none;">[[[Done]]]</button>
-            <button type="button" id="copy-embed-code-back-button" class="app-button app-secondary-button pull-left" style="display: none;">[[[Back]]]</button>
+            <span>
+                <button type="button" id="manage-access-button" class="app-button app-secondary-button app-btn-secondary pull-left">[[[Manage Access]]]</button>
+            </span>
+            <button type="button" id="manage-access-back-button" class="app-button app-secondary-button app-btn-secondary pull-left" style="display: none;">[[[Back]]]</button>
+            <button type="button" id="share-done-popup-button" class="app-button app-secondary-button app-btn-secondary pull-right">[[[Done]]]</button>
+            <button type="button" id="manage-access-cancel-button" class="app-button app-secondary-button app-btn-secondary pull-right" style="display: none;">[[[Cancel]]]</button>
+            <button type="button" id="share-permission-button" class="app-button app-primary-button app-btn-primary pull-right" onclick="saveItemPermission()" style="display: none;">[[[Share]]]</button>
+            <button type="button" id="add-owner-permission-button" class="app-button app-primary-button app-btn-primary pull-right" onclick="addGroupOwnerPermission()" style="display: none;">[[[Add Owner]]]</button>
+            <button type="button" id="manage-access-save-button" class="app-button app-primary-button app-btn-primary pull-right" style="display: none;">[[[Save]]]</button>
+            <button type="button" id="access-mode-cancel-button" class="app-button app-secondary-button app-btn-secondary pull-right" style="display: none;">[[[Cancel]]]</button>
+            <button type="button" id="access-mode-change-button" class="app-button app-primary-button app-btn-primary pull-right" style="display: none;" disabled="disabled">[[[Change]]]</button>
+            <button type="button" id="copy-embed-code-done-button" class="app-button app-secondary-button app-btn-secondary pull-right" style="display: none;">[[[Done]]]</button>
+            <button type="button" id="copy-embed-code-back-button" class="app-button app-secondary-button app-btn-secondary pull-left" style="display: none;">[[[Back]]]</button>            
         </div>
     </div>
 </div>

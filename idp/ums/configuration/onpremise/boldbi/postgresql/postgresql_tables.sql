@@ -110,7 +110,9 @@ CREATE TABLE SyncDS_Item(
 	IsPublic smallint NOT NULL DEFAULT 0,
 	IsDraft smallint NULL DEFAULT 0,
 	IsLocked smallint NULL DEFAULT 0,
-	IsActive smallint NULL)
+	IsActive smallint NULL,
+	IsUnlisted smallint NOT NULL DEFAULT 0,
+	UnlistedCode varchar(20) NULL)
 ;
 
 CREATE TABLE SyncDS_ItemView(
@@ -167,6 +169,7 @@ CREATE TABLE SyncDS_ItemLog(
 	ItemId uuid NOT NULL,
 	ItemVersionId int NOT NULL,
 	SourceTypeId int NOT NULL,
+	EventTypeId int NULL,
 	ParentId uuid NULL,
 	FromCategoryId uuid NULL,
 	ToCategoryId uuid NULL,
@@ -189,6 +192,9 @@ CREATE TABLE SyncDS_UserPermission(
 	PermissionEntityId int NOT NULL,
 	ItemId uuid NULL,
 	UserId int NOT NULL,
+	SettingsTypeId int NULl,
+	ScopeGroupId int NULl,
+	ItemTypeId int NULl,
 	IsActive smallint NOT NULL)
 ;
 
@@ -198,6 +204,9 @@ CREATE TABLE SyncDS_GroupPermission(
 	PermissionEntityId int NOT NULL,
 	ItemId uuid NULL,
 	GroupId int NOT NULL,
+	SettingsTypeId int NULl,
+	ScopeGroupId int NULl,
+	ItemTypeId int NULl,
 	IsActive smallint NOT NULL)
 ;
 
@@ -233,6 +242,7 @@ CREATE TABLE SyncDS_ScheduleDetail(
 	ModifiedById int NOT NULL,
 	CreatedDate timestamp NOT NULL,
 	ModifiedDate timestamp NOT NULL,
+	ScheduleExportInfo text NULL,
 	IsActive smallint NOT NULL)
 ;
 
@@ -317,7 +327,7 @@ CREATE TABLE SyncDS_ScheduleLog(
 CREATE TABLE SyncDS_SystemSettings(
 	Id SERIAL PRIMARY KEY NOT NULL,
 	Key varchar(255) NOT NULL,
-	Value varchar(4000) NULL,
+	Value text NULL,
 	ModifiedDate timestamp NOT NULL,
 	IsActive smallint NOT NULL,
 	CONSTRAINT UK_SyncDS_SystemSettings_Key UNIQUE(Key))
@@ -334,6 +344,7 @@ CREATE TABLE SyncDS_Comment(
     ItemId uuid NOT NULL,
     UserId int NOT NULL,
     ParentId int NULL,
+    ParentItemId uuid NULL,
     CreatedDate timestamp NOT NULL,
     ModifiedDate timestamp NOT NULL,
     ModifiedById int NOT NULL,
@@ -343,6 +354,7 @@ CREATE TABLE SyncDS_Comment(
 CREATE TABLE SyncDS_ItemWatch(
 	Id SERIAL PRIMARY KEY NOT NULL,
 	ItemId uuid NOT NULL,
+	ParentItemId uuid NULL,
 	UserId int NOT NULL,
 	ModifiedDate timestamp NOT NULL,
 	IsWatched smallint NOT NULL,
@@ -703,6 +715,7 @@ CREATE TABLE SyncDS_DeploymentDashboards(
 	CategoryName varchar(255) NOT NULL,
 	IsDashboardLocked smallint NOT NULL,
 	IsDatasourceLocked smallint NOT NULL,
+	ItemInfo text NOT NULL,
     Description varchar(1026) NULL,
     CreatedById int NOT NULL,
     CreatedDate timestamp NOT NULL,
@@ -770,6 +783,12 @@ CREATE TABLE SyncDS_ExternalSites(
 	IsActive smallint NOT NULL)
 ;
 
+CREATE TABLE SyncDS_SettingsType(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	Name varchar(100) NOT NULL UNIQUE,
+	IsActive smallint NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into SyncDS_ItemType (Name,IsActive) VALUES (N'Category',1)
@@ -791,6 +810,41 @@ insert into SyncDS_ItemType (Name,IsActive) values (N'Widget',1)
 insert into SyncDS_ItemType (Name,IsActive) values (N'ItemView',1)
 ;
 Insert INTO SyncDS_ItemType (Name, IsActive) Values ('Slideshow',1)
+;
+INSERT into SyncDS_ItemType (Name, IsActive) Values (N'Settings',1)
+; 
+INSERT INTO SyncDS_ItemType (Name, IsActive) Values (N'User Management',1)
+;
+INSERT INTO SyncDS_ItemType (Name, IsActive) Values (N'Permissions',1)
+;
+
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Site Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Dashboard Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Embed Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Data Store Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Connectors',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Email Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Accounts Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) values (N'User Directory Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) values (N'Authentication Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Notification Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Manage License',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Support Settings',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Subscription',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Payments',1)
 ;
 
 INSERT into SyncDS_ItemLogType (Name,IsActive) VALUES ( N'Added',1)
@@ -895,6 +949,20 @@ INSERT into SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUE
 ;
 INSERT into SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Slideshow',1,10,1)
 ;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Specific Settings',0,11,1)
+;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Settings',1,11,1)
+;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Specific Group',0,12,1)
+;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Users and Groups',1,12,1)
+;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'Specific Permissions',0,13,1)
+;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Permissions',1,13,1)
+;
+INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Groups',1,12,1)
+;
 
 INSERT into SyncDS_Group (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',null,now() at time zone 'utc', 1, 1)
 ;
@@ -970,6 +1038,8 @@ INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, 
 ;
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,1,1)
 ;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (29,1,1)
+;
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,2,1)
 ;																									  
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (5,2,1)
@@ -1029,6 +1099,18 @@ INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, 
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (21,3,1)
 ;
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,3,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (23,3,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (24,3,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (25,3,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (26,3,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (27,3,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (28,3,1)
 ;
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,4,1)
 ;																									  
@@ -1320,6 +1402,8 @@ INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) V
 ;
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'SiteSettings',N'SiteSettings',now() at time zone 'utc',1)
 ;
+INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'DashboardSettings.UsageAnalytics',N'DashboardSettings.UsageAnalytics',now() at time zone 'utc',1)
+;
 
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (11,N'Contact',N'Contact',now() at time zone 'utc',1)
 ;
@@ -1582,12 +1666,24 @@ ALTER TABLE SyncDS_UserPermission  ADD  FOREIGN KEY(ItemId) REFERENCES SyncDS_It
 ;
 ALTER TABLE SyncDS_UserPermission  ADD  FOREIGN KEY(UserId) REFERENCES SyncDS_User (Id)
 ;
+ALTER TABLE SyncDS_UserPermission  ADD FOREIGN KEY(SettingsTypeId) REFERENCES SyncDS_SettingsType (Id) 
+;
+ALTER TABLE SyncDS_UserPermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES SyncDS_Group (Id)
+;
+ALTER TABLE SyncDS_UserPermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES SyncDS_ItemType (Id)
+;
 
 ALTER TABLE SyncDS_GroupPermission  ADD  FOREIGN KEY(PermissionEntityId) REFERENCES SyncDS_PermissionEntity (Id)
 ;
 ALTER TABLE SyncDS_GroupPermission  ADD  FOREIGN KEY(ItemId) REFERENCES SyncDS_Item (Id)
 ;
 ALTER TABLE SyncDS_GroupPermission  ADD  FOREIGN KEY(GroupId) REFERENCES SyncDS_Group (Id)
+;
+ALTER TABLE SyncDS_GroupPermission  ADD FOREIGN KEY(SettingsTypeId) REFERENCES SyncDS_SettingsType (Id)
+;
+ALTER TABLE SyncDS_GroupPermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES SyncDS_Group (Id)
+;
+ALTER TABLE SyncDS_GroupPermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES SyncDS_ItemType (Id)
 ;
 
 ALTER TABLE SyncDS_ScheduleDetail  ADD FOREIGN KEY(ScheduleId) REFERENCES SyncDS_Item (Id)
@@ -1653,11 +1749,15 @@ ALTER TABLE SyncDS_Comment ADD FOREIGN KEY(ItemId) REFERENCES SyncDS_Item (Id)
 ALTER TABLE SyncDS_Comment ADD FOREIGN KEY(UserId) REFERENCES SyncDS_User (Id)
 ;
 ALTER TABLE SyncDS_Comment ADD FOREIGN KEY(ModifiedById) REFERENCES SyncDS_User (Id)
-; 
+;
+ALTER TABLE SyncDS_Comment ADD FOREIGN KEY(ParentItemId) REFERENCES SyncDS_Item (Id) 
+;
  
 ALTER TABLE SyncDS_ItemWatch ADD FOREIGN KEY(ItemId) REFERENCES SyncDS_Item (Id)
 ;
 ALTER TABLE SyncDS_ItemWatch ADD FOREIGN KEY(UserId) REFERENCES SyncDS_User (Id)
+;
+ALTER TABLE SyncDS_ItemWatch ADD FOREIGN KEY(ParentItemId) REFERENCES SyncDS_Item (Id)
 ;
 
 ALTER TABLE SyncDS_Homepage  ADD FOREIGN KEY(UserId) REFERENCES SyncDS_User (Id)
@@ -1687,8 +1787,6 @@ ALTER TABLE SyncDS_DashboardWidget  ADD FOREIGN KEY(WidgetItemId) REFERENCES Syn
 ALTER TABLE SyncDS_DashboardDataSource  ADD FOREIGN KEY(DashboardItemId) REFERENCES SyncDS_Item (Id)
 ;
 ALTER TABLE SyncDS_DashboardDataSource  ADD FOREIGN KEY(DataSourceItemId) REFERENCES SyncDS_Item (Id)
-;
-ALTER TABLE SyncDS_DashboardDataSource  ADD FOREIGN KEY(VersionNumber) REFERENCES SyncDS_ItemVersion (Id)
 ;
 
 ALTER TABLE SyncDS_HomepageItemFilter  ADD FOREIGN KEY(HomepageId) REFERENCES SyncDS_Homepage (Id)

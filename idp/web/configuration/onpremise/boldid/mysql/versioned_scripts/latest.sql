@@ -1,34 +1,24 @@
-﻿ALTER TABLE {database_name}.BOLDTC_AuthSettings MODIFY COLUMN ModifiedBy char(38) NULL;
-ALTER TABLE {database_name}.BOLDTC_AuthSettings MODIFY COLUMN CreatedBy char(38) NULL;
-
-INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'LinkedIn',1);
-INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'Google',1);
-INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'GitHub',1);
-INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'Facebook',1);
-INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'Twitter',1);
-INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'JWTSSO',1);
-
-INSERT {database_name}.BOLDTC_AuthType (Name, ModifiedDate, IsActive) VALUES ( N'JWTSSO', UTC_TIMESTAMP(), 1);
-
-INSERT {database_name}.BOLDTC_AuthProvider (Name, AuthTypeId, ModifiedDate, IsActive) VALUES ( N'AzureAD', 3, UTC_TIMESTAMP(), 1);
-INSERT {database_name}.BOLDTC_AuthProvider (Name, AuthTypeId, ModifiedDate, IsActive) VALUES ( N'JWTSSO', 5, UTC_TIMESTAMP(), 1);
-
-ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD MaintenanceDatabase char(255) NULL;
-ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD ImDbMaintenanceDatabase char(255) NULL;
-
-CREATE TABLE IF NOT EXISTS {database_name}.BOLDTC_UserLog
-   (
-  	Id int NOT NULL AUTO_INCREMENT, 
-	LogAction nvarchar(255) NOT NULL,
-	UserId char(38) NOT NULL,
-	Message longtext NOT NULL,
-	RequestedById char(38) NOT NULL,
-	IpAddress nvarchar(100) NOT NULL,
-	LogDate datetime NOT NULL,
-	ReferrerUrl longtext NULL,
+CREATE TABLE [BOLDTC_AzureBlob] (
+	Id int NOT NULL AUTO_INCREMENT,
+	TenantInfoId char(38) NOT NULL,
+	AccountName nvarchar(max) NOT NULL,
+	AccessKey nvarchar(max) NOT NULL,
+	Uri nvarchar(max) NOT NULL,
+	ContainerName nvarchar(max) NOT NULL,
+	ConnectionType nvarchar(max) NOT NULL,
+	ConnectionString nvarchar(max) NOT NULL,
+	CreatedDate datetime NOT NULL,
+	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
-	AdditionalData longtext NULL,
-  CONSTRAINT PK_BOLDTC_USERLOG PRIMARY KEY (Id ASC),
-  CONSTRAINT BOLDTC_UserLog_fk1 FOREIGN KEY (UserId) REFERENCES {database_name}.BOLDTC_User(Id),
-  CONSTRAINT BOLDTC_UserLog_fk2 FOREIGN KEY (RequestedById) REFERENCES {database_name}.BOLDTC_User(Id)
-);
+  CONSTRAINT PK_BOLDTC_AZUREBLOB PRIMARY KEY (Id ASC)
+)
+;
+
+ALTER TABLE {database_name}.BOLDTC_AzureBlob ADD CONSTRAINT BOLDTC_AzureBlob_fk0 FOREIGN KEY (TenantInfoId) REFERENCES {database_name}.BOLDTC_TenantInfo(Id)
+;
+ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD UseCustomBranding tinyint NOT NULL DEFAULT 0
+;
+ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD IsNewImDbDatabase tinyint NOT NULL DEFAULT 0
+;
+ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD IsNewDatabase tinyint NOT NULL DEFAULT 0
+;
