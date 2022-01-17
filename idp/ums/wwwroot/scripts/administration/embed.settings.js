@@ -73,8 +73,8 @@ $(function () {
             }
             else {
                 document.execCommand('copy');
-                getLinkCopyLinkobj.attr("data-original-title", window.TM.App.LocalizationContent.Copysuccess);
-                getLinkCopyLinkobj.tooltip("hide").attr("data-original-title", window.TM.App.LocalizationContent.Copysuccess).tooltip("fixTitle").tooltip("show");
+                getLinkCopyLinkobj.attr("data-original-title", window.TM.App.LocalizationContent.Copied);
+                getLinkCopyLinkobj.tooltip("hide").attr("data-original-title", window.TM.App.LocalizationContent.Copied).tooltip("fixTitle").tooltip("show");
                 setTimeout(function () { getLinkCopyLinkobj.attr("data-original-title", window.TM.App.LocalizationContent.LinkCopy); getLinkCopyLinkobj.tooltip(); }, 3000);
             }
         }

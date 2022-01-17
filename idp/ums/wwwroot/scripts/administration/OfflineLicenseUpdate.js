@@ -1,5 +1,6 @@
 ﻿var licenseKey;
 var getLicenseUrl;
+var licenseToken;
 $(document).ready(function () {
     $("#offline-license-update-dialog").ejDialog({
         showOnInit: false,
@@ -47,7 +48,7 @@ $(document).ready(function () {
 
     });
 
-    $(document).on("click", "#offline-update-bi, #offline-update-reports, .offline-license-acion", function () {
+    $(document).on("click", "#offline-update-bi, #offline-update-reports, .offline-license-acion, #offline-change-subscription", function () {
         $("#offline-license-update-dialog").ejDialog("open");
         getLicenseUrl = $(this).attr("data-offlinelicense-url");
         $("#tenant-type").val($(this).attr("data-tenant-type"));
@@ -82,7 +83,9 @@ function sendData(data, url) {
 
     if (validJSON) {
         var key = JSON.parse(data.content).unlock_key;
+        var boldLicenseToken = JSON.parse(data.content).license_token;
         licenseKey = key;
+        licenseToken = boldLicenseToken;
         if (key !== undefined && !isEmptyOrSpaces(key)) {
             $.ajax({
                 type: 'POST',
@@ -111,9 +114,11 @@ function sendData(data, url) {
                             $("#plan-name-container").removeClass("display-none");
                         }
 
-                        if (data.ExpiryDate !== undefined && !isEmptyOrSpaces(data.ExpiryDate)) {
-                            $("#expiry-date").html(data.ExpiryDate);
-                            $("#expiry-date-container").removeClass("display-none");
+                        if (!data.IsPerpetualLicense) {
+                            if (data.ExpiryDate !== undefined && !isEmptyOrSpaces(data.ExpiryDate)) {
+                                $("#expiry-date").html(data.ExpiryDate);
+                                $("#expiry-date-container").removeClass("display-none");
+                            }
                         }
 
                         if (data.TenantStatus !== undefined && !isEmptyOrSpaces(data.TenantStatus)) {
@@ -125,6 +130,11 @@ function sendData(data, url) {
                             }
                             else if (data.TenantStatus == "Trial") {
                                 $("#tenant-status").addClass("trial");
+                            }
+
+                            if (data.IsPerpetualLicense) {
+                                $("#tenant-status").html("Perpetual")
+                                $("#tenant-status").addClass("active-status");
                             }
                         }
 
@@ -162,6 +172,7 @@ function uploadLicenseDialogClose() {
     $("#confirm-license").prop('disabled', true);
     $("#file-name").val('');
     licenseKey = "";
+    licenseToken = "";
     $("#tenant-type").val("");
     $("#offline-license-update-dialog").ejDialog("refresh");
     $("#offline-license-update-dialog").ejDialog("close");
@@ -172,7 +183,7 @@ function confirmLicenseUpdate() {
         $.ajax({
             type: "POST",
             url: updateLicenseKeyUrl,
-            data: { licenseKey: licenseKey, licenseType: "2" },
+            data: { licenseKey: licenseKey, licenseType: "2", currentUrl: window.location.origin, boldLicenseToken: licenseToken },
             beforeSend: showWaitingPopup($("#offline-license-update-dialog")),
             success: function (result) {
                 if ($("#license-selection-container").length != 0) {
@@ -182,7 +193,6 @@ function confirmLicenseUpdate() {
                         $("#license-selection-container").hide();
                         $('#auth-type-dropdown').removeClass("hide").addClass("show");
                         $("#system-settings-db-selection-container").slideDown("slow");
-                        addTitleForDropdown(".database-dropdown-margin");
                         uploadLicenseDialogClose();
                     }
                     else {

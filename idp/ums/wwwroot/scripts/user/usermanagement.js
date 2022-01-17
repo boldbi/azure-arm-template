@@ -125,7 +125,7 @@ $(document).ready(function () {
     $(document).on('click', "input#add-user", function () {
         var firstName = $("#firstname").val().trim();
         var userName = $("#username").val().trim().toLowerCase();
-        var password = $("#user-password").val();
+        var password = $("#new-password").val();
         var isValid = $("#dialog-container").valid();
         var emailid = $('#mailid').val().trim();
 
@@ -728,7 +728,7 @@ function onAddTenantsDialogOpen() {
         allowSorting: true,
         allowSearching: true,
         allowSelection: true,
-        allowFiltering: true,
+        allowFiltering: false,
         enableAltRow: false,
         pageSettings: { pageSize: 20 },
         filterSettings: { filterType: "menu" },
@@ -764,6 +764,7 @@ function onAddTenantsDialogOpen() {
             },
             {
                 template: true,
+                allowFiltering: false,
                 allowSorting: true,
                 templateID: "#application-name-template",
                 headerText: "Application Name",
@@ -774,6 +775,7 @@ function onAddTenantsDialogOpen() {
             },
             {
                 template: true,
+                allowFiltering: false,
                 templateID: "#application-url-template",
                 headerText: "Application URL",
                 width: 150,

@@ -1,4 +1,5 @@
 ﻿var windowRef;
+var changeSubscriptionDialog;
 
 $(document).ready(function () {
     if (location.href.match(/boldbi/) != null) {
@@ -56,7 +57,40 @@ $(document).ready(function () {
                 break;
         }
     });
+
+    changeSubscriptionDialog = new ej.popups.Dialog({
+        header: window.TM.App.LocalizationContent.ChangeSubscriptionDialogHeader,
+        content: document.getElementById("change-subscription-dialog"),
+        showCloseIcon: true,
+        width: '599px',
+        height: '275px',
+        isModal: true,
+        visible: false,
+        beforeOpen: fnBeforeOpen,
+        close: fnOnClose
+    });
+
+    changeSubscriptionDialog.appendTo('#change-subscription-content');
+
     $('[data-toggle="tooltip"]').tooltip();
+});
+
+
+function fnBeforeOpen() {
+    document.getElementById('change-subscription-dialog').style.visibility = 'visible';
+}
+
+function fnOnClose() {
+    $(".online-change-subscription").attr("license-service-url", "");
+    $(".offline-change-subscription").attr("data-offlinelicense-url", "").attr("data-tenant-type", "");
+}
+
+$(document).on("click", "#change-subscription", function () {
+    $(".online-change-subscription").attr("license-service-url", $(this).attr("license-service-url") + "&change_subscription=true");
+    $(".offline-change-subscription").attr("data-offlinelicense-url", $(this).attr("data-offlinelicense-url")).attr("data-tenant-type", $(this).attr("data-tenant-type"));
+    $("#change-subscription-help").attr("href", $(this).attr("data-offlinelicense-url"));
+
+    changeSubscriptionDialog.show();
 });
 
 $(document).on("click", "#update-onpremise-plan-bi, #update-onpremise-plan-reports", function (e) {
@@ -66,7 +100,7 @@ $(document).on("click", "#update-onpremise-plan-bi, #update-onpremise-plan-repor
     licenseWindow($(this), 600, 500);
 });
 
-$(document).on("click", "#online-license-reports, #online-license-bi", function (e) {
+$(document).on("click", "#online-license-reports, #online-license-bi, .online-change-subscription", function (e) {
     licenseWindow($(this), 800, 960);
 });
 
@@ -74,10 +108,12 @@ function handleApplyLicense(addButtonObj, evt) {
     if (evt.originalEvent.data.isSuccess !== undefined) {
         if (evt.originalEvent.data.isSuccess === true) {
             var refreshToken = evt.originalEvent.data.refreshtoken != undefined ? evt.originalEvent.data.refreshtoken : "";
+            var boldLicenseToken = evt.originalEvent.data.boldLicenseToken != undefined && evt.originalEvent.data.boldLicenseToken != null ? evt.originalEvent.data.boldLicenseToken : "";
+
             $.ajax({
                 type: "POST",
                 url: updateLicenseKeyUrl,
-                data: { licenseKey: evt.originalEvent.data.licenseKey, refreshToken: refreshToken, licenseType: "1" },
+                data: { licenseKey: evt.originalEvent.data.licenseKey, refreshToken: refreshToken, licenseType: "1", boldLicenseToken: boldLicenseToken, currentUrl: window.location.origin },
                 beforeSend: showWaitingPopup($("#server-app-container")),
                 success: function (result) {
                     if (result.Status) {
@@ -121,54 +157,4 @@ function licenseWindow(element, windowHeight, windowWidth) {
     showWaitingPopup($("#server-app-container"));
     windowRef = window.open(element.attr("license-service-url") + "&origin=" + window.location.origin, "", "height=" + windowHeight, "width=" + windowWidth);
     timer = setInterval($.proxy(checkWindowRef, 500, addButtonObj));
-}
-
-function copyToClipboard(elementId) {
-    var elem = document.getElementById(elementId)
-    // create hidden text element, if it doesn't already exist
-    var targetElementId = "hidden-copy-text";
-    var isInput = elem.tagName === "INPUT" || elem.tagName === "TEXTAREA";
-    var start, end;
-    if (isInput) {
-        // can just use the original source element for the selection and copy
-        targetElement = elem;
-        start = elem.selectionStart;
-        end = elem.selectionEnd;
-    } else {
-        // must use a temporary form element for the selection and copy
-        targetElement = document.getElementById(targetElementId);
-        if (!targetElement) {
-            var targetElement = document.createElement("textarea");
-            targetElement.style.position = "absolute";
-            targetElement.style.left = "-9999px";
-            targetElement.id = targetElementId;
-            document.body.appendChild(targetElement);
-        }
-        targetElement.textContent = elem.textContent;
-    }
-    // select the content
-    var currentFocus = document.activeElement;
-    targetElement.focus();
-    targetElement.setSelectionRange(0, targetElement.value.length);
-
-    // copy the selection
-    var done;
-    try {
-        done = document.execCommand("copy");
-    } catch (e) {
-        done = false;
-    }
-    // restore original focus
-    if (currentFocus && typeof currentFocus.focus === "function") {
-        currentFocus.focus();
-    }
-
-    if (isInput) {
-        // restore prior selection
-        elem.setSelectionRange(start, end);
-    } else {
-        // clear temporary content
-        targetElement.textContent = "";
-    }
-    return done;
 }

@@ -33,19 +33,19 @@
 
 function passwordBoxHightlight(element) {
     var rules = "";
-    $(element).closest('div').addClass("has-error");
+    $(element).closest('div').addClass("e-error");
     var isPopoverPasswordPolicy = $("#new-password").data("toggle") === "popover";
     var passwordPolicyElement = !isPopoverPasswordPolicy ? $('#password_policy_rules').find('li>span') : $('#password_policy_rules').find('li>span:not(.content)');
     var passwordPolicyClass = !isPopoverPasswordPolicy ? "su-tick" : "su-password-tick";
     if ($(element).attr('id') == "new-password") {
         for (var i = 0; i < passwordPolicyElement.length; i++) {
             if ($(passwordPolicyElement[i]).attr('class') == passwordPolicyClass)
-                $(element).closest('div').removeClass("has-error");
+                $(element).closest('div').removeClass("e-error");
             else
                 rules = "[[[unsatisfied-rule]]]";
         }
         if (rules != "" && rules != undefined) {
-            $(element).closest('div').addClass("has-error");
+            $(element).closest('div').addClass("e-error");
             rules = "";
         }
     }
@@ -53,7 +53,7 @@ function passwordBoxHightlight(element) {
 
 function passwordBoxUnhightlight(element) {
     var rules = "";
-    $(element).closest('div').removeClass('has-error');
+    $(element).closest('div').removeClass('e-error');
     var isPopoverPasswordPolicy = $("#new-password").data("toggle") === "popover";
     var passwordPolicyElement = !isPopoverPasswordPolicy ? $('#password_policy_rules').find('li>span') : $('#password_policy_rules').find('li>span:not(.content)');
     var passwordPolicyClass = !isPopoverPasswordPolicy ? "su-tick" : "su-password-tick";
@@ -63,10 +63,10 @@ function passwordBoxUnhightlight(element) {
             if ($(passwordPolicyElement[i]).attr('class') != passwordPolicyClass)
                 rules = "[[[unsatisfied-rule]]]";
             if ($(passwordPolicyElement[i]).attr('class') == passwordPolicyClass)
-                $(element).closest('div').removeClass("has-error");
+                $(element).closest('div').removeClass("e-error");
         }
         if (rules != "" && rules != undefined) {
-            $(element).closest('div').addClass("has-error");
+            $(element).closest('div').addClass("e-error");
             rules = "";
         }
     }

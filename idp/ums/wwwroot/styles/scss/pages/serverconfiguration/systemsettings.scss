@@ -8,28 +8,28 @@ $startup-header-height: 70px;
 $startup-element-border-radius: 6px;
 
 %form-field-container {
-    background: $white;
+    background: $admin-page-bg;
     border-radius: $startup-element-border-radius;
     box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.12);
     padding: 0px 24px 16px 24px;
-    width: 550px;
+    width: 500px;
 }
 
 %button-holder-style {
     .btn-holder {
         display: inline-block;
-        padding-top: 50px;
+        padding: 32px 60px 24px 60px;
         width: 100%;
 
         .proceed-button {
-            @include button(32px, 100%);
+            @include button(32px, 320px);
         }
     }
 }
 
 %link-header {
     font-size: 16px;
-    color: $primary-black;
+    color: $primary-text-color;
     letter-spacing: 0.75px;
     line-height: 30px;
 }
@@ -48,7 +48,7 @@ $startup-element-border-radius: 6px;
     font-style: normal;
     font-stretch: normal;
     line-height: normal;
-    color: $primary-black;
+    color: $primary-text-color;
 }
 
 %need-help-content-styles {
@@ -61,14 +61,74 @@ $startup-element-border-radius: 6px;
     letter-spacing: 0.65px;
 }
 
+* {
+    font-family: var(--font-family);
+}
+
+html {
+    height: 100%;
+}
+
+
+
+.storage-page-content {
+    height: 100%;
+}
+
 body {
-    background-color: $grey-100;
+    background-color: $admin-container-bg;
     padding-bottom: $startup-header-height;
     min-width: 950px;
+    color: $primary-text-color;
+    height: 100%;
 
     .popover {
+        background: $admin-page-bg;
         word-wrap: break-word;
         max-width: 450px;
+
+        .arrow::after {
+            border-top-color: $admin-page-bg !important;
+        }
+    }
+
+    .info-content {
+        font-style: normal;
+        font-size: 12px;
+        padding-top: 4px;
+        color: $grey-500;
+        font-size: 12px;
+    }
+
+    .radio-label {
+        font-weight: 600;
+    }
+
+    .radio-info {
+        margin-left: 29px;
+        width: 175px;
+    }
+
+    .txt-box-info {
+        margin-left: 13px;
+    }
+
+    .check-box-info {
+        margin-left: 25px;
+    }
+
+    .validation-txt-errors {
+        margin-left: 13px;
+        margin-top: 4px;
+        margin-bottom: 2px;
+    }
+
+    .center-storage-types {
+        padding-bottom: 24px;
+    }
+
+    .connection-types {
+        padding-bottom: 12px;
     }
 
     header.startup-header {
@@ -166,7 +226,7 @@ body {
 
                                 &.first-content {
                                     font-size: 18px;
-                                    color: $primary-black;
+                                    color: $primary-text-color;
                                     letter-spacing: 0.84px;
                                     line-height: 30px;
                                     margin-top: 40px;
@@ -368,8 +428,8 @@ body {
                                         -webkit-appearance: none;
                                         float: right;
                                         margin: 0 0 0 10px;
-                                        color: $primary-bg-color;
-                                        border: 1px solid $primary-btn-border-color;
+                                        color: $admin-page-bg;
+                                        border: 1px solid $primary-border;
                                         border-radius: 4px;
                                     }
 
@@ -443,7 +503,7 @@ body {
                             .secondary-button {
                                 margin-right: 20px;
 
-                                @include button(34px, 48%, "secondary");
+                                @include button(34px, 45%, "secondary");
                             }
                         }
 
@@ -459,6 +519,7 @@ body {
                     .hidden {
                         visibility: hidden !important;
                     }
+
 
                     @media screen and (min-width: 1400px) {
                         .primary-button, .secondary-button, .link-button, .critical-action-button {
@@ -501,7 +562,7 @@ body {
                             margin: 0 auto;
 
                             .progress-bar {
-                                background-color: $primary;
+                                background-color: $primary-color;
                                 border-radius: 5px;
                             }
                         }
@@ -511,14 +572,11 @@ body {
                         margin-top: 20px;
                         display: block;
                         letter-spacing: 0.65px;
-                        color: $grey-700;
+                        color: $primary-text-color;
                     }
                 }
 
                 .system-settings-page-container {
-                    .validation-txt-errors {
-                        position: absolute;
-                    }
 
                     .database-dropdown-margin {
                         .btn-group {
@@ -538,13 +596,14 @@ body {
                         cursor: default;
                     }
 
-                    .new-db, .existing-db {
-                        input:disabled {
-                            + label {
-                                color: $grey-500;
-                                cursor: default;
-                            }
-                        }
+                    .radio-button {
+                        width: 18px;
+                        height: 18px;
+                    }
+
+                    .radio-padding {
+                        padding-right: 0px;
+                        padding-left: 0px;
                     }
 
                     .secure-sql {
@@ -560,14 +619,16 @@ body {
                 .field-label {
                     letter-spacing: 0.56px;
                     margin-bottom: 8px;
+                    color: $primary-text-color;
                 }
 
                 .secure-sql {
-                    margin-top: 24px;
+                    color: $primary-text-color;
 
                     &.material-checkbox label {
                         &::before {
                             top: 2px;
+                            border-width: 2px;
                         }
 
                         &::after {
@@ -597,23 +658,135 @@ body {
 
                     .system-settings-db-selection-field, .system-settings-tenant-configuration-field {
                         @extend %form-field-container;
+                        padding-top: 10px;
+
+                        .database-types {
+                            padding-top: 24px;
+                        }
+
+                        #admin-nav {
+                            margin: 0px;
+                            padding: 0px;
+
+                            .nav-tabs {
+                                border: none;
+                            }
+
+                            ul {
+                                height: 40px;
+                                line-height: 40px;
+                                list-style: none;
+                                padding: 0;
+
+                                li {
+                                    display: inline-block;
+                                    height: inherit;
+                                    background-color: transparent;
+                                    width: 50%;
+                                    cursor: pointer;
+
+                                    .popover {
+                                        width: 250px;
+                                    }
+
+                                    .active {
+                                        background-color: transparent;
+                                    }
+
+                                    a {
+                                        padding: 10px 15px;
+                                        width: 100%;
+                                        text-align: center;
+                                        border: none;
+                                        color: $primary-text-color;
+                                        cursor: pointer;
+                                        display: inline-block;
+                                        height: inherit;
+                                        overflow: hidden;
+                                        outline: none;
+                                        position: relative;
+                                        font-weight: 600;
+                                        font-size: 12px;
+                                        line-height: 14px;
+                                        letter-spacing: 0.5px;
+
+                                        &:before {
+                                            bottom: 0;
+                                            content: "";
+                                            height: 3px;
+                                            position: absolute;
+                                            left: 50%;
+                                            right: 50%;
+                                            -webkit-transition-property: left, right;
+                                            transition-property: left, right;
+                                            -webkit-transition-duration: 0.3s;
+                                            transition-duration: 0.3s;
+                                            -webkit-transition-timing-function: ease-out;
+                                            transition-timing-function: ease-out;
+                                        }
+
+                                        &:hover, &:focus {
+                                            &:before {
+                                                background: $border-color;
+                                                left: 0;
+                                                right: 0;
+                                            }
+
+                                            background-color: transparent;
+                                        }
+
+                                        &.active {
+                                            color: $primary-color;
+
+                                            &:before {
+                                                background: $primary-color;
+                                                left: 0;
+                                                right: 0;
+                                                position: absolute;
+                                                height: 5px;
+                                                border-radius: 10px;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #database-type-dropdown {
+                            padding-top: 24px;
+                        }
+
+                        .db-selection-radio {
+                            padding-bottom: 22px;
+                            margin-bottom: 0px;
+                        }
 
                         .txt-holder {
-                            padding-top: 24px;
-                            position: relative;
+                            padding-bottom: 20px;
 
                             .info-icon {
                                 margin-left: 5px;
                                 cursor: pointer;
                             }
 
-                            .new-db, .existing-db {
-                                display: inline-block;
+                            #auth-type-info {
+                                background-color: #e7f3fe;
+                                border-left: 6px solid #2196F3;
+                                margin-top: 10px;
+                                margin-bottom: -15px;
+
+                                p {
+                                    margin-left: 10px;
+                                }
                             }
 
-                            .existing-db {
-                                margin-left: 100px;
+                            .note-additional-parameter {
+                                padding-top: 20px
                             }
+                        }
+
+                        .additional-parameters {
+                            padding-top: 32px !important;
                         }
 
                         .sql-server-existing-db {
@@ -639,6 +812,10 @@ body {
                         }
                     }
 
+                    .system-settings-tenant-configuration-field {
+                        border: 1px solid $startup-container-border-color;
+                    }
+
                     @extend %button-holder-style;
 
                     .sqlce-content {
@@ -648,7 +825,8 @@ body {
 
                     .database-error {
                         a {
-                            color: $primary;
+                            color: $primary-color;
+                            cursor: pointer;
                         }
                     }
                 }
@@ -664,15 +842,16 @@ body {
 
                     .file-storage-align, .blob-storage-align {
                         display: inline-block;
-                        margin-left: 90px;
                         margin-bottom: 24px;
+                        margin-left: 90px;
                     }
                 }
 
                 .content-value {
-                    text-align: center;
+                    text-align: left;
                     margin-bottom: 10px;
                     padding-top: 24px;
+                    color: $grey-500;
                 }
 
                 .report-content {
@@ -696,9 +875,13 @@ body {
                 }
 
                 .storage-block {
-                    .blob-error-message {
-                        color: #a94442;
-                        font-size: 12px;
+                    .azure-validation {
+                        margin-bottom: 10px;
+
+                        .blob-error-message {
+                            color: $validation-text-color;
+                            font-size: 12px;
+                        }
                     }
 
                     #blob-storage-form {
@@ -709,18 +892,21 @@ body {
 
                         .validation-txt-errors {
                             font-size: 12px;
-                            color: #a94442;
+                            color: $validation-text-color;
                         }
 
                         .form-div {
                             margin: 0px !important;
                             padding-top: 24px;
-                            position: relative;
                         }
 
                         .custom-endpoint-form-element {
                             margin: 0px !important;
                             position: relative;
+                        }
+
+                        #connection-string {
+                            height: 60px;
                         }
                     }
                 }
@@ -734,17 +920,51 @@ body {
 
                     .form-group {
                         margin: 0px !important;
-                        padding-top: 24px;
+                        padding-bottom: 16px;
                         position: relative;
                     }
 
+                    .form-group-top {
+                        padding-top: 24px;
+                    }
+
                     @extend %button-holder-style;
+
+                    .show-hide-password {
+                        bottom: 4px;
+                    }
+                }
+            }
+
+            #system-settings-db-selection-container {
+                .show-hide-password {
+                    margin-top: 10px;
+                }
+            }
+
+            #admin-account-fields-container {
+                .show-hide-password {
+                    top: 10px;
                 }
             }
 
             .show-hide-password {
                 right: 15px;
-                bottom: 9px;
+                font-size: 22px;
+                cursor: pointer;
+                position: absolute;
+            }
+
+            .tooltip {
+                .tooltip-inner {
+                    word-break: break-all !important;
+                    white-space: pre !important;
+                    max-width: none !important;
+                }
+
+                .tooltip.top .tooltip-arrow {
+                    bottom: 1px !important;
+                }
             }
         }
     }
@@ -770,154 +990,140 @@ body {
         }
     }
 
-#new-password + .popover {
-    background: $primary-black;
-    opacity: 0.8;
-    width: 210px;
-    top: -110px !important;
-
-    .arrow {
-        top: 80% !important;
-    }
-
-    .arrow::after {
-        border-left-color: $primary-black;
-        opacity: 0.8;
-    }
-
-    .popover-title {
+    #new-password + .popover {
         background: $primary-black;
         opacity: 0.8;
-        color: $white;
-        font-size: map-get($app-text-size, "sm");
-        letter-spacing: 0.3px;
-        line-height: 18px;
-        padding-bottom: 0px;
-        border: none;
-    }
+        width: 210px;
+        top: -154px !important;
 
-    .popover-content {
-        padding-top: 0px;
-        height: 175px;
+        .arrow {
+            top: 80% !important;
+        }
 
-        ul {
-            list-style: none;
-            padding: 0px;
+        .arrow::after {
+            border-left-color: $primary-black;
+            opacity: 0.8;
+        }
 
-            li {
-                height: 20px;
-                margin: 15px 15px 15px 10px;
+        .popover-title {
+            background: $primary-black;
+            opacity: 0.8;
+            color: $white;
+            font-size: map-get($app-text-size, "sm");
+            letter-spacing: 0.3px;
+            line-height: 18px;
+            padding-bottom: 0px;
+            border: none;
+        }
 
-                span.icon {
+        .popover-content {
+            padding-top: 0px;
+            height: 175px;
+
+            ul {
+                list-style: none;
+                padding: 0px;
+
+                li {
                     height: 20px;
-                    width: 20px;
-                    margin: 0 auto;
-                    border-radius: 50%;
-                    border: 2px solid $white;
-                    display: inline-block;
-                    float: left;
-                }
+                    margin: 15px 15px 15px 10px;
 
-                span.content {
-                    color: $white;
-                    display: block;
-                    margin-left: 40px;
+                    span.icon {
+                        height: 20px;
+                        width: 20px;
+                        margin: 0 auto;
+                        border-radius: 50%;
+                        border: 2px solid $white;
+                        display: inline-block;
+                        float: left;
+                    }
+
+                    span.content {
+                        color: $white;
+                        display: block;
+                        margin-left: 40px;
+                    }
                 }
             }
         }
     }
-}
 
-#messageBox_wrapper {
-    border-radius: $startup-element-border-radius;
-
-    .e-dialog-scroller {
+    #messageBox_wrapper {
         border-radius: $startup-element-border-radius;
 
-        #messageBox {
+        .e-dialog-scroller {
             border-radius: $startup-element-border-radius;
+
+            #messageBox {
+                border-radius: $startup-element-border-radius;
+            }
         }
     }
-}
 
-#messageBox {
-    font-family: $primary-font !important;
-    padding: 0px !important;
+    #messageBox {
+        font-family: $primary-font !important;
+        padding: 0px !important;
 
-    .message-header {
-        font-size: map-get($app-text-size, md);
-        padding: 10px;
-        background-color: $grey-200;
+        .message-header {
+            font-size: map-get($app-text-size, lg);
+            padding: 10px;
+            background-color: $grey-60;
 
-        span {
-            .su-login-error {
-                color: $validation-text-color;
+            span {
+                .su-login-error {
+                    color: $validation-text-color;
+                }
+            }
+
+            .modal-title {
+                margin-left: 10px;
             }
         }
 
-        .modal-title {
-            margin-left: 10px;
+        .message-box-close {
+            color: $grey-700;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.7;
+            position: absolute;
+            right: 15px;
+            top: 13px;
+            opacity: 1;
+
+            &:hover {
+                color: $icon-hover-color;
+            }
+        }
+
+        .message-content {
+            font-size: map-get($app-text-size, md);
+            margin-top: 20px;
+            padding: 0px 15px;
+            text-align: left;
+
+            .list-area {
+                margin-top: 10px;
+                height: 160px;
+                overflow-y: scroll;
+            }
+        }
+
+        .message-box-btn-holder {
+            bottom: 0;
+            padding: 10px;
+            position: absolute;
+            right: 0;
+            width: 100%;
+            text-align: center;
+            background-color: $grey-60;
+
+            .secondary-button {
+                @include button(28px, 90px, "secondary");
+            }
         }
     }
 
-    .message-box-close {
-        color: $primary-black;
-        cursor: pointer;
-        font-size: 10px;
-        opacity: 0.7;
-        position: absolute;
-        right: 15px;
-        top: 13px;
-
-        &:hover {
-            color: $primary-btn-hover-color;
-        }
+    .offline-width {
+        width: 568px !important;
+        height: 398px !important;
     }
-
-    .message-content {
-        font-size: map-get($app-text-size, sm);
-        margin-top: 20px;
-        padding: 0px 15px;
-        text-align: left;
-
-        .list-area {
-            margin-top: 10px;
-            height: 160px;
-            overflow-y: scroll;
-        }
-    }
-
-    .message-box-btn-holder {
-        bottom: 0;
-        padding: 10px;
-        position: absolute;
-        right: 0;
-        width: 100%;
-        text-align: center;
-        background-color: $grey-200;
-
-        .secondary-button {
-            @include button(28px, 90px, "secondary");
-        }
-    }
-}
-
-.trial {
-    background-color: $trial-bg-color;
-    color: $trial-color;
-}
-
-.trial-not-started {
-    background-color: $trialnotstarted-bg-color;
-    color: $trialnotstarted-color;
-}
-
-.active {
-    background-color: $active-bg-color;
-    color: $active-color;
-}
-
-.offline-width {
-    width: 568px !important;
-    height: 398px !important;
-}

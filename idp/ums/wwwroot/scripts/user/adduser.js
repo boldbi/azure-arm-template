@@ -24,7 +24,7 @@
 
     $.validator.addMethod("isValidUsername", function (value, element) {
         return IsValidUsername(value);
-    }, window.TM.App.LocalizationContent.InvalidUsername);
+    }, window.TM.App.LocalizationContent.UserNameSpecialCharacterValicator);
 
     $.validator.addMethod("isValidUsernameLength", function (value, element) {
         return IsValidUsernameLength(value);
@@ -159,14 +159,14 @@
         $(".useradd-validation-messages").css("display", "none");
     });
 
-    $(document).on("keyup", "#user-password", function () {
+    $(document).on("keyup", "#new-password", function () {
         createPasswordPolicyRules();
-        $("#user-password").valid();
+        $("#new-password").valid();
     });
 
     function createPasswordPolicyRules() {
-        if ($("#user-password").val() != '' && $("#user-password").next("ul").length == 0) {
-            $("#user-password").after("<ul id='password_policy_rules'></ul>");
+        if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
+            $("#new-password").after("<ul id='password_policy_rules'></ul>");
             $("#password_policy_rules").append("<li id='p_policy_heading'><p>" + window.TM.App.LocalizationContent.PasswordRule1 + "</p></li>");
             $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule2 + "</li>");
             $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule3 + "</li>");
@@ -177,8 +177,8 @@
             $(".button-section").css("margin-top", "-20px");
             $(".button-section").addClass("top-margin");
         }
-        if ($("#user-password").val() == '' && $("#user-password").next("ul").length != 0) {
-            $("#user-password").next("ul").remove();
+        if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
+            $("#new-password").next("ul").remove();
             $("#confirm-password-section").css("margin-top", "25px")
             $(".button-section").css("margin-top", "20px");
         }
@@ -200,8 +200,13 @@ function onUserAddDialogClose() {
 }
 
 function onUserAddDialogOpen() {
+    $("#add-user").removeAttr("disabled");
     $(".dropdown").removeClass("open");
     $("#user-add-dialog").ejDialog("open");
+    $("#new-password").val("");
+    $(".show-hide-password").removeClass("su-hide").addClass("su-show");
     $(".e-dialog-icon").attr("title", "Close");
+    $(".validation").closest("div").removeClass("has-error");
+    $(".useradd-validation-messages").css("display", "none");
     CheckMailSettingsAndNotify(window.TM.App.LocalizationContent.ToSendAccountActivation, $(".validation-message"), "");
 }

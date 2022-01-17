@@ -179,7 +179,7 @@ $(document).ready(function () {
     $(document).on('click', "input#add-user", function () {
         var firstName = $("#firstname").val().trim();
         var userName = $("#username").val().trim().toLowerCase();
-        var password = $("#user-password").val();
+        var password = $("#new-password").val();
         var emailid = $('#mailid').val().trim();       
         var tenantId = $("#myId").val();
         var isValid = $("#dialog-container").valid();
@@ -263,7 +263,7 @@ $(document).ready(function () {
                     $('#mailid').closest('div').addClass("has-error");
                     $("#invalid-email").html(window.TM.App.LocalizationContent.IsMailExist).css("display", "block");
                     $("#firstname").parent('div').removeClass("has-error");
-                    $("#user-password").parent('div').removeClass("has-error");
+                    $("#new-password").parent('div').removeClass("has-error");
                     isEmailExist = false;
                 }
             }
@@ -464,7 +464,7 @@ function getAppUsers() {
         enableAltRow: false,
         allowSearching: true,
         allowSelection: true,
-        allowFiltering: true,
+        allowFiltering: false,
         pageSettings: { pageSize: 20 },
         filterSettings: { filterType: "menu" },
         selectionType: ej.Grid.SelectionType.Multiple,
@@ -489,6 +489,7 @@ function getAppUsers() {
         columns: [
             {
                 template: true,
+                allowFiltering: false,
                 templateID: "#user-profile-template",
                 width: 115,
                 headerTemplateID: "#username-header",
@@ -497,6 +498,7 @@ function getAppUsers() {
             },
             {
                 field: "Username",
+                allowFiltering: false,
                 templateID: "#user-username-template",
                 headerTemplateID: "#user-username-header",
                 type: "string",
@@ -504,6 +506,7 @@ function getAppUsers() {
             },
             {
                 field: "Email",
+                allowFiltering: false,
                 templateID: "#user-email-template",
                 headerTemplateID: "#email-header",
                 type: "string",
@@ -511,6 +514,7 @@ function getAppUsers() {
             },
             {
                 field: "IsActive",
+                allowFiltering: false,
                 templateID: "#user-status-template",
                 headerTemplateID: "#status-header",
                 type: "string",
@@ -519,6 +523,7 @@ function getAppUsers() {
             {
                 template: true,
                 allowSorting: false,
+                allowFiltering: false,
                 templateID: "#commandstemplate",
                 headerTemplateID: "#actionsheader",
                 width: (window.innerWidth > 1024) ? 40 : 80
@@ -569,6 +574,7 @@ function getUsersWithoutAccess() {
                 },
                 {
                     template: true,
+                    allowFiltering: false,
                     templateID: "#user-name-template",
                     width: 115,
                     headerTemplateID: "#user-name-header",
@@ -577,6 +583,7 @@ function getUsersWithoutAccess() {
                 },
                 {
                     template: true,
+                    allowFiltering: false,
                     field: "Email",
                     templateID: "#email-template",
                     headerTemplateID: "#user-email-header",
