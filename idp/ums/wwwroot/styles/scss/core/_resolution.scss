@@ -1,0 +1,53 @@
+﻿@import "_typography.scss";
+@import "_variables.scss";
+@import "../themes/default.scss";
+
+$resolutions: ("below-1400": 0, "above-1400": 1400);
+
+
+@mixin small-btn-mixin($current-resolution-value) {
+    @if ($current-resolution-value < 1400) {
+        body {
+            font-size: map-get($app-text-size, "sm");
+
+            .form-control, .bootstrap-select .btn {
+                font-size: map-get($app-text-size, "sm");
+                height: map-get($input-height, "md");
+            }
+
+            .dropdown-menu .inner {
+                font-size: map-get($app-text-size, "sm");
+            }
+
+            .validation-txt-errors {
+                font-size: map-get($app-text-size, md);
+                color: $validation-text-color;
+            }
+        }
+    }
+    @else {
+        body {
+            font-size: map-get($app-text-size, "md");
+
+            .form-control, .bootstrap-select .btn {
+                font-size: map-get($app-text-size, "md");
+                height: map-get($input-height, "lg");
+            }
+
+            .dropdown-menu .inner {
+                font-size: map-get($app-text-size, "md");
+            }
+
+            .validation-txt-errors {
+                font-size: map-get($app-text-size, md);
+                color: $validation-text-color;
+            }
+        }
+    }
+}
+
+@each $current-resolution, $current-resolution-value in $resolutions {
+    @media screen and (min-width: $current-resolution-value+px) {
+        @include small-btn-mixin($current-resolution-value);
+    }
+}

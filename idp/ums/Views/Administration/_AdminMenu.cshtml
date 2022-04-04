@@ -1,0 +1,95 @@
+﻿@using Syncfusion.Server.Base.LicenseManagement.Core
+@{
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var currentUrl = requestUrl.LocalPath.TrimEnd('/');
+    var adminHomeUrl = Url.Action("administration", "administration");
+    var siteSettingsUrl = Url.Action("administration", "administration") == null ? string.Empty : Url.Action("administration", "administration") + "/site";
+    var adSettingsUrl = Url.Action("user-directory-settings", "administration");
+    var emailSettingsUrl = Url.Action("administration", "administration") == null ? string.Empty : Url.Action("administration", "administration") + "/e-mail-settings";
+    var manageLicenseUrl = Url.Action("LicenseSettings", "Administration");
+    var userSettingsUrl = Url.Action("UserSettings", "administration");
+    var ssoSettingsUrl = Url.Action("SAMLSettings", "Administration");
+    var authSettingsUrl = Url.Action("AuthenticationSettings", "Administration");
+    var isSelfHosted = CloudAppConfig.IsSelfHosted;
+    var products = new LicenseManagement().GetAllProducts();
+    var isBoldBIOnPremise = products.Any(x => x.TenantType == TenantType.BoldBIOnPremise);
+    var isBoldReportsOnPremise = products.Any(x => x.TenantType == TenantType.BoldReportsOnPremise);
+    var embedSettingsUrl = Url.Action("EmbedSettings", "Administration");
+    var apiKeysUrl = Url.Action("ApiKeys", "Administration");
+    var lookandfeelUrl = Url.Action("LookandFeel", "Administration");
+    var additionalSettingsUrl = Url.Action("AdditionalSettings", "Administration");
+}
+
+    <nav id="admin-menu-nav-bar" class="admin-nav-bar">
+        <h2 class="header">[[[Settings]]]</h2>
+        <ul>
+            <li class="admin-menu-item @(currentUrl.IndexOf(siteSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(adminHomeUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)">
+                <a id="site-settings-link" href="@siteSettingsUrl" role="tab">
+                    <i class="su su-url"></i>
+                    <span>[[[Site]]]</span>
+                </a>
+            </li>
+            @if (isBoldReportsOnPremise)
+            {
+                <li class="admin-menu-item @(currentUrl.IndexOf(lookandfeelUrl, StringComparison.CurrentCultureIgnoreCase) > -1  ? "active" : string.Empty)">
+                    <a id="site-settings-link" href="@lookandfeelUrl" role="tab">
+                        <i class="su su-look-and-feel"></i>
+                        <span>[[[Look and Feel]]]</span>
+                    </a>
+                </li>
+            }
+
+            @if (isBoldBIOnPremise)
+            {
+                <li class="admin-menu-item @(currentUrl.IndexOf(embedSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="embed-settings-link" href="@embedSettingsUrl" role="tab">
+                        <i class="su su-embed"></i>
+                        <span>[[[Embed]]]</span>
+                    </a>
+                </li>
+            }
+            <li class="admin-menu-item @(currentUrl.IndexOf(emailSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="email-settings-link" href="@emailSettingsUrl" role="tab">
+                    <i class="su su-e-mail"></i>
+                    <span>[[[Email]]]</span>
+                </a>
+            </li>
+            <li class="admin-menu-item @(currentUrl.IndexOf(userSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="user-settings-link" href="@userSettingsUrl" role="tab">
+                    <i class="su su-user-settings"></i>
+                    <span>[[[Accounts]]]</span>
+                </a>
+            </li>
+            <li class="admin-menu-item @(currentUrl.IndexOf(authSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="oauth-settings-link" href="@authSettingsUrl" role="tab">
+                    <i class="su su-lock"></i>
+                    <span>[[[Authentication]]]</span>
+                </a>
+            </li>
+            <li class="admin-menu-item @(currentUrl.IndexOf(apiKeysUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="api-keys-link" href="@apiKeysUrl" role="tab">
+                    <i class="su su-api-keys"></i>
+                    <span>[[[API Keys]]]</span>
+                </a>
+            </li>
+            <li class="admin-menu-item @(currentUrl.IndexOf(additionalSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" >
+                <a id="additional-settings-link" href="@additionalSettingsUrl" role="tab">
+                    <i class="su su-nav-settings"></i>
+                    <span>[[[Configuration]]]</span>
+                </a>
+            </li>
+            <li class="admin-menu-item @(currentUrl.IndexOf(manageLicenseUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="license-settings-link" href="@manageLicenseUrl" role="tab">
+                    <i class="su su-license-settings"></i>
+                    <span>[[[Manage License]]]</span>
+                </a>
+            </li>
+            @*<li>
+            <a id="active-directory-settings-link" class="admin-menu-item @(currentUrl.IndexOf(adSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)" href="@adSettingsUrl" role="tab">
+                <i class="su su-active-directory"></i>
+                <span>Active Directory</span>
+            </a>
+        </li>*@
+
+        </ul>
+    </nav>

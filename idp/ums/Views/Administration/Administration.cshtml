@@ -1,0 +1,144 @@
+﻿@{
+    ViewBag.Title = "[[[Administration]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var isSecureConnection = GlobalAppSettings.SystemSettings.IsSecureConnection;
+    var protocolTypes = new List<SelectListItem>
+    {  new SelectListItem
+    {
+        Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+    },
+        new SelectListItem
+        {
+            Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+        }
+    };
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/site-settings.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script>
+        var applicationImageUrl = "content/images/@GlobalAppSettings.Branding/application";
+        serverApp.controller("adSettingsController",
+            [
+                "$scope", function ($scope) {
+                    $scope.regex =
+                        '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
+                    $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_\s]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_\s]+)*$/;
+                }
+            ]);
+
+    </script>
+
+    <script type="text/javascript">
+        var selectedTimeZoneText = "@ViewBag.SelectedTimeZone.Text";
+        var selectedTimeZoneValue = "@ViewBag.SelectedTimeZone.Value";
+        var selectedTimeFormatText = "@ViewBag.SelectedTimeFormat.Text";
+        var selectedTimeFormatValue = "@ViewBag.SelectedTimeFormat.Value";
+        var selectedDateFormatText = "@ViewBag.SelectedDateFormat.Text";
+        var selectedDateFormatValue = "@ViewBag.SelectedDateFormat.Value";
+        var selectedLanguageText = "@ViewBag.SelectedLanguage.Text";
+        var selectedLanguageValue = "@ViewBag.SelectedLanguage.Value";
+        var SystemSettingsProperties = @Html.Raw(@Json.Serialize(ViewBag.SystemSettings));
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        var updateSystemSettingsUrl = "@Url.Action("UpdateSystemSettings", "Administration")";
+        var azureadTestconnectionUrl = "@Url.Action("AzureADTestConnection", "Administration")";
+        var updateAzureADSettingsUrl = "@Url.Action("UpdateAzureADSettings", "Administration")";
+        var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
+        var sentTestMail = "@Url.Action("SentTestMail", "Administration")";
+        var baseRootUrl = "@Url.Content("~/")";
+        var isSelfHosted = convertToBoolean("@CloudAppConfig.IsSelfHosted");
+        if (baseRootUrl.toLowerCase() === "/")
+            baseRootUrl = "";
+        var isSiteCreation = false;
+        var isSecureConnection = "@isSecureConnection.ToString()" == "True";
+
+        $(function() {
+            if ("@ViewBag.scheme.ToLower()" != "null") {
+                $("#enable-ssl").val("@ViewBag.scheme");
+            } else {
+                $("#enable-ssl").val("http");
+            }
+
+            $(document).click(function(e) {
+                if (e.target.id !== "error_icon") {
+                    $("#ssl-help-message").hide();
+                }
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        $(document)
+            .ready(function () {
+                var section = window.location.href;
+                $(".system-settings-sidebar li").hide();
+                if (section.toLowerCase().indexOf("groups") > 0 ||
+                    section.toLowerCase().indexOf("users") > 0 ||
+                    section.toLowerCase().indexOf("user-management") > 0) {
+                    $("li[data-current-content='groups'],li[data-current-content='users']").show();
+                } else {
+                    $(
+                        "li[data-current-content='emailsettings'],li[data-current-content='general'],li[data-current-content='activedirectorysettings'],li[data-current-content='notificationsettings'],li[data-current-content='usersettings'],li[data-current-content='databasesettings'],li[data-current-content='licensesettings'], li[data-current-content='samlsettings']")
+                        .show();
+                }
+                if (section.toLowerCase().indexOf("groups") > 0) {
+                    $("li[data-current-content='groups'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("users") > 0 ||
+                    section.toLowerCase().indexOf("user-management") > 0) {
+                    $("li[data-current-content='users'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("e-mail-settings") > 0) {
+
+                    $("li[data-current-content='emailsettings'] a").addClass('active');
+                    $("#look-and-feel-container, #active-directory-container,#database-settings-container").hide();
+                    $("#mail-settings-container").show();
+                } else if (section.toLowerCase().indexOf("user-directory-settings") > 0) {
+
+                    $("li[data-current-content='activedirectorysettings'] a").addClass('active');
+                    $("#look-and-feel-container, #mail-settings-container,#database-settings-container").hide();
+                    $("#active-directory-container").show();
+                } else if (section.toLowerCase().indexOf("notification-settings") > 0) {
+                    $("li[data-current-content='notificationsettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("user-settings") > 0) {
+                    $("li[data-current-content='usersettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("saml-settings") > 0) {
+                    $("li[data-current-content='samlsettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("database-settings") > 0) {
+                    $("li[data-current-content='databasesettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("license-settings") > 0) {
+                    $("li[data-current-content='licensesettings'] a").addClass('active');
+                    $("#mail-settings-container, #active-directory-container").hide();
+                } else {
+                    $("li[data-current-content='general'] a").addClass('active');
+                    $("#look-and-feel-container").show();
+                    if (isSelfHosted) {
+                        $("#mail-settings-container, #active-directory-container,#database-settings-container").hide();
+                    }
+                }
+                $("#schedule-synchronization").tooltip();
+            });
+    </script>
+
+    <script src="~/bundles/js/site-settings.js" asp-append-version="true"></script>
+}
+
+@section MainSection{
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        @await Html.PartialAsync("_ActiveDirectorySettings")
+    }
+    else
+    {
+        @await Html.PartialAsync("_AdminMenu")
+        @await Html.PartialAsync("_SiteSettings")
+        @await Html.PartialAsync("_EmailSettings")
+
+        if (!ViewBag.ThirdPartyLogins || !ViewBag.WhiteLabel || !ViewBag.CustomDomain)
+        {
+            @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+        }
+    }
+}

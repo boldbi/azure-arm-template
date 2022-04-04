@@ -1,0 +1,171 @@
+﻿@{
+    var mailAuthenticationTypes = new List<SelectListItem>
+{
+        new SelectListItem
+        {
+            Value = "0", Text = "Anonymous authentication", Selected = GlobalAppSettings.SystemSettings.MailSettingsAuthType == MailSettingsAuthType.Anonymous
+        },
+        new SelectListItem
+        {
+            Value = "1", Text = "Basic authentication", Selected = GlobalAppSettings.SystemSettings.MailSettingsAuthType == MailSettingsAuthType.Basic
+        }
+    };
+}
+
+
+    <div id="mail-settings-container" class="col-md-12 col-lg-12 col-sm-12 admin-page-content-container" role="tabpanel" aria-labelledby="email-settings">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div id="email-setting" class="admin-page-header col-md-12 col-lg-12 col-sm-12">
+                <hgroup class="admin-page-header-description">
+                    <h1 class="h2 page-title">[[[EMAIL SETTINGS]]]</h1>
+                    <h5 class="page-description">[[[Configuration for sending emails from the application]]]</h5>
+                </hgroup>
+            </div>
+
+            <div id="email-setting-body" class="admin-page-body col-xs-12">
+                <form id="email-setting-form" class="admin-page-form" autocomplete="off">
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-12 no-padding">
+                            @Html.Label("smtp-address", "[[[SMTP Server]]]", new
+                            {
+                                @class = "app-textbox-label"
+                            })
+                        </div>
+                        <div>
+                            <input type="text" id="smtp-address" class="form-control mail-settings-fields" name="smtp_address" placeholder="[[[SMTP server]]]" value="@ViewBag.SystemSettings.MailSettingsHost" />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            @Html.Label("port-number", "[[[SMTP Port]]]", new
+                            {
+                                @class = "app-textbox-label"
+                            })
+                        </div>
+                        <div>
+                            <input type="text" id="port-number" class="form-control mail-settings-fields" name="port_number" placeholder="[[[SMTP port]]]" value="@ViewBag.SystemSettings.MailSettingsPort" />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            @Html.Label("mail-display-name", "[[[Sender Name]]]", new
+                            {
+                                @class = "app-textbox-label"
+                            })
+                        </div>
+                        <div>
+                            <input type="text" id="mail-display-name" class="form-control mail-settings-fields" name="mail_display_name" placeholder="[[[Sender name]]]" value="@ViewBag.SystemSettings.MailSettingsSenderName" />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            @Html.Label("mail-user-name", "[[[Sender Email Address]]]", new
+                            {
+                                @class = "app-textbox-label"
+                            })
+                        </div>
+                        <div>
+                            <input type="text" id="mail-user-name" class="form-control mail-settings-fields" name="mail_user_name" placeholder="[[[Sender email address]]]" value="@ViewBag.SystemSettings.MailSettingsAddress" />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+                    <div id="authentication-type" class="col-xs-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            <label class="app-textbox-label mail-authentication">[[[Authentication Type]]]</label>
+                        </div>
+                        <div class="authentication-type" id="anonymous">
+                            <input type="radio" id="anonymous-authentication" name="mail-authentication-type" class="css-radio" value="0" @(GlobalAppSettings.SystemSettings.MailSettingsAuthType == MailSettingsAuthType.Anonymous ? "checked" : string.Empty) />
+                            <label for="anonymous-authentication" class="app-textbox-label radio-btn-label">[[[Anonymous authentication]]]</label>
+                        </div>
+                        <div class="authentication-type">
+                            <input type="radio" id="basic-authentication" name="mail-authentication-type" class="css-radio" value="1" @(GlobalAppSettings.SystemSettings.MailSettingsAuthType == MailSettingsAuthType.Basic ? "checked" : string.Empty) />
+                            <label for="basic-authentication" class="app-textbox-label radio-btn-label">[[[Basic authentication]]]</label>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            @Html.Label("sender-user-name", "[[[Username]]]", new
+                            {
+                                @class = "app-textbox-label"
+                            })
+                        </div>
+                        <div>
+                            @if (GlobalAppSettings.SystemSettings.MailSettingsAuthType == MailSettingsAuthType.Basic)
+                            {
+                                <input type="text" id="sender-user-name" class="form-control mail-settings-fields mail-credentials" name="sender_user_name" placeholder="[[[Username]]]" value="@ViewBag.SystemSettings.MailSettingsUserName" />
+                            }
+                            else
+                            {
+                                <input type="text" id="sender-user-name" class="form-control mail-settings-fields mail-credentials" name="sender_user_name" placeholder="[[[Username]]]" disabled="disabled" />
+                            }
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            @Html.Label("mail-password", "[[[Password]]]", new
+                            {
+                                @class = "app-textbox-label"
+                            })
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <input type="text" class="hidden-input" style="display: none;">
+                            <input style="visibility: hidden; position: absolute; left: -99999px" class="hidden-input" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
+                            @if (GlobalAppSettings.SystemSettings.MailSettingsAuthType == MailSettingsAuthType.Basic)
+                            {
+                                <input type="password" id="mail-password" class="form-control mail-settings-fields mail-credentials" name="mail_password"  placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" />
+                            }
+                            else
+                            {
+                                <input type="password" id="mail-password" class="form-control mail-settings-fields mail-credentials" name="mail_password" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" disabled="disabled" />
+                            }
+                            <span class="show-hide-password su su-show" data-toggle="tooltip" data-original-title="[[[Click to view]]]"></span>
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        @Html.CheckBox("secure-mail-authentication", (bool)ViewBag.SystemSettings.MailSettingsIsSecureAuthentication, new { @class = "material-checkbox", @id = "secure-mail-authentication" })
+                        @Html.Hidden("secure-mail-authentication")
+                        @Html.Label("secure-mail-authentication", "[[[Enable SSL]]]", new { @class = "app-textbox-label" })
+                    </div>
+                    <div class="col-xs-12 no-padding input-field-margin">
+                        <button id="test-mail-button" onclick="testMailTrigger()" class="primary-button pull-left test-connection-button" data-toggle="tooltip" data-placement="top" data-container="body" title="" data-original-title="[[[Send Test Email]]]">[[[Send Test Email]]] </button>
+                    </div>
+                </form>
+
+                <div id="test-mail-box" style="display: none;">
+                    <div class="test-mail-info">[[[Type an email address and then click Send to verify that there are no issues with the SMTP configuration.]]]</div>
+                    <form id="test-mail-form" class="row" autocomplete="off">
+                        <div class="update-form-input-field">
+                            @Html.Label("test-mail", "[[[To Email]]]", new { @class = "app-textbox-label col-lg-12" })
+                            <input placeholder="[[[To Email]]]" type="text" id="test-mail" autocomplete="off" name="test_mail" class="form-control" maxlength="85" />
+                            <span id="test-mail-validate" class="validation-message"></span>
+                        </div>
+                    </form>
+                    <div class="success-box" style="display: none;">
+                        <img src="/ums/images/success-toast.svg" class="toast-image-container">
+                        <div>[[[Test email sent successfully.]]]</div>
+                    </div>
+                    <div class="mail-error-description">
+                        <textarea id="test-main-error-message" class="form-control" name="text" value="" disabled></textarea>
+                    </div>
+                </div>
+
+            </div>
+            <div class="admin-page-footer col-xs-12">
+                <div class="admin-page-actions col-lg-12 col-md-12">
+                    <a href="@Url.Content("~/")" class="secondary-button pull-right" id="UpdateSystemSettingsCancel-bottom" title="">[[[Cancel]]]</a>
+                    <button type="button" title="" id="UpdateSystemSettings-bottom" name="UpdateSystemSettings" class="primary-button pull-right">
+                        <span>[[[Save]]]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>

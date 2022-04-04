@@ -1,0 +1,40 @@
+﻿@model TenantInfo
+@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"] == "isolation-code") ? "active" : string.Empty;
+}
+<script type="text/javascript">
+    var isolationCode = $('meta[name="isolation-code"]').attr("content");
+    var updateIsolationCodeUrl = "@Url.Action("IsolationCode", "TenantsManagement")";
+</script>
+
+<div role="tabpanel" class="col-xs-12 no-padding tab-pane @activeTab" id="data-security-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="isolation-enabled col-xs-12 no-padding">
+            <div class="material-switch inline-align" onclick="enableIsolationCode()">
+                <input type="checkbox" id="isolation-enable-switch" @((bool)Model.TenantIsolation.IsEnabled ? "checked" : string.Empty) />
+                <label for="isolation-enable-switch" class="label-primary"></label>
+            </div>
+            <div class="app-textbox-label inline-align activation enable-isolation-code">
+                [[[Enable Isolation Code]]]
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding input-field-margin">
+            <div class="col-md-12 no-padding">
+                @Html.Label("application-isolation-code", "[[[Isolation Code]]]", new { @class = "app-textbox-label col-md-4" })
+            </div>
+            <div class="application-isolation-code">
+                <div class="isolation-code-value" data-tenant-id="@Model.TenantInfoId"> </div>
+                @Html.TextBox("isolation-code", Model.TenantIsolation.IsolationCode, new { id = "isolation-code", placeholder = "[[[Please enter the isolation code]]]", @class = "form-control content-size" })
+                <span id="isolation-code-validation" class="validation-message"></span>
+            </div>
+        </div>
+    </div>
+    <div class="admin-page-footer col-xs-12">
+        <div class="admin-page-actions col-xs-12 col-md-12">
+            <a href="@Url.Action("Sites", "TenantsManagement")" class="secondary-button pull-right" id="cancel-isolation-code" title="">[[[Cancel]]]</a>
+            <button disabled type="button" title="" id="update-isolation-code" class="primary-button pull-right">
+                [[[Save]]]
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,372 @@
+﻿@model List<TenantDetail>
+@{
+    ViewBag.Title = "Subscriptions | " + (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier ? "Syncfusion Products" : "Bold Products");
+    var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+    var globalAppSettings = new GlobalAppSettings();
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/profile.css" asp-append-version="true"/>
+    <link href="https://fonts.googleapis.com/css?family=Bitter:400,700|Heebo:400,700&display=swap" rel="stylesheet">
+}
+@section scripts{
+    <script src="~/bundles/js/domain-list.js" asp-append-version="true"></script>
+}
+@section MainSection{
+    <div id="user-dns-list" class="col-lg-12 col-sm-12 col-md-12 col-xs-12 no-padding admin-page-container">
+        <div class="col-lg-12 col-md-12 co-sm-12 col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="col-xs-3 col-sm-4 col-md-4 col-lg-4 section-heading page-title header">My Products</h1>
+            </hgroup>
+        </div>
+        @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+        {
+            <div>
+                <ul id="site-tab-nav" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#cloud-sites-tab" id="cloud-sites" aria-controls="cloud-sites-tab" role="tab" data-toggle="tab">Bold BI Cloud</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#report-cloud-sites-tab" id="report-cloud-sites" aria-controls="report-cloud-sites-tab" role="tab" data-toggle="tab">Bold Reports Cloud</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#on-premise-sites-tab" id="on-premise-sites" aria-controls="on-premise-sites-tab" role="tab" data-toggle="tab">Bold BI Enterprise</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#bold-reports-on-premise-tab" id="bold-reports-on-premise" aria-controls="bold-reports-on-premise-tab" role="tab" data-toggle="tab">Bold Reports On-Premise</a>
+                    </li>
+                </ul>
+            </div>
+        }
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="cloud-sites-tab">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                    @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldBI))
+                    {
+                        for (var i = 0; i < Model.Count; i++)
+                        {
+                            if (Model[i].TenantTypeId == (int)TenantType.BoldBI)
+                            {
+                                <div class="user-dns-data col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                    <div class="dns-link" href="@Url.Action("LicenseSettings", "Subscription", new {id= Model[i].Id})" target="_blank">
+                                        <div class="user-dns col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div class="data no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                    <div class="dns-data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        <img class="dns-data-image no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6" src="@Model[i].FavIconUrl" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/static/company/boldbi/logo/v1/@IconFileNames.Favicon';" />
+                                                        <a href="https://@Model[i].DNS" target="_blank" maxlength="20" class="no-padding no-margin dns-org-name align-middle col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-top: -4px !important">
+                                                            <span data-toggle="tooltip" data-placement="top" data-container="body" title="@Model[i].DNS">@Model[i].DNS</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="tenant-status col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                    <span class="data status no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        @if (Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                        {
+                                                            <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Active)</span>
+                                                        }
+                                                        else if (Model[i].TenantStatus == TenantStatus.ActivePaymentRequired || Model[i].TenantStatus == TenantStatus.Trial)
+                                                        {
+                                                            <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Trial</span>
+                                                        }
+                                                        else if (Model[i].TenantStatus == TenantStatus.MarkedForSuspension || Model[i].TenantStatus == TenantStatus.Suspended || Model[i].TenantStatus == TenantStatus.MarkedForDeletion)
+                                                        {
+                                                            <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Suspended)</span>
+                                                        }
+                                                        else if (Model[i].TenantStatus == TenantStatus.SubscriptionCancelled)
+                                                        {
+                                                            <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Subscription cancelled</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="status-style"></span>
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                @if (Model[i].SaaSPlanId != 0)
+                                                {
+                                                    <label class="pull-left site-sub-lable">Plan</label>
+                                                    if (Model[i].SaaSPlanId == SaaSPlan.SingleUserPlan)
+                                                    {
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">Single User</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @GlobalAppSettings.GetDescription((SaaSPlan)Model[i].SaaSPlanId)
+                                                        </span>
+                                                    }
+                                                }
+                                                @if (Model[i].BillingCycle != null && Model[i].UserId == userId && Model[i].SaaSPlanId != SaaSPlan.SingleUserPlan && Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                {
+                                                    <label class="pull-left site-sub-lable">Billing Cycle</label>
+                                                    <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.StartDate, "MMM dd, yyyy") to @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.EndDate, "MMM dd, yyyy")
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="site-action-buttons col-lg-22 col-md-12 col-sm-12 col-xs-12">
+                                                @if (Model[i].UserId == userId)
+                                                {
+                                                    <button href="@Url.Action("LicenseSettings", "Subscription", new { id = Model[i].Id })" style="margin-left: 10px" target="_blank" class="link-button pull-right tenant-action-button">Manage</button>
+                                                }
+                                                <button href="https://@Model[i].DNS" target="_blank" class="link-button pull-right tenant-action-button">Go to site</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("../User/_AddNewSite", new ViewDataDictionary(ViewData) { { "TenantType", TenantType.BoldBI }, { "IsCloudTenant", true } });
+                    }
+                </div>
+            </div>
+            @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+            {
+                <div role="tabpanel" class="tab-pane" id="report-cloud-sites-tab">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                        @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldReports))
+                        {
+                            for (var i = 0; i < Model.Count; i++)
+                            {
+                                if (Model[i].TenantTypeId == (int)TenantType.BoldReports)
+                                {
+                                    <div class="user-dns-data col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                        <div class="dns-link" href="@Url.Action("LicenseSettings", "Subscription", new {id= Model[i].Id})" target="_blank">
+                                            <div class="user-dns col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="data no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <div class="dns-data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <img class="dns-data-image no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6" src="@Model[i].FavIconUrl" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/static/company/boldreports/logo/v1/@IconFileNames.Favicon';" />
+                                                            <a href="https://@Model[i].DNS" target="_blank" maxlength="20" class="no-padding no-margin dns-org-name align-middle col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-top: -4px !important">
+                                                                <span data-toggle="tooltip" data-placement="top" data-container="body" title="@Model[i].DNS">@Model[i].DNS</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tenant-status col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <span class="data status no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @if (Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Active)</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.ActivePaymentRequired || Model[i].TenantStatus == TenantStatus.Trial)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Trial</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.MarkedForSuspension || Model[i].TenantStatus == TenantStatus.Suspended || Model[i].TenantStatus == TenantStatus.MarkedForDeletion)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Suspended)</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.SubscriptionCancelled)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Subscription cancelled</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="status-style"></span>
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    @if (Model[i].SaaSPlanId != 0)
+                                                    {
+                                                        <label class="pull-left site-sub-lable">Plan</label>
+                                                        if (Model[i].SaaSPlanId == SaaSPlan.BoldReports_Cloud_SingleUserPlan)
+                                                        {
+                                                            <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">Single User</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                @GlobalAppSettings.GetDescription((SaaSPlan)Model[i].SaaSPlanId)
+                                                            </span>
+                                                        }
+                                                    }
+                                                    @if (Model[i].BillingCycle != null && Model[i].UserId == userId && Model[i].SaaSPlanId != SaaSPlan.BoldReports_Cloud_SingleUserPlan && Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                    {
+                                                        <label class="pull-left site-sub-lable">Billing Cycle</label>
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.StartDate, "MMM dd, yyyy") to @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.EndDate, "MMM dd, yyyy")
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="site-action-buttons col-lg-22 col-md-12 col-sm-12 col-xs-12">
+                                                    @if (Model[i].UserId == userId)
+                                                    {
+                                                        <button href="@Url.Action("LicenseSettings", "Subscription", new { id = Model[i].Id })" style="margin-left: 10px" target="_blank" class="link-button pull-right tenant-action-button">Manage</button>
+                                                    }
+                                                    <button href="https://@Model[i].DNS" target="_blank" class="link-button pull-right tenant-action-button">Go to site</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            @await Html.PartialAsync("../User/_AddNewSite", new ViewDataDictionary(ViewData) { { "TenantType", TenantType.BoldReports }, { "IsCloudTenant", true } });
+                        }
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="on-premise-sites-tab">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                        @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldBIOnPremise))
+                        {
+                            for (var i = 0; i < Model.Count; i++)
+                            {
+                                if (Model[i].TenantTypeId == (int)TenantType.BoldBIOnPremise)
+                                {
+                                    <div class="user-dns-data col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                        <div class="dns-link">
+                                            <div class="user-dns col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="data no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <div class="dns-data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <img class="dns-data-image no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6" src="@Model[i].FavIconUrl" />
+                                                            <h1 maxlength="20" class="no-padding no-margin dns-org-name align-middle col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                                <span data-toggle="tooltip" data-placement="top" data-container="body" title="@Model[i].Subdomain">@Model[i].Subdomain</span>
+                                                            </h1>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tenant-status col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <span class="data status no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @if (Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Active)</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.ActivePaymentRequired || Model[i].TenantStatus == TenantStatus.Trial || Model[i].TenantStatus == TenantStatus.TrialNotStarted)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Trial</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.MarkedForSuspension || Model[i].TenantStatus == TenantStatus.Suspended || Model[i].TenantStatus == TenantStatus.MarkedForDeletion)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Suspended)</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.SubscriptionCancelled)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Subscription cancelled</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="status-style"></span>
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    @if (Model[i].SaaSPlanId != 0)
+                                                    {
+                                                        <label class="pull-left site-sub-lable">Plan</label>
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @GlobalAppSettings.GetDescription((SaaSPlan)Model[i].SaaSPlanId)
+                                                        </span>
+                                                    }
+                                                    @if (Model[i].BillingCycle != null && Model[i].UserId == userId && Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                    {
+                                                        <label class="pull-left site-sub-lable">Billing Cycle</label>
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.StartDate, "MMM dd, yyyy") to @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.EndDate, "MMM dd, yyyy")
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="site-action-buttons col-lg-22 col-md-12 col-sm-12 col-xs-12">
+                                                    <button href="@Url.Action("LicenseSettings", "Subscription", new {id= Model[i].Id})" style="margin-left: 10px" target="_blank" class="link-button pull-right tenant-action-button">Manage</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            @await Html.PartialAsync("../User/_AddNewSite", new ViewDataDictionary(ViewData) { { "TenantType", TenantType.BoldBIOnPremise } });
+                        }
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="bold-reports-on-premise-tab">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                        @if (Model != null && Model.Any(x => x.TenantTypeId == (int)TenantType.BoldReportsOnPremise))
+                        {
+                            for (var i = 0; i < Model.Count; i++)
+                            {
+                                if (Model[i].TenantTypeId == (int)TenantType.BoldReportsOnPremise)
+                                {
+                                    <div class="user-dns-data col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                        <div class="dns-link">
+                                            <div class="user-dns col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="data no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <div class="dns-data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <img class="dns-data-image no-padding col-lg-6 col-md-6 col-sm-6 col-xs-6" src="@Model[i].FavIconUrl" />
+                                                            <h1 maxlength="20" class="no-padding no-margin dns-org-name align-middle col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                                <span data-toggle="tooltip" data-placement="top" data-container="body" title="@Model[i].Subdomain">@Model[i].Subdomain</span>
+                                                            </h1>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tenant-status col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <span class="data status no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @if (Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Active)</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.ActivePaymentRequired || Model[i].TenantStatus == TenantStatus.Trial || Model[i].TenantStatus == TenantStatus.TrialNotStarted)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Trial</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.MarkedForSuspension || Model[i].TenantStatus == TenantStatus.Suspended || Model[i].TenantStatus == TenantStatus.MarkedForDeletion)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">@GlobalAppSettings.GetDescription(TenantStatus.Suspended)</span>
+                                                            }
+                                                            else if (Model[i].TenantStatus == TenantStatus.SubscriptionCancelled)
+                                                            {
+                                                                <span class="status-style @Model[i].TenantStatus.ToString().ToLower()">Subscription cancelled</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="status-style"></span>
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="no-padding col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    @if (Model[i].SaaSPlanId != 0)
+                                                    {
+                                                        <label class="pull-left site-sub-lable">Plan</label>
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @GlobalAppSettings.GetDescription((SaaSPlan)Model[i].SaaSPlanId)
+                                                        </span>
+                                                    }
+                                                    @if (Model[i].BillingCycle != null && Model[i].UserId == userId && Model[i].TenantStatus == TenantStatus.Active || Model[i].TenantStatus == TenantStatus.ActiveBenefits)
+                                                    {
+                                                        <label class="pull-left site-sub-lable">Billing Cycle</label>
+                                                        <span class="data col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.StartDate, "MMM dd, yyyy") to @DateTimeHelper.ConvertDateTimeToString(Model[i].BillingCycle.EndDate, "MMM dd, yyyy")
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="site-action-buttons col-lg-22 col-md-12 col-sm-12 col-xs-12">
+                                                    <button href="@Url.Action("LicenseSettings", "Subscription", new {id= Model[i].Id})" style="margin-left: 10px" target="_blank" class="link-button pull-right tenant-action-button">Manage</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            @await Html.PartialAsync("../User/_AddNewSite", new ViewDataDictionary(ViewData) { { "TenantType", TenantType.BoldReportsOnPremise } });
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

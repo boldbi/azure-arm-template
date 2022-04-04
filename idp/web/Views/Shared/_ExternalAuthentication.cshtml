@@ -1,0 +1,120 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@using Newtonsoft.Json
+@using Microsoft.Extensions.DependencyInjection;
+@using Microsoft.AspNetCore.Authentication;
+@using System.Net;
+@using Syncfusion.Server.Base.Helpers; 
+
+@{
+    var schemes = Context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+    var loginProviders = (from scheme in await schemes.GetAllSchemesAsync() where !string.IsNullOrEmpty(scheme.DisplayName) select scheme).ToList();
+    if (!ViewBag.IsADFSEnabled)
+    {
+        loginProviders = loginProviders.Where(x => x.DisplayName.ToLower() != "azure adfs").ToList();
+    }
+
+    var orderedProviders = loginProviders.Where(x => x.DisplayName.ToString() == "Azure ADFS").Select(x => x).ToList();
+
+    var showExternalAuthentication = loginProviders.Any(x => x.DisplayName == "Azure ADFS");
+    var controllerName = Context.Request.RouteValues["controller"].ToString();
+    var loginAction = ViewBag.ReturnURL != null ? Url.Action("ExternalLogin", controllerName) + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("ExternalLogin", controllerName);
+    var syncfusionLogin = ViewBag.ReturnURL != null ? Url.Action("SyncfusionLogin", "Accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("SyncfusionLogin", "Accounts");
+    var microsoftLogoLink = !CloudAppConfig.IsSelfHosted ? GlobalAppSettings.CdnDomain + "/static/logos/v1/" + IconFileNames.Microsoft : GlobalAppSettings.SystemSettings.CDNLink + "/images/common/application/azuread.png";
+    var windowsADLogoLink = GlobalAppSettings.SystemSettings.CDNLink + "/images/common/application/windows-ad.svg";
+    var windowsADclass = showExternalAuthentication ? "col-xs-6 no-padding " : string.Empty;
+    var authSettings = ViewBag.AuthSettings as List<AuthSettings>;
+    var showAuthLogin = authSettings != null && authSettings.Count > 0;
+    var authLogoPrefixUrl = new Uri(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp).GetLeftPart(UriPartial.Authority) + (Context.Request.PathBase.ToString().ToLower().Equals("/api") ? string.Empty : Context.Request.PathBase.ToString()) + "/content/images/application/authlogo/";
+    string openidLoginUrl = Url.Action("OpenIdLogin", "accounts");
+    string oauthLoginUrl = Url.Action("OAuthLogin", "accounts");
+    string jwtLoginUrl = Url.Action("JwtLogin", "accounts");
+}
+@if (showExternalAuthentication || showAuthLogin)
+{
+    <div class="external-container">
+        <div class="divider-container col-xs-12">
+            <hr class="connect-line-left"><div class="content text-body">[[[or Connect with]]]</div><hr class="connect-line-right">
+        </div>
+        <div id="alternative-login">
+            <div class="page-wrapper">
+                @if (controllerName.ToLower() == "authorization")
+                {
+                    <input id="external-authentication-client-id" type="hidden" name="clientId" value="@ViewBag.ClientId" />
+                }
+
+                <div class="col-xs-12 no-padding">
+                    @if (showExternalAuthentication)
+                    {
+                        @foreach (var item in orderedProviders)
+                        {
+                            <form method="post" action="@loginAction" class="external-login-buttons">
+                                <button class="col-xs-6 no-padding login-provider link-button button-style" type="submit" id="@item.Name.Replace(" ", "").ToLower()-login">
+                                    @Html.AntiForgeryToken()
+                                    @Html.Hidden("provider", item.DisplayName)
+                                    <input type="hidden" id="azure-email" name="email" />
+                                    <img alt="Azure AD" src="@microsoftLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/azuread.png")') this.src = '@Url.Content("~/images/common/application/azuread.png")';" />
+                                    <span id="adfs-login-text" class="login-provider-name">[[[Microsoft ADFS]]]</span>
+                                    <div id="validate-azure-user" class="error-message validation-holder">
+                                    </div>
+                                </button>
+                            </form>
+                        }
+                        @if (!CloudAppConfig.IsSelfHosted)
+                        {
+                            <div class="login-provider col-xs-2 syncfusion-login-option">
+                                <button type="button" data-login-url="@syncfusionLogin" class="link-button button-style btn btn-secondary" data-container="body" data-toggle="tooltip" data-placement="top" title="Syncfusion" id="syncfusion-login">
+                                    <img alt="syncfusion" src="@GlobalAppSettings.CdnDomain/static/logos/v1/@IconFileNames.Syncfusion" />
+                                </button>
+
+                                <div id="syncfusion-login-text" class="login-provider-name">Syncfusion</div>
+
+                                <div id="validate-syncfusion-user" class="error-message validation-holder">
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @if (showAuthLogin)
+                    {
+                        foreach (var auth in authSettings)
+                        {
+                            if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication )
+                            {
+                                <form id="login-button-windows" class="external-login-buttons">
+                                    <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
+                                        <img alt="Windows AD" src="@windowsADLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/windows-ad.svg")') this.src = '@Url.Content("~/images/common/application/windows-ad.svg")';" />
+                                        <span class="windows-ad-login-text">[[[Windows AD]]]</span>
+                                        <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
+                                    </button>
+                                </form>
+                            }
+
+                            if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD)
+                            {
+                <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
+                    <input type="hidden" value="@ViewBag.ReturnURL" id="authReturnUrl" name="authReturnUrl" />
+                    @Html.Hidden("tenantId", auth.TenantId.ToString())
+                    @Html.Hidden("authProviderLocation", auth.AuthProviderLocation.ToString())
+                    <button id="@auth.AuthType.ToString().ToLower()-login" class="login-provider auth-login-button link-button button-style login-button-openid" type="submit">
+
+                        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                        {
+                            <img id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="[[[AuthLogo]]]" />
+                        }
+                        else
+                        {
+                            <img id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="[[[AuthLogo]]]" />
+                        }
+
+                        <span class="login-provider-name">@(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
+                    </button>
+                </form>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

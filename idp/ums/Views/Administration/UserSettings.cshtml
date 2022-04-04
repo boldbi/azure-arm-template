@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "User Settings - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-settings.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script type="text/javascript">
+        var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+        var saveUserSettingsUrl = "@Url.Action("SaveUserSettings", "Administration")";
+    </script>
+    <script src="~/bundles/js/user-settings.js" asp-append-version="true"></script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+
+<div id="user-settings-container" class="col-xs-12 admin-page-content-container">
+    <div class="admin-page-content col-xs-12 no-padding">
+        <div id="user-settings-header" class="col-xs-12 admin-page-header">
+            <hgroup class="admin-page-header-description">
+                <h1 class="h2 page-title">[[[USER SETTINGS]]]</h1>
+                <h5 class="page-description">[[[Configuration for activating user accounts]]]</h5>
+            </hgroup>
+        </div>
+        <div id="user-settings-body" class="col-xs-12 admin-page-body">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-12 no-padding">
+                    <label class="app-textbox-label activation">[[[Account Activation Mode]]]</label>
+                </div>
+                <div class="activation-mode" id="automatic">
+                    <input type="radio" id="automatic-account-activation" name="activation" class="css-radio" value="AutomaticActivation" @((int)ViewBag.UserSettings == (int)ActivationType.AutomaticActivation ? "checked" : string.Empty) />
+                    <label for="automatic-account-activation" class="app-textbox-label radio-btn-label notransition" id="labelautomatic">[[[Automatic]]]</label>
+                </div>
+                <div class="activation-mode" id="email">
+                    <input type="radio" id="email-account-activation" name="activation" class="css-radio" value="EmailActivation" @((int)ViewBag.UserSettings == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.IsEmailSettingsConfigured == "failure" ? "disabled" : string.Empty) />
+                    <label for="email-account-activation" class="app-textbox-label radio-btn-label notransition @(ViewBag.IsEmailSettingsConfigured == "failure" ? "disabled-lable-color" : string.Empty)" id="labelemail">[[[Email]]]</label>
+                </div>
+                @if (@ViewBag.IsEmailSettingsConfigured == "failure")
+                {
+                    <div class="col-lg-12 no-padding">
+                        <div class="bg-danger email-settings-validation validation-errors">
+                            [[[Activation emails cannot be sent until the email settings are configured. You can select 'Automatic Activation' to activate the user without configuring email settings.]]]
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-xs-12 no-padding email-container">
+                <div class="col-xs-12 no-padding">
+                    <label class="app-textbox-label is-email-required">
+                        User Email
+                    </label>
+                    <div class="section-info-message">[[[This setting controls whether email address is required for creating new users.]]]</div>
+                </div>
+                <div class="email-not-required activation-mode" id="not-required">
+                    <input type="radio" id="email-not-required" name="email-required" class="css-radio" value="Not Required" @(GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.NotRequired ? "checked" : string.Empty) @(GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled" : string.Empty) />
+                    <label for="email-not-required" class="app-textbox-label radio-btn-label notransition @(GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled-lable-color" : string.Empty)" id="label-email-not-required">[[[Not Required]]]</label>
+                </div>
+                <div class="email-not-required activation-mode" id="required">
+                    <input type="radio" id="email-required" name="email-required" class="css-radio" value="Required" @(((int)ViewBag.UserSettings == (int)ActivationType.EmailActivation || GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.Required) ? "checked" : string.Empty) />
+                    <label for="email-required" class="app-textbox-label radio-btn-label notransition" id="label-email-required">[[[Required]]]</label>
+
+                    <div class="col-lg-12 bg-danger email-settings-validation validation-errors hide"></div>
+                </div>
+                <div class="col-lg-12 no-padding">
+                    <div id="email-required-warning" class="bg-warning email-settings-validation validation-errors @(GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? string.Empty : "hide")">
+                        [[[When the account activation preference is email, email address is mandatory for activating the account.]]]
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin-page-footer col-lg-12">
+            <div class="admin-page-actions col-lg-12 col-md-12">
+                <a href="/" class="secondary-button pull-right" id="cancel-user-settings" title="">[[[Cancel]]]</a>
+                <button type="button" title="" id="update-user-settings" name="UpdateUserSettings" class="primary-button pull-right">
+                    <span>[[[Save]]]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</div>
+}

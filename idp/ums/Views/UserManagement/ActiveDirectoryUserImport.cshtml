@@ -1,0 +1,292 @@
+﻿@{
+    ViewBag.Title = "Azure AD – Import Users" + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-active-directory.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script src="~/bundles/js/user-active-directory.js" asp-append-version="true"></script>
+
+    <script>
+        var saveSelectedActiveDirectoryUserUrl = "@Url.Action("SaveSelectedAzureADUser", "UserManagement")";
+        var SearchActiveDirectoryUsersUrl = "@Url.Action("SearchAzureADUsers", "UserManagement")";
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_UserMenu")
+    @if (ViewBag.ActiveDirectory != null)
+    {
+        <script type="text/x-jsrender" id="user-detail-validation">
+            {{if IsDuplicated}}
+            <span class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+            {{/if}}
+        </script>
+        <script type="text/x-jsrender" id="checkbox-row-template">
+            {{if IsDuplicated}}
+            <input disabled type="checkbox" class="checkbox-row-disabled material-checkbox selfhosted" data-checked-id="{{:UserId}}" id="row-check{{:UserId}}" />
+            <input name="row-check{{:UserId}}" type="hidden" value="false">
+            <label for="row-check{{:UserId}}"> </label>
+            {{else}}
+            <input type="checkbox" class="checkbox-row material-checkbox selfhosted" data-checked-id="{{:UserId}}" id="row-check{{:UserId}}" />
+            <input name="row-check{{:UserId}}" type="hidden" value="false">
+            <label for="row-check{{:UserId}}"> </label>
+            {{/if}}
+        </script>
+
+        <script type="text/x-jsrender" id="full-name-template">
+            <span title="{{:FullName}}" class="grid-content" data-toggle="tooltip">
+                {{:FullName}}
+            </span>
+        </script>
+
+        <script type="text/x-jsrender" id="email-id-template">
+            <span title="{{:EmailId}}" class="grid-content" data-toggle="tooltip">
+                {{:EmailId}}
+            </span>
+        </script>
+
+        <script type="text/x-jsrender" id="checkbox-header-template">
+            @Html.CheckBox("checkbox-header", new
+            {
+                @class = "material-checkbox selfhosted"
+            })
+            @Html.Label("checkbox-header", " ", new
+            {
+                @class = "checkbox-header-label"
+            })
+        </script>
+
+        <script type="text/x-jsrender" id="full-name-header">
+            <span class="item-header">Name</span>
+        </script>
+        <script type="text/x-jsrender" id="user-name-header">
+            <span class="item-header">Username</span>
+        </script>
+        <script type="text/x-jsrender" id="last-name-header">
+            <div class="item-header">Last Name</div>
+        </script>
+        <script type="text/x-jsrender" id="first-name-header">
+            <div class="item-name">First Name</div>
+        </script>
+        <script type="text/x-jsrender" id="email-id-header">
+            <span class="item-header">Email Address</span>
+        </script>
+        <script type="text/x-jsrender" id="contact-header">
+            <div class="item-header">Mobile No</div>
+        </script>
+
+        <script type="text/javascript">
+
+            $(function() {
+                addPlacehoder("#search-area");
+                @if (ViewBag.AdImport)
+                {
+                    <text>
+                        @*var data = ej.DataManager({
+                            url: "@Url.Action("SearchActiveDirectoryUsers", "UserManagement")",
+                            adaptor: new ej.UrlAdaptor()
+                        });*@
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        var data = ej.DataManager({
+                            url: "@Url.Action("SearchAzureADUsers", "UserManagement")",
+                            adaptor: new ej.UrlAdaptor()
+                        });
+                    </text>
+                }
+                ej.support.stableSort = false;
+                GridLocalization();
+                $("#Grid").ejGrid({
+                    dataSource: data,
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    allowSorting: true,
+                    allowSelection: true,
+                    allowScrolling: false,
+                    allowFiltering: false,
+                    allowSearching: true,
+                    locale: "en-US",
+                    filterSettings: { filterType: "menu" },
+                    pageSettings: { pageSize: 20 },
+                    selectionType: ej.Grid.SelectionType.Multiple,
+                    selectionSettings: { selectionMode: ["row"] },
+                    templateRefresh: "refreshTemplate",
+                    actionComplete: "fnActionComplete",
+                    create: "fnCreate",
+                    recordClick: "recordClick",
+                    actionBegin: "fnOnADUserGridActionBegin",
+                    enableAltRow: false,
+                    rowDataBound: function() {
+                        $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
+                    },
+                    dataBound: function() {
+                        $("#checkbox-header").change(headCheckboxOnChange);
+                        this.model.indexes = {}; /* Additional property*/
+                    },
+                    columns: [
+                        {
+                            headerTemplateID: "#checkbox-header-template",
+                            template: true,
+                            templateID: "#checkbox-row-template",
+                            textAlign: ej.TextAlign.Center,
+                            width: 10,
+                            allowFiltering: false
+                        },
+                        {
+                            field: "FullName",
+                            cssClass: "full-name",
+                            headerText: "Name",
+                            templateID: "#full-name-template",
+                            headerTemplateID: "#full-name-header",
+                            width: 50,
+                            type: "string"
+                        },
+                        {
+                            field: "LastName",
+                            cssClass: "last-name",
+                            headerText: "Last Name",
+                            headerTemplateID: "#last-name-header",
+                            width: 10,
+                            visible: false
+                        },
+                        {
+                            field: "FirstName",
+                            cssClass: "first-name",
+                            headerText: "First Name",
+                            headerTemplateID: "#first-name-header",
+                            width: 10,
+                            visible: false
+                        },
+                        {
+                            field: "EmailId",
+                            cssClass: "email-id",
+                            headerText: "Email Address",
+                            templateID: "#email-id-template",
+                            headerTemplateID: "#email-id-header",
+                            width: 80,
+                            type: "string"
+                        },
+                        {
+                            field: "ContactNumber",
+                            cssClass: "mobile-no",
+                            headerText: "Mobile No",
+                            headerTemplateID: "#contact-header",
+                            width: 10,
+                            visible: false
+                        },
+                        {
+                            field: "UserId",
+                            cssClass: "item-id",
+                            headerText: "User Id",
+                            headerTemplateID: "#UserIdHeader",
+                            width: 10,
+                            visible: false
+                        },
+                        {
+                            field: "",
+                            width: 10,
+                            templateID: "#user-detail-validation",
+                            allowFiltering: false,
+                            textAlign: ej.TextAlign.Center
+                        }
+                    ]
+                });
+            });
+        </script>
+
+        <div id="import-active-directory-users" class="col-lg-12 admin-page-container">
+            <div class="col-lg-12 admin-page-header">
+                <div class="col-lg-6 no-padding import-area">
+                    <a href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-placement="top" data-container="body" title="Users" class="back-button pull-left">
+                        <i class="su su-arrow-back"> </i>
+                    </a>
+                    <h2 class="page-title no-margin">
+                        <span>IMPORT USERS — Azure AD </span>
+                    </h2>
+                </div>
+                <div class="col-lg-6 no-padding">
+                    <input type="button" value="Import and Activate" disabled="" data-toggle="tooltip" data-placement="top" data-container="body" title="Import the selected users and activate their accounts" onclick="SaveActiveDirectoryUsers()" id="import-button" class="primary-button pull-right import-button" />
+                </div>
+            </div>
+
+            <div class="content-section admin-page-body">
+                <div class="col-md-12 col-xs-12 no-margin no-padding directory-user-search">
+                    <div class="col-md-8 col-xs-8 no-padding directorypath-area">
+
+                        <span class="directory-path no-padding">Tenant Name :<input type="hidden" name="url" value="@ViewBag.ActiveDirectory.TenantName"></span>
+                        <span class="no-padding ad-url">
+                            @ViewBag.ActiveDirectory.TenantName&nbsp;&nbsp;
+                            @*<a href="@Url.Action("user-directory-settings", "Administration")?tab=azure-ad" data-toggle="tooltip" data-placement="top" data-container="body" title="Update Azure AD Configuration settings" class="link-button azure-section">Modify</a>*@
+                        </span>
+
+                        <div class="no-padding error-msg">@TempData["ErrorMessage"]</div>
+                    </div>
+                    <div id="search-area" class="pull-right">
+                        <input type="text" id="ad-user-import" class="pull-left" placeholder="Search users" autocomplete="off" />
+                        <span class="su su-inner-close close-icon pull-left" id="clear-search" data-toggle="tooltip" data-placement="top" data-container="body" title="Clear search"></span>
+                        <span class="su su-search search-user pull-left" data-toggle="tooltip" data-placement="top" data-container="body" title="Search"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12 no-padding no-margin user-data-grid">
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-12 col-md-12 no-padding">
+                            <span class="import-message">
+                                Search and select the users from the following list to import into Dashboards
+                            </span>
+                        </div>
+                        <div class="col-xs-12  col-md-12 no-padding no-margin">
+                            <div id="grid-validation-messages" class="list grid-error-validation">
+                                <div class="col-xs-12">
+                                    <span id="grid-validation" class="grid-validation no-padding"><span id="user-count" class="user-count">@ViewBag.UserCount</span> User(s) has been imported and activated successfully.</span>
+                                    <span id="grid-error-validation" class="grid-error-validation no-padding">Duplicate or Invalid data is found. Please change the data accordingly and re-import. </span>
+                                    <span id="empty-validation" class="validation-message empty-validation no-padding">Please select user(s) to import</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="grid-container" class="col-md-12 no-top-margin no-padding">
+                        <div class="col-md-12 container-fluid page-inner-padding no-padding ">
+                            <div id="Grid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 no-padding"></div>
+                    <div class="col-xs-8 no-padding"></div>
+                </div>
+            </div>
+            <input type="hidden" name="AllUserList" id="AllUserList" value="@ViewBag.Pathname" />
+            <input type="hidden" id="UserCount" data-value="@ViewBag.UserExists" />
+            <input type="hidden" id="csvFileError" data-value="@ViewBag.result" />
+            @*@Html.Partial("../UserManagement/_LimitUserCreation")*@
+        </div>
+    }
+    else
+    {
+        <div class="col-lg-12 admin-page-container" id="import-active-directory-users">
+            <div class="col-lg-12 admin-page-header">
+                <div class="col-md-12 no-padding import-area">
+                    <a href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-placement="top" data-container="body" title="Users" class="back-button pull-left">
+                        <i class="su su-arrow-back"> </i>
+                    </a>
+                    <h1 class="page-title">
+
+                        <span>IMPORT USERS — Azure AD</span>
+
+                    </h1>
+                </div>
+            </div>
+
+            <div class="col-md-12 admin-page-body">
+                <a href="@Url.Action("user-directory-settings", "administration")" class="btn btn-link admin-page-link">Click here to configure the Azure Active Directory settings</a>
+            </div>
+        </div>
+    }
+}
+
+}

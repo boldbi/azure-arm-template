@@ -1,0 +1,66 @@
+﻿@{
+    ViewBag.Title = "[[[API Validator]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var idpUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.Trim('/');
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/api-validation.css" asp-append-version="true" />
+}
+@section scripts{
+    <script src="~/bundles/js/api-validation.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        $.extend(ej, Syncfusion);
+        var validateTokenRequestUrl = "@Url.Action("ValidateTokenRequest", "Administration")";
+        var getEndpointResponseRequestUrl = "@Url.Action("GetEndpointResponse", "Administration")";
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div id="api-validation-container" class="col-xs-12 col-md-12 col-sm-12 admin-page-content-container">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div class="col-xs-12 col-md-12 col-sm-12 admin-page-header">
+                <hgroup class="admin-page-header-description">
+                    <h1 class="h2 page-title">
+                        [[[API Validator]]]
+                    </h1>
+                    <h5 class="page-description">
+                        [[[Validate the functionality of REST APIs]]]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-12 admin-page-body">
+                <div class="col-md-12 no-padding">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[Token Endpoint]]]</label>
+                    </div>
+                    <div>
+                        <input class="form-control end-point-textbox" disabled value="@idpUrl/api/token" readonly />
+                    </div>
+                    <div>
+                        <button id="validate-token" class="primary-button">[[[Validate]]]</button>
+                    </div>
+                </div>
+
+                <div class="col-md-12 no-padding input-field-margin">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[API Endpoint]]]</label>
+                    </div>
+                    <div>
+                        <input id="get-request-end-point" type="text" class="form-control end-point-textbox" required />
+                    </div>
+                    <div>
+                        <button id="get-response" class="primary-button" disabled="disabled">[[[Get Response]]]</button>
+                    </div>
+                    <div class="validation-message"></div>
+                    <div class="info-message no-padding">[[[Provide the endpoint that supports GET requests.]]]</div>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+    @await Html.PartialAsync("_ApiValidationResponse")
+}

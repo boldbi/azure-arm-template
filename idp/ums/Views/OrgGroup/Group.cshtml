@@ -1,0 +1,291 @@
+@{
+    ViewBag.Title = "Organization | Groups | Bold IAM";
+}
+<link rel="stylesheet" href="~/bundles/css/groups.css" asp-append-version="true"/>
+
+@section scripts{
+    <script>
+        var deleteGroupViewUrl = "@Url.Action("DeleteGroupView", "OrgGroup")";
+        var addGroupViewUrl = "@Url.Action("AddGroupView", "OrgGroup")";
+        var deleteGroupUrl = "@Url.Action("DeleteGroup", "OrgGroup")";
+        var groupPageUrl = "@Url.Action("Group", "OrgGroup")";
+        var deleteFromGroupListUrl = "@Url.Action("DeleteFromGroupList", "OrgGroup")";
+    </script>
+    <script src="~/bundles/js/groups.js" asp-append-version="true"></script>
+
+    <script type="text/x-jsrender" id="group-profile-template">
+        <a class="item-name grid-content" title="{{:~renderDoubleQuotes(Name)}}" data-toggle="tooltip" href="@Url.Action("ViewGroup", "OrgGroup")/{{:Id}}">{{:Name}}</a>
+
+        {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
+        <span title="Azure AD Group" class="su su-azure-ad Grid-directory-icon"> </span>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="group-description-template">
+        <span class="grid-content" title="{{:~renderDoubleQuotes(Description)}}" data-toggle="tooltip">
+            {{:Description}}
+        </span>
+    </script>
+    <script type="text/x-jsrender" id="actions-template">
+        <div class="user-hover-options" data-groupid="{{:Id}}" data-directory-type="{{:DirectoryType}}">
+            {{if DirectoryType != @((int)DirectoryType.AzureAD)}}
+            <a href="{{:~editGroupUrlEncode(Id)}} " class="user-add-class" title="Add Users" data-toggle="tooltip" data-groupid="{{:Id}}" data-directory-type="{{:DirectoryType}}">
+                <i class="su su-user-add"></i>
+            </a>
+            {{else}}
+            <a href="javascript:void(0);" class="user-add-class" title="You cannot add users to azure groups." data-toggle="tooltip" data-placement="left" data-groupid="{{:Id}}" data-directory-type="{{:DirectoryType}}">
+                <i class="su su-user-add disabled-icon-color"></i>
+            </a>
+            {{/if}}
+            <a href="@Url.Action("ViewGroup","OrgGroup")/{{:Id}}" title="View" data-toggle="tooltip" data-groupid="{{:Id}}">
+                <i class="su su-show"></i>
+            </a>
+            <a href="javascript:void(0);" class="delete user-delete-class" data-groupid="{{:Id}}" title="Delete" data-toggle="tooltip" data-groupname="{{:Name}}">
+                <i class="su su-delete"></i>
+            </a>
+        </div>
+    </script>
+    <script type="text/javascript">
+        var groups = @Html.Raw(@ViewBag.groups)
+            GridLocalization();
+        $(document).ready(function () {
+            $("#search-groups").val("");
+            addPlacehoder("#search-area");
+            $("#Grid").ejGrid({
+                dataSource: ej.DataManager({ url: "@Url.Action("RefreshGroup", "OrgGroup")", adaptor: "UrlAdaptor" }),
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                enableAltRow: false,
+                locale: "en-US",
+                allowSorting: true,
+                allowSearching: true,
+                allowSelection: true,
+                allowFiltering: true,
+                selectionType: ej.Grid.SelectionType.Multiple,
+                selectionSettings: { selectionMode: ["row"] },
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                rowDataBound: function () {
+                    var height = $(".e-gridcontent").height();
+                    if (height != null) {
+                        rowBound();
+                    }
+
+                },
+                rowSelecting: function (e) {
+                    this.multiSelectCtrlRequest = true;
+                },
+                rowSelected: "fnGroupRowSelected",
+                recordClick: "fnGroupRecordClick",
+                load: "fnOnGroupfLoad",
+                pageSettings: { pageSize: 20 },
+                filterSettings: { filterType: "menu" },
+                actionBegin: "fnOnGroupGridActionBegin",
+                actionComplete: "fnOnGroupGridActionComplete",
+                columns: [
+                    {
+                        template: true,
+                        allowSorting: true,
+                        allowFiltering: true,
+                        headerText: "Name",
+                        width: 105,
+                        headerTemplateID: "#name-header",
+                        templateID: "#group-profile-template",
+                        field: "Name",
+                        type: "string"
+                    },
+                    {
+                        field: "Description",
+                        headerText: "Description",
+                        allowSorting: true,
+                        allowFiltering: true,
+                        type: "string",
+                        width: 210,
+                        templateID: "#group-description-template",
+                        headerTemplateID: "#description-header"
+                    },
+                    {
+                        allowSorting: false,
+                        allowFiltering: false,
+                        field: "MembersCount",
+                        headerText: "Users",
+                        type: "string",
+                        width: 25
+                    },
+                    {
+                        template: true,
+                        allowSorting: false,
+                        allowFiltering: false,
+                        headerText: "Actions",
+                        templateID: "#actions-template",
+                        width: 75
+                    }
+
+                ]
+
+            });
+
+            $.views.helpers({
+                renderDoubleQuotes: function (inputString) {
+                    return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                },
+                editGroupUrlEncode: function (groupId) {
+                    return encodeURI(groupPageUrl + "/" + groupId + "/members");
+                }
+            });
+
+            $("#new-group-area").ejDialog({
+                width: "500px",
+                showOnInit: false,
+                allowDraggable: true,
+                enableResize: false,
+                showHeader: false,
+                title: "Add New Group",
+                enableModal: true,
+                closeOnEscape: true,
+                close: ''
+            });
+            $("#delete-group-area").ejDialog({
+                width: "499px",
+                showOnInit: false,
+                allowDraggable: true,
+                enableResize: false,
+                showHeader: false,
+                title: "Delete Group",
+                enableModal: true,
+                closeOnEscape: true,
+                close: ''
+            });
+
+
+			$("#delete-group-area_wrapper").ejWaitingPopup();
+
+			$("#new-group-area_wrapper").ejWaitingPopup();
+            $("#groups-delete-confirmation").ejDialog({
+                width: "378px",
+                showOnInit: false,
+                allowDraggable: false,
+                enableResize: false,
+                height: "auto",
+                showHeader: false,
+                title: "Delete Groups",
+                enableModal: true,
+                close: "onDeleteDialogClose",
+                closeOnEscape: true,
+                open: "onDeleteDialogOpen"
+            });
+
+			$("#groups-delete-confirmation_wrapper").ejWaitingPopup();
+			$("#body").ejWaitingPopup();
+
+        });
+
+
+    </script>
+
+    <script type="text/x-jsrender" id="name-header">
+        <div class="item-name">Name</div>
+    </script>
+    <script type="text/x-jsrender" id="description-header">
+        <div class="item-header">Description</div>
+    </script>
+}
+@section MainSection{
+    @await Html.PartialAsync("../OrgUserManagement/_UserMenu")
+    <div id="group-directory-container" role="tabpanel" class="admin-page-container col-lg-12 pull-left" aria-labelledby="active-directory-settings-link">
+
+        <div class="col-md-12 import-area admin-page-header">
+            <hgroup class="col-lg-4 col-md-4 col-sm-6 col-xs-12 no-padding">
+                <h2 class="page-title no-padding">GROUPS (<span id="group-count">@ViewBag.groupCount</span>)</h2>
+            </hgroup>
+            <div id="group-header" class="col-lg-8 col-md-8 col-sm-6 col-xs-12 no-padding">
+                <ul class="pull-right col-lg-12 no-padding no-margin groups-menu">
+                    <li class="dropdown">
+                        <button class="dropdown-toggle primary-button pull-right" data-toggle="dropdown" id="new-user-dropdown" title="Add new group">
+                            <span>New Group </span>
+                            <span class="caret"></span>
+                        </button>
+
+                        <ul class="dropdown-menu" role="menu" id="dropdown-options">
+                            <li id="new-group-button" title="Add new group">
+                                <a href="javascript:void(0)" title="Add new group" data-toggle="tooltip" data-placement="top">
+                                    <i class="su su-group-1"></i>
+                                    <span>Create Group</span>
+                                </a>
+                            </li>
+
+                            @*<li>
+                                    <a href="@Url.Action("AzureADGroupImport","orggroup")" data-toggle="tooltip" data-placement="top" title="Import groups from Azure AD">
+                                        <i class="su su-azure-ad"></i>
+                                        <span>Import from Azure AD</span>
+                                    </a>
+                                </li>*@
+                        </ul>
+                    </li>
+
+                    @*@if (ViewBag.AzureAD != null)
+                        {
+                            <li class="dropdown">
+                                <button class="dropdown-toggle primary-button pull-right" data-toggle="dropdown" id="synchronize-dropdown" title="Synchronize Groups">
+                                    <span>Synchronize </span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" id="synchronize-dropdown-menu">
+
+                                    @if (ViewBag.AzureAD != null)
+                                    {
+                                        <li>
+                                            <a class="dropdown-toggle" href="@Url.Action("AzureADGroup", "OrgGroup")" data-toggle="tooltip" data-placement="left" title="Synchronize groups with Azure AD">
+                                                <i class="su su-azure-ad"> </i>
+                                                <span>Azure AD Synchronization</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            if (ViewBag.AzureAD != null)
+                            {
+                                <li>
+                                    <a href="@Url.Action("AzureADGroup", "OrgGroup")" class="link-button pull-right synchronize-groups" title="Synchronize groups with Azure AD">
+                                        Azure AD Synchronization
+                                    </a>
+                                </li>
+                            }
+                        }*@
+                    <li class="flying-add hide" id="add-user-in-groups">
+                        <button class="critical-action-button group-delete-button" title="Delete selected Groups" data-directory-type="@((int)DirectoryType.AzureAD)" data-groupid="1">Delete Groups</button>
+                    </li>
+                </ul>
+                <input type="hidden" name="GroupCount" id="group-count-text" value="@ViewBag.groupCount" />
+                @*<input type="hidden" id="adgroup-count-text" value="@ViewBag.AdGroupCount">*@
+                <input type="hidden" id="azureadgroup-count-text" value="@ViewBag.AzureADGroupCount">
+            </div>
+        </div>
+        <div id="grid-container" class="col-lg-12 admin-page-body">
+            <div id="search-area" class="pull-right">
+                <input type="text" id="search-groups" class="pull-left no-margin" placeholder="Search groups" />
+                <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="Clear search"></span>
+                <span class="su su-search search-group pull-left no-margin" title="Search"></span>
+            </div>
+            <div id="Grid" data-gridName="Group" class="pull-left">
+            </div>
+            @if (ViewBag.AzureADGroupCount > 0)
+            {
+                <div id="azure-ad-indication" class="ad-azure-indication col-lg-12"><span class="su su-azure-ad"> </span> - <span class="margin">Azure AD group</span></div>
+            }
+        </div>
+        <div id="new-group-area" class="no-padding">
+            <iframe id="new-group-iframe" class="pull-left"></iframe>
+        </div>
+        <div id="delete-group-area" class="no-padding">
+            <iframe id="delete-group-iframe" class="pull-left"></iframe>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("../Group/_MultipleGroupDeleteDialog")
+}

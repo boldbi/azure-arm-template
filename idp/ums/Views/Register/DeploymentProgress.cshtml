@@ -1,0 +1,57 @@
+﻿@{
+    var tenantInfoId = ViewBag.TenantInfoId.ToString();
+    var planId = ViewBag.PlanId.ToString();
+    var tenantType = ViewBag.TenantType;
+    ViewBag.Title = tenantType == TenantType.BoldBI ? "Dashboard | Register – Deployment | " + GlobalAppSettings.BrandingDisplayName : "Report | Register – Deployment | " + AppBranding.BoldReports.DisplayName;
+    Layout = "../Shared/_Layout.Registration.cshtml";
+    ViewBag.HideLoginOption = true;
+    var isBoldBIBranding = GlobalAppSettings.Branding == @AppBranding.Bold.Identifier;
+    var isEmbedPlan = ViewBag.PlanId == (int)SaaSPlan.Embedded;
+    var name = tenantType == TenantType.BoldBI ? "dashboard" : "report";
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/deployment-process.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script src="~/signalr/hubs" asp-append-version="true"></script>
+    <script src="~/bundles/js/deployment-process.js" asp-append-version="true"></script>
+
+    <script type="text/javascript">
+        var deployTenantUrl = "@Url.Action("Deploy", "Register")";
+        var tenantInfoId = "@tenantInfoId";
+        var planId = "@planId";
+        var isEmbedPlan =  @Json.Serialize(isEmbedPlan);
+        var isBoldBiBranding =  @Json.Serialize(isBoldBIBranding);
+        var isBoldBICloudRegistration =  @Json.Serialize(tenantType == TenantType.BoldBI);
+    </script>
+}
+
+@section MainSection
+{
+    <div class="deploy-tenant-parent">
+        <div class="deploy-tenant-child">
+            <div class="deploy-tenant-bg">
+                @if (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier)
+                {
+                    <div class="syncfusion-app-logo"></div>
+                }
+                else
+                {
+                    <div class="@(tenantType == TenantType.BoldBI ? "boldbi-app-logo" : "boldreports-app-logo")"></div>
+                }
+                <div class="text-h1 deployment-content">Your @name site is starting up...</div>
+                <div class="text-body deployment-content-small">This won't take more than a minute or two. We will redirect you to your @name site once it is ready.</div>
+                <div class="deployment-container">
+                    <div class="circle-progress">
+                        <div class="wrapper">
+                            <img src="~/image/common/application/deploymentimage.gif" />
+                            <div id="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

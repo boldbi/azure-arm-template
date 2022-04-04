@@ -1,0 +1,170 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    var includeHeader = ViewBag.IncludeHeader != null ? ViewBag.IncludeHeader : false;
+    var loginBackgroundImage = ViewBag.LoginBackgroundImage;
+    var headerLogo = (ViewBag.LoginLogo != null) ? ViewBag.LoginLogo : CloudAppConfig.FallbackLoginLogoUrl;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    @await Html.PartialAsync("~/Views/Shared/_OGPContent.cshtml")
+    @RenderSection("meta", false)
+    <title>
+        @ViewBag.Title
+    </title>
+
+    @await Html.PartialAsync("_Favicon")
+
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/accounts-layout.css" asp-append-version="true" />
+    @RenderSection("styles", false)
+
+    @if (!string.IsNullOrWhiteSpace(loginBackgroundImage))
+    {
+        var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.TrimEnd('/') + "/content/images/application/" + loginBackgroundImage;
+        <style>
+            body {
+                background-image: url(@imageUrl);
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+            .account-parent{
+                background: transparent;
+            }
+            .account-bg {
+                background-color: white;
+                box-shadow: 0px 0px 5px #c9ced0;
+            }
+        </style>
+    }
+
+    <script src="~/bundles/js/accounts.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    @RenderSection("scripts", false)
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="popover"]').popover();
+
+            createWaitingPopup('body');
+        });
+    </script>
+    <style>
+        .loader-icon {
+            display: block;
+        }
+
+        .loader-icon {
+            left: 0px !important;
+            position: relative;
+            margin: 0px auto;
+            width: 54px;
+            height: 54px;
+        }
+
+            .loader-icon .circular {
+                -webkit-animation: rotate 2s linear infinite;
+                animation: rotate 2s linear infinite;
+                height: 54px;
+                width: 54px;
+                position: relative;
+            }
+
+            .loader-icon .path {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+                -webkit-animation: dash 1.5s ease-in-out infinite;
+                animation: dash 1.5s ease-in-out infinite;
+                stroke: #5592FB;
+                stroke-linecap: square;
+            }
+
+        @@keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@-webkit-keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes dash {
+            0% {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -124;
+            }
+        }
+
+        @@-webkit-keyframes dash {
+            0% {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -124;
+            }
+        }
+    </style>
+</head>
+<body id="body">
+    @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+
+    @if (includeHeader)
+    {
+        <section id="header">
+            @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
+        </section>
+    }
+    <div class="account-parent @(includeHeader ? "header-padding" : string.Empty)">
+        <div class="account-child">
+            <div class="account-bg">
+                <div class="account-header">
+                    @if (!CloudAppConfig.IsSelfHosted)
+                    {
+                        <img alt="[[[Login Logo]]]" src="@headerLogo" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" />
+                    }
+                    else
+                    {
+                        <img alt="Login Logo" src="@Url.Content(@headerLogo)" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.LoginLogo)';" />
+                    }
+                </div>
+                @RenderSection("MainSection", true)
+            </div>
+        </div>
+    </div>
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml")
+    }
+    else
+    {
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    }
+</body>
+</html>

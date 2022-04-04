@@ -1,0 +1,191 @@
+﻿@{
+    var userDetail = ViewBag.UserDetail;
+    var isAduser = ViewBag.IsAdUser;
+    var showResendButton = !userDetail.IsActive && DateTime.UtcNow < userDetail.ActivationExpirationDate && !isAduser && GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "show" : "hide";
+    var showActivationButton = !userDetail.IsActive && !isAduser && GlobalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation ? "show" : "hide";
+    var showDropdown = userDetail.IsActive && userDetail.Email.ToLower() != ViewBag.LoggedUser.ToLower() && !ViewBag.isAdUser ? "show" : "hide";
+    var showActive = userDetail.IsActive && userDetail.Email.ToLower() == ViewBag.LoggedUser.ToLower() ? "show" : "hide";
+    var showActiveUser = userDetail.IsActive && ViewBag.IsAdUser ? "show" : "hide";
+    var showInactive = showDropdown == "hide" && showActive == "hide" && showActiveUser == "hide" ? "show" : "hide";
+    var groupList = ViewBag.GroupList;
+    var idPUrl = GlobalAppSettings.Configuration.GetSection("AppSettings")["IdPUrl"];
+    ViewBag.Title = "Organization | User | Profile | Bold IAM";
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var idpChangePasswordUrl = GlobalAppSettings.SystemSettings.BaseUrl + "/profile/change-password?return_url=" + requestUrl.AbsoluteUri;
+    var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-management-profile.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script src="~/bundles/js/user-management-profile.js" asp-append-version="true"></script>
+
+    <script type="text/javascript">
+        var tanantManagementServerResourceUrl = "@GlobalAppSettings.SystemSettings.CDNLink";
+        var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+        var activateUserUrl = "@Url.Action("ActivateUser", "UserManagement")";
+        var resendactivationcodeUrl = "@Url.Action("resendactivationcode", "UserManagement")";
+        var updateprofilepictureUrl = "@Url.Action("updateprofilepicture", "user")";
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        var UpdatePasswordUrl = "@Url.Action("UpdatePassword", "UserManagement")";
+        var updateUserProfileUrl = "@Url.Action("UpdateUserProfile", "UserManagement")";
+        var emailSettingsUrl = "@Url.Action("e-mail-settings", "administration")";
+        var deleteSingleFromUserListUrl = "@Url.Action("DeleteSingleFromUserList", "UserManagement")";
+        var userPageUrl = "@Url.Action("Index", "UserManagement")";
+        var rootBaseUrl = "@Url.Content("~/")";
+        if (rootBaseUrl.toLowerCase() == "/")
+            rootBaseUrl = "";
+        var avatarUrl = "@(idPUrl + Url.Action("Avatar", "User"))";
+        var idpUrl = "@(idPUrl)";
+        var deleteavatarUrl = "@Url.Action("deleteavatar", "User")";
+        var getdefaultavatarUrl = "@Url.Action("getdefaultavatar", "User")";
+        $(document).ready(function() {
+            $("#avatar-button-click, #avatar-delete-click").css("display", "none");
+            $("#status-dom").hide();
+
+            window.dateFormat = "@dateFormat";
+            var fulldata = @Html.Raw(Json.Serialize(ViewBag.UserDetail));
+            editUser(fulldata, "@dateFormat");
+            if (@ViewBag.EditUserProfile > 0) {
+                $("#edit").trigger("click");
+                if (showDropdown == "show") {
+                    $("#status-div").addClass("line-spacing");
+                }
+            }
+            $('[data-toggle="tooltip"]').tooltip();
+            $(document).on("click",
+                ".popup-close",
+                function(e) {
+                    $(".edit-profile-field").attr("value", "updateUserProfileUrl");
+                    $("#profile-picture").attr("src", "@GlobalAppSettings.SystemSettings.CDNLink/images/common/preview.jpg");
+                    $('#upload-image').attr("disabled", "disabled");
+                    if ($(".img-container").children().hasClass("jcrop-active")) {
+                        $('#profile-picture').data("Jcrop").destroy();
+                    }
+                    $(function() {
+                        $("#avatar-upload-box").ejDialog({
+                            showOnInit: false,
+                            allowDraggable: true,
+                            enableResize: false,
+                            width: "600px",
+                            enableModal: true,
+                            showHeader: false,
+                            close: "DialogBoxClose",
+                            closeOnEscape: true
+                        });
+                    });
+                    eDialog = $("#avatar-upload-box").data("ejDialog");
+                    eDialog.close();
+                });
+        });
+    </script>
+}
+
+@section MainSection {
+    <html>
+    <head>
+        <link href="~/Content/Styles/scss/pages/user/user-profile.min.css" rel="stylesheet" />
+        <script>
+            $(window).scroll(function () {
+                $(".group-notification").addClass("a");
+            });
+        </script>
+    </head>
+    <body>
+        <div class="profile-content col-xs-12 col-sm-12 col-lg-12 col-md-12">
+            <div class="profile-top">
+                <div class="col-xs-12 col-sm-3 col-lg-2 col-md-2 no-padding">
+                    <div class="oval">
+                        <div data-id="@userDetail.UserId" data-type="user" data-display-name="@userDetail.DisplayName" data-image-size="122" data-toggle="tooltip" title="@userDetail.DisplayName" class="profile-pic-tag name-letter"></div>
+                    </div>
+                </div>
+                <div class="second-cont  col-xs-12 col-sm-9 col-lg-10 col-md-10 no-padding">
+                    <div class="profile-top-1">
+
+                        <div class="profile-full-name">
+                            <div class="profile-displayname"><div id="display-name">@userDetail.DisplayName</div></div>
+                            <div class="profile-edit-name">
+                                <input id="user-firstname" placeholder="Please enter first name" type="text" value="@userDetail.FirstName">
+                                <input class="profile-edit-space" id="user-lastname" placeholder="Please enter last name" type="text" value="@userDetail.LastName">
+                                <div class="su-tick"></div><div class="su-close"></div>
+                            </div>
+                        </div>
+                        <div class="edit-button-proflie">
+                            <span class="span-edit"><span class="su-edit"></span><span class="edit-option-profile">Edit</span></span>
+                            <span class="dropdown-toggle su su-options" data-toggle="dropdown"></span>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="@idpChangePasswordUrl">Change password</a></li>
+                            </ul>
+
+                        </div>
+                    </div>
+                    <div>
+                        <table>
+                            <tr>
+                                <td class="label-left-name profile-table-space">First Name:</td>
+                                <td id="user-firstname" class="label-right-name profile-table-space">@userDetail.FirstName</td>
+                            </tr>
+                            <tr>
+                                <td class="label-left-name">Last Name:</td>
+                                <td class="label-right-name" id="user-lastname">@userDetail.LastName</td>
+                            </tr>
+                            <tr>
+                                <td class="label-left-name">Email:</td>
+                                <td class="label-right-name"><a href="mailto:@userDetail.Email">@userDetail.Email</a></td>
+                            </tr>
+                            <tr>
+                                <td class="label-left-name">Phone:</td>
+                                <td class="label-right-name">@userDetail.Phone</td>
+                            </tr>
+                            <tr>
+                                <td class="label-left-name">Email Verification:</td>
+                                <td class="label-right-name">
+                                    @if (userDetail.EmailVerified)
+                                    {
+                                        <div id="completed-status" class="col-sm-5 col-xs-12 group-list">
+                                            <span class="label label-success">Completed</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div id="pending-status" class="col-sm-5 col-xs-12 group-list"><span class="label label-warning">Pending</span></div>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label-left-name">Status:</td>
+                                <td class="label-right-name">@Html.TextBox("status-user", "", new { id = "status-user", @class = "content-size status", @readonly = "readonly" })</td>
+                            </tr>
+                            <tr>
+                                <td class="label-left-name">Organization Access:</td>
+                                <td class="label-right-name">@Html.TextBox("status-org-user", "", new { id = "status-org-user", @class = "content-size status", @readonly = "readonly" })</td>
+                            </tr>
+                        </table>
+                        <div class="group-notification">
+                            <div class="profilepage-line"></div>
+                            <div class="profile-page-groups">Groups</div>
+                            <div class="small-padding-in-profile">
+                                @{
+                                    for (var group = 0; group < ViewBag.GroupList.Count; group++)
+                                    {
+                                        <div class="profile-server-team">
+                                            <span data-user-id="@userDetail.UserId" data-user-name="@ViewBag.GroupList[group].Name" class="profile-team-logo"></span>
+                                            <div class="profile-team-text"> @ViewBag.GroupList[group].Name</div>
+
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="profilepage-line"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </body>
+</html>
+}

@@ -1,0 +1,37 @@
+﻿@using Microsoft.AspNetCore.Http.Extensions;
+@using Syncfusion.Server.Base.DataClasses;
+@{
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var currentUrl = requestUrl.AbsolutePath.TrimEnd('/');
+    var profileDetailsUrl = $"{Context.Request.PathBase}/user/profile";
+    var profileEditUrl = $"{Context.Request.PathBase}/profile/edit";
+    var userDetail = (User)ViewBag.UserDetail;
+    var changePasswordUrl = Url.Action("EditPassword", "User");
+    var userAccountPreferenceUrl = Url.Action("UserAccountPreference", "User");
+    var returnUrl = (string)ViewBag.ReturnUrl;
+}
+<nav id="profile-menu-nav-bar">
+    <ul>
+        <li class="admin-menu-item @(currentUrl.IndexOf(profileDetailsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(profileDetailsUrl, StringComparison.CurrentCultureIgnoreCase) || currentUrl.IndexOf(profileEditUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(profileEditUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)">
+            <a id="site-settings-link" href="@profileDetailsUrl" role="tab">
+                <i class="su su-single-user"></i>
+                <span>[[[Profile]]]</span>
+            </a>
+        </li>
+        <li class="admin-menu-item @(currentUrl.IndexOf(userAccountPreferenceUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(userAccountPreferenceUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)">
+            <a id="site-settings-link" href="@userAccountPreferenceUrl" role="tab">
+                <i class="su su-nav-settings"></i>
+                <span>[[[Account Preference]]]</span>
+            </a>
+        </li>
+        @if ((userDetail.DirectoryTypeId == DirectoryType.Local || userDetail.DirectoryTypeId == DirectoryType.ExternalDatabase))
+        {
+            <li class="admin-menu-item @(currentUrl.IndexOf(changePasswordUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(changePasswordUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)">
+                <a id="site-settings-link" href="@changePasswordUrl" role="tab">
+                    <i class="su su-lock"></i>
+                    <span>[[[Security]]]</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

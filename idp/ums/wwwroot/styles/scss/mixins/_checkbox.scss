@@ -1,0 +1,87 @@
+﻿@import "../../fonts/variables.scss";
+@import "../themes/default.scss";
+
+//Checkbox material design class
+@mixin material-checkbox-controls($active: $primary-color, $default: $grey-500, $checkbox-tick: $white) {
+    & + input + label {
+        position: relative;
+        padding: 5px 0 0 25px !important;
+        cursor: pointer;
+        display: inline-block;
+        height: 25px;
+        margin: 0;
+        font-size: 12px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+
+        &::after {
+            border-radius: 3px;
+        }
+
+        &::before, &::after {
+            content: '';
+            left: 0;
+            position: absolute;
+            -webkit-transition: border .25s, background-color .25s, width .20s .1s, height .20s .1s, top .20s .1s, left .20s .1s;
+            transition: border .25s, background-color .25s, width .20s .1s, height .20s .1s, top .20s .1s, left .20s .1s;
+            z-index: 1;
+        }
+    }
+
+    &:not(:checked) + input + label::before {
+        width: 0;
+        height: 0;
+        border: 3px solid transparent;
+        left: 6px;
+        top: 10px;
+    }
+
+    &:not(:checked) + input + label::after {
+        height: 18px;
+        width: 18px;
+        background-color: transparent;
+        border: 2px solid $default;
+        top: 0px;
+        z-index: 1;
+        margin-top: 7px;
+        margin-bottom: 2px;
+    }
+
+    &:checked + input + label::before {
+        bottom: 5px;
+        color: $checkbox-tick;
+        content: $su-tick;
+        font-family: "Server";
+        height: 10.8px;
+        width: 8px;
+        left: 3px;
+    }
+
+    &:checked + input + label::after {
+        top: 0;
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid $active;
+        background-color: $active;
+        z-index: 0;
+        margin-top: 7px;
+        margin-bottom: 2px;
+    }
+
+    &:disabled + input + label::after {
+        background-color: $default;
+        border: 1px solid $default;
+    }
+
+    &:not(:checked):disabled + input + label::after {
+        background-color: white;
+        border: 1px solid $default;
+    }
+
+    &:not(:checked), &:checked {
+        position: absolute;
+        left: -9999px;
+        opacity: 0;
+    }
+}

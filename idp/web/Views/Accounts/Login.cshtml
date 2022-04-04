@@ -1,0 +1,80 @@
+﻿@using Syncfusion.Server.Base;
+
+@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    var organizationName = (ViewBag.OrganizationName != null) ? ViewBag.OrganizationName : GlobalAppSettings.SystemSettings.OrganizationName;
+    if (CloudAppConfig.IsSelfHosted)
+    {
+        ViewBag.Title = "[[[Login]]] - " + organizationName;
+    }
+    else
+    {
+        ViewBag.Title = "Login | " + CloudAppConfig.AccountTitle;
+    }
+    var isAdfsUserNotFound = TempData["IsAdfsUserNotFound"] as string;
+    var authMessage = TempData["AuthMessage"] as string;
+    var isAuthError = TempData["AuthError"];
+    var IsAdfsUserStatus = (TempData["AdfsUserStatus"] as string) ?? string.Empty;
+    var callBackUri = ViewBag.CallBackUri;
+    var showBoldSignUp = ViewBag.IsBoldSign ?? false;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/accounts.css" asp-append-version="true"/>
+    @if (TempData["show_demo_account"].ToString() == "block")
+    {
+        <style>
+            .mail-loader-div.email-loader {
+                bottom: 55px !important;
+            }
+        </style>
+    }
+}
+
+@section scripts{
+    <script>
+        var callBackUri = "@callBackUri";
+        var IsAdfsUserStatus = '@IsAdfsUserStatus';
+        var validateEmailUrl = "@Url.Action("ValidateEmail", "Accounts")";
+        var showBoldSignUp = "@showBoldSignUp";
+        var isAuthError = "@isAuthError";
+        var authMessage = "@authMessage";
+        var IsAdfsUserNotFound = '@isAdfsUserNotFound';
+        var isWindowADDefaultAuth = "@ViewBag.IsWindowADDefaultAuth";
+		var IsWindowADEmbedSSOAuth = "@ViewBag.IsWindowADEmbedSSOAuth";
+        var WindowADCallBackUrl = "@ViewBag.WindowADCallBackUrl";
+            var rootUrl = "@Url.Content("~/")";
+            if (rootUrl.toLowerCase() === "/")
+                rootUrl = "";
+            var homeUrl = "@Url.Action("Index", "Home")";
+
+    </script>
+
+}
+
+@section MainSection{
+    <div class="login-wrapper">
+        <div class="login-body">
+            @await Html.PartialAsync("~/Views/Shared/_LoginForm.cshtml")
+            @await Html.PartialAsync("~/Views/Shared/_ExternalAuthentication.cshtml")
+
+            <div id="access-denied" class="error-message validation-holder bg-danger">
+                <span class="su su-login-error text-danger"></span><span id="login-input-error">[[[Access denied]]]</span>
+            </div>
+            @if (CloudAppConfig.IsSelfHosted)
+            {
+                <div id="validate-auth-user" class="error-message validation-holder bg-danger">
+                    <span class="auth-error-text"></span>
+                </div>
+            }
+            <div class="forget-password-align"><a href="@Url.Action("RecoverAccount", "Accounts")" class="forgot-pwd-link" tabindex="6">[[[Cannot access your account?]]]</a></div>
+
+            @if (!CloudAppConfig.IsSelfHosted)
+            {
+                @await Html.PartialAsync("~/Views/Shared/_BoldAuthentication.cshtml")
+            }
+
+        </div>
+    </div>
+    <script src="~/bundles/js/accounts-login.js" asp-append-version="true"></script>
+}

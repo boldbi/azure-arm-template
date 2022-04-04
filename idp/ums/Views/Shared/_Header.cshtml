@@ -1,0 +1,72 @@
+﻿@{
+    var reqUrl = new Uri(this.Context.Request.GetDisplayUrl());
+    var currentUserId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+    var requestUrl = new Uri(this.Context.Request.GetDisplayUrl()).ToString();
+    var absolutePath = reqUrl.AbsolutePath;
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+    var idPUrl = GlobalAppSettings.Configuration.GetSection("AppSettings")["IdPUrl"];
+}
+
+<div class="header-bar col-lg-12 col-md-12 col-sm-12">
+    <div class="main-screen-logo mobile-hidden">
+        <a href="@Url.Action("Index", "Register")" class="home-link" data-container="body">
+            @if (!CloudAppConfig.IsSelfHosted)
+            {
+            <img alt="Application Logo" id="application-logo" src="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.MainLogo" />
+            }
+            else
+            {
+                <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/application/@IconFileNames.MainLogo';" />
+            }
+        </a>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(displayName) && !string.IsNullOrWhiteSpace(emailAddress))
+    {
+        <div class="user-account">
+            <div id="account-profile" class="dropdown no-padding">
+                <span class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="profile-picture">
+                        <img alt="Profile Picture" src="@(idPUrl + Url.Content("~/User/Avatar?id=" + currentUserId + "&ImageSize=64"))" />
+                    </span>
+                </span>
+                <div class="dropdown-menu" id="profile-info-section" role="menu">
+                    <div class="profile-info col-lg-12">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="profile-picture-area">
+                                        <img alt="Profile Picture" src="@(idPUrl + Url.Content("~/User/Avatar?id=" + currentUserId + "&ImageSize=64"))" />
+                                    </td>
+                                    <td class="profile-info-area">
+                                        <ul class="no-margin no-padding">
+                                            <li id="profile-name">@displayName</li>
+                                            <li id="profile-email">@emailAddress</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="profile-buttons">
+                        <a href="@idPUrl/user/profile" class="profile-menu-action col-lg-6" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[View my profile]]]">
+                            [[[PROFILE]]]
+                        </a>
+                        <a href="@Url.Action("logout", "accounts")" class="profile-menu-action col-lg-6" data-toggle="tooltip" data-placement="top" data-container="body" title="[[[Log Out]]]">
+                            [[[LOG OUT]]]
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="login-account">
+            <a href="@Url.Action("Login", "Accounts")">LOG IN</a>
+        </div>
+    }
+    <div class="org-name-wrapper">
+        <h5 class="header-org-name">Syncfusion Cloud</h5>
+    </div>
+</div>

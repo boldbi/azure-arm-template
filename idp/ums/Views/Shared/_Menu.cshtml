@@ -1,0 +1,197 @@
+﻿@{
+
+    var idPUrl = string.Empty;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
+
+    if (!CloudAppConfig.IsSelfHosted)
+    {
+        var tenantsListingUrl = Url.Action("Tenants", "TenantsManagement");
+        idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+        var homeUrl = isAdmin ? tenantsListingUrl : idPUrl;
+    }
+    else
+    {
+        idPUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+    }
+
+    var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+    var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
+    var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
+
+    var currentUrl = requestUrl.ToString().TrimEnd('/');
+
+    var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
+
+    var profilePageUrl = Url.Action("Profilepage", "User");
+
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+
+    var username = Context.Session.GetString("username") != null ? Context.Session.GetString("username").ToString() : string.Empty;
+
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId").ToString() : string.Empty;
+
+    var adminType = (AdminType)Enum.Parse(typeof(AdminType), GlobalAppSettings.HttpContextAccessor.HttpContext.Session.GetString("AdminType"));
+
+    var profilePicture = idPUrl + Url.Content("/User/Avatar?id=" + userId + "&ImageSize=64");
+
+    var isHomePage = currentUrlLocalPath.TrimEnd('/') == Url.Action("Homepage", "Home") || currentUrlLocalPath.TrimEnd('/') + "/homepage" == Url.Action("Homepage", "Home");
+
+    var isMobile = DeviceDetection.IsMobile;
+
+    var defaultAppLogo = GlobalAppSettings.Branding == AppBranding.Bold.Identifier ? GlobalAppSettings.CdnDomain + "/static/company/boldid/logo/v1/" + IconFileNames.MainLogo : GlobalAppSettings.SystemSettings.CDNLink + "/images/" + CloudAppConfig.AppBranding + "/application/" + IconFileNames.MainLogo;
+    var appLogo = (GlobalAppSettings.SystemSettings.MainScreenLogo.EndsWith(IconFileNames.MainLogo) || GlobalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : GlobalAppSettings.SystemSettings.MainScreenLogo;
+    var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId).TrimEnd('/');
+    var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
+}
+
+<aside class="menu-bar" id="app-navigation">
+    <nav id="main-nav">
+        <a id="mobile-profile-picture" rel="alternate" hreflang="en" href="@profilePicture" class="mobile-visible">
+            <div class="mobile-display-name">@displayName</div>
+            <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="175" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="margin-top:-35px"></div>
+        </a>
+        <ul id="items-menu">
+            <li class="mobile-hidden">
+                <a href="@idPUrl" class="home-link " style="background-color:transparent;" title=@GlobalAppSettings.SystemSettings.OrganizationName>
+                    @if (!CloudAppConfig.IsSelfHosted)
+                    {
+                        <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.CdnDomain/images/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.MainLogo" />
+                    }
+                    else
+                    {
+                        <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/boldid/application/@IconFileNames.MainLogo';" />
+                    }
+                </a>
+            </li>
+            <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+
+            @if (!CloudAppConfig.IsSelfHosted)
+            {
+                if (adminType == AdminType.SuperAdmin)
+                {
+                    <li>
+                        <a class="@(currentUrl.IndexOf(Url.Action("Tenants", "TenantsManagement"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)" href="@Url.Action("Tenants", "TenantsManagement")">
+                            <span class="menu-icon-container">
+                                <i class="su su-applications"></i>
+                            </span>
+                            <span class="menu-label">[[[Tenants]]]</span>
+                        </a>
+                    </li>
+                    <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                    <li>
+                        <a class="@(currentUrl.IndexOf(Url.Action("Administration", "Administration"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)" href="@Url.Action("Administration", "Administration")">
+                            <span class="menu-icon-container">
+                                <i class="su su-nav-settings"></i>
+                            </span>
+                            <span class="menu-label">[[[Settings]]]</span>
+                        </a>
+                    </li>
+                }
+            }
+
+            @if (CloudAppConfig.IsSelfHosted && (adminType == AdminType.SuperAdmin || adminType == AdminType.AppAdmin))
+            {
+                <li>
+                    <a class="@(currentUrl.IndexOf(Url.Action("Sites", "TenantsManagement"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)" href="@Url.Action("Sites", "TenantsManagement")">
+                        <span class="menu-icon-container">
+                            <i class="su su-applications"></i>
+                        </span>
+                        <span class="menu-label">[[[Sites]]]</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="@(currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)" href="@Url.Action("Index", "UserManagement")">
+                        <span class="menu-icon-container">
+                            <i class="su su-user"></i>
+                        </span>
+                        <span class="menu-label">[[[Users]]]</span>
+                    </a>
+                </li>
+                <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                <li class="mobile-hidden">
+                    <a class="@(currentUrl.IndexOf(Url.Action("Administration", "Administration"), StringComparison.CurrentCultureIgnoreCase) > 0 && currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) < 0 ? "active" : string.Empty)" href="@Url.Action("Administration", "Administration")">
+                        <span class="menu-icon-container">
+                            <i class="su su-nav-settings"></i>
+                        </span>
+                        <span class="menu-label">[[[Settings]]]</span>
+                    </a>
+                </li>
+            }
+
+            <li class="li-logout mobile-visible">
+                <img data-src="@(Model +"/images/divider_dark.png")" class="upper-divider" />
+                <a class="" href="@Url.Action("logout", "accounts")?returnUrl=@currentUrlLocalPath">
+                    <span class="menu-icon-container">
+                        <i class="su su-logout"></i>
+                    </span>
+                    <span class="menu-label">[[[Log Out]]]</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    @if (!isMobile)
+    {
+        <nav id="sub-nav" class="sf-nav-group mobile-hidden">
+            <ul>
+                @if (CloudAppConfig.IsSelfHosted && (adminType == AdminType.SuperAdmin || adminType == AdminType.AppAdmin))
+                {
+                    <li class="sub-menu-action dropup">
+                        <a class="dropdown-toggle" data-toggle="dropdown">
+                            <span class="menu-icon-container">
+                                <i class="su su-help"></i>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu sub-menu" role="menu">
+                            <li class="sub-menu-item-title">
+                                <div>[[[Help]]]</div>
+                            </li>
+                            <li class="sub-menu-item">
+                                <a href="@Url.Action("GetDiagnosticLogs", "Administration")">
+                                    [[[Get diagnostic logs]]]
+                                    <span tabindex="0" class="info-icon su su-info" role="button" data-toggle="popover" data-placement="top" data-trigger="hover" data-content="[[[Please note that these logs do not contain any of your organizational data. They only contain diagnostic logs required for Embedded BI and Enterprise Reporting. Please download and attach the logs in your support incident when reporting any issues with the product.]]]"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                <li class="profile-section dropup">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="profile-container">
+                            <span class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="45" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="border-radius:50%"></span>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu sub-menu" role="menu">
+                        <li class="sub-menu-item sub-menu-profile">
+                            <div class="sub-menu-profile-text-padding">[[[Profile]]]</div>
+                            <a rel="alternate" hreflang="en" href="@idPUrl/user/profile">
+                                <div class="sub-menu-profile-hover">
+                                    <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="40" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="border-radius:50%"></div>
+                                    <div class="sub-menu-user-name">
+                                        <div class="sub-menu-user-name-style">@displayName</div>
+                                        @if (emailAddress.Contains(CloudAppConfig.AutoGeneratedEmailDomain))
+                                        {
+                                            <div class="sub-menu-user-username-style">@username</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="sub-menu-user-email-style">@emailAddress</div>
+                                        }
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sf-sub-menu-separator"></li>
+                        <li class="sub-menu-item">
+                            <a href="@Url.Action("logout", "accounts")?returnUrl=@currentUrlLocalPath">
+                                [[[Logout]]]
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    }
+</aside>

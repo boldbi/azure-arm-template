@@ -1,0 +1,63 @@
+﻿@using Syncfusion.Server.Base.DataClasses;
+@{
+    var userSelectedCookieLanguage = TempData["CookieLanguage"] != null;
+    var uname = TempData["currentValue"] as string;
+    var demoAccount = (DemoAccount)ViewBag.DemoAccount;
+    var demoUsername = demoAccount != null && !string.IsNullOrWhiteSpace(demoAccount.Username) ? demoAccount.Username : string.Empty;
+    var demoPassword = demoAccount != null && !string.IsNullOrWhiteSpace(demoAccount.Password) ? demoAccount.Password : string.Empty;
+}
+
+<div id="alert-notification"></div>
+<form method="post" id="login-form" name="loginForm" class="login-form" action="@ViewBag.PostAction" onsubmit="return FormValidate()">
+    <h1 class="login-header">[[[Log in to your account]]]</h1>
+    <hr class="header-line">
+    <span id="message" class="text-center col-xs-12 validation-holder">
+        @if (!string.IsNullOrWhiteSpace((string)TempData["Message"]))
+        {
+            <span>@TempData["Message"]</span>
+        }
+        else if (!string.IsNullOrWhiteSpace((string)TempData["User"]))
+        {
+            <span>@TempData["User"]</span>
+        }
+        else if (!string.IsNullOrWhiteSpace((string)TempData["changePasswordstatus"]))
+        {
+            <span class="pwd-success">@TempData["changePasswordstatus"]</span>
+        }
+    </span>
+    <div class="login-fields">
+        <div class="input-field-form email">
+            <input id="hidden-email" type="hidden" value="@uname" />
+            <input type="text" required md-no-asterisk ng-model="uname" value="@uname" name="userName" id="login-email" placeholder="[[[Username / Email Address]]]" maxlength="100" />
+            <div class="mail-loader-div"></div>
+            <span class="demo-username" style="font-weight: bold; display: @TempData["show_demo_account"]">Username : @demoUsername</span>
+            <span class="validation-holder"></span>
+            <span class="special-char-msg-login"></span>
+        </div>
+        <div class="input-field-form" id="password-field" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
+            <input required md-no-asterisk ng-model="pwd" name="password" type="password" id="current-password" autocomplete="current-password" placeholder="[[[Password]]]" value="">
+            <span class="su su-show show-hide-password" id="show-newpassword"></span>
+            <span class="demo-password" style="font-weight: bold; display: @TempData["show_demo_account"]">Password: @demoPassword</span>
+            <span id="error-password" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
+                @TempData["errorMessage"]
+            </span>
+            <span class="validation-holder"></span>
+        </div>
+        <div class="login-options" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
+            <div id="remember-me" class="material-checkbox">
+                @Html.CheckBox("remember", new { @class = "material-checkbox pull-left", @id = "remember" })
+                @Html.Label("remember", "[[[Remember me]]]", new { @class = "disable-text-select", @id = "remember-label" })
+            </div>
+        </div>
+        <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
+        <button class="login-button proceed-button" ng-click="dsAuth()" type="submit" name="Submit" id="login-button" asp-route="PostLogin">
+            [[[Continue]]]
+        </button>
+    </div>
+
+    <input type="hidden" value="@ViewBag.ReturnURL" id="ReturnURL" name="ReturnURL" />
+    @if (userSelectedCookieLanguage)
+    {
+        <input type="hidden" value="@TempData["CookieLanguage"]" id="cookieLanguage" name="cookieLanguage" />
+    }
+</form>
