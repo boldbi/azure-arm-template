@@ -1,0 +1,66 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isValidIP = ViewBag.IsRestrictedFor == "spamip" ? true : false;
+    var themeCss = globalAppSettings.SystemSettings.AppTheme.BaseTheme + ".css";
+    var themeMinCss = globalAppSettings.SystemSettings.AppTheme.BaseTheme + ".min.css";
+    var themeBaseColors = globalAppSettings.SystemSettings.AppTheme.BaseColors;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>[[[Syncfusion Cloud Management - Access Denied]]]</title>
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/@themeCss" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/theme/@themeMinCss" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+    </environment>
+    <style>
+          :root {
+              @themeBaseColors
+          }
+    </style>
+
+</head>
+<body>
+    <div id="banned-country-page" class="base-container-bg">
+        <div class="base-conatiner" id="base-conatiner">
+            <div id="main-div">
+                <div class="app-logo">
+                    <img src="@GlobalAppSettings.CdnDomain/email/images/main-logo.png" />
+                </div>
+                <div class="secondary-div">
+                    <div class="page-title">
+                        [[[Access Denied]]]
+                    </div>
+
+                    @if (isValidIP)
+                    {
+                        <div class="page-content">
+                            [[[This IP address has been flagged for suspicious activity and is restricted from accessing our site. If you believe you have received this message in error, please contact ]]] <a href="mailto:@ServerAppConfig.AppSettings.Syncfusion.SalesTeam">@ServerAppConfig.AppSettings.Syncfusion.SalesTeam</a> [[[Thank you.]]]
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="page-content">
+                            @(GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier ? "Bold BI(Powered By Syncfusion)" : "Syncfusion") [[[is a United States company and is subject to US export laws. Consequently, due to your location, we may not allow access to any material on our site.
+                            If you believe that this is inaccurate, please contact]]] <a href="mailto:@ServerAppConfig.AppSettings.Syncfusion.SalesTeam">@ServerAppConfig.AppSettings.Syncfusion.SalesTeam</a> [[[Thank you.]]]
+                        </div>
+                    }
+
+                    <p class="text-danger">[[[We are unable to service your request.]]]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

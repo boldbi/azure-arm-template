@@ -1,0 +1,38 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
+    var loginImage = globalAppSettings.SystemSettings.LoginLogo;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    @await Html.PartialAsync("_OGPContent", new ViewDataDictionary(ViewData) { { "PageTitle", "Login" }, { "OrganizationName", globalAppSettings.SystemSettings.OrganizationName }, { "Logo", loginImage } })
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/account-page.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/account-page.min.css" />
+    </environment>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+    <script type="text/javascript">
+        window.onload = function () {
+            document.getElementById('login-form').submit();
+        }
+    </script>
+</head>
+<body>
+    <form method="post" id="login-form" name="loginForm" class="login-form">
+        <div id="container">
+            <div id="inner-container">
+                <div id="loading-popup"></div>
+                <span id="waiting-text">@T["Please wait..."]</span>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

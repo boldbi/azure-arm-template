@@ -1,0 +1,47 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var onBoardExperience = (OnBoardExperience)ViewBag.onBoardExperience;
+    var createItemPermission = ViewBag.createItemPermission;
+    var step = 0;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+
+<style>
+    .journey-content:hover {
+        background: #f2f2f2;
+    }
+</style>
+
+<div id="on-board-experience-section" class="dropdown no-padding">
+    <ul class="journey-menu">
+        <li id="journey-progress-bar-section">
+            <div>
+                <div class="journey-progress-bar-label col-xs-11">[[[DEPLOY YOUR FIRST DASHBOARD IN 2 EASY STEPS]]]</div>
+                <button id="donot-show-journey" type="button" title="[[[Don't show again]]]" data-toggle='tooltip' data-container="body" class="close col-xs-1" aria-label="Close"> <span class="su su-close"></span> </button>
+            </div>
+        </li>
+
+        @if (createItemPermission[ItemType.Dashboard])
+        {
+            <li class="col-xs-6 no-padding journey-li-step">
+                <a class="journey-content create-dashboard col-xs-12 @(onBoardExperience.IsDashboardAdded ? "journey-done" : string.Empty)">
+                    <span class="journey-step-box col-xs-2 no-padding">@(step += 1)</span>
+                    <span class="journey-step col-xs-9 no-padding">[[[Step]]] @step</span>
+                    <span class="journey-label col-xs-9 no-padding">[[[Create your first dashboard]]]</span>
+                </a>
+            </li>
+        }
+
+        @if (createItemPermission[ItemType.Dashboard])
+        {
+            <li class="col-xs-6 no-padding journey-li-step">
+                <a href="javascript:void(0)" id="on-board-share-dashboard" class="share-dashboard journey-content col-xs-12 @(onBoardExperience.IsDashboardShared ? "journey-done" : string.Empty)">
+                    <span class="journey-step-box col-xs-2 no-padding">@(step += 1)</span>
+                    <span class="journey-step col-xs-9 no-padding">[[[Step]]] @step</span>
+                    <span class="journey-label col-xs-9 no-padding">[[[Share your dashboard]]]</span>
+                </a>
+            </li>
+        }
+    </ul>
+</div>

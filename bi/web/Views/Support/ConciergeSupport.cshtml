@@ -1,0 +1,76 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = globalAppSettings.SystemSettings.OrganizationName + " - [[[Support Settings]]]";
+    ViewBag.MessageBox = false;
+    var isConciergeSupportHasAccess = Convert.ToBoolean(ViewBag.IsConciergeSupportHasAccess);
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ConciergeSupport);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section MainSection{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/concierge-support.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/concierge-support.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/concierge-support.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/concierge-support.min.js"></script>
+    </environment>
+
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+
+    <div id="concierge-settings-container" class="col-xs-12 admin-page-container">
+        <div id="concierge-settings-header" class="col-xs-12 admin-page-header">
+            <hgroup>
+                <h1 class="h2 page-title">
+                    [[[Support Settings]]]
+                </h1>
+                <h5 class="page-description">
+                    [[[Manage support team’s access to your resources.]]]
+                </h5>
+            </hgroup>
+        </div>
+        <div id="concierge-settings-body" class="admin-page-body">
+            <div class="row input-field-wrapper">
+                <div class="col-xs-8 field-container-dashboard bottom-width ">
+                    <div class="col-md-6 col-xs-4">
+                    </div>
+
+                    <div class="col-md-2 notification-header">
+                        <strong>[[[Allow]]]</strong>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8 field-container-dashboard">
+                        <label class="col-md-6 col-xs-4 app-textbox-label activation">
+                            [[[Allow support team to access my account.]]]
+                        </label>
+                        <div class="col-md-2 switch-align no-padding">
+                            <span class="material-switch pull-left">
+                                <input type="checkbox" id="concierge-support-access" @(isConciergeSupportHasAccess ? "checked" : string.Empty) />
+
+                                <label for="concierge-support-access" class="label-primary"></label>
+                            </span>
+                            <div class="tool-tip col-xs-1 no-padding">
+                                <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                <div class="dropdown-menu" role="menu">[[[Please check our ]]] <a class="app-hyperlink" href="http://files2.syncfusion.com/syncfusionio/support/sla/syncfusion-concierge-service-agreement_v1.pdf" target="_blank">[[[license agreement]]] </a> [[[ for this access.]]]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin-page-actions col-xs-12 col-md-12">
+            <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-concierge-settings" title="">[[[Cancel]]]</a>
+            <input type="button" title="" data-url="@Url.Action("UpdateConciergeUserAccess", "Administration")" id="update-concierge-settings" class="primary-button app-btn-primary pull-right" value="[[[Save]]]" />
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

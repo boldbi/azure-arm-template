@@ -1,0 +1,72 @@
+﻿<div id="selected-join-query" class="col-xs-12">
+    <div class="pull-left connection-str-holder">
+        <label class="app-textbox-label pull-left">[[[Query to pull users :]]]</label>
+        <div id="join-query">@ViewBag.JoinQuery </div>
+    </div>
+    <div class="pull-left change-connection-btn">
+        <button type="button" id="change-selected-column" class="primary-button app-btn-primary">[[[Change Query]]]</button>
+    </div>
+</div>
+<div class="col-xs-12">
+    <div id="grid-info-content" class="pull-left">
+        <span>[[[Please search and select the users from the following list to import]]] </span>
+    </div>
+    <div class="pull-right search-user-holder">
+        <input id="search-database-users" type="text" autocomplete="off" placeholder="[[[Search users]]]" class="form-control">
+        <span id="clear-search" class="su su-inner-close close-icon" data-toggle="tooltip" data-placement="bottom" title="[[[Clear search]]]"></span>
+        <span class="su su-search search-user" data-toggle="tooltip" data-placement="bottom" title="[[[Search user]]]"></span>
+    </div>
+</div>
+<div id="error-value" class="col-xs-12">
+    <span class="error-message"></span>
+</div>
+<script type="text/x-jsrender" id="user-detail-validation">
+    {{if IsDuplicated}}
+    <span class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+    {{/if}}
+</script>
+<script type="text/x-jsrender" id="checkbox-row-template">
+    {{if IsDuplicated}}
+    <input disabled type="checkbox" class="checkbox-row-disabled material-checkbox" data-checked-id="{{:Index}}" id="row-check{{:Index}}" />
+    <input name="row-check{{:Index}}" type="hidden" value="false">
+    <label for="row-check{{:Index}}"> </label>
+    {{else}}
+    <input type="checkbox" class="checkbox-row material-checkbox" data-checked-id="{{:Index}}" id="row-check{{:Index}}" />
+    <input name="row-check{{:Index}}" type="hidden" value="false">
+    <label for="row-check{{:Index}}"> </label>
+    {{/if}}
+</script>
+
+<script type="text/x-jsrender" id="checkbox-header-template">
+    @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
+    @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+</script>
+
+<script type="text/x-jsrender" id="full-name-header">
+    <span class="item-header">[[[Name]]]</span>
+</script>
+<script type="text/x-jsrender" id="user-name-header">
+    <span class="item-header">[[[Username]]]</span>
+</script>
+<script type="text/x-jsrender" id="last-name-header">
+    <div class="item-header">[[[Last Name]]]</div>
+</script>
+<script type="text/x-jsrender" id="first-name-header">
+    <div class="item-header">[[[First Name]]]</div>
+</script>
+<script type="text/x-jsrender" id="email-id-header">
+    <span class="item-header">[[[Email Address]]]</span>
+</script>
+
+<script type="text/javascript">
+    var gridData = @Html.Raw(Json.Serialize(ViewBag.ExternalDatabaseUsers));
+</script>
+
+<div id="grid-container" class="col-xs-12">
+    <div class="col-xs-12 container-fluid page-inner-padding no-padding ">
+        <div id="Grid">
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("../UserManagement/_LimitUserCreation")

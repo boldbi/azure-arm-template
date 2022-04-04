@@ -1,0 +1,69 @@
+﻿@using System.Configuration
+@using Microsoft.AspNetCore.Http
+
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId").ToString() : string.Empty;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<!DOCTYPE html>
+@{
+    var usersList = ViewBag.usersList;
+    var userDetails = usersList[0];
+    string firstName;
+    string lastName;
+    string email;
+    var userId = 0;
+}
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comment.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comment.min.js"></script>
+    </environment>
+
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+
+</head>
+<body>
+    <div>
+        <div class="dropdown" id="commentusers-list">
+            <ul>
+                @for (var item = 0; item < Model.Count; item++)
+                {
+                    userDetails = usersList[item];
+                    email = userDetails.Email;
+                    firstName = userDetails.FirstName;
+                    lastName = userDetails.LastName;
+                    userId = userDetails.UserId;
+                    <li style="list-style: none;">
+                        <div>
+                            <a>
+                                <span style="width:32px; height:32px;">
+                                    <img src="@(globalAppSettings.SystemSettings.IDPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=32"))" width="12" height="12" />
+                                </span>
+                                <span>
+                                    @Model[item].DisplayName - @Model[item].Email  @Model[item].FirstName @Model[item].LastName
+                                </span>
+                            </a>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>

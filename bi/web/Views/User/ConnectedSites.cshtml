@@ -1,0 +1,86 @@
+﻿
+@using Newtonsoft.Json
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Connected Sites"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var jsondata = JsonConvert.SerializeObject(Model);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-sites.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-sites.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-sites.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-sites.min.js"></script>
+    </environment>
+    <script>
+       var getExternalSitesUrl = "@Url.Action("GetExternalSites", "Publish")";
+       var removeExternalSiteUrl = "@Url.Action("RemoveExternalSite", "Publish")";
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            GridLocalization();
+            $("#ConnectedSitesGrid").ejGrid({
+                dataSource: @Html.Raw(jsondata),
+                gridLines: ej.Grid.GridLines.None,
+                allowSorting: true,
+                allowSearching: true,
+                allowPaging: true,
+                allowSelection: true,
+                allowFiltering: true,
+                filterSettings: { filterType: "menu" },
+                pageSettings: { pageSize: 10 },
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                columns: [
+                    { field: 'Name', templateID: "#site-name-template", headerText: '@T["Name"]', width: 40, allowSorting: true, allowFiltering: true },
+                    { field: 'ClientId', templateID: "#site-clientid-template", headerText: '@T["Client Id"]', width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'SiteURL', templateID: "#site-url-template", headerText: '@string.Format(T["Site {0}"].Value,"URL")', width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'CreatedDateString', headerText: '@T["Created On"]', width: 40, allowSorting: true, allowFiltering: false },
+                    { field: 'Options', headerText: '', templateID: "#options", width: 10, allowSorting: false, allowFiltering: false }
+                ]
+            });
+        });
+    </script>
+    <script type="text/x-jsrender" id="site-name-template">
+        <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+    </script>
+    <script type="text/x-jsrender" id="site-clientid-template">
+        <span class="grid-content" title="{{:ClientId}}" data-toggle="tooltip">{{:ClientId}}</span>
+    </script>
+    <script type="text/x-jsrender" id="site-url-template">
+        <span class="grid-content" title="{{:SiteURL}}" data-toggle="tooltip">{{:SiteURL}}</span>
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_ProfileMenu")
+<div id="external-site-container" class="bi-page-container col-xs-12">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="bi-page-header col-xs-12">
+            <hgroup class="col-xs-8 bi-page-header-description no-padding">
+                <h1 class="page-title">@T["Connected Sites"]</h1>
+                <h5 class="no-padding page-description">@T["View the list of connected sites"]</h5>
+            </hgroup>
+        </div>
+        <div class="bi-page-body col-md-12">
+            <div id="ConnectedSitesGrid"></div>
+            <script type="text/x-jsrender" id="options">
+                <div class="user-hover-options">
+                    <a class="delete-class" href="javascript:void(0);" id="remove-external-sites" title="@T["Remove"]" data-toggle="tooltip" data-id="{{:Id}}" data-name="group" onclick="deleteConfirmation(this)">
+                        <i class="su su-delete"></i>
+                    </a>
+                </div>
+            </script>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+}
