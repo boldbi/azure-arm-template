@@ -1,0 +1,97 @@
+﻿@{
+    ViewBag.Title = "[[[Configuration]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    bool? updateConfigValues = ViewBag.Result;
+    List<SelectListItem> values = ViewBag.EditableFiles;
+    var content = ViewBag.FileData;
+    bool? isValidFile = ViewBag.ValidFile;
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/additional-settings.css" asp-append-version="true" />
+}
+@section scripts{
+
+    <script src="~/bundles/js/additional-settings.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        $.extend(ej, Syncfusion);
+    </script>
+    <script>
+        var getFilesUrl = "@Url.Action("GetFiles", "Administration")";
+        var loadFileUrl = "@Url.Action("LoadFile", "Administration")";
+        var selectedFileName = "@ViewBag.FileName";
+        var methodType = "@Context.Request.Method";
+    </script>
+
+    <script>
+
+    </script>
+    @if (Context.Request.Method == "POST" && updateConfigValues.HasValue)
+    {
+        <script>
+            var isRequestSuccess = "@updateConfigValues.Value";
+            var isValidFile = "@isValidFile";
+            var selectedPath = "@ViewBag.FilePath";
+
+            $(document).ready(function () {
+
+                if (isRequestSuccess.toLowerCase() === "true" && isValidFile.toLowerCase() === "true") {
+                    SuccessAlert(window.TM.App.LocalizationContent.Configuration, window.TM.App.LocalizationContent.ConfigurationUpdated, 7000);
+                }
+                else if (isValidFile.toLowerCase() === "false")
+                {
+                    WarningAlert(window.TM.App.LocalizationContent.Configuration.InvalidConfiguration, 7000);
+                }
+                else
+                {
+                    WarningAlert(window.TM.App.LocalizationContent.Configuration, window.TM.App.LocalizationContent.ConfigurationUpdateError, 7000);
+                }
+        });
+        </script>
+    }
+
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+
+<div id="look-and-feel-container" class="admin-page-content-container">
+    <div class="admin-page-content col-xs-12 no-padding">
+        <div class="col-md-12 admin-page-header">
+            <hgroup class="admin-page-header-description">
+                <h1 class="h2 page-title">[[[Configuration]]]</h1>
+                <h5 class="page-description">[[[Update the configuration of the application]]]</h5>
+            </hgroup>
+        </div>
+        <div class="admin-page-body col-xs-12">
+            <form id="look-and-feel-form" class="form-horizontal" method="post" action="config-editor" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <input type="hidden" class="file-name" value="@ViewBag.FileName" name="fileName" />
+                <div class="col-xs-12 no-padding">
+                    <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12 no-padding edit-files">
+                        @Html.DropDownList("editfiles", values, new
+                        {
+                            id = "edit-files",
+                            @class = "selectpicker form-control",
+                            data_none_results_text = "[[[No results match]]]",
+                            data_size = "10",
+                            title = "[[[Select files]]]",
+                            data_live_search = "true",
+                            data_live_search_placeholder = "[[[Search]]]",
+                        })
+                    </div>
+                </div>
+                <div class="form-groups">
+                    <textarea id="text-area-content" class="textarea-label" name="configFileValues" placeholder="[[[Configuration]]]">@content</textarea><br><br>
+                </div>
+                <div class="admin-page-footer col-xs-12 no-padding">
+                    <div class="admin-page-actions col-lg-12 col-md-12">
+                        <a href="@Url.Content("~/administration/config-editor")" class="secondary-button pull-right">[[[Cancel]]]</a>
+                        <button type="submit" class="primary-button pull-right update-system-setting" form="look-and-feel-form" id="save-files">[[[Save]]]</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</div>
+}

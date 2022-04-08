@@ -1,0 +1,52 @@
+﻿@model Syncfusion.Server.Base.DataClasses.Subscription
+
+@{
+    var tenantInfo = ViewBag.TenantInfo as TenantInfo;
+    var productName = GlobalAppSettings.GetDescription((TenantType)tenantInfo.TenantTypeId);
+    ViewBag.Title = "Subscriptions - " + productName;
+    ViewBag.HeaderTitle = productName + " - " + tenantInfo.Tenant.DNS;
+    ViewBag.MessageBox = false;
+    var priorityOrderId = @Model.PlanId;
+    ViewBag.HelpSiteUrl = "/site-administration/subscription";
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/subscription-settings.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        var cancelSubscriptionUrl = "@Url.Action("CancelSubscription", "Subscription")";
+        var activateSubscriptionUrl = "@Url.Action("ActivateSubscription", "Subscription")";
+        var getSubscriptionPlanUrl = "@Url.Action("GetSubscriptionPlan", "Subscription")";
+        var cancelSubscriptionFeedbackUrl = "@Url.Action("AddUserFeedback", "FeedBack")";
+        var getPlansUrl = "@Url.Action("GetPlans", "Subscription")";
+        var updatePlanUrl = "@Url.Action("UpdatePlan", "Subscription")";
+        var updateTenantUrl = "@Url.Action("UpdateTenant", "Subscription")";
+        var updateTenantQuantityUrl = "@Url.Action("UpdateProductQuantity", "Subscription")";
+
+        $(document).ready(function () {
+            var fulldata = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.serilizedTenantDetail)));
+            editTenant(fulldata);
+            productName = "@productName";
+        });
+
+    </script>
+    <script src="~/bundles/js/subscription-settings.js" asp-append-version="true"></script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Shared/_SiteMenu")
+    <div id="license-settings-container">
+        <div id="subscription-plan-dialog">
+            @await Html.PartialAsync("../Subscription/_SubscriptionPlan", @Model)
+            @await Html.PartialAsync("../Shared/_CancelSubscriptionFeedback")
+
+        </div>
+        <div id="choose-plan-dialog">
+            @await Html.PartialAsync("../Subscription/_UpgradePlans", (List<SaaSPlanDetail>)ViewBag.PlansList, new ViewDataDictionary(ViewData) { { "PriorityOrderId", priorityOrderId }, { "TenantTypeId", tenantInfo.TenantTypeId } })
+        </div>
+    </div>
+    <script src="~/bundles/js/localizationcontent.js" asp-append-version="true"></script>
+}

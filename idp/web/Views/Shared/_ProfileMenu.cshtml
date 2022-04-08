@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http.Extensions
+@using Syncfusion.Server.Base
+@using System.Security.Claims;
+
+@{
+    var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var tenantHomePage = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/homepage";
+    var requestUri = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = requestUri.AbsolutePath.ToLower();
+    var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+}
+
+<aside class="menu-bar" id="app-navigation">
+    <nav id="main-nav">
+        <a id="mobile-profile-picture" href="@Url.Action("ProfilePage", "User")" class="mobile-visible">
+            <div class="mobile-display-name">@displayName</div>
+            <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="175" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="margin-top:-35px"></div>
+        </a>
+        <ul id="items-menu">
+            <li class="sf-nav-item @(requestUrl.IndexOf(@tenantHomePage, StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
+                <a href="@tenantHomePage">
+                    <span class="menu-label">[[[My Sites]]]</span>
+                </a>
+            </li>
+            <li class="sf-nav-item @(requestUrl.IndexOf(@Url.Action("ProfilePage", "User"), StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
+                <a href="@Url.Action("ProfilePage", "User")">
+                    <span class="menu-label">[[[My Profile]]]</span>
+                </a>
+            </li>
+            <li class="sf-nav-item @(requestUrl.IndexOf(@Url.Action("EditPassword","User"), StringComparison.OrdinalIgnoreCase) > -1 ? "active" : string.Empty )">
+                <a href="@Url.Action("EditPassword","User")">
+                    <span class="menu-label">[[[Change Password]]]</span>
+                </a>
+            </li>
+            <li class="li-logout mobile-visible">
+                <a class="" href="@Url.Action("logout", "accounts")">
+                    <span class="menu-log-label">[[[Log Out]]]</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>

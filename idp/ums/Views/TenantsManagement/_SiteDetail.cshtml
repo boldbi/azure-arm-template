@@ -1,0 +1,93 @@
+﻿@model TenantInfo
+@{
+    var tenantImageType = (TenantType)Model.TenantTypeId == TenantType.BoldBIOnPremise ? AppBranding.Bold.Identifier : AppBranding.BoldReports.Identifier;
+    var activeTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "general") ? "active" : string.Empty;
+}
+
+<script type="text/javascript">
+    var refreshclientsecretUrl = "@Url.Action("RegenerateClientSecret", "TenantsManagement")";
+</script>
+
+<div role="tabpanel" class="tab-pane col-xs-12 no-padding @activeTab" id="application-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="img-view-holder col-lg-2 col-md-2 col-sm-12 col-xs-12 no-padding">
+            <div data-id="application-logo" class="lazyload img-loader" data-src="@Url.Content(Model.Tenant.SiteUrl + "/get-client-logo")" data-alt="boldbilogo" data-default="this.onerror=null;this.src='/images/@tenantImageType/application/@IconFileNames.LoginLogo'" data-width="110px" data-height="25px"></div>
+        </div>
+        <div id="edit-application-form-div" class="col-lg-10 col-md-10 col-sm-12 col-xs-12 no-padding">
+            <form class="row admin-page-form" autocomplete="off">
+                @Html.HiddenFor(tenantInfo => tenantInfo.TenantInfoId, new { id = "application-id" })
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+                    @Html.Label("application-name", "[[[Site name]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-name">
+                        @Html.DisplayFor(tenantInfo => tenantInfo.Tenant.TenantName)
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("application-url", "[[[Site URL]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-url active ">
+                        <a title=@Html.Raw(Model.Tenant.SiteUrl) data-toggle="tooltip"  target="_blank" href=@Html.Raw(Model.Tenant.SiteUrl)>@Html.Raw(Model.Tenant.SiteUrl) </a>
+                    </div>
+                </div>
+                <div class="col-md-12 form-group">
+                    @Html.Label("client-id", "[[[Client id]]]", new { @class = "app-textbox-label col-md-2" })
+                    <div class="form-input-field  col-md-10 id">
+                        <input type="text" class="col-md-8 client-values form-control" id="myId" readonly="" onfocus="this.blur()" value="@Html.DisplayFor(tenantInfo => tenantInfo.TenantInfoId)" />
+                        <button class="col-md-2 su su-copy form-control" id="copy-client-id" onclick="copyToClipboard('#myId','#copy-client-id')" data-toggle="tooltip" data-original-title="[[[Click to copy]]]"></button>
+                    </div>
+
+                </div>
+                <div class="col-md-12 form-group ">
+                    @Html.Label("client-secret", "[[[Client secret]]]", new { @class = "app-textbox-label col-md-2" })
+                    <div class="form-input-field col-md-10 secret">
+                        <input type="password" id="mySecret" readonly="" onfocus="this.blur()" class="col-md-6 client-values my-secret form-control" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@Model.ClientSecret.ToString()" />
+                        <button class="col-md-2 su su-show show-client-secret form-control" onfocus="this.blur()" id="show-secret" data-toggle="tooltip" data-original-title="[[[Click to view]]]"></button>
+                        <button class="col-md-2 su su-copy form-control" id="copy-client-secret" onclick="copyToClipboard('#mySecret','#copy-client-secret')" data-toggle="tooltip" data-original-title="[[[Click to copy]]]"></button>
+                        @*<button class="su su-sync text focus" id="generate-client-secret" onclick="onRegenerateClientSecretDialogOpen()" data-toggle="tooltip" data-original-title="Click to Regenerate"></button>*@
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("Storage Type", "[[[Storage Type]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 storage-type ">
+                        @if (string.IsNullOrWhiteSpace(Model.BlobConnectionString) || Model.BlobConnectionString == null)
+                        {
+                            <div>
+                                [[[File Storage]]]
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                [[[Blob Storage]]]
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
+                    @Html.Label("site-status", "[[[Status]]]", new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
+                    <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 tenant-status">
+                        @if (Model.TenantStatus == TenantStatus.Active)
+                        {
+                            <span class="label label-success">@GlobalAppSettings.GetDescription(Model.TenantStatus)</span>
+                        }
+                        else if (Model.TenantStatus == TenantStatus.Deleted)
+                        {
+                            <span class="label label-danger">@GlobalAppSettings.GetDescription(Model.TenantStatus)</span>
+                        }
+                        else
+                        {
+                            <span class="label label-warning">@GlobalAppSettings.GetDescription(Model.TenantStatus)</span>
+                        }
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <div id="dialog" class="custom-template"></div>
+    <div id="dlgContent" style="visibility: hidden" class="dialogContent">
+        <span class="dialogText">
+            <span class="su su-warning-alt" id="warning-icon"></span>
+            <span class="dialog-text-text">[[[Beware Any script or application using this client secret need to be updated]]]</span>
+        </span>
+    </div>
+</div>

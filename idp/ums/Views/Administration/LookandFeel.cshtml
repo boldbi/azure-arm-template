@@ -1,0 +1,70 @@
+﻿@{
+    ViewBag.Title = "[[[Look and Feel]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var fonts = ViewBag.FontList as List<SelectListItem>;
+    var selectedFont = fonts.FirstOrDefault(x => x.Selected);
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/look-and-feel.css" asp-append-version="true" />
+}
+@section scripts{
+
+    <script src="~/bundles/js/look-and-feel.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        $.extend(ej, Syncfusion);
+    </script>
+    <script>
+        var fontReferenceUrl = "@Url.Action("GetFontCss", "Font")";
+        var updateFontSettingsUrl = "@Url.Action("UpdateFontSettings", "Administration")";
+        var selectedFontText = "@selectedFont.Text";
+        var selectedFontValue = "@selectedFont.Value";
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+    @await Html.PartialAsync("_uploadfont")
+
+<div id="look-and-feel-container" class="col-xs-12 admin-page-content-container">
+    <div class="admin-page-content col-xs-12 no-padding">
+        <div id="look-and-feel-header" class="col-xs-12 admin-page-header">
+            <hgroup class="admin-page-header-description">
+                <h1 class="h2 page-title">
+                    [[[Look and Feel]]]
+                </h1>
+                <h5 class="page-description">
+                    [[[Customize the look and feel of the application.]]]
+                </h5>
+            </hgroup>
+        </div>
+        <div id="look-and-feel-body" class="col-lg-12 admin-page-body">
+            <div class="col-xs-12 no-padding">
+                <div class="admin-settings-drop-down col-lg-12 no-padding">
+                    @Html.DropDownList("fontfamily", ViewBag.FontList as IEnumerable<SelectListItem>, new { id = "fontfamily", @class = "admin-settings-drop-down", data_live_search = "false" })
+                    <p class="add-new-font">
+                        <a href="javascript:void(0)" onclick="onUploadFontDialogOpen()" id="woff-upload" title="[[[Upload the font file here.]]]">[[[Add a new font]]]</a>
+                    </p>
+                </div>
+            </div>
+
+            @*<div class="form-group">
+                    @Html.Label("theme", "Application Themeing", new { @class = "col-xs-2 app-textbox-label" })
+                    <div class="dropdown col-xs-3">
+                        @Html.DropDownList("theme", ViewBag.ThemeList as IEnumerable<SelectListItem>, new { id = "theme", @class = "selectpicker form-control pull-left", data_live_search = "false" })
+                    </div>
+                </div>*@
+        </div>
+        <div class="admin-page-footer col-xs-12">
+            <div class="admin-page-actions col-lg-12 col-md-12">
+                <a href="@Url.Content("~/")" class="secondary-button pull-right" id="update-font-settings-cancel">[[[Cancel]]]</a>
+                <button type="button" id="update-font-settings" name="update-font-settings" class="primary-button pull-right">
+                    <span>[[[Save]]]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</div>
+}

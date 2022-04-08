@@ -1,0 +1,170 @@
+﻿@{
+    var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
+
+    var showMenuBar = Context.User.Identity.IsAuthenticated && (ViewBag.ShowMenuBar == null || ViewBag.ShowMenuBar) && Convert.ToBoolean(Context.Session.GetString("IsAdmin")) || await new UserManagement().IsTenantMangementUser(Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value));
+    var isMobile = DeviceDetection.IsMobile ;
+    var appContainerStyle = (ViewBag.HidePageLoader != null && ViewBag.HidePageLoader) ? "" : "opacity:0;";
+    var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("_OGPContent")
+    <title>
+        @ViewBag.Title
+    </title>
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        <link rel="icon" href="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.Favicon" />
+    }
+    else
+    {
+        <link rel="icon" href="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon';" />
+    }
+
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        <script type="text/javascript">
+            var rootUrl = "";
+            var baseurl = "";
+        </script>
+    }
+    else
+    {
+        <script type="text/javascript">
+           var isLicenseExpiredUrl = "@Url.Action("IsLicenseExpired", "Home")";
+           var validateIsolationCodeUrl = "@Url.Action("IsValidIsolationCode", "TenantsManagement")";
+           var manageLicenseUrl = "@Url.Action("LicenseSettings", "Administration")";
+           var boldContactUrl = "https://www.syncfusion.com/support/directtrac/incidents/newincident";
+           //$.extend(ej, Syncfusion);
+        </script>
+    }
+
+    @await Html.PartialAsync("../Shared/_FontReference")
+    <link rel="stylesheet" href="~/bundles/css/layout.css" asp-append-version="true" />
+    @RenderSection("styles", false)
+
+    <script src="~/bundles/js/ej2-dialog.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/layout-mobile.js" asp-append-version="true"></script>
+    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    @RenderSection("scripts", false)
+
+    @if (!showMenuBar)
+    {
+        <script>
+            $(document).ready(function () {
+                $("#base-footer-div").css("padding-left", "0px");
+            });
+        </script>
+        <style type="text/css">
+            body #server-app-container #content-area {
+                padding: 80px 30px 30px !important;
+            }
+        </style>
+    }
+    <script>
+        $(window).load(function () {
+            $('.lazyload').each(function () {
+                img = document.createElement('img');
+                img.onload = imageOnLoad;
+                img.src = $(this).attr("data-src");
+                img.alt = $(this).attr("data-alt");
+                img.id = $(this).attr("data-id");
+                $(img).attr("onerror", $(this).attr("data-default"));
+                $(img).addClass($(this).attr("data-class"));
+                img.style = "display: none";
+                $(this).parent().append(img);
+            });
+        });
+
+        function imageOnLoad() {
+            $(this).show().parent().find("div.lazyload").remove();
+        }
+    </script>
+</head>
+<body ng-app="serverApp" class="clearfix col-xs-12 no-padding" id="body" style="background-image: url('@GlobalAppSettings.SystemSettings.CDNLink/images/common/waitingpopup.gif'); background-color: #fff; background-repeat: no-repeat; background-position: center center;">
+    <div id="server-app-container" style="@appContainerStyle">
+        <section id="header-area" class="mobile-visible">
+            <div class="header-bar col-lg-12 col-md-12 col-sm-12">
+                @if (showMenuBar)
+                {
+                    <div class="mobile-menu-icon text-center mobile-visible collapsed" data-toggle="collapse" aria-expanded="false" data-target="#menu-area">
+                        <span>
+                            <i class="su su-mobile-menu-icon"></i>
+                        </span>
+                    </div>
+                }
+                <div class="org-name-wrapper">
+                    <h5 class="header-org-name">@GlobalAppSettings.SystemSettings.OrganizationName</h5>
+                </div>
+            </div>
+        </section>
+        @if (showMenuBar)
+        {
+            <section id="menu-area" class="collapse">
+
+                @if (isMobile)
+                {
+                    if (@requestUrl.ToString() == "/ums/homepage")
+                    {
+                        @await Html.PartialAsync("../Shared/_HomePageMenu")
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("../Shared/_Menu")
+                    }
+                }
+                else
+                {
+                    @await Html.PartialAsync("../Shared/_Menu")}
+            </section>
+        }
+        else
+        {
+            <section id="menu-area" class="collapse">
+                @await Html.PartialAsync("../Shared/_Menu")
+            </section>
+        }
+
+        <div id="content-area" class="clearfix">
+            <div class="user-warning" style="display:none">
+                <div class="user-warning-content"></div>
+            </div>
+            @RenderSection("MainSection", true)
+            <div id="success-alert">
+                <div id="image-container">
+                    <div class="image-holder">
+                        <span class="su su-tick" alt="[[[Success Icon]]]"></span>
+                    </div>
+                </div>
+                <div id="message">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+            </div>
+            <div id="warning-alert">
+                <div id="image-container">
+                    <span class="su su-warning-alt" alt="[[[Warning Icon]]]"></span>
+                </div>
+                <div id="message" class="div-close">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+                <div class="close-div">
+                    <span id="close-content">[[[Close]]]</span>
+                </div>
+            </div>
+            <div id="mobile-alert">
+                <span id="message"></span>
+            </div>
+        </div>
+        
+    </div>
+
+    <div id="alert-notification">
+    </div>
+
+</body>
+</html>

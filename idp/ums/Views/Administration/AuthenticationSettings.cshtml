@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "[[[Authentication Settings - ]]]" + GlobalAppSettings.SystemSettings.OrganizationName;
+    var defaultSettingsCount = ViewBag.DefaultAuthenticationSettings != null ? ViewBag.DefaultAuthenticationSettings.ProviderName.Count : "0";
+    var selectedDefaultAuthenticationText = "";
+    var selectedDefaultAuthenticationValue = 0;
+    if (defaultSettingsCount != 0)
+    {
+        selectedDefaultAuthenticationText = ViewBag.DefaultAuthenticationSettings.EnabledProviderName != 0 ? GlobalAppSettings.GetProviderName(ViewBag.DefaultAuthenticationSettings.EnabledProviderName) : GlobalAppSettings.GetProviderName(ViewBag.DefaultAuthenticationSettings.ProviderName[0]);
+        selectedDefaultAuthenticationValue = ViewBag.DefaultAuthenticationSettings.EnabledProviderName != 0 ? (int)ViewBag.DefaultAuthenticationSettings.EnabledProviderName : (int)ViewBag.DefaultAuthenticationSettings.ProviderName[0];
+    }
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/auth-settings-page.css" asp-append-version="true" />
+}
+@section scripts{
+    <script src="~/bundles/js/auth-settings-page.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        $.extend(ej, Syncfusion);
+    </script>
+    <script type="text/javascript">
+        var authSettingsUrl = "@Url.Action("AuthenticationSettings", "Administration")";
+        var updatesamlsettingsUrl = "@Url.Action("UpdateSAMLSettings", "Administration")";
+        var refreshSigningKeyUrl = "@Url.Action("RegenerateSigningKey", "Administration")";
+        var updateauthsettingsUrl = "@Url.Action("UpdateAuthSettings", "Administration")";
+        var defaultauthsettingsUrl = "@Url.Action("EnableDefaultauth", "Administration")";
+        var providerNameCount = @defaultSettingsCount;
+        var defaultAuthentication = "@(ViewBag.DefaultAuthenticationSettings.EnabledProviderName == 0 ? "" : ViewBag.DefaultAuthenticationSettings.EnabledProviderName)";
+        var baseRootUrl = "@Url.Content("~/")";
+        if (baseRootUrl.toLowerCase() === "/")
+            baseRootUrl = "";
+
+        var isEnabled = @Html.Raw(Json.Serialize(ViewBag.AzureAdSettings.IsEnabled));
+        var oAuthEnabled = @Html.Raw(Json.Serialize(ViewBag.OAuthSettings.IsEnabled));
+        var openIdEnabled = @Html.Raw(Json.Serialize(ViewBag.OpenIDSettings.IsEnabled));
+        var jwtIsEnabled = @Html.Raw(Json.Serialize(ViewBag.JwtSettings.IsEnabled));
+        var windowsAdEnabled = @Html.Raw(Json.Serialize(ViewBag.WindowsAdSettings.IsEnabled));
+        if (providerNameCount != 0) {
+            var selectedDefaultAuthText = "@selectedDefaultAuthenticationText";
+            var selectedDefaultAuthValue = "@selectedDefaultAuthenticationValue";
+        }
+        var defaultAuthEnabled = @Html.Raw(Json.Serialize(ViewBag.DefaultAuthenticationSettings.IsDefaultAuthenticationEnabled));
+        serverApp.controller("adSettingsController", ["$scope", function ($scope) {
+            $scope.IsEnabled = isEnabled;
+            $scope.oauthIsEnabled = oAuthEnabled;
+            $scope.openidIsEnabled = openIdEnabled;
+            $scope.jwtIsEnabled = jwtIsEnabled;
+            $scope.windowsAdEnabled = windowsAdEnabled;
+            $scope.defaultauthenticationIsEnabled = defaultAuthEnabled;
+
+        }]);
+    </script>
+    <script>
+
+      
+
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    @await Html.PartialAsync("_DiologBox")
+<div id="auth-settings-container" role="tabpanel" class="col-xs-12 admin-page-content-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")" aria-labelledby="active-directory-settings-link" ng-controller="adSettingsController">
+    <div id="authentication-block" class="admin-page-content col-xs-12 no-padding">
+        <div class="col-md-12 admin-page-header auth-header">
+            <hgroup class="admin-page-header-description">
+                <h1 class="h2 page-title">[[[Authentication Settings]]]</h1>
+                <h5 class="page-description">[[[Configure authentication/authorization providers’ information.]]]</h5>
+            </hgroup>
+        </div>
+        <div class="col-xs-12 no-padding auth-page-nav-bar">
+            <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation">
+                    <a href="#default-authentication-settings-tab" id="default-authentication-settings" aria-controls="default-authentication-settings" role="tab" data-toggle="tab">[[[General]]]</a>
+                </li>
+                <li role="presentation">
+                    <a href="#windows-ad-settings-tab" id="windows-ad-settings" class="@((CloudAppConfig.IsSelfHosted && !GlobalAppSettings.IsAzureApplication && EnvironmentHelper.IsWindows()) ? string.Empty : "hide")" aria-controls="windows-ad-settings-tab" role="tab" data-toggle="tab">[[[Windows AD]]]</a>
+                </li>
+                <li role="presentation">
+                    <a href="#azure-ad-settings-tab" id="azure-ad-settings" aria-controls="azure-ad-settings-tab" role="tab" data-toggle="tab">Azure AD</a>
+                </li>
+                <li role="presentation">
+                    <a href="#oauth-settings-tab" id="oauth-settings" aria-controls="oauth-settings-tab" role="tab" data-toggle="tab">OAuth 2.0</a>
+                </li>
+                <li role="presentation">
+                    <a href="#openid-settings-tab" id="openid-settings" aria-controls="openid-settings-tab" role="tab" data-toggle="tab">OpenID Connect</a>
+                </li>
+                <li role="presentation">
+                    <a href="#jwt-settings-tab" id="jwt-settings" aria-controls="jwt-settings-tab" role="tab" data-toggle="tab">JWT</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content col-xs-12 no-padding">
+            @await Html.PartialAsync("_DefaultAuthentication")
+            @await Html.PartialAsync("_WindowsADSettings")
+            @await Html.PartialAsync("_AzureADSettings")
+            @await Html.PartialAsync("_OAuthSettings")
+            @await Html.PartialAsync("_OpenIdConnectSettings")
+            @await Html.PartialAsync("_JWTSettings")
+        </div>
+
+        <div class="admin-page-footer col-xs-12">
+            <div class="admin-page-actions col-lg-12 col-md-12">
+                <a href="@Url.Content("~/")" class="secondary-button pull-right" id="cancel-active-dir-settings" title="">[[[Cancel]]]</a>
+                <button type="submit" id="update-saml-settings" class="primary-button pull-right update-auth-settings" ng-disabled="ssoSettingsForm.$invalid">[[[Save]]]</button>
+                <button type="submit" id="update-jwt-settings" class="primary-button pull-right update-auth-settings" ng-disabled="jwtSettingsForm.$invalid">[[[Save]]]</button>
+                <button type="submit" id="update-defaultauthlogin-settings" class="primary-button pull-right update-defaultauth-settings @(ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0 ? "display-none" : string.Empty)" ng-disabled>[[[Save]]]</button>
+                <button type="submit" id="update-oauth-settings" class="primary-button pull-right update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">[[[Save]]]</button>
+                <button type="submit" id="update-openid-settings" class="primary-button pull-right update-auth-settings" ng-disabled="openidSettingsForm.$invalid">[[[Save]]]</button>
+                <button type="submit" id="update-windowsad-settings" class="primary-button pull-right update-auth-settings" ng-disabled="windowsadSettingsForm.$invalid">[[[Save]]]</button>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</div>
+    <div id="dialog" class="custom-template"></div>
+    <div id="dlgContent" style="visibility: hidden" class="dialogContent">
+        <span class="dialogText">
+            <span class="su su-warning-alt" id="warning-icon"></span>
+            <span class="dialog-text-text">[[[Beware Any script or application using this signing key need to be updated.]]]</span>
+        </span>
+    </div>
+    @if ((!ViewBag.ThirdPartyLogins || !ViewBag.WhiteLabel))
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

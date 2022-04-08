@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Dashboards | Register – Plan and Subscription | " + CloudAppConfig.BoldBIDisplayName;
+    //var countryList = ViewBag.CountryList;
+    Layout = "../Shared/_Layout.Registration.cshtml";
+    //var trialPeriod = int.Parse(System.Configuration.ConfigurationManager.AppSettings["TrailPeriod"]);
+    //ViewBag.FreeSubscriptionEndDate = DateTime.UtcNow.AddDays(trialPeriod).ToString("MMMM dd, yyyy");
+    var selectedPlanId = ViewBag.SelectedPlanId;
+    var isBoldBIBranding = GlobalAppSettings.Branding == @AppBranding.Bold.Identifier;
+    var analyticsTrackingEnabled = Syncfusion.Server.Base.CloudAppConfig.EnableAnalyticsTracking;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/creditcarddetails.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script type="text/javascript">
+        var isBoldBiBranding = @Json.Serialize(isBoldBIBranding);
+    </script>
+}
+
+@section MainSection
+{
+    <input type="hidden" value="@ViewBag.TenantInfoId" id="tenantid" />
+    <input type="hidden" value="@selectedPlanId" id="hidden-plan-id" />
+
+    @if (GlobalAppSettings.Branding == AppBranding.Bold.Identifier)
+    {
+
+        @await Html.PartialAsync("_PlanDetails_BoldBI")
+    }
+    else
+    {
+
+        @await Html.PartialAsync("_PlanDetails")
+    }
+
+    @*@Html.Partial("_BillingAddress")
+        @Html.Partial("_CreditCardPay")*@
+    <form class="hidden" id="duplicate-form" method="post" action="@Url.Action("CreateSubscription", "Register")">
+        <input id="duplicate-pay-form-info-fullname" name="tenantBillingInfo.FullName" type="text">
+        <input id="duplicate-pay-form-info-email" name="tenantBillingInfo.Email" type="text">
+        <input id="duplicate-pay-form-info-address1" name="tenantBillingInfo.AddressLine1" type="text">
+        <input id="duplicate-pay-form-info-address2" name="tenantBillingInfo.AddressLine2" type="text">
+        <input id="duplicate-pay-form-info-country" name="tenantBillingInfo.Country" type="text">
+        <input id="duplicate-pay-form-info-city" name="tenantBillingInfo.City" type="text">
+        <input id="duplicate-pay-form-info-state" name="tenantBillingInfo.State" type="text">
+        <input id="duplicate-pay-form-info-zip" name="tenantBillingInfo.ZipCode" type="text">
+        <input id="duplicate-pay-form-info-Source-Token" name="token" type="text">
+        <input id="duplicate-pay-form-info-plan-id" name="planId" type="text">
+        <input id="duplicate-pay-form-info-tenant-id" name="tenantInfoId" value="@ViewBag.TenantInfoId" type="text">
+    </form>
+}

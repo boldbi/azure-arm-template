@@ -1,0 +1,54 @@
+﻿@{ 
+    var protocolTypes = new List<SelectListItem>
+    {  new SelectListItem
+        {
+            Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+        },
+        new SelectListItem
+        {
+             Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+        }
+    };
+    var siteUrl = Url.Action("Sites", "TenantsManagement");
+    var existingDomainUrl = GlobalAppSettings.SystemSettings.BaseUrl + siteUrl + "?searchKey=" + GlobalAppSettings.SystemSettings.BaseUrl;
+}
+
+<div class="site-sub-section no-padding">
+    <h3 class="title sub-section-heading">[[[General]]]</h3>
+    <div class="form-group">
+        @Html.Label("site-orgname", "[[[Organization name]]]", new { @class = "col-xs-12 app-textbox-label" })
+        <div class="no-padding">
+            <input type="text" id="site-orgname" name="site_name" class="form-control site-orgname-fields" placeholder="[[[Enter your Organization Name]]]" value="@ViewBag.SystemSettings.OrganizationName" data-original-value="@ViewBag.SystemSettings.OrganizationName" />
+            <span class="validation-errors" id="site-name-validation"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.Label("enable-ssl", "[[[Site URL]]]", new { @class = "col-xs-12 app-textbox-label" })
+
+        <div id="ssl-selectpicker" class="input-group no-padding">
+            <div class="input-group-addon">
+                @Html.DropDownList("enableSsl", protocolTypes, new { id = "enable-ssl", @class = "enable-ssl", data_live_search = "false" })
+            </div>
+            <div class="no-padding">
+                <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="[[[Enter your URL]]]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+            </div>
+        </div>
+        <div id="site-url-validation" class="col-xs-12 no-padding validation-errors site-url-validation"></div>
+        <div class=" exist-domain-info hide">
+            @Html.CheckBox("DomainInfo", true, new { id = "domain-change" })
+            <label class="app-textbox-label no-margin">[[[Update the URL of the ]]]<a target="_blank" href="@existingDomainUrl">[[[sites]]]</a>[[[ that are deployed to the same URL.]]]</label>
+        </div>
+
+
+        @if (!CloudAppConfig.IsSelfHosted)
+        {
+            <div class="col-xs-6" id="help_text" style="display: @ViewBag.icon">
+                <span id="error_icon" class="su su-info cursor-type" title=""></span>
+                <div class="col-xs-2 dropdown-menu" id="ssl-help-message" style="display: none">
+                    [[[This application needs to be hosted in IIS with a valid SSL certificate assigned. Click]]] <a href="@CloudAppConfig.DocumentationUrl/dashboard-platform/dashboard-server/installation-and-deployment#host-in-iis">[[[here]]]</a> [[[for more details.]]]
+                </div>
+            </div>
+        }
+        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
+    </div>
+</div>

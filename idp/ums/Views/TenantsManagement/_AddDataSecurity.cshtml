@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<head>
+    <script>
+        $(document).ready(function () {
+            $("#AddSiteAttributesGrid").ejGrid({
+                dataSource: null,
+                gridLines: ej.Grid.GridLines.None,
+                allowSorting: true,
+                allowSearching: true,
+                allowPaging: true,
+                allowSelection: true,
+                filterSettings: { filterType: "menu" },
+                pageSettings: { pageSize: 3 },
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                columns: [
+                    { field: 'Name', templateID: "#site-attribute-name-template", headerText: '[[[Name]]]', width: 30, allowSorting: true },
+                    { field: 'Value', templateID: "#site-attribute-value-template", headerText: '[[[Value]]]', width: 40, allowSorting: true },
+                    { field: 'Actions', headerText: '', templateID: "#actions", width: 30, allowSorting: false }
+                ]
+            });
+        });
+    </script>
+    <script type="text/x-jsrender" id="site-attribute-name-template">
+        <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+    </script>
+    <script type="text/x-jsrender" id="site-attribute-value-template">
+        {{if CanEncrypt}}
+        <span class="grid-content" title="*****" data-toggle="tooltip">*****</span>
+        {{else}}
+        <span class="grid-content" title="{{:Value}}" data-toggle="tooltip">{{:Value}}</span>
+        {{/if}}
+    </script>
+
+    <link rel="stylesheet" href="~/bundles/css/custom-attribute.css" asp-append-version="true" />
+    <script src="~/bundles/js/custom-attribute.js" asp-append-version="true"></script>
+
+</head>
+<body>
+    <div class="col-xs-12 data-security-container no-padding">
+        <div class="isolation-part @(ViewBag.IsBoldBIMultiTenant ? "" : "hide")">
+            <h5>[[[Isolation Code]]]</h5>
+            <div class="data-security-description">
+                [[[Configure row-level security applied to all dashboards in the site. Here, you can set the filter value in a specific column of the data source.]]]
+                @if (!CloudAppConfig.IsHideHelpLink)
+                {
+                    <a href="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IsolationCode)">[[[Read more.]]]</a>
+                }
+            </div>
+            <div class="col-xs-12 no-padding">
+                <div class="material-switch inline-align" onclick="enableIsolationCode()">
+                    <input type="checkbox" id="isolation-enable-switch" />
+                    <label for="isolation-enable-switch" class="label-primary"></label>
+                </div>
+                <div class="app-textbox-label inline-align enable-isolation-code no-padding">
+                    [[[Enable Isolation Code]]]
+                </div>
+            </div>
+            <div class="col-xs-12 isolation-code-container no-padding">
+                <div class="form-input-field col-xs-12 application-isolation-code no-padding">
+                    <div class="isolation-code-value col-xs-12 no-padding">
+                        <input type="text" id="site-isolation-code" class="" placeholder="[[[Isolation Code]]]" />
+                        <span id="isolation-code-validation" class="validation-message"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 attribute-header no-padding">
+            <h5>[[[Attributes]]]</h5>
+            <span class="su-add add-site-attribute" onclick="openCustomAttributeDialog(null,'addtenant')">[[[ADD]]]</span>
+        </div>
+        <div class="col-xs-12 data-security-description no-padding">
+            [[[A custom attribute is a piece of code that acts like a parameter, which is replaced anywhere in the query. The attribute name is replaced by the code, which is saved in the site while rendering the dashboard.]]]
+            @if (!CloudAppConfig.IsHideHelpLink)
+            {
+                <a href="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.CustomAttribute)">[[[Read more.]]]</a>
+            }
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group no-padding">
+            <div id="AddSiteAttributesGrid"></div>
+        </div>
+        <script type="text/x-jsrender" id="actions">
+            <div class="user-hover-options">
+                <a href="javascript:void(0);" id="edit-site-attribute" title="[[[Edit]]]" data-toggle="tooltip" onclick="editCustomAttribute(this, 'addtenant')">
+                    <i class="su su-edit"></i>
+                </a>
+                <a class="delete-class" href="javascript:void(0);" id="remove-site-attribute" title="[[[Remove]]]" data-toggle="tooltip" onclick="removeSiteAttribute()">
+                    <i class="su su-delete"></i>
+                </a>
+            </div>
+        </script>
+        <div class="notes-container">
+            <h5>[[[Note:]]]</h5>
+            @if (ViewBag.IsBoldBIMultiTenant)
+            {
+                <p class="data-security-note">[[[You can configure the isolation code and attribute for this site later.]]]</p>
+            }
+            else
+            {
+                <p class="data-security-note">[[[You can configure attribute for this site later.]]]</p>
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("_AddCustomAttribue")
+</body>

@@ -1,0 +1,48 @@
+﻿@{
+    Layout = null;
+    var currentUserEmail = (Context.User.Identity).Name;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Syncfusion Cloud Management - Access Denied</title>
+    @if (!CloudAppConfig.IsSelfHosted)
+    {
+        <link rel="icon" href="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.Favicon" />
+    }
+    else
+    {
+        <link rel="icon" href="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon';" />
+    }
+    @await Html.PartialAsync("../Shared/_FontReference")
+    <link rel="stylesheet" href="~/bundles/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="base-container-bg">
+        <div class="base-conatiner" id="base-conatiner">
+            <div id="main-div">
+                <div class="app-logo">
+                    @if (!CloudAppConfig.IsSelfHosted)
+                    {
+                        <img alt="Login Logo" src="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.LoginLogo" />
+                    }
+                    else
+                    {
+                        <img alt="[[[Login Logo]]]" src="@GlobalAppSettings.SystemSettings.LoginLogo" onerror="this.onerror=null;this.src='@Url.Content("~/content/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.LoginLogo)';" />
+                    }
+                </div>
+                <div class="secondary-div">
+                    <div class="page-title">
+                        Access Denied
+                    </div>
+                    <div class="page-content login-message">You were signed in as <b>@currentUserEmail</b>. If this wasn't the account you intended to use, please <a href="@Url.Action("logout", "accounts")?returnUrl=@WebUtility.UrlEncode(requestUrl.AbsoluteUri)">sign out and sign in</a> again using the intended account.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

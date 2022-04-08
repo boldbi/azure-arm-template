@@ -1,0 +1,185 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@using Syncfusion.Server.IdentityProvider.Models;
+@using Syncfusion.Server.Base.Middlewares;
+@using Microsoft.AspNetCore.Http;
+@using Microsoft.AspNetCore.Http.Extensions;
+@using Microsoft.AspNetCore.Session;
+@using System.Linq;
+@using System.Security.Claims;
+@using Newtonsoft.Json
+
+@{
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+
+    var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
+
+    var currentUrl = requestUrl.ToString().TrimEnd('/');
+
+    var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
+
+    var idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    var profilePageUrl = $"{idPUrl}/user/profile";
+
+    var isAdmin = await new UserManagement().IsAdmin(Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value));
+    var tenantSitesUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/sites";
+    var tenantUsersUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/administration/user-management/users";
+    var tenantSettingsUrl = "/" + @CloudAppConfig.TenantManagementUrl.Trim('/') + "/administration";
+    AdminType adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+    var username = Context.Session.GetString("username") != null ? Context.Session.GetString("username").ToString() : string.Empty;
+    var userId = Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+    var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+}
+
+<aside class="menu-bar" id="app-navigation">
+    @if (CloudAppConfig.IsSelfHosted)
+    {
+        <nav id="main-nav">
+            <ul id="items-menu">
+                <li>
+                    <a href="@imageUrl" class="home-link" style="background-color:transparent;" title=@GlobalAppSettings.SystemSettings.OrganizationName>
+                        @if (!CloudAppConfig.IsSelfHosted)
+                        {
+                            <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.CdnDomain/static/company/@GlobalAppSettings.Branding/logo/v1/@IconFileNames.MainLogo" />
+                        }
+                        else
+                        {
+                            <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/images/boldid/application/@IconFileNames.MainLogo';" />
+                        }
+                    </a>
+                </li>
+                @if (isAdmin)
+                {
+                    <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                    <li>
+                        <a href="@tenantSitesUrl">
+                            <span class="menu-icon-container">
+                                <i class="su su-applications"></i>
+                            </span>
+                            <span class="menu-label">[[[Sites]]]</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@tenantUsersUrl">
+                            <span class="menu-icon-container">
+                                <i class="su su-user"></i>
+                            </span>
+                            <span class="menu-label">[[[Users]]]</span>
+                        </a>
+                    </li>
+                    <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                    <li class="mobile-hidden">
+                        <a href="@tenantSettingsUrl">
+                            <span class="menu-icon-container">
+                                <i class="su su-nav-settings"></i>
+                            </span>
+                            <span class="menu-label">[[[Settings]]]</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+        <nav id="sub-nav" class="sf-nav-group mobile-hidden">
+            <ul>
+                <li class="profile-section dropup">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="45" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="border-radius:50%"></div>
+                    </a>
+                    <ul class="dropdown-menu sub-menu" role="menu">
+                        <li class="sub-menu-item sub-menu-profile">
+
+                            <div class="sub-menu-profile-text-padding">[[[Profile]]]</div>
+                            <a href="/user/profile">
+
+                                <div class="sub-menu-profile-hover">
+                                    <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="40" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="border-radius:50%"></div>
+                                    <div class="sub-menu-user-name">
+                                        <div class="sub-menu-user-name-style">@displayName</div>
+                                        @if (emailAddress.Contains(CloudAppConfig.AutoGeneratedEmailDomain))
+                                        {
+                                            <div class="sub-menu-user-username-style">@username</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="sub-menu-user-email-style">@emailAddress</div>
+                                        }
+                                    </div>
+                                </div>
+                            </a>
+
+                        </li>
+                        <li class="sf-sub-menu-separator"></li>
+                        <li class="sub-menu-item">
+                            <a href="@Url.Action("logout", "accounts")?returnUrl=@currentUrlLocalPath">
+                                [[[Logout]]]
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    }
+    else
+    {
+        <nav id="main-nav">
+            <a id="mobile-profile-picture" href="@profilePageUrl" class="mobile-visible">
+                <div class="mobile-display-name">@displayName</div>
+                <img alt="Profile Picture" width="175" src="@Url.Content("~/User/Avatar?id=" @*+ userId*@ + "&ImageSize=110")" />
+
+            </a>
+            <ul id="items-menu">
+                <li>
+                    <a class="@((currentUrl.IndexOf(Url.Action("Index", "Home"), StringComparison.CurrentCultureIgnoreCase) > 0 || currentUrlLocalPath == "/") && currentUrl.IndexOf(Url.Action("Administration", "Administration"), StringComparison.CurrentCultureIgnoreCase) < 0 ? "active" : string.Empty)" href="/" data-toggle="tooltip" data-placement="right" data-container="body" title="Home">
+                        <i class="su su-nav-home"></i>
+                        <span class="menu-label mobile-visible">Home</span>
+                    </a>
+                </li>
+                @if (isAdmin@*|| ApplicationManagementModel.IsAppAdmin(userId)*@)
+{
+<li>
+    <a class="@(currentUrl.IndexOf(Url.Action("Index", "Application"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)" href="@Url.Action("Index", "Application")" data-toggle="tooltip" data-placement="right" data-container="body" title="Application Management">
+        <i class="su su-applications"></i>
+        <span class="menu-label mobile-visible">Applications</span>
+    </a>
+</li>
+}
+                @if (isAdmin)
+                {
+                    <li>
+                        <a class="@(currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) > 0 ? "active" : string.Empty)" href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-placement="right" data-container="body" title="User Management">
+                            <i class="su su-user"></i>
+                            <span class="menu-label mobile-visible">User Management</span>
+                        </a>
+                    </li>
+                }
+                <li class="li-logout">
+                    <img src="@GlobalAppSettings.SystemSettings.CDNLink/images/common/divider_dark.png" class="upper-divider" />
+                    <a class="" href="@Url.Action("logout", "accounts")?returnUrl=@currentUrlLocalPath" data-toggle="@(!DeviceDetection.IsMobile ? "" : "tooltip")" data-placement="right" data-container="body" title="Log out">
+                        <i class="su su-logout"></i>
+                        <span class="menu-label mobile-visible">Log out</span>
+                    </a>
+                </li>
+            </ul>
+            @if (isImageRequest == false && !DeviceDetection.IsMobile)
+            {
+                <ul id="administration-menu" class="mobile-hidden">
+                    @if (isAdmin)
+                    {
+                        <li>
+                            <a class="@(currentUrl.IndexOf(Url.Action("Administration", "Administration"), StringComparison.CurrentCultureIgnoreCase) > 0 && currentUrl.IndexOf(Url.Action("Index", "UserManagement"), StringComparison.CurrentCultureIgnoreCase) < 0 ? "active" : string.Empty)" href="@Url.Action("Administration", "Administration")" data-toggle="tooltip" data-placement="right" data-container="body" title="Settings">
+                                <i class="su su-nav-settings"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </nav>
+    }
+</aside>
+
+

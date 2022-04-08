@@ -1,0 +1,26 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    ViewBag.IncludeHeader = false;
+    ViewBag.RemoveUserProfile = Context.User.Identity.IsAuthenticated ? !Context.User.Identity.IsAuthenticated : true;
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    if (CloudAppConfig.IsSelfHosted)
+    {
+        ViewBag.Title = "[[[Account Activation]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    }
+    else
+    {
+    ViewBag.Title = "Account Activation | " + (GlobalAppSettings.Branding == AppBranding.Bold.Identifier ? "Bold ID" : GlobalAppSettings.BrandingDisplayName) + " Account";
+    }
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/account-activation.css" asp-append-version="true"/>
+}
+
+@section MainSection{
+    <div id="account-activation-content">
+        @await Html.PartialAsync("_EmailSentConfirmation")
+    </div>
+}

@@ -1,0 +1,67 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Reactivate Account | @GlobalAppSettings.BrandingDisplayName Account</title>
+    @await Html.PartialAsync("../Shared/_FontReference")
+    <link rel="stylesheet" href="~/bundles/css/user-account-closed.css" asp-append-version="true" />
+    <script src="~/bundles/js/user-account-closed.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        var userAccountDeleteRequestCancelUrl = "@Url.Action("UserAccountDeleteCancelRequest", "User")";
+        $(document).ready(function () {
+            $("#body").ejWaitingPopup();
+        });
+
+        function retrieveAccount() {
+            $("#body").ejWaitingPopup("show");
+            $.ajax({
+                type: "POST",
+                url: userAccountDeleteRequestCancelUrl,
+                success: function (result) {
+                    if (result.Success) {
+                        window.location.href = result.Url;
+                    }
+                    else {
+                        $("#body").ejWaitingPopup("hide");
+                        WarningAlert(window.Server.App.LocalizationContent.UserAccountCancelClose, window.Server.App.LocalizationContent.UserAccountClosedFailure, 7000);
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body id="body">
+    <div class="account-parent">
+        <div class="account-child">
+            <img class="syncfusion-logo" src="@GlobalAppSettings.SystemSettings.CDNLink/images/@GlobalAppSettings.Branding/application/footer_logo_black.svg" alt="Syncfusion">
+            <div class="account-bg">
+                <h3>Good to have you back!</h3>
+                <h5>Do you want to retrieve your account?</h5>
+                <div class="button-container">
+                    <input type="button" class="proceed-button" onclick="retrieveAccount()" value="Yes, I want to retrieve my account" />
+                    <input type="button" class="back-button" onclick="$('#body').ejWaitingPopup('show'); location.href='@Url.Action("logout", "accounts")'" value="No" />
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer")
+    <div id="warning-alert">
+        <div id="image-container">
+            <span class="su su-warning-alt" alt="Warning Icon"></span>
+        </div>
+        <div id="message" class="div-close">
+            <h1 id="message-header"></h1>
+            <span id="message-content"></span>
+        </div>
+        <div class="close-div">
+            <span id="close-content">Close</span>
+        </div>
+    </div>
+</body>
+</html>

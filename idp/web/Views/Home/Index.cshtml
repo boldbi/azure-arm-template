@@ -1,0 +1,177 @@
+﻿@using Syncfusion.Server.IdentityProvider.Models
+@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@model AdminHomeModel
+@{
+    ViewBag.Title = GlobalAppSettings.SystemSettings.OrganizationName + " - Admin";
+    var timeNow = int.Parse(DateTime.Now.ToString("HH"));
+    ViewBag.MessageBox = false;
+
+    var appThemes = new List<string>
+{
+        "app-theme-blue",
+        "app-theme-green",
+        "app-theme-cyan",
+        "app-theme-gold",
+        "app-theme-yellow",
+        "app-theme-red",
+        "app-theme-indigo"
+    };
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/adminpage.css" asp-append-version="true"/>
+}
+@section scripts{
+    <script src="~/bundles/js/admin-home.js" asp-append-version="true"></script>
+}
+@section MainSection{
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-container no-padding siteadmin">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-header">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+                <h1 class="col-lg-12 col-md-12 col-sm-12 col-xs-12 section-heading page-title header">
+                    <span id="salutation-text" data-name="@Model.DisplayName"></span>
+                </h1>
+            </div>
+        </div>
+
+        <div class="admin-page-body">
+            <div id="admin-page-inner-body" class="col-lg-9 col-md-12 col-sm-12 col-xs-12 no-margin no-padding inner-body">
+                <div class="row">
+                    @if (true)
+                    {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 column user-column">
+                            <div class="list-content">
+                                <div class="appheader">
+                                    <span class="icon-badge users">
+                                        <i class="su su-users"></i>
+                                    </span>
+
+                                    <h4>Users</h4>
+                                    <h1 class="count">@Model.NumberOfUsers</h1>
+                                </div>
+                                <div class="module-links pull-left">
+                                    <ul class="main-nav list-unstyled no-padding">
+                                        <li>
+                                            <a href="@Url.Action("Index", "UserManagement")?action=create">
+                                                <i class="su-add-1"></i>
+                                                <span>Add User</span>
+                                            </a>
+                                        </li>
+                                        <li class="view-link">
+                                            <a href="@Url.Action("Index", "UserManagement")">
+                                                <i class="su-view-lens"></i>
+                                                <span>View Users</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <span class="no-hyperlink">
+                                                Import Users
+                                                <i class="su-angle-right"></i>
+                                            </span>
+                                            <ul class="sub-nav import-nav">
+                                                <li>
+                                                    <a href="@Url.Action("ActiveDirectoryUserImport", "UserManagement")">Active Directory</a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.Action("AzureADUserImport", "UserManagement")">Azure Active Directory</a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.Action("GetUserDataForImportFromDatabase", "UserManagement")">Database</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <span class="no-hyperlink">
+                                                Synchronization
+                                                <i class="su-angle-right"></i>
+                                            </span>
+                                            <div>
+                                            </div>
+                                            <ul class="sub-nav sync-nav">
+                                                <li>
+                                                    <a href="@Url.Action("SynchronizeUsers", "UserManagement")">Active Directory</a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.Action("SynchronizeAzureUsers", "UserManagement")">Azure Active Directory</a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.Action("SynchronizeCustomDatabaseUsers", "UserManagement")">Database</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 column group-column">
+                            <div class="list-content">
+                                <div class="appheader">
+                                    <span class="icon-badge groups">
+                                        <i class="su su-groups"></i>
+                                    </span>
+                                    <h4>Groups</h4>
+                                    <h1 class="count">@Model.NumberOfGroups</h1>
+                                </div>
+                                <div class="module-links pull-left">
+                                    <ul class="main-nav list-unstyled no-padding">
+                                        <li>
+                                            <a href="@Url.Action("group", "group")?action=create">
+                                                <i class="su-add-1"></i>
+                                                <span>Add Group</span>
+                                            </a>
+                                        </li>
+                                        <li class="view-link">
+                                            <a href="@Url.Action("group", "group")">
+                                                <i class="su-view-lens"></i>
+                                                <span>View Groups</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <span class="no-hyperlink">
+                                                Import Groups
+                                                <i class="su-angle-right"></i>
+                                            </span>
+                                            <ul class="sub-nav import-nav">
+                                                <li><a href="@Url.Action("ActiveDirectoryGroupImport", "Group")">Active Directory</a></li>
+                                                <li><a href="@Url.Action("AzureADGroupImport", "Group")">Azure Active Directory</a></li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <span class="no-hyperlink">
+                                                Synchronization
+                                                <i class="su-angle-right"></i>
+                                            </span>
+                                            <ul class="sub-nav sync-nav">
+                                                <li><a href="@Url.Action("ActiveDirectoryGroup", "Group")">Active Directory</a></li>
+                                                <li><a href="@Url.Action("AzureADGroup", "Group")">Azure Active Directory</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+            <div class="col-lg-3 mobile-hidden hidden-md recent-users-container">
+                <div class="recent-users-module">
+                    <h3>Recent Users</h3>
+                    <ul class="recent-users-list">
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <li>
+                                <i class="img-loader"></i>
+                                <span class="name-loader"></span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+}

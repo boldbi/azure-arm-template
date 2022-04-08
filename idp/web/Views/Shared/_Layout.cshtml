@@ -1,0 +1,325 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.IdentityProvider.Models;
+@using Syncfusion.Server.Base.Middlewares;
+@using Microsoft.AspNetCore.Http.Extensions;
+@using System.Security.Claims;
+@{
+    var gridName = string.Empty;
+    var reqUrl = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = reqUrl.AbsolutePath.ToLower();
+
+    //To show or hide menu for mobile devices
+    var menuClass = DeviceDetection.IsMobile ? "collapse width" : "collapse in";
+
+    var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
+
+    var userId = Context != null && Context.User != null && Context.Request.IsHttps /*&& !(Context.User is RolePrincipal)*/ ? Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value) : Guid.Empty;
+
+    var isWelcomePage = ViewBag.IsWelcomePage != null && ViewBag.IsWelcomePage;
+    var headerTitle = ViewBag.HeaderTitle != null ? ViewBag.HeaderTitle : GlobalAppSettings.SystemSettings.OrganizationName;
+    var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <partial name="_OGPContent" />
+    @RenderSection("meta", false)
+    <title>
+        @ViewBag.Title
+    </title>
+    @await Html.PartialAsync("_Favicon")
+    <style>
+        .loader-icon {
+            display: block;
+        }
+
+        .loader-icon {
+            left: 0px !important;
+            position: relative;
+            margin: 0px auto;
+            width: 54px;
+            height: 54px;
+        }
+
+            .loader-icon .circular {
+                -webkit-animation: rotate 2s linear infinite;
+                animation: rotate 2s linear infinite;
+                height: 54px;
+                width: 54px;
+                position: relative;
+            }
+
+            .loader-icon .path {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+                -webkit-animation: dash 1.5s ease-in-out infinite;
+                animation: dash 1.5s ease-in-out infinite;
+                stroke: #5592FB;
+                stroke-linecap: square;
+            }
+
+        @@keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@-webkit-keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes dash {
+            0% {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -124;
+            }
+        }
+
+        @@-webkit-keyframes dash {
+            0% {
+                stroke-dasharray: 1,200;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 89,200;
+                stroke-dashoffset: -124;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        var rootUrl = "";
+        var baseurl = "";
+        var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
+    </script>
+
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    @await Html.PartialAsync("../Shared/_MenuTheme.cshtml")
+    <link rel="stylesheet" href="~/bundles/css/layout.css" asp-append-version="true" />
+
+    @RenderSection("styles", false)
+
+    <script src="~/bundles/js/layout.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+
+    @if (DeviceDetection.IsMobile)
+    {
+        <script type="text/javascript">
+            $(document).ready(function () {
+                function nextEvent() {
+                    $(this).on('touchend', function (e) {
+
+                        window.location.href = ($(this).attr("href"));
+                        $(this).off('touchend');
+                    });
+                    $(this).on('touchmove', function (e) {
+                        $(this).off('touchend');
+                    });
+                }
+
+                $('#main-nav a, .items a, .notification-mobile-link, .menu-options a, .notification-text-content a, .admin-page-header a, #edit-profile-heading-div a, #change-password-btn a').on('click touchstart', this, nextEvent);
+
+                $(window).on('popstate', function (e) {
+                });
+
+                $(document).on('touchend', function (e) {
+                    $(".tooltip").hide();
+                });
+                ej.popups.createSpinner({
+                    target: document.getElementById('body')
+                });
+
+            });
+
+
+        </script>
+    }
+
+    @RenderSection("scripts", false)
+
+    @if (includeMessageBox)
+    {
+        <script>
+            $(document).ready(function () {
+
+                var messageBoxDialog = new ej.popups.Dialog({
+                    header: "title",
+                    width: (window.innerWidth > 460) ? "472px" : (window.innerWidth - 10),
+                    visible: false,
+                    allowDragging: true,
+                    height: "auto",
+                    isModal: true,
+                    footerTemplate: "footer",
+                    close: "onMessageDialogClose"
+                });
+                messageBoxDialog.appendTo("#messageBox");
+            });
+        </script>
+    }
+
+</head>
+<body ng-app="serverApp" class="clearfix" id="body" style="background-image: url('@GlobalAppSettings.SystemSettings.CDNLink/images/common/waitingpopup.gif');background-color: #fff; background-repeat: no-repeat; background-position: center center;">
+    <div id="server-app-container" style="opacity: 0">
+        @if (CloudAppConfig.IsSelfHosted)
+        {
+        @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+        <section id="header-area" class="mobile-visible">
+            <div class="header-bar col-lg-12 col-md-12 col-sm-12">
+                @if (!isWelcomePage)
+                    {
+                <div class="mobile-menu-icon text-center mobile-visible collapsed" data-toggle="collapse" aria-expanded="false" data-target="#menu-area">
+                    <span>
+                        <i class="su su-mobile-menu-icon"></i>
+                    </span>
+                </div>}
+                <div class="org-name-wrapper">
+                    <h5 class="header-org-name">@headerTitle</h5>
+                </div>
+
+                <div class="pull-right" id="notification-section">
+                    <a id="notification-link" class="notification-mobile-link no-padding" href="@Url.Action("getusernotifications", "notification")">
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section id="menu-area" class="collapse">
+
+            @if (DeviceDetection.IsMobile)
+                {
+                    if (requestUrl == "/user/profile" || requestUrl == "/profile/change-password")
+                    {
+            @await Html.PartialAsync("../Shared/_ProfileMenu")
+                    }
+                }
+                else
+                {@await Html.PartialAsync("../Shared/_Menu")}
+
+        </section>
+        <div id="content-area" class="clearfix">
+            @RenderSection("MainSection", true)
+            <div id="success-alert">
+                <div id="image-container">
+                    <div class="image-holder">
+                        <span class="su su-tick" alt="[[[Success Icon]]]"></span>
+                    </div>
+                </div>
+                <div id="message">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+            </div>
+            <div id="warning-alert">
+                <div id="image-container">
+                    <span class="su su-warning-alt" alt="[[[Warning Icon]]]"></span>
+                </div>
+                <div id="message" class="div-close">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+                <div class="close-div">
+                    <span id="close-content">[[[Close]]]</span>
+                </div>
+            </div>
+        </div>
+        }
+        else
+        {
+        @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+        <section id="header-area">
+            @await Html.PartialAsync("~/Shared/_Header.cshtml")
+        </section>
+        <div id="content-area" class="clearfix">
+            @RenderSection("MainSection", true)
+            <div id="success-alert">
+                <div id="image-container">
+                    <div class="image-holder">
+                        <span class="su su-tick" alt="Success Icon"></span>
+                    </div>
+                </div>
+                <div id="message">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+            </div>
+            <div id="warning-alert">
+                <div id="image-container">
+                    <span class="su su-warning-alt" alt="Warning Icon"></span>
+                </div>
+                <div id="message" class="div-close">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+                <div class="close-div">
+                    <span id="close-content">Close</span>
+                </div>
+            </div>
+        </div>
+        }
+        @if (!CloudAppConfig.IsSelfHosted)
+        {
+        @await Html.PartialAsync("../Shared/_Footer")
+        }
+
+        @if (includeMessageBox)
+        {
+        <div id="messageBox">
+            <div class="message-box-close"></div>
+            <div class="message-content text-center"></div>
+        </div>
+        }
+    </div>
+
+    <div class="page-additional-navigation">
+        <input id="userName" type="hidden" @*value="@userId"*@ />
+        <input id="BaseUrlHidden" type="hidden" value="/" />
+        <input id="baseurl" name="baseurl" type="hidden" value="" />
+        <input id="DateFormat" name="DateFormat" type="hidden" value="@dateFormat" />
+    </div>
+    <div id="alert-notification">
+    </div>
+
+    <div id="mobile-menu" style="display: none">
+        <input type="hidden" class="page-name" id="page" data-content="" />
+
+        <div id="menu-list">
+        </div>
+
+        <div id="notification" class="pull-right hidden">
+            <div id="notification_area_link">
+                <a href="@Url.Action("getusernotifications", "notification")">
+                    <span id="notification_area_icon" class="su su-notification-alert pull-left">
+                        @*@if (notificationCount != 0)
+                            {
+                                <span id="notification-indicator"></span>
+                            }*@
+                    </span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

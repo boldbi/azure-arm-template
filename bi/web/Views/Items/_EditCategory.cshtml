@@ -1,0 +1,52 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<div id="EditCategoryPopup" style="display:none">
+    <div style="background:white;" class="dialog">
+        <div class="col-md-12 dialog-header">
+            <span class="su su-folder Head-icon"></span>
+            <span class="PopupTitle extendedTitle" title="@T["Update Category"]">
+                @T["Update Category"]
+            </span>
+            <a href="javascript:void(0);" class="PopupClose" title="@T["Close"]" onclick="closeEditCategoryPopup()"><span class="su su-close"></span></a>
+        </div>
+        <form id="update_category_content" class="col-md-12 dialog-body">
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                        <td>
+                            <span>
+                                <input type="text" id="category_name" class="popup form-control text-field bottom-margin30 text" maxlength="255" value="" tabindex="1" autofocus name="categoryName">
+                                <span id="validate-name" class="validation-message text"></span>
+                                <div id="plugin_validation" class="validation-message text"></div>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Description"]</div></td>
+                        <td>
+                            <textarea class="form-control text-field top-margin text" maxlength="1024" id="category_description" tabindex="2"></textarea>
+                            <span class="help-text">
+                                <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <div class="category-btns dialog-footer">
+            <div class="pull-right">
+                <input type="submit" title="" class="col-md-2 app-button app-primary-button app-btn-primary" value="@T["Update"]" onclick="updateCategory()" id="saveEditCategory" disabled="disabled" tabindex="3">
+                <input type="button" title="" class="col-md-2 app-button app-secondary-button app-btn-secondary" onclick="closeEditCategoryPopup()" value="@T["Cancel"]" tabindex="4">
+            </div>
+        </div>
+    </div>
+</div>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
+</environment>

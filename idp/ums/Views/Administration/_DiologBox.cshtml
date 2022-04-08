@@ -1,0 +1,57 @@
+﻿@functions
+{
+    public string GetSomeString(AuthProvider provider)
+    {
+        if (provider == AuthProvider.AzureAD)
+        {
+            return "Azure AD";
+        }
+        else if (provider == AuthProvider.CustomOAuth)
+        {
+            return "OAuth 2.0";
+        }
+        else if (provider == AuthProvider.CustomOIDC)
+        {
+            return "OpenID Connect";
+        }
+        else if (provider == AuthProvider.JWTSSO)
+        {
+            return "JWT SSO";
+        }
+        else
+        {
+            return "No Authentication Configured";
+        }
+    }
+}
+<div id="default-authentication-confirmation-diolog" class="modal no-padding" tabindex="-1" role="dialog">
+    <div class="modal-dialog no-margin">
+        <div id="popup-container" class="col-lg-12 no-padding modal-content">
+            <div class="col-md-12 modal-header">
+                <div class="col-xs-6 no-padding">
+                    <span class="su su-open"></span>
+                    <span class="popup-title modal-title">[[[Default Authentication Confirmation]]]</span>
+                </div>
+                <div class="col-xs-6 no-padding text-right">
+                    <a href="javascript:void(0);" onclick="authenticationDialogBoxClose()" class="popup-close" title="[[[Close]]]">
+                        <span class="su su-close"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-body col-xs-12">
+                <p>[[[You have chosen]]] <span class="provider-name"> [[[@GetSomeString(ViewBag.DefaultAuthenticationSettings.EnabledProviderName)]]]</span> [[[as the]]] <a href="@Url.Action("AuthenticationSettings","Administration")">default authentication</a>. [[[If you disable this setting, the default authentication will be reverted.]]]</p><br>
+                <p>[[[Would you like to proceed?]]]</p>
+            </div>
+            <div class="modal-footer no-padding">
+                <div class="col-xs-12 modal-footer">
+                    <div class="col-xs-4"></div>
+                    <div class="col-xs-8 text-align no-padding margin-top">
+                        <input type="button" value="[[[Yes]]]" style="margin-right: 15px" class="primary-button update-oauth-or-openid-settings">
+                        <input type="button" value="[[[No]]]" onclick="authenticationDialogBoxClose()" class="secondary-button">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

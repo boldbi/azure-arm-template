@@ -1,0 +1,90 @@
+﻿@using Syncfusion.Server.Base.DataClasses;
+@{
+    var returnUrl = (string)ViewBag.ReturnUrl;
+    var userDetail = (User)ViewBag.UserDetail;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.MessageBox = false;
+    ViewBag.Title = "[[[Account Preference]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-preference.css" asp-append-version="true" />
+}
+@section scripts{
+    <script src="~/bundles/js/user-preference.js" asp-append-version="true"></script>
+    <script>
+        var userId = "@userDetail.UserId";
+        var updateUserPreferenceUrl = "@Url.Action("UpdateUserLanguagePreference", "User")";
+        var selectedApplicationLanguageText = "@ViewBag.SelectedApplicationLanguage.Text";
+        var selectedApplicationLanguageValue = "@ViewBag.SelectedApplicationLanguage.Value";
+        var selectedDataLanguageText = "@ViewBag.SelectedDataLanguages.Text";
+        var selectedDataLanguageValue = "@ViewBag.SelectedDataLanguages.Value";
+        $(document).ready(function () {
+            generateProfileAvatar();
+        });
+    </script>
+}
+@section MainSection{
+    @await Html.PartialAsync("_UserProfileMenu")
+    @if (CloudAppConfig.IsSelfHosted)
+    {
+        <div class="col-md-12 col-sm-12 col-xs-12 col-lg-12 admin-page-content-container">
+            <div class="admin-page-content col-xs-12 no-padding">
+                <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 admin-page-header">
+                    <hgroup>
+                        <h2 class="page-title">[[[Account Preferences]]]</h2>
+                    </hgroup>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
+                    <div class="col-xs-12 no-padding">
+                        @Html.Label("language", "[[[Application language]]]", new { @class = "app-textbox-label" })
+                        <div class="admin-settings-drop-down">
+                            @Html.DropDownList("language", ViewBag.languageList as IEnumerable<SelectListItem>, new { id = "language", @class = "form-control" })
+                            <input type="hidden" id="lang_tag" value="@ViewBag.UserPreferenceLanguage">
+                        </div>
+                        <div class="info-message">[[[The language used in the application user interface (such as menu items, dialog boxes, toolboxes, and more).]]]</div>
+                    </div>
+                    @if (ViewBag.HaveBILicense)
+                    {
+                        <div class="col-xs-12 no-padding language-label input-field-margin">
+                            @Html.Label("model-language", "[[[Data language]]]", new { @class = "app-textbox-label" })
+                            <div class="admin-settings-drop-down" id="model-language-conainer">
+                                @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { id = "model-language", @class = "form-control", data_live_search = "true", data_size = 10 })
+                                <input type="hidden" id="model-lang_tag" value="@ViewBag.UserModelPreferenceLanguage">
+                            </div>
+                            @if (ViewBag.HaveBILicense && ViewBag.HaveReportsLicense)
+                            {
+                                <div class="info-message">[[[The language used in date, number, and currency formats(Applicable for Bold BI only).]]]</div>
+                            }
+                            else
+                            {
+                                <div class="info-message">[[[The language used in date, number, and currency formats]]]</div>
+                            }
+                        </div>
+
+                    }
+                </div>
+                <div class="admin-page-footer col-xs-12">
+                    <div class="admin-page-actions col-lg-12 col-md-12">
+                        @if (!string.IsNullOrWhiteSpace(returnUrl))
+                        {
+                            <a href="@returnUrl" class="secondary-button pull-right margin10" id="language-cancel-link-button">[[[Cancel]]]</a>
+                            <input id="hidden-return-url" class="hidden" value="@returnUrl" />
+                        }
+                        else
+                        {
+                            <button type="button" class="secondary-button pull-right" title="" id="language-cancel-button">[[[Cancel]]]</button>
+                        }
+
+                        <input type="button" class="primary-button pull-right inactive-content" id="language-save-button" title="" onclick="SaveUserPreference()" value="[[[Save]]]">
+
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3 no-padding" id="message">
+                    <h5 id="success-message"></h5>
+                </div>
+
+            </div>
+            @await Html.PartialAsync("../Shared/_FooterOnPremise")
+        </div>
+    }
+}

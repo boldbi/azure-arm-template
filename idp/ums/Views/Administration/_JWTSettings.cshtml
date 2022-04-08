@@ -1,0 +1,84 @@
+﻿@{
+    var urlRegEx = @"/(?:^|[ \t])((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/";
+    var enableSigningKeyOptions = !string.IsNullOrEmpty(ViewBag.JwtSettings.JwtSettings.SigningKey);
+}
+    <div role="tabpanel" class="tab-pane  col-xs-12 no-padding" id="jwt-settings-tab">
+        <div id="jwt-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+            <form id="jwt-setting" name="jwtSettingsForm" class="auth-settings-form col-lg-12 col-md-12 col-sm-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="hidden" name="jwtAuthenticationProvider" value="@ViewBag.JwtSettings.AuthProvider">
+                <input type="hidden" name="jwtLogo" value="">
+                <div class="col-xs-12 no-padding">
+                    <div class="material-switch inline-align">
+                        <input type="checkbox" id="enable-jwt" ng-model="jwtIsEnabled" ng_change="hideValidationMessage(jwtIsEnabled, 'jwt')" />
+                        <label for="enable-jwt" class="label-primary"></label>
+                    </div>
+                    <div class="app-textbox-label inline-align">
+                        [[[Enable JWT]]]
+                    </div>
+                </div>
+
+                <div class="col-md-12 no-padding input-field-margin">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[Name]]]<span class="mandatory">*</span></label>
+                    </div>
+                    <div ng-class="(jwtSettingsForm.jwtName.$dirty && jwtSettingsForm.jwtName.$invalid) ? 'has-error' : ''">
+                        <input type="text" class="form-control no-margin" ng-model="jwtName" ng-init="jwtName='@ViewBag.JwtSettings.JwtSettings.Name'" ng-maxlength="20" name="jwtName" placeholder="[[[Name]]]" id="jwt-provider-name" data-ng-disabled="!jwtIsEnabled" required />
+                        <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtName.$error.maxlength && jwtSettingsForm.jwtName.$dirty && jwtIsEnabled">[[[Provider name is too long. Must be no more than 20 characters.]]]</span>
+                        <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtName.$error.required && jwtSettingsForm.jwtName.$dirty && jwtIsEnabled">[[[Please enter the name.]]]</span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 no-padding input-field-margin">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[Provider Logo]]]<span class="mandatory">*</span></label>
+                    </div>
+                    <div class="col-xs-12 no-padding logo-container">
+                        <div id="jwt-image-upload-box" class="auth-image-upload-box">
+                            <div class="js-image-preview" style="background-image:{{jwtLogoUrl}}"></div>
+                            <div class="upload-options">
+                                <label>
+                                    <span>[[[Change logo]]]</span>
+                                    <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="jwtLogoUrl" ng-init="jwtLogoUrl='@ViewBag.JwtSettings.LogoUrl'" name="jwtLogoUrl" data-ng-disabled="!jwtIsEnabled" required />
+                                </label>
+                            </div>
+                        </div>
+                        <span class="validation-message top-padding" ng-show="!jwtSettingsForm.isValidjwtLogoUrl && jwtIsEnabled"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 no-padding input-field-margin">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[Remote Login URL]]]<span class="mandatory">*</span></label>
+                    </div>
+                    <div ng-class="(jwtSettingsForm.jwtLoginUrl.$dirty && jwtSettingsForm.jwtLoginUrl.$invalid) ? 'has-error' : ''">
+                        <input type="text" class="form-control no-margin" ng-model="jwtLoginUrl" ng-init="jwtLoginUrl='@ViewBag.JwtSettings.JwtSettings.LoginUrl'" ng-pattern="@urlRegEx" name="jwtLoginUrl" placeholder="[[[Remote Login URL]]]" id="jwt-authority" data-ng-disabled="!jwtIsEnabled" required />
+                        <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLoginUrl.$error.required && jwtSettingsForm.jwtLoginUrl.$dirty && jwtIsEnabled">[[[Please enter the login url.]]]</span>
+                        <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLoginUrl.$error.pattern && jwtSettingsForm.jwtLoginUrl.$dirty && jwtIsEnabled">[[[Please enter a valid login url.]]]</span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 no-padding input-field-margin">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[Remote Logout URL]]]</label>
+                    </div>
+                    <div ng-class="(jwtSettingsForm.jwtLogOutUrl.$dirty && jwtSettingsForm.jwtLogOutUrl.$invalid) ? 'has-error' : ''">
+                        <input type="text" class="form-control no-margin" ng-model="jwtLogOutUrl" ng-init="jwtLogOutUrl='@ViewBag.JwtSettings.JwtSettings.LogOutUrl'" ng-pattern="@urlRegEx" name="jwtLogOutUrl" placeholder="[[[Remote Logout URL(Optional)]]]" id="jwt-client-id" data-ng-disabled="!jwtIsEnabled" />
+                        <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLogOutUrl.$error.pattern && jwtSettingsForm.jwtLogOutUrl.$dirty && jwtIsEnabled">[[[Please enter a valid logout url.]]]</span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 no-padding input-field-margin margin-bottom">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">[[[Signing Key]]]</label>
+                    </div>
+                    <div ng-class="(jwtSettingsForm.jwtSigningKey.$dirty && jwtSettingsForm.jwtSigningKey.$invalid) ? 'has-error' : ''">
+                        <input type="password" id="jwt-signing-key" readonly="" class="form-control no-margin signing-key-values @(!enableSigningKeyOptions ? "signing-key-width" : string.Empty)" name="jwtSigningKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@ViewBag.JwtSettings.JwtSettings.SigningKey" />
+
+                        <div class="su su-show form-control show-hide-password copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="show-signing-key" data-toggle="tooltip" data-original-title="[[[Click to view]]]"></div>
+                        <div class="su su-copy form-control copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="copy-signing-key" onclick="fnCopySigningKey('#jwt-signing-key','#copy-signing-key')" data-toggle="tooltip" data-original-title="[[[Click to copy]]]"></div>
+                        <div class="su su-sync form-control text focus copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="generate-signing-key" onclick="onRegenerateSigningKeyDialogOpen()" data-toggle="tooltip" data-original-title="[[[Click to Regenerate]]]" data-trigger="hover"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>

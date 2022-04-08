@@ -1,0 +1,154 @@
+﻿@model List<TenantDetail>
+@{
+    Layout = null;
+    var tenantIdentifierPrefix = CloudAppConfig.TenantIdentifierPrefix;
+    var idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    var userId = Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+    var profilePicture = idPUrl + "/User/Avatar?id=" + ViewBag.UserId + "&ImageSize=64";
+    var displayName = ViewBag.UserDetails.DisplayName;
+    var createSiteUrl = @Url.Action("Sites", "TenantsManagement") + "?action=create-new-site";
+    var adminType = (AdminType)Enum.Parse(typeof(AdminType), GlobalAppSettings.HttpContextAccessor.HttpContext.Session.GetString("AdminType"));
+    var poweredbyClass = GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion ? "block" : "none";
+    var copyrightClass = GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "block" : "none";
+    var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
+}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>[[[Home]]] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
+    <link rel="icon" href="@GlobalAppSettings.SystemSettings.FavIcon" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/@GlobalAppSettings.Branding/application/@IconFileNames.Favicon';" />
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    
+    <link rel="stylesheet" href="~/bundles/css/homepage.css" asp-append-version="true" />
+</head>
+
+<body>
+    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/homepage.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
+    </script>
+    <div id="site-down-alert"></div>
+    @await Html.PartialAsync("_SiteDownAlert")
+    <div id="header-container">
+        <img class="boldbi-logo" src="@GlobalAppSettings.SystemSettings.EmailLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + @GlobalAppSettings.Branding + "/application/email_logo.png")';" alt="[[[Bold BI logo]]]">
+        <div class="logout-container">
+            <a class="logout" href="@Url.Action("logout", "accounts")">[[[LOGOUT]]]</a>
+        </div>
+        @if (adminType == AdminType.SuperAdmin)
+        {
+            if (ViewBag.IsMultiTenant)
+            {
+                <a class="create-site" href="@createSiteUrl">[[[Create new site]]]</a>
+            }
+
+            <a class="manage-sites" href="@Url.Action("Sites", "TenantsManagement")">[[[Manage sites]]]</a>
+        }
+    </div>
+
+    <div id="body-container">
+        <div class="user-image-container">
+            @if (!string.IsNullOrWhiteSpace(ViewBag.UserDetails.Picture))
+            {
+                <img class="user-image" rel="alternate" hreflang="en" href="" src="@profilePicture" alt="[[[user]]]">
+            }
+            else
+            {
+                <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="100" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="border-radius:50%;margin:auto"></div>
+            }
+        </div>
+        <div class="user-name">[[[Hello, ]]]@displayName</div>
+        <div class="welcome-note">[[[Welcome back!]]]</div>
+        <div class="line"></div>
+        <div class="choose-site">[[[Choose site to enter]]]</div>
+
+        <div id="site-container">
+            <div class="row">
+                @if (Model != null)
+                {
+                    for (var i = 0; i < Model.Count; i++)
+                    {
+                        <a class="dns-link site-row-container" rel="alternate" hreflang="en" href="@Model[i].SiteUrl" target="_blank">
+                            <div class="user-dns">
+                                <div class="image-div site-logo-container">
+                                    <div class="lazyload img-loader" data-class="site-logo" data-id="homepagelogo" data-src="@Url.Content(Model[i].SiteUrl + "/get-client-logo")" data-alt="boldbi" data-width="110px" data-height="25px" data-default="this.onerror=null;this.src='/images/@GlobalAppSettings.Branding/application/@IconFileNames.LoginLogo'"></div>
+                                </div>
+                                <div class="dns-org-name site-name" title="@Model[i].TenantName" data-toggle="tooltip">
+                                    @Model[i].TenantName
+                                </div>
+                                <div class="site-url-container">
+                                    <div class="dns-name site-url" title="@Model[i].SiteUrl" data-toggle="tooltip">
+                                        @Model[i].SiteUrl
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-container" class="displaynone">
+        <div class="copyright-container" style="display:@copyrightClass">
+            <div class="copyright">@Html.Raw(GlobalAppSettings.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
+        </div>
+        <div class="footer-logo-container" style="display:@poweredbyClass">
+            <div class="powered-by">[[[Powered by]]]</div>
+            <img class="footer-logo" src="@GlobalAppSettings.SystemSettings.PoweredByLogo" alt="[[[footer logo]]]">
+        </div>
+    </div>
+
+    <script>
+        $(window).load(function () {
+            $('.lazyload').each(function () {
+                img = document.createElement('img');
+                img.onload = imageOnLoad;
+                img.src = $(this).attr("data-src");
+                img.alt = $(this).attr("data-alt");
+                img.id = $(this).attr("data-id");
+                $(img).attr("onerror", $(this).attr("data-default"));
+                $(img).addClass($(this).attr("data-class"));
+                img.style = "display: none";
+                $(this).parent().append(img);
+                refreshLoginFooter();
+            });
+
+            refreshLoginFooter();
+        });
+
+        function imageOnLoad() {
+            $(this).show().parent().find("div.lazyload").remove();
+        }
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        $(window).resize(function () {
+            refreshLoginFooter();
+        });
+
+        function refreshLoginFooter() {
+            var windowHeight = window.innerHeight;
+            var loginContainerTop = $("#header-container").innerHeight();
+            var contentHeight = $("#body-container").innerHeight();
+
+            var footerOuterHeight = $('#footer-container').outerHeight();
+            var total = loginContainerTop + contentHeight + 16 + footerOuterHeight;
+            var remainingHeight = windowHeight - total;
+            if (total < windowHeight) {
+                $('#footer-container').css("margin-top", remainingHeight + "px");
+            }
+            else {
+                $("#footer-container").css("margin-top", "16px");
+            }
+            $("#footer-container").removeClass("displaynone");
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+﻿@model TenantInfo
+<div role="tabpanel" class="tab-pane" id="payment-activity-tab">
+    <div class="admin-page-body">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom: 2%">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+            <div id="items" class="item-grid">
+            </div>
+            <script type="text/x-jsrender" id="paymentamount-header">
+                <div class="item-name">Amount</div>
+            </script>
+
+            <script type="text/x-jsrender" id="paymentinvoice-header">
+                <div class="item-name">Invoice Id</div>
+            </script>
+
+            <script type="text/x-jsrender" id="paymentsubscription-header">
+                <div class="item-name">Subscription Id</div>
+            </script>
+
+            <script type="text/x-jsrender" id="paymentstatus-header">
+                <div class="item-name">Status</div>
+            </script>
+
+            <script type="text/x-jsrender" id="paymentcomments-header">
+                <div class="item-name">Comments</div>
+            </script>
+
+            <script type="text/x-jsrender" id="paymentdate-header">
+                <div class="item-name">Date</div>
+            </script>
+
+            <script type="text/x-jsrender" id="paymentamnount">
+                <div class="item-description grid-content payment-elipsis" title="{{:Amount}}">
+                    <span>
+                        ${{:Amount}}
+                    </span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="paymentinvoice">
+                <div class="item-description grid-content payment-elipsis" title="{{:InvoiceId}}">
+                    <span>
+                        {{:InvoiceId}}
+                    </span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="paymentsubscription">
+                <div class="item-description grid-content payment-elipsis" title="{{:SubscriptionId}}">
+                    <span>
+                        {{:SubscriptionId}}
+                    </span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="paymentstatus">
+                <div class="item-description grid-content payment-elipsis" title="{{:Status}}">
+                    <span>
+                        {{:Status}}
+                    </span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="paymentcomments">
+                <div class="item-description grid-content payment-elipsis" title="{{:SellerMessage}}">
+                    <span>
+                        {{:SellerMessage}}
+                    </span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="paymentdate">
+                <div class="item-description grid-content payment-elipsis" title="{{:DisplayTime}}">
+                    <span>
+                        {{:DisplayTime}}
+                    </span>
+                </div>
+            </script>
+        </div>
+    </div>
+
+</div>
+<script>
+    var filters = { filterType: "menu" };
+    $(document).ready(function () {
+        ej.support.enableLocalizedSort = true;
+        $("#items").ejGrid({
+            dataSource: ej.DataManager({ url: "@Url.Action("GetPaymentLogs", 'd')", adaptor: "UrlAdaptor" }),
+            gridLines: ej.Grid.GridLines.None,
+            pageSettings: { pageSize: 10 },
+            allowPaging: true,
+            enableAltRow: false,
+            actionBegin: "fnPaymentLogs",
+            filterSettings: filters,
+            columns: [
+                 {
+                     headerText: "Amount",
+                     template: true,
+                     headerTemplateID: "#paymentamount-header",
+                     templateID: "#paymentamnount",
+                     width: ("@DeviceDetection.IsMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200))
+                         ? 30
+                         : 80,
+                     field:
+                         "[@GlobalAppSettings.DBColumns.DB_TenantInvoiceDetails.DB_TableName].[@GlobalAppSettings.DBColumns.DB_TenantInvoiceDetails.Amount]",
+                     type: "string",
+                     allowFiltering: false
+                 },
+                {
+                    headerText: "Invoice Id",
+                    template: true,
+                    headerTemplateID: "#paymentinvoice-header",
+                    templateID: "#paymentinvoice",
+                    width: ("@DeviceDetection.IsMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200))
+                        ? 80
+                        : 120,
+                    field:
+                        "[@GlobalAppSettings.DBColumns.DB_TenantInvoiceDetails.DB_TableName].[@GlobalAppSettings.DBColumns.DB_TenantInvoiceDetails.InvoiceId]",
+                    type: "string",
+                    allowFiltering: false
+                },
+                {
+                    headerText: "Subscription Id",
+                    template: true,
+                    headerTemplateID: "#paymentsubscription-header",
+                    templateID: "#paymentsubscription",
+                    width: ("@DeviceDetection.IsMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200))
+                        ? 80
+                        : 120,
+                    field:
+                        "[@GlobalAppSettings.DBColumns.DB_TenantInvoiceDetails.DB_TableName].[@GlobalAppSettings.DBColumns.DB_TenantInvoiceDetails.SubscriptionId]",
+                    type: "string",
+                    allowFiltering: false
+                },
+                {
+                    headerText: "Status",
+                    template: true,
+                    headerTemplateID: "#paymentstatus-header",
+                    templateID: "#paymentstatus",
+                    width: ("@DeviceDetection.IsMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200))
+                        ? 30
+                        : 80,
+                    field:
+                        "[@GlobalAppSettings.DBColumns.DB_TenantPaymentLog.DB_TableName].[@GlobalAppSettings.DBColumns.DB_TenantPaymentLog.Status]",
+                    type: "string",
+                    allowFiltering: false
+                },
+          {
+              headerText: "Comments",
+              template: true,
+              headerTemplateID: "#paymentcomments-header",
+              templateID: "#paymentcomments",
+              width: ("@DeviceDetection.IsMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200))
+                  ? 80
+                  : 120,
+              field:
+                  "[@GlobalAppSettings.DBColumns.DB_TenantPaymentLog.DB_TableName].[@GlobalAppSettings.DBColumns.DB_TenantPaymentLog.LogComments]",
+              type: "string",
+              allowFiltering: false
+          },
+                    {
+                        headerText: "Date",
+                        template: true,
+                        headerTemplateID: "#paymentdate-header",
+                        templateID: "#paymentdate",
+                        width: ("@DeviceDetection.IsMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200))
+                            ? 80
+                            : 120,
+                        field:
+                            "[@GlobalAppSettings.DBColumns.DB_TenantPaymentLog.DB_TableName].[@GlobalAppSettings.DBColumns.DB_TenantPaymentLog.CreatedDate]",
+                        type: "string",
+                        allowFiltering: false
+                    }
+            ]
+        });
+    });
+</script>

@@ -1,0 +1,132 @@
+﻿@{
+    var oauthRegEx = @"/(?:^|[ \t])((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/";
+}
+    <div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="openid-settings-tab">
+        <div id="openid-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+            <form id="openid-setting" name="openidSettingsForm" class="auth-settings-form col-lg-12 col-md-12 col-sm-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="hidden" name="openidAuthenticationProvider" value="@ViewBag.OpenIDSettings.AuthProvider">
+                <input type="hidden" name="openidLogo" value="@ViewBag.OpenIDSettings.OIDCAuthSettings.Logo">
+                <div class="col-xs-12 separator-margin">
+                    <div class="col-xs-12 no-padding">
+                        <div class="material-switch inline-align">
+                            <input type="checkbox" id="openidIsEnabled" ng-model="openidIsEnabled" ng_change="hideValidationMessage(openidIsEnabled, 'openid')" />
+                            <label for="openidIsEnabled" class="label-primary"></label>
+                        </div>
+                        <div class="app-textbox-label inline-align">
+                            [[[Enable OpenID Connect]]]
+                        </div>
+                    </div>
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Provider Name]]]</label>
+                        </div>
+                        <div ng-class="(openidSettingsForm.openidProviderName.$dirty && openidSettingsForm.openidProviderName.$invalid) ? 'has-error' : ''">
+                            <input type="text" class="form-control no-margin" ng-model="openidProviderName" ng-maxlength="20" ng-init="openidProviderName='@ViewBag.OpenIDSettings.OIDCAuthSettings.ProviderName'" name="openidProviderName" placeholder="[[[Provider Name]]]" id="openid-provider-name" data-ng-disabled="!openidIsEnabled" required />
+                            <span class="validation-message top-padding" ng-show="openidSettingsForm.openidProviderName.$error.maxlength && openidSettingsForm.openidProviderName.$dirty && openidIsEnabled">[[[Provider name is too long. Must be no more than 20 characters.]]]</span>
+                            <span class="validation-message top-padding" ng-show="openidSettingsForm.openidProviderName.$error.required && openidSettingsForm.openidProviderName.$dirty && openidIsEnabled">[[[Please enter the OpenID provider name.]]]</span>
+                        </div>
+                        <div class="info-message no-padding">[[[Name of the authentication provider to be displayed in the login page.]]]</div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Provider Logo]]]</label>
+                        </div>
+                        <div class="col-xs-12 no-padding logo-container">
+                            <div id="openid-image-upload-box" class="auth-image-upload-box">
+                                <div class="js-image-preview" style="background-image:{{openidLogoUrl}}"></div>
+                                <div class="upload-options">
+                                    <label>
+                                        <span>[[[Change logo]]]</span>
+                                        <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="openidLogoUrl" ng-init="openidLogoUrl='@ViewBag.OpenIDSettings.LogoUrl'" name="openidLogoUrl" data-ng-disabled="!openidIsEnabled" required />
+                                    </label>
+                                </div>
+                            </div>
+                            <span class="validation-message top-padding" ng-show="!openidSettingsForm.isValidOpenIdLogoUrl && openidIsEnabled"></span>
+                        </div>
+                        <div class="info-message no-padding">[[[Logo of the authentication provider to be displayed in the login page.]]]</div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Authority]]]</label>
+                        </div>
+                        <div ng-class="(openidSettingsForm.openidAuthority.$dirty && openidSettingsForm.openidAuthority.$invalid) ? 'has-error' : ''">
+                            <input type="text" class="form-control no-margin" ng-model="openidAuthority" ng-init="openidAuthority='@ViewBag.OpenIDSettings.OIDCAuthSettings.Authority'" ng-pattern="@oauthRegEx" name="openidAuthority" placeholder="[[[Authority]]]" id="openid-authority" data-ng-disabled="!openidIsEnabled" required />
+                            <span class="validation-message" ng-show="openidSettingsForm.openidAuthority.$error.required && openidSettingsForm.openidAuthority.$dirty && openidIsEnabled">[[[Please enter the Authority URL.]]]</span>
+                            <span class="validation-message" ng-show="openidSettingsForm.openidAuthority.$error.pattern && openidSettingsForm.openidAuthority.$dirty && openidIsEnabled">[[[Please enter a valid Authority URL.]]]</span>
+                        </div>
+                        <div class="info-message no-padding">[[[Endpoint to authenticate the user and grant access to the protected resource. It returns the claims about the authenticated user.]]]</div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Client ID]]]</label>
+                        </div>
+                        <div ng-class="(openidSettingsForm.openidClientId.$dirty && openidSettingsForm.openidClientId.$invalid) ? 'has-error' : ''">
+                            <input type="text" class="form-control no-margin" ng-model="openidClientId" ng-init="openidClientId='@ViewBag.OpenIDSettings.OIDCAuthSettings.ClientId'" name="openidClientId" placeholder="[[[Client ID]]]" id="openid-client-id" data-ng-disabled="!openidIsEnabled" required />
+                            <span class="validation-message" ng-show="openidSettingsForm.openidClientId.$error.required && openidSettingsForm.openidClientId.$dirty && openidIsEnabled">[[[Please enter the Client ID.]]]</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Client Secret]]]</label>
+                            <div class="col-md-12 no-padding" ng-class="(openidSettingsForm.openidClientSecret.$dirty && openidSettingsForm.openidClientSecret.$invalid) ? 'has-error' : ''">
+                                <input type="password" class="form-control no-margin" ng-model="openidClientSecret" ng-init="openidClientSecret" name="openidClientSecret" placeholder="[[[Client Secret]]]" id="openid-client-secret" data-ng-disabled="!openidIsEnabled" required />
+                                <span class="validation-message" ng-show="openidSettingsForm.openidClientSecret.$error.required && openidSettingsForm.openidClientSecret.$dirty && openidIsEnabled">[[[Please enter the client secret.]]]</span>
+                                <span class="show-hide-password su su-show"  data-toggle="tooltip" data-original-title="[[[Click to view]]]"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Identifier]]]</label>
+                        </div>
+                        <div ng-class="(openidSettingsForm.openidIdentifier.$dirty && openidSettingsForm.openidIdentifier.$invalid) ? 'has-error' : ''">
+                            <input type="text" class="form-control no-margin" ng-model="openidIdentifier" ng-init="openidIdentifier='@ViewBag.OpenIDSettings.OIDCAuthSettings.Identifier'" name="openidIdentifier" placeholder="[[[Identifier]]]" id="openid-identifier" data-ng-disabled="!openidIsEnabled" required />
+                            <span class="validation-message" ng-show="openidSettingsForm.openidIdentifier.$error.required && openidSettingsForm.openidIdentifier.$dirty && openidIsEnabled">[[[Please enter the Identifier.]]]</span>
+                        </div>
+                        <div class="info-message no-padding">[[[These claims are normally represented by a JSON object that contains a collection of name and value pairs for each claim. Provide the JSON key to identify the unique identity (email) of the user.]]]</div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Logout Endpoint]]]</label>
+                        </div>
+                        <div ng-class="(openidSettingsForm.openidLogoutUrl.$dirty && openidSettingsForm.openidLogoutUrl.$invalid) ? 'has-error' : ''">
+                            <input type="text" class="form-control no-margin" ng-model="openidLogoutUrl" ng-init="openidLogoutUrl='@ViewBag.OpenIDSettings.OIDCAuthSettings.LogoutUrl'" name="openidLogoutUrl" placeholder="[[[Logout Endpoint (Optional)]]]" id="openid-logout url" ng-pattern="@oauthRegEx" data-ng-disabled="!openidIsEnabled" />
+                            <span class="validation-message" ng-show="openidSettingsForm.openidLogoutUrl.$error.pattern && openidSettingsForm.openidLogoutUrl.$dirty && openidIsEnabled">[[[Please enter a valid logout endpoint.]]]</span>
+                        </div>
+                        <div class="info-message no-padding">[[[We support logout endpoints that have static request parameters.]]]</div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Redirect URI]]]</label>
+                            <div>
+                                <input onClick="this.setSelectionRange(0, this.value.length)" id="openid-callback-link" value="@(GlobalAppSettings.SystemSettings.BaseUrl + AuthenticationConfig.OidcCallabckUrl)" class="form-control no-margin" readonly />
+                                <div class="form-control su su-copy text focus" id="openid-callback-link-copy" readonly="" data-toggle="tooltip" data-original-title="[[[Click to copy]]]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            <label class="app-textbox-label">[[[Mobile App Redirect URI]]]</label>
+                            <div>
+                                <input onClick="this.setSelectionRange(0, this.value.length)" id="openid-mobile-callback-link" value="com.boldbi.dashboard://auth" class="form-control no-margin" readonly />
+                                <div class="form-control su su-copy text focus" id="openid-mobile-callback-link-copy" readonly="" data-toggle="tooltip" data-original-title="[[[Click to copy]]]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 separator-margin">
+                    <div id="openid-group-import" class="group-import">
+                        @await Html.PartialAsync("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OpenIDSettings.OIDCAuthSettings.GroupImportSettings, new ViewDataDictionary(ViewData) { { "AuthType", AuthType.OIDC } })
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>

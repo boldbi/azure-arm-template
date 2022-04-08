@@ -1,0 +1,127 @@
+﻿@{
+    ViewBag.Title = "[[[Embed Settings]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var embedEnabled = Convert.ToBoolean(ViewBag.EmbedSettings);
+    var embedSecretCode = GlobalAppSettings.SystemSettings.EmbedSecret;
+    var generateSecret = "[[[Generate Secret]]]";
+    var resetSecret = "[[[Reset Secret]]]";
+    var fileName = !string.IsNullOrEmpty(ViewBag.fileName) ? ViewBag.fileName : "[[[Browse file path (.json)]]]";
+    var showDownloadLink = embedEnabled ? "display:block" : "display:none";
+    var branding = GlobalAppSettings.Branding;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/embed-settings.css" asp-append-version="true" />
+}
+@section scripts{
+    <script src="~/bundles/js/embed-settings.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script>
+        $.extend(ej, Syncfusion);
+    </script>
+    <script>
+        var embedEnabled = @Html.Raw(Json.Serialize(embedEnabled));
+        var embedSecretCode = "@embedSecretCode";
+        var isResetEmbedSecretUrl = "@Url.Action("ResetEmbedSecret", "Administration")";
+        var updateSystemSettingsValueUrl = "@Url.Action("UpdateSystemSettingValue", "Administration")";
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div id="embed-settings-container" class="col-xs-12 admin-page-content-container @(ViewBag.Embed ? string.Empty : "unlock-enterprise-features blur-content")">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div id="embed-settings-header" class="col-xs-12 admin-page-header">
+                <hgroup class="admin-page-header-description">
+                    <h1 class="h2 page-title">
+                        [[[EMBED SETTINGS]]]
+                    </h1>
+                    <h5 class="page-description">
+                        [[[Configuration for Embedded BI sites]]]
+                    </h5>
+                </hgroup>
+            </div>
+            <div id="embed-settings-body" class="admin-page-body col-xs-12">
+                <div class="embed-authentication col-xs-12 no-padding">
+                    <div class="material-switch inline-align">
+                        <input type="checkbox" id="restrict-embed-enabled" @(embedEnabled ? "checked" : string.Empty) />
+                        <label for="restrict-embed-enabled" class="label-primary"></label>
+                    </div>
+                    <div class="app-textbox-label inline-align activation">
+                        [[[Enable embed authentication]]]
+                    </div>
+                    <div class="embed-loader inline-align">
+                        <span class="loader-align"></span>
+                    </div>
+                </div>
+
+                <form action="@Url.Action("PostEmbedSettings", "Administration")" method="post" onsubmit="" enctype="multipart/form-data">
+                    <div class="col-xs-12 no-padding import-file">
+                        <label class="app-textbox-label activation embed-enabled">
+                            [[[Embed Configuration]]]
+                        </label>
+                        <div class="no-padding">
+                            <div class="upload-box">
+                                <input type="text" class="form-control col-md-6 no-margin @(embedEnabled ? string.Empty : "disabled")" onfocus="this.blur()" id="filename" value="@fileName" readonly>
+                                <span id="trigger-file" class="input-group-addon btn popup no-left-border @(embedEnabled ? string.Empty : "disabled")">
+                                    ...
+                                </span>
+                                <input type="file" accept=".json" name="csfile" id="csfile" class="btn popup upload-btn">
+                            </div>
+                            <input type="submit" class="primary-button" title="[[[Upload Embed Configuration File here]]]" id="cs-upload" disabled="" value="[[[Upload]]]" />
+
+                            <p>
+                                <a href="@Url.Action("DownloadTemplate", "Administration")" class="download-template" title="[[[Download sample template]]]" style="@showDownloadLink">[[[Download Template]]]</a>
+                                @if (ViewBag.result.ToLower() == "error")
+                                {
+                                    <span id="import-validation-msg">[[[Please upload a valid json file.]]]</span>
+                                }
+                                else if (ViewBag.result.ToLower() == "invalid")
+                                {
+                                    <span id="import-validation-msg">[[[Please select a json file with a valid format]]]</span>
+                                }
+                                else if (fileName.ToLower() == "success")
+                                {
+                                    <span id=""></span>
+                                }
+                            </p>
+                        </div>
+
+                    </div>
+                </form>
+                <div id="get-secret-code" class="col-xs-12 no-padding input-field-margin">
+                    <label class="app-textbox-label activation">
+                        [[[Embed secret]]]
+                    </label>
+                    <div class="secret-code-container">
+                        <div id="secret-code-link">
+                            <input type="text" id="secret-code" name="" class="form-control" placeholder="[[[Embed secret]]]" autocomplete="off" disabled="disabled" onClick="this.setSelectionRange(0, this.value.length)">
+                            <div class="form-control su su-copy text focus" id="secret-code-copy" disabled="disabled" data-original-title="[[[Click to copy]]]"></div>
+                        </div>
+                        <button type="button" title="" id="get-embed-code" onclick="getEmbedSecret();" class="primary-button" @(embedEnabled ? string.Empty : "disabled")>
+                            @if (string.IsNullOrWhiteSpace(embedSecretCode))
+                            {
+                                @generateSecret;
+                            }
+                            else
+                            {
+                                @resetSecret;
+                            }
+                        </button>
+                        <div class="info-message">[[[Anyone with access to the secret key can impersonate and create a URL to access the dashboard. So, keep the embed authentication disabled when not in use.]]]</div>
+                        <div class="bg-warning secret-code-notification">
+                            [[[Store the secret key somewhere safe. As soon as you navigate away from this page, you will not be able to retrieve or restore the generated secret key.]]]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+
+    @if (!ViewBag.Embed)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

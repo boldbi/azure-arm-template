@@ -1,0 +1,88 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("../Shared/_FontReference")
+    <link rel="stylesheet" href="~/bundles/css/iframe.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/bundles/css/addgroup.css" asp-append-version="true" />
+    <script>
+        var checkGroupnameUrl = "@Url.Action("CheckGroupname", "group")";
+        var addGroupUrl = "@Url.Action("AddGroup", "group")";
+        var deleteGroupViewUrl = "@Url.Action("DeleteGroupView", "group")";
+        var addGroupViewUrl = "@Url.Action("AddGroupView", "group")";
+        var deleteGroupUrl = "@Url.Action("DeleteGroup", "group")";
+        var groupPageUrl = "@Url.Action("group", "group")";
+    </script>
+    <script src="~/bundles/js/addgroup.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            if (($(parent.window).width()) > 1400) {
+                $("#resolution-fix").addClass("lg-flexible-creategroup");
+            } else {
+                $("#resolution-fix").removeClass("lg-flexible-creategroup");
+            }
+            parent.$("#new-group-area_wrapper").ejWaitingPopup("hide");
+            $(document).on("click",
+                ".close-dialog",
+                function (e) {
+                    eDialog = parent.$("#new-group-area").data("ejDialog");
+                    eDialog.close();
+                    parent.$("#new-group-area iframe").attr("src", "");
+                });
+        });
+
+    </script>
+</head>
+<body class="white-bg" id="resolution-fix">
+    <form class="col-lg-12 no-padding group-form" id="popup-container" autocomplete="off">
+        <div class="col-md-12 header-menu pull-left no-margin">
+            <div class="col-xs-6 no-padding">
+                <span class="su su-group-1 head-icon"></span>
+                <span class="popup-title no-padding">[[[Add Group]]]</span>
+            </div>
+            <div class="col-xs-6 no-padding">
+                <a href="javascript:void(0);" class="popup-close close-dialog pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="[[[Close]]]">
+                    <span class="su su-close pull-right"></span>
+                </a>
+                <div id="folder-setting-arrow" class="down-arrow"></div>
+            </div>
+        </div>
+
+        <div class="dialog-body col-xs-12 no-padding">
+            <div class="col-xs-12 namepad">
+                <div class="col-xs-3 text-right no-padding top-margin">[[[Name]]]<span class="mandatory">*</span></div>
+                <div class="col-xs-1"></div>
+                <div class="col-xs-8 grouppad" id="group-name">
+                    <input type="text" id="GroupName" class="form-control has-error" placeholder="Group name" name="groupname" tabindex="1" maxlength="60" autofocus>
+                    <span id="invalid-groupname" class="error-message pull-left" title="Please enter group name" data-content=""></span>
+                </div>
+            </div>
+            <div class="col-xs-12 namepad">
+                <div class="col-xs-3 text-right no-padding top-margin">[[[Description]]]</div>
+                <div class="col-xs-1"></div>
+                <div class="col-xs-8 grouppad">
+                    <textarea class="form-control has-error" maxlength="1024" id="group-description" tabindex="2"></textarea>
+                    <div class="help-text">
+                        *[[[1024 characters maximum]]]
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 dialog-footer text-right dialog-footer-fixed">
+            <div class="col-xs-6">
+                <div class="col-md-12 success-message pull-left no-padding"></div>
+            </div>
+            <div class="col-xs-6 no-padding text-right">
+                <input type="button" id="add-group" class="primary-button" value="[[[Add]]]" tabindex="3" />
+                <input type="button" id="cancel-group" class="secondary-button pull-right text-right close-dialog" value="[[[Cancel]]]" tabindex="4" />
+            </div>
+        </div>
+    </form>
+</body>
+</html>

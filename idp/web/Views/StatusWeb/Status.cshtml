@@ -1,0 +1,75 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@model List<AppHealthCheck>
+
+@{
+    Layout = null;
+    var headerLogo = (ViewBag.LoginLogo != null) ? ViewBag.LoginLogo : CloudAppConfig.FallbackLoginLogoUrl;
+    var apprunning = Model.TrueForAll(s => s.IsRunning);
+    var tenantmanagementurl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.TrimEnd('/') + "/ums/startup";
+    var querystringerror = @Context.Request.Query["error"];
+}
+@await Html.PartialAsync("../Shared/_FontReference")
+<html>
+<head>
+    <title>Application Healthcheck</title>
+    <link rel="stylesheet" href="~/bundles/css/statushealthcheck.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="container">
+        <div class="image">
+            <img alt="[[[Login Logo]]]" src="@headerLogo" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" />
+        </div>
+        <div>
+
+            @if (apprunning)
+            {
+                <h3 class="status-header status-success"> All services are up and running</h3>
+            }
+            else
+            {
+
+                <h3 class="status-header status-warning">
+                    <span>One or more services are down.</span>
+                    @if (querystringerror == "startup")
+                    {
+                        <span>  Please resolve the issues and retry the <a href=@tenantmanagementurl>application startup.</a></span>
+                    }
+                </h3>
+            }
+
+        </div>
+
+        <div class="border">
+            <table class="table">
+                <tbody class="tbody">
+
+                    @foreach (var platform in Model)
+                    {
+                        <tr class="row">
+                            <td>
+                                <p class="left">  @platform.ApplicationName </p>
+
+                                <p class="right">
+
+                                    @if (platform.IsRunning)
+                                    {
+                                        <span style="color:forestgreen">Online</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:red">Down</span>
+                                    }
+                                </p>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</body>
+</html>

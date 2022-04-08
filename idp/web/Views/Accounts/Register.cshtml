@@ -1,0 +1,79 @@
+﻿@model Syncfusion.Server.IdentityProvider.ViewModels.UserRegister
+@using Syncfusion.Server.Base.Helpers;
+@using Syncfusion.Server.Base;
+@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    var headerLogo = (ViewBag.LoginLogo != null) ? ViewBag.LoginLogo : CloudAppConfig.BoldIdHeaderLogo;
+    var passwordRules = "<ul class='text-body' id='password_policy_rules'><li id='p_policy_length'><span class = 'icon'></span><span class='content'>6 characters</span></li><li id='p_policy_uppercase'><span class = 'icon'></span><span class='content'>1 Uppercase letter</span></li><li id='p_policy_lowercase'><span class = 'icon'></span><span class='content'>1 Lowercase letter</span></li><li id='p_policy_number'><span class = 'icon'></span><span class='content'>1 Number</span></li><li id='p_policy_specialcharacter'><span class = 'icon'></span><span class='content'>1 Special character</span></li></ul>";
+    ViewBag.Title = "Create Free Account | Bold ID";
+}
+
+@section scripts{
+    <script src="~/bundles/js/accounts-signup-registration.js" asp-append-version="true"></script>
+
+    <script>
+        var signUpUrl = "@Url.Action("Register","Accounts")";
+        var passwordRegex = @ValidationHelpers.PasswordRegex;
+    </script>
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/bundles/css/accounts-register.css" asp-append-version="true"/>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+
+    <div class="sign-up-container">
+        <div class="sign-up-page">
+            <form method="post" id="sign-up-form" action="/accounts/register" autocomplete="off">
+                @Html.AntiForgeryToken()
+
+                <div class="form-content">
+                    <h2 class="sign-up-details">Create Free Account</h2>
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="input-elements name-input-place">
+                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control name-input first-name", id = "form-first-name", PlaceHolder = "First name" } })
+                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger error valid-name", id = "form-first-name-error" })
+                    </div>
+                    <div class="input-elements name-input-place">
+                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control name-input last-name", id = "form-last-name", PlaceHolder = "Last name" } })
+                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger error valid-name", id = "form-last-name-error" })
+                    </div>
+                    <div class="input-elements">
+                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", id = "form-email", PlaceHolder = "Business email address" } })
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger error", id = "form-email-error" })
+                    </div>
+                    <div class="input-elements">
+                        @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control change-password-form", id = "register-password", name = "password", type = "password", PlaceHolder = "Password", data_container = "#sign-up-form", data_toggle = "popover", data_title = "Password must contain", data_trigger = "focus", data_html = "true", data_content = @passwordRules } })
+
+                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger error", id = "register-password-error" })
+                        <span class="su su-eye show-hide-password"></span>
+                    </div>
+                    <div class="input-elements">
+                        @Html.EditorFor(model => model.Company, new { htmlAttributes = new { @class = "form-control", id = "form-company-name", PlaceHolder = "Company name" } })
+                        @Html.ValidationMessageFor(model => model.Company, "", new { @class = "text-danger error", id = "form-company-name-error" })
+                    </div>
+                    <div class="input-elements">
+                        @Html.EditorFor(model => model.Contact, new { htmlAttributes = new { @class = "form-control", id = "form-phone", PlaceHolder = "Phone number" } })
+                        @Html.ValidationMessageFor(model => model.Contact, "", new { @class = "text-danger error", id = "form-phone-error" })
+                    </div>
+                    <div class="condition-checkbox-div">
+                        <div class="material-checkbox">
+                            @Html.CheckBoxFor(model => model.Privacy, new { @class = "material-checkbox", id = "input-register" })
+                            <label for="input-register" class="toggle-space">
+                                <span class="condition-links">
+                                    I have read and agree to Syncfusion's <a href="https://www.boldbi.com/privacy">privacy policy</a>, <a href="https://www.boldbi.com/cookie-policy">cookie policy </a> and Bold BI's<a href="https://www.boldbi.com/terms-of-use"> terms of use</a>.
+                                    <a href="#accounts" style="padding-right: 5px;" data-toggle="popover" data-placement="right" data-container="body" data-trigger="focus" data-content="I understand I will receive transactional emails relating to my account, including invoices, and documentation." data-original-title="" title="" id="read-more-privacy">Read More</a>
+                                </span>
+                            </label>
+                            @Html.ValidationMessageFor(model => model.Privacy, "", new { @class = "text-danger error", id = "input-register-error" })
+                        </div>
+
+                    </div>
+                    <input type="submit" value="Register" id="register-button" class="btn default-btn submit" disabled />
+                </div>
+            </form>
+        </div>
+    </div>
+}

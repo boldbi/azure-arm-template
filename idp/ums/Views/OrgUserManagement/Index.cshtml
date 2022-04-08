@@ -1,0 +1,331 @@
+﻿@{
+    var idPUrl = GlobalAppSettings.Configuration.GetSection("AppSettings")["IdPUrl"];
+    ViewBag.Title = "Organization | Users List | Bold IAM";
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-management-module.css" asp-append-version="true"/>
+
+}
+
+@section scripts{
+    <script src="~/bundles/js/user-management.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/localizationcontent.js" asp-append-version="true"></script>
+
+    <script>
+        var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+        var postactionUrl = "@Url.Action("OrgUserPostAction", "OrgUserManagement")";
+        var isPresentEmailId = "@Url.Action("IsEmailExistInOrg", "OrgUserManagement")";
+        var updateUserIntoGroupUrl = "@Url.Action("UpdateUserIntoGroup", "OrgGroup")";
+        var checkGroupnameUrl = "@Url.Action("CheckGroupName", "OrgGroup")";
+        var getAddUserInGroupDialogUrl = "@Url.Action("GetAddUserInGroupDialog", "OrgUserManagement")";
+        var saveUserIntoGroupUrl = "@Url.Action("SaveUserIntoGroup", "OrgGroup")";
+        var avatarUrl = "@(idPUrl + Url.Action("Avatar", "User"))";
+        var getAllActiveGroupListUrl = "@Url.Action("GetAllActiveGroupList", "OrgGroup")";
+        var deleteFromUserListUrl = "@Url.Action("RemoveMultipleUserAccess", "OrgUserManagement")";
+        var userPageUrl = "@Url.Action("Index", "OrgUserManagement")";
+        var deleteSingleFromUserListUrl = "@Url.Action("RemoveSingleUserAccess", "OrgUserManagement")";
+
+
+    </script>
+    <script>
+        window.data = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.users)));
+    </script>
+    <script type="text/javascript">
+        function selectItems(e) {
+            var parentRow = $(e.event.currentTarget.parentNode).parents(".user-row-details");
+            $(parentRow).hasClass('user-table-row-selected')
+                ? $(parentRow).removeClass('user-table-row-selected')
+                : $(parentRow).addClass("user-table-row-selected");
+            ($(".grid-view-table").find(".user-table-row-selected").length > 0)
+                ? $("#add-user-in-group").fadeIn("slow")
+                : $("#add-user-in-group").fadeOut("slow");
+        }
+
+    </script>
+
+    <script type="text/x-jsrender" id="user-profile-template">
+        <a class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip" href="@Url.Action("Index", "OrgUserManagement")/{{:UserId}}">{{:DisplayName}}</a>
+
+        {{if DirectoryTypeId == @((int)DirectoryType.AzureAD)}}
+        <span class="su su-azure-ad grid-directory-icon"> </span>
+        {{else DirectoryTypeId == @((int)DirectoryType.ExternalDatabase)}}
+        <span class="su su-datasource grid-directory-icon"> </span>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="user-email-template">
+        <span class="grid-content" title="{{:Email}}" data-toggle="tooltip">{{:Email}}</span>
+    </script>
+    <script type="text/x-jsrender" id="status-description-template">
+        {{if IsActive}}
+        Active
+        {{else}}
+        Inactive
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="email-verification-template">
+        {{if EmailVerified}}
+        Completed
+        {{else}}
+        Pending
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="itemname-header">
+        <div class="item-name">Name</div>
+    </script>
+    <script type="text/x-jsrender" id="email-header">
+        <div class="item-header">Email Address</div>
+    </script>
+    <script type="text/x-jsrender" id="status-header">
+        <div class="item-header">Status</div>
+    </script>
+    <script type="text/x-jsrender" id="email-verification-header">
+        <div class="item-header">Email Verification</div>
+    </script>
+    <script type="text/x-jsrender" id="options">
+        <div class="user-hover-options" data-content="{{:Email}}">
+            @*<a href="@Url.Action("userpermission", "permission")?userId={{:UserId}}" title="Manage Permissions" data-toggle="tooltip">
+                    <i class="su su-manage-permission"></i>
+                </a>*@
+            <a href="@Url.Action("Index", "OrgUserManagement")/{{:UserId}}" title="View" data-toggle="tooltip">
+                <i class="su su-show"></i>
+            </a>
+            {{if Email == "@ViewBag.LoggedUser"}}
+            <a href="javascript:void(0);" title="It's You" data-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
+                <i class="su su-delete disabled-icon-color"></i>
+            </a>
+            {{else}}
+            <a class="delete-class" href="javascript:void(0);" title="Remove" data-toggle="tooltip" data-email="{{:Email}}" data-content="{{:UserId}}">
+                <i class="su su-delete"></i>
+            </a>
+            {{/if}}
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#search-users").val("");
+            var data = ej.DataManager({
+                url: "@Url.Action("GetAllUserListInOrg", "OrgUserManagement")",
+                adaptor: new ej.UrlAdaptor()
+            });
+
+            $("#user_grid").ejGrid({
+                dataSource: data,
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                allowSorting: true,
+                allowSearching: true,
+                allowSelection: true,
+                allowFiltering: true,
+                pageSettings: { pageSize: 20 },
+                filterSettings: { filterType: "menu" },
+                selectionType: ej.Grid.SelectionType.Multiple,
+                selectionSettings: { selectionMode: ["row"] },
+                enableRowHover: true,
+                enableAltRow: false,
+                rowDataBound: function () {
+                    var height = $(".e-gridcontent").height();
+                    if (height != null) {
+                        rowBound();
+                    }
+                },
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                rowSelecting: function (e) {
+                    this.multiSelectCtrlRequest = true;
+                },
+                rowSelected: "fnUserRowSelected",
+                recordClick: "fnUserRecordClick",
+                load: "fnOnUserGridLoad",
+                actionBegin: "fnOnUserGridActionBegin",
+                actionComplete: "fnOnUserGridActionComplete",
+                columns: [
+                    {
+                        template: true,
+                        allowSorting: true,
+                        templateID: "#user-profile-template",
+                        headerText: "Name",
+                        width: 115,
+                        headerTemplateID: "#itemname-header",
+                        field: "DisplayName",
+                        type: "string"
+                    },
+                    {
+                        field: "Email",
+                        templateID: "#user-email-template",
+                        headerText: "Email Address",
+                        headerTemplateID: "#email-header",
+                        type: "string",
+                        width: 155
+                    },
+                    {
+                        field: "StatusDescription",
+                        headerText: "Status",
+                        headerTemplateID: "#status-header",
+                        templateID: "#status-description-template",
+                        width: 80,
+                        allowFiltering: false
+                    },
+                    {
+                        field: "EmailVerified",
+                        headerText: "Email Verification",
+                        headerTemplateID: "#email-verification-header",
+                        templateID: "#email-verification-template",
+                        width: 80,
+                        allowFiltering: false
+                    },
+                    {
+                        template: true,
+                        allowSorting: false,
+                        headerText: "Actions",
+                        templateID: "#options",
+                        width: 75,
+                        allowFiltering: false
+                    }
+                ]
+
+            });
+        });
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_UserMenu")
+    <div id="base-container" class="col-xs-12 admin-page-container ">
+        <div class="col-lg-12 admin-page-header">
+            <div class="col-xs-12 no-padding" id="user-title">
+                <h1 class="pull-left col-lg-6 no-padding page-title">
+                    <input type="hidden" id="user-count-text" value="@ViewBag.UserCount">
+                    USERS (<span id="user-count" value="@ViewBag.UserCount">@ViewBag.UserCount</span>)
+                </h1>
+
+                <ul class="pull-right col-lg-6 no-margin no-padding" id="user-management-option">
+                    <li class="dropdown no-padding">
+                        @if (DeviceDetection.IsMobile)
+                        {
+                            <button class="primary-button" id="new-user-dropdown" title="Add new user" data-toggle="tooltip" onclick="onUserAddDialogOpen()">
+                                New User
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="dropdown-toggle primary-button" data-toggle="dropdown" id="new-user-dropdown" title="Add new user">
+                                <span>New User </span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu add-user-dropdown multi-level" role="menu" id="dropdown-options">
+                                <li id="create-user" title="Add new user" onclick="onUserAddDialogOpen()">
+                                    <a href="javascript:void(0)" title="Add user" data-toggle="tooltip" data-placement="top">
+                                        <i class="su su-user-add"> </i>
+                                        <span>Add User</span>
+                                    </a>
+                                </li>
+                                @*<li>
+                                        <a href="@Url.Action("UploadFileFormAction", "OrgUserManagement")" title="Import users from CSV" data-toggle="tooltip" data-placement="top">
+                                            <i class="su su-download"> </i>
+                                            <span>Import from CSV</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-toggle" href="@Url.Action("azureaduserimport", "OrgUserManagement")" title="Import users from Azure AD" data-toggle="tooltip" data-placement="top">
+                                            <i class="su su-azure-ad"> </i>
+                                            <span>Import from Azure AD</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-toggle" href="@Url.Action("GetUserDataForImportFromDatabase", "OrgUserManagement")" title="Import users from Database" data-toggle="tooltip" data-placement="top">
+                                            <i class="su su-datasource"> </i>
+                                            <span>Import from Database</span>
+                                        </a>
+                                    </li>*@
+                            </ul>
+                        }
+                    </li>
+
+                    @if ((ViewBag.ActiveDirectory != null && ViewBag.AzureAD != null) || (ViewBag.ActiveDirectory != null && ViewBag.CustomDatabaseUserCount != null) || (ViewBag.AzureAD != null && ViewBag.CustomDatabaseUserCount != null))
+                    {
+                        <li class="dropdown no-padding">
+                            <button class="dropdown-toggle primary-button" data-toggle="dropdown" id="synchronize-dropdown" title="Synchronize Users">
+                                <span>Synchronize </span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu sync-user-dropdown multi-level" role="menu" id="dropdown-options">
+                                @if (ViewBag.AzureAD != null)
+                                {
+                                    <li>
+                                        <a class="dropdown-toggle" href="@Url.Action("SynchronizeAzureUsers", "OrgUserManagement")" data-toggle="tooltip" data-placement="left" title="Synchronize users with Azure AD">
+                                            <i class="su su-azure-ad"> </i>
+                                            <span>Azure AD Synchronization</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (ViewBag.CustomDatabaseUserCount != null)
+                                {
+                                    <li>
+                                        <a class="dropdown-toggle" href="@Url.Action("SynchronizeCustomDatabaseUsers", "OrgUserManagement")" data-toggle="tooltip" data-placement="left" title="Synchronize users with Custom Database">
+                                            <i class="su su-datasource"> </i>
+                                            <span>Database Synchronization</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+
+                    }
+                    else
+                    {
+                        if (ViewBag.ActiveDirectory != null)
+                        {
+                            <li>
+                                <a href="@Url.Action("SynchronizeUsers", "OrgUserManagement")" class="link-button synchronize-users" title="Synchronize users with Active Directory" data-toggle="tooltip" data-placement="left">Active Directory Synchronization</a>
+                            </li>
+                        }
+                        if (ViewBag.AzureAD != null)
+                        {
+                            <li>
+                                <a href="@Url.Action("SynchronizeAzureUsers", "OrgUserManagement")" class="link-button synchronize-azure-users" title="Synchronize users with Azure AD" data-toggle="tooltip" data-placement="left">Azure AD Synchronization</a>
+                            </li>
+                        }
+                        if (ViewBag.CustomDatabaseUserCount != null)
+                        {
+                            <li>
+                                <a href="@Url.Action("SynchronizeCustomDatabaseUsers", "OrgUserManagement")" class="link-button synchronize-database-users" title="Synchronize users with Custom Database" data-toggle="tooltip" data-placement="left">Database Synchronization</a>
+                            </li>
+                        }
+                    }
+                    <li class="flying-add hide" id="add-user-in-group">
+                        <button class="critical-action-button user-delete-button" title="Remove selected users" data-toggle="tooltip" data-log-user="@ViewBag.LoggedUser" id="delete-user">Remove User</button>
+                        <button class="secondary-button user-add-group" title="Assign a group to selected users" data-toggle="tooltip">Assign Group</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="user-list-container" class="list col-xs-12 admin-page-body">
+            <div id="search-area" class="pull-right">
+                <input type="text" class="pull-left" id="search-users" placeholder="Search users" />
+                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="Clear search"></span>
+                <span class="su su-search search-user pull-left" title="Search"></span>
+            </div>
+            <div class="col-xs-12 no-padding ">
+                <div id="user_grid">
+                </div>
+            </div>
+
+            @if (ViewBag.AzureADUserCount > 0)
+            {
+                <div id="azure-ad-indication" class="ad-azure-indication col-lg-12"><span class="su su-azure-ad"> </span> - Azure AD User</div>
+            }
+            @if (ViewBag.DatabaseUserCount > 0)
+            {
+                <div id="database-indication" class="ad-azure-indication col-lg-12"><span class="su su-datasource"> </span> - Database User</div>
+            }
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_UserAddDialog")
+    @await Html.PartialAsync("_MultipleUserDeleteDialog")
+    @await Html.PartialAsync("_SingleUserDeleteDialog")
+}

@@ -1,0 +1,68 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("../Shared/_FontReference")
+    <link rel="stylesheet" href="~/bundles/css/deleteconfirm.css" asp-append-version="true" />
+
+    <script>
+        var deleteGroupUrl = "@Url.Action("DeleteGroup", "orggroup")";
+        var groupPageUrl = "@Url.Action("group", "orggroup")";
+    </script>
+    <script src="~/bundles/js/deleteconfirm.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            if (($(parent.window).width()) > 1400) {
+                $("#delete-resolution-fix").addClass("lg-flexible-deletegroup");
+            }
+            var eDialog = parent.$("#delete-group-area").data("ejDialog");
+            parent.$("#delete-group-area_wrapper").ejWaitingPopup("hide");
+            $(document).on("click",
+                ".popup-close",
+                function (e) {
+                    eDialog.close();
+                    parent.$("#delete-group-area iframe").attr("src", "");
+                });
+        });
+    </script>
+</head>
+<body id="delete-resolution-fix">
+<div id="group-delete-confirmation" class="no-padding">
+    <div class="col-md-12 error-message pull-left no-padding">@TempData["ErrorMessage"]</div>
+    <div class="col-md-12 success-message pull-left no-padding"></div>
+    <div class="modal-content col-xs-12 no-padding" id="container">
+        <div class="col-md-12 modal-header">
+            <div class="col-xs-8 no-padding">
+                <span class="su su-delete head-icon"></span>
+                <span class="modal-title">Delete Group</span>
+            </div>
+            <div class="col-xs-4 no-padding">
+                <a href="javascript:void(0);" class="popup-close  pull-right">
+                    <span class="su su-close"></span>
+                </a>
+            </div>
+        </div>
+        <div class="modal-body col-xs-12 no-padding">
+            <div class="col-xs-12 no-left-padding no-bottom-padding no-right-padding">
+                <div class="delete-msg">Are you sure you want to delete the group &mdash; <span class="highlight-name">@Context.Request.Form["name"]</span> ?</div>
+            </div>
+        </div>
+        <div class="col-xs-12 modal-footer">
+            <div class="col-xs-4">
+                <input type="hidden" id="hidden-id" value="@ViewBag.id"/>
+            </div>
+            <div class="col-xs-8 no-padding pull-right margin-top">
+                <input type="button" id="delete-group" class="critical-action-button margin-right" value="Yes"/>
+                <input type="button" id="cancel-group" class="secondary-button popup-close" value="No"/>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
