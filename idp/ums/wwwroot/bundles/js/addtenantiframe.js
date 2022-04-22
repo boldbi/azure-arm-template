@@ -3533,7 +3533,7 @@ $(document).ready(function () {
             tenantidentifier: {
                 required: true,
                 isValidIdentifier: true,
-                maxlength: 32
+                maxlength: 64
             },
             domainname: {
                 isDomainRequired: true,
