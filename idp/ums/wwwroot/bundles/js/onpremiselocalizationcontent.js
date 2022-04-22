@@ -156,7 +156,7 @@ var TM = {
             //SysetmSettings.js
             SelectDatabase: "[[[Select a database]]]",
             SiteValidation: "[[[Site name is too long. Must be fewer than 255 characters.]]]",
-            SiteIdentifierValidation: "[[[Site identifier is too long. Must be fewer than 32 characters.]]]",
+            SiteIdentifierValidation: "[[[Site identifier is too long. Must be fewer than 64 characters.]]]",
             YourSite: "[[[Step 2: Let’s configure the database]]]",
             YourSite2: "[[[This is where we store user identities and ]]]",
             YourSite3: " [[[sites.]]]",
