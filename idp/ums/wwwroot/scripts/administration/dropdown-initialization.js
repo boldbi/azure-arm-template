@@ -1,13 +1,22 @@
-﻿function dropDownListInitialization(id, placeHolder) {
+﻿function dropDownListInitialization(id, placeHolder, allowFilter, data) {
     var dropDownList = new ejs.dropdowns.DropDownList({
         index: 0,
         floatLabelType: "Never",
         placeholder: placeHolder,
         cssClass: 'e-outline e-custom e-non-float',
-        enablePersistence: true
+        enablePersistence: true,
+        change: onDropDownListChange,
+        query: new ej.data.Query(),
+        allowFiltering: allowFilter,
+        filterType: "Contains"
     });
 
     dropDownList.appendTo(id);
+}
+
+function onDropDownListChange(args) {
+    if (args.element.id == 'enable-ssl')
+        onBaseUrlChange(args);
 }
 
 function groupImportDropDownListInitialization(id, placeHolder) {

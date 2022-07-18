@@ -13,7 +13,7 @@
 
     var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
 
-    var userId = Context != null && Context.User != null && Context.Request.IsHttps /*&& !(Context.User is RolePrincipal)*/ ? Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value) : Guid.Empty;
+    var userId = Context != null && Context.User != null && Context.Request.IsHttps ? Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value) : Guid.Empty;
 
     var isWelcomePage = ViewBag.IsWelcomePage != null && ViewBag.IsWelcomePage;
     var headerTitle = ViewBag.HeaderTitle != null ? ViewBag.HeaderTitle : GlobalAppSettings.SystemSettings.OrganizationName;
@@ -27,6 +27,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     <partial name="_OGPContent" />
     @RenderSection("meta", false)
+    @await Html.PartialAsync("_PasswordPolicyRules")
     <title>
         @ViewBag.Title
     </title>
@@ -123,6 +124,108 @@
 
     <script src="~/bundles/js/layout.js" asp-append-version="true"></script>
     <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+</head>
+<body ng-app="serverApp" class="clearfix" id="body" style="background-image: url('@GlobalAppSettings.SystemSettings.CDNLink/images/common/waitingpopup.gif');background-color: #fff; background-repeat: no-repeat; background-position: center center;">
+    <div id="server-app-container" style="opacity: 0">
+        @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+        <section id="header-area" class="mobile-visible">
+            <div class="header-bar col-lg-12 col-md-12 col-sm-12">
+                @if (!isWelcomePage)
+                {
+                    <div class="mobile-menu-icon text-center mobile-visible collapsed" data-toggle="collapse" aria-expanded="false" data-target="#menu-area">
+                        <span>
+                            <i class="su su-mobile-menu-icon"></i>
+                        </span>
+                    </div>
+                }
+                <div class="org-name-wrapper">
+                    <h5 class="header-org-name">@headerTitle</h5>
+                </div>
+
+                <div class="pull-right" id="notification-section">
+                    <a id="notification-link" class="notification-mobile-link no-padding" href="@Url.Action("getusernotifications", "notification")">
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section id="menu-area" class="collapse">
+
+            @if (DeviceDetection.IsMobile)
+            {
+                if (requestUrl == "/user/profile" || requestUrl == "/profile/change-password")
+                {
+                    @await Html.PartialAsync("../Shared/_ProfileMenu")
+                }
+            }
+            else
+            {
+                @await Html.PartialAsync("../Shared/_Menu")
+            }
+
+        </section>
+        <div id="content-area" class="clearfix">
+            @RenderSection("MainSection", true)
+            <div id="success-alert">
+                <div id="image-container">
+                    <div class="image-holder">
+                        <span class="su su-tick" alt="[[[Success Icon]]]"></span>
+                    </div>
+                </div>
+                <div id="message">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+            </div>
+            <div id="warning-alert">
+                <div id="image-container">
+                    <span class="su su-warning-alt" alt="[[[Warning Icon]]]"></span>
+                </div>
+                <div id="message" class="div-close">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+                <div class="close-div">
+                    <span id="close-content">[[[Close]]]</span>
+                </div>
+            </div>
+        </div>
+
+        @if (includeMessageBox)
+        {
+            <div id="messageBox">
+                <div class="message-box-close"></div>
+                <div class="message-content text-center"></div>
+            </div>
+        }
+    </div>
+
+    <div class="page-additional-navigation">
+        <input id="userName" type="hidden" @*value="@userId"*@ />
+        <input id="BaseUrlHidden" type="hidden" value="/" />
+        <input id="baseurl" name="baseurl" type="hidden" value="" />
+        <input id="DateFormat" name="DateFormat" type="hidden" value="@dateFormat" />
+    </div>
+    <div id="alert-notification">
+    </div>
+
+    <div id="mobile-menu" style="display: none">
+        <input type="hidden" class="page-name" id="page" data-content="" />
+
+        <div id="menu-list">
+        </div>
+
+        <div id="notification" class="pull-right hidden">
+            <div id="notification_area_link">
+                <a href="@Url.Action("getusernotifications", "notification")">
+                    <span id="notification_area_icon" class="su su-notification-alert pull-left">
+                    </span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    @RenderSection("scripts", false)
 
     @if (DeviceDetection.IsMobile)
     {
@@ -156,9 +259,6 @@
 
         </script>
     }
-
-    @RenderSection("scripts", false)
-
     @if (includeMessageBox)
     {
         <script>
@@ -178,148 +278,5 @@
             });
         </script>
     }
-
-</head>
-<body ng-app="serverApp" class="clearfix" id="body" style="background-image: url('@GlobalAppSettings.SystemSettings.CDNLink/images/common/waitingpopup.gif');background-color: #fff; background-repeat: no-repeat; background-position: center center;">
-    <div id="server-app-container" style="opacity: 0">
-        @if (CloudAppConfig.IsSelfHosted)
-        {
-        @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
-        <section id="header-area" class="mobile-visible">
-            <div class="header-bar col-lg-12 col-md-12 col-sm-12">
-                @if (!isWelcomePage)
-                    {
-                <div class="mobile-menu-icon text-center mobile-visible collapsed" data-toggle="collapse" aria-expanded="false" data-target="#menu-area">
-                    <span>
-                        <i class="su su-mobile-menu-icon"></i>
-                    </span>
-                </div>}
-                <div class="org-name-wrapper">
-                    <h5 class="header-org-name">@headerTitle</h5>
-                </div>
-
-                <div class="pull-right" id="notification-section">
-                    <a id="notification-link" class="notification-mobile-link no-padding" href="@Url.Action("getusernotifications", "notification")">
-                    </a>
-                </div>
-            </div>
-        </section>
-        <section id="menu-area" class="collapse">
-
-            @if (DeviceDetection.IsMobile)
-                {
-                    if (requestUrl == "/user/profile" || requestUrl == "/profile/change-password")
-                    {
-            @await Html.PartialAsync("../Shared/_ProfileMenu")
-                    }
-                }
-                else
-                {@await Html.PartialAsync("../Shared/_Menu")}
-
-        </section>
-        <div id="content-area" class="clearfix">
-            @RenderSection("MainSection", true)
-            <div id="success-alert">
-                <div id="image-container">
-                    <div class="image-holder">
-                        <span class="su su-tick" alt="[[[Success Icon]]]"></span>
-                    </div>
-                </div>
-                <div id="message">
-                    <h1 id="message-header"></h1>
-                    <span id="message-content"></span>
-                </div>
-            </div>
-            <div id="warning-alert">
-                <div id="image-container">
-                    <span class="su su-warning-alt" alt="[[[Warning Icon]]]"></span>
-                </div>
-                <div id="message" class="div-close">
-                    <h1 id="message-header"></h1>
-                    <span id="message-content"></span>
-                </div>
-                <div class="close-div">
-                    <span id="close-content">[[[Close]]]</span>
-                </div>
-            </div>
-        </div>
-        }
-        else
-        {
-        @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
-        <section id="header-area">
-            @await Html.PartialAsync("~/Shared/_Header.cshtml")
-        </section>
-        <div id="content-area" class="clearfix">
-            @RenderSection("MainSection", true)
-            <div id="success-alert">
-                <div id="image-container">
-                    <div class="image-holder">
-                        <span class="su su-tick" alt="Success Icon"></span>
-                    </div>
-                </div>
-                <div id="message">
-                    <h1 id="message-header"></h1>
-                    <span id="message-content"></span>
-                </div>
-            </div>
-            <div id="warning-alert">
-                <div id="image-container">
-                    <span class="su su-warning-alt" alt="Warning Icon"></span>
-                </div>
-                <div id="message" class="div-close">
-                    <h1 id="message-header"></h1>
-                    <span id="message-content"></span>
-                </div>
-                <div class="close-div">
-                    <span id="close-content">Close</span>
-                </div>
-            </div>
-        </div>
-        }
-        @if (!CloudAppConfig.IsSelfHosted)
-        {
-        @await Html.PartialAsync("../Shared/_Footer")
-        }
-
-        @if (includeMessageBox)
-        {
-        <div id="messageBox">
-            <div class="message-box-close"></div>
-            <div class="message-content text-center"></div>
-        </div>
-        }
-    </div>
-
-    <div class="page-additional-navigation">
-        <input id="userName" type="hidden" @*value="@userId"*@ />
-        <input id="BaseUrlHidden" type="hidden" value="/" />
-        <input id="baseurl" name="baseurl" type="hidden" value="" />
-        <input id="DateFormat" name="DateFormat" type="hidden" value="@dateFormat" />
-    </div>
-    <div id="alert-notification">
-    </div>
-
-    <div id="mobile-menu" style="display: none">
-        <input type="hidden" class="page-name" id="page" data-content="" />
-
-        <div id="menu-list">
-        </div>
-
-        <div id="notification" class="pull-right hidden">
-            <div id="notification_area_link">
-                <a href="@Url.Action("getusernotifications", "notification")">
-                    <span id="notification_area_icon" class="su su-notification-alert pull-left">
-                        @*@if (notificationCount != 0)
-                            {
-                                <span id="notification-indicator"></span>
-                            }*@
-                    </span>
-                </a>
-            </div>
-        </div>
-
-    </div>
-
 </body>
 </html>

@@ -4,7 +4,7 @@
 @using Microsoft.Extensions.DependencyInjection;
 @using Microsoft.AspNetCore.Authentication;
 @using System.Net;
-@using Syncfusion.Server.Base.Helpers; 
+@using Syncfusion.Server.Base.Helpers;
 
 @{
     var schemes = Context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
@@ -60,26 +60,13 @@
                                 </button>
                             </form>
                         }
-                        @if (!CloudAppConfig.IsSelfHosted)
-                        {
-                            <div class="login-provider col-xs-2 syncfusion-login-option">
-                                <button type="button" data-login-url="@syncfusionLogin" class="link-button button-style btn btn-secondary" data-container="body" data-toggle="tooltip" data-placement="top" title="Syncfusion" id="syncfusion-login">
-                                    <img alt="syncfusion" src="@GlobalAppSettings.CdnDomain/static/logos/v1/@IconFileNames.Syncfusion" />
-                                </button>
-
-                                <div id="syncfusion-login-text" class="login-provider-name">Syncfusion</div>
-
-                                <div id="validate-syncfusion-user" class="error-message validation-holder">
-                                </div>
-                            </div>
-                        }
                     }
 
                     @if (showAuthLogin)
                     {
                         foreach (var auth in authSettings)
                         {
-                            if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication )
+                            if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication)
                             {
                                 <form id="login-button-windows" class="external-login-buttons">
                                     <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
@@ -92,24 +79,24 @@
 
                             if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD)
                             {
-                <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
-                    <input type="hidden" value="@ViewBag.ReturnURL" id="authReturnUrl" name="authReturnUrl" />
-                    @Html.Hidden("tenantId", auth.TenantId.ToString())
-                    @Html.Hidden("authProviderLocation", auth.AuthProviderLocation.ToString())
-                    <button id="@auth.AuthType.ToString().ToLower()-login" class="login-provider auth-login-button link-button button-style login-button-openid" type="submit">
+                                <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
+                                    <input type="hidden" value="@ViewBag.ReturnURL" id="authReturnUrl" name="authReturnUrl" />
+                                    @Html.Hidden("tenantId", auth.TenantId.ToString())
+                                    @Html.Hidden("authProviderLocation", auth.AuthProviderLocation.ToString())
+                                    <button id="@auth.AuthType.ToString().ToLower()-login" class="login-provider auth-login-button link-button button-style login-button-openid" type="submit">
 
-                        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
-                        {
-                            <img id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="[[[AuthLogo]]]" />
-                        }
-                        else
-                        {
-                            <img id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="[[[AuthLogo]]]" />
-                        }
+                                        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+                                        {
+                                            <img id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="[[[AuthLogo]]]" />
+                                        }
+                                        else
+                                        {
+                                            <img id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="[[[AuthLogo]]]" />
+                                        }
 
-                        <span class="login-provider-name">@(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
-                    </button>
-                </form>
+                                        <span class="login-provider-name">@(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
+                                    </button>
+                                </form>
                             }
                         }
                     }

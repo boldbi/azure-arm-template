@@ -416,15 +416,15 @@ CREATE TABLE [BOLDBI_AzureADCredential](
 ;
 
 CREATE TABLE [BOLDBI_ADCredential](
-[Id] [int] IDENTITY(1,1) primary key NOT NULL,
-[Username] [nvarchar](100),
-[Password] [nvarchar](100),
-[LdapUrl] [nvarchar](255),
-[EnableSsl] [bit] NOT NULL,
-[DistinguishedName] [nvarchar](150),
-[PortNo] [int] NOT NULL,
-[IsActive] [bit] NOT NULL,
-[EnableGroupUserImport] [bit] NOT NULL)
+	[Id] [int] IDENTITY(1,1) primary key NOT NULL,
+	[Username] [nvarchar](100),
+	[Password] [nvarchar](100),
+	[LdapUrl] [nvarchar](255),
+	[EnableSsl] [bit] NOT NULL,
+	[DistinguishedName] [nvarchar](150),
+	[PortNo] [int] NOT NULL,
+	[IsActive] [bit] NOT NULL,
+	[EnableGroupUserImport] [bit] NOT NULL)
 ;
 
 CREATE TABLE [BOLDBI_SAMLSettings](
@@ -814,6 +814,73 @@ CREATE TABLE [BOLDBI_EmailActivityLog](
 	[StatusMessage] [nvarchar](max) NULL,
 	[IsActive] [bit] NOT NULL)
 ;
+
+CREATE TABLE [BOLDBI_Webhook](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[Name] [nvarchar](512) NOT NULL,
+	[Description] [nvarchar](4000) NULL,
+	[Url] [nvarchar](512) NOT NULL,
+	[UserId] [int] NOT NULL,
+	[Security] [nvarchar](512) NULL,
+	[Headers] [nvarchar](max) NULL,
+	[ContentType] [int] NOT NULL,
+	[SubscribedEvent] [nvarchar](512) NOT NULL,
+	[Payload] [nvarchar](max) NULL,
+	[Failures] [int] NOT NULL,
+	[CreatedById] [int] NOT NULL,
+	[ModifiedById] [int] NOT NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+	[IsEnable] [bit] NOT NULL,
+	[IsActive] [bit] NOT NULL)
+;
+
+CREATE TABLE [BOLDBI_NotificationTrigger](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[WebhookId] [int] NOT NULL,
+	[RecurrenceInfo] [nvarchar](4000) NOT NULL,
+	[RetryCount] [int] NOT NULL,
+	[RequestData] [nvarchar](max) NULL,
+	[WebhookTargetData] [nvarchar](max) NULL,
+	[AdditionalInfo] [nvarchar](max) NULL,
+	[NextScheduleDate] [datetime] NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ReferenceId] [nvarchar](255) NULL,
+	[IsActive] [bit] NOT NULL)
+;
+
+CREATE TABLE [BOLDBI_WebhookLog](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[WebhookId] [int] NULL,
+	[Event] [nvarchar](512) NOT NULL,
+	[RequestUrl] [nvarchar](512) NULL,
+	[FailureType] [nvarchar](512) NOT NULL,
+	[ReferenceId] [nvarchar](255) NULL,
+	[ResponseMessage] [nvarchar](max) NULL,
+	[ResponseStatusCode] [nvarchar](512) NOT NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[IsActive] [bit] NOT NULL)
+;
+
+CREATE TABLE [BOLDBI_NotificationEvents](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[Name] nvarchar(100) UNIQUE NOT NULL,
+	[IsActive] [bit] NOT NULL)
+;
+
+CREATE TABLE [BOLDBI_EventPayloads](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[Name] nvarchar(100) UNIQUE NOT NULL,
+	[IsActive] [bit] NOT NULL)
+;
+
+CREATE TABLE [BOLDBI_EventPayloadsMapping](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[EventType] [int] NOT NULL,
+	[PayloadType] [int] NOT NULL,
+	[IsActive] [bit] NOT NULL)
+;
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into [BOLDBI_ItemType] (Name,IsActive) VALUES (N'Category',1)
@@ -870,6 +937,10 @@ INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Support Settings',1)
 INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Subscription',1)
 ;
 INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Payments',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Widgets',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Security',1)
 ;
 
 INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Added',1)
@@ -1649,13 +1720,74 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'EmbedSettings',N'EmbedSettings',GETDATE(),1)
 ;
 
-INSERT into [SyncDS_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.OAuth2',N'UserDirectory.OAuth2',GETDATE(),1)
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.OAuth2',N'UserDirectory.OAuth2',GETDATE(),1)
 ;
-INSERT into [SyncDS_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.OpenIDConnect',N'UserDirectory.OpenIDConnect',GETDATE(),1)
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.OpenIDConnect',N'UserDirectory.OpenIDConnect',GETDATE(),1)
 ;
-INSERT into [SyncDS_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.AuthControl',N'UserDirectory.AuthControl',GETDATE(),1)
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.AuthControl',N'UserDirectory.AuthControl',GETDATE(),1)
 ;
 
+INSERT INTO [BOLDBI_NotificationEvents] (Name, IsActive) VALUES (N'Time Drive Dashboard Export',1)
+;
+INSERT INTO [BOLDBI_NotificationEvents] (Name, IsActive) VALUES (N'Alert Drive Dashboard Export',1)
+;
+
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Schedule Name',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Schedule Id',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Dashboard Id',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Dashboard Name',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Message',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'File Content',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'File Extension',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Export Format',1)
+;
+INSERT INTO [BOLDBI_EventPayloads] (Name, IsActive) VALUES (N'Alert Info',1)
+;
+
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,1,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,2,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,3,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,4,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,5,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,6,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,7,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (1,8,1)
+;
+
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,1,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,2,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,3,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,4,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,5,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,6,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,7,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,8,1)
+;
+INSERT INTO [BOLDBI_EventPayloadsMapping] (EventType, PayloadType, IsActive) VALUES (2,9,1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Integrations',1)
+;
 ---- PASTE ALTER Queries below this section --------
 
 ALTER TABLE [BOLDBI_UserGroup]  ADD FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
@@ -1976,6 +2108,18 @@ ALTER TABLE [BOLDBI_EmailActivityLog]  ADD  FOREIGN KEY([GroupId]) REFERENCES [B
 ALTER TABLE [BOLDBI_EmailActivityLog]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_EmailActivityLog]  ADD FOREIGN KEY([CommentId]) REFERENCES [BOLDBI_Comment] ([Id])
+;
+
+ALTER TABLE [BOLDBI_WebhookLog]  ADD  FOREIGN KEY([WebhookId]) REFERENCES [BOLDBI_Webhook] ([Id])
+;
+
+ALTER TABLE [BOLDBI_EventPayloadsMapping]  ADD FOREIGN KEY([EventType]) REFERENCES [BOLDBI_NotificationEvents] ([Id])
+;
+
+ALTER TABLE [BOLDBI_EventPayloadsMapping]  ADD FOREIGN KEY([PayloadType]) REFERENCES [BOLDBI_EventPayloads] ([Id])
+;
+
+ALTER TABLE [BOLDBI_NotificationTrigger]  ADD  FOREIGN KEY([WebhookId]) REFERENCES [BOLDBI_Webhook] ([Id])
 ;
 
 CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleDetail_ScheduleId] ON [BOLDBI_ScheduleDetail]([ScheduleId]) WITH (ONLINE = ON)

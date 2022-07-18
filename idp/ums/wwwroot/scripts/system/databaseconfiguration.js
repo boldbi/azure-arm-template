@@ -263,9 +263,8 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
     removeError();
     var canProceed = $("#db-content-holder").valid();
     if (canProceed) {
-        if (typeof isDockerOrk8s != "undefined" && !isDockerOrk8s) {
-            showWaitingPopup($(".startup-waiting-popup"));
-        }
+        showWaitingPopup('startup-waiting-element');
+        $("#startup-waiting-element").find(".e-spinner-pane").css("height", $("#startup-waiting-element").height())
         $(this).prop("disabled", true);
         window.serverName = $("#txt-servername").val();
         window.portNumber = $("#txt-portnumber").val();
@@ -300,7 +299,7 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                                 isSimpleMode: isSimpleModeSelction()
                             },
                             function (result) {
-                                hideWaitingPopup($(".startup-waiting-popup"));
+                                hideWaitingPopup('startup-waiting-element');
                                 if (result.Data.key) {
                                     registration(isSimpleModeSelction());
                                 }
@@ -322,7 +321,7 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                             function (result) {
                                 var items = result.Data.value;
                                 if (result.Data.key && items.length > 0) {
-                                    hideWaitingPopup($(".startup-waiting-popup"));
+                                    hideWaitingPopup('startup-waiting-element');
                                     var html = window.TM.App.LocalizationContent.TablesAlreadyExists;
                                     html += "<ol class='list-area'>";
                                     for (var t = 0; t < items.length; t++) {
@@ -341,7 +340,7 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                                             data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: false })
                                         },
                                         function (result) {
-                                            hideWaitingPopup($(".startup-waiting-popup"));
+                                            hideWaitingPopup('startup-waiting-element');
                                             if (result.Data.key) {
                                                 registration(isSimpleModeSelction());
                                             }
@@ -356,7 +355,7 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                                     $(".db-connect-outer-container").find(".title").html(window.TM.App.LocalizationContent.DatabaseCreation + "!");
                                     $("#database-name").focus();
                                 } else {
-                                    hideWaitingPopup($(".startup-waiting-popup"));
+                                    hideWaitingPopup('startup-waiting-element');
                                     $("#db_config_generate, #db-config-submit").hide();
                                     $("#sql-existing-db-submit").show().prop("disabled", false);
                                     errorContent = result.Data.value;
@@ -369,7 +368,7 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                     $("#txt-dbname").focus();
                 }
                 else {
-                    hideWaitingPopup($(".startup-waiting-popup"));
+                    hideWaitingPopup('startup-waiting-element');
                     var id = "#txt-dbname";
                     if (isNewDatabaseTab) {
                        id = result.Data.connectionResponse.IsServerDatabaseError ? "#txt-dbname" : result.Data.connectionResponse.IsTenantServerDatabaseError ? "#server-dbname" : result.Data.connectionResponse.IsIntermediateServerDatabaseError ? "#imdbname" : id;
@@ -395,10 +394,9 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
 
 function registerApplication(isSimpleMode) {
     getFormData();
-    hideWaitingPopup($(".startup-waiting-popup"));
+    hideWaitingPopup('startup-waiting-element');
     $(".startup-waiting-popup").addClass("storage-page-content");
     var elem = $(".system-startUp-settings-bg");
-    elem.ejWaitingPopup({ text: " " });
     $(".e-text").find(".configuration-status").remove();
     $(".e-text").append('<span class="configuration-status"></span>');
     $("#progress-parent-container").show();
@@ -433,10 +431,10 @@ function registration(isSimpleMode) {
     delete window.password;
     delete window.databaseName;
     delete window.sslEnabled;
-    if (isSimpleMode && !isAzureApplication ) {
+    if (isSimpleMode && !isAzureApplication) {
         registerApplication(isSimpleMode);
     }
-    else if (isAzureApplication && selfHosted) {
+    else if (isAzureApplication) {
         azureStep();
     }
     else {
@@ -445,13 +443,6 @@ function registration(isSimpleMode) {
 }
 
 function azureStep() {
-    $("#image-parent-container").show();
-    $("#image-parent-container .startup-image").hide().attr("src", storageUrl).fadeIn();
-    $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourStorage).slideDown();
-    $(".startup-content span.second-content").hide().text(isBoldBI ? window.TM.App.LocalizationContent.StorageBIMsg : window.TM.App.LocalizationContent.StorageReportsMsg).slideDown();
-    $(".startup-content a#help-link").attr("href", idStorageConfiguration);
-    $(".startup-waiting-popup").addClass("storage-page-content");
-    $("#system-settings-filestorage-container").slideDown("slow");
     $("#file-storage").prop("disabled", true);
     $("#blob-storage").prop("checked", true);
     $(".custom-endpoint-form-element, .report-content").hide();
@@ -554,15 +545,16 @@ function onDatbaseChange(args) {
             $("#move-to-next,.sqlce-content").removeClass("show").addClass("hide");
             $(".content-display").hide();
             $(".show-sql-content").slideDown("slow");
-            hideDataStore();
-            if (isSiteCreation) {
-                $("#admin-nav").hide();
-            }
-
+            
             if (!isSiteCreation) {
                 prefillDbNames();
             }
-           
+            if (!isSiteCreation && isBoldReports) {
+                hideDataStore();
+            }
+            else if (isSiteCreation && isBoldReportsTenantType()) {
+                hideDataStore();
+            }
             $("div.placeholder").remove();
             $(".note-additional-parameter a").attr("href", mySQLParameter);
             DomResize();
@@ -674,10 +666,6 @@ function onDbSelectChange() {
         $(".database-name, #db-config-submit").show();
     }
 
-    var databaseType = getDropDownValue("database-type");
-    if (databaseType == "MySQL") {
-        hideDataStore();
-    }
     changeFooterPostion();
     DomResize();
     if (!isBoldBI) {

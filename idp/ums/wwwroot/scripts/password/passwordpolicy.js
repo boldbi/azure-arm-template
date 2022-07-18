@@ -25,8 +25,7 @@
     },
     p_policy_length: function (userpassword) {
         this.name = "p_policy_length";
-        var re = /^(?=.{6,}).+$/
-        if (re.test(userpassword))
+        if (userpassword.length >= $('meta[name="password_policy:minlength"]').attr("content"))
             return "p_policy_length"
     }
 };
@@ -73,26 +72,6 @@ function passwordBoxUnhightlight(element) {
     $(element).closest('div').find(".password-validate-holder").html("");
 }
 
-function createPasswordPolicyRules() {
-    if ($("#new-password").data("toggle") !== "popover") {
-        if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
-            $("#new-password").after("<ul id='password_policy_rules'></ul>");
-            $("#password_policy_rules").append("<li id='p_policy_heading'>Password must meet the following requirements:</li>")
-            $("#tenant-password-policy").attr("data-policy-minimumlength") != "" ? $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>At least " + $("#tenant-password-policy").attr("data-policy-minimumlength") + " characters.</li>") : ""
-            $("#tenant-password-policy").attr("data-policy-uppercase").toLowerCase() == "true" ? $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>One uppercase.</li>") : ""
-            $("#tenant-password-policy").attr("data-policy-lowercase").toLowerCase() == "true" ? $("#password_policy_rules").append("<li id='p_policy_lowercase'><span class='su su-close'></span>One lowercase.</li>") : ""
-            $("#tenant-password-policy").attr("data-policy-number").toLowerCase() == "true" ? $("#password_policy_rules").append("<li id='p_policy_number'><span class='su su-close'></span>One numeric.</li>") : ""
-            $("#tenant-password-policy").attr("data-policy-specialcharacter").toLowerCase() == "true" ? $("#password_policy_rules").append("<li id='p_policy_specialcharacter'><span class='su su-close'></span>One special character.</li>") : ""
-        }
-        if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
-            $("#new-password").next("ul").remove();
-        }
-    }
-    else {
-        passwordPolicyPopover("#new-password", $("#new-password").val());
-    }
-}
-
 $.validator.addMethod("isValidPassword", function (value, element) {
     var validateMethods = new Array();
     validateMethods.push(validateUserpassword.p_policy_uppercase);
@@ -100,35 +79,9 @@ $.validator.addMethod("isValidPassword", function (value, element) {
     validateMethods.push(validateUserpassword.p_policy_number);
     validateMethods.push(validateUserpassword.p_policy_specialcharacter);
     validateMethods.push(validateUserpassword.p_policy_length);
-    if ($("#new-password").data("toggle") !== "popover") {
-        for (var n = 0; n < validateMethods.length; n++) {
-            var currentMethodName = validateMethods[n];
-            if (currentMethodName(value) != "" && currentMethodName(value) != undefined) {
-                ruleName = currentMethodName(value);
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") != "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-tick").removeClass("su su-close");
-                    $('#password_policy_rules').find('li#' + ruleName).addClass("clear-error");
-                    ruleName = ""
-                }
-            }
-            else {
-                ruleName = name;
-                $(element).closest('div').addClass("has-error");
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") == "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-close").removeClass("su-tick");
-                    $('#password_policy_rules').find('li#' + ruleName).removeClass("clear-error");
-                    ruleName = "";
-                }
-            }
-        }
-        if ($('#password_policy_rules li>span.su-tick').length == $('#password_policy_rules').find('li>span').length)
-            return true;
-    }
-    else {
-        passwordPolicyPopover("#new-password", value);
-        if ($('#password_policy_rules li>span.su-password-tick').length == $('#password_policy_rules li>span:not(.content)').length) {
-            return true;
-        }
+    passwordPolicyPopover("#new-password", value);
+    if ($('#password_policy_rules li>span.su-password-tick').length == $('#password_policy_rules li>span:not(.content)').length) {
+        return true;
     }
 }, "");
 

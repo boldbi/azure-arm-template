@@ -100,7 +100,7 @@ $(document).ready(function () {
             $("#tenant-identifier").val("");
             $("#tenant-identifier").attr("disabled", true);
             $("#tenant-identifier-validation-error").css("display", "none");
-            $("#tenant-identifier").closest(".txt-holder").removeClass("has-error");
+            $("#tenant-identifier").parent(".e-float-input").removeClass("e-error");
             $("#input-domain").closest("div").removeClass("has-error");
             $(".identifier-info").css("padding-top", "20px");
             $(".site-id-name").html("");
@@ -251,7 +251,7 @@ $(document).ready(function () {
             tenantidentifier: {
                 required: true,
                 isValidIdentifier: true,
-                maxlength: 32
+                maxlength: 64
             },
             domainname: {
                 isDomainRequired: true,

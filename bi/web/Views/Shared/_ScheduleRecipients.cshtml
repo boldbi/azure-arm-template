@@ -14,8 +14,11 @@
     <script>
         var getActiveandInactiveUserUrl = "@Url.Action("getallactivegroupsandusers", "accounts")";
         var updateScheduleUrl = "@Url.Action("UpdateSchedule", "scheduler")";
+        var getWebhooksUrl = "@Url.Action("GetWebhooks", "scheduler")";
+        var getWebhookDetailsByIdUrl = "@Url.Action("GetWebhookDetailsById", "scheduler")";
         var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
         var canExport = @Html.Raw(Json.Serialize(ViewBag.CanExport));
+        var webhookevent = @Html.Raw(Json.Serialize(ViewBag.webhookEvent));
         var validateFTPCredentials = "@Url.Action("ValidateFTPCredentials", "scheduler")";
     </script>
     <environment include="Development,CloudDevelopment">
@@ -147,9 +150,9 @@
             </div>
             <div class="export-separator"></div>
             <div id="location-export-options" class="col-sm-8 col-xs-8 no-margin">
-                <div id="enable-checkbox">
-                    @Html.CheckBox("location-export", new { @class = "material-checkbox", @id = "location-export" })
-                    @Html.Label("location-export", T["Location Export"].Value)
+                <div id="enable-checkbox" class="export-dest">
+                    @Html.CheckBox("export-destination", new { @class = "material-checkbox", @id = "export-destination" })
+                    @Html.Label("export-destination", T["Other Destinations"].Value)
                 </div>
                 @*Now using only ftp so, no need for the below items*@
                 <!--<div>-->
@@ -174,10 +177,21 @@
                         <label for="webHook-location" class="pointer normal-font notransition">WebHook</label>
                     </div>*@
                 <!--</div>-->
-                <form class="col-sm-12 col-xs-12 no-padding" id="ftp-form">
-                    <label class="location-export-header-text no-margin">@T["FTP Location"]</label>
+            <form class="col-sm-12 col-xs-12 no-padding" id="ftp-form">
+                <div class="col-xs-12 no-padding auth-radio-btn">
+                    <div class="ftp-destination select-destination">
+                        <input type="radio" id="ftp-destination" class="css-radio" name="destinationType" value="0" checked="checked" disabled="disabled">
+                        <label for="ftp-destination" class="radio-btn-label app-textbox-label"><span class="text">@string.Format(T["{0} Location"].Value, "FTP")</span></label>
+                    </div>
+                    <div class="webhook-destination select-destination">
+                        <input type="radio" id="webhook-destination" class="css-radio" name="destinationType" value="1" disabled="disabled">
+                        <label for="webhook-destination" class="radio-btn-label app-textbox-label"><span class="text">@T["Webhook"]</span></label>
+                    </div>
+                </div>
+                <div class="ftp-location-div">
+                    @*<label class="location-export-header-text no-margin">@T["FTP Location"]</label>*@
                     <div class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px;">
-                        @T["Supported protocols are FTP, FTPS, and sFTP"]
+                        @string.Format(T["Supported protocols are {0} and {1}"].Value, "FTP, FTPS,", "sFTP")
                     </div>
                     <div class="col-sm-12 col-xs-12 no-padding ftp-form-container">
                         <div class="col-sm-4 col-xs-4">
@@ -198,7 +212,32 @@
                         </div>
                         <div id="ftp-validation-message"></div>
                     </div>
-                </form>
+                </div>
+                <div class="webhook-location-div hide">
+                    <div class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px;">
+                        @T["Please select an existing webhook or create new a webhook and refresh the dropdown."]
+                    </div>
+                    <div class="col-sm-12 col-xs-12 no-padding webhook-form-container">
+                        <div class="col-sm-6 col-xs-6 select-webhook-div">
+                            <select class="selectpicker form-control" id="webhook-option" title="@T["Select webhook"]" disabled="disabled">
+                                <option value="" id="select-webhook-option" data-hidden="true" selected="selected" disabled="disabled">@T["Select webhook"]</option>
+                            </select>
+                            <span id="webhook-select-validations" style="display:none" class="display validation-errors">@T["Please select a webhook"]</span>
+                        </div>
+                        <div class="create-webhook-btn">
+                            <a href="@Url.Action("AddWebhookPage", "User")" id="create-webhook" target ="_blank" class="secondary-button app-btn-secondary pull-left disabled">@T["Create"]</a>
+                        </div>
+                        <div class="refresh-btn">
+                            <button type="button" title="" id="refresh-webhook" name="RefreshWebhook" disabled class="secondary-button app-btn-secondary pull-left" onclick="refreshDropdown()">
+                                @T["Refresh"]
+                            </button>
+                        </div>
+                    </div>
+                    <div id="webhook-info" class="col-xs-12" style="display:none">
+                        <span></span>
+                    </div>
+                </div>
+            </form>
             </div>
         </div>
     </div>

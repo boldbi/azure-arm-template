@@ -2,21 +2,42 @@
 var getLicenseUrl;
 var licenseToken;
 $(document).ready(function () {
-    $("#offline-license-update-dialog").ejDialog({
-        showOnInit: false,
-        allowDraggable: false,
-        enableResize: false,
-        height: "auto",
-        width: "500px",
-        enableModal: true,
-        showHeader: false,
+    
+    var offlineLicenseDialog = new ejs.popups.Dialog({
+        header: window.TM.App.LocalizationContent.UploadLicense,
+        showCloseIcon: true,
+        width: '472px',
         close: "uploadLicenseDialogClose",
-        closeOnEscape: true
+        buttons: [
+            {
+                'click': function () {
+                    uploadLicenseDialogClose();
+                },
+                buttonModel: {
+                    content: window.TM.App.LocalizationContent.CancelButton
+                }
+            },
+            {
+                'click': function () {
+                    confirmLicenseUpdate();
+                },
+                buttonModel: {
+                    content: window.TM.App.LocalizationContent.UpdateLicense,
+                    isPrimary: true,
+                    cssClass: 'upload-license-button'
+                }
+            }           
+        ],
+        isModal: true,
+        animationSettings: { effect: 'Zoom' },
+        visible: false
     });
+    offlineLicenseDialog.appendTo("#offline-license-update-dialog");
+    createWaitingPopup('offline-license-update-dialog');
 
     $(window).resize(function () {
         resizeLicenseDialog();
-    });
+    })
 
     $(document).on("click", "#browse-lic, #file-name", function () {
         $("#getFile").click();
@@ -33,12 +54,12 @@ $(document).ready(function () {
             $("#file-name").val(fileName);
             var file = event.originalEvent.target.files[0];
             var data = {};
-            showWaitingPopup($("#offline-license-update-dialog"))
+            showWaitingPopup('offline-license-update-dialog')
             readFile(file, function (content) {
                 data.content = content;
                 sendData(data, validateLicenseKeyUrl);
             })
-            hideWaitingPopup($("#offline-license-update-dialog"));
+            hideWaitingPopup('offline-license-update-dialog');
         }
         else {
             $("#file-name").val('');
@@ -49,9 +70,10 @@ $(document).ready(function () {
     });
 
     $(document).on("click", "#offline-update-bi, #offline-update-reports, .offline-license-acion, #offline-change-subscription", function () {
-        $("#offline-license-update-dialog").ejDialog("open");
+        document.getElementById("offline-license-update-dialog").ej2_instances[0].show();
         getLicenseUrl = $(this).attr("data-offlinelicense-url");
         $("#tenant-type").val($(this).attr("data-tenant-type"));
+        $(".upload-license-button").attr("disabled", true);
     });
 });
 
@@ -77,7 +99,7 @@ function sendData(data, url) {
         validJSON = true;
     }
     catch {
-        $(".validation-error-message").html(window.TM.App.LocalizationContent.LicenseFileCorrupt + "<a target='_blank' href='" + getLicenseUrl + "'>"+ window.TM.App.LocalizationContent.Here +"</a>");
+        $(".validation-error-message").html(window.TM.App.LocalizationContent.LicenseFileCorrupt + "<a target='_blank' href='" + getLicenseUrl + "'>" + window.TM.App.LocalizationContent.Here + "</a>");
         $(".validation-error-message").removeClass("display-none");
     }
 
@@ -91,7 +113,7 @@ function sendData(data, url) {
                 type: 'POST',
                 data: { key: key, tenantType: parseInt($("#tenant-type").val()) },
                 url: url,
-                beforeSend: showWaitingPopup($("#offline-license-update-dialog")),
+                beforeSend: showWaitingPopup('offline-license-update-dialog'),
                 success: function (data) {
                     if (data.Status) {
                         if (data.Email !== undefined && !isEmptyOrSpaces(data.Email)) {
@@ -138,9 +160,11 @@ function sendData(data, url) {
                             }
                         }
 
-                        $("#offline-license-update-dialog").ejDialog({ position: { X: (window.innerWidth - 422) / 2, Y: (window.innerHeight - 494) / 2 } });
+                        document.getElementById("offline-license-update-dialog").ej2_instances[0].position.X = (window.innerWidth - 422) / 2;
+                        document.getElementById("offline-license-update-dialog").ej2_instances[0].position.Y = (window.innerHeight - 494) / 2;
                         $("#license-details").slideDown("slow");
                         $("#confirm-license").prop('disabled', false);
+                        $(".upload-license-button").attr("disabled", false);
                     }
                     else if (!data.Status && data.Message != undefined) {
                         $("#customer-email-container, #subscription-id-container, #subscription-name-container,#plan-name-container, #expiry-date-container, #tenant-status-container").addClass("display-none");
@@ -152,15 +176,15 @@ function sendData(data, url) {
                         $("#confirm-license").prop('disabled', true);
                     }
 
-                    hideWaitingPopup($("#offline-license-update-dialog"));
+                    hideWaitingPopup('offline-license-update-dialog');
                 },
                 error: function () {
-                    hideWaitingPopup($("#offline-license-update-dialog"));
+                    hideWaitingPopup('offline-license-update-dialog');
                 }
             });
         }
         else {
-            $(".validation-error-message").html(window.TM.App.LocalizationContent.LicenseFileCorrupt +"<a target='_blank' href='" + getLicenseUrl + "'>" + window.TM.App.LocalizationContent.Here +"</a>");
+            $(".validation-error-message").html(window.TM.App.LocalizationContent.LicenseFileCorrupt + "<a target='_blank' href='" + getLicenseUrl + "'>" + window.TM.App.LocalizationContent.Here + "</a>");
             $(".validation-error-message").removeClass("display-none");
         }
     }
@@ -174,8 +198,8 @@ function uploadLicenseDialogClose() {
     licenseKey = "";
     licenseToken = "";
     $("#tenant-type").val("");
-    $("#offline-license-update-dialog").ejDialog("refresh");
-    $("#offline-license-update-dialog").ejDialog("close");
+    document.getElementById("offline-license-update-dialog").ej2_instances[0].refresh();
+    document.getElementById("offline-license-update-dialog").ej2_instances[0].hide();
 }
 
 function confirmLicenseUpdate() {
@@ -184,7 +208,7 @@ function confirmLicenseUpdate() {
             type: "POST",
             url: updateLicenseKeyUrl,
             data: { licenseKey: licenseKey, licenseType: "2", currentUrl: window.location.origin, boldLicenseToken: licenseToken },
-            beforeSend: showWaitingPopup($("#offline-license-update-dialog")),
+            beforeSend: showWaitingPopup('offline-license-update-dialog'),
             success: function (result) {
                 if ($("#license-selection-container").length != 0) {
                     if (result.Status) {
@@ -196,14 +220,14 @@ function confirmLicenseUpdate() {
                         uploadLicenseDialogClose();
                     }
                     else {
-                        hideWaitingPopup($("#offline-license-update-dialog"));
+                        hideWaitingPopup('offline-license-update-dialog');
                         WarningAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdateFailed, 0);
                         uploadLicenseDialogClose();
                     }
                 }
                 else {
                     if (result.Status) {
-                        hideWaitingPopup($("#offline-license-update-dialog"));
+                        hideWaitingPopup('offline-license-update-dialog');
                         SuccessAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdated, 7000);
                         uploadLicenseDialogClose();
 
@@ -212,7 +236,7 @@ function confirmLicenseUpdate() {
                         }, 1000);
                     }
                     else {
-                        hideWaitingPopup($("#offline-license-update-dialog"));
+                        hideWaitingPopup('offline-license-update-dialog');
                         WarningAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdateFailed, 0);
                         uploadLicenseDialogClose();
                     }
@@ -221,7 +245,7 @@ function confirmLicenseUpdate() {
         });
     }
     else {
-        hideWaitingPopup($("#offline-license-update-dialog"));
+        hideWaitingPopup('offline-license-update-dialog');
         WarningAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdateFailed, 0);
     }
 }
@@ -231,5 +255,6 @@ function isEmptyOrSpaces(str) {
 }
 
 function resizeLicenseDialog() {
-    $("#offline-license-update-dialog").ejDialog({ position: { X: (window.innerWidth - $("#offline-license-update-dialog").width()) / 2, Y: (window.innerHeight - $("#offline-license-update-dialog").height()) / 2 } });
+    document.getElementById("offline-license-update-dialog").ej2_instances[0].position.X = (window.innerWidth - $("#offline-license-update-dialog").width()) / 2;
+    document.getElementById("offline-license-update-dialog").ej2_instances[0].position.Y = (window.innerHeight - $("#offline-license-update-dialog").height()) / 2;
 }

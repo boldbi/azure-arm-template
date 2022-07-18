@@ -1,6 +1,6 @@
 ﻿var isKeyUp = false;
 var userDetails;
-var browser = ej.browserInfo();
+//var browser = ej.browserInfo();
 $(document).ready(function () {
     var custompath;
     var currentDate = $.now();
@@ -9,28 +9,20 @@ $(document).ready(function () {
     var ruleName;
     var rules;
     addPlacehoder("body");
-    $("#avatar-upload-box").ejDialog({
-        showOnInit: false,
-        allowDraggable: true,
-        enableResize: false,
-        width: "600px",
-        enableModal: true,
-        close: "DialogBoxClose",
-        closeOnEscape: true,
-        showHeader: false,
-        showRoundedCorner: true
-    });
-    $("#userprofile-delete-confirmation").ejDialog({
-        width: "400px",
-        showOnInit: false,
-        allowDraggable: false,
-        enableResize: false,
-        height: "187px",
-        enableModal: true,
-        close: "onDeleteDialogClose",
-        open: "onDeleteDialogOpen"
-    });
 
+    // Yet to convert from EJ1 to EJ2
+    //$("#avatar-upload-box").ejDialog({
+    //    showOnInit: false,
+    //    allowDraggable: true,
+    //    enableResize: false,
+    //    width: "600px",
+    //    enableModal: true,
+    //    close: "DialogBoxClose",
+    //    closeOnEscape: true,
+    //    showHeader: false,
+    //    showRoundedCorner: true
+    //});
+    
     $.validator.addMethod("isValidEmail", function (value, element) {
         if (value.trim() == "") {
             return true;
@@ -123,7 +115,7 @@ $(document).ready(function () {
 
     });
 
-    $("#new-password").bind("keyup", function () {
+    $(document).on("keyup", "#new-password", function () {
         if ($("#new-password").val() == $("#confirm-password").val()) {
             $("#confirm-password").closest('div').removeClass('has-error');
             $("#confirm-password").closest('tr').next("tr").find("span").html("");
@@ -132,39 +124,9 @@ $(document).ready(function () {
             $("#confirm-password").closest('div').addClass("has-error");
             $("#confirm-password").closest('div').next("div").find("span").html(window.TM.App.LocalizationContent.PasswordMismatch).css("display", "block");
         }
-        createPasswordPolicyRules();
+        passwordPolicyPopover("#new-password", $("#new-password").val());
     });
 
-    $.validator.addMethod("isUserPassword", function (value, element) {
-        var validateMethods = new Array();
-        validateMethods.push(validateUserpassword.p_policy_uppercase);
-        validateMethods.push(validateUserpassword.p_policy_lowercase);
-        validateMethods.push(validateUserpassword.p_policy_number);
-        validateMethods.push(validateUserpassword.p_policy_specialcharacter);
-        validateMethods.push(validateUserpassword.p_policy_length);
-        for (var n = 0; n < validateMethods.length; n++) {
-            var currentMethodName = validateMethods[n];
-            if (currentMethodName(value) != "" && currentMethodName(value) != undefined) {
-                ruleName = currentMethodName(value);
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") != "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-tick").removeClass("su su-close");
-                    $('#password_policy_rules').find('li#' + ruleName).addClass("clear-error");
-                    ruleName = ""
-                }
-            }
-            else {
-                ruleName = name;
-                $(element).closest('div').addClass("has-error");
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") == "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-close").removeClass("su-tick");
-                    $('#password_policy_rules').find('li#' + ruleName).removeClass("clear-error");
-                    ruleName = "";
-                }
-            }
-        }
-        if ($('#password_policy_rules li>span.su-tick').length == $('#password_policy_rules').find('li>span').length)
-            return true;
-    }, "");
     $('.change-password-form').validate({
         errorElement: 'span',
         onkeyup: function (element, event) {
@@ -181,7 +143,7 @@ $(document).ready(function () {
         rules: {
             "new-password": {
                 required: true,
-                isUserPassword: true
+                isValidPassword: true
             },
             "confirm-password": {
                 required: true,
@@ -191,33 +153,11 @@ $(document).ready(function () {
         },
         highlight: function (element) {
             $(element).closest('div').addClass("has-error");
-            if ($(element).attr('id') == "new-password") {
-                for (var i = 0; i < $('#password_policy_rules').find('li>span').length; i++) {
-                    if ($($('#password_policy_rules').find('li>span')[i]).attr('class') == "su-tick")
-                        $(element).closest('div').removeClass("has-error");
-                    else
-                        rules = "unsatisfied-rule";
-                }
-                if (rules != "" && rules != undefined) {
-                    $(element).closest('div').addClass("has-error");
-                    rules = "";
-                }
-            }
+            passwordBoxHightlight(element);
         },
         unhighlight: function (element) {
             $(element).closest('div').removeClass('has-error');
-            if ($(element).attr('id') == "new-password") {
-                for (var i = 0; i < $('#password_policy_rules').find('li>span').length; i++) {
-                    if ($($('#password_policy_rules').find('li>span')[i]).attr('class') != "su-tick")
-                        rules = "unsatisfied-rule";
-                    if ($($('#password_policy_rules').find('li>span')[i]).attr('class') == "su-tick")
-                        $(element).closest('div').removeClass("has-error");
-                }
-                if (rules != "" && rules != undefined) {
-                    $(element).closest('div').addClass("has-error");
-                    rules = "";
-                }
-            }
+            passwordBoxUnhightlight(element);
             $(element).closest('div').find(".validation-message").html("");
         },
         errorPlacement: function (error, element) {
@@ -234,35 +174,12 @@ $(document).ready(function () {
         }
     });
 
-
-
     $('#new-password').on("change", function () {
-        createPasswordPolicyRules();
+        passwordPolicyPopover("#new-password", $("#new-password").val());
         $("#new-password").valid();
     });
-    function createPasswordPolicyRules() {
-        if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
-            $("#new-password").after("<ul id='password_policy_rules'></ul>");
-            $("#password_policy_rules").append("<li id='p_policy_heading'>" + window.TM.App.LocalizationContent.PasswordRule1 + "</li>")
-            $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule2 + "</li>")
-            $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule3 + "</li>")
-            $("#password_policy_rules").append("<li id='p_policy_lowercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule4 + "</li>")
-            $("#password_policy_rules").append("<li id='p_policy_number'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule5 + "</li>")
-            $("#password_policy_rules").append("<li id='p_policy_specialcharacter'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule6 + "</li>")
-            if (($(parent.window).width()) > 1400) {
-                $("#confirm-password-section").css("margin-top", "-103px")
-            }
-            if (($(parent.window).width()) < 1400) {
-                $("#confirm-password-section").css("margin-top", "-73px")
-            }
-        }
-        if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
-            $("#new-password").next("ul").remove();
-            $("#confirm-password-section").css("margin-top", "5px")
-        }
-    }
 
-    $(".edit-user-profile-field").bind("keypress", function (e) {
+    $(".edit-user-profile-field").on("keypress", function (e) {
         if (e.keyCode == 13) {
             e.preventDefault();
             SaveUserdetails();
@@ -270,7 +187,7 @@ $(document).ready(function () {
         }
     });
 
-    $(".password-fields-user-profile-edit").bind("keypress", function (e) {
+    $(".password-fields-user-profile-edit").on("keypress", function (e) {
         if (e.keyCode == 13) {
             e.preventDefault();
             onUserChangePasswordClick();
@@ -324,57 +241,57 @@ $(document).ready(function () {
         });
     });
 
-    $('#upload-image').click(function () {
-        var isUpdated = $(".img-container").children("img").attr("src");
-        var userId = $("#user-id").val();
-        var isNewFile = false;
+    //$('#upload-image').click(function () {
+    //    var isUpdated = $(".img-container").children("img").attr("src");
+    //    var userId = $("#user-id").val();
+    //    var isNewFile = false;
 
-        if (isUpdated != tanantManagementServerResourceUrl + "/images/common/preview.jpg") {
-            isNewFile = true;
+    //    if (isUpdated != tanantManagementServerResourceUrl + "/images/common/preview.jpg") {
+    //        isNewFile = true;
 
-            var data =
-            {
-                "selection.LeftOfCropArea": parseInt($('input[name=LeftOfCropArea]').val()),
-                "selection.TopOfCropArea": parseInt($('input[name=TopOfCropArea]').val()),
-                "selection.LeftToCropArea": parseInt($('input[name=LeftToCropArea]').val()),
-                "selection.TopToCropArea": parseInt($('input[name=TopToCropArea]').val()),
-                "selection.height": parseInt($('input[name=height]').val()),
-                "selection.width": parseInt($('input[name=width]').val()),
-                "selection.UserName": $("#user-name").val(),
-                "selection.UserId": userId,
-                "selection.ImageName": $("#image").val(),
-                "selection.IsNewFile": isNewFile
-            };
+    //        var data =
+    //        {
+    //            "selection.LeftOfCropArea": parseInt($('input[name=LeftOfCropArea]').val()),
+    //            "selection.TopOfCropArea": parseInt($('input[name=TopOfCropArea]').val()),
+    //            "selection.LeftToCropArea": parseInt($('input[name=LeftToCropArea]').val()),
+    //            "selection.TopToCropArea": parseInt($('input[name=TopToCropArea]').val()),
+    //            "selection.height": parseInt($('input[name=height]').val()),
+    //            "selection.width": parseInt($('input[name=width]').val()),
+    //            "selection.UserName": $("#user-name").val(),
+    //            "selection.UserId": userId,
+    //            "selection.ImageName": $("#image").val(),
+    //            "selection.IsNewFile": isNewFile
+    //        };
 
-            $.ajax({
-                type: "POST",
-                data: JSON.stringify(data),
-                url: updateprofilepictureUrl,
-                contentType: "application/json; charset=utf-8",
-                beforeSend: ShowWaitingProgress("#avatar-upload-box", "show"),
-                dataType: "json",
-                success: function (result) {
-                    var isLoggedUser = $("#logged-user").html().toLowerCase();
-                    parent.messageBox("su-image", window.TM.App.LocalizationContent.ChangeProfilepicture, window.TM.App.LocalizationContent.ProfilePictureSaved, "success", function () {
-                        parent.onCloseMessageBox();
-                    });
-                    $("#image-path").val("browse image path");
-                    $("#profile-picture").attr("src", tanantManagementServerResourceUrl + "/images/common/preview.jpg");
-                    $('#upload-image').attr("disabled", "disabled");
-                    if ($(".img-container").children().hasClass("jcrop-active")) {
-                        $('#profile-picture').data('Jcrop').destroy();
-                    }
-                    $("#avatar-upload-box").ejDialog("close");
-                    ShowWaitingProgress("#avatar-upload-box", "hide");
-                },
-                error: function (result) {
-                    parent.messageBox("su-open", window.TM.App.LocalizationContent.ChangeProfilepicture, window.TM.App.LocalizationContent.ProfilePictureSaveFailed, "error", function () {
-                        parent.onCloseMessageBox();
-                    });
-                }
-            });
-        }
-    });
+    //        $.ajax({
+    //            type: "POST",
+    //            data: JSON.stringify(data),
+    //            url: updateprofilepictureUrl,
+    //            contentType: "application/json; charset=utf-8",
+    //            beforeSend: ShowWaitingProgress("#avatar-upload-box", "show"),
+    //            dataType: "json",
+    //            success: function (result) {
+    //                var isLoggedUser = $("#logged-user").html().toLowerCase();
+    //                parent.messageBox("su-image", window.TM.App.LocalizationContent.ChangeProfilepicture, window.TM.App.LocalizationContent.ProfilePictureSaved, "success", function () {
+    //                    parent.onCloseMessageBox();
+    //                });
+    //                $("#image-path").val("browse image path");
+    //                $("#profile-picture").attr("src", tanantManagementServerResourceUrl + "/images/common/preview.jpg");
+    //                $('#upload-image').attr("disabled", "disabled");
+    //                if ($(".img-container").children().hasClass("jcrop-active")) {
+    //                    $('#profile-picture').data('Jcrop').destroy();
+    //                }
+    //                $("#avatar-upload-box").ejDialog("close");
+    //                ShowWaitingProgress("#avatar-upload-box", "hide");
+    //            },
+    //            error: function (result) {
+    //                parent.messageBox("su-open", window.TM.App.LocalizationContent.ChangeProfilepicture, window.TM.App.LocalizationContent.ProfilePictureSaveFailed, "error", function () {
+    //                    parent.onCloseMessageBox();
+    //                });
+    //            }
+    //        });
+    //    }
+    //});
 
     $(document).on("click", "#avatar-delete-click", function () {
         messageBox("su-delete", window.TM.App.LocalizationContent.DeleteProfilePicture, window.TM.App.LocalizationContent.DeleteProfilePictureConfirm, "error", function () {
@@ -407,154 +324,204 @@ $(document).ready(function () {
         $("#avatar-upload-box a.popup-close").trigger('mouseover').mouseover(function () { $(".tooltip").css("z-index", maxIndex); });
     });
 
-    $("#upload-picture").ejUploadbox({
-        saveUrl: fileUploadUrl + "?imageType=profileimage&&userName=" + $("#user-name").val() + "&&timeStamp=" + currentDate,
-        autoUpload: true,
-        showFileDetails: false,
-        fileSize: 31457280,
-        extensionsAllow: ".PNG,.png,.jpg,.JPG,.jpeg,.JPEG",
-        extensionsDeny: "",
-        buttonText: { browse: "..." },
-        begin: function () {
-            ShowWaitingProgress("#avatar-upload-box", "show");
-        },
-        fileSelect: function (e) {
-            currentDate = $.now();
-            extension = e.files[0].extension.toLowerCase();
-            uploadFileName = e.files[0].name;
-            this.model.saveUrl = fileUploadUrl + "?imageType=profileimage&&userName=" + $("#user-name").val() + "&&timeStamp=" + currentDate;
-        },
-        error: function (e) {
-            if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
-                $("#image-path").val(window.TM.App.LocalizationContent.InValidFileFormat).addClass("ValidationErrorImage");
-                $("#image-path").closest("div").addClass("has-error");
-                $(".e-uploadinput").val("").attr("title", window.TM.App.LocalizationContent.NoFileSelected);
-            }
-        },
-        complete: function fileselect(e) {
-            var filename = "profile_picture_" + currentDate + ".png";
-            filename = filename.replace('"', '');
-            $("#image-path").removeClass("ValidationErrorImage");
-            $("#image").removeClass("ValidationErrorImage").val(filename);
-            $("#image-path").closest("div").removeClass("has-error");
-            custompath = filename;
-            $("#upload-picture").attr("data-filename", filename);
-            $('.e-uploadinput').attr('title', uploadFileName);
-            $("#image-path").closest("div").removeClass("has-error");
-            $("#image-path").val(uploadFileName);
-            $(".jcrop-selection.jcrop-current").children("button").css("background", "");
-            $("#profile-picture").attr("src", rootBaseUrl + "/content/images/profilepictures/" + $("#user-name").val() + "/" + filename + "?v=" + $.now());
-            var cb, filter;
+    //$("#upload-picture").ejUploadbox({
+    //    saveUrl: fileUploadUrl + "?imageType=profileimage&&userName=" + $("#user-name").val() + "&&timeStamp=" + currentDate,
+    //    autoUpload: true,
+    //    showFileDetails: false,
+    //    fileSize: 31457280,
+    //    extensionsAllow: ".PNG,.png,.jpg,.JPG,.jpeg,.JPEG",
+    //    extensionsDeny: "",
+    //    buttonText: { browse: "..." },
+    //    begin: function () {
+    //        ShowWaitingProgress("#avatar-upload-box", "show");
+    //    },
+    //    fileSelect: function (e) {
+    //        currentDate = $.now();
+    //        extension = e.files[0].extension.toLowerCase();
+    //        uploadFileName = e.files[0].name;
+    //        this.model.saveUrl = fileUploadUrl + "?imageType=profileimage&&userName=" + $("#user-name").val() + "&&timeStamp=" + currentDate;
+    //    },
+    //    error: function (e) {
+    //        if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
+    //            $("#image-path").val(window.TM.App.LocalizationContent.InValidFileFormat).addClass("ValidationErrorImage");
+    //            $("#image-path").closest("div").addClass("has-error");
+    //            $(".e-uploadinput").val("").attr("title", window.TM.App.LocalizationContent.NoFileSelected);
+    //        }
+    //    },
+    //    complete: function fileselect(e) {
+    //        var filename = "profile_picture_" + currentDate + ".png";
+    //        filename = filename.replace('"', '');
+    //        $("#image-path").removeClass("ValidationErrorImage");
+    //        $("#image").removeClass("ValidationErrorImage").val(filename);
+    //        $("#image-path").closest("div").removeClass("has-error");
+    //        custompath = filename;
+    //        $("#upload-picture").attr("data-filename", filename);
+    //        $('.e-uploadinput').attr('title', uploadFileName);
+    //        $("#image-path").closest("div").removeClass("has-error");
+    //        $("#image-path").val(uploadFileName);
+    //        $(".jcrop-selection.jcrop-current").children("button").css("background", "");
+    //        $("#profile-picture").attr("src", rootBaseUrl + "/content/images/profilepictures/" + $("#user-name").val() + "/" + filename + "?v=" + $.now());
+    //        var cb, filter;
 
-            jQuery(function ($) {
-                var CircleSel = function () { };
-                CircleSel.prototype = new $.Jcrop.component.Selection();
+    //        jQuery(function ($) {
+    //            var CircleSel = function () { };
+    //            CircleSel.prototype = new $.Jcrop.component.Selection();
 
-                $.extend(CircleSel.prototype, {
-                    zoomscale: 1,
-                    attach: function () {
-                        this.frame.css({
-                            background: 'url(' + $('#profile-picture')[0].src.replace('750', '750') + ')'
-                        });
-                    },
-                    positionBg: function (b) {
-                        var midx = (b.x + b.x2) / 2;
-                        var midy = (b.y + b.y2) / 2;
-                        var ox = (-midx * this.zoomscale) + (b.w / 2);
-                        var oy = (-midy * this.zoomscale) + (b.h / 2);
-                        this.frame.css({ backgroundPosition: -(b.x + 1) + 'px ' + (-b.y - 1) + 'px' });
-                    },
-                    redraw: function (b) {
-                        $.Jcrop.component.Selection.prototype.redraw.call(this, b);
+    //            $.extend(CircleSel.prototype, {
+    //                zoomscale: 1,
+    //                attach: function () {
+    //                    this.frame.css({
+    //                        background: 'url(' + $('#profile-picture')[0].src.replace('750', '750') + ')'
+    //                    });
+    //                },
+    //                positionBg: function (b) {
+    //                    var midx = (b.x + b.x2) / 2;
+    //                    var midy = (b.y + b.y2) / 2;
+    //                    var ox = (-midx * this.zoomscale) + (b.w / 2);
+    //                    var oy = (-midy * this.zoomscale) + (b.h / 2);
+    //                    this.frame.css({ backgroundPosition: -(b.x + 1) + 'px ' + (-b.y - 1) + 'px' });
+    //                },
+    //                redraw: function (b) {
+    //                    $.Jcrop.component.Selection.prototype.redraw.call(this, b);
 
-                        this.positionBg(this.last);
-                        return this;
-                    },
-                    prototype: $.Jcrop.component.Selection.prototype
-                });
-                var jcrop_api;
-                $('#profile-picture').Jcrop({
+    //                    this.positionBg(this.last);
+    //                    return this;
+    //                },
+    //                prototype: $.Jcrop.component.Selection.prototype
+    //            });
+    //            var jcrop_api;
+    //            $('#profile-picture').Jcrop({
 
-                    selectionComponent: CircleSel,
-                    applyFilters: ['constrain', 'extent', 'backoff', 'ratio', 'round'],
-                    aspectRatio: 1,
-                    setSelect: [25, 25, 100, 100],
-                    handles: ['n', 's', 'e', 'w'],
+    //                selectionComponent: CircleSel,
+    //                applyFilters: ['constrain', 'extent', 'backoff', 'ratio', 'round'],
+    //                aspectRatio: 1,
+    //                setSelect: [25, 25, 100, 100],
+    //                handles: ['n', 's', 'e', 'w'],
 
-                    dragbars: [],
-                    borders: [],
-                    onChange: function (coordinates) {
-                        onPictureCropEnd(coordinates);
-                    }
-                }, function () {
-                    this.container.addClass('jcrop-circle-demo');
-                    interface_load(this);
-                    jcrop_api = this;
-                });
+    //                dragbars: [],
+    //                borders: [],
+    //                onChange: function (coordinates) {
+    //                    onPictureCropEnd(coordinates);
+    //                }
+    //            }, function () {
+    //                this.container.addClass('jcrop-circle-demo');
+    //                interface_load(this);
+    //                jcrop_api = this;
+    //            });
 
-                function interface_load(obj) {
-                    cb = obj;
-                    cb.container.append($('<div />').addClass('custom-shade'));
+    //            function interface_load(obj) {
+    //                cb = obj;
+    //                cb.container.append($('<div />').addClass('custom-shade'));
 
-                    function random_coords() {
-                        return [
-                            Math.random() * 300,
-                            Math.random() * 200,
-                            (Math.random() * 540) + 50,
-                            (Math.random() * 340) + 60
-                        ];
-                    }
-                    $(document.body).on('click', '[data-setting]', function (e) {
-                        var $targ = $(e.target),
-                            setting = $targ.data('setting'),
-                            value = $targ.data('value'),
-                            opt = {};
+    //                function random_coords() {
+    //                    return [
+    //                        Math.random() * 300,
+    //                        Math.random() * 200,
+    //                        (Math.random() * 540) + 50,
+    //                        (Math.random() * 340) + 60
+    //                    ];
+    //                }
+    //                $(document.body).on('click', '[data-setting]', function (e) {
+    //                    var $targ = $(e.target),
+    //                        setting = $targ.data('setting'),
+    //                        value = $targ.data('value'),
+    //                        opt = {};
 
-                        opt[setting] = value;
-                        cb.setOptions(opt);
+    //                    opt[setting] = value;
+    //                    cb.setOptions(opt);
 
-                        $targ.closest('.btn-group').find('.active').removeClass('active');
-                        $targ.addClass('active');
+    //                    $targ.closest('.btn-group').find('.active').removeClass('active');
+    //                    $targ.addClass('active');
 
-                        if ((setting == 'multi') && !value) {
-                            var m = cb.ui.multi, s = cb.ui.selection;
+    //                    if ((setting == 'multi') && !value) {
+    //                        var m = cb.ui.multi, s = cb.ui.selection;
 
-                            for (var i = 0; i < m.length; i++)
-                                if (s !== m[i]) m[i].remove();
+    //                        for (var i = 0; i < m.length; i++)
+    //                            if (s !== m[i]) m[i].remove();
 
-                            cb.ui.multi = [s];
-                            s.focus();
-                        }
+    //                        cb.ui.multi = [s];
+    //                        s.focus();
+    //                    }
 
-                        e.preventDefault();
-                    });
+    //                    e.preventDefault();
+    //                });
 
-                    $(document.body).on('click', '[data-action]', function (e) {
-                        var $targ = $(e.target);
-                        var action = $targ.data('action');
+    //                $(document.body).on('click', '[data-action]', function (e) {
+    //                    var $targ = $(e.target);
+    //                    var action = $targ.data('action');
 
-                        switch (action) {
-                            case 'random-move':
-                                cb.ui.selection.animateTo(random_coords());
-                                break;
-                        }
+    //                    switch (action) {
+    //                        case 'random-move':
+    //                            cb.ui.selection.animateTo(random_coords());
+    //                            break;
+    //                    }
 
-                        cb.ui.selection.refresh();
+    //                    cb.ui.selection.refresh();
 
-                    }).on('selectstart', function (e) {
-                        e.preventDefault();
-                    }).on('click', 'a[data-action]', function (e) {
-                        e.preventDefault();
-                    });
-                }
+    //                }).on('selectstart', function (e) {
+    //                    e.preventDefault();
+    //                }).on('click', 'a[data-action]', function (e) {
+    //                    e.preventDefault();
+    //                });
+    //            }
 
-            });
-            ShowWaitingProgress("#avatar-upload-box", "hide");
-            $('#upload-image').removeAttr("disabled");
-        }
+    //        });
+    //        ShowWaitingProgress("#avatar-upload-box", "hide");
+    //        $('#upload-image').removeAttr("disabled");
+    //    }
+    //});
+
+    createWaitingPopup('make-admin-confirmation');
+    createWaitingPopup('remove-admin-confirmation');
+    createWaitingPopup('singleuser-delete-confirmation');
+
+    var makeAdminDialog = new ej.popups.Dialog({
+        header: window.TM.App.LocalizationContent.AssignRole,
+        content: document.getElementById("make-admin-confirmation-dialog-content"),
+        showCloseIcon: true,
+        buttons: [
+            { click: MakeSingleUserAdmin, buttonModel: { content: window.TM.App.LocalizationContent.YesButton, isPrimary: true } },
+            { click: onMakeAdminDialogClose, buttonModel: { content: window.TM.App.LocalizationContent.NoButton } }
+        ],
+        width: "472px",
+        height: "auto",
+        isModal: true,
+        visible: false,
+        animationSettings: { effect: 'Zoom' },
     });
+    makeAdminDialog.appendTo("#make-admin-confirmation");
 
+    var removeAdminDialog = new ej.popups.Dialog({
+        header: window.TM.App.LocalizationContent.RemoveRole,
+        content: document.getElementById("remove-admin-confirmation-dialog-content"),
+        showCloseIcon: true,
+        buttons: [
+            { click: removeAdmin, buttonModel: { content: window.TM.App.LocalizationContent.YesButton, isPrimary: true } },
+            { click: onRemoveAdminDialogClose, buttonModel: { content: window.TM.App.LocalizationContent.NoButton } }
+        ],
+        width: "472px",
+        height: "auto",
+        isModal: true,
+        visible: false,
+        animationSettings: { effect: 'Zoom' },
+    });
+    removeAdminDialog.appendTo("#remove-admin-confirmation");
 
+    var singleUserDeleteDialog = new ej.popups.Dialog({
+        header: window.TM.App.LocalizationContent.DeleteUser,
+        content: document.getElementById("singleuser-delete-confirmation-dialog-content"),
+        showCloseIcon: true,
+        buttons: [
+            { click: deleteSingleUser, buttonModel: { content: window.TM.App.LocalizationContent.YesButton, isPrimary: true } },
+            { click: onSingleDeleteDialogClose, buttonModel: { content: window.TM.App.LocalizationContent.NoButton } }
+        ],
+        width: "472px",
+        height: "auto",
+        isModal: true,
+        animationSettings: { effect: 'Zoom' },
+        visible: false
+    });
+    singleUserDeleteDialog.appendTo("#singleuser-delete-confirmation");
 });
 
 function successMessage() {
@@ -581,11 +548,11 @@ function onUserChangePasswordClick() {
         return;
     }
 
-    ShowWaitingProgress("#content-area", "show");
+    showWaitingPopup('content-area');
     doAjaxPost('POST', UpdatePasswordUrl, { newpassword: $("#new-password").val(), confirmpassword: $("#confirm-password").val(), userId: $("#user-id").val() },
         function (result) {
             $("input[type='password']").val("");
-            ShowWaitingProgress("#content-area", "hide");
+            hideWaitingPopup('content-area');
             $("#password_policy_rules").remove();
             $("#confirm-password-section").removeAttr("style");
             if (!result.Data.status) {
@@ -636,7 +603,7 @@ function SaveUserdetails() {
         else {
             isActive = $("#container-select").hasClass("show") ? userStatus : false;
         }
-        ShowWaitingProgress("#content-area", "show");
+        showWaitingPopup('content-area');
         doAjaxPost('POST',
             updateUserProfileUrl,
             {
@@ -649,7 +616,7 @@ function SaveUserdetails() {
                 status: isActive
             },
             function (result) {
-                ShowWaitingProgress("#content-area", "hide");
+                hideWaitingPopup('content-area');
                 if (result.Data.status) {
                     var updateddetails = result.Data.profileinfo;
                     var updatedfirstname = (updateddetails.firstName != null) ? $("#user-firstname").val(updateddetails.firstName) : $("#user-firstname").val(updateddetails.previousFirstName);
@@ -744,4 +711,89 @@ $(document).on("click", "#cancel-button", function (e) {
 
 if ($("#status-user").val == "InActive") {
     $("#activate-button-click").removeClass("hide");
+}
+
+$(document).on("click", ".delete-class", function () {
+    $(this).parent("li").addClass("is-delete");
+    onSingleDeleteDialogOpen();
+});
+
+$(document).on("click", ".make-admin-class", function () {
+    $(this).parent("li").addClass("make-admin");
+    onMakeAdminDialogOpen();
+});
+
+$(document).on("click", ".remove-admin-class", function () {
+    $(this).parent("li").addClass("remove-admin");
+    onRemoveAdminDialogOpen();
+});
+
+function onSingleDeleteDialogOpen() {
+    $("#singleuser-delete-confirmation").find("button.e-primary").addClass("critical-action-button");
+    document.getElementById("singleuser-delete-confirmation").ej2_instances[0].show();
+}
+
+function onMakeAdminDialogOpen() {
+    document.getElementById("make-admin-confirmation").ej2_instances[0].show();
+}
+
+function onRemoveAdminDialogOpen() {
+    document.getElementById("remove-admin-confirmation").ej2_instances[0].show();
+}
+
+function MakeSingleUserAdmin() {
+    var userId = $(".make-admin").attr("data-content");
+    showWaitingPopup('make-admin-confirmation');
+    $.ajax({
+        type: "POST",
+        url: makeAdminUrl,
+        data: "&users=" + userId,
+        success: function (result) {
+            hideWaitingPopup('make-admin-confirmation');
+            onMakeAdminDialogClose();
+            window.location.reload();
+        }
+    });
+
+}
+
+function onMakeAdminDialogClose() {
+    document.getElementById("make-admin-confirmation").ej2_instances[0].hide();
+}
+
+function removeAdmin() {
+    var userId = $(".remove-admin").attr("data-content");
+    showWaitingPopup('remove-admin-confirmation');
+    $.ajax({
+        type: "POST",
+        url: removeAdminUrl,
+        data: { "userId": userId },
+        success: function (result) {
+            hideWaitingPopup("remove-admin-confirmation");
+            onRemoveAdminDialogClose();
+            window.location.reload();
+        }
+    });
+}
+
+function onRemoveAdminDialogClose() {
+    document.getElementById("remove-admin-confirmation").ej2_instances[0].hide();
+}
+
+function deleteSingleUser() {
+    showWaitingPopup('singleuser-delete-confirmation');
+    var userId = $(".is-delete").attr("data-content");
+    doAjaxPost("POST", deleteSingleFromUserListUrl, "UserId=" + userId, function (data) {
+        if (data.status) {
+            window.location.href = userPageUrl;
+        } else {
+            hideWaitingPopup('singleuser-delete-confirmation');
+            onSingleDeleteDialogClose();
+            window.location.reload();
+        }
+    });
+}
+
+function onSingleDeleteDialogClose() {
+    document.getElementById("singleuser-delete-confirmation").ej2_instances[0].hide();
 }

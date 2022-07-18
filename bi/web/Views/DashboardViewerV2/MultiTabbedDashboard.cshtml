@@ -28,7 +28,6 @@
     var isViewNotFound = (ViewBag.ViewNotFound != null && ViewBag.ViewNotFound) ? true : false;
     var isCommentNotFound = (ViewBag.CommentNotFound != null && ViewBag.CommentNotFound) ? true : false;
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && ViewBag.MultiDashboardDetails.IsPublic;
-
 }
 <html>
     <head>
@@ -124,6 +123,7 @@
             var isViewNotFound = @Html.Raw(Json.Serialize(isViewNotFound));
             var isCommentNotFound = @Html.Raw(Json.Serialize(isCommentNotFound));
             var cdnLink = "@dashboardServerResourceUrl";
+            var theming = @Json.Serialize(globalAppSettings.SystemSettings.Theming);
         </script>
         @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
     </head>
@@ -160,7 +160,7 @@
             <div class="e-content" id="multi-tab-content">
                 @for (var i = 0; i < ViewBag.MultiTabDashboardDetails.Count; i++)
                 {
-                    <div data-designer-id="@("dashboard" + i)" style="width:100%;height:100%">
+                    <div data-designer-id="@("dashboard" + i)" class="tab-dashboard" style="width:100%;height:100%">
                         <div id="@("dashboard" + i)"></div>
                     </div>
                 }
@@ -213,7 +213,7 @@
                 <ul class="multi-tab-header-list-container">
                     @for (var i = 0; i < ViewBag.MultiTabDashboardDetails.Count; i++)
                     {
-                        <li class="multi-tab-header-list" id="e-item_@i">
+                        <li class="multi-tab-header-list" id="e-item-multi-tab-dashboard_@i">
                             <div class="multi-tab-header-names">@ViewBag.MultiTabDashboardDetails[i].Name</div>
                         </li>
                     }

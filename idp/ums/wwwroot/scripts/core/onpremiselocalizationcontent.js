@@ -9,7 +9,8 @@
             AvoidSpecailCharacters: "[[[Please avoid special characters]]]",
             EnterPassword: "[[[Please enter the password]]]",
             PasswordRule1: "[[[Password must meet the following requirements. It must contain,]]]",
-            PasswordRule2: "[[[at least 6 characters]]]",
+            PasswordRule2_Length1: "[[[at least ]]]",
+            PasswordRule2_Length2: "[[[ characters]]]",
             PasswordRule3: "[[[1 uppercase]]]",
             PasswordRule4: "[[[1 lowercase]]]",
             PasswordRule5: "[[[1 numeric]]]",
@@ -20,6 +21,7 @@
 
             //Authentication Settings
             DefaultAuthenticationSettings: "[[[Default Authentication Provider]]]",
+            DefaultAuthenticationConfirmation: "[[[Default Authentication Confirmation]]]",
             Provider: "[[[Provider]]]",
             SSOSettings: "[[[SSO Settings]]]",
             SSOSettingsUpdated: "[[[SSO settings have been updated.]]]",
@@ -46,6 +48,8 @@
 
             //License Settings
             ManageLicense: "[[[Manage License]]]",
+            UpdateLicense: "[[[Update License]]]",
+            UploadLicense: "[[[Upload License]]]",
             LicenseUpdated: "[[[The license has been updated successfully.]]]",
             LicenseUpdateFailed: "[[[Failed to update the license.]]]",
             ChangeSubscriptionDialogHeader: "[[[Change Subscription]]]",
@@ -78,12 +82,14 @@
             postgresPortInfo: "[[[Specify the TCP port number that the server is listening for connections. The default port number is 5432.]]]",
             MailSendFailureMessage1: "[[[Unable to send test email.]]]",
             MailSendFailureMessage2: "[[[View More]]]",
+            SecuritySettings: "[[[Security Settings]]]",
 
             //Offlinelicenupdate.js
             InvalidLicFileFormat: "[[[Invalid file type. Please select .lic format only]]]",
             LicenseFileCorrupt: "[[[License file is corrupted. Please get the new license file from]]]",
 
             //Email Settings
+            SendTestMail: "[[[Send Test Email]]]",
             SenderEmailValidator: "[[[Please enter sender email address]]]",
             SenderNameValidator: "[[[Please enter sender name]]]",
             MailSMTPServerValidator: "[[[Please enter SMTP server]]]",
@@ -156,7 +162,7 @@
             //SysetmSettings.js
             SelectDatabase: "[[[Select a database]]]",
             SiteValidation: "[[[Site name is too long. Must be fewer than 255 characters.]]]",
-            SiteIdentifierValidation: "[[[Site identifier is too long. Must be fewer than 32 characters.]]]",
+            SiteIdentifierValidation: "[[[Site identifier is too long. Must be fewer than 64 characters.]]]",
             YourSite: "[[[Step 2: Let’s configure the database]]]",
             YourSite2: "[[[This is where we store user identities and ]]]",
             YourSite3: " [[[sites.]]]",
@@ -321,6 +327,11 @@
             GrantSiteAcessHeaderDescription: "[[[Select the sites to which you want to grant access.]]]",
             GrantSiteAccessButton: "[[[Grant access]]]",
             ManageUserAccess: "[[[Manage User Access]]]",
+            UnlockUser: "[[[Unlock User]]]",
+            UserUnlocked: "[[[User has been unlocked successfully]]]",
+            UserUnlockedError: "[[[An error occured while unlocking user]]]",
+            MinLengthEmpty: "[[[Please enter the value.]]]",
+            MinLengthNeeded: "[[[Passwords must be at least 6 characters long.]]]",
 
             //UserManagementProfile.js
             PhoneNumberValidator: "[[[Please enter the valid phone number]]]",

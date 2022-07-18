@@ -70,10 +70,19 @@ function testMailTrigger() {
         };
 
         var testMailDialogobj = new ejs.popups.Dialog({
-            header: "Send Test Email",
+            header: window.TM.App.LocalizationContent.SendTestMail,
             showCloseIcon: true,
             content: document.getElementById("test-mail-box"),
             buttons: [
+                {
+                    'click': function () {
+                        testMailDialogobj.hide();
+                        $("#test-mail").val("");
+                    },
+                    buttonModel: {
+                        content: window.TM.App.LocalizationContent.CancelButton
+                    }
+                },
                 {
                     'click': function (e) {
                         if ($("#test-mail-form").valid()) {
@@ -81,9 +90,9 @@ function testMailTrigger() {
                                 type: "POST",
                                 url: sentTestMail,
                                 data: { email: $("#test-mail").val(), mailSettingsData: JSON.stringify(mailSettingsData) },
-                                beforeSend: showWaitingPopup($("#server-app-container")),
+                                beforeSend: showWaitingPopup('server-app-container'),
                                 success: function (result) {
-                                    hideWaitingPopup($("#server-app-container"));
+                                    hideWaitingPopup('server-app-container');
                                     if (result.Status) {
                                         $("#test-mail").val("");
                                         $(".success-box").show();
@@ -93,7 +102,7 @@ function testMailTrigger() {
                                         $(".test-mail-info, #test-mail-form").hide();
                                     }
                                     else {
-                                        $("#test-mail").parent().addClass("e-error");
+                                        $("#test-mail").closest('span').addClass("e-error");
                                         $("#test-mail-validate").css("display", "block");
                                         $("#test-mail-validate").html(window.TM.App.LocalizationContent.MailSendFailureMessage1 + '<a id="mail-error-detail">' + window.TM.App.LocalizationContent.MailSendFailureMessage2 + '</a>');
                                         $("#test-main-error-message").val(result.Data);
@@ -113,22 +122,13 @@ function testMailTrigger() {
                         $("#test-mail").val("");
                     },
                     buttonModel: {
-                        content: window.TM.App.LocalizationContent.CancelButton
-                    }
-                },
-                {
-                    'click': function () {
-                        testMailDialogobj.hide();
-                        $("#test-mail").val("");
-                    },
-                    buttonModel: {
                         content: window.TM.App.LocalizationContent.DoneButton
                     }
                 }
             ],
             animationSettings: { effect: 'Zoom' },
             beforeOpen: showTestMailBox,
-            width: '400px',
+            width: '472px',
             isModal: true,
         });
         testMailDialogobj.appendTo(createDialogId);

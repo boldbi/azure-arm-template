@@ -23,7 +23,11 @@
     var credentialsUrl = Url.Action("Credentials", "Administration");
     var dashboardServerResourceUrl = _globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var groupPageUrl = Url.Action("group", "group");
+    var webhookSettingsPageUrl = Url.Action("WebhookSettings", "Administration");
+    var editWebhookSettingsPageUrl = Url.Action("EditWebhook", "Administration");
     var userPageUrl = Url.Action("User", "UserManagement");
+    var widgetUrl = Url.Action("CustomWidgets", "Administration");
+    var securitySettingsUrl = Url.Action("SecuritySettings", "Administration");
 }
 
 <environment include="Development,CloudDevelopment">
@@ -85,6 +89,15 @@
                         </a>
                     </li>
                 }
+                @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.Widgets]))
+                {
+                    <li class="admin-menu-item @(currentUrl.IndexOf(widgetUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                        <a id="widget-settings-link" href="@widgetUrl">
+                            <i class="su su-widget"></i>
+                            <span>@T["Widgets"]</span>
+                        </a>
+                    </li>
+                }
                 @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.Email]))
                 {
                     <li class="admin-menu-item @(currentUrl.IndexOf(emailSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
@@ -131,6 +144,16 @@
                     </a>
                 </li>
             }
+
+            @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.Security]))
+            {
+                <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(securitySettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="cors-settings-link" class="" href="@securitySettingsUrl">
+                        <i class="su su-cors"><i class="su-cors path1" style="padding-right:0px"></i></i>
+                        <span>@T["Security"]</span>
+                    </a>
+                </li>
+            }
             @if (!ServerAppConfig.IsSelfHosted)
             {
                 @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.SupportSettings]))
@@ -153,17 +176,17 @@
                 }
             }
             @*else
+        {
+            @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.ManageLicense]))
             {
-                @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.ManageLicense]))
-                {
-                    <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(manageLicenseSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
-                        <a id="license-settings-link" class="" href="@manageLicenseSettingsUrl">
-                            <i class="su su-license-settings"></i>
-                            <span>@T["Manage License"]</span>
-                        </a>
-                    </li>
-                }
-            }*@
+                <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(manageLicenseSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="license-settings-link" class="" href="@manageLicenseSettingsUrl">
+                        <i class="su su-license-settings"></i>
+                        <span>@T["Manage License"]</span>
+                    </a>
+                </li>
+            }
+        }*@
             @if (isAdmin || (model != null && model[PermissionEntity.UsersandGroups]))
             {
                 <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("users") || currentUrl.IndexOf(userPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
@@ -179,6 +202,15 @@
                     <a id="license-settings-link" class="" href="@groupPageUrl">
                         <i class="su su-group-1"></i>
                         <span>@T["Groups"]</span>
+                    </a>
+                </li>
+            }
+            @if (isAdmin || (model != null && model[SettingsScopes.All] || model[SettingsScopes.Integrations]))
+            {
+                <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(webhookSettingsPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(editWebhookSettingsPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="webhook-settings-link" href="@webhookSettingsPageUrl">
+                        <i class="su su-webhook"></i>
+                        <span>@T["Integrations"]</span>
                     </a>
                 </li>
             }

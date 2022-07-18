@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "[[[Security]]] - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/security-settings.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script src="~/bundles/js/security-settings.js" asp-append-version="true"></script>
+    <script>
+        var updateSecuritySettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
+        var passwordLength = "@GlobalAppSettings.SystemSettings.PasswordSettings.MinimumLength";
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+    <div id="security-settings-container" role="tabpanel" class="col-xs-12 admin-page-content-container">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div class="col-md-12 admin-page-header">
+                <hgroup class="admin-page-header-description">
+                    <h1 class="h2 page-title">[[[Security]]]</h1>
+                    <h5 class="page-description">[[[Configure application and user account security policies.]]]</h5>
+                </hgroup>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+                @await Html.PartialAsync("_PasswordPolicy")
+                @await Html.PartialAsync("_LockAccount")
+            </div>
+
+            <div class="admin-page-footer col-xs-12">
+                <div class="admin-page-actions col-lg-12 col-md-12">
+                    <button class="secondary-button pull-right" id="cancel-settings">[[[Cancel]]]</button>
+                    <button type="button" title="" id="update-password-settings" class="primary-button pull-right">
+                        [[[Save]]]
+                    </button>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

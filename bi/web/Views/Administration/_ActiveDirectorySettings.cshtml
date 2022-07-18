@@ -11,7 +11,7 @@
     authControl = ViewBag.AuthControl as List<TenantAuthControl>;
     authControl = authControl != null && authControl.Count > 0 ? authControl : null;
 #else
-cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
+    cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
 #endif
     var isAzureApplication = ServerAppConfig.IsAzureApplication;
     var enableWindowsAD = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !isAzureApplication;
@@ -19,6 +19,7 @@ cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isAdmin = _identityResponse.IsAdmin;
+    var loginDisclaimerObject = ServerAppConfig.IsSelfHosted ? string.Empty : ViewBag.SystemSettings.LoginDisclaimer;
     var scopeList = ServerAppConfig.SettingsScopesList;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
 }
@@ -62,6 +63,7 @@ cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
         var SystemSettingsProperties = @Html.Raw(Json.Serialize(ViewBag.SystemSettings));
         var isAzureApplication = @Json.Serialize(isAzureApplication);
         var enableWindowsAD = @Json.Serialize(enableWindowsAD);
+        var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
     </script>
     <script type="text/javascript">
 

@@ -1,5 +1,4 @@
 ﻿$(document).ready(function () {
-    $("#body").ejWaitingPopup();
     $(document).on("click", ".css-radio", function () {
         $(this).siblings("label").removeClass("notransition");
     });
@@ -47,7 +46,7 @@ $(document).on("click", "#update-user-settings", function () {
         ActivationType: $("input:radio[name=activation]:checked").val(),
         EmailRequired: $("input:radio[name=email-required]:checked").val()
     };
-    $("#body").ejWaitingPopup("show");
+    showWaitingPopup('body');
     $.ajax({
         type: "POST",
         url: window.saveUserSettingsUrl,
@@ -58,7 +57,7 @@ $(document).on("click", "#update-user-settings", function () {
             } else {
                 WarningAlert(window.TM.App.LocalizationContent.UserSettings, window.TM.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
             }
-            $("#body").ejWaitingPopup("hide");
+            hideWaitingPopup('body');
         }
     });
 });

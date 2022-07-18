@@ -218,7 +218,12 @@ var Designer = {
                 argument: "Argument",
                 dimension: "Dimension",
                 measure: "Measure",
-                designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator."
+				designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator.",
+				valueAsDimension: "Dimension(s)",				
+                designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator.",
+                minimumToolText: "The field bind in this section will be considered as a start value of the Gauge Range. For setting static values, use the properties panel.",
+				maximumToolText: "The field bind in this section will be considered as an end value of the Gauge Range. For setting static values, use the properties panel.",
+                rangeNavigatorToolTextMessage:"Range Navigator requires at least one value and one argument to render.The argument section supports only the Date field."
             },
             propertyPanel: {
                 headerText: "Properties",
@@ -355,7 +360,12 @@ var Designer = {
 
                     },
                     widgetTitleAutoFontSize: "Title Auto Font Size",
-                    widgetSubTitleAutoFontSize: "Subtitle Auto Font Size"
+                    widgetSubTitleAutoFontSize: 'Subtitle Auto Font Size',
+					widgetPaddingInfo: {
+						autoPaddingSetting: "Auto Padding Settings",
+						autoPadding: "Auto Padding",
+						padding: "Padding"
+					},
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -398,6 +408,7 @@ var Designer = {
                     isInversed:"Inverse Scroll Bar",
 		    enableSmoothScroll: "Enable Smooth Scroll",
                     pageSize:"Page Size",
+                    chartSize:"Chart Size",
                     valueLabelRotation: "Value Label Rotation",
                     valueLabelPosition: "Value Label Position",
                     dataLabel: "Data Label",
@@ -460,7 +471,10 @@ var Designer = {
                     padding: "Padding",
                     defaultType: "Default Type",
 					hideEmptyHeaders: "Hide Empty Headers",
-                    emptyCellsContent:"Empty Cell Content" 
+                    lineWidth:"Line Width",
+                    emptyCellsContent:"Empty Cell Content",
+					rawData: "Show Raw Data",
+                    rawDataInfo:"This option will remove the aggregation in grid columns and show raw data."
                 },
 				PaddingSettings:{
 					top: "Top",
@@ -495,6 +509,7 @@ var Designer = {
                     enable: "Enable",
                     confidenceInterval: "Confidence Interval",
                     SubmitForecast: "SubmitForecast",
+                    legendText:"Legend Text",
                     confidenceBandStyle: "Confidence Band Style"
 
                 },
@@ -529,6 +544,10 @@ var Designer = {
                     useDefaultPalette: "Use Default Palette",
                     advancedSetting: "Advanced Setting"
                 },
+				kpiBasicSettings: {
+					fixedLayout: "Fixed Layout",
+					responsiveMargin: "Reponsive Margin"
+				},
                 columnSettings: {
                     columnCustomize: "Column Alignment",
                     kpiColumnsText: "KPI Columns",
@@ -679,7 +698,9 @@ var Designer = {
                     markerShape: "Marker Shape",
                     markerColor: "Color",
                     markerWidth: "Width",
-                    markerHeight: "Height"
+                    markerDefaultZoom: "Marker Based Zoom",
+                    markerHeight: "Height",
+					markerDefaultZoom: "Marker Based Zoom"
                 },
                 rangeSettings: {
                     showRange: "Show Range",
@@ -819,6 +840,23 @@ var Designer = {
                 dsExpressionText: "Expression",
                 parameterHeaderText: "Dashboard Parameter",
 				dataSamplingHeaderText: "Data Sampling",
+				dataCacheHeaderText: "Data Cache",
+				dataCacheON: "ON",
+				dataCacheONtext: ":Results will be cached.",
+				dataCacheOFF: "OFF",
+				dataCacheOFFtext: ":Results will not be cached, your existing cache will be deleted.",
+				dataCacheInfo: "Data Cache is enabled and data will be cached after first rendering of the dashboard. Therefore, data in the widgets will be shown from the cache. Please choose the refresh option from the menu to fetch live data.",
+				dataCacheMemory: "Maximum Memory Size",
+				dataCacheApply: "Apply",
+				dataCacheTitle: "Data Cache Settings",
+				dataCacheTimeExpire: "Expire After",
+				dataCacheInMemory: "In-Memory",
+				dataCacheRedis: "Redis",
+				dataCacheFileSystem: "Files System",
+				dataCacheMemoryMode: "Cache Modes",
+				redisServeErrorContent: "Configured redis cache server is not reachable. Please ensure that the redis server is properly running or else change the cache mode to inmemory in BoldServices\\bi\\dataservice\\appsettings.json",
+				redisServeErrorTitle: "Redis Server Error",
+				clearCacheButtonText: "Clear",
                 refreshScheduleText: "Refresh Schedule",
                 authentication: "Authentication",
                 promptText: "Prompt",
@@ -926,6 +964,7 @@ var Designer = {
                     msSql: "Microsoft SQL",
                     azureSqlDataWarehouse: "Azure SQL Data Warehouse",
                     ssas: "Microsoft SQL Server Analysis Services",
+                    SSAS:"SSAS",
                     mongodb: "MongoDB",
                     mySql: "MySQL",
                     mariadb: "MariaDB",
@@ -960,6 +999,9 @@ var Designer = {
                     ravendb: "RavenDB",
                     webDataSource: "Web",
                     sqlite: "SQLite",
+                    clickHouse:"ClickHouse",
+                    Clickhouse:"Clickhouse",
+                    redShift:"Redshift",
                     jira: {
                         name: "Jira",
                         templates: {
@@ -1497,6 +1539,12 @@ var Designer = {
                         templates: [
                             { projects: { name: '', desc: '' } }
                         ]
+                    },
+                    boldDesk: {
+                        name: 'BoldDesk',
+                        templates: [
+                            { projects: { name: '', desc: '' } }
+                        ]
                     }
                 },
                 oauthConnectors: {
@@ -1876,6 +1924,7 @@ var Designer = {
                 imageURLPatternValidationMessage: "The number of fields configured is less when compared to the value used in the URL pattern.",
                 slaveWidgetDataResetMessage: "Widgets with fields in rows cannot listen to period-over-period comparisons. Do you want to remove the rows?",
                 resetPoPMessage: "Widgets listening to period-over-period comparisons cannot contain fields in rows. Do you want to ignore the comparison configuration?",
+				resetKPIPoPMessage: "Widgets listening to period-over-period comparisons cannot contain fields in target value. Do you want to ignore the comparison configuration?",
                 slaveOverrideMessage: "The selected widget already listens to ",
                 slaveOverrideAlert: ". Do you want to make it listen to ",
                 largeFileSizeMessage: "The selected file size is too large ",
@@ -2677,7 +2726,7 @@ var Designer = {
             webCustomDataSource: {
                 emptyUrlValidation: "Url should not be empty.",
                 emptyRawBodyValidation: "Raw body should not be empty",
-                hostNameDisplayText: "HostName",
+                hostNameDisplayText: "Host Name",
                 apiKeyDisplayText: "API Key",
                 apiTokenDisplayText: "API Token",
                 clubReadyChainIdDisplayText: "Chain Id",
@@ -4549,6 +4598,12 @@ var Designer = {
 
                     avgDesc: "Returns the average of the values in the given expression.",
                     avgEx: "AVG(numeric_expression)",
+					
+					sumdDesc: "Returns the sum of the Distinct values in the given expression.",
+                    sumdEx: "SUMD(expression)",
+
+                    avgdDesc: "Returns the average of the Distinct values in the given expression.",
+                    avgdEx: "AVGD(expression)",
 
                     countDesc: "Returns the number of items in the given expression.",
                     countEx: "COUNT(expression)",
@@ -4867,6 +4922,25 @@ var Designer = {
             },
             measureFormatting: {
                 autoText: "Auto"
+            },
+			widgetConfiguration: {
+                enableAll: "Enable All",
+                noSelectionAlert: "Please select minimum one connection.",
+				uploading: 'Uploading...',
+				uploadFailed: 'Upload Failed.',
+				uploadCompleted: 'Upload Completed',
+				initiatingUpload: 'Initiating Upload...',
+				invalidSession: 'Invalid Session',
+				title: 'Widget configuration',
+				upload: 'Upload',
+				authenticationFailed:'Authentication failed for the request',
+				connectionRefused: 'Failed to connect to the Dashboard Service. Please check your network connection and try again',
+				dataFetchingError: 'An error occurred while fetching data',
+				fileUploadInProgress: 'File upload in progress. Please wait...',
+				invalidSessionForErrorMessage: 'Please make sure that you have logged into the dashboard site and your session is valid',
+				okBtnText: 'OK',
+				noBtnText: 'No',
+				yesBtnText: 'Yes'
             },
             connectionConfiguration: {
                 save: "Save",
@@ -5638,6 +5712,102 @@ var Designer = {
 				subscriptionByAccount: 'Subscription By Account',
 				invoiceItems: 'Invoice Items',
 				invoicePayments: 'Invoice Payments',
+            },
+            boldDeskDataSource: {
+                brands: 'Brands',
+                fields: 'Fields',
+                fieldDependencies: 'Field Dependencies',
+                contacts: 'Contacts',
+                contactGroups: 'Contact Groups',
+                users: 'Users',
+                agents: 'Agents',
+                groups: 'Groups',
+                tickets: 'Tickets',
+                satisfactionSurvey: 'Satisfaction Survey',
+                holidays: 'Holidays',
+                worklogs: 'Worklogs',
+                cannedResponses: 'Canned Responses',
+                locals: 'Locals',
+                roles: 'Roles',
+                sla: 'SLA',
+                webhooks: 'Webhooks',
+                integrations: 'Integrations',
+
+
+                allBrands: 'All Brands',
+                allUserBrands: 'All User Brands',
+                allFieldOptions: 'All Field Options',
+                allFieldDependencies: 'All Field Dependencies',
+                getFieldDependencyById: 'Get Field Dependency By Id',
+                contactByEmail: 'Contact By Email',
+                allContacts: 'All Contact',
+                getContactById: 'Get Contact By Id',
+                allContactFields: 'All Contact Fields',
+                getContactFieldById: 'Get Contact Field By Id',
+                contactGroupByContactId: 'Contact Group By Contact Id',
+                contactNotes: 'Contact Notes',
+                allContactGroups: 'All Contact Groups',
+                getContactGroupById: 'Get Contact Group By Id',
+                contactGroupByName: 'Contact Group By Name',
+                contactsByContactGroup: 'Contacts By Contact Group',
+                contactGroupDomains: 'Contact Group Domains',
+                allContactGroupFields: 'All Contact Group Fields',
+                getContactGroupFieldById: 'Get Contact Group Field By Id',
+                contactGroupNotesById: 'Contact Group Notes By Id',
+                userProfileByEmail: 'User Profile By Email',
+                userProfile: 'User Profile',
+                contactGroupsByUserId: 'Contact Groups By User Id',
+                allUserCollections: 'All User Collections',
+                allAgents: 'All Agents',
+                getAgentById: 'Get Agent By Id',
+                agentByEmail: 'Agent By Email',
+                allAgentsCollections: 'All Agent Collections',
+                getGroupById: 'Get Group By Id',
+                agentCount: 'Agent Count',
+                allGroups: 'All Groups',
+                allGroupsCollections: 'All Groups Collections',
+                membersByGroupId: 'Members By Group Id',
+                allTickets: 'All Tickets',
+                getTicketById: 'Get Ticket By Id',
+                ticketHistories: 'Ticket Histories',
+                ticketAttachment: 'Ticket Attachment',
+                deletedTickets: 'Deleted Tickets',
+                spamTickets: 'Spam Tickets',
+                ticketUpdates: 'Ticket Updates',
+                ticketNotes: 'Ticket Notes',
+                ticketPriorities: 'Ticket Priorities',
+                ticketStatus: 'Ticket Status',
+                ticketSources: 'Ticket Sources',
+                ticketFields: 'Ticket Fields',
+                ticketForms: 'Ticket Forms',
+                allTicketsUpdates: 'All Tickets Updates',
+                ticketWatchers: 'Ticket Watchers',
+                allTiceketMetrics: 'All Ticket Metrics',
+                ticketMetricsByTicket: 'Ticket Metrics By Ticket',
+                tagsByTicket: 'Tags By Tickets',
+                webLinksByTicket: 'Web Links By Ticket',
+                ticketLinksByTicket: 'Ticket Links By Ticket',
+                linksCountByTicket: 'Links Count By Ticket',
+                ticketMessages: 'Ticket Messages',
+                messageBasedOnTicketAndMessageId: 'Message Based On Ticket And Message Id',
+                satisfactionRatings: 'Satisfaction Ratings',
+                allHolidays: 'All Holidays',
+                getHolidayById: 'Get Holiday By Id',
+                allWorklogs: 'All Worklogs',
+                worklogsUsingFilters: 'Worklogs Using Filters',
+                allCannedResponses: 'All Canned Responses',
+                getCannedResponseById: 'Get Canned Response By Id',
+                cannedResponseCategories: 'Canned Response Categories',
+                timezones: 'Timezones',
+                languages: 'Languages',
+                allRoles: 'All Roles',
+                getRoleById: 'Get Role By Id',
+                membersByRoleId: 'Members By Role Id',
+                allSLAs: 'All SLAs',
+                getSLAById: 'Get SLA By Id',
+                allWebhooks: 'All Webhooks',
+                getWebhookById: 'Get webhook By Id',
+                allLinkedItems: 'All Linked Items',
             },
             freshdeskDataSource: {
                 allTickets: "All Tickets",

@@ -6,15 +6,14 @@ var siteCreation = false;
 
 $(document).ready(function () {
     var inputbox = new ejs.inputs.TextBox({
-        cssClass: 'e-outline e-custom',
-        floatLabelType: 'Auto'
+        cssClass: 'e-outline e-custom e-non-float',
+        floatLabelType: 'Never',
     });
 
     inputbox.appendTo("#custom-attribute-name");
 
     multiLineInputBoxInitialization("#custom-attribute-value");
     multiLineInputBoxInitialization("#custom-attribute-descrition");
-
     $("#custom-attribute-form").validate({
         errorElement: "span",
         onkeyup: function (element, event) {
@@ -88,12 +87,13 @@ function openCustomAttributeDialog(attributeId, name) {
             header: '<div class="dlg-title">' + window.TM.App.LocalizationContent.AddCustomAttribute + '</div>',
             content: document.getElementById("custom-attribute-content"),
             buttons: [
-                { click: saveAttribute, buttonModel: { isPrimary: true, content: window.TM.App.LocalizationContent.SaveButton } },
                 { click: onCloseCustomAttribute, buttonModel: { content: window.TM.App.LocalizationContent.CancelButton } },
+                { click: saveAttribute, buttonModel: { isPrimary: true, content: window.TM.App.LocalizationContent.SaveButton } },
             ],
             animationSettings: { effect: 'Zoom' },
             beforeOpen: showCustomAttribute,
             beforeClose: beforeCloseAttributeDialog,
+            close: onCloseCustomAttribute,
             width: '514px',
             height: '474px',
             showCloseIcon: true,
@@ -105,8 +105,8 @@ function openCustomAttributeDialog(attributeId, name) {
     else {
         var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
         dialog[0].buttons = [
-            { click: saveAttribute, buttonModel: { isPrimary: true, content: window.TM.App.LocalizationContent.SaveButton } },
             { click: onCloseCustomAttribute, buttonModel: { content: window.TM.App.LocalizationContent.CancelButton } },
+            { click: saveAttribute, buttonModel: { isPrimary: true, content: window.TM.App.LocalizationContent.SaveButton } },
         ],
         dialog[0].show();
     }
@@ -116,6 +116,7 @@ function openCustomAttributeDialog(attributeId, name) {
             showSavedAttributes();
         }, 500);
     }
+    createWaitingPopup('custom-attribute-dialog');
 }
 
 function saveAttribute() {
@@ -126,6 +127,14 @@ function saveAttribute() {
             saveCustomAttribute();
         }
     }
+    var attributeObj;
+    if (siteCreation) {
+        attributeObj = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    }
+    else {
+        attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    }
+    attributeObj.clearSelection();
 }
 
 function onCloseCustomAttribute() {
@@ -133,11 +142,19 @@ function onCloseCustomAttribute() {
     $("#custom-attribute-form").find("div").removeClass("e-error");
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     dialog[0].hide();
+    var attributeObj;
+    if (siteCreation) {
+        attributeObj = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    }
+    else {
+        attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    }
+    attributeObj.clearSelection();
 }
 
 function showSavedAttributes() {
-    var attributeGridObj = siteCreation ? $("#AddSiteAttributesGrid").data("ejGrid") : $("#SiteAttributesGrid").data("ejGrid");
-    customAttributeInfo = attributeGridObj.getCurrentViewData()[attributeGridObj.getIndexByRow($("tr.e-row[aria-selected *='true']"))];
+    var attributeGridObj = siteCreation ? document.getElementById('AddSiteAttributesGrid').ej2_instances[0] : document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    customAttributeInfo = attributeGridObj.getCurrentViewRecords()[attributeGridObj.getSelectedRowIndexes()];
     document.getElementById("custom-attribute-name").ej2_instances[0].value = customAttributeInfo.Name;
     document.getElementById("custom-attribute-descrition").ej2_instances[0].value = customAttributeInfo.Description;
     customAttributeInfo.CanEncrypt ? "" : document.getElementById("custom-attribute-value").ej2_instances[0].value = customAttributeInfo.Value;
@@ -162,14 +179,14 @@ function saveCustomAttribute() {
         ModifiedDate: new Date()
     }
 
-    ShowWaitingProgress("#custom-attribute-dialog", "show");
+    showWaitingPopup('custom-attribute-dialog');
     if (siteCreation) {
         addSiteLevelAttribute(customAttribute);
         return;
     }
 
     var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
-    ShowWaitingProgress("#custom-attribute-dialog", "show")
+    showWaitingPopup('custom-attribute-dialog');
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     $.ajax({
         type: "POST",
@@ -179,10 +196,10 @@ function saveCustomAttribute() {
             if (result.Status) {
                 getSiteAttributes();
                 SuccessAlert(window.TM.App.LocalizationContent.AddCustomAttribute, window.TM.App.LocalizationContent.CustomAttributeSuccess, 7000);
-                ShowWaitingProgress("#custom-attribute-dialog", "hide");
+                hideWaitingPopup('custom-attribute-dialog');
                 dialog[0].hide();
             } else {
-                ShowWaitingProgress("#custom-attribute-dialog", "hide");
+                hideWaitingPopup('custom-attribute-dialog');
                 if (!isEmptyOrWhitespace(result.Message)) {
                     $("#custom-attribute-name").addClass("e-error");
                     $("#custom-attribute-form").valid();
@@ -241,7 +258,7 @@ function updateCustomAttribute(attributeId) {
         ModifiedDate: new Date()
     }
 
-    ShowWaitingProgress("#custom-attribute-dialog", "show");
+    showWaitingPopup('custom-attribute-dialog');
     if (siteCreation) {
         updateSiteLevelAttribute(customAttribute);
         return;
@@ -256,10 +273,10 @@ function updateCustomAttribute(attributeId) {
             if (result.Status) {
                 getSiteAttributes();
                 SuccessAlert(window.TM.App.LocalizationContent.EditCustomAttribute, window.TM.App.LocalizationContent.UpdateCustomAttributeSuccess, 7000);
-                ShowWaitingProgress("#custom-attribute-dialog", "hide");
+                hideWaitingPopup('custom-attribute-dialog');
                 dialog[0].hide();
             } else {
-                ShowWaitingProgress("#custom-attribute-dialog", "hide");
+                hideWaitingPopup('custom-attribute-dialog');
                 if (!isEmptyOrWhitespace(result.Message)) {
                     $("#custom-attribute-name").addClass("e-error");
                     $("#custom-attribute-form").valid();
@@ -278,6 +295,7 @@ function removeCustomAttribute(item) {
         CreatedDate: new Date(),
         ModifiedDate: new Date()
     }
+    showWaitingPopup('messageBox');
     var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
     $.ajax({
         type: "POST",
@@ -286,34 +304,37 @@ function removeCustomAttribute(item) {
         success: function (result) {
             if (result.Status) {
                 getSiteAttributes();
+                hideWaitingPopup('messageBox');
                 SuccessAlert(window.TM.App.LocalizationContent.DeleteCustomAttribute, window.TM.App.LocalizationContent.DeleteCustomAttributeSuccess, 7000);
             } else {
+                hideWaitingPopup('messageBox');
                 WarningAlert(window.TM.App.LocalizationContent.DeleteCustomAttribute, window.TM.App.LocalizationContent.DeleteCustomAttributeFailure, 7000);
             }
-            $("#messageBox_wrapper").ejWaitingPopup("hide");
+            hideWaitingPopup('messageBox');
             onCloseMessageBox();
         }
     });
 }
 
-function editCustomAttribute(item, name) {
+function editCustomAttribute(item) {
     var id = $(item).attr("data-id");
+    var name = $(item).attr("name");
     isAttributeEdit = true;
     openCustomAttributeDialog(id, name);
 }
 
 function getSiteAttributes() {
-    showWaitingPopup("SiteAttributesGrid");
+    showWaitingPopup('SiteAttributesGrid');
     $.ajax({
         type: "GET",
         url: siteAttributesUrl,
         data: { tenantInfoId: tenantInfoId },
         success: function (result) {
             if (result.Status) {
-                var siteAttributesGrid = $("#SiteAttributesGrid").data("ejGrid");
-                siteAttributesGrid.dataSource(result.Attributes);
+                var siteAttributesGrid = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+                siteAttributesGrid.dataSource = result.Attributes;
             }
-            hideWaitingPopup("SiteAttributesGrid");
+            hideWaitingPopup('SiteAttributesGrid');
         }
     });
 }
@@ -330,31 +351,35 @@ function updateValidationMessages() {
 
 function deleteConfirmation(item) {
     setTimeout(function () {
-        var attributeGridObj = $("#SiteAttributesGrid").data("ejGrid");
-        var attribute = attributeGridObj.getCurrentViewData()[attributeGridObj.getIndexByRow($("tr.e-row[aria-selected *='true']"))];
+        var attributeGridObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        var attribute = attributeGridObj.getCurrentViewRecords()[attributeGridObj.getSelectedRowIndexes()];
         messageBox("su-delete", window.TM.App.LocalizationContent.DeleteCustomAttribute, window.TM.App.LocalizationContent.DeleteAttributeConfirm + '<span class ="highlight-name">' + attribute.Name + " ?" + '</span>', "error", function () {
-            var messageboxWaitingPopupTemplateIdId = createLoader("messageBox_wrapper");
-            $("#messageBox_wrapper").ejWaitingPopup({ template: $("#" + messageboxWaitingPopupTemplateIdId) });
-            $("#messageBox_wrapper").css("height", $("#messageBox").outerHeight());
-            $("#messageBox_wrapper").ejWaitingPopup("show");
             removeCustomAttribute(item)
+        }, function () {
+                clearAttributeSelection() 
         });
     }, 100);
 }
 
+function clearAttributeSelection() {
+    var attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    attributeObj.clearSelection();
+    onCloseMessageBox();
+}
+
 function initialSiteGridCreate() {
     if (window.location.search.includes("tab=attributes")) {
-        showWaitingPopup("SiteAttributesGrid");
+        showWaitingPopup('SiteAttributesGrid');
     }
 }
 
 function addSiteLevelAttribute(customAttribute) {
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     addSiteAttribute.push(customAttribute);
-    var siteAttributesGrid = $("#AddSiteAttributesGrid").data("ejGrid");
-    siteAttributesGrid.dataSource(addSiteAttribute);
-    siteAttributesGrid.refreshContent();
-    ShowWaitingProgress("#custom-attribute-dialog", "hide");
+    var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    siteAttributesGrid.dataSource = addSiteAttribute;
+    siteAttributesGrid.refresh();
+    hideWaitingPopup('custom-attribute-dialog');
     dialog[0].hide();
 }
 
@@ -372,24 +397,24 @@ function nameCheckAtAddTenant() {
 
 function updateSiteLevelAttribute(customAttribute) {
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
-    var siteAttributesGrid = $("#AddSiteAttributesGrid").data("ejGrid");
-    addSiteAttribute.splice(siteAttributesGrid.getIndexByRow($("tr.e-row[aria-selected *='true']")), 1);
+    var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    addSiteAttribute.splice(siteAttributesGrid.getSelectedRowIndexes(), 1);
     addSiteAttribute.push(customAttribute);
-    siteAttributesGrid.refreshContent();
-    ShowWaitingProgress("#custom-attribute-dialog", "hide");
+    siteAttributesGrid.refresh();
+    hideWaitingPopup('custom-attribute-dialog');
     dialog[0].hide();
 }
 
 function removeSiteAttribute() {
-    var siteAttributesGrid = $("#AddSiteAttributesGrid").data("ejGrid");
-    addSiteAttribute.splice(siteAttributesGrid.getIndexByRow($("tr.e-row[aria-selected *='true']")));
-    siteAttributesGrid.refreshContent();
+    var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    addSiteAttribute.splice(siteAttributesGrid.getSelectedRowIndexes());
+    siteAttributesGrid.refresh();
 }
 
 function multiLineInputBoxInitialization(id) {
     var inputbox = new ejs.inputs.TextBox({
-        cssClass: 'e-outline e-custom',
-        floatLabelType: 'Auto',
+        cssClass: 'e-outline e-custom e-non-float',
+        floatLabelType: 'Never',
         multiline: true
     });
     inputbox.appendTo(id);

@@ -19,39 +19,8 @@ $(document).ready(function () {
             $("#confirm-password").closest('div').addClass("has-error");
             $("#confirm-password").closest('div').next("div").find("span").html(window.TM.App.LocalizationContent.PasswordMismatch).css("display", "block");
         }
-        createPasswordPolicyRules();
+        passwordPolicyPopover("#new-password", $("#new-password").val());
     });
-
-    $.validator.addMethod("isEditadminPassword", function (value, element) {
-        var validateMethods = new Array();
-        validateMethods.push(validateUserpassword.p_policy_uppercase);
-        validateMethods.push(validateUserpassword.p_policy_lowercase);
-        validateMethods.push(validateUserpassword.p_policy_number);
-        validateMethods.push(validateUserpassword.p_policy_specialcharacter);
-        validateMethods.push(validateUserpassword.p_policy_length);
-        for (var n = 0; n < validateMethods.length; n++) {
-            var currentMethodName = validateMethods[n];
-            if (currentMethodName(value) != "" && currentMethodName(value) != undefined) {
-                ruleName = currentMethodName(value);
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") != "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-tick").removeClass("su su-close");
-                    $('#password_policy_rules').find('li#' + ruleName).addClass("clear-error");
-                    ruleName = ""
-                }
-            }
-            else {
-                ruleName = name;
-                $(element).closest('div').addClass("has-error");
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") == "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-close").removeClass("su-tick");
-                    $('#password_policy_rules').find('li#' + ruleName).removeClass("clear-error");
-                    ruleName = "";
-                }
-            }
-        }
-        if ($('#password_policy_rules li>span.su-tick').length == $('#password_policy_rules').find('li>span').length)
-            return true;
-    }, "");
 
     $('.change-password-form').validate({
         errorElement: 'span',
@@ -70,7 +39,7 @@ $(document).ready(function () {
             },
             "new-password": {
                 required: true,
-                isEditadminPassword: true
+                isValidPassword: true
             },
             "confirm-password": {
                 required: true,
@@ -127,29 +96,9 @@ $(document).ready(function () {
 });
 
 $('#new-password').on("change", function () {
-    createPasswordPolicyRules();
+    passwordPolicyPopover("#new-password", $("#new-password").val());
     $("#new-password").valid();
 });
-
-function createPasswordPolicyRules() {
-    if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
-        $("#new-password").after("<ul id='password_policy_rules'></ul>");
-        $("#password_policy_rules").append("<li id='p_policy_heading'>" + window.TM.App.LocalizationContent.PasswordRule1 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule2 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule3 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_lowercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule4 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_number'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule5 + "</li>")
-        $("#password_policy_rules").append("<li id='p_policy_specialcharacter'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule6 + "</li>")
-        $("#confirm-password-section").css("margin-top", "-53px")
-        $(".button-section").css("margin-top", "-20px");
-        $(".button-section").addClass("top-margin");
-    }
-    if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
-        $("#new-password").next("ul").remove();
-        $("#confirm-password-section").css("margin-top", "25px")
-        $(".button-section").css("margin-top", "20px");
-    }
-}
 
 function onChangePasswordClick() {
     $(".password-validate-holder").html("");
@@ -167,11 +116,11 @@ function onChangePasswordClick() {
         return;
     }
 
-    ShowWaitingProgress("#content-area", "show");
+    showWaitingPopup('content-area');
     doAjaxPost('POST', updatepasswordUrl, { oldpassword: $("#old-password").val(), newpassword: $("#new-password").val(), confirmpassword: $("#confirm-password").val() },
         function (result) {
             $("input[type='password']").val("");
-            ShowWaitingProgress("#content-area", "hide");
+            hideWaitingPopup('content-area');
             $("#password_policy_rules").remove();
             $("#confirm-password-section").removeAttr("style");
             $("#change-password-btn").css("margin-top", "0px");

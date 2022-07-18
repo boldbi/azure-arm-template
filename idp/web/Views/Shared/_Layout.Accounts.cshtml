@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     @await Html.PartialAsync("~/Views/Shared/_OGPContent.cshtml")
+    @await Html.PartialAsync("_PasswordPolicyRules")
     @RenderSection("meta", false)
     <title>
         @ViewBag.Title
@@ -34,9 +35,11 @@
                 background-size: cover;
                 background-repeat: no-repeat;
             }
-            .account-parent{
+
+            .account-parent {
                 background: transparent;
             }
+
             .account-bg {
                 background-color: white;
                 box-shadow: 0px 0px 5px #c9ced0;
@@ -44,17 +47,6 @@
         </style>
     }
 
-    <script src="~/bundles/js/accounts.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
-    @RenderSection("scripts", false)
-    <script>
-        $(document).ready(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-            $('[data-toggle="popover"]').popover();
-
-            createWaitingPopup('body');
-        });
-    </script>
     <style>
         .loader-icon {
             display: block;
@@ -151,20 +143,24 @@
                     }
                     else
                     {
-                        <img alt="Login Logo" src="@Url.Content(@headerLogo)" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.LoginLogo)';" />
+                        <img alt="Login Logo" src="@headerLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)';" />
                     }
                 </div>
                 @RenderSection("MainSection", true)
             </div>
         </div>
     </div>
-    @if (!CloudAppConfig.IsSelfHosted)
-    {
-        @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml")
-    }
-    else
-    {
-        @await Html.PartialAsync("../Shared/_FooterOnPremise")
-    }
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    <script src="~/bundles/js/accounts.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    @RenderSection("scripts", false)
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="popover"]').popover();
+
+            createWaitingPopup('body');
+        });
+    </script>
 </body>
 </html>

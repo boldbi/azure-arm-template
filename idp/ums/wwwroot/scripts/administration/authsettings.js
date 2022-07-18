@@ -34,41 +34,55 @@ $(document).ready(function () {
         }
     }
 
-    $("#default-authentication-confirmation-diolog").ejDialog({
-        showOnInit: false,
-        allowDraggable: true,
-        enableResize: false,
-        width: "600px",
-        enableModal: true,
-        showHeader: false,
+    var defaultAuthenticationDialog = new ejs.popups.Dialog({
+        header: window.TM.App.LocalizationContent.DefaultAuthenticationConfirmation,
+        showCloseIcon: true,
+        width: '472px',
         close: "authenticationDialogBoxClose",
-        closeOnEscape: true
+        isModal: true,
+        visible: false,
+        animationSettings: { effect: 'Zoom' },
+        buttons: [
+            {
+                'click': function () {
+                    authenticationDialogBoxClose();
+                },
+                buttonModel: {
+                    content: window.TM.App.LocalizationContent.NoButton
+                }
+            },
+            {
+                'click': function () {
+                    document.getElementById("default-authentication-confirmation-diolog").ej2_instances[0].hide();
+                    if (this.id === 'oauth' || this.id === 'openid') {
+                        updateSetting(this.id);
+                    }
+                    else if (this.id === 'jwt') {
+                        updateJwtSetting();
+                    }
+                    else if (this.id === 'sso') {
+                        updatesamlSetting();
+                    }
+                },
+                buttonModel: {
+                    content: window.TM.App.LocalizationContent.YesButton,
+                    isPrimary: true
+                }
+            }
+        ],
     });
+    defaultAuthenticationDialog.appendTo("#default-authentication-confirmation-diolog");
 
     dropDownListInitialization("#login-provider-type", window.TM.App.LocalizationContent.DefaultAuthenticationSettings);
     dropDownListInitialization("#token-method-type", '');
     dropDownListInitialization("#user-info-method-type", '');
     groupImportDropDownListInitialization("#group-import-provider-oauth", window.TM.App.LocalizationContent.Provider, "Oauth");
     groupImportDropDownListInitialization("#group-import-provider-openid", window.TM.App.LocalizationContent.Provider, "OpenId");
-    
+
     if (providerNameCount != 0) {
         document.getElementById("login-provider-type").ej2_instances[0].value = selectedDefaultAuthValue;
         document.getElementById("login-provider-type").ej2_instances[0].text = selectedDefaultAuthText;
     }
-
-    $(document).on("click", "#oauth-callback-link-copy, #openid-callback-link-copy, #oauth-mobile-callback-link-copy, #openid-mobile-callback-link-copy", function (e) {
-        $(this).siblings("input").select();
-        if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) {
-            $(this).removeClass("su su-copy");
-            $(this).attr("data-original-title", "");
-        }
-        else {
-            document.execCommand('copy');
-            $(this).attr("data-original-title", "Copied");
-            $(this).tooltip("hide").attr("data-original-title", window.TM.App.LocalizationContent.Copied).tooltip("fixTitle").tooltip("show");
-            setTimeout(function () { $(this).attr("data-original-title", window.TM.App.LocalizationContent.ClickToCopy); $(this).tooltip(); }, 3000);
-        }
-    });
 
     if (!$("#enable-defaultauthentication").is(":checked")) {
         $("#update-defaultauthlogin-settings").prop("disabled", true);
@@ -77,7 +91,7 @@ $(document).ready(function () {
         }
     }
 
-    $("#enable-defaultauthentication").click(function () {
+    $(document).on("click", "#enable-defaultauthentication", function () {
         var isChecked = $("#enable-defaultauthentication").is(":checked");
         if (isChecked) {
             if (providerNameCount != 0) {
@@ -338,7 +352,7 @@ $(document).ready(function () {
     });
 
     $(".update-oauth-or-openid-settings").click(function () {
-        $("#default-authentication-confirmation-diolog").ejDialog("close");
+        document.getElementById("default-authentication-confirmation-diolog").ej2_instances[0].hide();
         if (this.id === 'oauth' || this.id === 'openid') {
             updateSetting(this.id);
         }
@@ -372,7 +386,7 @@ $(document).ready(function () {
             provider = $("input[name='azureADAuthenticationProvider']").val().trim();
         }
         if ((defaultAuthentication == provider) && !($("#enable-" + authPrefix).is(":checked"))) {
-            $("#default-authentication-confirmation-diolog").ejDialog("open");
+            document.getElementById("default-authentication-confirmation-diolog").ej2_instances[0].show();
             $(".update-oauth-or-openid-settings").attr("id", authPrefix);
         }
         else {
@@ -439,9 +453,9 @@ $(document).ready(function () {
             url: updateauthsettingsUrl,
             type: "POST",
             data: { AuthSettingsData: JSON.stringify(authSettingsData) },
-            beforeSend: showWaitingPopup($("#server-app-container")),
+            beforeSend: showWaitingPopup('server-app-container'),
             success: function (result) {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
                 if (result.IsSuccess) {
                     window.location.href = window.location.href;
                     SuccessAlert(window.TM.App.LocalizationContent.WindowsAdSettings, window.TM.App.LocalizationContent.WindowsAdSettingsUpdated, 7000);
@@ -451,7 +465,7 @@ $(document).ready(function () {
                 }
             },
             error: function () {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
             }
         });
     };
@@ -474,9 +488,9 @@ $(document).ready(function () {
             type: "POST",
             url: updateauthsettingsUrl,
             data: { AuthSettingsData: JSON.stringify(authSettingsData) },
-            beforeSend: showWaitingPopup($("#server-app-container")),
+            beforeSend: showWaitingPopup('server-app-container'),
             success: function (result) {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
                 if (result.IsSuccess) {
                     window.location.href = window.location.href;
                     SuccessAlert(window.TM.App.LocalizationContent.AuthenticationSettings, window.TM.App.LocalizationContent.AuthSettingsUpdated, 7000);
@@ -487,7 +501,7 @@ $(document).ready(function () {
                 }
             },
             error: function () {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
             }
         });
     }
@@ -498,21 +512,21 @@ $(document).ready(function () {
             type: "POST",
             url: defaultauthsettingsUrl,
             data: { AuthProvider: authProvider },
-            beforeSend: showWaitingPopup($("#server-app-container")),
+            beforeSend: showWaitingPopup('server-app-container'),
             success: function (result) {
                 if (result.Status) {
-                    hideWaitingPopup($("#server-app-container"));
+                    hideWaitingPopup('server-app-container');
                     defaultAuthentication = result.AuthProvider;
                     $(".modal-body").find("p:first").find("span").html(getDefaultAuthDisplayName(defaultAuthentication));
                     SuccessAlert(window.TM.App.LocalizationContent.AuthenticationSettings, window.TM.App.LocalizationContent.AuthSettingsUpdated, 7000);
                 }
                 else {
-                    hideWaitingPopup($("#server-app-container"));
+                    hideWaitingPopup('server-app-container');
                     WarningAlert(window.TM.App.LocalizationContent.AuthenticationSettings, window.TM.App.LocalizationContent.AuthSettingsUpdatedError, 7000);
                 }
             },
             error: function () {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
                 WarningAlert(window.TM.App.LocalizationContent.AuthenticationSettings, window.TM.App.LocalizationContent.AuthSettingsUpdatedError, 7000);
             }
 
@@ -526,9 +540,9 @@ $(document).ready(function () {
             type: "POST",
             url: window.updateauthsettingsUrl,
             data: { AuthSettingsData: JSON.stringify(authSettingsData) },
-            beforeSend: ShowWaitingProgress("#content-area", "show"),
+            beforeSend: showWaitingPopup('content-area'),
             success: function (result) {
-                ShowWaitingProgress("#content-area", "hide");
+                hideWaitingPopup('content-area');
                 if (result.IsSuccess) {
                     SuccessAlert(window.TM.App.LocalizationContent.AuthenticationSettings, window.TM.App.LocalizationContent.AuthSettingsUpdated, 7000);
                     authPrefix === 'oauth' ? oauthLogoChanged = false : openidLogoChanged = false;
@@ -539,7 +553,7 @@ $(document).ready(function () {
                 }
             },
             error: function () {
-                ShowWaitingProgress("#content-area", "hide");
+                hideWaitingPopup('content-area');
             }
         });
     }
@@ -760,7 +774,7 @@ $(document).ready(function () {
 });
 
 function authenticationDialogBoxClose() {
-    $("#default-authentication-confirmation-diolog").ejDialog("close");
+    document.getElementById("default-authentication-confirmation-diolog").ej2_instances[0].hide();
 }
 
 function getDefaultAuthDisplayName(provider) {
@@ -791,25 +805,24 @@ function fnCopySigningKey(inputId, buttonId) {
     }
 
     setTimeout(function () {
-        $(buttonId).attr("data-original-title", "Copied");
+        $(buttonId).attr("data-original-title", window.TM.App.LocalizationContent.Copied);
         $(buttonId).tooltip('show');
     }, 200);
     setTimeout(function () {
-        $(buttonId).attr("data-original-title", "Click to Copy");
+        $(buttonId).attr("data-original-title", window.TM.App.LocalizationContent.ClickToCopy);
         $(buttonId).tooltip();
     }, 3000);
 }
 
 function signingKeyConfirmationDlg() {
-    ej.base.enableRipple(true);
-    var icontemp = '<button id="sendButton" class="e-control e-btn e-primary" data-ripple="true">' + 'OK </button>';
+    var footerTemplate = '<button id="sendButton" class="e-control e-btn e-primary">' + window.TM.App.LocalizationContent.OKButton + ' </button>';
     var sendbutton = new ej.buttons.Button();
     dialog = new ej.popups.Dialog({
         header: 'Regenerate Signing Key',
-        footerTemplate: icontemp,
+        footerTemplate: footerTemplate,
         content: document.getElementById("dlgContent"),
         showCloseIcon: true,
-        width: '400px',
+        width: '472px',
         height: '200px',
         isModal: true,
         visible: false,
@@ -865,7 +878,6 @@ function ongroupImportchange(args) {
         var groupImportDiv = $(".group-import-provider-type-openid").parent(".e-input-group").closest(".group-import");
     }
     groupImportDiv.find(".cognito-fields, .auth0-fields, .okta-fields, .onelogin-fields").addClass("display-none");
-    var value = this.value;
     switch (this.value) {
         case "CognitoAWS":
             groupImportDiv.find(".cognito-fields").removeClass("display-none");

@@ -135,7 +135,7 @@ $(document).ready(function () {
                 data: JSON.stringify(data),
                 url: updateprofilepictureUrl,
                 contentType: "application/json; charset=utf-8",
-                beforeSend: ShowWaitingProgress("#avatar-upload-box", "show"),
+                beforeSend: showWaitingPopup('avatar-upload-box'),
                 dataType: "json",
                 success: function (result) {
                     parent.messageBox("su-image", "Change Profile picture", "Profile picture has been saved successfully.", "success", function () {
@@ -167,7 +167,7 @@ $(document).ready(function () {
                         $('#profile-picture').data('Jcrop').destroy();
                     }
                     $("#avatar-upload-box").ejDialog("close");
-                    ShowWaitingProgress("#avatar-upload-box", "hide");
+                    hideWaitingPopup('avatar-upload-box');
                 },
                 error: function (result) {
                     parent.messageBox("su-open", "Change Profile picture", "Failed to update the Profile picture, try again later.", "error", function () {
@@ -233,7 +233,7 @@ $(document).ready(function () {
         extensionsAllow: ".PNG,.png,.jpg,.JPG,.jpeg,.JPEG",
         buttonText: { browse: "..." },
         begin: function () {
-            ShowWaitingProgress("#avatar-upload-box", "show");
+            showWaitingPopup('avatar-upload-box');
         },
         fileSelect: function (e) {
             currentDate = $.now();
@@ -367,7 +367,7 @@ $(document).ready(function () {
                 }
 
             });
-            ShowWaitingProgress("#avatar-upload-box", "hide");
+            hideWaitingPopup('avatar-upload-box');
             $('#upload-image').removeAttr("disabled");
 
         }
@@ -407,7 +407,7 @@ function SaveProfile() {
     var isValid = $('.edit-profile-form').valid();
 
     if (isValid) {
-        ShowWaitingProgress("#content-area", "show");
+        showWaitingPopup('content-area');
         doAjaxPost('POST',
             updateUserProfileUrl,
             {
@@ -420,7 +420,7 @@ function SaveProfile() {
                 defaulthomepage: $("#default-homepage").val()
             },
             function (result) {
-                ShowWaitingProgress("#content-area", "hide");
+                hideWaitingPopup('content-area');
                 if (result.Data.status) {
                     var updateddetails = result.Data.profileinfo;
                     var updatedfirstname = (updateddetails.firstName != null) ? $("#user-firstname").val(updateddetails.firstName) : $("#user-firstname").val(updateddetails.previousFirstName);

@@ -67,6 +67,7 @@ $(document).ready(function () {
         isModal: true,
         visible: false,
         beforeOpen: fnBeforeOpen,
+        animationSettings: { effect: 'Zoom' },
         close: fnOnClose
     });
 
@@ -114,15 +115,15 @@ function handleApplyLicense(addButtonObj, evt) {
                 type: "POST",
                 url: updateLicenseKeyUrl,
                 data: { licenseKey: evt.originalEvent.data.licenseKey, refreshToken: refreshToken, licenseType: "1", boldLicenseToken: boldLicenseToken, currentUrl: window.location.origin },
-                beforeSend: showWaitingPopup($("#server-app-container")),
+                beforeSend: showWaitingPopup('server-app-container'),
                 success: function (result) {
                     if (result.Status) {
-                        hideWaitingPopup($("#server-app-container"));
+                        hideWaitingPopup('server-app-container');
                         SuccessAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdated, 7000);
                         window.location.reload();
                     }
                     else {
-                        hideWaitingPopup($("#server-app-container"));
+                        hideWaitingPopup('server-app-container');
                         WarningAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdateFailed, 0);
                     }
                 }
@@ -140,7 +141,7 @@ function checkWindowRef(addButtonObj) {
         $("#update-license-key-notification-loader-bi").hide();
         $("#update-onpremise-plan-reports").show();
         $("#update-license-key-notification-loader-reports").hide();
-        hideWaitingPopup($("#server-app-container"));
+        hideWaitingPopup('server-app-container');
         clearInterval(timer);
     }
 }
@@ -154,7 +155,7 @@ function licenseWindow(element, windowHeight, windowWidth) {
     addButtonObj = element;
     $(window).off('message', $.proxy(handleApplyLicense, window, addButtonObj));
     $(window).on('message', $.proxy(handleApplyLicense, window, addButtonObj));
-    showWaitingPopup($("#server-app-container"));
+    showWaitingPopup('server-app-container');
     windowRef = window.open(element.attr("license-service-url") + "&origin=" + window.location.origin, "", "height=" + windowHeight, "width=" + windowWidth);
     timer = setInterval($.proxy(checkWindowRef, 500, addButtonObj));
 }

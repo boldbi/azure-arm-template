@@ -115,22 +115,22 @@
             <div role="tabpanel" class="tab-pane bi-page-body @isSettingsTab" id="dashboard-settings">
                 <ul id="dashboard-settings-ul" class="no-padding dashboard-listCollection">
                     <li class="dashboard-settings-list">
-                        @Html.CheckBox("restrict-makepublic-dashboard", makepublic, new { @class = "material-checkbox" })
+                        @Html.CheckBox("restrict-makepublic-dashboard", makepublic, new { @class = "material-checkbox", @autocomplete = "off" })
                         <label for="restrict-makepublic-dashboard">
                             <span>
                                 @T["Mark dashboards as public"]
                             </span>
                         </label>
                         <div class="info-message">
-                             @Html.Raw(string.Format(T["This setting will allow the dashboard creators to create public dashboards and these dashboards can be opened by an anonymous user. Click on public {0}dashboards{1} to view them."].Value,"<a class='app-hyperlink' href='"+ Url.Action("dashboards", "dashboards", new { view="public"}) +"' target='_blank'>","</a>"))
+                            @Html.Raw(string.Format(T["This setting will allow the dashboard creators to create public dashboards and these dashboards can be opened by an anonymous user. Click on public {0}dashboards{1} to view them."].Value, "<a class='app-hyperlink' href='" + Url.Action("dashboards", "dashboards", new { view = "public" }) + "' target='_blank'>", "</a>"))
                             @if (!@ServerAppConfig.IsHideHelpLink)
                             {
-                                <span>@Html.Raw(string.Format(T["Learn more about {0}public dashboards{1}."].Value,"<a class='app-hyperlink' href='"+ (helpSiteBaseUrl + publicDashboardsHelpSiteUrl) +"' target='_blank'>","</a>"))</span>
+                                <span>@Html.Raw(string.Format(T["Learn more about {0}public dashboards{1}."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + publicDashboardsHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
                             }
                         </div>
                     </li>
                     <li class="dashboard-settings-list">
-                        @Html.CheckBox("restrict-default-view-dashboard", defaultView, new { @class = "material-checkbox" })
+                        @Html.CheckBox("restrict-default-view-dashboard", defaultView, new { @class = "material-checkbox", @autocomplete = "off" })
                         <label for="restrict-default-view-dashboard">
                             <span>@T["Default views"]</span>
                         </label>
@@ -138,12 +138,12 @@
                             @T["This setting will allow users to set the default view for the dashboards."]
                             @if (!@ServerAppConfig.IsHideHelpLink)
                             {
-                                <span>@Html.Raw(string.Format(T["Learn more about {0}default views{1}."].Value,"<a class='app-hyperlink' href='"+ (helpSiteBaseUrl + defaultViewHelpSiteUrl) +"' target='_blank'>","</a>"))</span>
+                                <span>@Html.Raw(string.Format(T["Learn more about {0}default views{1}."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + defaultViewHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
                             }
                         </div>
                     </li>
                     <li class="dashboard-settings-list">
-                        @Html.CheckBox("restrict-auto-save-filter", autosavedFilter, new { @class = "material-checkbox" })
+                        @Html.CheckBox("restrict-auto-save-filter", autosavedFilter, new { @class = "material-checkbox", @autocomplete = "off" })
                         <label for="restrict-auto-save-filter">
                             <span>@T["Autosave filter"]</span>
                         </label>
@@ -151,12 +151,12 @@
                             @T["The dashboards will be rendered with the last applied filters by the users."]
                             @if (!@ServerAppConfig.IsHideHelpLink)
                             {
-                                <span>@Html.Raw(string.Format(T["Learn more about {0}autosaving filters{1}."].Value,"<a class='app-hyperlink' href='" + (helpSiteBaseUrl + autoSaveHelpSiteUrl) + "' target='_blank'>","</a>"))</span>
+                                <span>@Html.Raw(string.Format(T["Learn more about {0}autosaving filters{1}."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + autoSaveHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
                             }
                         </div>
                     </li>
                     <li class="dashboard-settings-list">
-                        @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox" })
+                        @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox", @autocomplete = "off" })
                         <label for="dashboard-theming-setting">
                             <span>@T["Theming"]</span>
                         </label>
@@ -164,15 +164,18 @@
                             @T["This setting will allow the user to hide or show theme options in the dashboard."]
                         </div>
                     </li>
-                    <li class="dashboard-settings-list">
-                        @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox" })
-                        <label for="usage-analytics-setting">
-                            <span>@T["Usage analytics"]</span>
-                        </label>
-                        <div class="info-message">
-                            @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
-                        </div>
-                    </li>
+                    @if (isSelfHosted)
+                    {
+                        <li class="dashboard-settings-list">
+                            @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="usage-analytics-setting">
+                                <span>@T["Usage analytics"]</span>
+                            </label>
+                            <div class="info-message">
+                                @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
+                            </div>
+                        </li>
+                    }
                 </ul>
                 <div class="bi-page-footer no-padding col-xs-12">
                     <div class="bi-page-actions col-xs-12 col-md-12">

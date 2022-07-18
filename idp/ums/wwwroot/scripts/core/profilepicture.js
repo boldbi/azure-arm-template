@@ -71,5 +71,5 @@
 }
 
 function isNullOrWhitespace(value) {
-    return (value == null || value == undefined || $.trim(value) == "");
+    return (value == null || value == undefined || value.trim() == "");
 }

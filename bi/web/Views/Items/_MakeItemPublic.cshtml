@@ -33,100 +33,65 @@
 
     @if (IsMarkItemsPublic == true)
     {
-        <div class="col-lg-12 no-padding dialog" id="PopupContainer">
-            <div class="col-md-12 dialog-header">
-                <span class="su su-public Head-icon"></span>
-                <span class="PopupTitle">@T["Make Public"]</span>
-                <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="onMakePublicDialogClose()"><span class="su su-close"></span></a>
+    <div class="col-lg-12 no-padding dialog" id="PopupContainer">
+        <input type="hidden" id="make-public-status" value="true" />
+        <input type="hidden" data-item-type="@(itemTypeName)" id="make-item-public" data-name="@ViewData["ItemName"]" data-item-id="@ViewData["ItemId"]" data-ispublic="@ViewData["IsPublic"]" />
+        <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
+
+            <div class="deleteItem" id="makepublicitem" style="font-size:14px !important">
+
+                <span style="white-space:normal;float:left;width:100%" class="text">
+                    @T["Are you sure you want to make this Dashboard public?"]
+                </span>
+
+                <strong style="float:left;padding-top:15px;width:100%" class="note">@T["Note:"]</strong>
+                <span style="white-space:normal;float:left;padding-top:5px" class="text">
+                    @T["Public dashboards are accessible to anyone with a link to them."]
+                </span>
             </div>
-            <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
-                <div class="col-xs-12 padding-bottom20">
-
-                    <div class="deleteItem" id="makepublicitem" style="font-size:14px !important">
-
-                        <span style="white-space:normal;float:left;width:100%" class="text">
-                            @Html.Raw(String.Format(T["Are you sure you want to make the Dashboard - {0} public?"].Value, "<span class='highlight-name'>" + ViewData["ItemName"] + "</span>"))
-                        </span>
-
-                        <strong style="float:left;padding-top:15px;width:100%" class="note">@T["Note:"]</strong>
-                        <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px" class="text">
-                            @T["Public dashboards are accessible to anyone with a link to them."]
-                        </span>
-                    </div>
-                    <div class="error-msg deleteItem text" style="display:none">
-                        @Html.Raw(String.Format("{1}"+T["Unable to mark this Dashboard — {0} as public. Internal server error. Please try again."].Value, "</span><span id='item_name' class='delete-item-body highlight-name'>" + ViewData["ItemName"] + "</span>","<span style='white-space:normal; float:left'>"))
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-12 dialog-footer rightAlign" style="position:relative !important;font-size:14px !important">
-                <div class="col-xs-3"></div>
-
-                <div class="col-xs-9 no-padding rightAlign validationArea" id="select-area">
-                    <input type="button" class="app-button app-primary-button app-btn-primary rightAlign" value="@T["Make Public"]" data-item-type="@(itemTypeName)" id="make-item-public" data-name="@ViewData["ItemName"]" data-item-id="@ViewData["ItemId"]" data-ispublic="@ViewData["IsPublic"]" data-isunlisted="@ViewData["IsUnlisted"]" tabindex="1" autofocus />
-
-                    <input type="button" id="Cancel" class=" app-button app-secondary-button app-btn-secondary PopupClose no" value="@T["No"]" onclick="onMakePublicDialogClose()" tabindex="2" />
-                </div>
-                <div class="col-xs-8 no-padding centerAlign validationArea" id="close" style="display:none">
-                    <input title="" type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose" value="@T["Close"]" onclick="onMakePublicDialogClose()" tabindex="3" autofocus />
-                </div>
+            <div class="error-msg deleteItem text" style="display:none">
+                @Html.Raw(String.Format("{1}" + T["Unable to mark this Dashboard — {0} as public. Internal server error. Please try again."].Value, "</span><span id='item_name' class='delete-item-body highlight-name'>" + ViewData["ItemName"] + "</span>", "<span style='white-space:normal; float:left'>"))
             </div>
         </div>
+    </div>
     }
     @if (IsMarkItemsPublic == false)
     {
-        <div class="col-lg-12 no-padding dialog" id="PopupContainer">
-            <div class="col-md-12 dialog-header">
-                <span class="su su-public Head-icon"></span>
-                <span class="PopupTitle">@T["Make Public"]</span>
-                <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="onMakePublicDialogClose()"><span class="su su-close"></span></a>
-            </div>
-            <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
-                <div class="col-xs-12 padding-bottom20">
+<div class="col-lg-12 no-padding dialog" id="PopupContainer">
+    <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
 
-                    <div class="deleteItem" id="makepublicitem">
+        <div class="deleteItem" id="makepublicitem">
 
-                        @if (ViewBag.IsAdmin == true || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings])
-                        {
-                            if ((int)itemType == ((int)ItemType.Dashboard))
-                            {
-                                <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;text-align:center; padding-left:20px;padding-top:10px;font-size:14px!important" class="text">
-                                    @Html.Raw(String.Format(T["Public Dashboards are disabled in {0}dashboard settings{1}."].Value, !isMobile ? "<a href = "+Url.Action("DashboardSettings", "Administration")+">" : string.Empty , !isMobile ? "</a>" : string.Empty))
-                                </span>
-                            }
+            @if (ViewBag.IsAdmin == true || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings])
+            {
+                if ((int)itemType == ((int)ItemType.Dashboard))
+                {
+                    <span style="white-space:normal;float:left;text-align:center;font-size:14px!important" class="text">
+                        @Html.Raw(String.Format(T["Public Dashboards are disabled in {0}dashboard settings{1}."].Value, !isMobile ? "<a href = " + Url.Action("DashboardSettings", "Administration") + ">" : string.Empty, !isMobile ? "</a>" : string.Empty))
+                    </span>
+                }
 
-                            if ((int)itemType == ((int)ItemType.Widget))
-                            {
-                                <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;text-align:center;padding-left:20px;padding-top:10px;font-size:14px!important" class="text"> @Html.Raw(string.Format(T["Public Widgets disabled in {0}dashboard settings{1}."].Value, "<a href='" + Url.Action("DashboardSettings", "Administration") + "'>","</a>"))</span>
+                if ((int)itemType == ((int)ItemType.Widget))
+                {
+                    <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;text-align:center;padding-left:20px;padding-top:10px;font-size:14px!important" class="text"> @Html.Raw(string.Format(T["Public Widgets disabled in {0}dashboard settings{1}."].Value, "<a href='" + Url.Action("DashboardSettings", "Administration") + "'>", "</a>"))</span>
 
-                            }
-                        }
-                        else
-                        {
-                            if ((int)itemType == ((int)ItemType.Dashboard))
-                            {
-                                <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;padding-left:20px;font-size:14px!important" class="text">@T["Public Dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span>
-                            }
+                }
+            }
+            else
+            {
+                if ((int)itemType == ((int)ItemType.Dashboard))
+                {
+                    <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;padding-left:20px;font-size:14px!important" class="text">@T["Public Dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span>
+                }
 
-                            if ((int)itemType == ((int)ItemType.Widget))
-                            {
-                                <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;padding-left:20px;font-size:14px!important" class="text"> @T["Public Widgets disabled by the system administrator. Please contact your system administrator to enable this."]</span>
+                if ((int)itemType == ((int)ItemType.Widget))
+                {
+                    <span style="white-space:normal;float:left;padding-top:5px;padding-bottom:15px;padding-left:20px;font-size:14px!important" class="text"> @T["Public Widgets disabled by the system administrator. Please contact your system administrator to enable this."]</span>
 
-                            }
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-12 dialog-footer rightAlign" style="position:relative !important;font-size:14px !important">
-                <div class="col-xs-3"></div>
-
-                <div class="col-xs-9 no-padding centerAlign validationArea" id="select-area">
-                    <input type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose no" value="@T["Close"]" onclick="onMakePublicDialogClose()" tabindex="2" />
-                </div>
-                <div class="col-xs-8 no-padding centerAlign validationArea" id="close" style="display:none">
-                    <input id="Cancel" class="app-button app-secondary-button app-btn-secondary PopupClose" type="button" autofocus="" tabindex="3" onclick="onRemovePublicDialogClose()" value='@T["Close"]' title="">
-
-                </div>
-            </div>
+                }
+            }
         </div>
+    </div>
+</div>
     }
 </body>

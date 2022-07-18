@@ -48,7 +48,7 @@
     var isExludeEjDialog = ViewBag.IsExludeEjDialog != null ? ViewBag.IsExludeEjDialog : false;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
-    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : Context.Request.PathBase.ToString();
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var isSlideshow = url.Query.ToLower().Contains("isslideshow");
     var siteIdentifier = Context.Request.RouteValues["tenantName"] != null ? Context.Request.RouteValues["tenantName"].ToString() : string.Empty;
     var adminPageUrl = siteIdentifier + "/administration";
@@ -58,30 +58,30 @@
 @{
     var preloadScriptsFiles = new string[]
     {
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer-component.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/datasource-designer.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/connection-designer.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej1.common.all.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej2.common.all.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej.dashboarddesigner.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej1.web.all.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej2.web.all.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/signalr-bundle.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/datasourcerecurrencepage.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/datasourcerecurrencedependency.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/scripts/dashboard-feedback.min.js")
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer-component.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/datasource-designer.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/connection-designer.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej1.common.all.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej2.common.all.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej.dashboarddesigner.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej1.web.all.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej2.web.all.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/signalr-bundle.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/datasourcerecurrencepage.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/datasourcerecurrencedependency.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/dashboard-feedback.min.js")
     };
 
     var preloadStylesFiles = new string[]
     {
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer-component.min.css"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer.min.css"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/datasource-designer.min.css"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/connection-designer.min.css"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/css/scheduleiframe.min.css"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/css/schedulerrecurrence.min.css"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(this.Context.Request.PathBase, dashboardServerResourceUrl + "/cdn/css/datasourcerecurrence.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer-component.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/datasource-designer.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/connection-designer.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/scheduleiframe.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/schedulerrecurrence.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/datasourcerecurrence.min.css"),
         "https://fonts.googleapis.com/css?family=Roboto:400,700"
     };
     var bannerApiEndpoint = ServerAppConfig.AppSettings.BoldBiBannerApiEndpoint;
@@ -475,7 +475,6 @@
     @if (!ServerAppConfig.IsSelfHosted)
     {
         @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
-        @await Html.PartialAsync("~/Views/Support/_ConciergeSupport.cshtml")
         <environment include="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
         </environment>
@@ -489,15 +488,15 @@
     }
     @await Html.PartialAsync("~/Views/DataSourceDesigner/_Connection.cshtml")
     @if ((absolutePath == "/" ||
-      absolutePath == Url.Content("~/") ||
-      requestUrl.IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 ||
-      requestUrl.IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 ||
-      requestUrl.IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 ||
-      requestUrl.IndexOf("/files", StringComparison.CurrentCultureIgnoreCase) > 0 ||
-      requestUrl.IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 ||
-      requestUrl.IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0 ||
-      requestUrl.IndexOf("/widgets", StringComparison.CurrentCultureIgnoreCase) > 0) &&
-      !isMobile)
+     absolutePath == Url.Content("~/") ||
+     requestUrl.IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+     requestUrl.IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+     requestUrl.IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+     requestUrl.IndexOf("/files", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+     requestUrl.IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+     requestUrl.IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+     requestUrl.IndexOf("/widgets", StringComparison.CurrentCultureIgnoreCase) > 0) &&
+     !isMobile || !ServerAppConfig.IsSelfHosted)
     {
         if (ViewBag.ItemAddOptions != null)
         {

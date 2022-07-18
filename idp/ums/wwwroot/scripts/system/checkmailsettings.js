@@ -1,5 +1,4 @@
 ﻿function CheckMailSettingsAndNotify(args,selection,successMessage) {
-    ShowWaitingProgress(".Sticky-header", "show");
     $.ajax({
         type: "POST",
         url: checkMailSettingUrl,

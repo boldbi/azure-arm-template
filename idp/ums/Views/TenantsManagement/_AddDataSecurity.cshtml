@@ -2,42 +2,41 @@
 <head>
     <script>
         $(document).ready(function () {
-            $("#AddSiteAttributesGrid").ejGrid({
+            var siteAttributeGrid = new ejs.grids.Grid({
                 dataSource: null,
-                gridLines: ej.Grid.GridLines.None,
+                gridLines: 'None',
                 allowSorting: true,
                 allowSearching: true,
                 allowPaging: true,
                 allowSelection: true,
-                filterSettings: { filterType: "menu" },
                 pageSettings: { pageSize: 3 },
-                enableRowHover: true,
+                enableHover: true,
                 enableAltRow: false,
                 dataBound: function (args) {
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle="tooltip"]').tooltip(
+                        {
+                            container: 'body'
+                        });
                 },
                 columns: [
-                    { field: 'Name', templateID: "#site-attribute-name-template", headerText: '[[[Name]]]', width: 30, allowSorting: true },
-                    { field: 'Value', templateID: "#site-attribute-value-template", headerText: '[[[Value]]]', width: 40, allowSorting: true },
-                    { field: 'Actions', headerText: '', templateID: "#actions", width: 30, allowSorting: false }
+                    { field: 'Name', template: "#site-attribute-name-template", headerText: '[[[Name]]]', width: 30, allowSorting: true },
+                    { field: 'Value', template: "#site-attribute-value-template", headerText: '[[[Value]]]', width: 40, allowSorting: true },
+                    { field: 'Actions', headerText: '', template: "#actions", width: 30, allowSorting: false }
                 ]
             });
+            siteAttributeGrid.appendTo("#AddSiteAttributesGrid");
         });
     </script>
     <script type="text/x-jsrender" id="site-attribute-name-template">
-        <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+        <span class="grid-content" title="${Name}" data-toggle="tooltip">${Name}</span>
     </script>
     <script type="text/x-jsrender" id="site-attribute-value-template">
-        {{if CanEncrypt}}
+        ${if (CanEncrypt)}
         <span class="grid-content" title="*****" data-toggle="tooltip">*****</span>
-        {{else}}
-        <span class="grid-content" title="{{:Value}}" data-toggle="tooltip">{{:Value}}</span>
-        {{/if}}
+        ${else}
+        <span class="grid-content" title="${Value}" data-toggle="tooltip">${Value}</span>
+        ${/if}
     </script>
-
-    <link rel="stylesheet" href="~/bundles/css/custom-attribute.css" asp-append-version="true" />
-    <script src="~/bundles/js/custom-attribute.js" asp-append-version="true"></script>
-
 </head>
 <body>
     <div class="col-xs-12 data-security-container no-padding">
@@ -84,7 +83,7 @@
         </div>
         <script type="text/x-jsrender" id="actions">
             <div class="user-hover-options">
-                <a href="javascript:void(0);" id="edit-site-attribute" title="[[[Edit]]]" data-toggle="tooltip" onclick="editCustomAttribute(this, 'addtenant')">
+                <a href="javascript:void(0);" id="edit-site-attribute" title="[[[Edit]]]" name="addtenant"  data-toggle="tooltip" onclick="editCustomAttribute(this)">
                     <i class="su su-edit"></i>
                 </a>
                 <a class="delete-class" href="javascript:void(0);" id="remove-site-attribute" title="[[[Remove]]]" data-toggle="tooltip" onclick="removeSiteAttribute()">

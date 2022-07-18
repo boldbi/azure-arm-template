@@ -248,7 +248,17 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlAvg", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to AVGD.
+        /// </summary>
+        internal static string SqlAvgD
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlAvgD", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to BEGIN SELECT {0} FROM {1} END ELSE BEGIN SELECT TOP 1({0}) FROM {1} END.
         /// </summary>
@@ -1364,7 +1374,19 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlSum", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to SUM.
+        /// </summary>
+        internal static string SqlSumD
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlSumD", resourceCulture);
+            }
+        }
+
+
         /// <summary>
         ///   Looks up a localized string similar to ¤Super_Query.
         /// </summary>

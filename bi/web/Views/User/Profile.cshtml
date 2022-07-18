@@ -67,15 +67,15 @@
         var profileSettingsUrl = "@Url.Action("UpdateProfileSettings", "User")";
         $(document).ready(function () {
 
-            if(@userHomepage.Count == 0){
+            if (@userHomepage.Count == 0) {
+                $('#default-homepage > option:first').hide();
+                $('.default-homepage-dropdown ul li:first').hide();
                 $("#default-homepage").find(".remove-default-homepage").remove();
-                $("#default-homepage").selectpicker("refresh");
                 $(".btn-group .bs-searchbox").after("<span class='no-result'>@T["No Results Found"]</span>");
             }
+
             if ("@ViewBag.IsDefaultHomepage" == "True") {
-                $("#default-homepage").val("@ViewBag.DefaultHomePageId");
                 $("#default-homepage").attr("data-original-value", "@ViewBag.DefaultHomePageId");
-                $("#default-homepage option:eq(0)").before("<option class='remove-default-homepage' value='null'>@T["No default Pinboard"]</option>");
             }
 
             if("@ViewBag.DefaultHomePageName" == ""){
@@ -256,8 +256,7 @@
                                             </div>
                                         </div>
                                         <div id="id-account-link">
-                                           <a hreflang="en" href="@idpUserPreferenceUrl" id="edit-link">@T["Update application language details through your account"]</a>
-                                            
+                                            <a hreflang="en" href="@idpUserPreferenceUrl" id="edit-link">@T["Update application language details through your account"]</a>
                                         </div>
                                     </div>
                                 }
@@ -270,7 +269,7 @@
                                             @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { @class = "selectpicker user-model-language-dropdown pull-left", disabled = "disabled", data_live_search = "true", data_size = 10 })
                                         </div>
                                         <div id="id-account-link">
-                                           <a hreflang="en" href="@idpUserPreferenceUrl" id="edit-link">@T["Update data language details through your account"]</a>
+                                            <a hreflang="en" href="@idpUserPreferenceUrl" id="edit-link">@T["Update data language details through your account"]</a>
                                         </div>
                                     }
                                     else
@@ -287,15 +286,9 @@
                                         <h6 class="no-margin">@Html.Raw(string.Format(T["Click {0}here{1} to learn how to set a default pinboard."].Value, "<a href='"+(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SetDefaultPinboards))+"' target='_blank'>", "</a>"))</h6>
                                     }
 
-                                    <div class="txt-holder margin-top-12" id="homepage-list">
-                                        <select id="default-homepage" data-live-search="true" class="selectpicker no-padding" data-size="5" title="@T["Select Pinboard"]" data-original-value="null" data-none-results-text = "@T["No results match"]">
-                                            <option data-hidden="true" value="">@T["Select Pinboard"]</option>
-                                            @for (var item = 0; item < userHomepage.Count; item++)
-                                            {
-                                                <option value="@userHomepage[item].Id">@userHomepage[item].Name</option>
-                                            }
-                                        </select>
-                                    </div>
+                                <div class="txt-holder margin-top-12" id="homepage-list">
+                                    @Html.DropDownList("default-homepage", ViewBag.UserHomePages as IEnumerable<SelectListItem>, new { @class = "selectpicker default-homepage-dropdown pull-left", data_live_search = "true", data_size = 10 })
+                                </div>
                                 </div>
                                 @await Html.PartialAsync("_UserDashboardSettings")
                             </form>

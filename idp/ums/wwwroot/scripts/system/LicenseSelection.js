@@ -4,7 +4,7 @@ var getLicenseUrl;
 var licenseToken;
 $(document).ready(function () {
     $(document).on("click", "#online-license", function (e) {
-        showWaitingPopup($(".startup-page-container-body"));
+        showWaitingPopup('startup-page-container-waiting-element');
         if (windowRef !== undefined) {
             clearInterval(timer);
             windowRef.close();
@@ -32,12 +32,12 @@ $(document).ready(function () {
             $("#file-name").val(fileName);
             var file = event.originalEvent.target.files[0];
             var data = {};
-            showWaitingPopup($(".startup-page-container-body"));
+            showWaitingPopup('startup-page-container-waiting-element');
             readFile(file, function (content) {
                 data.content = content;
                 sendData(data, validateLicenseKeyUrl);
             })
-            hideWaitingPopup($(".startup-page-container-body"));
+            hideWaitingPopup('startup-page-container-waiting-element');
         }
         else {
             $("#file-name").val('');
@@ -61,7 +61,7 @@ $(document).ready(function () {
 
 function checkWindowRef(addButtonObj) {
     if (windowRef.closed) {
-        hideWaitingPopup($(".startup-page-container-body"));
+        hideWaitingPopup('startup-page-container-waiting-element');
         clearInterval(timer);
     }
 }
@@ -72,37 +72,31 @@ function handleApplyLicense(addButtonObj, evt) {
 
             var refreshToken = evt.originalEvent.data.refreshtoken != undefined ? evt.originalEvent.data.refreshtoken : "";
             var boldLicenseToken = evt.originalEvent.data.boldLicenseToken != undefined && evt.originalEvent.data.boldLicenseToken != null ? evt.originalEvent.data.boldLicenseToken : "";
-
             $.ajax({
                 type: "POST",
                 url: updateLicenseKeyUrl,
                 data: { licenseKey: evt.originalEvent.data.licenseKey, refreshToken: refreshToken, licenseType: "1", boldLicenseToken: boldLicenseToken, currentUrl: window.location.origin },
-                beforeSend: showWaitingPopup($(".startup-page-container-body")),
+                beforeSend: showWaitingPopup('startup-page-container-waiting-element'),
                 success: function (result) {
                     if (result.Status) {
                         $('meta[name=has-drm-configuration]').attr("content", "true");
-                        if (isDockerOrk8s) {
-                            autoDeploy();
+                        $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
+                        $(".startup-content").fadeIn();
+                        $("#system-settings-welcome-container").hide();
+                        $(".welcome-content").addClass("display-none");
+                        $("#system-settings-offline-license-container").hide();
+                        $('#auth-type-dropdown').removeClass("hide").addClass("show");
+                        $("#system-settings-user-account-container").slideDown("slow");
+
+                        if (evt.originalEvent.data.userInfo != undefined && evt.originalEvent.data.userInfo != null) {
+                            preFillUser(evt.originalEvent.data.userInfo);
+                            autoFocus("new-password");
                         }
                         else {
-                            $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
-                            $(".startup-content").fadeIn();
-                            $("#system-settings-welcome-container").hide();
-                            $(".welcome-content").addClass("display-none");
-                            $("#system-settings-offline-license-container").hide();
-                            $('#auth-type-dropdown').removeClass("hide").addClass("show");
-                            $("#system-settings-user-account-container").slideDown("slow");
-
-                            if (evt.originalEvent.data.userInfo != undefined && evt.originalEvent.data.userInfo != null) {
-                                preFillUser(evt.originalEvent.data.userInfo);
-                                autoFocus("new-password");
-                            }
-                            else {
-                                autoFocus("txt-firstname");
-                            }
+                            autoFocus("txt-firstname");
                         }
                     }
-                    hideWaitingPopup($(".startup-page-container-body"));
+                    hideWaitingPopup('startup-page-container-waiting-element');
                 }
             });
 
@@ -146,7 +140,7 @@ function sendData(data, url) {
                 type: 'POST',
                 data: { key: key, tenantType: parseInt($("#tenant-type").val()) },
                 url: url,
-                beforeSend: showWaitingPopup($(".startup-page-container-body")),
+                beforeSend: showWaitingPopup('startup-page-container-waiting-element'),
                 success: function (data) {
                     if (data.Status) {
 
@@ -205,10 +199,10 @@ function sendData(data, url) {
                         $("#confirm-license").prop('disabled', true);
                     }
 
-                    hideWaitingPopup($(".startup-page-container-body"));
+                    hideWaitingPopup('startup-page-container-waiting-element');
                 },
                 error: function () {
-                    hideWaitingPopup($(".startup-page-container-body"));
+                    hideWaitingPopup('startup-page-container-waiting-element');
                 }
             });
         }
@@ -228,7 +222,7 @@ function offlineLicenseComplete() {
     licenseKey = "";
     licenseToken = "";
     $("#tenant-type").val("");
-    hideWaitingPopup($(".startup-page-container-body"));
+    hideWaitingPopup('startup-page-container-waiting-element');
 }
 
 function confirmLicenseUpdate() {
@@ -237,25 +231,20 @@ function confirmLicenseUpdate() {
             type: "POST",
             url: updateLicenseKeyUrl,
             data: { licenseKey: licenseKey, licenseType: "2", currentUrl: window.location.origin, boldLicenseToken: licenseToken   },
-            beforeSend: showWaitingPopup($(".startup-page-container-body")),
+            beforeSend: showWaitingPopup('startup-page-container-waiting-element'),
             success: function (result) {
                 if (result.Status) {
                     $('meta[name=has-drm-configuration]').attr("content", "true");
                     offlineLicenseComplete();
-                    if (isDockerOrk8s) {
-                        autoDeploy();
-                    }
-                    else {
-                        $("#image-parent-container .startup-image").removeClass("offline-width")
-                        $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
-                        $(".startup-content").fadeIn();
-                        $("#system-settings-welcome-container").hide();
-                        $(".welcome-content").addClass("display-none");
-                        $("#system-settings-offline-license-container").hide();
-                        $('#auth-type-dropdown').removeClass("hide").addClass("show");
-                        $("#system-settings-user-account-container").slideDown("slow");
-                        autoFocus("txt-firstname");
-                    }
+                    $("#image-parent-container .startup-image").removeClass("offline-width")
+                    $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
+                    $(".startup-content").fadeIn();
+                    $("#system-settings-welcome-container").hide();
+                    $(".welcome-content").addClass("display-none");
+                    $("#system-settings-offline-license-container").hide();
+                    $('#auth-type-dropdown').removeClass("hide").addClass("show");
+                    $("#system-settings-user-account-container").slideDown("slow");
+                    autoFocus("txt-firstname");
                 }
                 else {
                     offlineLicenseComplete();
@@ -264,7 +253,7 @@ function confirmLicenseUpdate() {
         });
     }
     else {
-        hideWaitingPopup($(".startup-page-container-body"));
+        hideWaitingPopup('startup-page-container-waiting-element');
         WarningAlert(window.TM.App.LocalizationContent.ManageLicense, window.TM.App.LocalizationContent.LicenseUpdateFailed, 0);
     }
 }

@@ -48,76 +48,70 @@
                         </div>
                     </div>
                     @*<div class="form-group">
-                        @Html.Label("login-welcome-text", "[[[Welcome note]]]", new { @class = "col-xs-2 app-textbox-label" })
-                        <div class="col-xs-4">
-                            <textarea rows="3" maxlength="70" id="txt_welcome_note" class="form-control welcome-note-text NotificationContent" placeholder="[[[Welcome note]]]">@ViewBag.SystemSettings.WelcomeNoteText</textarea>
-                            <span class="info-text">*[[[70 characters maximum]]]</span>
-                        </div>
-                    </div>*@
+                    @Html.Label("login-welcome-text", "[[[Welcome note]]]", new { @class = "col-xs-2 app-textbox-label" })
+                    <div class="col-xs-4">
+                        <textarea rows="3" maxlength="70" id="txt_welcome_note" class="form-control welcome-note-text NotificationContent" placeholder="[[[Welcome note]]]">@ViewBag.SystemSettings.WelcomeNoteText</textarea>
+                        <span class="info-text">*[[[70 characters maximum]]]</span>
+                    </div>
+                </div>*@
                 </div>
             }
 
-            @await Html.PartialAsync("~/Views/Administration/_DisplaySettings.cshtml")
-            <div class="branding-sub-section site-settings-page-section col-xs-12 no-padding @(ViewBag.ThirdPartyLogins ||  ViewBag.WhiteLabel || ViewBag.CustomDomain ? string.Empty : "unlock-enterprise-features")">
-                <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content">@T["Branding"]</h3>
-                @if (!ServerAppConfig.IsSelfHosted)
-                {
-                    <div class="form-group blur-whitelable-content">
+            @if (!ServerAppConfig.IsSelfHosted)
+            {
+                <div class="general-sub-section site-settings-page-section no-padding">
+                    <h3 class="title sub-section-heading">@T["General"]</h3>
+                    <div class="form-group">
                         @Html.Label("site-orgname", T["Organization name"].Value, new { @class = "col-xs-12 app-textbox-label section-label" })
                         <div class="no-padding" id="site-orgname-section">
-                            <input type="text" id="site-orgname" class="form-control site-orgname-fields" placeholder="@T["Enter your Organization Name"]" value="@ViewBag.SystemSettings.OrganizationName" data-original-value="@ViewBag.SystemSettings.OrganizationName" />
+                            <input type="text" id="site-orgname" name="site-org-name" class="form-control site-orgname-fields" placeholder="@T["Enter your Organization Name"]" value="@ViewBag.SystemSettings.OrganizationName" data-original-value="@ViewBag.SystemSettings.OrganizationName" />
+                            <span class="validation-errors"></span>
                         </div>
                     </div>
-                    if (ViewBag.IsCustomDomain)
-                    {
-                        <div class="dropdown updatessl col-xs-6">
-                            <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
-                                <i class="su su-options dropdown-items"></i>
-                            </span>
-                            <ul class="dropdown-menu" role="menu">
-                                <li id="update-ssl-certificate">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top">
-                                        <span>@string.Format(T["Update {0} Certificate"].Value,"SSL")</span>
-                                    </a>
-                                </li>
-                                <li class="divider"></li>
-                                <li id="delete-custom-domain">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top">
-                                        <span>@T["Delete custom domain"]</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    }
                     <div class="form-group blur-whitelable-content">
                         @Html.Label("enable-ssl", T["Domain"].Value, new { @class = "col-xs-12 app-textbox-label section-label" })
 
                         <div class="no-padding custom-domain-section">
-                            <input type="text" id="site_url" name="site_url" disabled class="form-control site-url-fields" placeholder="@T["Enter your URL"]" value="@ViewBag.SystemSettings.BaseUrl" data-original-value="@ViewBag.SystemSettings.BaseUrl" />
-
-                            <div class="custom-domain pull-left no-padding">
-                                @if (!ViewBag.IsCustomDomain)
-                                {
-                                    <span>@T["Now, you can use your own domain"]</span>
-                                    <button type="button" title="" id="add-custom-domain" class="app-button app-secondary-button app-btn-secondary custom-domain-btn">
+                            <input type="text" id="site_url" name="site_url" disabled class="form-control site-url-fields @(ViewBag.IsCustomDomain ? "pull-left" : string.Empty)" placeholder="@T["Enter your URL"]" value="@ViewBag.SystemSettings.BaseUrl" data-original-value="@ViewBag.SystemSettings.BaseUrl" />
+                            @if (ViewBag.IsCustomDomain)
+                            {
+                                <div class="dropdown updatessl col-xs-4">
+                                    <a id="update-ssl-certificate" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="@string.Format(T["Update {0} Certificate"].Value, "SSL")">
+                                        <i class="su su-edit"></i>
+                                    </a>
+                                    <div class="separator"></div>
+                                    <a id="delete-custom-domain" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="@T["Delete custom domain"]">
+                                        <i class="su su-delete"></i>
+                                    </a>
+                                </div>
+                                <div class="custom-domain no-padding col-xs-12 ssl-msg">
+                                    <div class="alert alert-success no-margin">
+                                        @Html.Raw(string.Format(T["{0} Certificate expires on {1}"].Value, "SSL", "<b>" + ViewBag.ExpirationDate + "</b>"))
+                                    </div>
+                                    @*<button type="button" title="" id="update-custom-domain" class="app-button app-secondary-button custom-domain-btn no-margin">
+                                      [[[Update custom domain]]]
+                                </button>*@
+                                </div>
+                            }
+                            @if (!ViewBag.IsCustomDomain)
+                            {
+                                <div class="custom-domain pull-left no-padding">
+                                    <div class="col-xs-12 no-padding">
+                                        <span>@T["Now, you can use your own domain"]</span>
+                                    </div>
+                                    <button type="button" title="" id="add-custom-domain" class="app-button app-secondary-button app-btn-secondary custom-domain-btn no-padding">
                                         @T["Use custom domain"]
                                     </button>
-                                }
-                                else
-                                {
-                                    <div class="alert alert-success no-margin">
-                                        @Html.Raw(string.Format(T["{0} Certificate expires on {1}"].Value,"SSL","<b>" + ViewBag.ExpirationDate + "</b>"))
-                                    </div>
-
-                                    @*<button type="button" title="" id="update-custom-domain" class="app-button app-secondary-button custom-domain-btn no-margin">
-                                        [[[Update custom domain]]]
-                                    </button>*@
-                                }
-                            </div>
+                                </div>
+                            }
                         </div>
-
                     </div>
-                }
+                </div>
+            }
+
+            @await Html.PartialAsync("~/Views/Administration/_DisplaySettings.cshtml")
+            <div class="branding-sub-section site-settings-page-section col-xs-12 no-padding @(ViewBag.ThirdPartyLogins ||  ViewBag.WhiteLabel || ViewBag.CustomDomain ? string.Empty : "unlock-enterprise-features") @(ServerAppConfig.IsSelfHosted ? "branding-sec" : string.Empty )">
+                <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content">@T["Branding"]</h3>
                 <div class="col-xs-12 no-margin blur-whitelable-content no-padding">
                     <div class="col-xs-12 no-padding">
                         <div class="form-group highlight-image col-xs-6 branding-logo no-padding login-screen-logo" data-image="login-screen">
@@ -126,7 +120,7 @@
                             </div>
                             <div class="col-xs-8 logo-description">
                                 <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Login screen logo"]</h3>
-                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value,"200x40")</p>
+                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value, "200x40")</p>
                                 <div class="upload-link">
                                     <div id="upload-login-image" class="settings-upload-button">
                                     </div>
@@ -139,7 +133,7 @@
                             </div>
                             <div class="col-xs-8 logo-description">
                                 <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Header logo"]</h3>
-                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value,"40x40")</p>
+                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value, "40x40")</p>
                                 <div class="upload-link">
                                     <div id="upload-Main-screen-image" class="settings-upload-button">
                                     </div>
@@ -156,7 +150,7 @@
                             </div>
                             <div class="col-xs-8 logo-description">
                                 <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Favicon"]</h3>
-                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value,"40x40")</p>
+                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value, "40x40")</p>
                                 <div class="upload-link">
                                     <div id="upload-favicon-image" class="settings-upload-button">
                                     </div>
@@ -169,7 +163,7 @@
                             </div>
                             <div class="col-xs-8 logo-description">
                                 <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Email logo"]</h3>
-                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value,"200x40")</p>
+                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value, "200x40")</p>
                                 <div class="upload-link">
                                     <div id="upload-emaillogo-image" class="settings-upload-button">
                                     </div>
@@ -184,22 +178,25 @@
                             <div id="enable-checkbox">
                                 @Html.CheckBox("enablepoweredbysyncfusion", new { @class = "material-checkbox", @id = "enablepoweredbysyncfusion" })
                                 @Html.Hidden("enablepoweredbysyncfusion")
-                                @Html.Label("enablepoweredbysyncfusion", T["Show powered by information"].Value, new { @class = "app-textbox-label col-xs-4 section-label" })
+                                @Html.Label("enablepoweredbysyncfusion", T["Show powered by information"].Value, new { @class = "app-textbox-label col-xs-4 section-label enable-powered-by-syncfusion" })
                             </div>
                         </div>
-                        <div class="form-group highlight-image col-xs-6 branding-logo footer-logo no-padding margin" data-image="login-screen">
-                            <div class="col-xs-3 logo-section">
-                                <img id="display-footer-logo" src="@globalAppSettings.SystemSettings.FooterLogo" height="40" width="60" alt="@T["Powered by logo"]" />
-                            </div>
-                            <div class="col-xs-8 logo-description">
-                                <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Powered by logo"]</h3>
-                                <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value,"100x25")</p>
-                                <div class="upload-link">
-                                    <div id="upload-footer-image" class="settings-upload-button">
+                        @if (ServerAppConfig.IsSelfHosted)
+                        {
+                            <div class="form-group highlight-image col-xs-6 branding-logo footer-logo no-padding margin" data-image="login-screen">
+                                <div class="col-xs-3 logo-section">
+                                    <img id="display-footer-logo" src="@globalAppSettings.SystemSettings.FooterLogo" height="40" width="60" alt="@T["Powered by logo"]" />
+                                </div>
+                                <div class="col-xs-8 logo-description">
+                                    <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Powered by logo"]</h3>
+                                    <p class="no-margin">@String.Format(T["{0} pixels preferred"].Value, "100x25")</p>
+                                    <div class="upload-link">
+                                        <div id="upload-footer-image" class="settings-upload-button">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
                 <div class="form-group blur-whitelable-content col-xs-12 no-margin no-padding">
@@ -208,98 +205,122 @@
                             <div id="enable-checkbox">
                                 @Html.CheckBox("enablecopyrightinfo", new { @class = "material-checkbox", @id = "enablecopyrightinfo" })
                                 @Html.Hidden("enablecopyrightinfo")
-                                @Html.Label("enablecopyrightinfo", T["Show copyright information"].Value, new { @class = "app-textbox-label col-xs-4 section-label" })
+                                @if (ServerAppConfig.IsSelfHosted)
+                                {
+                                    @Html.Label("enablecopyrightinfo", T["Show copyright information"].Value, new { @class = "app-textbox-label col-xs-4 section-label enable-copyright-info copy-right-info" })
+                                }
+                                else
+                                {
+                                    @Html.Label("enablecopyrightinfo", T["Show copyright information"].Value, new { @class = "app-textbox-label col-xs-4 section-label enable-copyright-info" })
+                                }
                             </div>
                         </div>
-                        <label class="app-textbox-label section-label title col-xs-12 copyright-info">@T["Site copyright information"]</label>
-                        <div class="no-padding col-xs-12">
-                            <input type="text" id="site-copyright" name="copy_right_info" class="form-control validation-padding" placeholder="@T["Enter copyright information"]" value="@globalAppSettings.SystemSettings.CopyrightInformation" data-original-value="@globalAppSettings.SystemSettings.CopyrightInformation" />
+                        @if (ServerAppConfig.IsSelfHosted)
+                        {
+                            <label class="app-textbox-label section-label title col-xs-12 copyright-info">@T["Site copyright information"]</label>
+                            <div class="no-padding col-xs-12">
+                                <input type="text" id="site-copyright" name="copy_right_info" class="form-control validation-padding" placeholder="@T["Enter copyright information"]" value="@globalAppSettings.SystemSettings.CopyrightInformation" data-original-value="@globalAppSettings.SystemSettings.CopyrightInformation" />
+                                <span class="validation-errors"></span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!ServerAppConfig.IsSelfHosted)
+            {
+        <div class="login-disclaimer-section site-settings-page-section col-xs-12 no-padding">
+            <div id="login-disclaimer" class="col-xs-12 no-padding" ng-controller="LoginDisclaimerInfoCtrl">
+                <div class="hidden">
+                    <textarea id="temp" class="hidden"></textarea>
+                    <div id="toRemoveCulture"></div>
+                </div>
+                <h3 class="title col-xs-12 login-disclaimer sub-section-heading blur-whitelable-content">@T["Login Disclaimer"]</h3>
+                <div class="form-group blur-whitelable-content">
+                    <div class="enable-login-disclaimer">
+                        @Html.CheckBox("enablelogindisclaimer", ViewBag.SystemSettings.LoginDisclaimer.IsEnabled, new { @class = "material-checkbox", ng_click = "enableLoginDisclaimer()" })
+                        @Html.Hidden("enablelogindisclaimer")
+                        <label for="enablelogindisclaimer">
+                            <span>
+                                @T["Enable login disclaimer"]
+                            </span>
+                        </label>
+                    </div>
+                    <div>
+                        @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = !ViewBag.SystemSettings.LoginDisclaimer.IsEnabled })
+                        @Html.Hidden("enablecheckboxconsent")
+                        <label for="enablecheckboxconsent">
+                            <span>
+                                @T["Users must consent every time"]
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                @*<div class="form-group blur-whitelable-content">
+                @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = !ViewBag.SystemSettings.LoginDisclaimer.IsEnabled })
+                @Html.Hidden("enablecheckboxconsent")
+                <label for="enablecheckboxconsent">
+                    <span>
+                        @T["Enable login disclaimer"]
+                    </span>
+                </label>
+            </div>*@
+                <div id="consent-preview-container" class="col-xs-6 no-margin no-padding blur-whitelable-content">
+                    <div class="form-group blur-whitelable-content">
+                        <label class="app-textbox-label col-xs-12 no-padding">@T["Consent content"]</label>
+                        <div class="col-xs-8 no-margin form-input-field no-padding">
+                            <input type="text" class="form-control" placeholder="@T["Enter the consent content"]" id="consent-content" name="consent-content" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") maxlength="100" value="@(ViewBag.SystemSettings.LoginDisclaimer.ConsentContent != string.Empty ? ViewBag.SystemSettings.LoginDisclaimer.ConsentContent : (ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? @T["I have read and accept the login disclaimer."] : @T["By logging in you accept our login disclaimer."]))" ng-model="consentContent" ng-change="consentContentSplit()" />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+                    <div class="form-group blur-whitelable-content">
+                        <label class="app-textbox-label col-xs-12 no-padding">@T["Title"]</label>
+                        <div class="col-xs-8 no-margin form-input-field no-padding">
+                            <input type="text" class="form-control" placeholder="@T["Enter the login disclaimer title"]" id="login-disclaimer-title" name="login-disclaimer-title" value="@(ViewBag.SystemSettings.LoginDisclaimer.Title)" maxlength="100" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") ng-model="consentTitle" />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+                    <div class="form-group blur-whitelable-content">
+                        <label class="app-textbox-label col-xs-12 no-padding">@T["Message"]</label>
+                        <div class="col-xs-8 no-margin form-input-field no-padding" id="login-temp-container">
+                            <textarea id="login-disclaimer-temp" name="login-disclaimer-temp" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") onclick="EnableDisclaimerMessage()">@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
+                            <span class="validation-errors"></span>
+                        </div>
+                        <div class="col-xs-8 no-margin form-input-field no-padding" id="login-disclaimer-container" style="display: none">
+                            <textarea id="login-disclaimer-message" name="login-disclaimer-message" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled")>@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
                             <span class="validation-errors"></span>
                         </div>
                     </div>
                 </div>
-
-                @if (!ServerAppConfig.IsSelfHosted)
-                {
-                    <div id="login-disclaimer" class="col-xs-12 no-padding" ng-controller="LoginDisclaimerInfoCtrl">
-                        <div class="hidden">
-                            <textarea id="temp" class="hidden"></textarea>
-                            <div id="toRemoveCulture"></div>
-                        </div>
-                        <h3 class="title col-xs-12 login-disclaimer sub-section-heading blur-whitelable-content">@T["Login Disclaimer"]</h3>
-                        <div class="form-group blur-whitelable-content">
-                            @Html.Label("enablelogindisclaimer", T["Enable login disclaimer"].Value, new { @class = "app-textbox-label col-xs-2" })
-                            <div class="col-xs-4 enablelogindisclaimer switch-align">
-                                <span class="material-switch text-left">
-                                    <input type="checkbox" id="enablelogindisclaimer" name="enablefooter" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? "checked" : string.Empty) ng-click="enableLoginDisclaimer()" />
-                                    <label for="enablelogindisclaimer" class="label-primary"></label>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="form-group blur-whitelable-content">
-                            @Html.Label("enablecheckboxconsent", T["Users must consent every time"].Value, new { @class = "app-textbox-label col-xs-2" })
-                            <div class="col-xs-4 enablecheckboxconsent switch-align">
-                                <span class="material-switch text-left">
-                                    <input type="checkbox" id="enablecheckboxconsent" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") name="enablefooter" @(ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? "checked" : string.Empty) ng-click="enableConsentContent()" />
-                                    <label for="enablecheckboxconsent" class="label-primary"></label>
-                                </span>
-                            </div>
-                        </div>
-                        <div id="consent-preview-container" class="col-xs-6 no-margin no-padding blur-whitelable-content">
-                            <div class="form-group blur-whitelable-content">
-                                <label class="app-textbox-label col-xs-4">@T["Consent content"]</label>
-                                <div class="col-xs-8 no-margin form-input-field">
-                                    <input type="text" class="form-control no-margin" placeholder="@T["Enter the consent content"]" id="consent-content" name="consent-content" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") maxlength="100" value="@(ViewBag.SystemSettings.LoginDisclaimer.ConsentContent != string.Empty ? ViewBag.SystemSettings.LoginDisclaimer.ConsentContent : (ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? @T["I have read and accept the login disclaimer."] : @T["By logging in you accept our login disclaimer."]))" ng-model="consentContent" ng-change="consentContentSplit()" />
-                                    <div class="validation-errors"></div>
-                                </div>
-                            </div>
-                            <div class="form-group blur-whitelable-content">
-                                <label class="app-textbox-label col-xs-4">@T["Title"]</label>
-                                <div class="col-xs-8 no-margin form-input-field">
-                                    <input type="text" class="form-control no-margin" placeholder="@T["Enter the login disclaimer title"]" id="login-disclaimer-title" name="login-disclaimer-title" value="@(ViewBag.SystemSettings.LoginDisclaimer.Title)" maxlength="100" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") ng-model="consentTitle" />
-                                    <div class="validation-errors"></div>
-                                </div>
-                            </div>
-                            <div class="form-group blur-whitelable-content">
-                                <label class="app-textbox-label col-xs-4">@T["Message"]</label>
-                                <div class="col-xs-8 no-margin form-input-field" id="login-temp-container">
-                                    <textarea id="login-disclaimer-temp" name="login-disclaimer-temp" autocomplete="off" class="form-control no-margin" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") onclick="EnableDisclaimerMessage()">@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
-                                    <div class="validation-errors"></div>
-                                </div>
-                                <div class="col-xs-8 no-margin form-input-field" id="login-disclaimer-container" style="display: none">
-                                    <textarea id="login-disclaimer-message" name="login-disclaimer-message" autocomplete="off" class="form-control no-margin" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled")>@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
-                                    <div class="validation-errors"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xs-6 text-center blur-whitelable-content" ng-if="loginDisclaimerEnabled">
-                            <div id="image-container" class="center-img disclaimer-content-container">
-                                @Html.CheckBox("content-disclaimer-checkbox", true, new { @class = "material-checkbox" })
-                                @Html.Hidden("content-disclaimer-checkbox")
-                                <label class="content-disclaimer-name"></label>
-                            </div>
-                        </div>
-                        <div id="consent-content-dialog" style="display: none">
-                            <div class="fluent-popup-header col-xs-12 no-padding">
-                                <h4 class="popup-title">
-                                    <span id="info-dialog-header">{{consentTitle}}</span>
-                                    <button id="close-info-dialog" type="button" title="@T["Close"]" data-toggle="tool-tip" data-container="body" class="close popup-close" ng-click="closeConsentContentInfo()" aria-label="Close">
-                                        <span class="su su-close"></span>
-                                    </button>
-                                </h4>
-                            </div>
-                            <div class="fluent-item-popup-body col-xs-12">
-                                <div class="col-xs-12 no-padding" id="consent-message">
-                                </div>
-                            </div>
-                            <div class="fluent-popup-footer text-center no-padding col-xs-12">
-                                <button class="app-button app-secondary-button app-btn-secondary" ng-click="closeConsentContentInfo()" title="Close">@T["Close"]</button>
-                            </div>
+                <div class="col-xs-6 text-center blur-whitelable-content" ng-if="loginDisclaimerEnabled">
+                    <div id="image-container" class="center-img disclaimer-content-container">
+                        @Html.CheckBox("content-disclaimer-checkbox", true, new { @class = "material-checkbox" })
+                        @Html.Hidden("content-disclaimer-checkbox")
+                        <label class="content-disclaimer-name"></label>
+                    </div>
+                </div>
+                <div id="consent-content-dialog" style="display: none">
+                    <div class="fluent-popup-header col-xs-12 no-padding">
+                        <h4 class="popup-title">
+                            <span id="info-dialog-header">{{consentTitle}}</span>
+                            <button id="close-info-dialog" type="button" title="@T["Close"]" data-toggle="tool-tip" data-container="body" class="close popup-close" ng-click="closeConsentContentInfo()" aria-label="Close">
+                                <span class="su su-close"></span>
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="fluent-item-popup-body col-xs-12">
+                        <div class="col-xs-12 no-padding" id="consent-message">
                         </div>
                     </div>
-                }
+                    <div class="fluent-popup-footer text-center no-padding col-xs-12">
+                        <button class="app-button app-secondary-button app-btn-secondary" ng-click="closeConsentContentInfo()" title="Close">@T["Close"]</button>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
+
+            }
+            </form>
         <div class="bi-page-footer col-xs-12">
             <div class="bi-page-actions col-lg-12 col-md-12 no-margin">
                 <a href="@Url.Action("Index","Home")" class="secondary-button  app-btn-secondary pull-right" id="cancel-site-settings" title="">@T["Cancel"]</a>

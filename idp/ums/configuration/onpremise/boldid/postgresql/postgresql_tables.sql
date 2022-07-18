@@ -185,6 +185,7 @@ CREATE TABLE BOLDTC_User (
 	IsActivated smallint NOT NULL,
 	IsActive smallint NOT NULL,
 	IsDeleted smallint NOT NULL,
+	Status int NULL,
   CONSTRAINT PK_BOLDTC_USER PRIMARY KEY (Id)
 )
 ;
@@ -760,6 +761,17 @@ CREATE TABLE BOLDTC_AzureBlob (
 )
 ;
 
+CREATE TABLE BOLDTC_UserStatus (
+	Id SERIAL NOT NULL,
+	Status varchar(100) NOT NULL,
+        Value int NOT NULL UNIQUE,
+        CreatedDate timestamp NOT NULL,
+        ModifiedDate timestamp NOT NULL,
+	IsActive smallint NOT NULL,
+  CONSTRAINT PK_BOLDTC_USERSTATUS PRIMARY KEY (Id)
+)
+;
+
 INSERT into BOLDTC_TenantLogType  ( Name , IsActive ) VALUES (N'Registration', 1);
 INSERT into BOLDTC_TenantLogType  ( Name ,  IsActive ) VALUES (N'StatusUpdated', 1);
 INSERT into BOLDTC_TenantLogType  ( Name ,  IsActive ) VALUES (N'PaymentUpdated', 1);
@@ -896,6 +908,11 @@ INSERT into BOLDTC_AuthProvider  (Name, AuthTypeId, ModifiedDate, IsActive) VALU
 INSERT into BOLDTC_AuthProvider  (Name, AuthTypeId, ModifiedDate, IsActive) VALUES (N'AzureAD', 3, now() at time zone 'utc', 1);
 INSERT into BOLDTC_AuthProvider  (Name, AuthTypeId, ModifiedDate, IsActive) VALUES (N'JWTSSO', 5, now() at time zone 'utc', 1);
 INSERT into BOLDTC_AuthProvider  (Name, AuthTypeId, ModifiedDate, IsActive) VALUES (N'WindowsAD', 6, now() at time zone 'utc', 1);
+
+INSERT into BOLDTC_UserStatus  (Status, Value, CreatedDate, ModifiedDate, IsActive) VALUES (N'NotActivated', 0, now() at time zone 'utc', now() at time zone 'utc', 1);
+INSERT into BOLDTC_UserStatus  (Status, Value, CreatedDate, ModifiedDate, IsActive) VALUES (N'Activated', 1, now() at time zone 'utc', now() at time zone 'utc', 1);
+INSERT into BOLDTC_UserStatus  (Status, Value, CreatedDate, ModifiedDate, IsActive) VALUES (N'Locked', 2, now() at time zone 'utc', now() at time zone 'utc', 1);
+
 
 
 ALTER TABLE  BOLDTC_CouponLog  ADD CONSTRAINT  BOLDTC_CouponLog_fk0  FOREIGN KEY ( CouponLogTypeId ) REFERENCES  BOLDTC_CouponLogType ( Id )
@@ -1226,4 +1243,9 @@ ALTER TABLE BOLDTC_UserLog  VALIDATE CONSTRAINT BOLDTC_UserLog_fk2
 ALTER TABLE  BOLDTC_AzureBlob  ADD CONSTRAINT  BOLDTC_AzureBlob_fk0  FOREIGN KEY ( TenantInfoId ) REFERENCES  BOLDTC_TenantInfo ( Id )
 ;
 ALTER TABLE  BOLDTC_AzureBlob  VALIDATE CONSTRAINT  BOLDTC_AzureBlob_fk0
+;
+
+ALTER TABLE  BOLDTC_User  ADD CONSTRAINT  BOLDTC_User_fk1  FOREIGN KEY ( Status ) REFERENCES  BOLDTC_UserStatus ( Value )
+;
+ALTER TABLE  BOLDTC_User  VALIDATE CONSTRAINT  BOLDTC_User_fk1 
 ;

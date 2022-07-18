@@ -31,83 +31,45 @@
 <body onload="load()">
     <div id="PopupContainer" class="dialog">
 
-        <div class="col-md-12 dialog-header">
-            <div class="col-xs-11 no-padding">
-                <span class="su su-move Head-icon"></span>
-                <span class="PopupTitle">@T["Move Dashboard"]</span>
-                <div class="report-name padding10 no-left-padding no-top-padding ellipsis" title="@ViewBag.FullItemName">@ViewBag.FullItemName</div>
-            </div>
-            <div class="col-xs-1 no-padding">
-                <a href="javascript:void(0);" title='@T["Close"]' class="PopupClose close-dialog"><span class="su su-close"></span></a>
-            </div>
-        </div>
         @if (TempData["ErrorMessage"] == null)
         {
-            <form class="dialog-body col-xs-12 no-padding copy-move-category" id="move_report_form">
-                <div class="col-xs-12 padding20 no-bottom-padding" id="item-name-division">
-                    <div class="col-xs-3 no-padding text-right text-label">@T["Name"]<span class="mandatory">*</span></div>
-                    <div class="col-xs-1 no-padding"></div>
-                    <div class="col-xs-8 no-padding">
-                        <input type="text" id="item_name" name="itemName" maxlength="255" value="@ViewBag.FullItemName" class="form-control site-orgname-fields bottom-margin30 text" />
-                        <span class="validation-error text"></span>
-                    </div>
-                </div>
-                <div class="col-xs-12 padding20 no-bottom-padding no-top-padding bottom-margin30" id="action-category-division">
-                    <div class="col-xs-3 no-padding text-right text-label">@T["Move to Category"]</div>
-                    <div class="col-xs-1 no-padding"></div>
-                    @if (canCreateCategory)
-                    {
-                        <div class="col-xs-7 no-padding dropup">
-                            <select id="CategoryList" class="selectpicker" data-live-search="true" title="@T["Select category"]" data-size="3"></select>
-                            <span class="category-validation-error text"></span>
-                        </div>
-                        <span class="col-xs-1 input-group-btn no-padding" id="add-new-category">
-                            <button class="btn btn-default" style="padding:4px 10px;" type="button" title="@T["Add new Category"]" data-toggle="tooltip"><span class="su-add" style="font-size:12px;"></span></button>
-                        </span>
-                    }
-                    else
-                    {
-                        <div class="col-xs-8 no-padding dropup">
-                            <select id="CategoryList" class="selectpicker" data-live-search="true" title="@T["Select category"]" data-size="3"></select>
-                        </div>
-                    }
-
-                </div>
-                <input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" />
-                <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />
-            </form>
-
-            <div class="col-xs-4" style="display:none;"><input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" /></div>
-            <div class="col-xs-12 dialog-footer no-right-padding no-left-padding dialog-footer-position" id="action-button-division">
-                <div class="col-xs-6">
-                    <span class="ErrorMessage text-left"></span>
-                    <span class="SuccessMessage "></span>
-                </div>
-                <div class="col-xs-6 rightAlign">
-                    @{
-                        if (ViewBag.Action == "Move")
-                        {
-                            <input type="button" id="MoveButton" title="" class="app-button app-primary-button app-btn-primary" value="@T["Move"]" />
-                        }
-
-                    }
-                    <input type="button" id="CancelButton" title="" class="app-button app-secondary-button app-btn-secondary PopupClose" value="@T["Cancel"]" />
+        <form class="dialog-body no-padding copy-move-category" id="move_report_form">
+            <input type="hidden" id="move-dashboard-status" value="true" />
+            <div class="col-xs-12" id="item-name-division">
+                <div class="col-xs-12 no-padding text-label" style="font-weight:bold">@T["Name"]<span class="mandatory">*</span></div>
+                <div class="col-lg-12 no-padding">
+                    <input type="text" id="item_name" name="itemName" maxlength="255" value="@ViewBag.FullItemName" class="form-control site-orgname-fields text" />
+                    <span class="validation-error text"></span>
                 </div>
             </div>
+            <div class="col-xs-12" id="action-category-division">
+                <div class="col-xs-12 no-padding text-label" style="font-weight:bold">@T["Move to Category"]</div>
+                @if (canCreateCategory)
+                {
+                    <div class="col-xs-12 no-padding dropup">
+                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
+                        <span class="category-validation-error text"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-xs-12 no-padding dropup">
+                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
+                    </div>
+                }
+
+            </div>
+            <input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" />
+            <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />
+        </form>
+
+            <div class="col-xs-4" style="display:none;"><input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" /></div>
 
         }
         else
         {
-            <div class="dialog-body col-xs-12 no-padding">
-
-                <div class="col-xs-12 no-left-padding padding20 no-right-padding bottom-margin30">
-                    <div class="permission-denied">@TempData["ErrorMessage"]</div>
-                </div>
-                <div class="col-xs-12 dialog-footer no-right-padding no-left-padding dialog-footer-position" id="action-button-division">
-                    <div class="col-xs-12 no-padding text-center">
-                        <input type="button" id="CancelButton" title="" class="app-button app-secondary-button app-btn-secondary" value="@T["OK"]" />
-                    </div>
-                </div>
+            <div class="col-xs-12 no-padding">
+                <div class="permission-denied">@TempData["ErrorMessage"]</div>
             </div>
         }
         <environment include="Development,CloudDevelopment">

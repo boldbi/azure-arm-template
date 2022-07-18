@@ -9,10 +9,12 @@
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isAdmin = _identityResponse.IsAdmin;
     var isEmailRequired = globalAppSettings.SystemSettings.IsEmailRequired;
+    var isSelfHosted = ServerAppConfig.IsSelfHosted;
     var disabled = ViewBag.IsLocalDirectory ? "" : "disabled";
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var scopeList = ServerAppConfig.SettingsScopesList;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var passwordPolicy = ServerAppConfig.PasswordPolicy;
 }
 
 @section scripts{
@@ -42,6 +44,7 @@
         var isUsernameExistsUrl = "@Url.Action("IsUsernameExists", "UserManagement")";
         var isEmailRequired = "@isEmailRequired";
         var enableGroupEdit = @Json.Serialize(ViewBag.EnableGroupEdit);
+        var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         serverApp.controller('GroupEditController', function ($scope) {
             $scope.selectedRow = 1;
             $scope.page = 0;
@@ -177,6 +180,16 @@
             }
         });
     </script>
+    @if (isSelfHosted)
+    {
+        <script>
+            var minimumLength = "@passwordPolicy.MinimumLength";
+            var lowerCaseRequired = "@passwordPolicy.LowerCaseRequired";
+            var upperCaseRequired = "@passwordPolicy.UpperCaseRequired";
+            var numberRequired = "@passwordPolicy.NumberRequired";
+            var specialCharactersRequired = "@passwordPolicy.SpecialCharactersRequired";
+        </script>
+    }
     <script type="text/x-jsrender" id="attribute-name-template">
         <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
     </script>

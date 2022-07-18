@@ -1,18 +1,19 @@
 ﻿$(document).ready(function () {
     addPlacehoder("#user-add-dialog");
-    $("#user-add-dialog").ejDialog({
+    createWaitingPopup('user-add-dialog');
+    var addUserDialog = new ej.popups.Dialog({
+        header: window.TM.App.LocalizationContent.AddUser,
+        content: document.getElementById("dialog-container"),
+        showCloseIcon: true,
         width: "500px",
         height: "auto",
-        showOnInit: false,
-        allowDraggable: true,
-        enableResize: false,
-        title: window.TM.App.LocalizationContent.AddUser,
-        showHeader: false,
-        enableModal: true,
-        close: "onUserAddDialogClose",
+        isModal: true,
+        visible: false,
         closeOnEscape: true,
-        open: "onUserAddDialogOpen"
+        animationSettings: { effect: 'Zoom' },
+        close: "onUserAddDialogClose",
     });
+    addUserDialog.appendTo("#user-add-dialog");
 
     $.validator.addMethod("isRequired", function (value, element) {
         return !isEmptyOrWhitespace(value);
@@ -86,13 +87,16 @@
         },
         highlight: function (element) {
             $(element).closest('div').addClass("has-error");
+            passwordBoxHightlight(element);
         },
         unhighlight: function (element) {
+            passwordBoxUnhightlight(element);
             $(element).closest('div').removeClass('has-error');
-            $(element).closest('div').find("span").html("");
+            $(element).closest('div').find("span.useradd-validation-messages").html("");
+            
         },
         errorPlacement: function (error, element) {
-            $(element).closest('div').find("span").html(error.html()).css("display", "block");
+            $(element).closest('div').find("span.useradd-validation-messages").html(error.html()).css("display", "block");
         },
         messages: {
 			"email-address": {
@@ -103,7 +107,10 @@
             },
             "first-name": {
                 isRequired: window.TM.App.LocalizationContent.FirstNameValidator
-            }
+            },
+            "user-password": {
+                isValidPassword: window.TM.App.LocalizationContent.EnterPassword
+            },
         }
     });
 
@@ -114,28 +121,10 @@
         validateMethods.push(validateUserpassword.p_policy_number);
         validateMethods.push(validateUserpassword.p_policy_specialcharacter);
         validateMethods.push(validateUserpassword.p_policy_length);
-        for (var n = 0; n < validateMethods.length; n++) {
-            var currentMethodName = validateMethods[n];
-            if (currentMethodName(value) != "" && currentMethodName(value) != undefined) {
-                ruleName = currentMethodName(value);
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") != "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-tick").removeClass("su su-close");
-                    $('#password_policy_rules').find('li#' + ruleName).addClass("clear-error");
-                    ruleName = ""
-                }
-            }
-            else {
-                ruleName = name;
-                $(element).closest('div').addClass("has-error");
-                if ($('#password_policy_rules').find('li#' + ruleName + ' span').attr("class") == "su-tick") {
-                    $('#password_policy_rules').find('li#' + ruleName + ' span').addClass("su su-close").removeClass("su-tick");
-                    $('#password_policy_rules').find('li#' + ruleName).removeClass("clear-error");
-                    ruleName = "";
-                }
-            }
-        }
-        if ($('#password_policy_rules li>span.su-tick').length == $('#password_policy_rules').find('li>span').length)
+        passwordPolicyPopover("#new-password", value);
+        if ($('#password_policy_rules li>span.su-password-tick').length == $('#password_policy_rules li>span:not(.content)').length) {
             return true;
+        }
     }, "");
 
     $(document).on("keyup", "#dialog-container", function (e) {
@@ -152,7 +141,7 @@
     $(document).on("click", "#create-user", function () {
         $("#add-user").removeAttr("disabled");
         $(".form input[type='text']").val('');
-        var usergrid = $('#user_grid').data("ejGrid");
+        var usergrid = document.getElementById('user_grid').ej2_instances[0];
         usergrid.clearSelection();
         $("#add-user-in-group").removeClass("show").addClass("hide");
         $(".validation").closest("div").removeClass("has-error");
@@ -160,29 +149,9 @@
     });
 
     $(document).on("keyup", "#new-password", function () {
-        createPasswordPolicyRules();
+        passwordPolicyPopover("#new-password", $("#new-password").val());
         $("#new-password").valid();
     });
-
-    function createPasswordPolicyRules() {
-        if ($("#new-password").val() != '' && $("#new-password").next("ul").length == 0) {
-            $("#new-password").after("<ul id='password_policy_rules'></ul>");
-            $("#password_policy_rules").append("<li id='p_policy_heading'><p>" + window.TM.App.LocalizationContent.PasswordRule1 + "</p></li>");
-            $("#password_policy_rules").append("<li id='p_policy_length'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule2 + "</li>");
-            $("#password_policy_rules").append("<li id='p_policy_uppercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule3 + "</li>");
-            $("#password_policy_rules").append("<li id='p_policy_lowercase'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule4 + "</li>");
-            $("#password_policy_rules").append("<li id='p_policy_number'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule5 + "</li>");
-            $("#password_policy_rules").append("<li id='p_policy_specialcharacter'><span class='su su-close'></span>" + window.TM.App.LocalizationContent.PasswordRule6 + "</li>");
-            $("#confirm-password-section").css("margin-top", "-53px")
-            $(".button-section").css("margin-top", "-20px");
-            $(".button-section").addClass("top-margin");
-        }
-        if ($("#new-password").val() == '' && $("#new-password").next("ul").length != 0) {
-            $("#new-password").next("ul").remove();
-            $("#confirm-password-section").css("margin-top", "25px")
-            $(".button-section").css("margin-top", "20px");
-        }
-    }  
 
     function hasWhiteSpace(value) {
         if (/\s/g.test(value)) {
@@ -195,14 +164,14 @@
 });
 
 function onUserAddDialogClose() {
-    $("#user-add-dialog").ejDialog("close");
+    document.getElementById("user-add-dialog").ej2_instances[0].hide();
     $("#password_policy_rules").remove();
 }
 
 function onUserAddDialogOpen() {
     $("#add-user").removeAttr("disabled");
     $(".dropdown").removeClass("open");
-    $("#user-add-dialog").ejDialog("open");
+    document.getElementById("user-add-dialog").ej2_instances[0].show();
     $("#new-password").val("");
     $(".show-hide-password").removeClass("su-hide").addClass("su-show");
     $(".e-dialog-icon").attr("title", "Close");

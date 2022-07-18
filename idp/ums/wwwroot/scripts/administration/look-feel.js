@@ -1,18 +1,16 @@
 ﻿$(document).ready(function () {
     addPlacehoder("#font-upload-dialog");
-    $("#font-upload-dialog").ejDialog({
-        width: "500px",
-        height: "auto",
-        showOnInit: false,
-        allowDraggable: true,
-        enableResize: false,
-        title: window.TM.App.LocalizationContent.UploadFont,
-        showHeader: false,
-        enableModal: true,
+    
+    var fontUploadDialog = new ejs.popups.Dialog({
+        header: window.TM.App.LocalizationContent.UploadFont,
+        showCloseIcon: true,
+        width: '472px',
         close: "onUploadFontDialogClose",
-        closeOnEscape: true,
-        open: "onUploadFontDialogOpen"
+        isModal: true,
+        visible: false,
+        animationSettings: { effect: 'Zoom' }
     });
+    fontUploadDialog.appendTo("#font-upload-dialog");
 
     fontDropDownListInitialization('#fontfamily', window.TM.App.LocalizationContent.LookAndFeel);
     document.getElementById("fontfamily").ej2_instances[0].value = selectedFontValue;
@@ -72,7 +70,7 @@
 
     $(document).on("click", "#update-font-settings", function () {
         var fontSettings = { FontFamily: document.getElementById("fontfamily").ej2_instances[0].value };
-        showWaitingPopup($("#body"));
+        showWaitingPopup('body');
         $.ajax({
             type: "POST",
             url: updateFontSettingsUrl,
@@ -84,13 +82,13 @@
                 } else {
                     WarningAlert(window.TM.App.LocalizationContent.FontSettings, window.TM.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
                 }
-                hideWaitingPopup($("#body"));
+                hideWaitingPopup('body');
             }
         });
     });
 
     $(document).on("click", "#upload-font", function () {
-        showWaitingPopup($("#body"));     
+        showWaitingPopup('body');     
     });
 });
 
@@ -123,12 +121,11 @@ function onUploadFontDialogClose() {
     $("#font-file-name").val(window.TM.App.LocalizationContent.BrowseFont);
     $(".validation").closest("div").removeClass("has-error");
     $(".fontupload-validation-messages").css("display", "none");
-    $("#font-upload-dialog").ejDialog("close");
+    document.getElementById("font-upload-dialog").ej2_instances[0].hide();
 }
 
 function onUploadFontDialogOpen() {
-    $("#font-upload-dialog").ejDialog("open");
-    $(".e-dialog-icon").attr("title", "Close");
+    document.getElementById("font-upload-dialog").ej2_instances[0].show();
 }
 
 

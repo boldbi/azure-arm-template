@@ -3,6 +3,9 @@
     ViewBag.Title = T["Group Permissions"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePermissions);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
 }
 
 @model List<ItemDetail>
@@ -27,7 +30,7 @@
 }
 @section MainSection {
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div id="base-container" role="tabpanel" class="bi-page-container ">
+    <div id="base-container" role="tabpanel" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
         <div class="bi-page-content col-xs-12 no-padding">
             <div id="group-header" class="col-lg-12 col-md-12 co-sm-12 col-xs-12 bi-page-header">
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
@@ -46,7 +49,7 @@
             <div class="active-directory-form col-xs-12 bi-page-body">
                 <div class="col-md-12 col-xs-12 col-sm-12 permission-grid">@await Html.PartialAsync("_GroupPermissionGrid", Model)</div>
                 <div class="col-md-3">
-                    <div id="add-permission" class="no-padding">
+                    <div id="add-permission" class="no-padding" style="display:none">
                         @await Html.PartialAsync("_AddGroupPermission")
                     </div>
                 </div>

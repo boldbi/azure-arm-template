@@ -8,117 +8,83 @@
 
 @if (Model.Success)
 {
-    <div class="modal-content" id="delete-popup-container">
-        <div class="modal-header">
-            <div class="col-xs-11 col-sm-11 col-md-11 no-padding">
-                <span class="su su-delete"></span>
-                <span class="modal-title popup-title">@ViewBag.PopupTitle</span>
-            </div>
-            <div class="col-xs-1 col-sm-1 col-md-1 no-padding">
-                <a href="javascript:void(0);" onclick="onDeleteItemDialogClose()" title="@T["Close"]" class="popup-close pull-right"><span class="su su-close"></span></a>
-            </div>
-        </div>
-        <div class="modal-body">
-            <div class="col-xs-12">
-                @if (ViewBag.Validation != null)
-                {
-                    if (ViewBag.Validation[ItemType.Schedule] && ViewBag.Validation[ItemType.Dashboard] && ViewBag.Validation[ItemType.Slideshow])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing schedules, multi-tabbed dashboards, and slideshows. Deleting this dashboard will make the schedules, multi-tabbed dashboards, and slideshows linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                    else if (ViewBag.Validation[ItemType.Schedule] && ViewBag.Validation[ItemType.Dashboard])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing schedules and multi-tabbed dashboards. Deleting this dashboard will make the schedules and multi-tabbed dashboards linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                    else if (ViewBag.Validation[ItemType.Dashboard] && ViewBag.Validation[ItemType.Slideshow])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing multi-tabbed dashboards and slideshows. Deleting this dashboard will make the multi-tabbed dashboards and slideshows linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                    else if (ViewBag.Validation[ItemType.Schedule] && ViewBag.Validation[ItemType.Slideshow])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing schedules and slideshows. Deleting this dashboard will make the schedules and slideshows linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                    else if (ViewBag.Validation[ItemType.Schedule])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing schedules. Deleting this dashboard will make the schedules linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                    else if (ViewBag.Validation[ItemType.Dashboard])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing multi-tabbed dashboards. Deleting this dashboard will make the multi-tabbed dashboards linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                    else if (ViewBag.Validation[ItemType.Slideshow])
-                    {
-                        <div class="datasource-delete-warning">
-                            @T["This dashboard has been used in existing slideshows. Deleting this dashboard will make the slideshows linked with it no longer work."]
-                        </div>
-                        <br />
-                    }
-                }
-
-                <div class="delete-item">
-
-                        @Html.Raw("<span style='white-space:nowrap; float:left'>"+ String.Format(ViewBag.deleteConformation, "</span><span id = 'delete-item-name' class='delete-item-body highlight-name'>" + ViewData["ItemName"]+ "</span>"))
+<div class="col-lg-12 no-padding dialog" id="delete-popup-container">
+    <input type="hidden" id="delete-slideshow" data-item-id="@ViewData["ItemId"]" data-datasource-type="@ViewData["DatasourceType"]" data-itemtype="@(Model.Value)" />
+    <input type="hidden" id="delete-item" data-item-id="@ViewData["ItemId"]" data-datasource-type="@ViewData["DatasourceType"]" data-itemtype="@(Model.Value)" />
+    <input type="hidden" id="delete-category-status" value="true" />
+    <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
+        @if (ViewBag.Validation != null)
+        {
+            if (ViewBag.Validation[ItemType.Schedule] && ViewBag.Validation[ItemType.Dashboard] && ViewBag.Validation[ItemType.Slideshow])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing schedules, multi-tabbed dashboards, and slideshows. Deleting this dashboard will make the schedules, multi-tabbed dashboards, and slideshows linked with it no longer work."]
                 </div>
+                <br />
+            }
+            else if (ViewBag.Validation[ItemType.Schedule] && ViewBag.Validation[ItemType.Dashboard])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing schedules and multi-tabbed dashboards. Deleting this dashboard will make the schedules and multi-tabbed dashboards linked with it no longer work."]
+                </div>
+                <br />
+            }
+            else if (ViewBag.Validation[ItemType.Dashboard] && ViewBag.Validation[ItemType.Slideshow])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing multi-tabbed dashboards and slideshows. Deleting this dashboard will make the multi-tabbed dashboards and slideshows linked with it no longer work."]
+                </div>
+                <br />
+            }
+            else if (ViewBag.Validation[ItemType.Schedule] && ViewBag.Validation[ItemType.Slideshow])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing schedules and slideshows. Deleting this dashboard will make the schedules and slideshows linked with it no longer work."]
+                </div>
+                <br />
+            }
+            else if (ViewBag.Validation[ItemType.Schedule])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing schedules. Deleting this dashboard will make the schedules linked with it no longer work."]
+                </div>
+                <br />
+            }
+            else if (ViewBag.Validation[ItemType.Dashboard])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing multi-tabbed dashboards. Deleting this dashboard will make the multi-tabbed dashboards linked with it no longer work."]
+                </div>
+                <br />
+            }
+            else if (ViewBag.Validation[ItemType.Slideshow])
+            {
+                <div class="datasource-delete-warning">
+                    @T["This dashboard has been used in existing slideshows. Deleting this dashboard will make the slideshows linked with it no longer work."]
+                </div>
+                <br />
+            }
+        }
 
-                @if (itemType == ItemType.Datasource)
-                {
+        <div class="delete-item">
+
+            @Html.Raw("<span style='white-space:nowrap; float:left'>" + String.Format(ViewBag.deleteConformation, "</span><span id = 'delete-item-name' class='delete-item-body highlight-name'>" + ViewData["ItemName"] + "</span>"))
+        </div>
+
+        @if (itemType == ItemType.Datasource)
+        {
             <div class="datasource-delete-warning">
                 @Html.Raw(String.Format(T["Dashboards that use this data source will no longer work. You can view the {0}dashboards{1} linked to this data source and then delete it."].Value, "<a href='" + Url.Action("viewlinkeddashboards", "datasources", new { dataSourceId = ViewData["ItemId"] }) + "'>", "</a>"))
                 @*@String.Format(T["{0}Dashboards{1} that use this data source will no longer work. You cannot undo this action."].Value, "<a href='@Url.Action("dashboards", "dashboards")/?datasource="@ViewData["ItemName"]"' target='_blank'>","</a>")*@
             </div>
-                }
-            </div>
-        </div>
-        <div class="modal-footer">
-            <div class="col-xs-4"></div>
-            <div class="col-xs-8 no-padding padding-top validation-area">
-                @if (itemType == ItemType.Slideshow)
-                {
-                    <input type="button" class="app-button app-critical-action-button app-btn-danger" value="@T["Yes"]" id="delete-slideshow" data-item-id="@ViewData["ItemId"]" data-datasource-type="@ViewData["DatasourceType"]" data-itemtype="@(Model.Value)" tabindex="1" autofocus />
-                }
-                else
-                {
-                    <input type="button" class="app-button app-critical-action-button app-btn-danger" value="@T["Yes"]" id="delete-item" data-item-id="@ViewData["ItemId"]" data-datasource-type="@ViewData["DatasourceType"]" data-itemtype="@(Model.Value)" tabindex="1" autofocus />
-                }
-                <input type="button" id="cancel" class="app-button app-secondary-button app-btn-secondary popup-close" value="@T["No"]" onclick="onDeleteItemDialogClose()" tabindex="2" />
-            </div>
-            <div class="col-xs-8 padding-top success-area" style="display:none">
-                <input title="" type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary popup-close" value="@T["OK"]" onclick="onDeleteItemDialogClose()" tabindex="3" autofocus />
-            </div>
-        </div>
+        }
     </div>
+</div>
 }
 else
 {
-    <div class="modal-content" id="delete-popup-container">
-        <div class="modal-header">
-            <div class="col-xs-11 col-sm-11 col-md-11 no-padding">
-                <span class="su su-delete"></span>
-                <span class="modal-title">@ViewBag.PopupTitle</span>
-            </div>
-            <div class="col-xs-1 col-sm-1 col-md-1 no-padding">
-                <a href="javascript:void(0);" title="@T["Close"]" onclick="onDeleteItemDialogClose()" class="popup-close pull-right"><span class="su su-close"></span></a>
-            </div>
-        </div>
-        <div class="modal-body text-center">
+    <div class="col-lg-12 no-padding dialog" id="delete-popup-container">
+        <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
             @switch ((ItemType)Model.Value)
             {
                 case ItemType.Category:
@@ -145,7 +111,7 @@ else
                     break;
 
                 case ItemType.Datasource:
-                   
+
                     <div class="delete-item">
                         <span>
                             @Html.Raw(String.Format(T["Cannot delete {0} as the Data Source is being used by dashboards."].Value, "</span><span class='delete-item-body highlight-name'>" + @ViewData["ItemName"] + "</span><span>"))
@@ -153,10 +119,6 @@ else
                     </div>
                     break;
             }
-        </div>
-
-        <div class="modal-footer text-center">
-            <input title="" type="button" id="Cancel" class="app-button app-secondary-button app-btn-secondary popup-close" value="@T["OK"]" onclick="onDeleteItemDialogClose()" tabindex="1" autofocus />
         </div>
     </div>
 

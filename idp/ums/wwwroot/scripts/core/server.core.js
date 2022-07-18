@@ -48,23 +48,22 @@ var excludedSearchKeys = [
 ];
 
 $(document).ready(function () {
+    setClientLocaleCookie("boldservice.client.locale", 365);
+    createWaitingPopup('body');
+    createWaitingPopup('server-app-container');
+    createWaitingPopup('content-area');
+    createWaitingPopup('startup-waiting-element');
+    createWaitingPopup('startup-page-container-waiting-element');
+    createWaitingPopup('messageBox');
+
     $('[data-toggle="popover"]').popover();
     $("body, .login-main, #server-app-container").removeAttr("style");
 
     $("form").attr("autocomplete", "off");
     $("input[type=text], input[type=password]").attr("autocomplete", "off");
     $("[data-toggle='tooltip']").tooltip();
-    $(".dropdown-menu #notify_header").click(function (e) {
+    $(document).on("click", ".dropdown-menu #notify_header", function (e) {
         e.stopPropagation();
-    });
-    $("#notification-icon").click(function (e) {
-        if (!$("#notification-link").hasClass("open")) {
-            $("#notification-content-area").ejWaitingPopup();
-            $("#notification-content-area").addClass("show");
-            $("#notification-content-area").ejWaitingPopup("show");
-            $("#notification-content-area").removeClass("show");
-            $("#notification-list").attr("src", getUserNotificationsPartialViewResultUrl);
-        }
     });
 
     var notBackdrop =
@@ -74,30 +73,8 @@ $(document).ready(function () {
         parent.$("#nav-backdrop").hide();
     });
 
-    $("#notification-link, #account-profile, #upload-item-section").click(function (e) {
-        if ($(".dropdown-backdrop").length === 0) {
-            $("body").append(notBackdrop);
-        }
-        if (!$("#notification-link").hasClass("open")) {
-            notBackdrop.show();
-        }
-        else if (!$("#account-profile").hasClass("open")) {
-            notBackdrop.show();
-        } else {
-            notBackdrop.show();
-        }
-    });
-
-    $("#account-profile .dropdown-menu").click(function (e) {
-        e.stopPropagation();
-    });
-
     notBackdrop.click(function () {
         notBackdrop.hide();
-    });
-
-    $(document).on("click", ".dropdown-backdrop", function () {
-        parent.$("#nav-backdrop").hide();
     });
 
     searchId = $("#search-area").children("input").attr("id");
@@ -185,20 +162,34 @@ $(document).ready(function () {
         }
     });
 
-    function imageOnLoad() {
-        $(this).show();
-        if ($(this).attr("id") === "footerlogo") {
-            $(this).parent().parent().find("div.lazyload").remove();
-        }
-        $(this).parent().find("div.lazyload").remove();
-    }
-
     if (typeof (isLicenseExpiredUrl) !== "undefined") {
         $.ajax({
             type: "POST",
             url: isLicenseExpiredUrl,
         });
     }
+});
+
+$(document).on("click", ".dropdown-backdrop", function () {
+    parent.$("#nav-backdrop").hide();
+});
+
+$(document).on("click", "#notification-link, #account-profile, #upload-item-section", function (e) {
+    if ($(".dropdown-backdrop").length === 0) {
+        $("body").append(notBackdrop);
+    }
+    if (!$("#notification-link").hasClass("open")) {
+        notBackdrop.show();
+    }
+    else if (!$("#account-profile").hasClass("open")) {
+        notBackdrop.show();
+    } else {
+        notBackdrop.show();
+    }
+});
+
+$(document).on("click", "#account-profile .dropdown-menu", function (e) {
+    e.stopPropagation();
 });
 
 $(document).on("keyup", "textarea", function (event) {
@@ -209,6 +200,190 @@ $(document).on("keyup", "textarea", function (event) {
         }
     }
 });
+
+$(document).on("keyup", "textarea", function (event) {
+    if (event.keyCode != 8 && event.keyCode != 46) {
+        var max = 255;
+        if ($(this).attr("maxlength") != undefined) {
+            max = $(this).attr("maxlength");
+        }
+        if ($(this).val().length >= max) {
+            $(this).val($(this).val().substring(0, max));
+        }
+    }
+});
+
+$(document).on("focus", "input[type=text],input[type=password],textarea", function () {
+    if (regexIe8.test(userAgent)) {
+        $(this).next(".placeholder").removeClass("show").addClass("hide");
+    }
+});
+
+$(document).on("focusout", "input[type=text],input[type=password],textarea", function () {
+    if (regexIe8.test(userAgent) && $(this).val() === "") {
+        $(this).next(".placeholder").removeClass("hide").addClass("show");
+    }
+});
+$(document).on("focus", ".placeholder", function () {
+    $(this).prev("input").focus();
+});
+
+$(document).on("keyup", "#search-users, #search-tenants, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search", function (e) {
+    var element = "#" + this.id;
+    if ($(element).val() != "") {
+        if (element == "#search-home-page" || element == "#search-tenant-users") {
+            $(element).parent().siblings("span.close-icon").css("display", "block");
+            $(element).parent().siblings("span.search-icon").css("display", "none");
+        }
+        else {
+            $(element).siblings("span.close-icon").css("display", "block");
+            $(element).siblings("span.search-user").css("display", "none");
+            $(element).siblings("span.search-group").css("display", "none");
+            $(element).siblings("span.search-group-users").css("display", "none");
+            $(element).siblings("span.search-icon").css("display", "none");
+            $(element).siblings("span.search-item").css("display", "none");
+            $(element).siblings("span.search-schedule").css("display", "none");
+            $(element).siblings("span.search").css("display", "none");
+            $(element).siblings("span.search-application").css("display", "none");
+        }
+    } else {
+        if (element == "#search-home-page" || element == "#search-tenant-users") {
+            $(element).parent().siblings("span.close-icon").css("display", "none");
+            $(element).parent().siblings("span.su-search").css("display", "block");
+        }
+        else {
+            $(element).siblings("span.close-icon").css("display", "none");
+            $(element).siblings("span.su-search").css("display", "block");
+        }
+    }
+});
+
+$(document).on("click", "#clear-search,.clear-search,#add-user-clear-search,#add-tenant-clear-search", function () {
+    var currentElement = $(this).prevAll("input");
+    if (currentElement == "" || currentElement == null || currentElement == undefined || currentElement.length <= 0) {
+        currentElement = $(this).prev("div").find("input");
+    }
+    var currentId = "#" + currentElement.attr("id");
+    currentElement.val("");
+
+    if (!clearSearch) {
+        $("#clear-search").css("display", "none");
+        $("#add-user-clear-search").css("display", "none");
+        $("#add-tenant-clear-search").css("display", "none");
+    }
+
+    if (currentElement.val() == "") {
+        if (currentId == "#search-home-page" && !clearSearch) {
+            $("#clear-search").parent().siblings("span.su-search").css("display", "block");
+            $(".search-area").removeClass("add-background");
+            $(".placeholder, #clear-search").hide();
+            if ($(".all-items").hasClass("active") && !$("#category-list").is(":visible")) {
+                setTimeout(function () { $(".search-area").prevAll().show().parent().removeClass("pull-right"); $("#category-section-name").show(); }, 300);
+            }
+            else {
+                setTimeout(function () { $(".search-area").prevAll(":not(#back-icon)").show().parent().removeClass("pull-right"); $("#category-section-name").show(); }, 300);
+            }
+            setTimeout(function () { $(".search-home-section:visible").removeClass("show"); }, 300);
+        }
+        else {
+            $("#clear-search").siblings("span.su-search").css("display", "block");
+            $("#add-user-clear-search").siblings("span.su-search").css("display", "block");
+            $("#add-tenant-clear-search").siblings("span.su-search").css("display", "block");
+        }
+
+        if (currentId == "#ad-user-import" || currentId == "#ad-group-import" || currentId == "#search-database-users") {
+            var gridObj = $("#Grid").data("ejGrid");
+            gridObj.option("dataSource", "");
+            if (currentId == "#search-database-users") {
+                var e = jQuery.Event("keypress", { keyCode: 13 });
+                $("#search-database-users").trigger(e);
+            }
+        } else {
+            PerformSearch(currentId);
+        }
+
+        if (currentId == "#search-ad-users" || currentId == "#search-ad-groups") {
+            if (currentId == "#search-ad-groups") {
+                var gridObj = $("#Grid").data("ejGrid");
+                $("#checkbox-header").prop("checked", false);
+                $(".checkbox-row").prop("checked", false);
+                gridObj.clearSelection();
+            } else {
+                var gridObj = document.getElementById('user_grid').ej2_instances[0];
+                $("#checkbox-header").prop("checked", false);
+                $(".checkbox-row").prop("checked", false);
+                gridObj.clearSelection();
+            }
+        }
+    }
+    else {
+        currentElement.val("");
+    }
+});
+
+$(document).on("keydown", "#search-users, #search-tenants, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search", function (e) {
+    $.xhrPool.abortAll();
+    var currentKeyCode = parseInt(e.which);
+    var element = "#" + this.id;
+    if (timeOut != null) {
+        clearTimeout(timeOut);
+        timeOut = null;
+    }
+    if (currentKeyCode === keyCode.Enter) {
+        PerformSearch(element);
+    }
+    else if (excludedSearchKeys.indexOf(currentKeyCode) === -1) {
+        timeOut = setTimeout(function () {
+            PerformSearch(element);
+        }, 900);
+    }
+});
+
+$(document).on('click', ".close-user-warning-icons", function (e) {
+    $("#content-area").removeClass("user-warning-space");
+    $(".user-warning").css("display", "none");
+});
+
+function PerformSearch(currentId) {
+    var gridObj;
+    if (currentId == "#search-users") {
+        gridObj = document.getElementById('user_grid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId == "#search-tenants") {
+        gridObj = document.getElementById('tenants_grid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId === "#search-app-users") {
+        gridObj = document.getElementById('users_grid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId === "#add-user-search") {
+        gridObj = document.getElementById('add_users_grid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId === "#add-tenant-search") {
+        gridObj = document.getElementById('add_tenants_grid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId == "#search-tenant-users") {
+        gridObj = document.getElementById('add_admins_grid').ej2_instances[0];
+        gridObj.refresh();
+    }
+}
+
+function imageOnLoad() {
+    $(this).show();
+    if ($(this).attr("id") === "footerlogo") {
+        $(this).parent().parent().find("div.lazyload").remove();
+    }
+    $(this).parent().find("div.lazyload").remove();
+}
 
 function isEmptyOrWhitespace(value) {
     if ($.trim(value) == "")
@@ -323,33 +498,6 @@ function addPlacehoder(object) {
     }
 }
 
-$("textarea").keyup(function (event) {
-    if (event.keyCode != 8 && event.keyCode != 46) {
-        var max = 255;
-        if ($(this).attr("maxlength") != undefined) {
-            max = $(this).attr("maxlength");
-        }
-        if ($(this).val().length >= max) {
-            $(this).val($(this).val().substring(0, max));
-        }
-    }
-});
-
-$(document).on("focus", "input[type=text],input[type=password],textarea", function () {
-    if (regexIe8.test(userAgent)) {
-        $(this).next(".placeholder").removeClass("show").addClass("hide");
-    }
-});
-
-$(document).on("focusout", "input[type=text],input[type=password],textarea", function () {
-    if (regexIe8.test(userAgent) && $(this).val() === "") {
-        $(this).next(".placeholder").removeClass("hide").addClass("show");
-    }
-});
-$(document).on("focus", ".placeholder", function () {
-    $(this).prev("input").focus();
-});
-
 function doAjaxPost(type, url, data, onSuccess, onError, onComplete, element, processData, contentType, passDataToCallbackFn) {
     if (element) {
         if (element.is(":input:button") || element.is("button"))
@@ -397,31 +545,26 @@ function doAjaxPost(type, url, data, onSuccess, onError, onComplete, element, pr
     });
 };
 
-function ShowWaitingProgress(selector, show) {
-    if (show == "show") {
-        $(selector).ejWaitingPopup();
-        $(selector).ejWaitingPopup("show");
-    } else
-        $(selector).ejWaitingPopup("hide");
-};
-
 function getFnObj(obj) {
     if (typeof obj === "function") return obj;
     if (typeof obj === "string" && window[obj])
         return obj;
 };
 
+function createWaitingPopup(element) {
+    ejs.popups.createSpinner({
+        target: document.getElementById(element)
+    });
+}
+
 function showWaitingPopup(element) {
-    if (typeof element === "string")
-        element = $((element.indexOf(".") === 0) ? element : "#" + element);
-    element.ejWaitingPopup();
-    element.ejWaitingPopup("show");
+    ejs.popups.showSpinner(document.getElementById(element));
+    $("#" + element).find(".e-spinner-pane").addClass("e-spinner-bg");
 };
 
 function hideWaitingPopup(element) {
-    if (typeof element === "string")
-        element = $((element.indexOf(".") === 0) ? element : "#" + element);
-    element.ejWaitingPopup("hide");
+    ejs.popups.hideSpinner(document.getElementById(element));
+    $("#" + element).find(".e-spinner-pane").removeClass("e-spinner-bg");
 };
 
 function redirect(url, interval) {
@@ -576,7 +719,7 @@ function IsValidContactNumber(contactNumber) {
 }
 
 function onCloseMessageBox() {
-    $(".e-footer-content").html("");
+    $("#messageBox").find(".e-footer-content").html("");
     document.getElementById("messageBox").ej2_instances[0].hide();
 }
 
@@ -588,7 +731,7 @@ function onMessageDialogClose() {
 
 function messageBox(messageIcon, messageHeader, messageText, type, successCallback, errorCallback, width, height, maxHeight, cssClass) {
     $("#messageBox").find(".message-content").text("");
-    $(".e-footer-content").html("");
+    $("#messageBox").find(".e-footer-content").html("");
     $(".message-box-close").html("");
     $("#messageBox").find(".e-dlg-header").html("<span class='su " + messageIcon + "'></span> <span class='modal-title' data-toggle='tooltip' data-placement='bottom' data-container='body' title='" + messageHeader + "'  >" + messageHeader + "</h2>");
     $("#messageBox").find(".message-content").html(messageText);
@@ -618,7 +761,7 @@ function messageBox(messageIcon, messageHeader, messageText, type, successCallba
             });
         }
         $(".message-box-close").html(closeIcon);
-        $(".e-footer-content").append(errorButton, successButton);
+        $("#messageBox").find(".e-footer-content").append(errorButton, successButton);
         $("#messageBox").unbind("keydown");
     }
     else {
@@ -667,30 +810,30 @@ function messageBox(messageIcon, messageHeader, messageText, type, successCallba
     }
 }
 
-function deleteUserAvatar() {
-    ShowWaitingProgress("#user-profile-master", "show");
-    doAjaxPost('POST', deleteavatarUrl, { userName: $("#user-name").val() },
-        function (result) {
-            ShowWaitingProgress("#user-profile-master", "hide");
-            if (result.status) {
-                messageBox("su-delete", window.TM.App.LocalizationContent.DeleteAvatar, window.TM.App.LocalizationContent.DeleteAvatarSuccess, "success", function () {
-                    var isLoggedUser = $("#logged-user").html().toLowerCase();
-                    $("#user-profile-picture").attr("src", getdefaultavatarUrl);
-                    $("#user-profile-picture").siblings("#avatar-delete-click").remove();
-                    if ($("#user-name").val() == isLoggedUser) {
-                        $(".profile-picture,#profile-picture-menu").find("img").attr("src", getdefaultavatarUrl);
-                    }
-                    onCloseMessageBox();
-                });
-            }
-            else {
-                messageBox("su-delete", window.TM.App.LocalizationContent.DeleteAvatarTitle, window.TM.App.LocalizationContent.DeleteAvatarError, "success", function () {
-                    onCloseMessageBox();
-                });
-            }
-        }
-    );
-}
+//function deleteUserAvatar() {
+//    ShowWaitingProgress("#user-profile-master", "show");
+//    doAjaxPost('POST', deleteavatarUrl, { userName: $("#user-name").val() },
+//        function (result) {
+//            ShowWaitingProgress("#user-profile-master", "hide");
+//            if (result.status) {
+//                messageBox("su-delete", window.TM.App.LocalizationContent.DeleteAvatar, window.TM.App.LocalizationContent.DeleteAvatarSuccess, "success", function () {
+//                    var isLoggedUser = $("#logged-user").html().toLowerCase();
+//                    $("#user-profile-picture").attr("src", getdefaultavatarUrl);
+//                    $("#user-profile-picture").siblings("#avatar-delete-click").remove();
+//                    if ($("#user-name").val() == isLoggedUser) {
+//                        $(".profile-picture,#profile-picture-menu").find("img").attr("src", getdefaultavatarUrl);
+//                    }
+//                    onCloseMessageBox();
+//                });
+//            }
+//            else {
+//                messageBox("su-delete", window.TM.App.LocalizationContent.DeleteAvatarTitle, window.TM.App.LocalizationContent.DeleteAvatarError, "success", function () {
+//                    onCloseMessageBox();
+//                });
+//            }
+//        }
+//    );
+//}
 
 function IsValidName(validationType, inputString) {
     var regex;
@@ -718,214 +861,6 @@ function GridLocalization() {
         nextPageTooltip: window.TM.App.LocalizationContent.NextPage,
         previousPageTooltip: window.TM.App.LocalizationContent.PreviousPage
     };
-}
-
-$(document).on("keyup", "#SearchCategory, #search-groups, #search-group-users, #ad-user-import, #userSearchKey,#groupSearchKey, #ad-group-import, #searchItems, #search-schedules, #search-users, #search-ad-users, #search-ad-groups, #search-user-permission, #search-group-permission, #search-database-users,#search-tree, #search-home-page, #search-items, .search-user-holder, .tree-view-search-holder, #search-tenants, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search", function (e) {
-    var element = "#" + this.id;
-    if ($(element).val() != "") {
-        if (element == "#search-home-page" || element == "#search-tenant-users") {
-            $(element).parent().siblings("span.close-icon").css("display", "block");
-            $(element).parent().siblings("span.search-icon").css("display", "none");
-        }
-        else {
-            $(element).siblings("span.close-icon").css("display", "block");
-            $(element).siblings("span.search-user").css("display", "none");
-            $(element).siblings("span.search-group").css("display", "none");
-            $(element).siblings("span.search-group-users").css("display", "none");
-            $(element).siblings("span.search-icon").css("display", "none");
-            $(element).siblings("span.search-item").css("display", "none");
-            $(element).siblings("span.search-schedule").css("display", "none");
-            $(element).siblings("span.search").css("display", "none");
-            $(element).siblings("span.search-application").css("display", "none");
-        }
-    } else {
-        if (element == "#search-home-page" || element == "#search-tenant-users") {
-            $(element).parent().siblings("span.close-icon").css("display", "none");
-            $(element).parent().siblings("span.su-search").css("display", "block");
-        }
-        else {
-            $(element).siblings("span.close-icon").css("display", "none");
-            $(element).siblings("span.su-search").css("display", "block");
-        }
-    }
-});
-
-$(document).on("click", "#clear-search,.clear-search,#add-user-clear-search,#add-tenant-clear-search", function () {
-    var currentElement = $(this).prevAll("input");
-    if (currentElement == "" || currentElement == null || currentElement == undefined || currentElement.length <= 0) {
-        currentElement = $(this).prev("div").find("input");
-    }
-    var currentId = "#" + currentElement.attr("id");
-    currentElement.val("");
-
-    if (!clearSearch) {
-        $("#clear-search").css("display", "none");
-        $("#add-user-clear-search").css("display", "none");
-        $("#add-tenant-clear-search").css("display", "none");
-    }
-
-    if (currentElement.val() == "") {
-        if (currentId == "#search-home-page" && !clearSearch) {
-            $("#clear-search").parent().siblings("span.su-search").css("display", "block");
-            $(".search-area").removeClass("add-background");
-            $(".placeholder, #clear-search").hide();
-            if ($(".all-items").hasClass("active") && !$("#category-list").is(":visible")) {
-                setTimeout(function () { $(".search-area").prevAll().show().parent().removeClass("pull-right"); $("#category-section-name").show(); }, 300);
-            }
-            else {
-                setTimeout(function () { $(".search-area").prevAll(":not(#back-icon)").show().parent().removeClass("pull-right"); $("#category-section-name").show(); }, 300);
-            }
-            setTimeout(function () { $(".search-home-section:visible").removeClass("show"); }, 300);
-        }
-        else {
-            $("#clear-search").siblings("span.su-search").css("display", "block");
-            $("#add-user-clear-search").siblings("span.su-search").css("display", "block");
-            $("#add-tenant-clear-search").siblings("span.su-search").css("display", "block");
-        }
-
-        if (currentId == "#ad-user-import" || currentId == "#ad-group-import" || currentId == "#search-database-users") {
-            var gridObj = $("#Grid").data("ejGrid");
-            gridObj.option("dataSource", "");
-            if (currentId == "#search-database-users") {
-                var e = jQuery.Event("keypress", { keyCode: 13 });
-                $("#search-database-users").trigger(e);
-            }
-        } else {
-            PerformSearch(currentId);
-        }
-
-        if (currentId == "#search-ad-users" || currentId == "#search-ad-groups") {
-            if (currentId == "#search-ad-groups") {
-                var gridObj = $("#Grid").data("ejGrid");
-                $("#checkbox-header").prop("checked", false);
-                $(".checkbox-row").prop("checked", false);
-                gridObj.clearSelection();
-            } else {
-                var gridObj = $("#user_grid").data("ejGrid");
-                $("#checkbox-header").prop("checked", false);
-                $(".checkbox-row").prop("checked", false);
-                gridObj.clearSelection();
-            }
-        }
-    }
-    else {
-        currentElement.val("");
-    }
-});
-
-$(document).on("keydown", "#search-groups, #search-group-users, #searchItems, #search-schedules,#userSearchKey,#groupSearchKey, #search-users, #search-user-permission, #search-group-permission, #search-home-page, #search-items, #search-tenants, #search-app-users, #add-tenant-search,#add-user-search", function (e) {
-    $.xhrPool.abortAll();
-    var currentKeyCode = parseInt(e.which);
-    var element = "#" + this.id;
-    if (timeOut != null) {
-        clearTimeout(timeOut);
-        timeOut = null;
-    }
-    if (currentKeyCode === keyCode.Enter) {
-        PerformSearch(element);
-    }
-    else if (excludedSearchKeys.indexOf(currentKeyCode) === -1) {
-        timeOut = setTimeout(function () {
-            PerformSearch(element);
-        }, 900);
-    }
-});
-
-function PerformSearch(currentId) {
-    var gridObj;
-    if (currentId == "#search-schedules") {
-        gridObj = $("#scheduleGrid").data("ejGrid");
-        gridObj.search($("#search-schedules").val());
-    }
-    else if (currentId == "#search-users") {
-        gridObj = $("#user_grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId == "#search-ad-users") {
-        $("#checkbox-header").prop("checked", false);
-        $(".checkbox-row").prop("checked", false);
-        gridObj = $("#user_grid").data("ejGrid");
-        gridObj.search($("#search-ad-users").val());
-    }
-    else if (currentId == "#search-items") {
-        gridObj = $("#items").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId == "#search-tenants") {
-        gridObj = $("#tenants_grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId === "#search-app-users") {
-        gridObj = $("#users_grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId === "#add-user-search") {
-        gridObj = $("#add_users_grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId === "#add-tenant-search") {
-        gridObj = $("#add_tenants_grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId == "#search-home-page") {
-        gridObj = $("#items").data("ejGrid");
-        gridObj.model.filterSettings.filteredColumns = [];
-        if (!$("#category-list").is(":visible") || $("#category-list").length <= 0) {
-            if ($(".all-items").hasClass("active")) {
-                gridObj.model.filterSettings.filteredColumns = [{ field: "CategoryName", operator: "equal", value: $("#category-section-name").html() }];
-            }
-            gridObj.model.pageSettings.currentPage = 1;
-            gridObj.refreshContent();
-        }
-    }
-    else if (currentId == "#search-group-users" || currentId == "#search-groups") {
-        gridObj = $("#Grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
-    else if (currentId == "#search-ad-groups") {
-        gridObj = $("#Grid").data("ejGrid");
-        gridObj.search($("#search-ad-groups").val());
-    }
-    else if (currentId == "#ad-user-import") {
-        $(".grid-error-validation").css("display", "none");
-        $(".empty-validation").css("display", "none");
-        $(".grid-validation").css("display", "none");
-        searchADUsers($("#ad-user-import").val());
-    }
-    else if (currentId == "#ad-group-import") {
-        $(".grid_error_validation").css("display", "none");
-        $(".empty_validation").css("display", "none");
-        $(".grid_validation").css("display", "none");
-        searchADGroups($("#ad-group-import").val());
-    }
-    else if (currentId == "#search-user-permission") {
-        gridObj = $("#itempermissiongrid").data("ejGrid");
-        gridObj.search($("#search-user-permission").val());
-    }
-    else if (currentId == "#search-group-permission") {
-        gridObj = $("#itemgrouppermissiongrid").data("ejGrid");
-        gridObj.search($("#search-group-permission").val());
-    }
-    else if (currentId == "#userSearchKey") {
-        gridObj = $("#UserGrid").data("ejGrid");
-        gridObj.refreshContent();
-    }
-    else if (currentId == "#groupSearchKey") {
-        gridObj = $("#GroupGrid").data("ejGrid");
-        gridObj.refreshContent();
-    }
-    else if (currentId == "#search-tenant-users") {
-        gridObj = $("#add_admins_grid").data("ejGrid");
-        gridObj.model.pageSettings.currentPage = 1;
-        gridObj.refreshContent();
-    }
 }
 
 function SuccessAlert(header, content, duration) {
@@ -1031,53 +966,16 @@ function getUrlQueryVariable(url, variable) {
     return null;
 }
 
-function showOrHideGridPager(gridId) {
-    var pageDetails = $(gridId).ejGrid("option", "pageSettings");
-    if (pageDetails.totalRecordsCount <= pageDetails.pageSize) {
-        $(gridId + " .e-pager").css("display", "none");
-    }
-    else {
-        $(gridId + " .e-pager").css("display", "block");
-    }
+function setClientLocaleCookie(name, exdays) {
+    var value = {
+        Locale: navigator.language,
+        TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    var exdate = new Date();
+    exdate.setDate(exdate.getDate() + exdays++);
+    var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+    document.cookie = name + "=" + cookie_value + ";path=/";
 }
-
-$(document).ready(function (e) {
-    if ($(".cookie-notification").length > 0 && $(".agreement-wrapper .agreement-div").length > 0) {
-        $('.agreement-wrapper .agreement-div').css('margin-top', 10);
-    }
-
-    $('#cookiesubs').on('click', function () {
-        $(".cookie-notification").remove();
-        SetCookie();
-    });
-
-    setClientLocaleCookie("boldservice.client.locale", 365);
-
-    function SetCookie() {
-        $.ajax({
-            type: "POST",
-            url: window.setPermissionUrl,
-        });
-    }
-
-    function setClientLocaleCookie(name, exdays) {
-        var value = {
-            Locale: navigator.language,
-            TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        };
-        var exdate = new Date();
-        exdate.setDate(exdate.getDate() + exdays++);
-        var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
-        document.cookie = name + "=" + cookie_value + ";path=/";
-    }
-
-
-});
-
-$(document).on('click', ".close-user-warning-icons", function (e) {
-    $("#content-area").removeClass("user-warning-space");
-    $(".user-warning").css("display", "none");
-});
 
 function profileDisplayNameSelection() {
     $(".profile-pic-tag").each(function () {
@@ -1156,7 +1054,8 @@ function copyToClipboard(inputId, buttonId) {
         document.execCommand("copy");
         if (buttonId == "#api-copy-client-secret" || buttonId == "#copy-client-secret") {
             copyText.attr("type", "password");
-        }    }
+        }
+    }
     setTimeout(function () {
         $(buttonId).attr("data-original-title", window.TM.App.LocalizationContent.Copied);
         $(buttonId).tooltip('show');
@@ -1195,10 +1094,12 @@ function ValidateIsolationCode(code, id) {
                 $("#isolation-code-validation").html("");
                 $(id).closest('div').removeClass("e-error");
                 $("#update-isolation-code").attr("disabled", false);
+                $("#details-next").removeAttr("disabled");
             } else {
                 $("#isolation-code-validation").html(window.TM.App.LocalizationContent.IsolationCodeValidator);
                 $(id).closest('div').addClass("e-error");
                 $("#update-isolation-code").attr("disabled", true);
+                $("#details-next").attr("disabled", true);
             }
         }
     });

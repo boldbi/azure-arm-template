@@ -11,8 +11,7 @@ $(document).ready(function () {
 });
 
 $(document).on("click", "#language-cancel-button", function (e) {
-    $("#language-save-button,#language-cancel-button,#language-cancel-link-button").hide();
-    $("#edit-language").show();
+    window.location.href = "profile";
 });
 
 function SaveUserPreference() {

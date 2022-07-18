@@ -3,12 +3,13 @@
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/'); ;
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var themeCss = globalAppSettings.SystemSettings.AppTheme.BaseTheme + ".css";
     var themeMinCss = globalAppSettings.SystemSettings.AppTheme.BaseTheme + ".min.css";
     var themeBaseColors = globalAppSettings.SystemSettings.AppTheme.BaseColors;
+
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -50,11 +51,12 @@
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.richtexteditor.all.min.js"></script>
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-component.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-component.min.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.min.js"></script>
     </environment>
+
     <style>
             :root {
                     @themeBaseColors
@@ -283,6 +285,7 @@
     var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
     var custombrandName = "@ServerAppConfig.CustomBrandName";
     var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+     var cdnLink = "@cdnLink";
 
     $("#selected_dashboard,#selected_category").selectpicker();
     $("#selected_childdashboard").attr("disabled", true);

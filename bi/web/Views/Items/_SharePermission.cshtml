@@ -19,6 +19,7 @@
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var specificGroupEntity = (int)PermissionEntity.SpecificGroup;
     var currentuserId = _identityResponse.User.UserId;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
 }
 
 <script>
@@ -41,6 +42,7 @@
     window.sharedUserGroupList = @Html.Raw(Json.Serialize(@data));
     window.accessModeList = @Html.Raw(Json.Serialize(@data));
     var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+    var isSelfHosted =  @Json.Serialize(isSelfHosted);
 </script>
 
 <div id="share-permission-popup" class="fluent-popup custom-bootstrap-styles" style="display:none;">
@@ -100,7 +102,7 @@
             <div class="get-item-embed-link-section col-xs-12 no-padding" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType != @slideShowType && currentItemType !=@userManagement">
                 <a class="get-embed-link app-hyperlink pull-left" href="javascript:void(0)" onclick="getEmbedCode()">&lt;/&gt; @T["Get Embed code"]</a>
             </div>
-            <div class="share-with-label slideshow-note" ng-if="currentItemType == @slideShowType">@Html.Raw("<b>" + T["Note: "].Value + "</b>" + T["Anyone can navigate to this link, but only users with the appropriate permissions will be able to view items in the slideshow."].Value)</div>
+            <div class="share-with-label slideshow-note" ng-if="currentItemType == @slideShowType">@Html.Raw("<b>" + T["Note: "].Value + "</b>" + T["Anyone can navigate to this link, but only users with appropriate permissions to access dashboards used in the slideshow will be able to view the items in the slideshow."].Value)</div>
             <hr class="divider-cls col-xs-12 no-padding" ng-if="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType !=@userManagement">
             <div id="assign-user-group-container">
                 <div class="share-user-group-permission-section">
@@ -116,7 +118,7 @@
                             @await Html.PartialAsync("../AutoComplete/_AccessibleUserGroupSuggestion")
                         </div>
                         <div id="access-mode-selection-container" class="col-xs-4 no-padding" ng-show="currentItemType != @itemViewType && currentItemType != @userManagement ">
-                            <select id="access-mode-selection" class="selectpicker" data-size="5" title="@T["Select Access"]"></select>
+                            <select id="access-mode-selection" class="selectpicker" data-size="5"></select>
                         </div>
                     </div>
                 </div>
@@ -162,7 +164,7 @@
                                         </div>
                                         <div class="col-xs-12 no-padding action-for-delete-container" ng-show="{{(people.TargetUserId != currentUserId) && (people.CanRemove)}}">
                                             <div class="col-xs-10 no-padding change-access-mode-select">
-                                                <select class="change-access-mode-selection selectpicker" title="" data-original-title="" id="select_{{$index}}" name="accessMode" ng-change="updateValue(people.PermissionAccess, '{{$index}}')" ng-model="people.PermissionAccess" ng-options="parseInt(p.Key) as p.Value for p in accessModes" ng-show="currentItemType != @itemViewType"></select>
+                                                <select class="change-access-mode-selection selectpicker-sharedialog" title="" data-original-title="" id="select_{{$index}}" name="accessMode" ng-change="updateValue(people.PermissionAccess, '{{$index}}')" ng-model="people.PermissionAccess" ng-options="parseInt(p.Key) as p.Value for p in accessModes" ng-show="currentItemType != @itemViewType"></select>
                                             </div>
                                             <div class="col-xs-2 no-padding shared-user-group-delete-access-container">
                                                 <i class="su su-close mark-for-deletion-icon" ng-show="{{(people.IsUserPermission && people.CanRemove) || (people.CanRemove && people.TargetGroupId > 0)}}" ng-click="MarkForDeletion($event, people.PermissionAccess, $index)"></i>
@@ -196,10 +198,10 @@
                     <div class="share-permission-dashboard-setting-section" style="display:none" ng-show="!@IsMarkItemsPublic && currentItemType != @itemViewType">
                         <div class="col-xs-12 public-private-content-section">
                             <div class="public-private-content" ng-show="hasDashboardSettingsPermission">
-                                <div class="private-public-description"><span class="bg-warning text-warning">@Html.Raw(String.Format(T["Public Dashboards are disabled in {0}dashboard settings{1}."].Value, "<a class='app-hyperlink' target='_blank' href=" + Url.Action("DashboardSettings", "Administration") + ">", "</a>"))</span></div>
+                                <div class="private-public-description"><span>@Html.Raw(String.Format(T["Public Dashboards are disabled in {0}dashboard settings{1}."].Value, "<a class='app-hyperlink' target='_blank' href=" + Url.Action("DashboardSettings", "Administration") + ">", "</a>"))</span></div>
                             </div>
                             <div class="public-private-content" ng-show="!hasDashboardSettingsPermission">
-                                <div class="private-public-description"><span class="bg-warning text-warning">@T["Public dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span></div>
+                                <div class="private-public-description"><span>@T["Public dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span></div>
                             </div>
                         </div>
                     </div>
@@ -275,13 +277,29 @@
             <div class="embed-code-description" ng-if="currentItemType == @dashboardType">@T["Copy this HTML code to embed the dashboard into any web application."]</div>
             <div class="embed-code-description" ng-if="currentItemType == @itemViewType">@T["Copy this HTML code to embed the dashboard view into a web application."]</div>
             <div class="embed-code-description" ng-if="currentItemType == @widgetType">@T["Copy this HTML code to embed the widget into a web application."]</div>
+            <div class="embed-code-description" ng-if="currentItemType == @datasourceType">@T["Copy this HTML code to embed the datasource into any web application."]</div>
 
             <div class="embed-text-area-section">
                 <span id="copy-embed-code" class="pull-right app-hyperlink"><span class="su su-copy"></span>@T["Copy"]</span>
                 <textarea id="embed-code" class="form-control" readonly></textarea>
             </div>
             <div class="embed-configuration col-xs-12">
-                <div class="embed-config-row col-xs-12 no-padding">
+                <div class="embed-config-row col-xs-12 no-padding" style="margin-bottom: 10px;" ng-show="currentItemType == @dashboardType">
+                    <div class="col-xs-5 no-padding">
+                        <label>@T["Mode"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Users can able to change the Mode as Edit or View."]</div>
+                        </div>
+                    </div>
+                    <div class="col-xs-5 no-padding" style="width:120px">
+                        <select id="mode-selection" class="selectpicker no-padding mode-selection" title="@string.Format(T["Select {0} provider"].Value, "SSO")">
+                            <option class="no-margin-dropdown-ul" value="edit" selected="">Edit</option>
+                            <option class="no-margin-dropdown-ul" value="view" selected="">View</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="embed-config-row col-xs-12 no-padding" ng-show="currentItemType == @dashboardType">
                     <div class="col-xs-5 no-padding">
                         <label>@T["Dashboard Comments"]</label>
                         <div class="info-popup">
@@ -290,11 +308,11 @@
                         </div>
                     </div>
                     <span class="material-switch text-left">
-                        <input type="checkbox" id="embed-dashboard-comments" />
+                        <input type="checkbox" class="mode-change" id="embed-dashboard-comments" />
                         <label for="embed-dashboard-comments" class="label-primary"></label>
                     </span>
                 </div>
-                <div class="embed-config-row col-xs-12 no-padding">
+                <div class="embed-config-row col-xs-12 no-padding" ng-show="currentItemType == @dashboardType">
                     <div class="col-xs-5 no-padding">
                         <label>@T["Widget Comments"]</label>
                         <div class="info-popup">
@@ -303,11 +321,11 @@
                         </div>
                     </div>
                     <span class="material-switch text-left">
-                        <input type="checkbox" id="embed-widget-comments" />
+                        <input type="checkbox" class="mode-change" id="embed-widget-comments" />
                         <label for="embed-widget-comments" class="label-primary"></label>
                     </span>
                 </div>
-                <div class="embed-config-row col-xs-12 no-padding">
+                <div class="embed-config-row col-xs-12 no-padding" ng-show="currentItemType == @dashboardType">
                     <div class="col-xs-5 no-padding">
                         <label>@T["Views"]</label>
                         <div class="info-popup">
@@ -316,11 +334,11 @@
                         </div>
                     </div>
                     <span class="material-switch text-left">
-                        <input type="checkbox" id="embed-views" />
+                        <input type="checkbox" class="mode-change" id="embed-views" />
                         <label for="embed-views" class="label-primary"></label>
                     </span>
                 </div>
-                <div class="embed-config-row col-xs-12 no-padding">
+                <div class="embed-config-row col-xs-12 no-padding" ng-show="currentItemType == @dashboardType">
                     <div class="col-xs-5 no-padding">
                         <label>@T["Export"]</label>
                         <div class="info-popup">
@@ -329,36 +347,39 @@
                         </div>
                     </div>
                     <span class="material-switch text-left">
-                        <input type="checkbox" id="embed-export" />
+                        <input type="checkbox" class="mode-change" id="embed-export" />
                         <label for="embed-export" class="label-primary"></label>
                     </span>
                 </div>
-                <div class="embed-config-row col-xs-12 no-padding">
-                    <div class="col-xs-5 no-padding">
-                        <label>@string.Format(T["Use {0}"].Value, "SSO")</label>
-                        <div class="info-popup">
-                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
-                            <div class="dropdown-menu" role="menu">@string.Format(T["Enable the {0} authentication for the dashboard."].Value, "SSO")<br>@string.Format(T["If your application shares the same authentication as that of the {0}, use {1} and select corresponding authentication provider."].Value, "Bold BI" , "SSO" )</div>
+                @if (isSelfHosted)
+                {
+                    <div class="embed-config-row col-xs-12 no-padding">
+                        <div class="col-xs-5 no-padding">
+                            <label>@string.Format(T["Use {0}"].Value, "SSO")</label>
+                            <div class="info-popup">
+                                <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                <div class="dropdown-menu" role="menu">@string.Format(T["Enable the {0} authentication for the dashboard."].Value, "SSO")<br>@string.Format(T["If your application shares the same authentication as that of the {0}, use {1} and select corresponding authentication provider."].Value, "Bold BI", "SSO")</div>
+                            </div>
+                        </div>
+                        <span class="material-switch text-left">
+                            <input type="checkbox" id="embed-sso" />
+                            <label for="embed-sso" class="label-primary"></label>
+                        </span>
+                    </div>
+                    <div class="embed-config-row col-xs-12 no-padding auth-provider-row hide">
+                        <div class="col-xs-5 no-padding">
+                            <label>@T["Authentication Provider"]</label>
+                        </div>
+                        <div class="col-xs-5 no-padding">
+                            <select id="sso-providers" class="selectpicker no-padding sso-providers" title="@string.Format(T["Select {0} provider"].Value , "SSO")" style="display:none">
+                                <option class="no-margin-dropdown-ul" value="WindowsAD" selected="">Windows Active Directory</option>
+                                <option class="no-margin-dropdown-ul" value="AzureAD" selected="">Azure Active Directory</option>
+                                <option class="no-margin-dropdown-ul" value="OAuth" selected="">OAuth 2.0</option>
+                                <option class="no-margin-dropdown-ul" value="OpenID" selected="">OpendID Connect</option>
+                            </select>
                         </div>
                     </div>
-                    <span class="material-switch text-left">
-                        <input type="checkbox" id="embed-sso" />
-                        <label for="embed-sso" class="label-primary"></label>
-                    </span>
-                </div>
-                <div class="embed-config-row col-xs-12 no-padding auth-provider-row hide">
-                    <div class="col-xs-5 no-padding">
-                        <label>@T["Authentication Provider"]</label>
-                    </div>
-                    <div class="col-xs-5 no-padding">
-                        <select id="sso-providers" class="selectpicker no-padding sso-providers" title="@string.Format(T["Select {0} provider"].Value , "SSO")" style="display:none">
-                            <option class="no-margin-dropdown-ul" value="WindowsAD" selected="">Windows Active Directory</option>
-                            <option class="no-margin-dropdown-ul" value="AzureAD" selected="">Azure Active Directory</option>
-                            <option class="no-margin-dropdown-ul" value="OAuth" selected="">OAuth 2.0</option>
-                            <option class="no-margin-dropdown-ul" value="OpenID" selected="">OpendID Connect</option>
-                        </select>
-                    </div>
-                </div>
+                }
             </div>
             <div class="embed-code-note">
                 <span class="note-label">@T["Note:"]</span>
@@ -370,6 +391,7 @@
                 <span class="public-embed-code-note" ng-if="currentItemType == @itemViewType && !isDashboardPublic">@T["You can use this code to embed and render this dashboard view in your web application. Users need to be logged in and have permission to view the dashboard."]</span>
                 <span class="private-embed-code-note" ng-if="currentItemType == @widgetType && !isDashboardPublic">@T["You can use this code to embed and render this widget in your web application. Users need to be logged in and have the appropriate permission to view the widget."]</span>
                 <span class="public-embed-code-note" ng-if="currentItemType == @widgetType && isDashboardPublic">@T["You can use this code to embed and render this widget in your web application. Since the dashboard has have been marked as public, anyone will be able to view it."]</span>
+                <span class="private-embed-code-note" ng-if="currentItemType == @datasourceType">@T["You can use this code to embed and render this datasource in your web application. Users need to be logged in and have the appropriate permission to view the datasource."]</span>
             </div>
             <div class="copy-message-container col-xs-12 no-padding"><span class="embed-copy-success alert-success col-xs-12 no-padding" style="display:none">@T["Embed code copied successfully!"]</span></div>
         </div>

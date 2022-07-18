@@ -10,6 +10,7 @@
     var customUI = globalAppSettings.SystemSettings.CustomUI;
     var schemes = customUI?.Profiles != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].DataSources.Scheme).FirstOrDefault() : null;
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var enablePublishModule = ServerAppConfig.EnablePublishModule;
 }
 <script>
     var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
@@ -28,6 +29,7 @@
     var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
     var linkedDashboardViewUrl = "@Url.Action("viewlinkeddashboards", "datasources", new { dataSourceId = " " })";
     var i_am_ie9 = false;
+    var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
 </script>
 <!--[if LT IE  10]>
         <script>
@@ -113,7 +115,7 @@
             <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" target="_blank">{{:Name}}</a></span>*@
         {{else ItemType=="@((int)ItemType.Datasource)" && IsDraft}}
         <span class="datasource-name">{{:Name}}</span>
-        <span class="badge badge-secondary">@T["Draft"]</span>
+        <span class="badge badge-secondary1 badge-secondary2">@T["Draft"]</span>
         {{else}}
         <span>{{:Name}}</span>
         {{/if}}
@@ -210,6 +212,18 @@
             <li role="separator" class="divider @(schemes != null && !schemes.Preview ? "hide" : string.Empty)"></li>
             {{/if}}
 
+            {{if ItemType == "@((int)ItemType.Datasource)"}}
+            <li>
+                <a href="javascript:void(0);" class="get-embed-code-option-click">
+                    <i class="su su-embed"></i>
+                    <span>@T["Get Embed code"]</span>
+                </a>
+            </li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Edit ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+
             {{if CanWrite}}
             {{if ~checkMobile()}}
             {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
@@ -292,13 +306,13 @@
 
             {{if ~checkMobile()}}
             {{if (CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Datasource].ToString().ToLower()) == true) && !IsDraft}}
-            <li class="@(schemes != null && !schemes.Publish ? "hide" : string.Empty)">
+            <li class="@(schemes != null && !schemes.Publish || !enablePublishModule ? "hide" : string.Empty)">
                 <a href="javascript:void(0);" class="publish-datasource">
                     <i class="su su-publish"></i>
                     <span>@T["Publish"]</span>
                 </a>
             </li>
-            <li role="separator" class="divider @(schemes != null && !schemes.Publish ? "hide" : string.Empty)"></li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Publish || !enablePublishModule ? "hide" : string.Empty)"></li>
             {{/if}}
             {{/if}}
 

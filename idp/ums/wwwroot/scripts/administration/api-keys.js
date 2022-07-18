@@ -1,5 +1,5 @@
 ﻿$(function () {
-    $(".show-client-secret").on("click", function () {
+    $(document).on("click", ".show-client-secret", function () {
         if ($(".my-secret").is(":password")) {
             $(".my-secret").attr('type', 'text').val();
             $(this).removeClass('su-show').addClass('su-hide').attr("data-original-title", window.TM.App.LocalizationContent.ClicktoHide);
@@ -12,7 +12,7 @@
         }
     });
 
-    $(".show-client-secret").bind("touch", function () {
+    $(document).on("touch", ".show-client-secret", function () {
         if ($(".my-secret").is(":password")) {
             $(".my-secret").attr('type', 'text');
             $(this).removeClass('su-show').addClass('su-hide');

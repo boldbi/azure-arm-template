@@ -64,7 +64,7 @@
         Expires = DateTime.UtcNow.AddYears(1),
         SameSite = SameSiteMode.Lax
     });
-    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (Context.Request.PathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : Context.Request.PathBase.ToString();
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var hasDashboardSettingsPermissionFlag = (_identityResponse.IsAdmin || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings]);
     if (ServerAppConfig.IsSelfHosted)
@@ -222,27 +222,27 @@
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
 
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.min.js"></script>
+    </environment>
+
     @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
     @if (isSelfHosted)
     {
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
-            <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-component.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
-            <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-component.min.js"></script>
         </environment>
     }
     else
     {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
-        <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-component.js"></script>
-        </environment>
-        <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-component.min.js"></script>
-        </environment>
+
     }
 
     <environment include="Development,CloudDevelopment">
@@ -300,7 +300,6 @@
     @if (!ServerAppConfig.IsSelfHosted && (ViewBag.isEmbed != null && ViewBag.isEmbed.ToString().ToLower() != "true"))
     {
         @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
-        @await Html.PartialAsync("~/Views/Support/_ConciergeSupport.cshtml")
         <environment include="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
         </environment>

@@ -807,6 +807,73 @@ CREATE TABLE SyncDS_EmailActivityLog(
 	StatusMessage text NULL,
 	IsActive smallint NOT NULL)
 ;
+
+CREATE TABLE SyncDS_Webhook(
+	Id  SERIAL PRIMARY KEY NOT NULL,
+	Name varchar(512) NOT NULL,
+	Description varchar(4000) NULL,
+	Url varchar(512) NOT NULL,
+	UserId int NOT NULL,
+	Security varchar(512) NULL,
+	Headers text NULL,
+	ContentType int NOT NULL,
+	SubscribedEvent varchar(512) NOT NULL,
+	Payload text NULL,
+	Failures int NOT NULL,
+	CreatedById int NOT NULL,
+	ModifiedById int NOT NULL,
+	CreatedDate timestamp NOT NULL,
+	ModifiedDate timestamp NOT NULL,
+	IsEnable smallint NOT NULL,
+	IsActive smallint NOT NULL)
+;
+
+CREATE TABLE SyncDS_NotificationTrigger(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	WebhookId int NULL,
+	RecurrenceInfo varchar(4000) NOT NULL,
+	RetryCount int NOT NULL,
+	RequestData text NULL,
+	WebhookTargetData text NULL,
+	AdditionalInfo text NULL,
+	NextScheduleDate timestamp NULL,
+	CreatedDate timestamp NOT NULL,
+	ModifiedDate timestamp NULL,
+	ReferenceId varchar(255) NULL,
+	IsActive smallint NOT NULL)
+;
+
+CREATE TABLE SyncDS_WebhookLog(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	WebhookId int NULL,
+	Event varchar(512) NOT NULL,
+	RequestUrl varchar(512) NULL,
+	FailureType varchar(512) NOT NULL,
+	ReferenceId varchar(255) NULL,
+	ResponseMessage text NULL,
+	ResponseStatusCode varchar(512) NOT NULL,
+	CreatedDate timestamp NOT NULL,
+	IsActive smallint NOT NULL)
+;
+
+CREATE TABLE SyncDS_NotificationEvents(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	Name varchar(100) UNIQUE NOT NULL,
+	IsActive smallint NOT NULL)
+;
+
+CREATE TABLE SyncDS_EventPayloads(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	Name varchar(100) UNIQUE NOT NULL,
+	IsActive smallint NOT NULL)
+;
+
+CREATE TABLE SyncDS_EventPayloadsMapping(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	EventType int NOT NULL,
+	PayloadType int NOT NULL,
+	IsActive smallint NOT NULL)
+;
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into SyncDS_ItemType (Name,IsActive) VALUES (N'Category',1)
@@ -863,6 +930,10 @@ INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Support Settings',1)
 INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Subscription',1)
 ;
 INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Payments',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Widgets',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'Security',1)
 ;
 
 INSERT into SyncDS_ItemLogType (Name,IsActive) VALUES ( N'Added',1)
@@ -1647,6 +1718,68 @@ INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) V
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (10,N'UserDirectory.AuthControl',N'UserDirectory.AuthControl',now() at time zone 'utc',1)
 ;
 
+INSERT INTO SyncDS_NotificationEvents (Name, IsActive) VALUES (N'Time Drive Dashboard Export',1)
+;
+INSERT INTO SyncDS_NotificationEvents (Name, IsActive) VALUES (N'Alert Drive Dashboard Export',1)
+;
+
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Schedule Name',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Schedule Id',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Dashboard Id',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Dashboard Name',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Message',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'File Content',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'File Extension',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Export Format',1)
+;
+INSERT INTO SyncDS_EventPayloads (Name, IsActive) VALUES (N'Alert Info',1)
+;
+
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,1,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,2,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,3,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,4,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,5,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,6,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,7,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (1,8,1)
+;
+
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,1,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,2,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,3,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,4,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,5,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,6,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,7,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,8,1)
+;
+INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUES (2,9,1)
+;
+INSERT into SyncDS_SettingsType (Name,IsActive) Values (N'Integrations',1)
+;
+
 ---- PASTE ALTER Queries below this section --------
 
 ALTER TABLE SyncDS_UserGroup  ADD FOREIGN KEY(GroupId) REFERENCES SyncDS_Group (Id)
@@ -1967,6 +2100,18 @@ ALTER TABLE SyncDS_EmailActivityLog  ADD  FOREIGN KEY(GroupId) REFERENCES SyncDS
 ALTER TABLE SyncDS_EmailActivityLog  ADD  FOREIGN KEY(ItemId) REFERENCES SyncDS_Item (Id)
 ;
 ALTER TABLE SyncDS_EmailActivityLog  ADD FOREIGN KEY(CommentId) REFERENCES SyncDS_Comment (Id)
+;
+
+ALTER TABLE SyncDS_WebhookLog  ADD FOREIGN KEY(WebhookId) REFERENCES SyncDS_Webhook (Id)
+;
+
+ALTER TABLE SyncDS_NotificationTrigger  ADD FOREIGN KEY(WebhookId) REFERENCES SyncDS_Webhook (Id)
+;
+
+ALTER TABLE SyncDS_EventPayloadsMapping ADD FOREIGN KEY(EventType) REFERENCES SyncDS_NotificationEvents (Id)
+;
+
+ALTER TABLE SyncDS_EventPayloadsMapping ADD FOREIGN KEY(PayloadType) REFERENCES SyncDS_EventPayloads (Id)
 ;
 
 CREATE INDEX IX_SyncDS_ScheduleDetail_ScheduleId ON SyncDS_ScheduleDetail(ScheduleId);

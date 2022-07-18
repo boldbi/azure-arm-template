@@ -17,7 +17,7 @@
     var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
 
     var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
-    var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
+    var currentUrlLocalPath = requestUrl.PathAndQuery.ToLower();
 
     var currentUrl = requestUrl.ToString().TrimEnd('/');
 
@@ -46,7 +46,6 @@
     var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId).TrimEnd('/');
     var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
 }
-
 <aside class="menu-bar" id="app-navigation">
     <nav id="main-nav">
         <a id="mobile-profile-picture" rel="alternate" hreflang="en" href="@profilePicture" class="mobile-visible">
@@ -62,7 +61,7 @@
                     }
                     else
                     {
-                        <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/boldid/application/@IconFileNames.MainLogo';" />
+                        <img alt="[[[Application Logo]]]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorSquareImage)';" />
                     }
                 </a>
             </li>
@@ -193,5 +192,5 @@
                 </li>
             </ul>
         </nav>
-    }
-</aside>
+     }
+    </aside>

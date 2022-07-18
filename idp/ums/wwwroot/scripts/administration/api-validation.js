@@ -1,12 +1,13 @@
 ﻿$(document).ready(function () {
     var getResponseDialog = new ej.popups.Dialog({
-        header: "<div class='dlg-title'>" + window.TM.App.LocalizationContent.APIResponse + "</div>",
+        header: window.TM.App.LocalizationContent.APIResponse,
         content: document.getElementById("get-request-response-dialog-content"),
         showCloseIcon: true,
         buttons: [
             { click: onGetResponseDialogClose, buttonModel: { content: window.TM.App.LocalizationContent.OKButton } }
         ],
-        width: "500px",
+        animationSettings: { effect: 'Zoom' },
+        width: "472px",
         height: "auto",
         isModal: true,
         visible: false
@@ -38,15 +39,15 @@
         $.ajax({
             type: "GET",
             url: validateTokenRequestUrl,
-            beforeSend: showWaitingPopup($("#server-app-container")),
+            beforeSend: showWaitingPopup('server-app-container'),
             success: function (data) {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
                 messageBox("", window.TM.App.LocalizationContent.IdpTokenAPI, data.Message, "success", function () {
                     onCloseMessageBox();
                 });
             },
             error: function () {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
             }
         });
     });
@@ -56,10 +57,10 @@
         $.ajax({
             type: "POST",
             url: getEndpointResponseRequestUrl,
-            beforeSend: showWaitingPopup($("#server-app-container")),
+            beforeSend: showWaitingPopup('server-app-container'),
             data: { getRequestUrl: requestUrl },
             success: function (response) {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
                 document.getElementById("get-request-response").ej2_instances[0].show();
                 $(".api-end-point").html(requestUrl);
                 $(".response-code").html(response.Data.StatusCode);
@@ -71,7 +72,7 @@
                 }
             },
             error: function () {
-                hideWaitingPopup($("#server-app-container"));
+                hideWaitingPopup('server-app-container');
             }
         });
     });

@@ -40,7 +40,7 @@
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepages-page-v1-dependency.js"></script>
         @*<script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-common-all.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.js"></script>*@
+          <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.js"></script>*@
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepages-page-v1-utilities.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
@@ -55,30 +55,38 @@
 
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.common.all.min.js"></script>
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.common.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej.dashboarddesigner.min.js"></script>
 
-    @if (!isSelfHosted)
-    {
-        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
-    }
-    else
-    {
-        <environment include="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
-        </environment>
-        <environment exclude="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
-        </environment>
-    }
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard.min.js"></script>
+    </environment>
 
-    @* Need to check for cloud
+@if (!isSelfHosted)
+{
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+
+}
+else
+{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+    </environment>
+}
+
+@* Need to check for cloud
     @if (isDebug)
     {
         <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.ejcommon.all.min.js")"></script>
         <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.viewer.all.min.js")"></script>
     }*@
 
-    <script type="text/javascript">
+
+<script type="text/javascript">
         var allHomepages = @Html.Raw(@ViewBag.UserHomepages);
         var allHomepagesCount = allHomepagesCount;
         var baseUrl = "@baseUrl";
@@ -122,7 +130,7 @@
             //Add placeholder for search box in 'Select a default pinboard' selectpicker in homepage
             $("#widget-container #no-default-homepage-container .bootstrap-select .bs-searchbox .input-block-level").attr("placeholder", window.Server.App.Localization.SearchPinboards);
         }
-    </script>
+</script>
 }
 @section MainSection{
     <div id="homepage-page-container" ng-app="serverApp" ng-controller="homepagesController">
@@ -265,18 +273,13 @@
             }
         </div>
     </div>
-    <div id="homepage-action-popup" class="no-padding">
+    <div id="homepage-action-popup" class="no-padding display-none">
+        <input type="hidden" id="homepage-name" data-original-title="" />
+        <input type="hidden" title="" data-value="" id="save-button" value="@T["Save"]" />
         <div id="homepage-option-container" class="dialog">
-            <div class="col-md-12 dialog-header">
-                <span class="su su-pin Head-icon"></span>
-                <span class="PopupTitle"></span>
-                <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="closeHomepageActionPopup()"><span class="su su-close"></span></a>
-                <div id="homepage-name"><div id="name" data-toggle="tooltip" data-placement="bottom" data-original-title="" title=""></div></div>
-            </div>
-
             <form class="dialog-body col-xs-12 no-padding" id="homepage-option-form" data-homepage-id="">
                 <div>
-                    <div class="col-xs-12 padding20 no-bottom-padding" id="item-name-division">
+                    <div class="col-xs-12 no-bottom-padding" id="item-name-division">
                         <div class="col-xs-4 no-padding text-right text-label">@T["Name"]<span class="mandatory">*</span></div>
                         <div class="col-xs-1 no-padding"></div>
                         <div class="col-xs-7 no-padding">
@@ -308,12 +311,6 @@
                     </div>
                 </div>
             </form>
-            <div class="col-xs-12 dialog-footer no-right-padding no-left-padding" id="action-button-division">
-                <div class="rightAlign">
-                    <input type="button" title="" data-value="" id="save-button" class="btn primary-button app-btn-primary" value="@T["Save"]" />
-                    <input type="button" id="cancel-button" title="" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" onclick="closeHomepageActionPopup()" />
-                </div>
-            </div>
         </div>
     </div>
     <div id="add-item-popup" class="no-padding">

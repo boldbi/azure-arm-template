@@ -124,12 +124,12 @@ function validate_storage_type() {
                             registerApplication(isSimpleModeSelction());
                             return false;
                         } else {
-                            hideWaitingPopup(".startup-waiting-popup");
+                            hideWaitingPopup('startup-waiting-element');
                             $(".azure-validation,.blob-error-message").css("display", "block");
                             changeFooterPostion();
                         }
                     } else {
-                        hideWaitingPopup(".startup-waiting-popup");
+                        hideWaitingPopup('startup-waiting-element');
                         $(".azure-validation,.blob-error-message").css("display", "block");
                         changeFooterPostion();
                     }
@@ -138,7 +138,7 @@ function validate_storage_type() {
 
             return false;
         } else {
-            hideWaitingPopup(".startup-waiting-popup");
+            hideWaitingPopup('startup-waiting-element');
             changeFooterPostion();
             return false;
         }

@@ -4,7 +4,7 @@ var isSafari = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgen
 var selectedAdmins = [];
 var gridAdminData = [];
 var isFirstRequest = false;
-var waitingPopUpElement = "";
+var waitingPopUpElement;
 var tenantNameinDB = "";
 var tenantIdentifierinDB = "";
 var gridHeight = 355;
@@ -82,7 +82,7 @@ $(document).ready(function () {
         $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text());
     }
 
-    waitingPopUpElement = parent.$("#add-tenant-popup");
+    waitingPopUpElement = 'add-tenant-popup';
     if (actionType.toLowerCase() == "edit") {
         $("#total-step").html("").html(" 2");
         $(".add-tenant-popup-title label").html("Edit site");
@@ -96,22 +96,12 @@ $(document).ready(function () {
         if (isBoldBI) {
             $(".selector").addClass("selector-alignment");
         }
+        parent.hideWaitingPopup(waitingPopUpElement);
         autoFocus("tenant-name");
-        hideWaitingPopup(waitingPopUpElement);
     }
     $("#search-area").hide();
     addPlacehoder("body");
     $(".placeholder").css("display", "none");
-
-    $("#duplicate-table-list").ejDialog({
-        width: "450px",
-        showOnInit: false,
-        allowDraggable: true,
-        enableResize: false,
-        height: "230px",
-        showHeader: false,
-        enableModal: true
-    });
 
     $("#file-storage, #blob-storage").click(function () {
         if ($("#file-storage").is(":checked")) {
@@ -188,7 +178,7 @@ $(document).ready(function () {
             type: "POST",
             url: checkHealthStatusUrl,
             async: false,
-            data: { domain: domain },
+            data: { domain: domain, tenantType: getDropDownValue("tenant-type") },
             success: function (data) {
                 if (!data.Data) {
                     $("#input-domain").closest("div").addClass("e-error");
@@ -223,7 +213,7 @@ $(document).ready(function () {
                 var tenantName = $("#tenant-name").val().trim();
                 var canProceed = $("#tenant-registration-form").valid();
                 if (canProceed) {
-                    showWaitingPopup(waitingPopUpElement);
+                    parent.showWaitingPopup(waitingPopUpElement);
                     tenantNameIdentiferCheck(tenantName, tenantIdentifier);
                 } else {
                     $(this).removeAttr("disabled");
@@ -274,14 +264,14 @@ $(document).ready(function () {
                 systemSettingsDetails.StorageType = $("input[name='IsBlobStorage']:checked").val();
                 preserveStorageFormData();
                 if ($("#blob-storage-form").valid()) {
-                    showWaitingPopup(waitingPopUpElement);
+                    parent.showWaitingPopup(waitingPopUpElement);
                     if (!($("#file-storage").is(":checked"))) {
                         $.ajax({
                             type: "POST",
                             url: blobExist,
                             data: { connectionString: azuredetails.ConnectionString, containerName: window.containername },
                             success: function (result) {
-                                hideWaitingPopup(waitingPopUpElement);
+                                parent.hideWaitingPopup(waitingPopUpElement);
                                 if (typeof result.Data != "undefined") {
                                     if (result.Data.Key.toString().toLowerCase() == "true") {
                                         $(".azure-validation,.blob-error-message").css("display", "none");
@@ -340,14 +330,14 @@ $(document).ready(function () {
                         systemSettingsDetails.StorageType = $("input[name='IsBlobStorage']:checked").val();
                         preserveStorageFormData();
                         if ($("#blob-storage-form").valid()) {
-                            showWaitingPopup(waitingPopUpElement);
+                            parent.showWaitingPopup(waitingPopUpElement);
                             if (!($("#file-storage").is(":checked"))) {
                                 $.ajax({
                                     type: "POST",
                                     url: blobExist,
                                     data: { connectionString: azuredetails.ConnectionString, containerName: window.containername },
                                     success: function (result) {
-                                        hideWaitingPopup(waitingPopUpElement);
+                                        parent.hideWaitingPopup(waitingPopUpElement);
                                         if (typeof result.Data != "undefined") {
                                             if (result.Data.Key.toString().toLowerCase() == "true") {
                                                 $(".azure-validation,.blob-error-message").css("display", "none");
@@ -382,7 +372,7 @@ $(document).ready(function () {
             else if ($(".tenant-user-form").hasClass("hide") && $(this).hasClass("update") && $(".tenant-database-form").find(".e-error").length == 0) {
                 var proceed = $("#db-content-holder").valid();
                 if (proceed) {
-                    showWaitingPopup(waitingPopUpElement);
+                    parent.showWaitingPopup(waitingPopUpElement);
                     $("#details-back").show().removeClass("back-button");
                     if (getDropDownValue("database-type").toLowerCase() == "mssql" || getDropDownValue("database-type").toLowerCase() == "postgresql" || getDropDownValue("database-type").toLowerCase() == "mysql") {
                         checkingNewDBConnection(waitingPopUpElement, actionType);
@@ -395,7 +385,7 @@ $(document).ready(function () {
             }
             else {
                 if ($(".tenant-user-form").hasClass("show") && $(".tenant-user-form").find(".has-error").length == 0 && selectedAdmins.length != 0) {
-                    showWaitingPopup("add-tenant-popup");
+                    parent.showWaitingPopup(waitingPopUpElement);
                     $("#details-back").show().removeClass("back-button");
                     addTenant();
                 } else {
@@ -598,7 +588,7 @@ $(document).ready(function () {
             parent.history.pushState('', document.title, parent.window.location.pathname);
         }
 
-        parent.$("#add-tenant-popup").ejDialog("close");
+        parent.document.getElementById("add-tenant-popup").ej2_instances[0].hide();
     });
     Resize();
     ResizeHeightForDOM();
@@ -663,16 +653,17 @@ function nextToUserPage() {
         $("#search-area").show();
         listUsersForAdminSelection();
         ResizeHeightForDOM();
-        hideWaitingPopup(waitingPopUpElement);
+        parent.hideWaitingPopup(waitingPopUpElement);
     }
 }
+
 function getTenant(id) {
     $.ajax({
         type: "POST",
         url: getTenantDetailsUrl,
         data: { tenantId: id },
         success: function (data) {
-            hideWaitingPopup(waitingPopUpElement);
+            parent.hideWaitingPopup(waitingPopUpElement);
             if (data.TenantDetails != "" || data.TenantDetails != null || data.TenantDetails != undefined) {
                 var tenantInformation = data.TenantDetails;
                 tenantNameinDB = tenantInformation.Tenant.TenantName;
@@ -779,7 +770,6 @@ function getTenant(id) {
                 $("#txt-accesskey").val(systemSetting.BlobStorageAccessKey);
                 $("#txt-containername").val(systemSetting.AzureBlobStorageContainerName);
             }
-
         }
     });
 }
@@ -813,17 +803,17 @@ function updateTenant(waitingPopUpElement, connectionString) {
         data: { tenantId: tenantId, tenantName: name, tenantIdentifier: tenantIdentifier, tenantUrl: tenantUrl, databaseDetails: connectionString, additionalParameters: additionalParameters, useSiteIdentifier: siteIdentifier },
         success: function (data) {
             if (data.result == true) {
-                hideWaitingPopup(waitingPopUpElement);
-                parent.$("#add-tenant-popup").ejDialog("close");
+                parent.hideWaitingPopup(waitingPopUpElement);
+                parent.document.getElementById("add-tenant-popup").ej2_instances[0].hide();
                 parent.messageBox("su-edit", window.TM.App.LocalizationContent.UpdateSite, window.TM.App.LocalizationContent.SiteUpdated, "success", function () {
                     parent.onCloseMessageBox();
                 });
-                var tenantGridObj = parent.$("#tenants_grid").data("ejGrid");
-                tenantGridObj.refreshContent();
+                var tenantGridObj = parent.document.getElementById('tenants_grid').ej2_instances[0];
+                tenantGridObj.refresh();
             }
             else {
-                hideWaitingPopup(waitingPopUpElement);
-                parent.$("#add-tenant-popup").ejDialog("close");
+                parent.hideWaitingPopup(waitingPopUpElement);
+                parent.document.getElementById("add-tenant-popup").ej2_instances[0].hide();
                 parent.messageBox("su-edit", window.TM.App.LocalizationContent.UpdateSite, window.TM.App.LocalizationContent.SiteUpdateFailed, "success", function () {
                     parent.onCloseMessageBox();
                 });
@@ -840,53 +830,6 @@ function Resize() {
     } else {
         $(".modal-tenant-body").removeClass("adjustment");
     }
-}
-
-
-function ResizeHeightForDOM() {
-    var height = /*$(window).height() - $(".modal-header").height() - 210*/"";
-    var modalheight = /*$("#dialog-body-container").height() + $("#dialog-body-header").height() + 50*/"";
-    //if ($(".tenant-registration-form").hasClass("show")) {
-    //    height = $(window).height() - $(".modal-header").height() - 210 + 100;
-    //    modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-    //}
-
-    if ($(".storage-form").hasClass("show")) {
-        if ($("#file-storage").is(":checked")) {
-            height = $(window).height() - $(".modal-header").height() - 210;
-            modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-        } else {
-            height = $(window).height() - $(".modal-header").height() - 210 + 280;
-            modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-        }
-    }
-
-    //if ($(".tenant-user-form").hasClass("show")) {
-    //    height = $(window).height() - $(".modal-header").height() - 210;
-    //    modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-    //}
-
-    //if ($(".data-security-form").hasClass("show")) {
-    //    height = $(window).height() - $(".modal-header").height() - 210;
-    //    modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-    //}
-
-    //if ($(".tenant-database-form").hasClass("show")) {
-    //    var databaseType = getDropDownValue("database-type").toLowerCase();
-
-    //    if (databaseType == "postgresql") {
-    //        height = 1225;
-    //        modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-    //    }
-
-    //}
-
-    if (height > modalheight) {
-        $(".dialog-body-div").css("height", height);
-    } else {
-        $(".dialog-body-div").css("height", modalheight);
-    }
-    gridHeight = height;
 }
 
 function saveDatabaseValuesTemporarly() {
@@ -925,7 +868,7 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
             data: { tenantName: tenantName, tenantIdentifier: tenantIdentifier },
             async: false,
             success: function (data) {
-                hideWaitingPopup(waitingPopUpElement);
+                parent.hideWaitingPopup(waitingPopUpElement);
                 if (data.Result || data.ResultIdentifier) {
                     if (data.Value != null && data.ResultIdentifier && tenantIdentifier != tenantIdentifierinDB) {
                         $("#tenant-identifier").closest("div").addClass("e-error");
@@ -963,7 +906,7 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
         } else {
             $("#tenant-name, #details-next").removeAttr("disabled");
         }
-        hideWaitingPopup(waitingPopUpElement);
+        parent.hideWaitingPopup(waitingPopUpElement);
     }
 }
 
@@ -1136,7 +1079,7 @@ function nextToDataSecurityPage() {
         $("#details-next").removeClass("data-security").addClass("user");
         $("#details-next").removeAttr("disabled").addClass("next-alignment");
     }
-    hideWaitingPopup(waitingPopUpElement);
+    parent.hideWaitingPopup(waitingPopUpElement);
 }
 
 function preserveStorageFormData() {
@@ -1176,11 +1119,13 @@ function enableIsolationCode() {
     if (isEnabled) {
         document.getElementById("site-isolation-code").ej2_instances[0].enabled = true;
         $("#isolation-code").focus();
+        $("#details-next").attr("disabled", true);
     } else {
         document.getElementById("site-isolation-code").ej2_instances[0].enabled = false;
         $("#isolation-code-validation").html("");
         document.getElementById("site-isolation-code").ej2_instances[0].value = null;
         $("#site-isolation-code").closest('div').removeClass("e-error");
+        $("#details-next").removeAttr("disabled");
     }
 }
 

@@ -117,7 +117,7 @@ function getEmbedSecret() {
 
 function resetEmbedSecret() {
     onCloseMessageBox();
-    showWaitingPopup($("#body"));
+    showWaitingPopup('body');
     $.ajax({
         type: "POST",
         url: isResetEmbedSecretUrl,
@@ -126,7 +126,7 @@ function resetEmbedSecret() {
                 secretCodeChange(data);
                 SuccessAlert(window.TM.App.LocalizationContent.EmbedSettings, window.TM.App.LocalizationContent.ResetSecretSuccessAlert, 7000);
             }
-            hideWaitingPopup($("#body"));
+            hideWaitingPopup('body');
         }
     });
 }

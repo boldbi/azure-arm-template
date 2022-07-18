@@ -1,6 +1,5 @@
 ﻿var haveCustomDomainAccess, haveWhiteLabelAccess, isSitesPage;
 $(document).ready(function () {
-    $.extend(ej, Syncfusion);
 
     var unlockFeatureDialogobj = new ejs.popups.Dialog({
         showCloseIcon: false,

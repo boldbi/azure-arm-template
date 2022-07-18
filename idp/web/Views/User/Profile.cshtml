@@ -3,6 +3,7 @@
 @using System.Security.Claims;
 @using Microsoft.AspNetCore.Http;
 @using Microsoft.AspNetCore.Http.Extensions;
+@using TimeZoneConverter;
 @using Newtonsoft.Json;
 
 @inject IJsonHelper Json;
@@ -11,17 +12,8 @@
 @{
     var userDetail = (User)ViewBag.UserDetail;
     var groupList = ViewBag.GroupList;
-    if (CloudAppConfig.IsSelfHosted)
-    {
-        ViewBag.Title = "[[[Profile]]] | " + GlobalAppSettings.SystemSettings.OrganizationName;
-
-    }
-    else
-    {
-        ViewBag.Title = "Profile | " + CloudAppConfig.AccountTitle;
-    }
+    ViewBag.Title = "[[[Profile]]] | " + GlobalAppSettings.SystemSettings.OrganizationName;
     var userId = Guid.Parse(GlobalAppSettings.HttpContextAccessor.HttpContext.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
-
 
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var isWindowsAdUser = (DirectoryType)userDetail.DirectoryTypeId == DirectoryType.WindowsAD;
@@ -38,8 +30,9 @@
 }
 
 @section styles{
-    <link rel="stylesheet" href="~/bundles/css/profile.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/bundles/css/profile.css" asp-append-version="true"/>
 }
+
 @section scripts{
     <script src="~/bundles/js/profile.js" asp-append-version="true"></script>
     <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
@@ -59,7 +52,7 @@
             rootBaseUrl = "";
         var deleteavatarUrl = "@Url.Action("deleteavatar", "User")";
         var getdefaultavatarUrl = "@Url.Action("getdefaultavatar", "User")";
-        var prepareDataUrl = "@Url.Action("PrepareUserData","User")";
+        var prepareDataUrl = "@Url.Action("PrepareUserData", "User")";
         var downloadDataUrl = "@Url.Action("DownloadUserData", "User")";
         var updateUserProfile = "@Url.Action("UpdateUserProfile", "User")";
         var userId = "@userDetail.UserId";
@@ -90,30 +83,18 @@
                 if ($(".img-container").children().hasClass("jcrop-active")) {
                     $('#profile-picture').data("Jcrop").destroy();
                 }
-                $(function () {
-                    $("#avatar-upload-box").ejDialog({
-                        showOnInit: false,
-                        allowDraggable: true,
-                        enableResize: false,
-                        width: "600px",
-                        enableModal: true,
-                        showHeader: false,
-                        close: "DialogBoxClose",
-                        closeOnEscape: true
-                    });
-                });
-                eDialog = $("#avatar-upload-box").data("ejDialog");
-                eDialog.close();
+
             });
         });
     </script>
 }
+
 @section MainSection{
     @await Html.PartialAsync("_UserProfileMenu")
     <div id="edit-profile-base-div" class="col-lg-12 col-sm-12 col-md-12 col-xs-12 admin-page-content-container">
         <div class="admin-page-content col-xs-12 no-padding">
             <input type="hidden" class="page-name" data-content="USER PROFILE">
-            <input type="hidden" id="user-id" value="@userId" />
+            <input type="hidden" id="user-id" value="@userId"/>
             <span id="is-aduser">@ViewBag.IsAdUser</span>
             <span id="logged-user">@ViewBag.LoggedUser</span>
             <div id="edit-profile-heading-div" class=" col-md-12 col-lg-12 col-sm-12 admin-page-header">
@@ -168,23 +149,26 @@
                                 [[[Last name]]]
                             </label>
                             <div class="input-field-div">
-                                @Html.TextBox("user-lastname", userDetail.LastName.Trim(), new { id = "user-lastname", placeholder = "[[[Please enter last name]]]", @class = "edit-profile-field no-edit", @readonly = true })
+                                @Html.TextBox("user-lastname", !string.IsNullOrWhiteSpace(userDetail.LastName) ? userDetail.LastName.Trim() : "--", new { id = "user-lastname", placeholder = "[[[Please enter last name]]]", @class = "edit-profile-field no-edit", @readonly = true })
                                 <span id="last-name-validation" class="alert-messages validation-message"></span>
                             </div>
                         </div>
-                        <div class="form-element-label">
-                            <label class="app-textbox-label">
-                                [[[Email]]]
-                                @if (isEmailActivation)
-                                {
-                                    <span> *</span>
-                                }
-                            </label>
-                            <div class="input-field-div">
-                                <input type="text" id="user-email" value="@userEmail" readonly onfocus="this.blur()" placeholder="[[[Please enter email address]]]" required="@isEmailActivation" data-toggle="tooltip" data-original-title="@userEmail" />
-                                <span id="email-duplicate-validation" class="alert-messages validation-message"></span>
+                        @if (!string.IsNullOrWhiteSpace(userEmail))
+                        {
+                            <div class="form-element-label">
+                                <label class="app-textbox-label">
+                                    [[[Email]]]
+                                    @if (isEmailActivation)
+                                    {
+                                        <span> *</span>
+                                    }
+                                </label>
+                                <div class="input-field-div">
+                                    <input type="text" id="user-email" value="@userEmail" readonly onfocus="this.blur()" placeholder="[[[Please enter email address]]]" required="@isEmailActivation" data-toggle="tooltip" data-original-title="@userEmail" />
+                                    <span id="email-duplicate-validation" class="alert-messages validation-message"></span>
+                                </div>
                             </div>
-                        </div>
+                        }
                         <div class="form-element-label">
                             <label class="app-textbox-label">
                                 [[[Phone]]]
@@ -192,6 +176,14 @@
                             <div class="input-field-div">
                                 @Html.TextBox("user-phonenumber", !string.IsNullOrWhiteSpace(userDetail.Contact) ? userDetail.Contact.Trim() : "--", new { id = "user-phonenumber", placeholder = "[[[Please enter phone number]]]", @class = "edit-profile-field no-edit", @readonly = true })
                                 <span id="contact-validation" class="alert-messages validation-message"></span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <label class="app-textbox-label">
+                                [[[Last Seen]]]
+                            </label>
+                            <div class="input-field-div">
+                                @Html.TextBox("user-lastseen", new GlobalAppSettings().GetDateTimeFormat(TimeZoneInfo.ConvertTimeFromUtc((DateTime)userDetail.LastLogin, TZConvert.GetTimeZoneInfo(new GlobalAppSettings().GetSessionTimeZone(_clientDateTimeInfo))), _clientDateTimeInfo), new { id = "user-lastseen", @class = "", @readonly = true })
                             </div>
                         </div>
                     </form>
@@ -213,7 +205,7 @@
                     @if (returnUrl != null)
                     {
                         <a href="@returnUrl" class="secondary-button pull-right" id="cancel-link-button">[[[Cancel]]]</a>
-                        <input id="hidden-return-url" class="hidden" value="@returnUrl" />
+                        <input id="hidden-return-url" class="hidden" value="@returnUrl"/>
                     }
                     else
                     {
@@ -225,7 +217,7 @@
         </div>
         @await Html.PartialAsync("../Shared/_FooterOnPremise")
     </div>
-    <input type="hidden" id="image" value="" />
+    <input type="hidden" id="image" value=""/>
     <span id="baseurl" data-url="@Url.Content("~/")"></span>
     @await Html.PartialAsync("_ProfilePictureUploadBox")
 }

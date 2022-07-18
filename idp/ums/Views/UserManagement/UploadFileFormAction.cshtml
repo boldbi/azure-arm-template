@@ -8,9 +8,7 @@
 @section scripts{
     <script src="~/bundles/js/user-management.js" asp-append-version="true"></script>
     <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
-    <script>
-        $.extend(ej, Syncfusion);
-    </script>
+    
     <script>
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
         var postactionUrl = "@Url.Action("postaction", "UserManagement")";
@@ -41,53 +39,42 @@
     <script type="text/javascript">
         var data1 = @Html.Raw(ViewBag.user);
         var csvImportGridColumn = [
-            { field: "Username", cssClass: "user-name", headerText: "[[[Username]]]", width: 50 },
+            { field: "Username", customAttributes: { class: 'user-name' }, headerText: "[[[Username]]]", width: 50 },
             { field: "Fullname", headerText: "[[[Name]]]", width: 50 }
         ];
         if (isEmailRequired) {
-            csvImportGridColumn.push({ field: "Email", cssClass: "email-id", headerText: "[[[Email Address]]]", width: 50 });
+            csvImportGridColumn.push({ field: "Email", customAttributes: { class: 'email-id' }, headerText: "[[[Email Address]]]", width: 50 });
         }
         if (isAutomaticActivation) {
-            csvImportGridColumn.push({ field: "Password", cssClass: "password", headerText: "[[[Password]]]", width: 30 });
+            csvImportGridColumn.push({ field: "Password", customAttributes: { class: 'password' }, headerText: "[[[Password]]]", width: 30 });
         }
-        csvImportGridColumn.push({ field: "DisplayMessage", cssClass: "user-validation", headerText: "[[[Error]]]", width: 100, visible: false });
+        csvImportGridColumn.push({ field: "DisplayMessage", customAttributes: { class: 'user-validation' }, headerText: "[[[Error]]]", width: 100, visible: false });
         $(document).ready(function() {
             $(function () {
                 var data = data1.Value.Data;
-                $("#user_import_grid").ejGrid({
+                var userImportGrid = new ejs.grids.Grid({
                     dataSource: data,
-                    gridLines: ej.Grid.GridLines.None,
+                    gridLines: 'None',
                     allowPaging: false,
                     allowSorting: false,
                     allowSelection: false,
                     allowScrolling: false,
-                    actionBegin: "fnUploadFileActionBegin",
                     locale: "en-us",
                     enableAltRow: false,
-                    enableRowHover: true,
-                    actionComplete:"onComplete",
-                    dataBound: function (args) {
-                        if (data1.Value.IsUserLimitExceed)
-                        {
-                            $("#limit-user").ejDialog("open");
-                            if (data1.Data.UserLicense.UsersLeft > 0){
-                                $("#limit-import-ad").show();
-                                $(".importad-allowed-count").html(data1.Data.UserLicense.UsersLeft);
-                                $("#limit-import-ad .licensed-user-count").html(data1.Data.UserLicense.Users);
-                            } else {
-                                $("#zero-user-acc .licensed-user-count").html(data1.Data.UserLicense.Users);
-                                $("#zero-user-acc").show();
-                            }
-                        }
-                    },
+                    enableHover: true,
+                    dataBound: onComplete,
                     columns: csvImportGridColumn,
                 });
-
+                userImportGrid.appendTo("#user_import_grid");
             });
 
         });
         function onComplete(args) {
-            if(args.model.currentViewData.length>0){
+            $('[data-toggle="tooltip"]').tooltip(
+                {
+                    container: 'body'
+                });
+            if(this.currentViewData.length>0){
                 $('#import-button').prop("disabled", false);
             }
             else {

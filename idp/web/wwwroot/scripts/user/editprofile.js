@@ -23,7 +23,7 @@ $(document).ready(function () {
         isModal: true,
         visible: false,
         close: "closeAvatarBox",
-        allowDragging: true,
+        animationSettings: { effect: 'Zoom' },
         closeOnEscape: true
     });
     avatarUploadDialog.appendTo("#avatar-upload-box");
@@ -123,8 +123,11 @@ $(document).ready(function () {
         selected: function (e) {
             showWaitingPopup('avatar-upload-box');
             currentDate = $.now();
-            extension = e.filesData[0].type.toLowerCase();
-            if (extension != "png" && extension != "jpg" && extension != "jpeg") {
+            extension = e.filesData[0]?.type.toLowerCase();
+            if (extension === undefined) {
+                hideWaitingPopup('content-area');
+            }
+            else if (extension != "png" && extension != "jpg" && extension != "jpeg") {
                 $(".image-validation-message").text(window.Server.App.LocalizationContent.InvalidFileFormat);
                 $("#file-description").css("margin-top", "10px");
                 hideWaitingPopup('avatar-upload-box');
@@ -310,6 +313,7 @@ $(document).on("click", "#image-path", function () {
 $(document).on("click", "#edit", function (e) {
     var isAdUser = $("#is-aduser").html().toLowerCase();
     $("#user-phonenumber").val(userDetails.Contact);
+    $("#user-lastname").val(userDetails.LastName);
     $("#edit").hide();
     $("#save-button,#cancel-button,#cancel-link-button,.admin-page-footer").show();
     if (isAdUser == "false") {
@@ -326,7 +330,7 @@ $(document).on("click", "#cancel-button", function (e) {
     $("#user-firstname").val(userDetails.FirstName);
     $("#user-username").val(userDetails.Username);
     $("#user-email").val(userDetails.Email);
-    $("#user-lastname").val(userDetails.LastName);
+    $("#user-lastname").val(userDetails.LastName === "" ? "--" : userDetails.LastName);
     $("#user-phonenumber").val(userDetails.Contact === "" ? "--" : userDetails.Contact);
 
     $(".edit-profile-field").removeClass("form-control").addClass("no-edit");

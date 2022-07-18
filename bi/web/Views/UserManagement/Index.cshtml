@@ -8,6 +8,7 @@
     var isAzureApplication = ServerAppConfig.IsAzureApplication;
     var enableWindowsAD = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     var isEmailRequired = globalAppSettings.SystemSettings.IsEmailRequired;
+    var isSelfHosted = ServerAppConfig.IsSelfHosted;
     var isAdmin = _identityResponse.IsAdmin;
     var permissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var customUI = _globalAppSettings.SystemSettings.CustomUI;
@@ -16,6 +17,7 @@
     {
         userImport = customUI?.Profiles[0]?.UserImport != null ? customUI?.Profiles[0]?.UserImport[0] : new UserImport();
     }
+    var passwordPolicy = ServerAppConfig.PasswordPolicy;
 }
 
 @section scripts{
@@ -46,10 +48,19 @@
 
         var getResultDataUrl = "@Url.Action("GetUserDataForImportFromDatabase", "UserManagement")";
         var isEmailRequired = "@isEmailRequired";
-		var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+        var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         var isAdmin = @Json.Serialize(isAdmin);
-
     </script>
+    @if (isSelfHosted)
+    {
+        <script>
+            var minimumLength = "@passwordPolicy.MinimumLength";
+            var lowerCaseRequired = "@passwordPolicy.LowerCaseRequired";
+            var upperCaseRequired = "@passwordPolicy.UpperCaseRequired";
+            var numberRequired = "@passwordPolicy.NumberRequired";
+            var specialCharactersRequired = "@passwordPolicy.SpecialCharactersRequired";
+        </script>
+    }
     <script>
         window.data = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.users)));
     </script>
@@ -498,6 +509,8 @@
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
     </div>
+
+    <div id="assign-group" class="no-padding pull-left" style="display:none"></div>
 
     @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
     @await Html.PartialAsync("../UserManagement/_MultipleUserDeleteDialog")

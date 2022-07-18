@@ -6,14 +6,16 @@
     var cdnLink = string.Empty;
     var faviconLogo = string.Empty;
     var loginLogo = string.Empty;
+    var internalServerLogo = string.Empty;
     var dashboardServerResourceUrl = string.Empty;
     var homePageUrl = Url.Action("Dashboards", "Dashboards");
     if (ServerAppConfig.IsSelfHosted)
     {
-        cdnLink = Context.Request.PathBase.ToString().Equals("/") ? string.Empty : !string.IsNullOrWhiteSpace(Context.Request.PathBase) ? Context.Request.PathBase.ToString() : new Uri(ServerAppConfig.InternalAppBiUrl).AbsolutePath.TrimEnd('/') + "/";
-        dashboardServerResourceUrl = !string.IsNullOrWhiteSpace(Context.Request.PathBase) ? Context.Request.PathBase.ToString() : new Uri(ServerAppConfig.InternalAppBiUrl).AbsolutePath.TrimEnd('/') + "/";
+        cdnLink = GlobalAppSettings.HttpPathBase.ToString().Equals("/") ? string.Empty : !string.IsNullOrWhiteSpace(GlobalAppSettings.HttpPathBase) ? GlobalAppSettings.HttpPathBase.ToString() : new Uri(ServerAppConfig.InternalAppBiUrl).AbsolutePath.TrimEnd('/') + "/";
+        dashboardServerResourceUrl = !string.IsNullOrWhiteSpace(GlobalAppSettings.HttpPathBase) ? GlobalAppSettings.HttpPathBase.ToString() : new Uri(ServerAppConfig.InternalAppBiUrl).AbsolutePath.TrimEnd('/') + "/";
         faviconLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon";
         loginLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=login";
+        internalServerLogo = cdnLink + "/cdn/images/static/error-pages/v1/500.svg";
     }
     else
     {
@@ -21,6 +23,7 @@
         dashboardServerResourceUrl = ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
         faviconLogo = dashboardServerResourceUrl + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + @IconFileNames.Favicon;
         loginLogo = dashboardServerResourceUrl + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + @IconFileNames.LoginLogo;
+        internalServerLogo = dashboardServerResourceUrl + "/cdn/images/static/error-pages/v1/500.svg";
     }
 
     if (homePageUrl == string.Empty)
@@ -70,7 +73,7 @@
                     <img src="@loginLogo" onerror="if (this.src != '@cdnLink/cdn/images/static/company/@ServerAppConfig.AppSettings.AppBranding.Identifier/logo/v1/@IconFileNames.LoginLogo') this.src = '@cdnLink/cdn/images/static/company/@ServerAppConfig.AppSettings.AppBranding.Identifier/logo/v1/@IconFileNames.LoginLogo';" class="error-image-1">
                 </div>
                 <div class="error-image-center-2">
-                    <img src="@cdnLink/cdn/images/static/error-pages/v1/500.svg" class="error-image-2">
+                    <img src="@internalServerLogo" class="error-image-2">
                 </div>
                 <div class="error-type">@T["Internal Server Error (500)"]</div>
                 <div class="error-text">

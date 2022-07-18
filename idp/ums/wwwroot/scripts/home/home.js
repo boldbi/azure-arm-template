@@ -9,8 +9,8 @@
             showCloseIcon: true,
             closeOnEscape: false,
             visible: false,
-            width: '584px',
-            height:"350px",
+            width: '472px',
+            height:"auto",
             animationSettings: { effect: 'Zoom' },
             zIndex: 4
         });

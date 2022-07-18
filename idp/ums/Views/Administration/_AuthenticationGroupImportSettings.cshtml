@@ -1,17 +1,22 @@
-﻿<div class="col-md-12 no-padding auth-sub-title">
-    <div class="section-title">
-        <span>[[[Group Import Settings]]]</span>
+﻿@{ 
+    var isOauthSettings = ViewData["AuthType"] != null && ViewData["AuthType"].ToString() == AuthType.OAuth.ToString();
+    var isOpenIdSettings = ViewData["AuthType"] != null && ViewData["AuthType"].ToString() == AuthType.OIDC.ToString();
+    var providerCount = isOauthSettings ? 4 : 3;
+}
+    <div class="col-md-12 no-padding auth-sub-title">
+        <div class="section-title">
+            <span>[[[Group Import Settings]]]</span>
+        </div>
+        <div class="col-md-12 no-padding section-info-message">
+            [[[This settings will be used for importing groups from the above configured authentication provider. We have @providerCount known authentication providers where we know how to import groups from them. Select any of the applicable provider from the dropdown.]]]
+        </div>
     </div>
-    <div class="col-md-12 no-padding section-info-message">
-        [[[This settings will be used for importing groups from the above configured authentication provider. We have 4 known authentication providers where we know how to import groups from them. Select any of the applicable provider from the dropdown.]]]
-    </div>
-</div>
 
 <div class="col-md-12 no-padding input-field-margin">
     <div class="col-md-12 no-padding">
         <label class="app-textbox-label">[[[Provider]]]</label>
     </div>
-    @if (ViewData["AuthType"] != null && ViewData["AuthType"].ToString() == AuthType.OAuth.ToString())
+    @if (isOauthSettings)
     {
         <div>
             <select id="group-import-provider-oauth" class="no-padding group-import-provider-type-oauth admin-settings-drop-down">
@@ -23,7 +28,7 @@
             </select>
         </div>
     }
-    @if (ViewData["AuthType"] != null && ViewData["AuthType"].ToString() == AuthType.OIDC.ToString())
+    @if (isOpenIdSettings)
     {
         <div>
             <select id="group-import-provider-openid" class="no-padding group-import-provider-type-openid admin-settings-drop-down">

@@ -25,7 +25,7 @@
         },
         onfocusin: function (element) {
             if (element.id === "new-password" && $("#new-password").data("toggle") === "popover" && $("#new-password").val() != undefined && $("#new-password").val() != "") {
-                createPasswordPolicyRules();
+                passwordPolicyPopover("#new-password", $("#new-password").val());
             }
         },
         rules: {
@@ -104,11 +104,11 @@
             $("#txt-confirm-password").closest(".form-group").removeClass("has-error");
             $("#txt-confirm-password").parent().find(">.startup-validation").hide();
         }
-        createPasswordPolicyRules();
+        passwordPolicyPopover("#new-password", $("#new-password").val());
     });
 
     $("#new-password").on("change", function () {
-        createPasswordPolicyRules();
+        passwordPolicyPopover("#new-password", $("#new-password").val());
         $("#new-password").valid();
     });
 
@@ -137,6 +137,7 @@
             $("#image-parent-container .startup-image").hide().attr("src", serverSetupImageUrl).fadeIn();
             $(".startup-content span.first-content").hide().text(window.TM.App.LocalizationContent.YourSite).slideDown();
             $(".startup-content span.second-content").hide().text(window.TM.App.LocalizationContent.YourSite2 + displayName + window.TM.App.LocalizationContent.YourSite3).slideDown();
+            $("#help-link").attr("href", databaseConfigurationUrl);
             $("#system-settings-db-selection-container").show();
             $("#db-content-holder,#db-config-submit").show();
             $("#sql-existing-db-submit, .sql-server-existing-db").hide();
