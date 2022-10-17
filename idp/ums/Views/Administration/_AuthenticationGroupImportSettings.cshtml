@@ -1,0 +1,139 @@
+﻿@{ 
+    var isOauthSettings = ViewData["AuthType"] != null && ViewData["AuthType"].ToString() == AuthType.OAuth.ToString();
+    var isOpenIdSettings = ViewData["AuthType"] != null && ViewData["AuthType"].ToString() == AuthType.OIDC.ToString();
+    var providerCount = isOauthSettings ? 4 : 3;
+}
+    <div class="col-md-12 no-padding auth-sub-title">
+        <div class="section-title">
+            <span>[[[Group Import Settings]]]</span>
+        </div>
+        <div class="col-md-12 no-padding section-info-message">
+            [[[This settings will be used for importing groups from the above configured authentication provider. We have @providerCount known authentication providers where we know how to import groups from them. Select any of the applicable provider from the dropdown.]]]
+        </div>
+    </div>
+
+<div class="col-md-12 no-padding input-field-margin">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[Provider]]]</label>
+    </div>
+    @if (isOauthSettings)
+    {
+        <div>
+            <select id="group-import-provider-oauth" class="no-padding group-import-provider-type-oauth admin-settings-drop-down">
+                <option class="no-margin-dropdown-ul" value="None">[[[Select a provider]]]</option>
+                <option class="no-margin-dropdown-ul" value="CognitoAWS" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS)">[[[Cognito AWS]]]</option>
+                <option class="no-margin-dropdown-ul" value="Auth0" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.Auth0)">[[[Auth0]]]</option>
+                <option class="no-margin-dropdown-ul" value="Okta" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.Okta)">[[[Okta]]]</option>
+                <option class="no-margin-dropdown-ul" value="OneLogin" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin)">[[[OneLogin]]]</option>
+            </select>
+        </div>
+    }
+    @if (isOpenIdSettings)
+    {
+        <div>
+            <select id="group-import-provider-openid" class="no-padding group-import-provider-type-openid admin-settings-drop-down">
+                <option class="no-margin-dropdown-ul" value="None">[[[Select a provider]]]</option>
+                <option class="no-margin-dropdown-ul" value="Auth0" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.Auth0)">[[[Auth0]]]</option>
+                <option class="no-margin-dropdown-ul" value="Okta" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.Okta)">[[[Okta]]]</option>
+                <option class="no-margin-dropdown-ul" value="OneLogin" selected="@(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin)">[[[OneLogin]]]</option>
+            </select>
+        </div>
+    }
+</div>
+
+@if (ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth)
+{
+    @*Cognito AWS*@
+    <div class="col-md-12 no-padding input-field-margin cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <div class="col-md-12 no-padding">
+            <label class="app-textbox-label">[[[User Pool Id]]]</label>
+        </div>
+        <div>
+            <input type="text" class="form-control no-margin" name="userPoolId" placeholder="[[[User Pool Id]]]" id="user-pool-id" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.UserPoolId) ? Model.Cognito.UserPoolId : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        </div>
+    </div>
+
+    <div class="col-md-12 no-padding input-field-margin cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <div class="col-md-12 no-padding">
+            <label class="app-textbox-label">[[[AWS Accesskey Id]]]</label>
+        </div>
+        <div>
+            <input type="text" class="form-control no-margin" name="awsAccesskeyId" placeholder="[[[AWS Accesskey Id]]]" id="aws-accesskey-id" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.AwsAccesskeyId) ? Model.Cognito.AwsAccesskeyId : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        </div>
+    </div>
+
+    <div class="col-md-12 no-padding input-field-margin cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <div class="col-md-12 no-padding">
+            <label class="app-textbox-label col-md-3 no-margin">[[[AWS Accesskey Secret]]]</label>
+        </div>
+        <div>
+            <input type="text" class="form-control no-margin" name="awsAccesskeySecret" placeholder="[[[AWS Accesskey Secret]]]" id="aws-accesskey-secret" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.AwsAccesskeySecret) ? Model.Cognito.AwsAccesskeySecret : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        </div>
+    </div>
+
+    <div class="col-md-12 no-padding input-field-margin cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <div class="col-md-12 no-padding">
+            <label class="app-textbox-label">[[[Region]]]</label>
+        </div>
+        <div>
+            <input type="text" class="form-control no-margin" name="cognitoRegion" placeholder="[[[Region]]]" id="cognito-region" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.Region) ? Model.Cognito.Region : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        </div>
+    </div>
+}
+
+@*Auth0*@
+<div class="col-md-12 no-padding input-field-margin auth0-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.Auth0 ? string.Empty : "display-none")">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[Audience]]]</label>
+    </div>
+    <div>
+        <input type="text" class="form-control no-margin" name="audience" placeholder="[[[Audience]]]" id="audience" value="@(Model != null && Model.Auth0 != null && !string.IsNullOrWhiteSpace(Model.Auth0.Audience) ? Model.Auth0.Audience : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+    </div>
+</div>
+
+<div class="col-md-12 no-padding input-field-margin auth0-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.Auth0 ? string.Empty : "display-none")">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[Extension URL]]]</label>
+    </div>
+    <div>
+        <input type="text" class="form-control no-margin" name="extensionUrl" placeholder="[[[Extension URL]]]" id="extension-url" value="@(Model != null && Model.Auth0 != null && !string.IsNullOrWhiteSpace(Model.Auth0.ExtensionURL) ? Model.Auth0.ExtensionURL : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+    </div>
+</div>
+
+@*Okta*@
+<div class="col-md-12 no-padding input-field-margin okta-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.Okta ? string.Empty : "display-none")">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[API Token]]]</label>
+    </div>
+    <div>
+        <input type="text" class="form-control no-margin" name="apiToken" placeholder="[[[API Token]]]" id="api-token" value="@(Model != null && Model.Okta != null && !string.IsNullOrWhiteSpace(Model.Okta.ApiToken) ? Model.Okta.ApiToken : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+    </div>
+</div>
+
+@*OneLogin*@
+<div class="col-md-12 no-padding input-field-margin onelogin-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin ? string.Empty : "display-none")">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[API Client ID]]]</label>
+    </div>
+    <div>
+        <input type="text" class="form-control no-margin" name="apiClientId" placeholder="[[[API Client ID]]]" id="api-client-id" value="@(Model != null && Model.OneLogin != null && !string.IsNullOrWhiteSpace(Model.OneLogin.ApiClientId) ? Model.OneLogin.ApiClientId : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+    </div>
+</div>
+
+<div class="col-md-12 no-padding input-field-margin onelogin-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin ? string.Empty : "display-none")">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[API Client Secret]]]</label>
+    </div>
+    <div>
+        <input type="text" class="form-control no-margin" name="apiClientSecret" placeholder="[[[API Client Secret]]]" id="api-client-secret" value="@(Model != null && Model.OneLogin != null && !string.IsNullOrWhiteSpace(Model.OneLogin.ApiClientSecret) ? Model.OneLogin.ApiClientSecret : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+    </div>
+</div>
+
+<div class="col-md-12 no-padding input-field-margin onelogin-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin ? string.Empty : "display-none")">
+    <div class="col-md-12 no-padding">
+        <label class="app-textbox-label">[[[Region]]]</label>
+    </div>
+    <div>
+        <input type="text" class="form-control no-margin" name="oneloginRegion" placeholder="[[[Region]]]" id="onelogin-region" value="@(Model != null && Model.OneLogin != null && !string.IsNullOrWhiteSpace(Model.OneLogin.Region) ? Model.OneLogin.Region : string.Empty)" @(ViewBag.AuthType != null && ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+    </div>
+</div>

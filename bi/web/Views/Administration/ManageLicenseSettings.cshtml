@@ -1,0 +1,66 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = "[[[Manage License]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    var PlanDetails = ViewData["licenseSettings"] as Dictionary<string, string>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/license-settings.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/license-settings.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+<div id="subscription-plan-container" class="bi-page-container">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div id="subscription-plan-block" class="col-xs-12 no-padding">
+            <div class="col-md-12 import-area bi-page-header">
+                <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding license-settings-container bi-page-header-description">
+                    <h1 class="h2 page-title">[[[Manage License]]]</h1>
+                    <h5 class="page-description">[[[Managing the license and plan for the application]]]</h5>
+                </hgroup>
+            </div>
+            <form id="subscription-plan-form" class="col-xs-12 form-horizontal bi-page-body" autocomplete="off">
+                <h3 class="title col-xs-12 sub-section-heading no-padding">[[[Plan Details]]]</h3>
+                <div class="col-xs-6 no-margin no-padding" id="plan-details-contianer">
+                    <table class="table table-section">
+                        <tr>
+                            <th>[[[Particulars]]]</th>
+                            <th>[[[Your Quota]]]</th>
+                            <th>[[[Used]]]</th>
+                            <th>[[[Remaining]]]</th>
+                        </tr>
+                        <tr>
+                            <td>[[[Users]]]</td>
+                            <td>@PlanDetails["Users"]</td>
+                            <td>@PlanDetails["UsedUsers"]</td>
+                            <td>@PlanDetails["RemainingUsers"]</td>
+                        </tr>
+                        <tr>
+                            <td>[[[Dashboards]]]</td>
+                            <td>@PlanDetails["Dashboards"]</td>
+                            <td>@PlanDetails["UsedDashboards"]</td>
+                            <td>@PlanDetails["RemainingDashboard"]</td>
+                        </tr>
+                        <tr>
+                            <td>[[[Creators]]]</td>
+                            <td>@PlanDetails["Creators"]</td>
+                            <td>@PlanDetails["UsedCreators"]</td>
+                            <td>@PlanDetails["RemainingCreators"]</td>
+                        </tr>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+
+}

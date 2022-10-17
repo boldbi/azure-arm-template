@@ -1,0 +1,43 @@
+﻿@model TenantInfo
+@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"] == "users") ? "active" : string.Empty;
+}
+
+<script type="text/javascript">
+    var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+    var isPresentUserNameAndEmailId = "@Url.Action("isPresentUserNameAndEmailId", "UserManagement")";
+    var addUserUrl = "@Url.Action("AddUser", "TenantsManagement")";
+    var isEmailRequired = @Json.Serialize(GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.Required);
+    var tenantName = "@Model.Tenant.TenantName";
+</script>
+
+<div role="tabpanel" class="col-xs-12 no-padding tab-pane @activeTab" id="users-tab">
+    <div id="user-list-container" class="col-xs-12 admin-page-body">
+        <div id="search-area" class="pull-right">
+            <input type="text" class="pull-left" id="search-app-users" placeholder="[[[Search users]]]" />
+            <span class="su su-inner-close close-icon pull-left" id="clear-search" title="[[[Clear search]]]"></span>
+            <span class="su su-search search-user pull-left" title="[[[Search]]]"></span>
+        </div>
+        <div id="new-user-button" class="pull-right">
+            <button class="primary-button" id="new-user-dropdown" title="[[[Add new user]]]" data-toggle="tooltip" onclick="onUserAddDialogOpen()">
+                [[[Add User]]]
+            </button>
+        </div>
+        <div id="add-users-button" class="pull-right">
+            <button class="primary-button">[[[Grant access]]]</button>
+        </div>
+        <div id="remove-users-button" class="pull-right hide">
+            <button class="critical-action-button remove-button">[[[Revoke access]]]</button>
+        </div>
+        <div class="col-xs-12 no-padding">
+            <div id="users_grid">
+            </div>
+        </div>
+    </div>
+
+    <div id="grant-users-access-dialog"></div>
+    <div id="user-remove-confirmation-dialog"></div>
+</div>
+@await Html.PartialAsync("_GrantAccess")
+@await Html.PartialAsync("_RevokeAccess")
+@await Html.PartialAsync("../UserManagement/_UserAddDialog")

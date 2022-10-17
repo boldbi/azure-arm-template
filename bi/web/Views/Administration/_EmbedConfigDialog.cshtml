@@ -1,0 +1,68 @@
+﻿@{
+    Layout = null;
+    var categories = ViewBag.Categories;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isAdmin = _identityResponse.IsAdmin;
+    var navigateDashboardUrl = globalAppSettings.SystemSettings.BaseUrl + "Dashboards";
+}
+
+<!DOCTYPE html>
+<head>
+    <title>@T["Generate Embed Config"]</title>
+
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/embed-config.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-config.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/embed-config.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-config.min.js"></script>
+    </environment>
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+
+<div class="overflow-none create-presentation-popup" id="create-presentation-container">
+    <div class="modal col-xs-12 no-padding" tabindex="-1" role="dialog" style="display:none">
+        <div class="modal-dialog col-xs-12 popup-header no-padding" role="document">
+            <div class="modal-content no-padding col-xs-12" id="embedconfig-popup-container" data-spy="scroll">
+                <div class="col-xs-12 modal-header no-padding">
+                    <div class="col-xs-11 no-padding">
+                        <span class="modal-title popup-title slideshow-popup-title ellipsis col-xs-10" data-container='presentation-container'>@T["Embed Configuration"]</span>
+                    </div>
+                    <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1  no-padding pull-right">
+                        <a href="javascript:void(0);" title="@T["Close"]" data-toggle='tooltip' data-placement="left" class="create-presentation-popup-close pull-right popup-close">
+                            <span class="su su-close"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-body col-xs-12 no-padding">
+                    <div class="model-body-dialog-content">
+                        <div class="dialog-body-content">@T["Choose a custom dashboard to embed in your application."]</div>
+                        <div class="dialog-body-content-sample" style="display: none">@T["Choose a sample dashboard to embed in your application. We will import the sample dashboard into the server and initiate the download."]</div>
+                        <div class="dialog-body-content-body">
+                            <div class="form-field col-xs-5 slide-category-dropdown" style="padding-left: 5px">
+                                <div class="categoryLabel">@T["Category"]</div>
+                                <select class="selectpicker dropdown" id="select_category" data-size="5" data-live-search="true" title='@T["Select category"]' onchange="disableDownloadEmbedconfig()" style="width: 100%; margin-bottom: 15px;">
+                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select category"]</option>
+                                </select>
+                            </div>
+                            <div class="form-field slide-dashboard-dropdown col-xs-7">
+                                <div class="dashboardLabel">@T["Dashboard"]</div>
+                                <select class="selectpicker dropdown" id="select_dashboard" data-size="5" data-live-search="true" title='@T["Select dashboard"]' onchange="enableDownloadEmbedconfig()" style="width: 100%; margin-bottom: 15px;">
+                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select dashboard"]</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer col-xs-12 no-padding">
+                    <div class="col-lg-12 margin-top">
+                        <input type="button" title="" class="btn primary-button app-btn-primary" id="generate-embedconfig" onclick="geneateEmbedConfig()" tabindex="4" value="@string.Format(T["Download {0} File"].Value, "Json")">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

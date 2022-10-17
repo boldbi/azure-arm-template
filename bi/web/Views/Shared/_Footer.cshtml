@@ -1,0 +1,94 @@
+﻿@using System.IO;
+
+
+@{
+    var globalAppSettings = (GlobalAppSettings)ViewBag.appsettings;
+
+    var poweredbyClass = globalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion ? "show" : "hide";
+    var copyrightClass = globalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "show" : "hide";
+    var separatorparagraphClass = (globalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion && globalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
+    var separatorFooterClass = (globalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion || globalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var footerLogo = !string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.FooterLogo) ? globalAppSettings.SystemSettings.FooterLogo : globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/footer_logo.svg";
+}
+
+<div id="base-footer-div">
+
+    <footer>
+        @if (!isMobile)
+        {
+            <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 no-padding layout-footer no-margin">
+                @if (!ServerAppConfig.IsSelfHosted && Context.Request.Cookies["cookie-consent"] == null)
+                {
+                    <div class="cookie-notification notification-not-mobile">
+                        <div class="container">
+                            <div class="row cookie-notification-row-not-mobile">
+                                <div class="col-lg-11 col-md-9 col-sm-10 col-xs-12 content-small vcenter cookie-notification-div-not-mobile">
+                                     @Html.Raw(string.Format(T["We use cookies to give you the best experience on our website. If you continue to browse, then you agree to our {0}privacy policy{1} and {2}cookie policy{3}."].Value, "<a href='https://www." + (GlobalAppSettings.BrandingDomain) + "/privacy' target='_blank' style='text-decoration:underline;' class='privacy-link'>","</a>","<a href='https://www." + (GlobalAppSettings.BrandingDomain) + "/cookie-policy' target='_blank' style='text-decoration:underline;' class='privacy-link'>","</a>"))
+                                </div>
+                                <div class="col-lg-1 col-sm-1 col-xs-12 vcenter agreebutton">
+                                    <button id="cookiesubs" type="button" class="btn  btn--stack  btn--primary cookiesubs-button">
+                                        <span class="btn--text cookiesubs-button-span">@T["OK"]</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="copyright-poweredby">
+                    <div class="col-xs-6 col-md-9 col-sm-9 col-lg-9 dropup no-padding language-area pull-left no-margin no-padding">
+                        <div class="no-padding pull-left" id="lang_menu">
+                            <p class="no-margin pull-left @copyrightClass" id="copyrightinfo"> @Html.Raw(globalAppSettings.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</p>
+                        </div>
+                    </div>
+                    <div class="col-xs-5 col-md-3 col-sm-3 col-lg-3 no-padding no-margin pull-right" id="enablefooter">
+                        @if (globalAppSettings.SystemSettings.IsShowPoweredBySyncfusion)
+                        {
+                            <div class="lazyload name-loader" data-id="footerlogo" data-src="@(footerLogo)" data-alt="Syncfusion" data-width="110px" data-height="25px"></div>
+                            <p class="no-margin pull-right pow @poweredbyClass" id="poweredbysyncfusion">
+                                @T["Powered by"]
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (isMobile)
+        {
+            <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 no-padding layout-footer no-margin">
+                @if (!ServerAppConfig.IsSelfHosted && Context.Request.Cookies["cookie-consent"] == null)
+                {
+                    <div class="cookie-notification">
+                        <div class="container">
+                            <div class="row cookie-notification-row-mobile">
+                                <div class="col-lg-10 col-md-9 col-sm-10 col-xs-12 content-small vcenter cookie-notification-div-mobile">
+                                    @Html.Raw(string.Format(T["We use cookies to give you the best experience on our website. If you continue to browse, then you agree to our {0}privacy policy{1} and {2}cookie policy{3}."].Value, "<a href='https://www." + (GlobalAppSettings.BrandingDomain) + "/privacy' target='_blank' style='text-decoration:underline;' class='privacy-link'>","</a>","<a href='https://www." + (GlobalAppSettings.BrandingDomain) + "/cookie-policy' target='_blank' style='text-decoration:underline;' class='privacy-link'>","</a>"))
+                                </div>
+                                <div class="col-lg-1 col-md-2 col-sm-1 col-xs-12 vcenter agreebutton agreebutton-mobile">
+                                    <button id="cookiesubs" type="button" class="btn  btn--stack  btn--primary cookiesubs-button">
+                                        <span class="btn--text cookiesubs-button-span">@T["OK"]</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="col-xs-5 col-md-6 col-sm-6 col-lg-6 no-padding pull-right no-margin" id="enablefooter">
+                    @if (globalAppSettings.SystemSettings.IsShowPoweredBySyncfusion)
+                    {
+                        <div class="lazyload name-loader" data-id="footerlogo" data-src="@(footerLogo)" data-alt="Syncfusion" data-width="110px" data-height="25px"></div>
+                        <p class="no-margin pow pull-right @poweredbyClass" id="poweredbysyncfusion">
+
+                            @T["Powered by"]
+                        </p>
+                    }
+
+                </div>
+
+            </div>
+        }
+    </footer>
+</div>

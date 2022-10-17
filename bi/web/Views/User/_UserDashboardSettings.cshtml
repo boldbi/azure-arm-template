@@ -1,0 +1,66 @@
+﻿@using Newtonsoft.Json
+@{
+    var dashboardSettings = ViewBag.DashboardSettings;
+    var defaultViewSettings = ViewBag.DefaultView;
+    var autosavedFilterValue = ViewBag.AutosavedFilterValue;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var autoSaveHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.AutoSaveFilter);
+    var IsHideHelpLink = ServerAppConfig.IsHideHelpLink;
+    var permission = ViewBag.GranularPermissions as Dictionary<object, bool>;
+}
+
+<div id="dashboard-settings" class="col-xs-12 no-padding form-fields">
+        <input type="hidden" class="page-title">
+        <label class="profile-textbox-label">@T["Dashboard Settings"]</label>
+        <div class="no-padding">
+            <div class="col-xs-12 no-padding checkbox-bottom notification-content">
+                <span class="inline-align">
+                    @if (autosavedFilterValue)
+                    {
+                        @Html.CheckBox("restrict-auto-save-filter", (dashboardSettings), new { @class = "material-checkbox"})
+                        <input type="hidden" id="restrict-auto-save-filter" onchange="SaveUserAutosaveFilter()">
+                        <label for="restrict-auto-save-filter">
+                            <span class="auto-save-filter inline-align">
+                                @T["Autosave filter"]
+                            </span>
+                        </label>
+
+                    }
+                    else
+                    {
+                        @Html.CheckBox("restrict-auto-save-filter", (dashboardSettings), new { @class = "material-checkbox", disabled = "true" })
+                        <input type="hidden" id="restrict-auto-save-filter" disabled />
+                        <label for="restrict-auto-save-filter">
+                            <span class="auto-save-filter inline-align">
+                                @T["Autosave filter"]
+                            </span>
+                        </label>
+                    }
+
+                </span>
+            </div>
+            <div class="col-xs-12 col-lg-12 no-padding">
+                <h6 class="no-margin" id="tooltip-info">
+                </h6>
+            </div>
+        </div>
+    <input type="hidden" id="defaultSettings" value="@ViewBag.DefaultView" />
+</div>
+<script>
+    var permission = @Html.Raw(JsonConvert.SerializeObject(permission));
+    if ($("#restrict-auto-save-filter").is(":disabled")) {
+        if (@Json.Serialize(ViewBag.IsAdminAccount) || (permission["DashboardSettings"] || permission["All"])) {
+             $("#tooltip-info").html(@Html.Raw(string.Format("'" + T["Autosave filter is disabled in {0}dashboard settings{1}."].Value, "<span><a target=\"_blank\" href=\" " + Url.Action("DashboardSettings", "Administration") + "\">","</a></span>") + "'"));
+        }else {
+            $("#tooltip-info").html(@Html.Raw("'" + T["Autosave filter is disabled by the system administrator. Please contact your system administrator to enable this."].Value + "'"));
+        }
+    }
+    else {
+        if (!@Json.Serialize(IsHideHelpLink)) {
+            $("#tooltip-info").html(@Html.Raw(string.Format("'" + T["The dashboards will be rendered with the last applied filters by the users. Learn more about {0}autosaving filters{1}."].Value, "<span><a target=\"_blank\" href=\" "+ (helpSiteBaseUrl + autoSaveHelpSiteUrl) + "\">","</a></span>") + "'"));
+
+        }else {
+            $("#tooltip-info").html(@Html.Raw("'" + T["The dashboards will be rendered with the last applied filters by the users."].Value + "'"));
+        }
+    }
+</script>
