@@ -1,0 +1,104 @@
+﻿@functions
+{
+    public string GetProviderName(AuthProvider provider)
+    {
+        if (provider == AuthProvider.AzureAD)
+        {
+            return "Azure AD";
+        }
+        else if (provider == AuthProvider.CustomOAuth)
+        {
+            return "OAuth 2.0";
+        }
+        else if (provider == AuthProvider.CustomOIDC)
+        {
+            return "OpenID Connect";
+        }
+        else if (provider == AuthProvider.JWTSSO)
+        {
+            return "JWT SSO";
+        }
+        else if (provider == AuthProvider.WindowsAD)
+        {
+            return "Window AD";
+        }
+        else
+        {
+            return "No Authentication Configured";
+        }
+    }
+}
+<div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="default-authentication-settings-tab">
+    <div id="defaultauthentication-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+        @if (ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0)
+        {
+            <div id="no-auth">
+                <p class="no-auth-msg no-padding">You have to configure or enable one of the following identity providers to set a default authentication.</p>
+                <div class="options-padding">
+                    @if (CloudAppConfig.IsSelfHosted && !GlobalAppSettings.IsAzureApplication && EnvironmentHelper.IsWindows())
+                    {
+                        <a href="@Url.Action("AuthenticationSettings", "Administration")?view=windows-ad-settings">
+                            <div class="default-auth-option">
+                                <div class="auth-icon su su-windows-ad"></div>
+                                <div class="auth-text">Windows AD</div>
+                            </div>
+                        </a>
+                    }
+                    <a href="@Url.Action("SamlSettings", "Administration")?view=azure-ad-settings">
+                        <div class="default-auth-option">
+                            <div class="auth-icon su su-azure-ad"></div>
+                            <div class="auth-text">Azure AD</div>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("AuthenticationSettings", "Administration")?view=oauth-settings">
+                        <div class="default-auth-option">
+                            <div class="auth-icon su su-oauth"><span class="su su-oauth"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span></div>
+                            <div class="auth-text">OAuth 2.0</div>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("AuthenticationSettings", "Administration")?view=openid-settings">
+                        <div class="default-auth-option">
+                            <div class="auth-icon su su-openid"></div>
+                            <div class="auth-text">OpenID Connect</div>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("AuthenticationSettings", "Administration")?view=jwt-settings">
+                        <div class="default-auth-option">
+                            <div class="auth-icon su su-single-sign-on"></div>
+                            <div class="auth-text">JWT SSO</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+    <form id="default-setting" name="defaultsettingsForm" class="auth-settings-form col-xs-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+        <div class="col-xs-12 no-padding margin-bottom">
+            <div class="material-switch inline-align">
+                <input type="checkbox" id="enable-defaultauthentication" ng-model="defaultauthenticationIsEnabled" ng-click="hideValidationMessage(defaultauthenticationIsEnabled, 'defaultauthentication')" />
+                <label for="enable-defaultauthentication" class="label-primary"></label>
+            </div>
+            <div class="app-textbox-label inline-align">
+                [[[Enable Default Authentication]]]
+            </div>
+        </div>
+
+        <div class="col-md-12 no-padding margin-bottom">
+            <label class="app-textbox-label col-xs-12 no-padding">[[[Default Authentication Provider ]]]</label>
+            <div class="col-md-5 no-padding margin-bottom admin-settings-drop-down">
+                <select id="login-provider-type" class="">
+                    @for (var provider = 0; provider < ViewBag.DefaultAuthenticationSettings.ProviderName.Count; provider++)
+                    {
+                        <option class="" value="@((int)ViewBag.DefaultAuthenticationSettings.ProviderName[provider])">@GetProviderName(ViewBag.DefaultAuthenticationSettings.ProviderName[provider])</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </form>
+        }
+    </div>
+</div>

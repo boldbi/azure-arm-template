@@ -1,0 +1,89 @@
+﻿@{
+    var isAccountActivationAlreadySent = ViewBag.UserLoginValidator.IsAccountActivationMailAlreadySent != null ? (bool)ViewBag.UserLoginValidator.IsAccountActivationMailAlreadySent : false;
+    var resendActivationCode = ViewBag.UserLoginValidator.IsResendActivationCode != null ? (bool)ViewBag.UserLoginValidator.IsResendActivationCode : false;
+    var isAccountAlreadyActivated = ViewBag.IsAccountAlreadyActivated != null ? (bool)ViewBag.IsAccountAlreadyActivated : false;
+    var isReturnToUrl = ViewBag.IsReturnToUrl != null ? (bool)ViewBag.IsReturnToUrl : false;
+    var linkExpired = ViewBag.LinkExpired != null ? (bool)ViewBag.LinkExpired : false;
+    var linkInvalid = ViewBag.InvalidLink != null ? (bool)ViewBag.InvalidLink : false;
+    var updateFailed = ViewBag.UpdateFailed != null ? (bool)ViewBag.UpdateFailed : false;
+    var isUserVerification = ViewBag.IsUserVerification != null ? (bool)ViewBag.IsUserVerification : false;
+    var returnUrl = Context.Request.Query["returnUrl"];
+    var returnActionUrl = isReturnToUrl ? Url.Action("Login", "Accounts") + "?returnUrl=" + returnUrl : Url.Action("Login", "Accounts");
+}
+<script>
+    var resendActivationUrl = "@Url.Action("ResendUserActivationCode", "Accounts")";
+    var activationCode = "@ViewBag.UserLoginValidator.ActivationCode";
+    var tenantEmail = "@ViewBag.UserLoginValidator.TenantEmail";
+    var subDomain = "@ViewBag.UserLoginValidator.Subdomain";
+    var callBackUri = "@ViewBag.UserLoginValidator.CallBackUri";
+
+    $(document).on("click", "#resend-activation-link", function (event) {
+        event.preventDefault();
+        localStorage.setItem(window.location.hostname + "_email", tenantEmail);
+        window.location.href = $(this).attr("href");
+    });
+</script>
+<div class="activation-wrapper">
+    @if (!linkExpired && !linkInvalid && !updateFailed && isAccountAlreadyActivated)
+    {
+        <div class="icon-success">
+            <div class="su su-tick"></div>
+        </div>
+    }
+    else
+    {
+        <div class="icon-failure"><span class="su su-warning-alt"></span></div>
+    }
+
+    @if (resendActivationCode)
+    {
+        <div class="status-message text-body">[[[Email resent successfully.]]]</div>
+        <div class="text-body resend-verification">[[[If it does not arrive, ]]] <a class="link-hover text-primary" id="mail-resend">[[[click here ]]]</a>[[[to resend the email.]]]</div>
+        <div class="divider-light"></div>
+        <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">[[[The verification link expires in 2 days!]]]</span></div>
+    }
+    else if (isAccountAlreadyActivated)
+    {
+        <div class="heading text-h4">[[[Email Verification]]]</div>
+        <div class="status-message text-body account-activated">[[[Your account has already been activated.]]]</div>
+        <form action="@returnActionUrl" method="post">
+            <input type="submit" class="btn-holder proceed-button" value="[[[Proceed to log in]]]">
+        </form>
+        <div class="divider-light"></div>
+        <div class="forget-password-align"><a href="@Url.Action("RecoverAccount", "Accounts")" class="forgot-pwd-link" tabindex="6">[[[Cannot access your account?]]]</a></div>
+    }
+    else if (linkExpired)
+    {
+        <div class="heading text-h4">[[[Account activation not successful.]]]</div>
+        <div class="resend-verification text-body">[[[Your verification link has expired. Please ]]] <a href="@Url.Action("RecoverAccount","accounts")?isaccountactivation=true"><span>[[[click here]]]</span></a> [[[to get a new account activation link.]]]</div>
+    }
+    else if (linkInvalid)
+    {
+        <div class="heading text-h4">[[[Account activation not successful.]]]</div>
+        <div class="resend-verification text-body">[[[Your verification link is invalid. Please ]]]<a href="@Url.Action("RecoverAccount","accounts")?isaccountactivation=true"><span>[[[click here]]]</span></a> [[[to get a new account activation link.]]]</div>
+    }
+    else if (isAccountActivationAlreadySent && !isAccountAlreadyActivated)
+    {
+        <div class="heading text-h4">[[[Account not activated]]]</div>
+        <div class="status-message text-body">[[[An email with instructions on how to verify your account has already been sent to ]]]<a id="tenant-email" href='mailto:  @ViewBag.UserLoginValidator.TenantEmail'>@ViewBag.UserLoginValidator.TenantEmail</a></div>
+        <div class="text-body resend-verification">[[[If you have not received it or the link has already expired, please click the following link to get a new activation link.]]]</div>
+        <div class="divider-light"></div>
+        <a id="resend-activation-link" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=true&callbackuri=@ViewBag.UserLoginValidator.CallBackUri">
+            <input type="submit" class="btn-holder proceed-button" value="[[[Resend activation link]]]">
+        </a>
+    }
+    else if (updateFailed)
+    {
+        <div class="status-message text-body">[[[Error occurred while activating the user.]]]</div>
+        <form action="@returnActionUrl" method="post">
+            <input type="submit" class="btn-holder proceed-button" value="[[[Return to log in]]]">
+        </form>
+    }
+    else
+    {
+        <div class="status-message text-body">[[[We need to verify your email address. We have sent an email to ]]]<a id="tenant-email" href='mailto:  @ViewBag.UserLoginValidator.TenantEmail'>@ViewBag.UserLoginValidator.TenantEmail</a> [[[to verify your address.]]]<span>[[[Please click the link in that email to continue.]]]</span></div>
+        <div class="text-body resend-verification">[[[If you don’t receive the verification email, ]]]<a class="link-hover text-primary" id="mail-resend">[[[click here ]]]</a>[[[to resend.]]]</div>
+        <div class="divider-light"></div>
+        <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">[[[The verification link expires in 2 days!]]]</span></div>
+    }
+</div>

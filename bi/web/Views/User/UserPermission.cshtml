@@ -1,0 +1,34 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["My Permissions"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MyPermissions);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+
+@section MainSection{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-permissions.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-permissions.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-permissions.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-permissions.min.js"></script>
+    </environment>
+    @await Html.PartialAsync("_ProfileMenu")
+<div id="user-permissions-container" class="bi-page-container col-xs-12">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="bi-page-header col-xs-12 bi-page-header-description">
+            <hgroup class="col-xs-8 no-padding">
+                <h1 class="page-title">@T["My Permissions"]</h1>
+                <h5 class="no-padding page-description">@T["View the permissions for the resources you can access"]</h5>
+            </hgroup>
+        </div>
+        <div class="bi-page-body col-md-12">
+            @(!new DeviceDetection(Context).IsMobile ? await Html.PartialAsync("../User/_UserPermissionGrid") : await Html.PartialAsync("../User/_UserPermissionGridForMobile"))
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+}

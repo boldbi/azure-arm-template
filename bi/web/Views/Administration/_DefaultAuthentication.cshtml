@@ -1,0 +1,65 @@
+﻿@{
+    var defaultAuthenticationsample = string.Empty;
+    switch (ViewBag.DefaultAuthentication)
+    {
+        case AuthProvider.CustomOAuth:
+            defaultAuthenticationsample = "oauth 2.0";
+            break;
+        case AuthProvider.CustomOIDC:
+            defaultAuthenticationsample = "openid connect";
+            break;
+        case AuthProvider.AzureAD:
+            defaultAuthenticationsample = "azure ad";
+            break;
+        case AuthProvider.WindowsAD:
+            defaultAuthenticationsample = "windows ad";
+            break;
+    }
+}
+
+<div role="tabpanel" class="tab-pane active col-xs-12 no-padding" id="general">
+    <div id="defaultauthentication-page-body" class="col-xs-12 col-xs-12 col-sm-12 bi-page-body">
+        <form id="default-setting" name="defaultsettingsForm" class="auth-settings-form form-top-margin col-xs-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+            <div class="col-xs-12 enable-default-checkbox no-padding">
+                @Html.CheckBox("enable-defaultauthentication", ((bool)ViewBag.OpenIDSettings.IsDefaultAuthentication || (bool)ViewBag.OAuthSettings.IsDefaultAuthentication || (bool)ViewBag.WindowsADSettings.IsDefaultAuthentication || (bool)ViewBag.AzureADSettings.IsDefaultAuthentication), new { @class = "material-checkbox" })
+                @Html.Hidden("enable-defaultauthentication")
+                <label for="enable-defaultauthentication">
+                    <span>
+                        @T["Enable Default Authentication"]
+                    </span>
+                </label>
+                <div class="info-message">
+                    @T["Default authentication allows you to configure any third-party identity provider as your default authentication provider. Once default authentication is configured, the application will automatically redirect to the corresponding authentication provider’s login page instead of the application’s login page."]
+                </div>
+            </div>
+            <div class="col-xs-12 default-authentication-select no-padding">
+                @Html.Label("default-authentication", T["Default Authentication Provider"].Value, new { @class = "app-textbox-label col-xs-12 no-padding" })
+                <div class="col-xs-8 default-auth-dropdown no-padding">
+                    <select id="login-provider-type" class="selectpicker method-type provider-list">
+                        @if ((bool)ViewBag.OpenIDSettings.IsEnabled)
+                        {
+                            <option class="no-margin-dropdown-ul" value="OpenID Connect" selected="@(defaultAuthenticationsample == "openid connect")">OpenID Connect</option>
+                        }
+                        @if ((bool)ViewBag.OAuthSettings.IsEnabled)
+                        {
+                            <option class="no-margin-dropdown-ul" value="OAuth 2.0" selected="@(defaultAuthenticationsample == "oauth 2.0")">OAuth 2.0</option>
+                        }
+                        @if ((bool)ViewBag.WindowsADSettings.IsEnabled)
+                        {
+                            <option class="no-margin-dropdown-ul" value="Windows AD" selected="@(defaultAuthenticationsample == "windows ad")">Windows Active Directory</option>
+                        }
+                        @if ((bool)ViewBag.AzureADSettings.IsEnabled)
+                        {
+                            <option class="no-margin-dropdown-ul" value="Azure AD" selected="@(defaultAuthenticationsample == "azure ad")">Azure Active Directory</option>
+                        }
+                        @if (!(bool)ViewBag.OAuthSettings.IsEnabled && !(bool)ViewBag.OpenIDSettings.IsEnabled && !(bool)ViewBag.WindowsADSettings.IsEnabled && !(bool)ViewBag.AzureADSettings.IsEnabled)
+                        {
+                            <option class="no-margin-dropdown-ul" id="none-default">@T["No default Authentication Available"]</option>
+                        }
+                    </select>
+                    <span class="validation-message" ng-show="defaultsettingsForm.loginProvider.$error.required && defaultsettingsForm.loginProvider.$dirty && enable-defaultauthentication">@T["Please Select the Login Provider."]</span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

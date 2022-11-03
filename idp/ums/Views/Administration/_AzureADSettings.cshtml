@@ -1,0 +1,82 @@
+﻿@{
+    var appBranding = GlobalAppSettings.Branding;
+}
+    <div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="azure-ad-settings-tab">
+        <div id="azure-ad-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+            <form id="saml-setting" name="ssoSettingsForm" class="saml-form auth-settings-form col-lg-12 col-md-12 col-sm-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="hidden" name="azureADAuthenticationProvider" value="@ViewBag.AzureAdSettings.AuthProvider">
+                <div class="col-xs-12 separator-margin">
+                    <div class="col-xs-12 no-padding">
+                        <div class="material-switch inline-align">
+                            <input type="checkbox" id="enable-sso" ng-model="IsEnabled" ng_change="hideValidationMessage(IsEnabled, 'azuread')" />
+                            <label for="enable-sso" class="label-primary"></label>
+                        </div>
+                        <div class="app-textbox-label inline-align">
+                            [[[Enable Azure AD]]]
+                        </div>
+                    </div>
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            <label class="app-textbox-label">[[[Application Id]]]</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control no-margin" ng-model="ApplicationId" ng-init="ApplicationId='@ViewBag.AzureAdSettings.SAMLSettings.ApplicationId'" name="ApplicationId" placeholder="[[[Application Id]]]" id="application-id" data-ng-disabled="!IsEnabled" required />
+                            <span class="validation-message top-padding" ng-show="ssoSettingsForm.ApplicationId.$error.required && ssoSettingsForm.ApplicationId.$dirty ">[[[Please enter Application Id]]]</span>
+                        </div>
+                        @if (appBranding == AppBranding.Bold.Identifier)
+                        {
+                            <div class="info-message no-padding">
+                                [[[A unique identifier used to register the Embedded BI web app in ADFS.]]]
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="info-message no-padding">
+                                [[[A unique identifier used to register the Enterprise Reporting web app in ADFS.]]]
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            <label class="app-textbox-label">[[[Application Id URI]]]</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control no-margin" ng-model="ApplicationIdURI" ng-init="ApplicationIdURI='@ViewBag.AzureAdSettings.SAMLSettings.ApplicationIdURI'" name="ApplicationIdURI" placeholder="[[[Application Id URI]]]" id="application-id-uri" data-ng-disabled="!IsEnabled" required />
+                            <span class="validation-message top-padding" ng-show="ssoSettingsForm.ApplicationIdURI.$dirty && ssoSettingsForm.ApplicationIdURI.$invalid">[[[Please enter Application Id URI]]]</span>
+                        </div>
+                        <div class="info-message no-padding">[[[The globally unique URI used to identify this web API. It is the prefix for scopes and the value of the audience claim in access tokens. It is also referred to as an identifier URI.]]]</div>
+
+                    </div>
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            <label class="app-textbox-label">[[[Tenant Name]]]</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control no-margin" ng-model="TenantName" ng-init="TenantName='@ViewBag.AzureAdSettings.SAMLSettings.TenantName'" name="TenantName" placeholder="[[[Tenant Name]]]" id="tenant-name" data-ng-disabled="!IsEnabled" ng-pattern="tenantRegex" required />
+                            <span class="validation-message top-padding" ng-show="ssoSettingsForm.tenantName.$error.required && ssoSettingsForm.tenantName.$dirty">[[[Please enter Tenant Name]]]</span>
+                            <span class="validation-message top-padding" ng-show="ssoSettingsForm.tenantName.$error.pattern ">[[[Please enter valid URL]]]</span>
+                        </div>
+                        <div class="info-message no-padding">[[[A dedicated instance of the Azure AD service.]]]</div>
+
+                    </div>
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-xs-12 no-padding">
+                            <label class="app-textbox-label">[[[Mobile App Client Id]]]</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control no-margin" ng-model="MobileApplicationId" ng-init="MobileApplicationId='@ViewBag.AzureAdSettings.SAMLSettings.MobileApplicationId'" name="MobileApplicationId" placeholder="[[[Mobile App Client Id]]]" id="mobile-app-id" data-ng-disabled="!IsEnabled" />
+                        </div>
+                        @if (appBranding == AppBranding.Bold.Identifier)
+                        {
+                            <div class="info-message no-padding">[[[A unique identifier used to register the Embedded BI mobile app in ADFS.]]]</div>
+                        }
+                        else
+                        {
+                            <div class="info-message no-padding">[[[A unique identifier used to register the Enterprise Reporting mobile app in ADFS.]]]</div>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+

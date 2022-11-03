@@ -1,0 +1,241 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Webhook Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "webhook-settings") ? "active" : string.Empty;
+    var isLogsTab = (Context.Request.Query["tab"].ToString() == "webhook-logs") ? "active" : string.Empty;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/webhook-settings.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/webhook-settings.min.css" />
+    </environment>
+}
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/webhook-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/webhook-settings.min.js"></script>
+    </environment>
+    <script>
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+    </script>
+
+    <script type="text/x-jsrender" id="webhook-name-template">
+        <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+    </script>
+    <script type="text/x-jsrender" id="event-type-template">
+        <span class="grid-content" title="{{:EventDescription}}" data-toggle="tooltip">{{:EventDescription}}</span>
+    </script>
+    <script type="text/x-jsrender" id="modified-by-template">
+        <span class="grid-content" title="{{:ModifiedByName}}" data-toggle="tooltip">{{:ModifiedByName}}</span>
+    </script>
+    <script type="text/x-jsrender" id="options">
+        <div class="dropdown">
+            <span class="dropdown-toggle option-icon" data-toggle="dropdown">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <a href="@Url.Action("EditWebhookPage", "Administration")?webhookId={{:Id}}" class="edit-webhook">
+                        <i class="su su-edit"></i>
+                        <span>@T["Edit"]</span>
+                    </a>
+                </li>
+                <li>
+                    {{if IsEnable}}
+                    <a href="javascript:void(0);" class="deactivate-webhook" data-item-id="{{:Id}}">
+                        <i class="su su-enable"></i>
+                        <span>@T["Deactivate"]</span>
+                    </a>
+                    {{else}}
+                    <a href="javascript:void(0);" class="activate-webhook" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                        <i class="su su-disable"></i>
+                        <span>@T["Activate"]</span>
+                    </a>
+                    {{/if}}
+                </li>
+                <li>
+                    <a id="delete-webhook" class="delete-class delete-webhook" href="javascript:void(0);" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                        <i class="su su-delete"></i>
+                        <span>@T["Delete"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </script>
+    <script type="text/x-jsrender" id="webhook-status">
+        {{if IsEnable}}
+        <span class="active su su-schedule-status"></span>
+        @T["Active"]
+        {{else}}
+        <span class="inactive su su-schedule-status"></span>
+        @T["Inactive"]
+        {{/if}}
+    </script>
+
+    <script type="text/javascript">
+        var isEdit = false;
+        var deleteWebhookConfirmationUrl = "@Url.Action("DeleteWebhook", "Administration")";
+        var deleteWebhookDetailsUrl = "@Url.Action("DeleteWebhookDetails", "User")";
+        var activateWebhookUrl = "@Url.Action("ActivateWebhook", "Administration")";
+        var deactivateWebhookUrl = "@Url.Action("DeactivateWebhook", "Administration")";
+        var allPayloadsObj = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.AllPayloads)));
+        var allEventsObj = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.AllEvents)));
+        $(function () {
+            GridLocalization();
+            $("#search-webhooks-grid").val("");
+            $("#webhooksGridSettings").ejGrid({
+                dataSource: ej.DataManager({ url: "@Url.Action("GetAllWebhooks", "Administration")", adaptor: "UrlAdaptor" }),
+                gridLines: ej.Grid.GridLines.None,
+                allowSorting: true,
+                allowSearching: true,
+                allowPaging: true,
+                allowSelection: true,
+                allowFiltering: true,
+                filterSettings: { filterType: "menu" },
+                pageSettings: { pageSize: 20 },
+                enableRowHover: true,
+                enableAltRow: false,
+                load: "fnOnGridLoad",
+                actionBegin: "fnActionBegin",
+                actionComplete: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                    showOrHideGridPager("#webhooksGridSettings");
+                    if (args.model.currentViewData.length === 0) {
+                        this.getContentTable().find("tbody .emptyrecord").html("No webhooks available to display");
+                        rowBound();
+                    }
+                },
+                rowDataBound: function () {
+                    var height = $(".e-gridcontent").height();
+                    if (height != null) {
+                        rowBound();
+                    }
+                    $("[data-toggle='tooltip']").tooltip();
+                },
+                dataBound: function (args) {
+                    $("[data-toggle='tooltip']").tooltip();
+                },
+                columns: [
+                    {
+                        templateID: "#webhook-name-template",
+                        allowSorting: true,
+                        headerText: '@T["Name"]',
+                        width: 115,
+                        field: "Name",
+                        type: "string",
+                        allowSorting: true,
+                        allowFiltering: true
+                    },
+                    {
+                        templateID: "#event-type-template",
+                        field: "EventDescription",
+                        headerText: '@T["Event Type"]',
+                        type: "string",
+                        width: 80,
+                        allowSorting: true,
+                        allowFiltering: false
+                    },
+                    {
+                        templateID: "#modified-by-template",
+                        field: "ModifiedByName",
+                        headerText: '@T["Mobified By"]',
+                        width: 115,
+                        allowSorting: true,
+                        allowFiltering: false
+                    },
+                    {
+                        field: "ModifiedDateString",
+                        headerText: '@T["Mobified On"]',
+                        width: 100,
+                        allowSorting: true,
+                        allowFiltering: false
+                    },
+                    {
+                        template: true,
+                        templateID: "#webhook-status",
+                        headerText: '@T["Status"]',
+                        width: 75,
+                        allowSorting: false,
+                        allowFiltering: false
+                    },
+                    {
+                        template: true,
+                        templateID: "#options",
+                        width: 40,
+                        allowSorting: false,
+                        allowFiltering: false
+                    }
+                ]
+
+            });
+        });
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div id="webhook-settings-container" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")" role="tabpanel" aria-labelledby="webhook-settings">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div id="webhook-setting" class="bi-page-header tabs-header-padding col-md-12 col-lg-12 col-sm-12">
+                <hgroup class="bi-page-header-description">
+                    <h1 class="h2 page-title">
+                        @T["Webhook"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Manage all webhooks here."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-12 no-padding bi-page-nav-bar">
+                <ul id="email-settings-tab-nav" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="@isSettingsTab">
+                        <a href="#webhook-settings" id="webhook-settings-tab" aria-controls="webhook-settings-tab" role="tab" data-toggle="tab">@T["General"]</a>
+                    </li>
+                    <li role="presentation" class="@isLogsTab">
+                        <a href="#webhook-logs" id="webhook-logs-tab" aria-controls="webhook-activity-logs-tab" role="tab" data-toggle="tab">@T["Failure Logs"]</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content col-xs-12 no-padding">
+                <div role="tabpanel" class="tab-pane bi-page-body @isSettingsTab" id="webhook-settings">
+                    <div id="webhook-setting-body" class="col-xs-12 no-padding">
+                        <div id="search-area" class="pull-right">
+                            <input type="text" class="pull-left" id="search-webhooks-grid" placeholder="@T["Search"]" />
+                            <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-accounts pull-left" title="@T["Search"]"></span>
+                        </div>
+                        <div class="col-xs-12 no-padding ">
+                            <div id="webhooksGridSettings"></div>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isLogsTab" id="webhook-logs">
+                    @await Html.PartialAsync("_WebhookActivityLog")
+                </div>
+                @await Html.PartialAsync("_WebhookLogInfo")
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    @await Html.PartialAsync("../Items/_AddItems")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailConfiguration.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailConfiguration.min.js"></script>
+    </environment>
+}
