@@ -1,0 +1,225 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    ViewBag.Title = T["Data Sources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageDatasources);
+    var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
+    var dataSourceName = ViewBag.ItemName;
+}
+@model List<ItemDetail>
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasources.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasources.min.css" />
+    </environment>
+    @if (isEmbed)
+    {
+        <style>
+            #server-app-container #menu-area {
+                display: none;
+            }
+
+            #server-app-container #content-area {
+                padding: 0px !important;
+            }
+        </style>
+    }
+}
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/view-linked-dashboards.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/view-linked-dashboards.min.js"></script>
+    </environment>
+    <script>
+        var dataSourceName = "@dataSourceName";
+        var createDatasourceIframeUrl = "@Url.Action("Connection", "DataSourceDesigner")";
+        var mergeDatasourceIframeUrl = "@Url.Action("MergeDataSource", "DataSourceDesigner")";
+        var viewLinkedDashboardsURL = "@Url.Action("GetLinkedDashboards", "Dashboards")";
+    </script>
+    <script type="text/x-jsrender" id="item-name-template">
+        <a class="item-name grid-content" title="{{:Name}}" data-toggle="tooltip" href="@Url.Action("Dashboards", "Dashboards")/{{:Id}}/{{:CategoryName}}/{{:Name}}" target="_blank">{{:Name}}</a>
+    </script>
+    <script type="text/x-jsrender" id="canread-template">
+        {{if CanRead}}
+        <div class="item-header">@T["Yes"]</div>
+        {{else }}
+        <div class="item-header">@T["No"]</div>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="itemname-header">
+        <div class="item-name">@T["Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="category-header">
+        <div class="item-header">@T["Category"]</div>
+    </script>
+    <script type="text/x-jsrender" id="owner-header">
+        <div class="item-header">@T["Owner"]</div>
+    </script>
+    <script type="text/x-jsrender" id="modifieddate-header">
+        <div class="item-header">@T["Last Modified"]</div>
+    </script>
+    <script type="text/x-jsrender" id="canread-header">
+        <div class="item-header">@T["CanAccess"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="options">
+        <div class="dropdown context-menu">
+            <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                <li class="menu-group">
+                    <a href="@Url.Action("Dashboards", "Dashboards")/{{:Id}}/{{:CategoryName}}/{{:Name}}" target="_blank" class="create-dashboard-using-datasource" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                        <i class="su su-open"><i class="su su-open path1"></i></i>
+                        <span class="menu-text">@T["Open"]</span>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li class="menu-group">
+                    <a href="javascript:void(0);" title="" class="item-info" id="item-info">
+                        <i class="su su-info"></i>
+                        <span>@T["Info"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+        GridLocalization();
+        var dashboards = @Html.Raw(Json.Serialize(Model));
+        $("#view_linked_dashboards").ejGrid({
+            dataSource: dashboards,
+            gridLines: ej.Grid.GridLines.None,
+            allowPaging: true,
+            allowSorting: true,
+            allowSearching: true,
+            allowSelection: true,
+            allowFiltering: true,
+            pageSettings: { pageSize: 20 },
+            filterSettings: { filterType: "menu" },
+            selectionSettings: { selectionMode: ["row"] },
+            enableRowHover: true,
+            enableAltRow: false,
+            rowDataBound: function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
+            dataBound: function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
+            actionBegin: "fnActionBegin",
+            actionComplete: "fnActionComplete",
+            columns: [
+                {
+                    field: "Name",
+                    templateID: "#item-name-template",
+                    allowSorting: true,
+                    headerText: "@T["Name"]",
+                    width: (window.innerWidth > 1200) ? 55 : 80,
+                    headerTemplateID: "#itemname-header",
+                    type: "string"
+                },
+                {
+                    field: "CategoryName",
+                    headerText: "@T["Category"]",
+                    width: (window.innerWidth > 1200) ? 70 : 50,
+                    headerTemplateID: "#category-header",
+                    type: "string"
+                },
+                {
+                    field: "CreatedByDisplayName",
+                    headerText: "@T["Owner"]",
+                    width: (window.innerWidth > 1200) ? 70 : 50,
+                    headerTemplateID: "#owner-header",
+                    type: "string"
+                },
+                {
+                    field: "ModifiedDate",
+                    headerText: "@T["Last Modified"]",
+                    headerTemplateID: "#modifieddate-header",
+                    type: "string",
+                    allowFiltering: false,
+                    width: (window.innerWidth > 1200) ? 70 : 50,
+                },
+                {
+                    field: "CanRead",
+                    templateID: "#canread-template",
+                    headerText: "@T["CanAccess"]",
+                    headerTemplateID: "#canread-header",
+                    width: (window.innerWidth > 1200) ? 70 : 50,
+                    allowFiltering: false
+                },
+                {
+                    template: true,
+                    templateID: "#options",
+                    width: (window.innerWidth > 1200) ? 15 : 25,
+                    allowSorting: false,
+                    allowFiltering: false
+                }
+            ]
+        });
+    });
+
+    </script>
+}
+
+@section MainSection{
+    <div id="item-grid-container" data-grid-name="linked-dashboards" class="bi-page-container grid-page-container">
+        <div class="bi-page-content col-md-12 no-padding">
+            <input type="hidden" class="page-name" data-content="@T["DATA SOURCES"]">
+            @if (!isMobile)
+            {
+                <div class="import-area col-xs-12 bi-page-header">
+                    <div class="bi-page-header-description col-xs-6 no-padding">
+                        <h1 class="h2 page-title">@T["DATA SOURCES"]</h1>
+                        <h5 class="page-description">@T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."]</h5>
+                    </div>
+                    <div class="col-xs-6 no-padding bi-header-btn">
+                        @if (itemPermissions[ItemType.Datasource])
+                        {
+                            <button type="button" id="create-datasource-connection" class="pull-right primary-button app-btn-primary">@T["Create Data Source"]</button>
+                        }
+                        <a href="@Url.Action("ConnectedAccounts", "User")" id="my-connection" class="link-button app-btn-link pull-right connected-accounts-button" title="">@T["My Connections"]</a>
+                        @if (itemPermissions[ItemType.Datasource])
+                        {
+                            <button type="button" id="merge-datasource" class="pull-right link-button app-btn-link">@T["Combine Data Source"]</button>
+                        }
+                    </div>
+                </div>
+                <div class="col-xs-12 bi-page-body">
+                    <div class="col-lg-12 col-md-12 co-sm-12 col-xs-12 dependent-dashboards-header no-padding">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
+                            <a class="back-button pull-left" href="@Url.Action("DataSources","DataSources")" data-toggle="tooltip" data-placement="top" title="@T["DataSources"]" data-container="body">
+                                <i class="su su-arrow-back back-navigaion img-size"> </i>
+                            </a>
+                            <hgroup>
+                                <h2 class="h2 page-title adjust-style-for-backarrow no-margin" id="display-name">@T["Dependent Dashboards"]</h2>
+                                <p>@dataSourceName</p>
+                            </hgroup>
+                        </div>
+                        <div id="search-area" class="pull-right">
+                            <input type="text" id="search-linked-dashboards" class="pull-left no-margin" placeholder="@T["Search dashboards"]" />
+                            <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-item pull-left no-margin" title="@T["Search dashboards"]"></span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding grid-container grid no-margin">
+                        <div id="view_linked_dashboards">
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    <div id="create-merge-datasource-popup" class="fluent-popup display-none">
+        <iframe id="create-merge-datasource-iframe" class="datasource-create-frame"></iframe>
+    </div>
+    @await Html.PartialAsync("../Items/_ItemInfo")
+}

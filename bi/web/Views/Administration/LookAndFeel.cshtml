@@ -1,0 +1,209 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    ViewBag.Title = T["Look and Feel"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var loginDisclaimerObject = string.Empty;
+    var themeMode = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var themeAppearanceUms = string.Empty;
+    var themeApplicationThemeUms = string.Empty;
+    var themeDashboardThemeUms = string.Empty;
+    var fontUms = string.Empty;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        themeAppearanceUms = ServerAppConfig.Theme.Appearance.Trim();
+        themeApplicationThemeUms = ServerAppConfig.Theme.ApplicationTheme.Trim();
+        themeDashboardThemeUms = ServerAppConfig.Theme.DashboardTheme.Trim();
+        fontUms = ServerAppConfig.FontFamily.Trim();
+
+    }
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.LookAndFeelSettings);
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/look-and-feel.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/look-and-feel.min.css" />
+    </environment>
+    @if (isSelfHosted)
+    {
+        @if (@themeMode == "light")
+        {
+            <environment include="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/dark.css">
+            </environment>
+            <environment exclude="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/dark.min.css">
+            </environment>
+            <link rel="prefetch" class="application-theme-ref" href="@ServerAppConfig.InternalAppIdpUrl/ums/theme/styles/application?theme=dark" />
+        }
+        else
+        {
+            <environment include="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/light.css">
+            </environment>
+            <environment exclude="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css">
+            </environment>
+            <link rel="prefetch" class="application-theme-ref" href="@ServerAppConfig.InternalAppIdpUrl/ums/theme/styles/application?theme=light" />
+        }
+    }
+    else
+    {
+        @if (@themeMode == "light")
+        {
+            <environment include="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/dark.css">
+                <link rel="prefetch" class="application-theme-ref"  href="@dashboardServerResourceUrl/cdn/css/theme/darkdefault.css" />
+            </environment>
+            <environment exclude="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/dark.min.css">
+                <link rel="prefetch" class="application-theme-ref" href="@dashboardServerResourceUrl/cdn/css/theme/darkdefault.min.css" />
+            </environment>
+        }
+        else
+        {
+            <environment include="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/light.css">
+                <link rel="prefetch" class="application-theme-ref"  href="@dashboardServerResourceUrl/cdn/css/theme/lightdefault.css" />
+            </environment>
+            <environment exclude="Development,CloudDevelopment">
+                <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css">
+                <link rel="prefetch" class="application-theme-ref"  href="@dashboardServerResourceUrl/cdn/css/theme/lightdefault.min.css" />
+            </environment>
+        }
+    }
+
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/look-and-feel.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/look-and-feel.min.js"></script>
+    </environment>
+    <script>
+        var updateCustomThemeSettingsUrl = "@Url.Action("UpdateLookAndFeelSettings", "Administration")";
+        var lookAndFeelSettingsUrl = "@Url.Action("LookAndFeel", "Administration")";
+        var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
+        var applicationThemeReferenceUrl = "@Url.Action("GetApplicationTheme", "FileDownload")";
+        var dashboardServerResourceUrl = "@dashboardServerResourceUrl";
+        var isDebug = @Json.Serialize(isDebug);
+        var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+        var InternalAppIdpUrl = @Html.Raw(Json.Serialize(ServerAppConfig.InternalAppIdpUrl));
+        var themeAppearanceUms = @Html.Raw(Json.Serialize(themeAppearanceUms));
+        var themeApplicationThemeUms = @Html.Raw(Json.Serialize(themeApplicationThemeUms));
+        var themeDashboardThemeUms = @Html.Raw(Json.Serialize(themeDashboardThemeUms));
+        var fontUms = @Html.Raw(Json.Serialize(fontUms));
+        var defaultFont = @Html.Raw(Json.Serialize(ServerAppConfig.DefaultFont));
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    @await Html.PartialAsync("_UploadApplicationTheme")
+    @await Html.PartialAsync("_UploadDashboardTheme")
+
+    <div id="look-and-feel-container" class="bi-page-container col-xs-12 @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+        <div id="organization-block" class="bi-page-content col-xs-12 no-padding">
+            <div class="col-md-12 import-area bi-page-header">
+                <hgroup class="bi-page-header-description">
+                    <h1 class="h2 page-title">@T["Look and Feel"]</h1>
+                    <h5 class="page-description">@T["Customize the look and feel of the application."]</h5>
+                </hgroup>
+            </div>
+            <div class="col-md-12 form-horizontal bi-page-body" autocomplete="off">
+                <div class="general-sub-section look-and-feel-settings-page-section no-padding">
+                    @if (ServerAppConfig.IsSelfHosted)
+                    {
+                        <div class="inherit-from-global-app-theme-div">
+                            @Html.CheckBox("inherit-from-global-app-theme", ViewBag.IsInheritFromGlobalLookAndFeelSettings, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="inherit-from-global-app-theme">
+                                <span>
+                                    @T["Inherit from Global Settings"]
+                                </span>
+                            </label>
+                            <div class="info-message">
+                                @T["Enabling this setting will cause the look and feel to be inherited from the UMS settings."]
+                            </div>
+                        </div>
+                    }
+                    @if (ServerAppConfig.IsSelfHosted)
+                    {
+                        <div class="col-lg-12 look-and-feel-section site-settings-page-section no-padding">
+                            @Html.Label("font-label", T["Fonts"].Value, new { @class = "app-textbox-label" })
+                            <div class="form-group">
+                                <div id="app-font-customize" class="no-padding app-font-customize">
+                                    @Html.DropDownList("application-font", ViewBag.CustomFontList as IEnumerable<SelectListItem>, new { id = "application-font", @class = "selectpicker form-control", data_live_search = "true", data_size = "5" })
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group appearance-div">
+                        @Html.Label("appearance", T["Theme Mode"].Value, new { @class = "app-textbox-label" })
+                        <div id="appearance-container">
+                            <div class="light-theme-required theme-mode" id="light">
+                                <input type="radio" id="light-theme-required" name="theme-required" class="css-radio" value="light" @(ViewBag.ThemeAppearance == "light" ? "checked" : string.Empty) />
+                                <label for="light-theme-required" class="app-textbox-label radio-btn-label notransition" id="label-light-theme-required">@T["Light"]</label>
+                            </div>
+                            <div class="dark-theme-required theme-mode" id="dark">
+                                <input type="radio" id="dark-theme-required" name="theme-required" class="css-radio" value="dark" @(ViewBag.ThemeAppearance == "dark" ? "checked" : string.Empty) />
+                                <label for="dark-theme-required" class="app-textbox-label radio-btn-label notransition" id="label-dark-theme-required">@T["Dark"]</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group app-theme-div">
+                        @Html.Label("application-theme", T["Custom Theme"].Value, new { @class = "app-textbox-label application-theme-label" })
+                        @if (!ServerAppConfig.IsSelfHosted)
+                        {
+                            <p class="manage-theme-box">
+                                <a href="javascript:void(0)" onclick="onUploadApplicationThemeDialogOpen()" id="woff-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
+                            </p>
+                        }
+                        <div class="col-lg-12 no-padding dropdown-look-and-feel">
+                            @Html.DropDownList("applicationTheme", ViewBag.ApplicationTheme as IEnumerable<SelectListItem>, new { id = "applicationTheme", @class = "selectpicker form-control", data_live_search = "true", data_size = "5" })
+                        </div>
+                        <p class="app-theme-info">@T["A custom theme can only be created for either a dark or light mode. A single custom theme will not work for both. Please choose a custom theme based on your current application mode. To reset the custom theme, please select the default value."]</p>
+                    </div>
+                    <div class="form-group dashboard-theme-div">
+                        @if (!ServerAppConfig.IsSelfHosted)
+                        {
+                            @Html.Label("dashboard-theme", T["Dashboard Theme"].Value, new { @class = "app-textbox-label dashboard-theme-label" })
+                            <p class="manage-theme-box">
+                                <a href="javascript:void(0)" onclick="onUploadDashboardThemeDialogOpen()" id="woff-upload-dashboard" title="@T["Upload the theme file here."]">@T["Manage"]</a>
+                            </p>
+                        }
+                        else
+                        {
+                            @Html.Label("dashboard-theme", T["Dashboard Theme"].Value, new { @class = "dashboard-theme-label app-textbox-label" })
+                        }
+
+                        <div class="col-lg-12 no-padding dropdown-look-and-feel-dashboard">
+                            @Html.DropDownList("dashboardTheme", ViewBag.DashboardTheme as IEnumerable<SelectListItem>, new { id = "dashboardTheme", @class = "selectpicker form-control", data_live_search = "true", data_size = "5" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bi-page-footer col-xs-12">
+                <div class="bi-page-actions col-lg-12 col-md-12 no-margin">
+                    <a href="@Url.Action("Index","Home")" class="secondary-button  app-btn-secondary pull-right" id="cancel-site-settings" title="">@T["Cancel"]</a>
+                    <button type="button" title="" id="update-look-and-feel-settings" name="update-look-and-feel" class="primary-button app-btn-primary pull-right">
+                        @T["Save"]
+                    </button>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+}

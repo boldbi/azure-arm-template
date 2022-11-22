@@ -1,0 +1,164 @@
+﻿@inject ServerPrincipal _identityResponse
+@{
+    Layout = null;
+    var userId = _identityResponse.User.UserId;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+
+    <script>
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var columns = @Html.Raw(Json.Serialize(ViewBag.columns));
+        var functionTypes = @Html.Raw(Json.Serialize(ViewBag.functionTypes));
+        var expressionList = @Html.Raw(Json.Serialize(ViewBag.ExpressionList));
+        var getDataSourceIdUrl = "@Url.Action("GetDataSourceId", "Scheduler")";
+        var saveCustomExpressionUrl = "@Url.Action("SaveCustomExpression", "Scheduler")";
+        var getExpressionDetailsByName = "@Url.Action("GetCustomExpressionDetailsByName", "Scheduler")";
+        var getExpressionDetailsByDatasourceId = "@Url.Action("GetCustomExpressionByDatasourceId", "Scheduler")";
+        var checkExpressionNameExists = "@Url.Action("CheckExpressionNameExists", "Scheduler")";
+        var DeleteExpressionUrl = "@Url.Action("DeleteCustomExpression", "Scheduler")";
+        var UpdateCustomExpression = "@Url.Action("UpdateCustomExpression", "Scheduler")";
+        var checkExpressionNameExistsWithExpressionId =
+            "@Url.Action("CheckExpressionNameExistsWithExpressionId", "Scheduler")";
+        var getCustomExpressionListUrl = "@Url.Action("getCustomExpressionList", "Scheduler")";
+        var getItemNamesUrl = "@Url.Action("GetColumnNames", "scheduler")";
+    </script>
+
+
+</head>
+<body>
+    <input type="hidden" value="@ViewBag.ItemId" id="itemid" />
+    <input type="hidden" value="@ViewBag.WidgetName" id="widgetname" />
+    <input type="hidden" value="@userId" id="userid" />
+    <input type="hidden" value="@ViewBag.DatasourceId" id="datasourceid" />
+    <input type="hidden" value="" id="expressionid" />
+    <input type="hidden" value="" id="widgetid" />
+    <input type="hidden" value="" id="columninfo" />
+    <input type="hidden" value="" id="expression-name" />
+    <div class="custom-expression-editor-container col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="modal-header no-margin col-sm-12">
+            <div class="col-sm-10 col-xs-10 no-padding pull-left nav-top"><span title="[[[Schedule]]]" class="su su-nav-schedule col-lg-1 col-xs-1 col-sm-1 col-md-1 header-icon"></span><span class="popup-title schedule-popup-title ellipsis col-lg-9 col-xs-9 col-sm-9 col-md-9 no-padding">@ViewBag.title</span></div>
+            <div class="col-sm-2 col-xs-2 title no-padding" id="close-icon">
+                <a href="javascript:void(0);" class="popup-close" title="[[[Close]]]"><span class="su su-close pull-right"></span></a>
+            </div>
+            <div id="windowCaption" class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px; padding-top: 3px !important;">
+                [[[Manage custom expression columns]]]
+            </div>
+        </div>
+        <div class="expressions-parent-container col-xs-12 no-padding">
+            <div class="expressions-child-container col-xs-12 no-padding">
+                <div class="custom-expressions-list col-sm-3 col-xs-3 no-padding" style="width: 200px; height: 480px; border: 1px solid #ccc;">
+                    <div id="custom-expression-list-title">[[[Custom expressions]]]</div>
+                    <ul id="list-items" class="no-padding"></ul>
+                    <button id="add-new-expression" class="btn col-sm-3">
+                        <span class="su-add"></span>
+                        <span class="add-new-expression">[[[Add new expression]]]</span>
+                    </button>
+                </div>
+                <div class="expression-section col-sm-9 col-xs-9 col-lg-7 no-padding">
+                    <div class="col-sm-9 col-xs-9 col-lg-7 no-padding">
+                        <label id="expression-name-label">[[[Name]]]</label>
+                    </div>
+                    <div class="expression-name-value col-sm-9 col-xs-9 col-lg-7">
+                        <input type="text" id="expression-name-value" class="form-control col-sm-9 col-xs-9 col-lg-7" />
+                        <span id="expression-name-validation"></span>
+                    </div>
+                    <div class="col-sm-9 col-xs-9 col-lg-7 no-padding">
+                        <label id="expression-label">[[[Expression]]]</label>
+                    </div>
+                    <div class="col-sm-9 col-xs-9 col-lg-7" id="expression-value-container">
+                        <textarea id="rte-post" class="form-control comment-area" maxlength="4000"></textarea>
+                    </div>
+                </div>
+                <div class="col-sm-9 col-xs-9 col-lg-7 save-expression">
+                    <span id="expression-text-validation"></span>
+                    <button id="save-expression" class="btn">
+                        <span class="button-text">[[[Save]]]</span>
+                    </button>
+                </div>
+                <div class="function-column-container col-sm-9 col-xs-9 col-lg-7">
+                    <div id="function-column-container">
+                        <div class="description col-sm-3 col-xs-3">
+                            [[[Select functions and column settings to form custom expressions.]]]
+                            <div class="col-sm-12 col-xs-12" id="function-syntax"></div>
+                            <div class="col-sm-12 col-xs-12" id="function-description"></div>
+                        </div>
+                        <div id="function-dropdown" class="col-sm-3 col-xs-3">
+                            <div class="col-sm-12 col-xs-12"><span class="function-title">[[[Functions]]]</span></div>
+                            <div class="function-dropdown col-sm-12 col-xs-12">
+                                <select id="selected_function" data-live-search="true" title='[[[All]]]' name="functionId" class="selectpicker col-sm-12 col-xs-12" data-size="5">
+                                    <option value="">[[[All]]]</option>
+                                    <option value="">[[[Numbers]]]</option>
+                                    <option value="">[[[Aggregation]]]</option>
+                                    <option value="">[[[Conditional]]]</option>
+                                    <option value="">[[[Logical]]]</option>
+                                    <option value="">[[[Date]]]</option>
+                                    <option value="">[[[String]]]</option>
+                                    <option value="">[[[Filter]]]</option>
+                                </select>
+                            </div>
+                            <div class="function-dropdown-values col-sm-12 col-xs-12">
+                                <select id="selected-function-value" data-live-search="true" title='[[[All]]]' name="functionId" class="selectpicker col-sm-12 col-xs-12" data-size="5"></select>
+                                <span class="su-search"></span>
+                            </div>
+                        </div>
+                        <div id="column-dropdown" class="col-sm-3 col-xs-3">
+                            <div id="column-title" class="col-sm-12 col-xs-12"><span class="column-title">[[[Column Settings]]]</span></div>
+                            <div class="column-dropdown col-sm-12 col-xs-12">
+                                <select id="selected_column" data-live-search="true" name="columnId" class="selectpicker col-sm-12 col-xs-12" data-size="5">
+                                    <option value="">[[[All]]]</option>
+                                    <option value="">[[[Number]]]</option>
+                                    <option value="">[[[Text]]]</option>
+                                    <option value="">[[[Date]]]</option>
+                                </select>
+                            </div>
+                            <div class="column-dropdown-values col-sm-12 col-xs-12">
+                                <select id="selected-column-value" data-live-search="true" title='[[[All]]]' name="columnId" class="selectpicker col-sm-12 col-xs-12" data-size="5"></select>
+                                <span class="su-search"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer col-xs-12">
+            <div class="col-sm-12 col-xs-12 no-margin" id="next-container">
+                <input id="back-button" type="button" title="[[[Back]]]" value="[[[Back]]]" tabindex="6" class="secondary-button app-btn-secondary pull-left button-left">
+            </div>
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+
+
+</html>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/customexpressioneditor.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/customexpressioneditor.min.js"></script>
+</environment>
+
+<div id="messageBox">
+    <div class="message-header"></div>
+    <div class="message-box-close"></div>
+    <div class="message-content text-center"></div>
+    <div class="message-box-btn-holder"></div>
+</div>
+
+
+
+

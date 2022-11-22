@@ -1,0 +1,462 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var licenseSettings = globalAppSettings.GetLicenseSettings(_clientDateTimeInfo);
+    var isadditionalStoragePresent = licenseSettings.Addons.Where(x => x.PlanId == GlobalAppSettings.GetDescription(AddOnProducts.AdditionalDataStorage)).FirstOrDefault();
+    var quantity = isadditionalStoragePresent != null ? isadditionalStoragePresent.Quantity.ToString() : string.Empty;
+    var tenantStatus = licenseSettings.TenantStatus;
+    var PlanDetails = ViewData["PlanDetails"] as Dictionary<string, string>;
+    var isCardExist = ViewBag.IsCardExist;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<div id="stripePublicKey" style="display:none">
+    @ServerAppConfig.AppSettings.Subscription.StripeKey
+</div>
+<div id="subscription-plan-container" class="admin-page-container">
+    <div id="subscription-plan-block" class="col-xs-12 no-padding">
+        <div class="col-md-12 import-area admin-page-header">
+            <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                <h1 class="h2 page-title">[[[SUBSCRIPTION]]]</h1>
+                <h5 class="page-description">[[[Manage the subscription and plan for the @GlobalAppSettings.BrandingDisplayName]]]</h5>
+            </hgroup>
+        </div>
+
+        @*@if (!licenseSettings.IsKcBenefit && GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier)
+            {
+                <div class="admin-page-body free-plan-container">
+                    <h3 class="title free-plan-title col-xs-12">
+                        Get Free Subscription
+                    </h3>
+                    <p>
+                        Are you a customer of <a class="app-hyperlink" href="https://syncfusion.com" target="_blank">Syncfusion.com</a> with a <a class="app-hyperlink" href="https://syncfusion.com/account/my-benefits/dashboard-cloud" target="_blank">valid global license</a>?
+                    </p>
+                    <p>
+                        Get <b>25 users</b> plus <b>25 GB</b> of data storage, until your Syncfusion.com global license period expires.
+                    </p>
+
+                    <button type="button" title="" id="link-kc-offer" name="ChangePlanSettings" onclick="openKcUserOfferPartial();" class="primary-button">
+                        [[[Connect Now]]]
+                    </button>
+                </div>
+            }*@
+        @if (licenseSettings.IsKcBenefit)
+        {
+            <div class="admin-page-body free-plan-container">
+                <p class="title free-plan-active col-xs-12 no-padding">
+                    <img class="success-image" src="@dashboardServerResourceUrl/cdn/images/success.png" />
+                    [[[Your free subscription through Syncfusion.com account is active!]]]
+                </p>
+                <span class="benefit-label"><b>@PlanDetails["Users"]</b> [[[Users]]]</span>
+                <span class="vertical-divider"></span>
+                <span class="benefit-label"><b>@(PlanDetails["Storage"])[[[GB]]]</b> [[[Storage]]]</span>
+                <span class="col-xs-12 horizontal-divider"></span>
+                <div class="col-xs-12 no-padding">
+                    @if (isadditionalStoragePresent == null)
+                    {
+                        <div class="buy-additional-storage no-padding"><span id="add-my-storage" onclick="openBuyAdditionalStoragePartial();">[[[BUY ADDITIONAL STORAGE]]]</span></div>
+                    }
+                    else
+                    {
+                        <div class="purchased-label">[[[Purchased]]]</div>
+
+                        <span class="storage-quantity"><b>@quantity GB</b> [[[Storage]]]</span>
+
+                        <span class="col-xs-12 horizontal-divider"></span>
+
+                        <div class="buy-additional-storage no-padding"><span id="upgrade-my-storage" onclick="openBuyAdditionalStoragePartial();">[[[UPGRADE MY STORAGE]]]</span></div>
+                    }
+
+                </div>
+            </div>
+        }
+
+        <form id="subscription-plan-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+            <div id="issubscriptioncancel" style="display:none">@ViewBag.IsSubscriptionCancel</div>
+            <div id="currentPlanId" style="display: none">@Model.PlanId</div>
+            <div class="admin-page-body">
+                <h3 class="title col-xs-12 sub-section-heading">[[[Plan Details]]]</h3>
+                <div class="col-xs-6 no-margin no-padding" id="plan-details-contianer">
+                    <table class="table table-section">
+                        <tr>
+                            <th>[[[Particulars]]]</th>
+                            <th>[[[Your Quota]]]</th>
+                            <th>[[[Used]]]</th>
+                            <th>[[[Remaining]]]</th>
+                        </tr>
+                        <tr>
+                            <td>[[[Users]]]</td>
+                            <td>@PlanDetails["Users"]</td>
+                            <td>@PlanDetails["UsedUsers"]</td>
+                            <td>@PlanDetails["RemainingUsers"]</td>
+                        </tr>
+                        <tr>
+                            <td>[[[Dashboards]]]</td>
+                            <td>@PlanDetails["Dashboards"]</td>
+                            <td>@PlanDetails["UsedDashboards"]</td>
+                            <td>@PlanDetails["RemainingDashboard"]</td>
+                        </tr>
+                        @if (GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier)
+                        {
+                            <tr>
+                                <td>[[[Creators]]]</td>
+                                <td>@PlanDetails["Creators"]</td>
+                                <td>@PlanDetails["UsedCreators"]</td>
+                                <td>@PlanDetails["RemainingCreators"]</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>[[[Storage]]]</td>
+                            <td>@(PlanDetails["Storage"])[[[GB]]]</td>
+                            <td>@(PlanDetails["UsedStorage"])[[[GB]]]</td>
+                            <td @(PlanDetails["RemainingStorage"].ToString().ToLower() == "exceeded" ? "style=color:red" : string.Empty)>@(PlanDetails["RemainingStorage"].ToString().ToLower() == "exceeded" ? "[[[Exceeded]]]" : PlanDetails["RemainingStorage"] + "[[[GB]]]")</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="admin-page-actions col-lg-12 col-md-12 no-margin no-padding">
+                    @if (tenantStatus != TenantStatus.MarkedForSuspension)
+                    {
+                        if (!licenseSettings.IsKcBenefit && !ServerAppConfig.IsCustomPlan((SaaSPlan)(int.Parse(Model.PlanId))) && !Model.IsVsDevSubscription)
+                        {
+                            <button type="button" title="" id="change-plan-settings" name="ChangePlanSettings" onclick="openPlanPickupPartial();" class="primary-button app-btn-primary pull-right">
+                                [[[Change Plan]]]
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert-note">[[[(Note: Subscription plan cannot be changed due to failed payments]]]. <a href='@Url.Action("GetCardDetail", "Payment")' id=''>[[[Update your payment details.]]]</a>)</div>
+                    }
+                </div>
+            </div>
+            <div class="col-xs-12 admin-page-body">
+                <h3 class="title col-xs-12 sub-section-heading">[[[Subscription Information]]]</h3>
+                <div class="col-xs-6 no-margin no-padding" id="subscription-information">
+                    <table class="table table-section">
+                        <tr>
+                            <td>[[[Price]]]</td>
+                            <td>
+                                @{
+                                    if (tenantStatus == TenantStatus.Trial && Model.IsVsDevSubscription)
+                                    {
+                                        <span>[[[Free until %0. |||| @_globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate)]]]</span>
+                                        <span> [[[You have a free 6-month Bold BI subscription. This is a value of $@(Model.Price * 6). You will not be billed after this time unless you add your credit card information.]]]</span>
+                                    }
+                                    else if (licenseSettings.IsKcBenefit || licenseSettings.PlanId == (int)SaaSPlan.SingleUserPlan)
+                                    {
+                                        <span>[[[Free subscription]]]</span>
+                                    }
+                                    else
+                                    {
+                                        if (@Model.Status.ToLower() == "trialing")
+                                        {
+                                            <span>[[[Free until @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate).]]]</span>
+                                            if (!ViewBag.IsSubscriptionCancel)
+                                            {
+                                                if (Model.IsDynamicPricing)
+                                                {
+                                                    <span> [[[Will be charged $@Model.Price on the month @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate).]]]</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>[[[Will be charged $@Model.Price  from @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate) every @Model.Interval.]]]</span>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!Model.IsDynamicPricing)
+                                            {
+                                                if (Model.Interval.ToLower() == "month" || Model.Interval.ToLower() == "year")
+                                                {
+                                                    <span>$@Model.Price / @Model.Interval</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>$@Model.Price every @Model.Interval</span>
+                                                }
+                                            }
+                                            if (!ViewBag.IsSubscriptionCancel)
+                                            {
+                                                if (Model.IsDynamicPricing)
+                                                {
+                                                    <span>Will be charged $@Model.Price on the month @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>[[[Will be charged next on @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate) and after every @Model.Interval.]]]</span>
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>[[[Created]]]</td>
+                            <td>@globalAppSettings.GetDateFormat(Model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td>[[[Billing cycle]]]</td>
+                            @if (licenseSettings.IsKcBenefit || (licenseSettings.PlanId == (int)SaaSPlan.SingleUserPlan && !isCardExist) || (ViewBag.IsSubscriptionCancel && !isCardExist))
+                            {
+                                <td>-</td>
+                            }
+                            else
+                            {
+                                <td>@globalAppSettings.GetDateFormat(Model.BillingCycle.StartDate) to @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>[[[Last payment]]]</td>
+                            @if (Model.LastPaymentDate != null && !licenseSettings.IsKcBenefit && isCardExist)
+                            {
+                                <td>@globalAppSettings.GetDateFormat(Model.LastPaymentDate)</td>
+                            }
+                            else
+                            {
+                                <td>-</td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+                <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                    <button type="button" title="" id="change-subscription-settings" name="ChangeSubscriptionSettings" onclick="openSubscriptionSettings();" class="secondary-button app-btn-secondary cancel-subscription-button pull-right disable-subscription">
+                        [[[Cancel my subscription]]]
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="subscription-settings-container">
+    <div id="cancel-subscription-container" class="admin-page-container hide-block">
+        <div id="cancel-subscription-block" class="col-xs-12 no-padding">
+            <div class="col-md-12 import-area admin-page-header">
+                <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                    <h1 class="h2 page-title">[[[CANCEL MY SUBSCRIPTION]]]</h1>
+                    <h5 class="page-description">[[[Cancel your subscription to @GlobalAppSettings.BrandingDisplayName]]]</h5>
+                </hgroup>
+            </div>
+            <form id="cancel-subscription-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+                <div class="admin-page-body subscription-content">
+                    <span>[[[Please click on the cancel subscription button below to end your subscription.]]]</span>
+                    <span>[[[Your subscription will terminate at the end of this billing period. You will continue to have access until your subscription end date – @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate).]]]</span>
+                    <span>[[[You can reactivate your account before @globalAppSettings.GetDateFormat(Model.BillingCycle.EndDate)]]]. <b>[[[After this date your account and all data stored under it will be completely deleted from our system.]]]</b></span>
+                    <span>[[[We are sad to see you go.  Please consider us for your future needs. We appreciate your business.]]]</span>
+                    <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                        <div id="cancelsubscription-group-button">
+                            <div class="col-lg-12 col-md-12 no-margin">
+                                @Html.CheckBox("deactivesubscription", new { @class = "material-checkbox" })
+                                @Html.Hidden("deactivesubscription")
+                                @Html.Label("deactivesubscription", "[[[I choose to cancel my subscription]]]", new { @class = "pull-right toggle-space" })
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 no-margin">
+                            <button type="button" title="" name="ChangeSubscriptionSettings" onclick="redirectToSubscriptionPlan();" class="primary-button app-btn-primary pull-right">
+                                [[[Go back]]]
+                            </button>
+                            <button type="button" title="" id="enable-cancelsubscription" onclick="cancelSubscriptionFeedback();" class="secondary-button app-btn-secondary cancel-subscription-button pull-right disable-subscription">
+                                [[[Cancel my subscription]]]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="reactivate-subscription-container" class="admin-page-container hide-block">
+        <div id="reactivate-subscription-block" class="col-xs-12 no-padding">
+            <div class="col-md-12 import-area admin-page-header">
+                <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                    <h1 class="h2 page-title">[[[REACTIVATE MY SUBSCRIPTION]]]</h1>
+                    <h5 class="page-description">[[[Continue the subscription for @GlobalAppSettings.BrandingDisplayName]]]</h5>
+                </hgroup>
+            </div>
+            <form id="reactivate-subscription-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+                <div class="admin-page-body subscription-content">
+                    <span>[[[We are happy to see you continue using @GlobalAppSettings.BrandingDisplayName.]]]</span>
+                    @if (isCardExist)
+                    {
+                        <span>[[[Your billing period and billed amount is not affected by this action as you have already paid for the current billing cycle. Click <b>Reactivate my subscription</b> to continue using dashboards.]]] </span>
+                    }
+                    else
+                    {
+                        <span>[[[Your billing period and billed amount is not affected by this action if you have already paid for the current billing cycle. Click <b>Reactivate my subscription</b> to continue using dashboards.]]] </span>
+                    }
+                    <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                        <button type="button" title="" onclick="redirectToSubscriptionPlan();" class="secondary-button app-btn-secondary pull-right">
+                            [[[Go back]]]
+                        </button>
+                        <button type="button" title="" onclick="activateSubscription();" class="primary-button app-btn-primary reactivate-subscription-button pull-right">
+                            [[[Reactivate my subscription]]]
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@*<div id="kc-link-popup" class="fluent-popup custom-bootstrap-styles custom-server-style">
+        <div class="fluent-popup-header">
+        <h4 class="popup-title">
+            <button id="close-kclink-popup" type="button" title="[[[Close]]]" class="close popup-close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </h4>
+        </div>
+        <div class="fluent-popup-body">
+            <div class="apply-coupon-section col-xs-12 no-padding">
+                <img class="syncfusion-logo" src="@(globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/footer_logo.svg")" />
+                <label class="heading col-xs-12">[[[Connect your Syncfusion account]]]</label>
+                <div class="fluent-popup-content">
+                    <p>
+                        [[[Get your code ]]]<a class="app-hyperlink" href="https://www.syncfusion.com/support/directtrac/incidents" target="_blank">[[[here]]]</a>.
+                    </p>
+                </div>
+                <div class="kc-coupon-code">
+                    <input class="form-control" maxlength="255" id="kc-coupon-code" placeholder="[[[Enter code here]]]" />
+                </div>
+            </div>
+            <div class="coupon-error-section col-xs-12 no-padding" style="display:none">
+                <h1 class="no-margin">[[[Oops!]]]</h1>
+                <p class="coupon-error-message">[[[Coupon code is not valid.]]]</p>
+            </div>
+        </div>
+        <div class="fluent-popup-footer">
+            <div class="col-lg-12 col-md-12">
+                <button type="button" id="kclink-submit-button" class="primary-button apply-coupon-section" disabled="disabled">[[[Connect Now]]]</button>
+                <button type="button" id="kclink-retry-button" class="primary-button coupon-error-section" style="display:none">[[[Try with another coupon]]]</button>
+            </div>
+        </div>
+    </div>*@
+
+<div id="buy-additional-storage-popup" class="fluent-popup custom-bootstrap-styles custom-server-style">
+    <div class="fluent-popup-header">
+        <h4 class="popup-title">
+            <span id="additional-storage-dialog-header">[[[Buy additional storage]]]</span>
+            <button id="storage-close-popup" type="button" title="[[[Close]]]" class="close popup-close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </h4>
+    </div>
+    <div class="fluent-popup-body buy-additional-storage-popup-body" ng-app="serverApp" ng-controller="additionalStorageController">
+        <div id="storage-selection-container">
+            <div class="storage-selection-section">
+                <span>
+                    <label id="storage-selection-label" class="popup-label">[[[Storage]]]</label>
+                </span>
+                <div class="storage-numeric-selection">
+                    <input type="text" class="form-control" id="numeric" ng-model="storageSelectionSize" ng-init="storageSelectionSize">
+                </div>
+                <span class="units-display">GB</span>
+            </div>
+            <div class="storage-summary-section">
+                <span>
+                    <label id="storage-summary-label" class="popup-label">[[[Summary]]]</label>
+                </span>
+                <div class="storage-summary-information">
+                    <table class="table table-section">
+                        <tr>
+                            <td>
+                                [[[Storage]]]
+                            </td>
+                            <td>
+                                <b>{{storageSelectionSize}}</b> x $10
+                            </td>
+                            <td>
+                                <b>${{storageSelectionSize*10}} / Mo</b>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>
+                                    [[[Total]]]
+                                </span>
+                            </td>
+                            <td></td>
+                            <td>${{storageSelectionSize*10}} / Mo</td>
+                        </tr>
+                    </table>
+                </div>
+                <input id="additional-storage-quantity" type="hidden" value="{{storageSelectionSize}}" />
+            </div>
+        </div>
+
+        <div id="billing-address-container" style="display: none;">
+            <form class="card-form no-padding col-xs-12" id="card-form-id">
+                <span>
+                    <label id="billing-address-label" class="popup-label">[[[Billing Address]]]</label>
+                </span>
+                <div class="col-xs-12 col-md-12 no-padding">
+                    <div class="col-xs-5 col-md-5 no-padding" id="validation-detail">
+                        <span class="validation-error text"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="card-payment-container" style="display: none;">
+            <form onsubmit="validateForm(event)">
+                <div id="upgradecard-details">
+                    @await Html.PartialAsync("../Payment/_CardInputElements")
+                </div>
+                <span class="col-xs-12 horizontal-divider"></span>
+                <div class="payment-summary">
+                    <label class="storage-payment-label">[[[Total Payment]]]</label>
+                    <span class="storage-total-price">${{storageSelectionSize*10}} / Mo</span>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <div id="additional-storage-button" class="fluent-popup-footer">
+        <div id="button-container" class="col-lg-12 col-md-12">
+            <button type="button" id="storage-close-popup-button" class="app-button app-secondary-button app-btn-secondary pull-right">[[[Close]]]</button>
+            @if (isCardExist)
+            {
+                <button type="button" id="storage-pay-now-button" class="app-button app-primary-button app-btn-primary pull-right">[[[Pay Now]]]</button>
+            }
+            else
+            {
+                <button type="button" id="billing-address-proceed-button" class="app-button app-primary-button app-btn-primary pull-right">[[[Next]]]</button>
+                <button type="button" id="card-detail-proceed-button" class="app-button app-primary-button app-btn-primary pull-right" style="display: none;">[[[Next]]]</button>
+                <button type="button" id="card-pay-now-button" class="app-button app-primary-button app-btn-primary pull-right" style="display: none;">[[[Pay Now]]]</button>
+                <button type="button" id="storage-back-popup-button" class="app-button app-secondary-button app-btn-secondary pull-left" style="display: none;">[[[Back]]]</button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    var applyKcCouponUrl = "@Url.Action("ApplyKcOffer", "Payment")";
+    var createSubscriptionCardUrl = "@Url.Action("AddPaymentDetail", "Payment")";
+    var updateSubscriptionUrl = "@Url.Action("UpdateAddonInStripe", "Payment")";
+    var isCardExist = "@isCardExist";
+    var quantity = "@quantity";
+    $(document).ready(function () {
+        $("#issubscriptioncancel").text('@ViewBag.IsSubscriptionCancel');
+        validateSubscriptionStatus();
+        if ('@Model.Status.ToLower()' != "trialing") {
+            $("#subscription-information table").removeClass("table-section");
+            $("#subscription-information table").addClass("active-subscription-table-section");
+            $("#plan-details-contianer table").removeClass("table-section");
+            $("#plan-details-contianer table").addClass("active-subscription-table-section");
+        }
+
+        $("#kc-link-popup").ejDialog({
+            height: 'auto',
+            width: '450px',
+            showOnInit: false,
+            allowDraggable: false,
+            enableResize: false,
+            showHeader: false,
+            enableModal: true,
+            closeOnEscape: false,
+            close: "onKcDialogClose",
+            open: "onKcDialogOpen"
+        });
+
+        $("#kc-link-popup_wrapper").ejWaitingPopup();
+        var kcLinkWaitingPopupTemplateId = createLoader("#kc-link-popup_wrapper");
+        $("#kc-link-popup_wrapper").ejWaitingPopup({ template: $("#" + kcLinkWaitingPopupTemplateId) });
+    });
+</script>

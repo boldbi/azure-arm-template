@@ -1,0 +1,43 @@
+﻿@{
+    var product = ViewBag.Product != null ? (TenantType)ViewBag.Product : TenantType.BoldBI;
+    var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
+    string title;
+    string description;
+}
+
+
+@if (product == TenantType.BoldBIOnPremise)
+{
+    title = string.Format(T["Try {0}"].Value, "Bold BI Enterprise");
+    description = T["Easily deploy data visualization tool to on-premises or private cloud. Data in your datacenter. Custom branding. Office 365 integration. Try now."].Value;
+
+    <meta property="og:title" content="@title" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:image" content="@CloudAppConfig.SyncfusionLoginLogoUrl" />
+    <meta property="og:url" content="@requestUrl.AbsoluteUri" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="@CloudAppConfig.TenantAppURL" />
+    <meta property="twitter:title" content="@title" />
+    <meta property="twitter:url" content="@requestUrl.AbsoluteUri" />
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:description" content="@description" />
+    <meta property="twitter:image" content="@CloudAppConfig.SyncfusionLoginLogoUrl" />
+}
+else if (product == TenantType.BoldReportsOnPremise)
+{
+    title = string.Format(T["Try {0} On-Premise"].Value, "Bold Report");
+    description = string.Format(T["Create, edit, store, share, and collaborate interactive {0} with {1} management system. Free sign up for {2} -day trial. Try it now."].Value, "reports", "enterprise report", CloudAppConfig.TrailPeriod);
+    var tenantLogo = CloudAppConfig.TenantLogoUrl(string.Empty, string.Empty, TenantType.BoldReportsOnPremise);
+
+    <meta property="og:title" content="@title" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:image" content="@tenantLogo" />
+    <meta property="og:url" content="@requestUrl.AbsoluteUri" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="@CloudAppConfig.TenantAppURL" />
+    <meta property="twitter:title" content="@title" />
+    <meta property="twitter:url" content="@requestUrl.AbsoluteUri" />
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:description" content="@description" />
+    <meta property="twitter:image" content="@tenantLogo" />
+}

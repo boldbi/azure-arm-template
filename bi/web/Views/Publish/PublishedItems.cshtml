@@ -1,0 +1,158 @@
+﻿@{ var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Published Resources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
+}
+@section MainSection{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/published-items.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/published-items.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.min.js"></script>
+    </environment>
+    <script>
+        var publishedItemDetails = @Html.Raw(Json.Serialize(ViewBag.PublishedItemDetails));
+        var synchronizeSitesUrl = { "dashboard": "@Url.Action("SynchronizePublishedItem", "Publish")", "datasource": "@Url.Action("SynchronizeDataSourcePublishedItem", "Publish")" };
+        var removePublishedItemUrl = "@Url.Action("RemovePublishedItem", "Publish")";
+        var synchronizePublishedBulkItems = "@Url.Action("SynchronizeBulkItem", "Publish")";
+    </script>
+
+    <div id="base-container" class="col-xs-12 bi-page-container grid-page-container">
+        <div class="bi-page-content col-md-12 no-padding">
+            <div class="bi-page-header col-md-12">
+                <div id="user-title" class="bi-page-header-description no-padding">
+                    <h1 class="h2 page-title">@T["PUBLISHED RESOURCES"]</h1>
+                    <h5 class="page-description">@T["Manage the resources that are published to other internal/external sites."]</h5>
+                </div>
+            </div>
+            <div id="user-list-container" class="list col-xs-12 bi-page-body">
+                <div id="search-area" class="pull-right">
+                    <input type="text" class="pull-left" id="search-published-items" placeholder="@T["Search resources"]" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                </div>
+                <div class="col-xs-12 no-padding ">
+                    <div class="control-section">
+                        <div class="content-wrapper">
+                            <script type="text/x-jsrender" id="options">
+                                <div class="dropdown context-menu">
+                                    <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                                        <span class="su su-options"> </span>
+                                    </span>
+                                    <ul class="dropdown-menu" role="menu">
+                                        {{if PublishJobHistory[0].Status == "Failed" || PublishJobHistory[0].Status == "Success"}}
+                                        <li class="menu-group">
+                                            <a href="javascript:void(0);" title="@T["Synchronize"]" onclick="onConfirmSynchronizeDialog()">
+                                                <i class="su su-synchronize"></i>
+                                                <span class="menu-text">@T["Synchronize"]</span>
+                                            </a>
+                                        </li>
+                                        {{/if}}
+                                        <li class="menu-group">
+                                            <a href="javascript:void(0);" title="@T["Info"]" onclick="openPublishInfo()">
+                                                <i class="su su-info"></i>
+                                                <span class="menu-text">@T["Info"]</span>
+                                            </a>
+                                        </li>
+                                        <li class="menu-group">
+                                            <a href="javascript:void(0);" title="@T["Publish History"]" onclick="publishHistoryDialog()">
+                                                <i class="su su-versions"></i>
+                                                <span class="menu-text">@T["Publish History"]</span>
+                                            </a>
+                                        </li>
+                                        <li role="separator" class="divider"></li>
+                                        <li class="menu-group">
+                                            <a href="javascript:void(0);" title="@T["Remove"]" onclick="showRemoveConfirmation()">
+                                                <i class="su su-delete"></i>
+                                                <span class="menu-text">@T["Remove"]</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </script>
+                            <script type="text/x-jsrender" id="dashboard-template">
+                                {{if ItemType == "Dashboard"}}
+                                <div class="item-dashboard grid-content" title="{{:Name}}" data-toggle="tooltip" data-placement="top">
+                                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:Name}}" target="_blank">{{:Name}}</a></span>
+                                </div>
+                                {{else}}
+                                <div class="item-dashboard grid-content" title="{{:Name}}" data-toggle="tooltip" data-placement="top">
+                                    <span>{{:Name}}</span>
+                                </div>
+                                {{/if}}
+                            </script>
+                            <script type="text/x-jsrender" id="site-name-template">
+                                <div class="item-dashboard grid-content" title="{{:SiteURL}}" data-toggle="tooltip" data-placement="top">
+                                    <span>{{:TenantName}}</span>
+                                </div>
+                            </script>
+                            <script type="text/x-jsrender" id="status-template">
+                                {{if PublishJobHistory[0].Status == "Started"}}
+                                <div class="item-dashboard grid-content" title="@T["Started"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["Started"]</span>
+                                </div>
+                                {{else PublishJobHistory[0].Status == "InProgress"}}
+                                <div class="item-dashboard grid-content" title="@T["In Progress"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["In Progress"]</span>
+                                </div>
+                                {{else PublishJobHistory[0].Status == "Success"}}
+                                <div class="item-dashboard grid-content" title="@T["Success"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["Success"]</span>
+                                </div>
+                                {{else}}
+                                <div class="item-dashboard grid-content" title="@T["Failed"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["Failed"]</span>
+                                </div>
+                                {{/if}}          
+                            </script>
+                            <script type="text/x-jsrender" id="itemType-template">
+                                 {{if ItemType == "Dashboard"}}
+                                     <div class="item-dashboard grid-content" title="@T["Dashboard"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["Dashboard"]</span>
+                                    </div>
+                                {{else}}
+                                    <div class="item-dashboard grid-content" title="@T["Datasource"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["Data source"]</span>
+                                    </div>
+                                 {{/if}}
+                            </script>
+
+                            <script id="grouping-synchronize-template" type="text/x-jsrender">
+                                {{:key}}
+                                <button class="btn display-none synchronize-button" onclick="onConfirmSynchronizeAllDialog(event)"><i class="su su-synchronize synchronize-icon-container"></i>@T["Synchronize"]</button>
+                            </script>
+                            <div id="PublishItemGrid"></div>
+                            @await Html.PartialAsync("_PublishHistory")
+                            @await Html.PartialAsync("_PublishInfo")
+                            <div id="publish-remove-container" class="display-none">
+                                <div class="col-xs-12 modal-header">
+                                    <div class="col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding">
+                                        <span class="header-icon col-xs-1 no-padding"><i class="su su-delete"></i></span>
+                                        <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding" data-toggle="tooltip" data-placement="bottom" data-container="body"><b>@T["Remove Published Dashboard"]</b></span>
+                                    </div>
+                                    <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1 no-padding">
+                                        <a href="javascript:void(0);" title="@T["Close"]" class="popup-close pull-right" onclick="hideRemoveConfirmation()"><span class="su su-close"></span></a>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 modal-body">
+                                    <p>
+                                         @T["Are you sure you want to remove the published dashboard?"]<br/><br/>
+                                        <b>@T["Note:"]</b> 
+                                        @T["Removing the published dashboard does not remove the dashboard in the published site."]
+                                    </p>
+                                </div>
+                                <div class="col-xs-12 modal-footer">
+                                    <input type="button" class="app-button app-secondary-button app-btn-secondary pull-right popup-close" value="@T["No"]" onclick="hideRemoveConfirmation()" tabindex="-1" />
+                                    <input type="button" class="app-button app-critical-action-button app-btn-danger pull-right popup-close" value="@T["Yes"]" onclick="removePublishedItem()" tabindex="-1" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+}
