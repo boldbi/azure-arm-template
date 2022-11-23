@@ -81,7 +81,7 @@ $(document).ready(function () {
         $(".cookie-notification").show();
     }
     else if ($("#none-cookie").is(":checked")) {
-        $(".cookie-notification").html(window.Server.App.LocalizationContent.NoneInformation.format("</br>", "<b>", "</b>"));
+        $(".cookie-notification").html(window.Server.App.LocalizationContent.NoneInformation.format("</br></br>", "<b>", "</b>"));
         $(".cookie-notification").show();
     }
     else if ($("#strict-cookie").is(":checked")) {
@@ -1107,7 +1107,7 @@ $(document).on("change", "#strict-cookie", function () {
 
 $(document).on("change", "#none-cookie", function () {
     if ($("#none-cookie").is(":checked")) {
-        $(".cookie-notification").html(window.Server.App.LocalizationContent.NoneInformation.format("</br>", "<b>", "</b>"));
+        $(".cookie-notification").html(window.Server.App.LocalizationContent.NoneInformation.format("</br></br>", "<b>", "</b>"));
         $(".cookie-notification").show();
     }
     else {
