@@ -1,0 +1,57 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Schedule Synchronization"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DbUsersSyncSchedule);
+}
+
+@section scripts{
+    <script>
+        var getScheduleInfoUrl = "@Url.Action("GetDatabaseScheduleInfo", "Administration")";
+        var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceType", "Administration")";
+        var updateAdScheduleUrl = "@Url.Action("UpdateDatabaseSchedule", "Administration")";
+    </script>
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedule-synchronization.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedule-synchronization.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedule-synchronization.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedule-synchronization.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.TimeFormat" id="timeFormat" />
+    <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.DateFormat" id="dateFormat" />
+    <div id="schedule-synchronization-container" class="bi-page-container col-xs-12 no-padding @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div id="schedule-header" class="col-xs-12 import-area bi-page-header">
+                <a href="@Url.Action("Administration","Administration")/user-directory-settings" data-toggle="tooltip" data-placement="top" data-container="body" title="@T["User Directory Settings"]" class="back-button pull-left">
+                    <i class="su su-arrow-back back-navigaion img-size"> </i>
+                </a>
+                <hgroup class="bi-page-header-description">
+                    <h2 class="page-title">@T["DATABASE SYNCHRONIZATION SCHEDULE"]</h2>
+                    <h5 class="page-description">@T["Schedule to synchronize users and groups with Database"]</h5>
+                </hgroup>
+            </div>
+            <div id="schedule-panel" class="bi-page-body col-xs-12">
+                @await Html.PartialAsync("_ScheduleSynchronization")
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

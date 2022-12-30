@@ -1,0 +1,65 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
+    var fromDarftPage = ViewBag.FromDraftPage != null ? ViewBag.FromDraftPage : false;
+    var uploadDashboardId = ViewBag.ItemId != null ? ViewBag.ItemId : string.Empty;
+}
+<html class="dashboard-server">
+<head>
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    <script>
+        var uploadDashboardViewUrl = "@Url.Action("UploadViewItem", "Dashboards")";
+        var getUploadDashboardStatusUrl = "@Url.Action("GetUploadDashboardStatus", "Dashboards")";
+        var dataSourceMappingUrl = "@Url.Action("DataSourceMapping", "Dashboards")";
+        var updateUploadStatusUrl = "@Url.Action("UpdateUploadDashboardStatus", "Dashboards")";
+        var updateFileValidationUrl = "@Url.Action("UpdateFileValidationStatus", "Dashboards")";
+        var addCategoryUrl = "@Url.Action("addcategory", "category")";
+        var fromDarftPage = @Json.Serialize(fromDarftPage);
+        var uploadDashboardId = "@uploadDashboardId";
+        var isMultiTab = false;
+    </script>
+</head>
+<body>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    <div id="Upload_Item" style="display:none" class="no-padding">
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/upload-iframe.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/upload-iframe.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.min.js"></script>
+    </environment>
+
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <script asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-component.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard.upload.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-component.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard.upload.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.min.js"></script>
+    </environment>
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    @await Html.PartialAsync("../Items/_AddCategory")
+</body>
+</html>

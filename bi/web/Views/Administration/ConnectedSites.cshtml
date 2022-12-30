@@ -1,0 +1,122 @@
+﻿@using Newtonsoft.Json
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Connected Sites"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isBISitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "bi-sites") ? "active" : string.Empty;
+    var isReportsSitesTab = (Context.Request.Query["tab"].ToString() == "reports-sites") ? "active" : string.Empty;
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-sites.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-sites.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-sites.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-sites.min.js"></script>
+    </environment>
+    <script>
+        var getExternalSitesUrl = "@Url.Action("GetExternalBISites", "Administration")";
+        var getExternalReportsSitesUrl = "@Url.Action("GetExternalReportsSites", "Administration")";
+        var removeExternalSiteUrl = "@Url.Action("RemoveExternalSite", "Administration")";
+        var editExternalSiteUrl = "@Url.Action("EditExternalSite", "Administration")";
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            GridLocalization();
+            $("#ConnectedSitesGrid").ejGrid({
+                dataSource: ej.DataManager({ url: "@Url.Action("GetExternalBISites", "Administration")", adaptor: "UrlAdaptor" }),
+                gridLines: ej.Grid.GridLines.None,
+                allowSorting: true,
+                allowSearching: true,
+                allowPaging: true,
+                allowSelection: true,
+                allowFiltering: true,
+                filterSettings: { filterType: "menu" },
+                pageSettings: { pageSize: 10 },
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                columns: [
+                    { field: 'Name', templateID: "#site-name-template", headerText: '@T["Name"]', width: 40, allowSorting: true, allowFiltering: true },
+                    { field: 'ClientId', templateID: "#site-clientid-template", headerText: '@T["Client Id"]', width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'SiteURL', templateID: "#site-url-template", headerText: '@string.Format(T["Site {0}"].Value,"URL")', width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'CreatedDateString', headerText: '@T["Created On"]', width: 40, allowSorting: true, allowFiltering: false },
+                    { field: 'Options', headerText: '', templateID: "#admin-externalsite-options", width: 10, allowSorting: false, allowFiltering: false }
+                ]
+            });
+        });
+    </script>
+    <script type="text/x-jsrender" id="site-name-template">
+        <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+    </script>
+    <script type="text/x-jsrender" id="site-clientid-template">
+        <span class="grid-content" title="{{:ClientId}}" data-toggle="tooltip">{{:ClientId}}</span>
+    </script>
+    <script type="text/x-jsrender" id="site-url-template">
+        <span class="grid-content" title="{{:SiteURL}}" data-toggle="tooltip">{{:SiteURL}}</span>
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div id="external-site-container" class="bi-page-container col-xs-12 @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")" role="tabpanel">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div class="bi-page-header col-xs-12">
+                <hgroup class="col-xs-8 bi-page-header-description no-padding">
+                    <h1 class="page-title">@T["Connected Sites"]</h1>
+                    <h5 class="no-padding page-description">@T["Manage all the BI and Reports connected sites"]</h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-12 no-padding bi-page-nav-bar">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="@isBISitesTab">
+                        <a href="#bi-sites" id="bi-sites-tab" aria-controls="bi-sites-tab" role="tab" data-toggle="tab">@T["BI Sites"]</a>
+                    </li>
+                    <li role="presentation" class="@isReportsSitesTab">
+                        <a href="#reports-sites" id="reports-sites-tab" aria-controls="reports-sites-tab" role="tab" data-toggle="tab">@T["Reports Sites"]</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-xs-12 no-padding tab-content">
+                <div role="tabpanel" class="tab-pane bi-page-body col-md-12 col-xs-12 @isBISitesTab" id="bi-sites">
+                    <div id="ConnectedSitesGrid"></div>
+                    <script type="text/x-jsrender" id="admin-externalsite-options">
+                        <div class="dropdown context-menu">
+                            <span class="dropdown-toggle option-icon" title="Actions" data-toggle="dropdown">
+                                <span class="su su-options">
+                                </span>
+                            </span>
+                            <ul class="dropdown-menu" role="menu">
+                                <li class="menu-group">
+                                    <a class="edit-class" href="javascript:void(0);" id="edit-bi-external-sites" title="@T["Edit"]" data-toggle="tooltip" data-id="{{:Id}}" data-name="{{:Name}}" data-clientid="{{:ClientId}}" data-site-url="{{:SiteURL}}" onclick="getExternalSitesDetailDialog(0,1,this)">
+                                        <i class="su su-edit"></i>
+                                        <span class="menu-text">@T["Edit"]</span>
+                                    </a>
+                                </li>
+                                <li class="menu-group">
+                                    <a class="delete-class" href="javascript:void(0);" id="remove-bi-external-sites" title="@T["Remove"]" data-toggle="tooltip" data-id="{{:Id}}" data-site-type="{{:SiteType}}" data-name="group" onclick="deleteConfirmation(this)">
+                                        <i class="su su-delete"></i>
+                                        <span class="menu-text">@T["Remove"]</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </script>
+                </div>
+                <div role="tabpanel" class="tab-pane bi-page-body col-xs-12 @isReportsSitesTab" id="reports-sites">
+                    @await Html.PartialAsync("../Shared/_ReportsConnectedSites", new ViewDataDictionary(ViewData) { { "fromAdminPage", true } })
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+        @await Html.PartialAsync("../Items/_GetExternalSites")
+    </div>
+}

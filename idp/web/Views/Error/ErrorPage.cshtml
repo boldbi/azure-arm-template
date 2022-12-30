@@ -1,0 +1,81 @@
+﻿@using System.Configuration
+@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@inject Microsoft.Extensions.Configuration.IConfiguration configuration;
+
+@{
+    Layout = null;
+    var email = ViewBag.Email;
+    var cdnLink = configuration["AppSettings:CdnLink"].TrimEnd('/');
+    var imageHelper = new ImageHelper();
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>@ViewBag.Title</title>
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@(ViewBag.ErrorType == "access_denied" ? imageHelper.AccessDeniedImage() : ViewBag.ErrorType == "license_expired" ? imageHelper.LicenseExpired() : imageHelper.PageNotFoundImage())" class="error-image-2">
+                </div>
+                <div class="error-type">@ViewBag.ErrorHeader</div>
+
+                @if (ViewBag.ErrorType == "access_denied")
+                {
+                    if (ViewBag.InActiveUser)
+                    {
+                        <div class="error-text">
+                            @Html.Raw(string.Format(T["You are logged in as {0}, but your account is not yet activated in the site {1}.{2} Please contact your system administrator to activate your account."].Value, $"<strong>{email}</strong>", $"<strong>{new Uri(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp).DnsSafeHost}</strong>", "<br>"))
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="error-text">
+                            @Html.Raw(string.Format(T["You are logged in as {0}, but you do not have access to the site {1}.{2} If you should have access to this site, contact your system administrator."].Value, $"<strong>{email}</strong>", $"<strong>{new Uri(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp).DnsSafeHost}</strong>", "<br>"))
+                        </div>
+                    }
+                }
+                else if (ViewBag.ErrorType == "license_expired")
+                {
+                    <div class="error-text">
+                        @T["Please contact your administrator to restore access."]
+                    </div>
+                }
+                else
+                {
+                    <div class="error-text">
+                        @ViewBag.ErrorText1 <br>
+                        @ViewBag.ErrorText2
+                    </div>
+                }
+                <div class="take-me-back-to-home-page">
+                    @if (ViewBag.ErrorType == "access_denied")
+                    {
+                        <span class="error-page-cursor">
+                            <a class="error-to-back-text-color" href="@Url.Action("Logout", "Accounts")">
+                                @T["Try a different account"]
+                            </a>
+                        </span>
+                    }
+                    else if (ViewBag.ErrorType == "http_error_404")
+                    {
+                        <span class="error-page-cursor"><a class="error-to-back-text-color" href="@Url.Action("Index", "Home")">@T["Take me back to home page"]</a></span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</body>
+</html>

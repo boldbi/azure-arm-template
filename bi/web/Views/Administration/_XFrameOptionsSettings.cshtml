@@ -1,0 +1,30 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+}
+
+<div id="x-frame-options-settings-body" class="col-xs-12 no-padding">
+    <div class="col-xs-12 no-padding field-container-dashboard">
+        <div class="info-label">
+            @Html.CheckBox("x-frame", (bool)globalAppSettings.SystemSettings.IsXFrameOptionsEnabled, new { @class = "material-checkbox" })
+            <label for="x-frame">
+                @T["Enable X-Frame-Options"]
+            </label>
+        </div>
+        <div class="info-message" id="x-frame-checkbox-label">
+            @T["If you enable this option, the application will add an X-Frame-Options header, SAMEORIGIN, meaning that the page will only be displayed if all frame ancestors and the page origin are the same. By default, this option is disabled."]
+        </div>
+        <div class="bg-warning x-frame-notification">
+            @T["Please make sure that you are not using iframe embedding, as it will not work when this setting is saved."]
+        </div>
+    </div>
+</div>
+<div class="bi-page-footer col-xs-12 no-padding">
+    <div class="bi-page-actions col-xs-12 col-md-12 no-margin">
+        <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-site-settings" title="">@T["Cancel"]</a>
+        <button type="button" title="" id="update-x-frame-options-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+            @T["Save"]
+        </button>
+    </div>
+</div>

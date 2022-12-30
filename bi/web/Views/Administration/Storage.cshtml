@@ -1,0 +1,138 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = "[[[Storage Settings]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/storage-page.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/storage-page.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/storage-page.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/storage-page.min.js"></script>
+    </environment>
+
+}
+
+<script>
+    var connectionType = "@ViewBag.ConnectionType";
+</script>
+
+<script>
+    $(document).ready(function () {
+        addPlacehoder("#blob_storage_form");
+    });
+</script>
+<div class="Edit-system-settings-container" id="base_container">
+
+    <div id="active-directory-container">
+        <div class="col-md-12 import-area">
+            <div class="import-label">
+                [[[AZURE BLOB STORAGE SETTINGS]]]
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+                <h5>[[[Update the storage settings here]]]</h5>
+            </div>
+        </div>
+        <form id="blob_storage_form" class="active-directory-form col-md-12" onsubmit="return validate_storage_type();" method="post" enctype="multipart/form-data">
+            <div class="col-md-12">
+                <div class="col-md-6 no-padding no-margin">
+                    <div class="import-label col-md-4 no-margin">[[[Account name]]]</div>
+                    <div class="col-md-8 no-margin form-input-field form-group">
+                        <input type="text" class="form-control col-md-6 no-margin" name="txt_accountname" value="@ViewBag.AccountName" placeholder="[[[Account name]]]" id="txt_accountname" />
+                        <span class="su su-login-error txt_accountname"></span>
+                    </div>
+                </div>
+            </div>
+            @*<div class="col-md-12">
+                    <div class="col-md-6 no-padding no-margin">
+                        <div class="import-label col-md-4 no-margin">[[[Blob Service endpoint]]]</div>
+                        <div class="col-md-8 no-margin form-input-field form-group">
+                            <input type="text" class="form-control col-md-6 no-margin" name="txt_endpoint" value="@ViewBag.EndPoint" placeholder="[[[Blob Service endpoint]]]" id="txt_endpoint" />
+                            <span class="text_caption">([[[For example]]] : http://***.blob.core.windows.net)</span>
+                            <span class="su su-login-error txt_endpoint"></span>
+                        </div>
+                    </div>
+                </div>*@
+            <div class="col-md-12">
+                <div class="col-md-6 no-padding no-margin">
+                    <div class="import-label col-md-4 no-margin">[[[Access key]]]</div>
+                    <div class="col-md-8 no-margin form-input-field form-group">
+                        <input type="text" class="form-control col-md-6 no-margin" name="txt_accesskey" value="@ViewBag.AccessKey" placeholder="[[[Access key]]]" id="txt_accesskey" />
+                        <span class="su su-login-error txt_accesskey"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-6 no-padding no-margin">
+                    <div class="import-label col-md-4 no-margin">[[[Container name]]]</div>
+                    <div class="col-md-8 no-margin form-input-field form-group">
+                        <input type="text" class="form-control col-md-6 no-margin" name="txt_containername" value="@ViewBag.ContainerName" placeholder="[[[Container name]]]" id="txt_containername" />
+                        <span class="su su-login-error txt_containername"></span>
+                    </div>
+                </div>
+            </div>
+            @*<div class="col-md-12">
+                    <div class="col-md-6 no-padding no-margin">
+                        <div class="import-label col-md-4 no-margin"><h5>[[[Connection]]]</h5></div>
+                        <div class="col-md-8 no-margin form-input-field">
+                            <div class="connectionTypes">
+                                <input type="radio" id="https" tabindex="5" class="connection" name="Connection" value="https" checked="checked" />
+                                <label for="https" class="connection-label"><span class="text">[[[Use HTTPS (Recommended)]]]</span></label>
+                            </div>
+                            <div class="connectionTypes">
+                                <input type="radio" id="http" tabindex="5" class="connection" name="Connection" value="http" />
+                                <label for="http" class="connection-label"><span class="text">[[[Use HTTP]]]</span></label>
+                            </div>
+                            <div class="connectionTypes">
+                                <input type="radio" id="customendpoint" tabindex="5" class="connection" name="Connection" value="customendpoint" />
+                                <label for="customendpoint" class="connection-label"><span class="text">[[[Specify custom endpoints]]]</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+            @*<div class="col-md-12 customendpointformelement">
+                    <div class="col-md-6 no-padding no-margin">
+                        <div class="import-label col-md-4 no-margin">[[[Blob URL]]]</div>
+                        <div class="col-md-8 no-margin form-input-field form-group">
+                            <input type="text" class="form-control col-md-6 no-margin" name="txt_bloburl" value="@ViewBag.BlobUrl" placeholder="[[[Blob URL]]]" id="txt_bloburl" />
+                            <span class="text_caption">([[[For example]]] : http://***.example.com)</span>
+                            <span class="su su-login-error txt_bloburl"></span>
+                        </div>
+                    </div>
+                </div>*@
+            @*<div class="col-md-12">
+                    <div class="col-md-6 no-padding no-margin">
+                        <div class="import-label col-md-4 no-margin">[[[Connection String]]]</div>
+                        <div class="col-md-8 no-margin form-input-field form-group">
+                            <textarea name="connectionString" id="connectionString" readonly="" class="form-control">@ViewBag.ConnectionString</textarea>
+                        </div>
+                    </div>
+                </div>*@
+            <div class="bottom-button-area col-lg-12 col-md-12">
+                <a href="@Url.Action("index", "UserManagement")" class="btn btn-default pull-right" id="UpdateSystemSettingsCancel-bottom" title="">[[[Cancel]]]</a>
+                <input type="hidden" value="@ViewBag.StorageType" id="StorageType" name="StorageType" />
+                <input type="submit" title="[[[Update]]]" id="UpdateSystemSettings-bottom" name="UpdateSystemSettings" class="btn btn-primary" value="[[[Update]]]" />
+                <div id="confirmationMessageBottom" class="confirmatioMessage validate-success">[[[Settings has been updated successfully.]]]</div>
+                <div id="DisplayValidationMessage" class="bottom-button-area center-block">
+                    [[[Invalid Azure Blob storage]]]
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        if (connectionType === "customendpoint") {
+            $(".customendpointformelement").show();
+        }
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</div>

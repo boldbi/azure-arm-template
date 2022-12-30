@@ -1,0 +1,119 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Published Resources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<!DOCTYPE html>
+<head>
+    <script>
+        var downloadedItemDetails = @Html.Raw(Json.Serialize(ViewBag.DownloadedItemDeatils));
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.min.js"></script>
+    </environment>
+</head>
+
+<div class="col-xs-12 no-padding" id="download-dashboards-section">
+    <div id="download-dashboards-info" class="col-xs-9 no-padding">
+        <label>@T["All files prepared more than 12 hours ago will be deleted automatically. Please click Status to see the progress of the file preparation."]</label>
+    </div>
+    <div id="search-area" class="col-xs-3 no-padding pull-right">
+        <input type="text" class="pull-left" id="search-downloaded-items" placeholder="@T["Search resources"]" />
+        <span class="su su-inner-close close-icon pull-left" id="clear-downloadfiles-search" title="@T["Clear search"]"></span>
+        <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+    </div>
+</div>
+
+<div class="col-xs-12 no-padding">
+    <div class="control-section">
+        <div class="content-wrapper">
+            <script type="text/x-jsrender" id="itemname-template">
+                <div class="item-dashboard grid-content" title="{{:ItemName}}" data-toggle="tooltip" data-placement="top">
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="download-status-template">
+                {{if Status == "Started"}}
+                <div class="item-dashboard grid-content" title="@T["Started"]">
+                    <span>@T["Started"]</span>
+                </div>
+                {{else Status == "InProgress"}}
+                <div class="item-dashboard grid-content" title="@T["In Progress"]">
+                    <span><a class="grid-content" href="javascript:void(0);" onclick="onStatusClick()">@T["In Progress"]</a></span>
+                </div>
+                {{else Status == "Success"}}
+                <div class="item-dashboard grid-content" title="@T["Success"]">
+                    <span><a class="grid-content" href="javascript:void(0);" onclick="onStatusClick()">@T["Success"]</a></span>
+                </div>
+                {{else}}
+                <div class="item-dashboard grid-content" title="@T["Failed"]">
+                    <span><a class="grid-content" href="javascript:void(0);" onclick="onStatusClick()">@T["Failed"]</a></span>
+                </div>
+                {{/if}}
+            </script>
+            <script type="text/x-jsrender" id="sensitiveinfo-template">
+                {{if CanIncludeSensitiveInfo }}
+                <div class="item-dashboard grid-content" title="@T["Yes"]">
+                    <span>@T["Yes"]</span>
+                </div>
+                {{else}}
+                <div class="item-dashboard grid-content" title="@T["No"]">
+                    <span>@T["No"]</span>
+                </div>
+                {{/if}}
+            </script>
+            <script type="text/x-jsrender" id="download-template">
+                {{if Status == "Success"}}
+                <div class="item-dashboard grid-content" title="{{:ItemName}}">
+                    <span><a class="grid-content" href="@Url.Action("DownloadDashboardFile", "Items")?jobId={{:JobId}}&itemId={{:ItemId}}" target="_blank">@T["Download"]</a></span>
+                </div>
+                {{else}}
+                <div class="item-dashboard grid-content disable-color" title="{{:ItemName}}">
+                    <span><a class="grid-content" href="javascript:void(0)" target="_blank" id="download-button">@T["Download"]</a></span>
+                </div>
+                {{/if}}
+            </script>
+            <div id="DownloadItemGrid"></div>
+            <div id="DownlodDashboardStatus"></div>
+            <div id="ProgressStages" class="display-none">
+                <ul id="progress-stages" class="no-margin no-padding"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    GridLocalization(window.Server.App.Localization.DownloadedResourcesEmpty);
+    $("#DownloadItemGrid").ejGrid({
+        dataSource: downloadedItemDetails,
+        gridLines: ej.Grid.GridLines.None,
+        allowSorting: true,
+        allowPaging: true,
+        allowGrouping: false,
+        allowSearching: true,
+        allowSelection: true,
+        allowFiltering: true,
+        filterSettings: { filterType: "menu" },
+        pageSettings: { pageSize: 20 },
+        enableRowHover: true,
+        enableAltRow: false, 
+        rowDataBound: function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        },
+        dataBound: function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        },
+        columns: [
+            { field: 'ItemName', headerText: window.Server.App.Localization.DownloadItemName, templateID: '#itemname-template', width: 100, allowFiltering: true, allowSorting: true, allowGrouping: false },
+            { field: 'CreatedDateString', headerText: window.Server.App.Localization.DownloadRequestedDate, width: 80, allowFiltering: false, allowSorting: true, allowGrouping: false },
+            { field: 'LastUpdatedDateString', headerText: window.Server.App.Localization.DownloadCompltededdate, width: 80, allowFiltering: false, allowSorting: true, allowGrouping: false },
+            { field: 'CanIncludeSensitiveInfo', headerText: window.Server.App.Localization.ContainsSensitiveData, templateID: '#sensitiveinfo-template', width: 80, allowFiltering: false, allowSorting: true, allowGrouping: false },
+            { field: 'Status', headerText: window.Server.App.Localization.DownloadItemStatus, templateID: '#download-status-template', width: 50, allowFiltering: false, allowSorting: false, allowGrouping: false },
+            {
+                headerText: "Actions", templateID: '#download-template', width: 40, allowFiltering: false, allowSorting: false, allowGrouping:false
+            },
+        ]
+    });
+</script>

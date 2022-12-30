@@ -1,0 +1,43 @@
+﻿@functions
+{
+    public string GetSomeString(AuthProvider provider)
+    {
+        if (provider == AuthProvider.AzureAD)
+        {
+            return "Azure AD";
+        }
+        else if (provider == AuthProvider.CustomOAuth)
+        {
+            return "OAuth 2.0";
+        }
+        else if (provider == AuthProvider.CustomOIDC)
+        {
+            return "OpenID Connect";
+        }
+        else if (provider == AuthProvider.JWTSSO)
+        {
+            return "JWT SSO";
+        }
+        else if (provider == AuthProvider.AzureADB2C)
+        {
+            return "Azure AD B2C";
+        }
+        else if (provider == AuthProvider.WindowsAD)
+        {
+            return "Windows AD";
+        }
+        else
+        {
+            return "No Authentication Configured";
+        }
+    }
+}
+<div id="default-authentication-confirmation-diolog" class="modal no-padding" tabindex="-1" role="dialog">
+    <div id="popup-container" class="col-lg-12 no-padding">
+        <div class="modal-body col-xs-12 no-padding">
+            <p>@Html.Raw(string.Format(T["You have chosen {0}{1}{2} as the {3}{4}{5}.If you disable this setting, the default authentication will be reverted."].Value, "<span class='provider-name'>", GetSomeString(ViewBag.DefaultAuthenticationSettings.EnabledProviderName), "</span>", "<a href='" + Url.Action("AuthenticationSettings","Administration") + "'>", "default authentication", "</a>"))
+        </p><br>
+            <p>@T["Would you like to proceed?"]</p>
+        </div>
+    </div>
+</div>

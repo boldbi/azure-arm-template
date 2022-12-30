@@ -1,0 +1,45 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerResourceUrl = _globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var uploadDashboardId = ViewBag.ItemId;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+}
+<head>
+    <meta name="designer_service:url" content="@ServerAppConfig.InternalAppDataRefreshServiceUrl" />
+    <meta name="dashboard_service:url" content="@dashboardServerApiUrl" />
+    <meta name="dashboard:id" content="@uploadDashboardId" />
+    <meta name="category:id" content="@ViewBag.CategoryId" />
+    <meta name="dashboard:name" content="@ViewBag.Name" />
+    <meta name="dashboard:description" content="@ViewBag.Description" />
+    <meta name="access:token" content="@ViewBag.AccessToken" />
+    <script>
+        var isSelfHosted = @Json.Serialize(isSelfHosted);
+        var isMappingDialog = true;
+        var canCreateDS = @Json.Serialize(ViewBag.CanCreateDS);
+    </script>
+</head>
+<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+    <div id="data_source_mapping"></div>
+    <input type="hidden" id="uploaddashbord-id" value="@uploadDashboardId" />
+
+    @if (isSelfHosted)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+        </environment>
+    }
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/datasource-mapping.js"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/datasource-mapping.min.js"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
