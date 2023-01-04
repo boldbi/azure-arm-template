@@ -486,12 +486,15 @@
                                                             <span>@T["Publish"]</span>
                                                         </span>
                                                     </li>
-                                                    <li ng-if="(dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="activeMenu === @((int)DisplayCategory.UsageAnalytics)">
-                                                        <span title="" class="option-click" data-action="Download" ng-click="downloadDashboard()">
-                                                            <i class="su su-download"></i>
-                                                            <span>@T["Download"]</span>
-                                                        </span>
-                                                    </li>
+                                                    @if (ServerAppConfig.CanShowDownloadDashboardOption)
+                                                    {
+                                                        <li ng-if="(dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="activeMenu === @((int)DisplayCategory.UsageAnalytics)">
+                                                            <span title="" class="option-click" data-action="Download" ng-click="downloadDashboard()">
+                                                                <i class="su su-download"></i>
+                                                                <span>@T["Download"]</span>
+                                                            </span>
+                                                        </li>
+                                                    }
                                                     <li ng-if="((dashboardItem.ItemType == @((int)ItemType.Dashboard) && dashboardItem.CanSchedule) || dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" role="separator" class="divider" ng-hide="schemesDetails != null && !schemesDetails.CreateSchedule || activeMenu === @((int)DisplayCategory.UsageAnalytics)"></li>
                                                     <li ng-if="dashboardItem.ItemType == @((int)ItemType.Dashboard) && dashboardItem.CanSchedule && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="schemesDetails != null && !schemesDetails.CreateSchedule">
                                                         <span href="javascript:void(0);" class="schedule-dashboards option-click" title="" ng-click="scheduleDashboard()">
@@ -692,9 +695,6 @@
     <div id="upload-popup-container" style="display: none;" class="no-padding">
         <iframe id="upload-popup-iframe" class="datasource-popup-frame"></iframe>
     </div>
-    <div id="ItemAction" style="display:none" title="@T["Item Actions"]" class="no-padding"></div>
-
-    <div id="Copy_Item" style="display:none" class="no-padding"></div>
 
     <div id="Download_Item" style="display:none" class="no-padding"></div>
 
@@ -712,6 +712,8 @@
         @await Html.PartialAsync("../Items/_DashboardSecurity")
         @await Html.PartialAsync("../Items/_PublishDashboard")
         @await Html.PartialAsync("../Items/_GetExternalSites")
+        @await Html.PartialAsync("../Items/_CopyItem")
+        @await Html.PartialAsync("../Items/_MoveItem")
     }
 
     @if (samePagePreview && !isMobile)
@@ -720,4 +722,10 @@
     }
 
     @await Html.PartialAsync("../Items/_ItemInfo")
+
+    <script>
+        $(document).ready(function () {
+            $('#user-group-search-input_suggestion').addClass("hide-suggesstion");
+        });
+    </script>
 }

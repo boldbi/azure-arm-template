@@ -2,11 +2,8 @@
     Layout = null;
     var globalAppSettings = _globalAppSettings;
     var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
-    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
-    var isDataSource = ViewBag.ItemType == "Datasource" ? true : false;
-    var isDashboard = ViewBag.ItemType == "Dashboard" ? true : false;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var usageAnalytics = ViewBag.IsUsageAnalytics;
+    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
     var permision = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
     var hacCreateDataSourcePermission = permision.ContainsKey(ItemType.Datasource) && permision[ItemType.Datasource];
 }
@@ -16,8 +13,6 @@
     var copyItemUrl = "@Url.Action("copyitem", "items")";
     var cloneItemUrl = "@Url.Action("cloneitem", "items")";
     var canCreateCategory = "@canCreateCategory";
-    var isUsageAnalytics = "@ViewBag.IsUsageAnalytics";
-    var hasAllLiveDataSource ="@ViewBag.HasAllLiveDataSource"
     var hacCreateDataSourcePermission = "@hacCreateDataSourcePermission"
     function load() {
         if (($(parent.window).width()) > 1400) {
@@ -32,106 +27,57 @@
 
 @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
-<environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
-</environment>
-
-<body onload="load()">
+<div id="Copy_Item" style="display:none" class="no-padding">
     <div id="PopupContainer" class="dialog">
-
-        @if (TempData["ErrorMessage"] == null)
-        {
-        <form class="dialog-body col-xs-12 no-padding copy-move-category" id="item_action_form">
+        <form class="dialog-body col-xs-12 no-padding copy-category" id="item_action_form" style="display: none">
             <input type="hidden" id="copy-dashboard-status" value="true" />
             <div class="copy-action-item">
                 <div class="col-xs-12" id="item-name-division">
                     <div class="col-xs-12 no-padding  text-label">@T["Name"]<span class="mandatory">*</span></div>
                     <div class="col-xs-12 no-padding">
-                        <input type="text" id="item_name" name="itemName" maxlength="255" value="@ViewBag.FullItemName" class="form-control site-orgname-fields text" />
+                        <input type="text" id="copy_item_name" name="itemName" maxlength="255" value="" class="form-control site-orgname-fields text" />
                         <span class="validation-error text"></span>
                     </div>
                 </div>
-                @if (!isDataSource)
-                {
-                    <div class="col-xs-12" id="action-category-division">
-                        <div class="col-xs-12 no-padding text-label">@ViewBag.ActionCategory</div>
-                        @if (canCreateCategory)
-                        {
-                            <div class="col-xs-12 no-padding dropup">
-                                <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
-                                <span class="category-validation-error text"></span>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="col-xs-12 no-padding dropup">
-                                <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
-                            </div>
-                        }
-                    </div>
-                }
-                <input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" />
+                <div class="col-xs-12" id="copyaction-category-division" style=display:none>
+                    <div class="col-xs-12 no-padding text-label">@T["Copy to Category"]</div>
+                    @if (canCreateCategory)
+                    {
+                        <div class="col-xs-12 no-padding dropup">
+                            <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
+                            <span class="category-validation-error text"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-xs-12 no-padding dropup">
+                            <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
+                        </div>
+                    }
+                </div>
+                <input type="hidden" id="CopyItemIdHidden" value="" />
                 <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />
-                <input type="hidden" id="ItemType" value="@ViewBag.ItemType" />
-                @if (isDashboard && !usageAnalytics)
-                {
-                    <div class="col-xs-12 no-padding" id="copy-datasource-checkbox">
-                        <div class="copy-datasource-division">
-                            @if (@ViewBag.DatasourceCount != 0 && permision.ContainsKey(ItemType.Datasource) && permision[ItemType.Datasource])
-                            {
-                                @Html.CheckBox("copy-datasource", new { @class = "material-checkbox" })
-                                @Html.Hidden("copy-datasource")
-                                <label for="copy-datasource">
-                                    <span>@T["Copy the data source"]</span>
-                                </label>
-                            }
-                            else
-                            {
-                                @Html.CheckBox("copy-datasource", new { @class = "material-checkbox", disabled = true})
-                                @Html.Hidden("copy-datasource")
-                                <label for="copy-datasource" id="copy-datasource-label">
-                                    <span>@T["Copy the data source"]</span>
-                                </label>
-                            }
-                            <div class="copy-datasource-description">
-                                @T["If this option is checked, data sources used in the dashboard will be copied and used in the copied dashboard. This option will be enabled only if this dashboard has data sources."]
-                            </div>
+                <input type="hidden" id="CopyItemType" value="" />
+                <input type="hidden" id="isUsageAnalytics" value="" />
+                <div class="col-xs-12 no-padding" id="copy-datasource-checkbox" style="display:none">
+                    <div class="copy-datasource-division">
+                        <div id="copy-datasource-enable">
+                            @Html.CheckBox("copy-datasource", new { @class = "material-checkbox" })
+                            @Html.Hidden("copy-datasource")
+                            <label for="copy-datasource" id="copy-datasource-label">
+                                <span>@T["Copy the data source"]</span>
+                            </label>
+                        </div>
+                        <div class="copy-datasource-description">
+                            @T["If this option is checked, data sources used in the dashboard will be copied and used in the copied dashboard. This option will be enabled only if this dashboard has data sources."]
                         </div>
                     </div>
-                }
+                </div>
             </div>
         </form>
-        <input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" />
-    }
-    else
-    {
+        <input type="hidden" id="ItemIdHidden" value="" />
         <div class="col-xs-12 no-padding">
-            <div class="permission-denied">@TempData["ErrorMessage"]</div>
+            <div class="permission-denied" id="copy-item-denied" style="display: none"></div>
         </div>
-    }
-        <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-        </environment>
-        <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-        </environment>
-        </div>
-
-        <script>
-        $(document).ready(function () {
-            var categories = @Html.Raw(Json.Serialize(ViewBag.CategoryDetails));
-            var options = "";
-            for (var t = 0; t < categories.length; t++) {
-                options += '<option value=' + categories[t].Id + '>' + categories[t].Name + '</option>';
-            }
-            $("#CategoryList").html(options);
-            $("#CategoryList").selectpicker("refresh");
-            $("#add-new-category [data-toggle='tooltip']").tooltip();
-            window.parent.$('#ItemAction_wrapper').ejWaitingPopup("hide");
-
-        });
-        </script>
-    </body>
+    </div>
+</div>

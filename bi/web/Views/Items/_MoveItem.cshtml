@@ -7,38 +7,28 @@
 }
 
 <script>
-        var moveItemUrl = "@Url.Action("moveitem", "items")";
-        var canCreateCategory = "@canCreateCategory";
+    var moveItemUrl = "@Url.Action("moveitem", "items")";
+    var canCreateCategory = "@canCreateCategory";
 
-        function load() {
-            if (($(parent.window).width()) > 1400) {
-                $(".dialog").addClass("iframe");
-            }
-
-            if (($(parent.window).width()) < 1400) {
-                $(".dialog").removeClass("iframe");
-            }
+    function load() {
+        if (($(parent.window).width()) > 1400) {
+            $(".dialog").addClass("iframe");
         }
+
+        if (($(parent.window).width()) < 1400) {
+            $(".dialog").removeClass("iframe");
+        }
+    }
 </script>
 
-<environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
-</environment>
-
-<body onload="load()">
+<div id="ItemAction" style="display:none" class="no-padding">
     <div id="PopupContainer" class="dialog">
-
-        @if (TempData["ErrorMessage"] == null)
-        {
-        <form class="dialog-body no-padding copy-move-category" id="move_report_form">
+        <form class="dialog-body no-padding move-category" id="move_report_form" style="display: none">
             <input type="hidden" id="move-dashboard-status" value="true" />
             <div class="col-xs-12" id="item-name-division">
                 <div class="col-xs-12 no-padding text-label" style="font-weight:bold">@T["Name"]<span class="mandatory">*</span></div>
                 <div class="col-lg-12 no-padding">
-                    <input type="text" id="item_name" name="itemName" maxlength="255" value="@ViewBag.FullItemName" class="form-control site-orgname-fields text" />
+                    <input type="text" id="move_item_name" name="itemName" maxlength="255" value="" class="form-control site-orgname-fields text" />
                     <span class="validation-error text"></span>
                 </div>
             </div>
@@ -59,39 +49,12 @@
                 }
 
             </div>
-            <input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" />
+            <input type="hidden" id="MoveItemIdHidden" value="" />
             <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />
         </form>
 
-            <div class="col-xs-4" style="display:none;"><input type="hidden" id="ItemIdHidden" value="@Context.Request.Form["itemId"]" /></div>
-
-        }
-        else
-        {
-            <div class="col-xs-12 no-padding">
-                <div class="permission-denied">@TempData["ErrorMessage"]</div>
-            </div>
-        }
-        <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-        </environment>
-        <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-        </environment>
+        <div class="col-xs-12 no-padding">
+            <div class="permission-denied" id="move-item-denied" style="display: none"></div>
+        </div>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            var categories = @Html.Raw(Json.Serialize(ViewBag.CategoryDetails));
-            var options = "";
-            for (var t = 0; t < categories.length; t++) {
-                if (categories[t].Id != "@ViewBag.ItemId.ToString()")
-                    options += '<option value=' + categories[t].Id + '>' + categories[t].Name + '</option>';
-            }
-            $("#CategoryList").html(options);
-            $("#CategoryList").selectpicker("refresh");
-            $("#add-new-category [data-toggle='tooltip']").tooltip();
-            window.parent.$('#ItemAction_wrapper').ejWaitingPopup("hide");
-        });
-    </script>
-</body>
+</div>
