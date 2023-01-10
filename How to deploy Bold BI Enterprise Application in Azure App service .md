@@ -19,7 +19,7 @@ Please follow the below step to create the Bold BI Azure web app using the ARM t
 
     ![Choose custom deployment](images/choose-own-template-editor.jpg)
     
-6.	[Click here](https://raw.githubusercontent.com/boldbi/azure-arm-template/master/armtemplates/v5.3.53/BoldBIAppServiceTemplate.json) to download the ARM template file.
+6.	[Click here](https://raw.githubusercontent.com/boldbi/azure-arm-template/master/armtemplates/v5.3.83/BoldBIAppServiceTemplate.json) to download the ARM template file.
 7.	Copy all the contents in the template file and replace them in the “Edit template” window. Then click on the save button.
 
     ![Editor template window](images/edit-template-window.jpg)
