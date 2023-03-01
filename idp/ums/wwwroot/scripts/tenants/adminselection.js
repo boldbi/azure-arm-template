@@ -25,7 +25,7 @@ $(document).ready(function () {
             timeOut = setTimeout(function () {
                 PerformSearch(element);
             }, 900);
-        }  
+        }
     });
 });
 
@@ -44,7 +44,7 @@ function listUsersForAdminSelection() {
             pageSettings: { pageSize: 25 },
             height: gridHeight - (140 + $("#header-description").outerHeight()),
             width: 'auto',
-            selectionSettings: {Type : 'Multiple'},
+            selectionSettings: { Type: 'Multiple' },
             enableHover: true,
             load: fnOnAddAdminGridActionBegin,
             actionBegin: fnOnAddAdminGridActionBegin,
@@ -96,11 +96,15 @@ $(document).on("change", ".checkbox-row", function () {
     $(".modal-dialog").addClass("fixed-pos");
     window.setTimeout('$(".modal-dialog").removeClass("fixed-pos");', 1);
     var currentUsername = $(this).attr("data-username");
+    var UserIdValue = $(this).attr("data-checked-id");
 
     if (isChecked) {
         selectedAdmins.push(currentUsername);
         previousIndex.push(index);
         gridObj.selectionModule.selectRows(previousIndex, index);
+        userId.push(UserIdValue);
+        previousIndexUserId.push(index);
+        gridObj.selectionModule.selectRows(previousIndexUserId, index);
     }
     else {
         var arrayIndex = selectedAdmins.indexOf(currentUsername);
@@ -108,6 +112,11 @@ $(document).on("change", ".checkbox-row", function () {
         selectedAdmins.splice(arrayIndex, 1);
         previousIndex.splice(previousArrayIndex, 1);
         gridObj.selectionModule.selectRows(previousIndex);
+        var arrayIndexUserId = userId.indexOf(UserIdValue);
+        var previousArrayIndexUserId = previousIndexUserId.indexOf(index)
+        userId.splice(arrayIndexUserId, 1);
+        previousIndexUserId.splice(previousArrayIndexUserId, 1);
+        gridObj.selectionModule.selectRows(previousIndexUserId);
     }
     gridAdminData = gridObj.currentViewData;
     var userRowCheckedCount = 0;
@@ -253,7 +262,7 @@ $(document).on("click", "#clear-search", function () {
     var gridObj = document.getElementById("add_admins_grid").ej2_instances[0];
     gridObj.clearSelection();
     selectedAdmins = [];
-	gridHeight = 500;
+    gridHeight = 500;
     listUsersForAdminSelection();
     gridObj.refresh();
 });

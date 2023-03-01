@@ -16,6 +16,7 @@ var isIsolationCodeUpdated = false;
 var validateTimer;
 var validateInterval = 1000;
 var previousIndex = [];
+var previousIndexUserId = [];
 var tenantId;
 var UpdateTenantId;
 

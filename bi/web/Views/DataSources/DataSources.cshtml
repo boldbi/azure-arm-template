@@ -1,7 +1,8 @@
-﻿@{
+﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
     var globalAppSettings = _globalAppSettings;
     var isMobile = new DeviceDetection(Context).IsMobile;
-    ViewBag.Title = T["Data Sources"].Value+" - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.Title = T["Data Sources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageDatasources);
     var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
     var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
@@ -104,7 +105,12 @@
                 {
                     <div class="import-area col-xs-12 bi-page-header">
                         <div class="bi-page-header-description col-xs-6 no-padding">
-                            <h1 class="h2 page-title">@T["DATA SOURCES"]</h1>
+                            <h1 class="h2 page-title">
+                                @T["DATA SOURCES"]
+                                <feature name=@FeatureManagement.Yokogawa>
+                                <span style="display: none" id="data-source-text">(<span id="data-source-count"></span>) </span>
+                                </feature>
+                            </h1>
                             <h5 class="page-description">@T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."]</h5>
                         </div>
                         <div class="col-xs-6 no-padding bi-header-btn">
@@ -117,7 +123,7 @@
                             {
                                 <button type="button" id="merge-datasource" class="pull-right link-button app-btn-link">@T["Combine Data Source"]</button>
                             }
-                            </div>
+                        </div>
                     </div>
                     <div class="col-xs-12 bi-page-body">
                         <div id="search-area" class="pull-right">
@@ -138,7 +144,7 @@
                     </div>
                 }
             </div>
-                @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
         </div>
     }
     else

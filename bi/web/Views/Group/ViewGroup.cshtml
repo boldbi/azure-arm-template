@@ -80,6 +80,7 @@
                         headerText: "@T["Name"]",
                         width: 100,
                         field: "DisplayName",
+                        templateID: "#NameTemplate",
                         headerTemplateID: "#nameheader",
                         type: "string",
                         allowFiltering: true
@@ -145,20 +146,6 @@
                 });
             });
 
-            $("#delete-group-area").ejDialog({
-                width: "499px",
-                showOnInit: false,
-                allowDraggable: true,
-                enableResize: false,
-                showHeader: false,
-                title: "@T["Delete Group"]",
-                enableModal: true,
-                closeOnEscape: true,
-                close: ''
-            });
-            var deleteGroupWaitingPopupTemplateId = createLoader("delete-group-area_wrapper");
-            $("#delete-group-area_wrapper").ejWaitingPopup({ template: $("#" + deleteGroupWaitingPopupTemplateId) });
-
             $.ajax({
                 type: "GET",
                 url: groupAttributesUrl,
@@ -211,12 +198,12 @@
         {{/if}}
     </script>
     <feature name=@FeatureManagement.Yokogawa>
-        <script type="text/x-jsrender" id="nametemplate">
+        <script type="text/x-jsrender" id="NameTemplate">
             <a class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}">{{:DisplayName}}</a>
         </script>
     </feature>
     <feature name=@FeatureManagement.Yokogawa negate="true">
-        <script type="text/x-jsrender" id="nametemplate">
+        <script type="text/x-jsrender" id="NameTemplate">
             <span class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
         </script>
     </feature>
@@ -476,9 +463,7 @@
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
-        <div id="delete-group-area" class="no-padding">
-            <iframe src="" style="border: 0;" id="delete-group-iframe" border="0" width="100%" height="100%"></iframe>
-        </div>
+        <div id="delete-group-area" class="no-padding"></div>
     </div>
     <div id="add-groupuser-area" class="no-padding">
         <iframe src="" style="border: 0;" id="add-groupuser-iframe" border="0" width="100%" height="100%"></iframe>

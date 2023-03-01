@@ -2,10 +2,18 @@
     Layout = null;
     var cdnLink = GlobalAppSettings.CdnDomain;
     var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = string.Empty;
     var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
     var favicon = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon";
     var loginLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=login";
-    var dashboardServerResourceUrl = (GlobalAppSettings.HttpPathBase + ServerAppConfig.AppSettings.EndPoints.CdnLink).TrimEnd('/');
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        dashboardServerResourceUrl = (GlobalAppSettings.HttpPathBase + ServerAppConfig.AppSettings.EndPoints.CdnLink).TrimEnd('/');
+    }
+    else
+    {
+        dashboardServerResourceUrl = ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
+    }
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
 }

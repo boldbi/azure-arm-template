@@ -586,7 +586,8 @@ $(document).ready(function () {
             success: function (result) {
                 if (isReloadPage) {
                     if (isUrlChange) {
-                        window.location.href = getSslValue() + "://" + siteURL + location.pathname;
+                        var currentURL = window.location.pathname;
+                        window.location.href = getSslValue() + "://" + siteURL + currentURL.substring(currentURL.indexOf("/ums/administration"));
                     }
                     else {
                         window.location.href = getSslValue() + "://" + location.host + location.pathname;

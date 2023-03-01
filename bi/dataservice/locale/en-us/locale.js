@@ -225,7 +225,18 @@
                 designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator.",
                 minimumToolText: "The field bind in this section will be considered as a start value of the Gauge Range. For setting static values, use the properties panel.",
 				maximumToolText: "The field bind in this section will be considered as an end value of the Gauge Range. For setting static values, use the properties panel.",
-                rangeNavigatorToolTextMessage:"Range Navigator requires at least one value and one argument to render. The argument section supports only the Date field."
+                rangeNavigatorToolTextMessage:"Range Navigator requires at least one value and one argument to render. The argument section supports only the Date field.",
+				hiddenColumnMessage: {
+					chart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column or Row section",
+					radarPolarChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
+					treeMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
+					heatMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Size or X-Axis or Y-Axis section",
+					map: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
+					bingMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
+					bubbleSactterChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the X-Axis or Label or Size or Row section",
+					circularGauge: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Series section",
+					comboChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section"
+				}
             },
             propertyPanel: {
                 headerText: "Properties",
@@ -288,6 +299,17 @@
 					pagerTemplateItemsText: "Items",
 					disableVirtualization: "Disable Virtual Loading"
 				},
+                summaryRowSettings: {
+                    summaryRowTitle: "Summary Row",
+					enableSummaryRow: "Enable Summary Row",
+					enableSummaryHeight: "Auto Height",
+					summaryheight: "Height",
+					enableSummaryPadding: "Auto Padding",
+					summaryPadding: "Padding",
+					enableSummaryFontSize: "Auto Font Size",
+					summaryFontSize: "Font Size",
+					customizeButton: "Customize"
+                },
                 filter: {
                     actAsMasterWidget: "Act As Master Widget",
                     ignoreFilterActions: "Ignore Filter Actions",
@@ -490,6 +512,12 @@
                     top: "Top",
                     middle: "Middle",
                     bottom: "Bottom"
+                },
+                emptyPointMode:{
+                    gap: "Gap",
+                    zero: "Zero",
+                    average: "Average",
+                    connect: "Connect"
                 },
                 fontSettings: {
                     categoryDisplayName: "Font Settings",
@@ -2168,7 +2196,7 @@
                     replaceText: "Replace ",
                     urlText: "URL",
                     withUserDataText: "with your data",
-                    apiDocumentationText: "API documentation",
+                    userGuideText: "User Guide",
                     accountKeyText: "Account Key",
                     authenticationTypeText: "SharedKeyAuthentication",
                     storageAccountNameText: "Storage Account Name",
@@ -3501,6 +3529,41 @@
                 getsubmissionByPermission: "Get Submission By Permission",
                 viewTags: "View Tags"
             },
+            sendGridDataSource: {
+                campaigns: "Campaigns",
+                others: "Others",
+                campaignsstats: "Campaigns Stats",
+                contacts: "Contacts",
+
+                allcampaigns: "All Campaigns",
+                senderidentities: "Sender Identities",
+                singlesends: "Single Sends",
+                searchsinglesends: "Search Single Sends",
+                segments: "Segments",
+                categories: "Categories",
+                filtermessages: "Filter Messages",
+                accounts: "Accounts",
+                allglobalsuppression: "All Global suppression",
+                allsuppressiongroups: "All suppression groups associated with user",
+                allsuppression: "All suppressions",
+                allinvalidemails: "All invalid emails",
+                automationstats: "Automation Stats",
+                singlesendstats: "Single Send Stats",
+                emailstats: "Email Stats for Categories",
+                sumofemailstats: "Sums of email stats for Categories",
+                globalemailstats: "Global email stats",
+                emailstatsprovince: "Email stats by State/Province",
+                emailstatsdevice: "Email stats by device",
+                emailstatsclient: "Email stats by client",
+                emailstatsmailbox: "Email stats by mailbox",
+                emailstatsbrowser: "Email stats by browser",
+                allbounces: "All Bounces",
+                allblocks: "All Blocks",
+                allspamreports: "All spam reports",
+                searchcontacts: "Search Contacts",
+                contactlists: "Contact lists",
+                recipients: "Recipients"
+            },
             webCustomDataSource: {
                 emptyUrlValidation: "Url should not be empty.",
                 emptyRawBodyValidation: "Raw body should not be empty",
@@ -3549,6 +3612,7 @@
                 almaApplicationText: "Application Key",
                 emptyApplicationnameValidation: "The Application name should not be empty",
                 validApplicationNameValidation: "Please enter a valid Application Key",
+                locationIdDisplayText: "Location Id",
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
@@ -5670,7 +5734,7 @@
                 requestConnect: "Request a connector",
                 breadcrumbSelectConnector: "SELECT CONNECTOR",
                 breadcrumbConnect: "CONNECT",
-                apiDocumentationText: "API Documentation"
+                userGuideText: "User Guide"
             },
             importType: {
                 importType: "Import Type",
@@ -6915,12 +6979,6 @@
                 tabOrder: "Tab Order",
                 widgetOrder: "Widget Order"
             },
-			downloadUpload: {
-                selectDataSource: "Please select a data source to map.",
-				configureDataSource: "Configure the data source",
-                mapToExistingDataSource: "Map to an existing data source",
-				dsPermissionInfoMessage: "You do not have permission to create data source. Please contact your System Administrator"
-            }
         }
     }
 }

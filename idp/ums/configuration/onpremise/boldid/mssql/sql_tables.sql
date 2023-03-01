@@ -267,7 +267,6 @@ CREATE TABLE [BOLDTC_UserLogin] (
   (
   [Id] ASC
   ) WITH (IGNORE_DUP_KEY = OFF)
-
 )
 ;
 CREATE TABLE [BOLDTC_TMUserGroup] (

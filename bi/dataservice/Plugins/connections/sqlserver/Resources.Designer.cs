@@ -465,7 +465,18 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlCountAll", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Count_BIG.
+        /// </summary>
+        internal static string SqlCount_Big
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlCount_Big", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to COUNTD.
         /// </summary>

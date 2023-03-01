@@ -898,12 +898,14 @@ CREATE TABLE SyncDS_BackgroundJobs (
 	JobType int NOT NULL,
 	ItemId uuid NULL,
 	UserId int NULL,
-	JobDetails text NOT NULL,
+	JobDetails text NULL,
 	CreatedDate timestamp NOT NULL,
 	CompletedDate timestamp NOT NULL,
 	Status varchar(255) NOT NULL,
+	StatusMessage varchar(255) NULL,
 	ResourceInfo text NULL,
-	CanIncludeSensitiveInfo smallint NOT NULL,
+	CanIncludeSensitiveInfo smallint NULL,
+	IsSampleData smallint NULL,
 	IsActive smallint NOT NULL)
 ;
 

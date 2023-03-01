@@ -5,6 +5,7 @@ var searchId;
 var isSafari = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1;
 var clearSearch = false;
 var toastTimeout;
+var downloadLogsDialog;
 
 var keyCode = {
     Tab: 9,
@@ -178,10 +179,51 @@ $(document).ready(function () {
     //        url: isLicenseExpiredUrl,
     //    });
     //}
+
+    downloadLogsDialog = new ej.popups.Dialog({
+        header: window.Server.App.LocalizationContent.GetDiagnosticLogs,
+        content: document.getElementById("download-logs-dialog"),
+        showCloseIcon: true,
+        width: '500px',
+        height: '284px',
+        isModal: true,
+        visible: false,
+        beforeOpen: fnBeforeOpen,
+        animationSettings: { effect: 'Zoom' }
+    });
+
+    downloadLogsDialog.appendTo('#download-logs-dialog-content');
+
+    var dropDownList = new ejs.dropdowns.DropDownList({
+        index: 0,
+        floatLabelType: "Never",
+        placeholder: "Select a time period",
+        cssClass: 'e-outline e-custom e-non-float',
+        enablePersistence: true,
+        query: new ej.data.Query(),
+        allowFiltering: false,
+        filterType: "Contains"
+    });
+
+    dropDownList.appendTo("#download-logs-dialog-dropdown");
+});
+
+$(document).on("click", "#download-log", function () {
+    downloadLogsDialog.show();
+});
+
+$(document).on("click", "#download-logs-dialog-cancel", function () {
+    downloadLogsDialog.hide();
 });
 
 $(document).on("click", ".dropdown-backdrop", function () {
     parent.$("#nav-backdrop").hide();
+});
+
+$(document).on("click", "#download-logs-dialog-proceed", function () {
+    downloadLogsDialog.hide();
+    var val = document.getElementById("download-logs-dialog-dropdown").ej2_instances[0].value;
+    window.location = getDiagnosticLogsUrl + "?span=" + val;
 });
 
 $(document).on("click", "#notification-link, #account-profile, #upload-item-section", function (e) {
@@ -393,6 +435,10 @@ function PerformSearch(currentId) {
         gridObj = document.getElementById('Localization_grid').ej2_instances[0];
         gridObj.refresh();
     }
+}
+
+function fnBeforeOpen() {
+    document.getElementById('download-logs-dialog').style.visibility = 'visible';
 }
 
 function imageOnLoad() {
@@ -916,7 +962,7 @@ function WarningAlert(header, content, error, duration) {
             parent.$('#warning-alert').fadeOut();
         }, duration);
     }
-  
+
     $(document).on("click", ".close-div", function () {
         parent.$('#warning-alert').fadeOut();
     });
@@ -1142,28 +1188,28 @@ function ValidateIsolationCode(code, id) {
     return isValid;
 }
 
-   $("#container, #view").hide();
-    $(document).on("click", ".view-more", function () {
-        $("#container").show();
-        $("#warning-alert").css('height', '200px')
-        $("#view").addClass("view-less");
-        $("#view").removeClass("view-more");
-        $("#view").html(window.Server.App.LocalizationContent.ViewLess);
-        clearTimeout(toastTimeout);
-    });
-    $(document).on("click", ".view-less", function () {
-        $("#container").hide();
-        $("#warning-alert").css('height', '84px')
-        $("#view").addClass("view-more");
-        $("#view").removeClass("view-less");
-        $("#view").html(window.Server.App.LocalizationContent.ViewMore);
-    });
+$("#container, #view").hide();
+$(document).on("click", ".view-more", function () {
+    $("#container").show();
+    $("#warning-alert").css('height', '200px')
+    $("#view").addClass("view-less");
+    $("#view").removeClass("view-more");
+    $("#view").html(window.Server.App.LocalizationContent.ViewLess);
+    clearTimeout(toastTimeout);
+});
+$(document).on("click", ".view-less", function () {
+    $("#container").hide();
+    $("#warning-alert").css('height', '84px')
+    $("#view").addClass("view-more");
+    $("#view").removeClass("view-less");
+    $("#view").html(window.Server.App.LocalizationContent.ViewMore);
+});
 
-    $('[data-toggle="tooltip"]').tooltip();
-    $(document).on("click", "#copy-error-area", function (e) {
-        $("#text-error-area").select();
-        document.execCommand('copy');
-        $("#copy-error-area").attr("data-original-title", window.Server.App.LocalizationContent.Copied);
-        $("#copy-error-area").tooltip("hide").attr("data-original-title", window.Server.App.LocalizationContent.Copied).tooltip("fixTitle").tooltip("show");
-        setTimeout(function () { $("#copy-error-area").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy); $("#copy-error-area").tooltip(); }, 3000);
-    });
+$('[data-toggle="tooltip"]').tooltip();
+$(document).on("click", "#copy-error-area", function (e) {
+    $("#text-error-area").select();
+    document.execCommand('copy');
+    $("#copy-error-area").attr("data-original-title", window.Server.App.LocalizationContent.Copied);
+    $("#copy-error-area").tooltip("hide").attr("data-original-title", window.Server.App.LocalizationContent.Copied).tooltip("fixTitle").tooltip("show");
+    setTimeout(function () { $("#copy-error-area").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy); $("#copy-error-area").tooltip(); }, 3000);
+});

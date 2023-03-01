@@ -35,7 +35,7 @@
 {
     <div class="external-container">
         <div class="divider-container col-xs-12">
-            <hr class="connect-line-left"><div class="content text-body">@T["or Connect with"]</div><hr class="connect-line-right">
+            <hr class="connect-line-left"><div class="content text-body">@T["or"]</div><hr class="connect-line-right">
         </div>
         <div id="alternative-login">
             <div class="page-wrapper">
@@ -54,8 +54,8 @@
                                 @Html.AntiForgeryToken()
                                 @Html.Hidden("provider", item.DisplayName)
                                 <input type="hidden" id="azure-email" name="email" />
-                                <img alt="Azure AD" src="@microsoftLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/azuread.png")') this.src = '@Url.Content("~/images/common/application/azuread.png")';" />
-                                <span id="adfs-login-text" class="login-provider-name">@T["Microsoft ADFS"]</span>
+                                <img class="external-provider" alt="Azure AD" src="@microsoftLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/azuread.png")') this.src = '@Url.Content("~/images/common/application/azuread.png")';" />
+                                <span id="adfs-login-text" class="login-provider-name">@T["Sign in with Microsoft"]</span>
                                 <div id="validate-azure-user" class="error-message validation-holder">
                                 </div>
                             </button>
@@ -71,8 +71,8 @@
                         {
                             <form id="login-button-windows" class="external-login-buttons">
                                 <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
-                                    <img alt="Windows AD" src="@windowsADLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/windows-ad.svg")') this.src = '@Url.Content("~/images/common/application/windows-ad.svg")';" />
-                                    <span class="windows-ad-login-text">@T["Windows AD"]</span>
+                                        <img class="external-provider" alt="Windows AD" src="@windowsADLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/windows-ad.svg")') this.src = '@Url.Content("~/images/common/application/windows-ad.svg")';" />
+                                    <span class="windows-ad-login-text">@T["Sign in with Windows AD"]</span>
                                     <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
                                 </button>
                             </form>
@@ -86,13 +86,13 @@
                                     <input type="hidden" id="azure-email" name="email" />
                                     @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
                                     {
-                                        <img id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
+                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
                                     }
                                     else
                                     {
-                                        <img id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + auth.AzureADB2CSettings.Logo)" alt="@T["AuthLogo"]" />
+                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + auth.AzureADB2CSettings.Logo)" alt="@T["AuthLogo"]" />
                                     }
-                                    <span class="login-provider-name">@auth.AzureADB2CSettings.AzureB2CProviderName</span>
+                                        <span class="login-provider-name"> Sign in with @auth.AzureADB2CSettings.AzureB2CProviderName</span>
                                 </button>
                             </form>
                         }
@@ -107,14 +107,14 @@
 
                                     @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
                                     {
-                                        <img id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
+                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
                                     }
                                     else
                                     {
-                                        <img id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="@T["AuthLogo"]" />
+                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="@T["AuthLogo"]" />
                                     }
 
-                                    <span class="login-provider-name">@(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
+                                        <span class="login-provider-name">Sign in with @(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
                                 </button>
                             </form>
                         }

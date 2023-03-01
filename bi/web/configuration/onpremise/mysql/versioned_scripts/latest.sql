@@ -23,8 +23,10 @@ CREATE TABLE {database_name}.BOLDBI_BackgroundJobs(
     CreatedDate datetime NOT NULL,
     CompletedDate datetime NOT NULL,
     Status varchar(255) NOT NULL,
+	StatusMessage varchar(255) NULL,
 	ResourceInfo text NULL,
-	CanIncludeSensitiveInfo tinyint NOT NULL,
+	CanIncludeSensitiveInfo tinyint NULL,
+	IsSampleData tinyint NULL,
     IsActive tinyint NOT NULL,
     PRIMARY KEY (Id))
 ;

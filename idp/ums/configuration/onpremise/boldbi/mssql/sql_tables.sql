@@ -909,8 +909,10 @@ CREATE TABLE [BOLDBI_BackgroundJobs](
     [CreatedDate] [datetime] NOT NULL,
     [CompletedDate] [datetime] NOT NULL,
     [Status] [nvarchar](255) NOT NULL,
+	[StatusMessage] [nvarchar](255) NULL,
 	[ResourceInfo] [nvarchar](max) NULL,
-	[CanIncludeSensitiveInfo] [bit] NOT NULL,
+	[CanIncludeSensitiveInfo] [bit] NULL,
+	[IsSampleData] [bit] NULL,
     [IsActive] [bit] NOT NULL)
 ;
 

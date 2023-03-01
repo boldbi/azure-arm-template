@@ -155,6 +155,8 @@
          var dashboardSettingsUrl = "@Url.Action("DashboardSettings", "Administration")";
         var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
         var pinWidgetToHomepageUrl = "@Url.Action("PinWidgetToHomepage", "Boards")";
+        var updateTemplateDashboardUrl = "@Url.Action("UpdateTemplateDashboardWithCustomerData", "Dashboards")";
+        var getTemplateDashboardStatusUrl = "@Url.Action("GetTemplateDashboardStatus", "Dashboards")";
         var triggerDashboardRenderComplete = "@Url.Action("DashboardOptions", "FileRender")";
         var pageurl = "@requestUrl.LocalPath";
         var canEdit = @Json.Serialize(canEdit);
@@ -183,13 +185,13 @@
         var viewDetails = @Html.Raw(Json.Serialize(ViewBag.ViewDetails));
         var isUserAuthenticatedInCurrentTenant = @Json.Serialize(isUserAuthenticatedInCurrentTenant);
         var autosaveFilter = @Json.Serialize(globalAppSettings.SystemSettings.IsEnableAutosaveFilter);
-        var theming = @Json.Serialize(globalAppSettings.SystemSettings.Theming);
+        var theming = false;
         var isUserAutosaveFilter = @Html.Raw(Json.Serialize(ViewBag.IsUserAutosaveFilter));
         var hasDefaultView = @Json.Serialize(ViewBag.HasDefaultView);
         var dashboardServerApiUrl = "@dashboardServerApiUrl";
         var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
         var filterQuery = @Html.Raw(Json.Serialize(filterQuery));
-        var dashboardTheme = "@ViewBag.Theme";
+        var dashboardTheme = "";
         var isDefaultView =  @Json.Serialize(ViewBag.IsDefaultView);
         var isWidgetRequest = @Json.Serialize(pinWidget);
         var widgetId = "@widgetId";
@@ -345,14 +347,9 @@
     {
         <environment include="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.js"></script>
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr/signalr.js"></script>
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr-bundle.js"></script>
-
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.min.js"></script>
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr/signalr.min.js"></script>
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/signalr-bundle.min.js"></script>
         </environment>
 
         <div class="pull-right" id="sample-data-notification" style="display:none">

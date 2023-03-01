@@ -13,11 +13,9 @@
 </environment>
 
 <script>
-    var validateCustomDomainUrl = "@Url.Action("ValidateCustomDomain", "CustomDomain")";
     var addCustomDomainUrl = "@Url.Action("AddCustomDomain", "CustomDomain")";
     var createSubscriptionCardUrl = "@Url.Action("AddPaymentDetail", "Payment")";
     var isCardExist = "@(GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier && ViewBag.SaasPlan != (int)SaaSPlan.SingleUserPlan ? true : ViewBag.IsCardExist)";
-    var updateSslCertificateUrl = "@Url.Action("UpdateSslCertificate", "CustomDomain")";
     var deleteCustomDomainUrl = "@Url.Action("DeleteCustomDomain", "CustomDomain")";
 </script>
 <script src="https://js.stripe.com/v3/"></script>
@@ -33,102 +31,39 @@
             </button>
         </h4>
     </div>
-    <div class="charge-custom-domain-div col-xs-12 no-padding">
-        <div class="fluent-popup-body col-xs-12">
-            <div class="custom-domain-logo text-center">
-                <i class="su su-www"></i>
-            </div>
-            <div class="custom-domain-header text-center">
-                <span>@T["Dashboards on your own domain!"]</span>
-            </div>
-            <div class="custom-domain-description">
-                <label id="custom-domain-description-label" class="popup-label text-center">@T["You can use your own domain for your dashboards."]<br>
-                    @string.Format(T["It includes your domain setup and an {0} Certificate."].Value,"SSL")<br>
-                    <a class="domain-learn" href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomDomain))" target="_blank">@T["Learn how to do it."]</a>
-                </label>
-            </div>
-            @if (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier || ViewBag.SaasPlan == (int)SaaSPlan.SingleUserPlan)
-            {
-            <hr class="buy-domain-separator" />
-            <div class="custom-domain-amount text-center popup-label">
-                @Html.Raw(string.Format(T["You will be charged {0}/Month{1}"].Value,"<span class='custom-domain-charge'>$100<span class='charge-period'>","</span></span>"))
-            </div>
-            <button type="button" id="custom-domain-buy-button" class="app-button app-primary-button app-btn-primary">@T["Buy now"]</button>
-            }
-            else
-            {
-            <hr class="invisible">
-            <button type="button" id="custom-domain-buy-button" class="app-button app-primary-button app-btn-primary">@T["Next"]</button>
-            }
-
+    <div class="validate-custom-domain-div fluent-popup-body col-xs-12">
+        <div class="custom-domain-logo text-center">
+            <i class="su su-www"></i>
         </div>
+        <div class="custom-domain-header text-center">
+            <span>@T["Dashboards on your own domain!"]</span>
+        </div>
+        <div class="custom-domain-description text-center">
+            <label id="custom-domain-description-label" class="popup-label text-center">
+                @Html.Raw(string.Format(T["To continue, add a {0} record mapping to the below domain name, for your domain in the {1} settings."].Value, "CNAME", "DNS"))
+                <a class="app-hyperlink" href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomDomain))" target="_blank">@T["Learn how to do it."]</a>
+            </label>
+            <div class="input-group custom-domain-link-div">
+                <input onClick="this.setSelectionRange(0, this.value.length)" value="@ServerAppConfig.AppSettings.EndPoints.CustomDomainMapping" type="text" class="form-control text-center custom-domain-link" readonly />
+                <span class="input-group-btn">
+                    <button class="btn btn-default su su-copy custom-domain-link-copy" type="button" readonly="" data-original-title="@T["Click to copy"]"></button>
+                </span>
+            </div>
+
+            <label class="col-xs-12 popup-label text-center domain-name-warning">@string.Format(T["Do not include {0} or {1}"].Value, "http://", "https://")</label>
+        </div>
+        <div class="custom-domain-input col-xs-12 no-padding">
+            <input id="custom-domain-name" type="text" class="form-control textarea" placeholder="www.mydashboardsite.com" maxlength="255" />
+            <div id="domain-validation-message" class="col-xs-12 error-message text-center"></div>
+        </div>
+        <label id="custom-domain-description-label" class="popup-label text-center">
+            @Html.Raw(string.Format(T["Note: Use only a subdomain and not your root domain when adding a {0} record. (For example: if you want use a root domain like {1}, add www as subdomain and update custom domain as {2}."].Value, "CNAME", "yourcompany.com", "www.yourcompany.com"))
+        </label>
     </div>
-
-    <div class="validate-custom-domain-div col-xs-12 no-padding" style="display:none">
-        <div class="fluent-popup-body col-xs-12">
-            <div class="custom-domain-logo text-center">
-                <i class="su su-www"></i>
-            </div>
-            <div class="custom-domain-header text-center">
-                <span>@T["Dashboards on your own domain!"]</span>
-            </div>
-            <div class="custom-domain-description text-center">
-                <label id="custom-domain-description-label" class="popup-label text-center">
-                    @Html.Raw(string.Format(T["To continue, add a {0} record mapping to the below domain name, for your domain in the {1} settings."].Value, "CNAME", "DNS"))
-                    <a class="app-hyperlink" href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomDomain))" target="_blank">@T["Learn how to do it."]</a>
-                </label>
-                <div class="input-group custom-domain-link-div">
-                    <input onClick="this.setSelectionRange(0, this.value.length)" value="@ServerAppConfig.AppSettings.EndPoints.CustomDomainMapping" type="text" class="form-control text-center custom-domain-link" readonly />
-                    <span class="input-group-btn">
-                        <button class="btn btn-default su su-copy custom-domain-link-copy" type="button" readonly="" data-original-title="@T["Click to copy"]"></button>
-                    </span>
-                </div>
-
-                <label class="col-xs-12 popup-label text-center domain-name-warning">@string.Format(T["Do not include {0} or {1}"].Value,"http://","https://")</label>
-            </div>
-            <div class="custom-domain-input col-xs-12 no-padding">
-                <input id="custom-domain-name" type="text" class="form-control textarea" placeholder="www.mydashboardsite.com" maxlength="255" />
-                <div id="domain-validation-message" class="col-xs-12 error-message text-center"></div>
-            </div>
-            <button type="button" id="custom-domain-validate-button" class="app-button app-primary-button app-btn-primary" disabled="disabled">@T["Validate and proceed"]</button>
-        </div>
+    <div id="custom-domain-footer" class="fluent-popup-footer col-xs-12">
+        <button type="button" id="close-custom-domain-dialog" class="app-button app-secondary-button app-btn-secondary pull-right close-custom-domain">@T["Close"]</button>
+        <button type="button" id="update-custom-domain" class="app-button app-primary-button app-btn-primary pull-right">@T["Add"]</button>
     </div>
-
-    <form class="upload-ssl-certificate-div" method="post" action="" enctype="multipart/form-data" id="sslform" style="display:none">
-        <div class="col-xs-12 no-padding">
-            <div class="fluent-popup-body col-xs-12">
-                <div class="free-ssl-div">
-                    <span class="su su-lock"></span>
-                    <span class="free-ssl-description">@string.Format(T["Get your free {0} certificate from us."].Value, "SSL")</span>
-                    <span class="free-ssl-badge badge">@T["Coming soon"]</span>
-                </div>
-                <div class="custom-domain-header text-center">
-                    <span>@string.Format(T["{0} Certificate"].Value,"SSL")</span>
-                </div>
-                <div class="upload-ssl-description text-center">
-                    <span class="popup-label">@string.Format(T["Upload {0} certificate to make your website secure."].Value,"SSL")</span>
-                </div>
-                <div class="ssl-certificate-input col-xs-12 no-padding">
-                    <div class="no-padding ssl-certificate-upload-div">
-                        <div class="input-group input-file ssl-certificate-upload" name="ssl-certificate">
-                            <input type="text" class="form-control ssl-browsefile-input" placeholder='@T["Browse file path"]' />
-                            <span class="input-group-btn">
-                                <button class="btn btn-default btn-choose ssl-browsefile-button" type="button">@T["Browse"]</button>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="no-padding certificate-password-div">
-                        <input id="ssl-certificate-password" type="password" class="form-control textarea" name="sslpassword" placeholder="@T["Password"]" maxlength="255" />
-                    </div>
-                </div>
-                <div id="certificate-upload-validation-message" class="col-xs-12 error-message text-center"></div>
-                <div class="ssl-certificate-button col-xs-8">
-                    <button type="button" id="ssl-certificate-validate-back" class="app-button app-secondary-button app-btn-secondary pull-left">@T["Back"]</button>
-                    <button type="button" id="ssl-certificate-validate-button" class="app-button app-primary-button app-btn-primary pull-right" disabled="disabled">@T["Validate and proceed"]</button>
-                </div>
-            </div>
-        </div>
-    </form>
 
     <div class="domain-registration-success col-xs-12 no-padding" style="display:none">
         <div class="fluent-popup-body col-xs-12">
@@ -142,65 +77,6 @@
                 www.mydashboardsite.com
             </a>
             <hr class="registration-success-separator" />
-            <div class="ssl-validity text-center">
-                @Html.Raw(string.Format(T["{0} certificate valid until {1}"].Value,"SSL","<span class='valid-until-date'></span>"))
-            </div>
-            <button type="button" class="app-button app-secondary-button app-btn-secondary registration-success-close">@T["Close"]</button>
-        </div>
-    </div>
-</div>
-
-<div id="update-ssl-certificate-popup" class="fluent-popup" style="display: none">
-    <div class="fluent-popup-header">
-        <h4 class="popup-title">
-            <i class="su su-edit"></i>
-            <span id="custom-domain-dialog-header">@string.Format(T["Update {0} Certificate"].Value,"SSL")</span>
-            <button type="button" title="@T["Close"]" class="close popup-close close-update-ssl" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </h4>
-    </div>
-
-    <form class="upload-ssl-certificate" method="post" action="" enctype="multipart/form-data" id="updatesslform" style="display:none">
-        <div class="col-xs-12 no-padding">
-            <div class="fluent-popup-body col-xs-12">
-                <div class="custom-domain-header text-center">
-                    <span>@string.Format(T["{0} Certificate"].Value, "SSL")</span>
-                </div>
-                <div class="upload-ssl-description text-center">
-                    <span class="popup-label">@string.Format(T["Upload {0} certificate to make your website secure."].Value,"SSL")</span>
-                </div>
-                <div class="ssl-certificate-input col-xs-12 no-padding">
-                    <div class="no-padding ssl-certificate-upload-div">
-                        <div class="input-group update-input-file ssl-certificate-upload" name="ssl-certificate">
-                            <input type="text" class="form-control ssl-browsefile-input" placeholder='@T["Browse file path"]' />
-                            <span class="input-group-btn">
-                                <button class="btn btn-default btn-choose ssl-browsefile-button" type="button">@T["Browse"]</button>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="no-padding certificate-password-div">
-                        <input id="update-ssl-certificate-password" type="password" class="form-control textarea" name="sslpassword" placeholder="@T["Password"]" maxlength="255" />
-                    </div>
-                </div>
-                <div id="update-certificate-validation-message" class="col-xs-12 error-message text-center"></div>
-                <div class="ssl-certificate-button col-xs-6">
-                    <button type="button" id="update-ssl-certificate-validate-button" class="app-button app-primary-button app-btn-primary pull-right" disabled="disabled">@T["Validate and proceed"]</button>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    <div class="domain-registration-success col-xs-12 no-padding" style="display:none">
-        <div class="fluent-popup-body col-xs-12">
-            <div class="registration-success-header text-center">
-                <i class="su su-password-tick"></i>
-            </div>
-            <hr class="registration-success-separator" />
-            <div class="ssl-validity text-center">
-                @string.Format(T["{0} certificate has been updated successfully."].Value, "SSL")<br>
-                @Html.Raw(string.Format(T["The {0} certificate is valid until {1}"].Value, "SSL", "<span class='valid-until-date'></span>"))
-            </div>
             <button type="button" class="app-button app-secondary-button app-btn-secondary registration-success-close">@T["Close"]</button>
         </div>
     </div>

@@ -1,4 +1,4 @@
-﻿/// <reference path="jquery-2.2.4.min.js" />
+/// <reference path="jquery-2.2.4.min.js" />
 'use strict'
 function initialize(data) {
     window.authData = data;
@@ -306,7 +306,7 @@ function authorize() {
             case 'stripe':
                 return 'Stripe';
             case "github":
-                return "Github";
+                return "GitHub";
             case "sendgrid":
                 return "SendGrid";
             case 'youtube':
@@ -338,11 +338,13 @@ function authorize() {
                 this.validateOAuthConnection();
                 break;
             case 'mailchimp':
-            case 'sendgrid':
             case 'github':
             case 'stripe':
             case 'twilio':
                 this.validateBasicAuthConnection();
+                break;
+            case 'sendgrid':
+                this.validateTokenAuthConnection();
                 break;
         }
     };
@@ -358,11 +360,11 @@ function authorize() {
     this.getTemplate = function (service) {
         switch (service) {
             case 'ServiceNow':
-                return this.getDomainBasicAuthTemplate('https://yourinstance.service-now.com/api/now/table/incident', 'ServiceNow');
+                return this.getDomainBasicAuthTemplate('{instance-name}.service-now.com', 'ServiceNow');
             case 'Jira':
                 return this.getDomainBasicAuthTemplate('https://yourdomain.atlassian.net', 'Jira');
             case 'Zendesk':
-                return this.getDomainBasicAuthTemplate('https://company.zendesk.com', 'Zendesk');
+                return this.getDomainBasicAuthTemplate('{domain-name}.zendesk.com', 'Zendesk');
             case 'Salesforce':
             case 'Google Analytics':
             case 'Google Ads':
@@ -376,11 +378,12 @@ function authorize() {
                 $('.e-new-account').css('display', 'inline-block');
                 return this.getOAuthTemplate();
             case 'Mail Chimp':
-            case 'Github':
+            case 'GitHub':
             case 'Twilio':
             case 'Stripe':
-            case 'SendGrid':
                 return this.getBasicAuthTemplate(service);
+            case 'SendGrid':
+                return this.getTokenAuthTemplate(service);
         }
     };
     this.validateBasicAuthConnection = function () {
@@ -430,13 +433,45 @@ function authorize() {
             this.doAjaxPost('GET', window.authData.designerService + this.api.validateCredentials + '?' + this.portObjToUrl(obj.data), obj.data, this.onFetchSuccess);
         }
     };
+
+this.validateTokenAuthConnection = function () {
+    $('.e-auth-content-wrapper').removeClass('e-req-error');
+    var obj = { status: false, data: '' };
+    var data = {};
+    var isRequiredFieldEmpty = false;
+    var requiredFields = $('input.e-required');
+    for (var i = 0; i < requiredFields.length; i++) {
+        if (requiredFields.eq(i).val().trim() === '') {
+            isRequiredFieldEmpty = true;
+            break;
+        }
+    }
+    if ($("#apitoken").val().trim() !== '') {
+        data.apitoken = $('#apitoken').val().trim();
+    }
+    obj.status = true;
+    obj.data = JSON.stringify(data);
+    if (isRequiredFieldEmpty) {
+        $('.e-auth-content-wrapper').addClass('e-req-error');
+        obj.status = false;
+    }
+    if (obj.status) {
+        var request = {
+            provider: window.authData.provider,
+            service: window.authData.service,
+            data: obj.data,
+            origin: window.authData.origin
+        };
+        this.doAjaxPost('GET', window.authData.designerService + this.api.validateCredentials + '?' + this.portObjToUrl(obj.data), obj.data, this.onFetchSuccess);
+    }
+};
     this.validateDomainBasicAuthConnection = function () {
         $('.e-domain-url').removeClass('e-req-error');
         $('.e-domain-username').removeClass('e-req-error');
         $('.e-domain-pwd').removeClass('e-req-error');
         var obj = { status: false, data: '' };
         var data = {};
-        if ($("#url").val().trim() !== '' && this.validateUrl($("#url").val().trim()) && $("#username").val().trim() !== '' && $("#password").val().trim() !== '') {
+        if ($("#url").val().trim() !== '' && this.validateDomain($("#url").val().trim()) && $("#username").val().trim() !== '' && $("#password").val().trim() !== '') {
             data.url = $('#url').val().trim();
             data.username = $('#username').val().trim();
             data.password = $('#password').val().trim();
@@ -444,7 +479,7 @@ function authorize() {
             obj.data = JSON.stringify(data);
         } else {
             obj.status = false;
-            if ($("#url").val().trim() === '' || !this.validateUrl($("#url").val().trim())) {
+            if ($("#url").val().trim() === '' || !this.validateDomain($("#url").val().trim())) {
                 $('.e-domain-url').addClass('e-req-error');
             }
             if ($("#username").val().trim() === '') {
@@ -551,6 +586,12 @@ function authorize() {
     this.getDomainBasicAuthTemplate = function (domainUrl, service) {
         let passwordLabel = 'Password';
         let infoUrl;
+        let url = '';
+        if (service.toLowerCase() == 'servicenow') {
+            url = 'Instance Name';
+        } else {
+            url = 'Domain Name';
+        }
         switch (service.toLowerCase()) {
             case 'jira':
                 passwordLabel = 'API Token';
@@ -561,7 +602,7 @@ function authorize() {
         }
         return '<div class="e-div">' +
             '<span>' +
-            '<label>Url</label>' +
+            '<label>' + url + '</label>' +
             '</span>' +
             '<input type="text" class="e-domain-url e-required" id="url" placeholder="' + domainUrl + '"/>' +
             '</div>' +
@@ -569,7 +610,7 @@ function authorize() {
             ' <span>' +
             '<label>Username</label>' +
             '</span>' +
-            ' <input type="text" class=" e-domain-username e-required" id="username" placeholder="username"/>' +
+            ' <input type="text" class=" e-domain-username e-required" id="username" placeholder="Username"/>' +
             '</div>' +
             '<div class="e-div">' +
             '<span>' +
@@ -601,7 +642,7 @@ function authorize() {
                     ' <span>' +
                     '<label>Username</label>' +
                     '</span>' +
-                    ' <input type="text" class="e-required" id="username" placeholder="username"/>' +
+                    ' <input type="text" class="e-required" id="username" placeholder="Username"/>' +
                     '</div>' +
                     '<div class="e-div">' +
                     '<span>' +
@@ -609,16 +650,19 @@ function authorize() {
                     '</span>' +
                     ' <input type="password" class="e-required" id="password" placeholder="**********"/>' +
                     ' </div>';
-            case 'Github':
+            case 'GitHub':
                 return '<div class="e-div">' +
                     '<span>' +
                     '<label>Username</label>' +
                     '</span>' +
-                    '<input type="text" class="e-domain-username e-required" id="username" placeholder="username"/>' +
+                    '<input type="text" class="e-domain-username e-required" id="username" placeholder="Username"/>' +
                     '</div>' +
                     '<div class="e-div">' +
                     ' <span>' +
                     '<label>Personal Access Token</label>' +
+                    '<a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">' +
+                    '<img class="help-icon-personal-access-token" src="../../Connection/Content/Images/help_icon.png" style="width:12px;height;12px;margin-left:5px">' +
+                    '</a>' +
                     '</span>' +
                     ' <input type="password" class=" e-domain-username e-required" id="password" placeholder="**********"/>' +
                     '</div>';
@@ -627,7 +671,7 @@ function authorize() {
                     ' <span>' +
                     '<label>Username</label>' +
                     '</span>' +
-                    ' <input type="text" class="e-required" id="username" placeholder="username"/>' +
+                    ' <input type="text" class="e-required" id="username" placeholder="Username"/>' +
                     '</div>' +
                     '<div class="e-div">' +
                     '<span>' +
@@ -635,6 +679,17 @@ function authorize() {
                     '</span>' +
                     ' <input type="password" class="e-required" id="password" placeholder="**********"/>' +
                     ' </div>';
+        }
+    };
+    this.getTokenAuthTemplate = function (serviceProvider) {
+        switch (serviceProvider) {
+            case 'SendGrid':
+                return '<div class="e-div">' +
+                    ' <span>' +
+                    '<label>Api Token</label>' +
+                    '</span>' +
+                    ' <input type="password" class="e-required" id="apitoken" placeholder="**********"/>' +
+                    '</div>';
         }
     };
     this.getOAuthTemplate = function () {
@@ -716,6 +771,10 @@ function authorize() {
         var regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
         return regexp.test(url);
     };
+    this.validateDomain = function (url) {
+        var regexp = /^(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+        return regexp.test(url);
+    };
     this.keyHandler = function (evt) {
         if (evt.which === 13 || evt.keyCode === 13) {
             $('#continue-btn').trigger('click');
@@ -787,7 +846,7 @@ function authorize() {
             '<div class="e-account-settings-dropdown-div">' +
             '<div class="e-account-settings-dropdown-label-div"><label>Repositories :</label></div>' +
             '<div class="e-repositories" id="list-repositories"></div>' +
-            '</div><div><label id="items-count"> 0 item(s) selected</div>';
+            '</div><div><label id="items-count" style="margin-top: -0.5%"> 0 item(s) selected</div>';
     };
 
     this.getAccountsSettings = function (args) {
@@ -952,7 +1011,7 @@ function authorize() {
                 data = JSON.parse(args.Data);
                 if (data.repoList.length !== 0) {
                     reposList.html('');
-                    var repoSearchElem = '<div class="e-search-panel"><input type="text" id="search" class="e-searchbox" name="search"><img class="search-icon" src="/Connection/Content/Images/search-icon.png"><input type="checkbox" id="selectAll" class="e-select-all" name="selectAll"><label for="selectAll"> Select All</label></div>';
+                    var repoSearchElem = '<div class="e-search-panel" style="display: flex;align-items: center;"><input type="text" id="search" class="e-searchbox" name="search"><img class="search-icon" src="/Connection/Content/Images/search-icon.png" style="margin-left: -18px;"><input type="checkbox" id="selectAll" class="e-select-all" name="selectAll"><label for="selectAll"> Select All</label></div>';
                     reposList.append(repoSearchElem);
                     $('#search').on('keyup', $.proxy(this.searchRepos, this));
                     $('#selectAll').on('change', $.proxy(this.checkUncheckAll, this));

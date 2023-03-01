@@ -13,16 +13,18 @@ CREATE TABLE SyncDS_UserSession(
 ALTER TABLE SyncDS_Item ADD COLUMN IsUploadDraft smallint NOT NULL default 0
 ;
 
-CREATE TABLE SyncDS_BackgroundJobs (
+CREATE TABLE SyncDS_BackgroundJobs(
 	Id SERIAL primary key NOT NULL,
 	JobType int NOT NULL,
 	ItemId uuid NULL,
 	UserId int NULL,
-	JobDetails text NOT NULL,
+	JobDetails text NULL,
 	CreatedDate timestamp NOT NULL,
 	CompletedDate timestamp NOT NULL,
 	Status varchar(255) NOT NULL,
+	StatusMessage varchar(255) NULL,
 	ResourceInfo text NULL,
-	CanIncludeSensitiveInfo smallint NOT NULL,
+	CanIncludeSensitiveInfo smallint NULL,
+	IsSampleData smallint NULL,
 	IsActive smallint NOT NULL)
 ;

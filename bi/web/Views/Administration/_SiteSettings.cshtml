@@ -27,6 +27,7 @@
         </div>
 
         <form id="look-and-feel-form" class="col-md-12 form-horizontal bi-page-body" autocomplete="off">
+            <input type="hidden" id="default-domain-id" value="@globalAppSettings.SystemSettings.OriginalDomain" />
             @if (ServerAppConfig.IsSelfHosted)
             {
                 <div class="general-sub-section site-settings-page-section no-padding">
@@ -76,21 +77,12 @@
                             @if (ViewBag.IsCustomDomain)
                             {
                                 <div class="dropdown updatessl col-xs-4">
-                                    <a id="update-ssl-certificate" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="@string.Format(T["Update {0} Certificate"].Value, "SSL")">
-                                        <i class="su su-edit"></i>
-                                    </a>
-                                    <div class="separator"></div>
                                     <a id="delete-custom-domain" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="@T["Delete custom domain"]">
                                         <i class="su su-delete"></i>
                                     </a>
                                 </div>
-                                <div class="custom-domain no-padding col-xs-12 ssl-msg">
-                                    <div class="alert alert-success no-margin">
-                                        @Html.Raw(string.Format(T["{0} Certificate expires on {1}"].Value, "SSL", "<b>" + ViewBag.ExpirationDate + "</b>"))
-                                    </div>
-                                    @*<button type="button" title="" id="update-custom-domain" class="app-button app-secondary-button custom-domain-btn no-margin">
-                                      [[[Update custom domain]]]
-                                </button>*@
+                                <div class="col-xs-12 no-padding default-domain">
+                                    <span>@string.Format(T["Default domain is {0}"].Value, "https://" + globalAppSettings.SystemSettings.OriginalDomain)</span>
                                 </div>
                             }
                             @if (!ViewBag.IsCustomDomain)
@@ -185,7 +177,7 @@
                         {
                             <div class="form-group highlight-image col-xs-6 branding-logo footer-logo no-padding margin" data-image="login-screen">
                                 <div class="col-xs-3 logo-section">
-                                    <img id="display-footer-logo" src="@globalAppSettings.SystemSettings.FooterLogo" height="40" width="60" alt="@T["Powered by logo"]" />
+                                    <img id="display-footer-logo" src="@globalAppSettings.SystemSettings.FooterLogo" alt="@T["Powered by logo"]" />
                                 </div>
                                 <div class="col-xs-8 logo-description">
                                     <h3 class="title col-xs-12  sub-section-heading blur-whitelable-content no-margin">@T["Powered by logo"]</h3>

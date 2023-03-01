@@ -1,9 +1,23 @@
-﻿@{
+﻿@using Newtonsoft.Json
+@{
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') : ServerAppConfig.IsSelfHosted ? GlobalAppSettings.HttpPathBase + ServerAppConfig.AppSettings.EndPoints.CdnLink : ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var allowedCookies = ServerAppConfig.AllowedCookies;
+    var keyValuePairs = new Dictionary<string, string>();
+    foreach (var cookie in Context.Request.Cookies)
+    {
+        if (allowedCookies.Contains(cookie.Key))
+        {
+            keyValuePairs.Add(cookie.Key, cookie.Value);
+        }
+    }
 }
+<script>
+    var cookies = @Html.Raw(JsonConvert.SerializeObject(keyValuePairs));
+    var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
+</script>
 
 <environment include="Development,CloudDevelopment">
     <link rel="stylesheet" class="font-stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl, dns, true)" />

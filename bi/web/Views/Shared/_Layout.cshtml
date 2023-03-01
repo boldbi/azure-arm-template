@@ -56,9 +56,9 @@
 }
 @{
     var preloadScriptsFiles = new string[]
-    {
+{
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer.min.js"),
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer-component.min.js"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/dashboard-designer-bundle.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/datasource-designer.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/connection-designer.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/scripts/designer/ej1.common.all.min.js"),
@@ -70,11 +70,11 @@
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/datasourcerecurrencepage.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/datasourcerecurrencedependency.min.js"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/dashboard-feedback.min.js")
-    };
+};
 
     var preloadStylesFiles = new string[]
     {
-        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer-component.min.css"),
+        this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer-bundle.min.css"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/dashboard-designer.min.css"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/datasource-designer.min.css"),
         this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardDesignerResourceUrl + "/cdn/css/designer/connection-designer.min.css"),
@@ -145,22 +145,11 @@
     {
         <link rel="prefetch" href="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/health-check">
     }
-    <script>
+<script>
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var cdnLink = "@dashboardServerResourceUrl";
 
-        SetClientLocaleCookie("boldservice.client.locale", 365);
-            function SetClientLocaleCookie(name, exdays) {
-            var value = {
-                Locale: navigator.language,
-                TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            };
-                var exdate = new Date();
-                exdate.setDate(exdate.getDate() + exdays++);
-                var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
-                document.cookie = name + "=" + cookie_value + ";path=/;SameSite=Lax";
-            }
         window.onload = function () {
             var preloadStyles = @Json.Serialize(preloadStylesFiles);
             var preloadScripts = @Json.Serialize(preloadScriptsFiles);
@@ -246,6 +235,18 @@
         var isMobile = @Json.Serialize(isMobile);
         var currentProductVersion = "@currentVersion";
         var runTimeEnvironment = "@ServerAppConfig.RunTimeEnvironment";
+        var isUmsAdmin = "@identityResponse.IsUmsAdmin";
+
+        var value = {
+            Locale: navigator.language,
+            TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        setTimeout(function () {
+            if (cookies["boldservice.client.locale"] != JSON.stringify(value)) {
+                SetHttpOnlyCookie("boldservice.client.locale", JSON.stringify(value), 365);
+            }
+        }, 5000);
 
         $(document).ready(function () {
             generateProfileAvatar();

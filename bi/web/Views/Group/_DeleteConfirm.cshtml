@@ -8,9 +8,6 @@
     var dns = url.GetLeftPart(UriPartial.Authority);
 }
 
-<!DOCTYPE html>
-<html class="dashboard-server">
-<head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
@@ -18,11 +15,9 @@
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/deleteconfirm.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/deleteconfirm.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/deleteconfirm.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/deleteconfirm.min.js"></script>
     </environment>
 
     <script>
@@ -31,47 +26,17 @@
         var cdnLink = "@dashboardServerResourceUrl";
     </script>
 
-    <script>
-        $(document).ready(function () {
-            if (($(parent.window).width()) > 1400) {
-                $("#delete-resolution-fix").addClass("lg-flexible-deletegroup");
-            }
-            var eDialog = parent.$("#delete-group-area").data("ejDialog");
-            parent.$("#delete-group-area_wrapper").ejWaitingPopup("hide");
-            $(document).on("click", ".popup-close", function (e) {
-                eDialog.close();
-                parent.$("#delete-group-area iframe").attr("src", "");
-            });
-        });
-    </script>
-
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
-</head>
-<body id="delete-resolution-fix">
+<div id="delete-resolution-fix">
     <div id="group-delete-confirmation" class="no-padding">
+        <input type="hidden" id="hidden-id" value="@ViewBag.id" />
         <div class="col-md-12 error-message pull-left no-padding">@TempData["ErrorMessage"]</div>
         <div class="col-md-12 success-message pull-left no-padding"></div>
-        <div class="modal-content col-xs-12 no-padding" id="container">
-            <div class="col-md-12 modal-header">
-                <div class="col-xs-8 no-padding">
-                    <span class="su su-delete head-icon"></span>
-                    <span class="modal-title">@T["Delete Group"]</span>
-                </div>
-                <div class="col-xs-4 no-padding">
-                    <a href="javascript:void(0);" class="popup-close  pull-right"><span class="su su-close"></span></a>
-                </div>
-            </div>
+        <div class="col-xs-12 no-padding" id="container">
             <div class="modal-body col-xs-12 no-padding">
-                <div class="col-xs-12 no-left-padding no-bottom-padding no-right-padding">
+                <div class="col-xs-12 no-padding">
                     <div class="delete-msg">@Html.Raw(String.Format(T["Are you sure you want to delete the group {0}?"].Value, " &mdash; <span class='highlight-name'>" + Context.Request.Query["name"] + "</span>"))</div>
-                </div>
-            </div>
-            <div class="col-xs-12 modal-footer">
-                <div class="col-xs-4"><input type="hidden" id="hidden-id" value="@ViewBag.id" /></div>
-                <div class="col-xs-8 no-padding pull-right margin-top">
-                    <input type="button" id="delete-group" class="critical-action-button app-btn-danger margin-right" value="@T["Yes"]" />
-                    <input type="button" id="cancel-group" class="secondary-button app-btn-secondary popup-close" value="@T["No"]" />
                 </div>
             </div>
         </div>
@@ -82,5 +47,4 @@
     <environment exclude="Development,CloudDevelopment">
         <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
-</body>
-</html>
+</div>
