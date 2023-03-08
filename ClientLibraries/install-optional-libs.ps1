@@ -25,6 +25,7 @@ Copy-Item -Path $clientlibraryextractpath/MongoDB.Bson.dll -Destination $destina
 Copy-Item -Path $clientlibraryextractpath/MongoDB.Driver.Core.dll -Destination $destination
 Copy-Item -Path $clientlibraryextractpath/MongoDB.Driver.dll -Destination $destination
 Copy-Item -Path $clientlibraryextractpath/MongoDB.Driver.Legacy.dll -Destination $destination
+Copy-Item -Path $clientlibraryextractpath/MongoDB.Libmongocrypt.dll -Destination $destination
 echo "mongodb libraries are installed"
 }
 "mysql"{
