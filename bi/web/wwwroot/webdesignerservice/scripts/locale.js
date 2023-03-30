@@ -290,6 +290,11 @@
 				contentSettingsText: "Content Settings",
                 kpiValueText: "KPI Value",
 				noDataContainerText: "No Data Appearance",
+				summaryRowText: "Summary Row",
+				customizeBtnText: "Customize",
+				changeButtonText: "Change",
+				persistenceNotificationsText: "Maintains the expanded and collapsed state of the nodes",
+				imagePaddingSettingsText: "Padding Settings",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
 					pageSizeText: "Page Size",
@@ -342,8 +347,15 @@
                     },
                     showPopup: "Show PopUp",
                     height: "Height",
-                    width: "Width"
+                    width: "Width",
+					interWidgetLinkingText: "Inter Widget Linking"
                 },
+				lineWidgetProperties: {
+					verticalOrientation: "Vertical Orientation",
+					lineWidgetThickness: "Thickness",
+					lineWidgetPadding: "Padding",
+					lineWidgetType: "Line Type"
+				},
                 containerApperance: {
                     containerTitleAlignText: "Title Alignment",
                     containerTitleColorText: "Title Color",
@@ -383,7 +395,7 @@
                         uploadFailed: "Upload failed."
                     },
                     widgetTitleAutoFontSize: "Title Auto Font Size",
-                    widgetSubTitleAutoFontSize: 'Subtitle Auto Font Size',
+                    widgetSubTitleAutoFontSize: "Subtitle Auto Font Size",
 					widgetPaddingInfo: {
 						autoPaddingSetting: "Auto Padding Settings",
 						autoPadding: "Auto Padding",
@@ -402,7 +414,8 @@
                     viewDataText: "View Underlying Data",
                     pinWidgetText: "Pin Widget",
                     actionText: "Actions",
-                    allowExportingText: "Allow Exporting"
+                    allowExportingText: "Allow Exporting",
+					showHeaderText: "Show Header"
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
@@ -421,19 +434,21 @@
                     showLegendAsDropDown: "Show Legend Items as Dropdown",
                     showLegendTitle: "Show Title",
 		            showTooltip:"Show Tooltip",
+					showValueInTooltip: "Show Value In Tooltip",
                     legend: "Legend",
+					legendShapeText: "Legend Shape",
                     legendPosition: "Legend Position",
-                    legendType:'Type',
-					legendPositioning: 'Position',
-					legendShape: 'Shape',
-					legendTitle: 'Title',
+                    legendType:"Type",
+					legendPositioning: "Position",
+					legendShapeListText: "Shape",
+					legendTitleListText: "Title",
 					legendTextOverFlow: "Text Overflow",
                     textwidth: "Text Width",
                     showValueLabels: "Show Value Labels",
                     isInversed:"Inverse Scroll Bar",
 					rawData: "Show Raw Data",
                     rawDataInfo: "This option will remove the aggregation in grid columns and show raw data.",
-		    enableSmoothScroll: "Enable Smooth Scroll",
+					enableSmoothScroll: "Enable Smooth Scroll",
                     pageSize:"Page Size",
                     chartSize:"Chart Size",
                     valueLabelRotation: "Value Label Rotation",
@@ -499,7 +514,22 @@
                     defaultType: "Default Type",
 					hideEmptyHeaders: "Hide Empty Headers",
                     lineWidth:"Line Width",
-                    emptyCellsContent:"Empty Cell Content" 
+                    emptyCellsContent:"Empty Cell Content",
+					doughnutRadiusText: "Radius",
+					chartSeriesColumnWidth: "Column Width",
+					chartSeriesColumnSpacing: "Column Spacing",
+					showActualValueText: "Show Actual Value",
+					valueLabelColorText: "Value Color",
+					showDifferenceValueText: "Show Difference Value",
+					percentSizeText: "Size",
+					chartSeriesShapeText: "Series Shape",
+					fixedCalendarSelectionText: "Fixed Calendar Selection",
+					widgetOrderText: "Widgets Order",
+					tabWidgetOrderText: "Tab Order",
+					tabWidgetHideTabText: "Hide Tab",
+					headerColorText: "Header Color",
+					headerFontSizeText: "Header Font Size",
+					activeTabText: "Active  Tab"
                 },
 				PaddingSettings:{
 					top: "Top",
@@ -541,7 +571,12 @@
                     confidenceInterval: "Confidence Interval",
                     SubmitForecast: "SubmitForecast",
                     legendText:"Legend Text",
-                    confidenceBandStyle: "Confidence Band Style"
+                    confidenceBandStyle: "Confidence Band Style",
+					forecastPointLengthText: "Length",
+					seasonalityText: "Seasonality",
+					forecastSubmitBtnText: "Apply",
+					showForecastText: "Forecast",
+					showConfidenceText: "Confidence"
                 },
                 axisSettings: {
                     showCategoryAxis: "Show Category Axis",
@@ -557,6 +592,11 @@
                     axisType: "Axis Type",
                     showSecondaryValueAxis: "Show Secondary Value Axis",
                     primaryAxisRange: "Primary Axis Range",
+					primaryAxisFormatText: "Primary Axis Format",
+					secondaryAxisFormatText: "Secondary Axis Format",
+					axisFormatButtonText: "Format",
+					primaryAxisEditRangeText: "Edit Axis Range",
+					axisFormatText: "Axis Format",
                     titleColor: "Title Color",
                         labelColor: "Label Color",
                         negativeRegion: "Inverse Axis"
@@ -570,7 +610,8 @@
                 },
                 seriesPaletteSettings: {
                     useDefaultPalette: "Use Default Palette",
-                    advancedSetting: "Advanced Setting"
+                    advancedSetting: "Advanced Setting",
+					colorMappingTypeText: "Color Mapping Type"
                 },
 				kpiBasicSettings: {
 					fixedLayout: "Fixed Layout",
@@ -625,7 +666,9 @@
                     imageSource: "Image",
                     imageBrowse: "Browse Image",
                     imageURL: "URL",
-                    imagePattern: "Pattern"
+                    imagePattern: "Pattern",
+					imagePosition: "Image Alignment",
+					imageRotation: "Image Rotation"
                 },
                 animationSettings: {
                     enableAnimation: "Enable Animation",
@@ -635,9 +678,9 @@
                     horizontalAlignment: "Horizontal Alignment",
                     autoFontSize: "Auto Font Size",
                     scalingFactor: "Scaling Factor",
-					verticalAlignment: 'Vertical Alignment'
+					verticalAlignment: "Vertical Alignment"
                 },
-				responsiveMargin: 'Responsive Margin',
+				responsiveMargin: "Responsive Margin",
                 seriesSettings: {
                     fixedRowsAndColumnsText: "Fixed Rows and Columns",
                     rowCountText: "Row Count",
@@ -800,6 +843,12 @@
 				},
 				interWidgetLinking:{
 					defaultInterWidgetLinking: "Configure how linking should behave with the tab widget. When default action is configured, the tab will be switched based on the index values in the current widget. This gives you the flexibility to switch between the tabs based on the value selected in the current widget. Custom action allows you to switch to a specific tab index so that any value selected in the current widget will switch the tab to the configured tab."
+				},
+				popSettings: {
+					popSettingsText: "PoP Settings",
+					popCustomizationText: "PoP Customization",
+					primaryBackgroundText: "Primary Background",
+					secondaryBackgroundText: "Secondary Background"
 				}
             },
             designPanel: {
@@ -956,7 +1005,7 @@
                 extractModeMessage: "<b>Note:</b> Initially, data will be extracted based on the Max Rows selected in order to proceed with data model creation. The remaining records (there is no limit) will be extracted during the next refresh.",
                 extractModeMessageMongoDB: "<b>Note:</b> Initially it will extract {0} records. Remaining records will be extracted based on configured refresh settings.",
                 extractModeMessageSqlite: "<b>Note:</b> It will extract {0} records only.",
-                liveWebModeMessage: "<b>Note:</b> For optimum performance in live mode Web API, records restricted to 5000 by default. Change the limit from Max Rows option to fetch more records in live mode or use extract mode for more than 5000 records.",
+                liveWebModeMessage: "<b>Note:</b> For optimum performance in live mode Web API, it is recommended to configure Max Rows as 5000 or less. Use extract mode for more than 5000 records.",
                 useAsWindowCredential: "Use as Window Credential",
                 impersonateAuthenticatedUserAfterConnecting: "Impersonate the authenticated user after connecting.",
                 promptForCredentials: "Prompt for credentials",
@@ -1910,12 +1959,12 @@
                         ]
                 },
                 quickbase: {
-                    name: 'Quickbase',
+                    name: "Quickbase",
                         templates: [
                             {
                                 projects: {
-                                    name: '',
-                                    desc: ''
+                                    name: "",
+                                    desc: ""
                                 }
                             }
                         ]
@@ -1958,8 +2007,8 @@
                         templates: [
                             {
                                 projects: {
-                                    name: '',
-                                    desc: ''
+                                    name: "",
+                                    desc: ""
                                 }
                             }
                         ]
@@ -1987,67 +2036,67 @@
                         ]
                 },
                 zuora: {
-                    name: 'Zuora',
+                    name: "Zuora",
                         templates: [
                             {
                                 projects: {
-                                    name: '',
-                                    desc: ''
+                                    name: "",
+                                    desc: ""
                                 }
                             }
                         ]
                 },
                 boldDesk: {
-                    name: 'BoldDesk',
+                    name: "BoldDesk",
                         templates: [
                             {
                                 projects: {
-                                    name: '',
-                                    desc: ''
+                                    name: "",
+                                    desc: ""
                                 }
                             }
                         ]
                 },
                 origami: {
-                    name: 'Origami',
+                    name: "Origami",
                         templates: [
                             {
                                 projects: {
-                                    name: '',
-                                    desc: ''
+                                    name: "",
+                                    desc: ""
                                 }
                             }
                         ]
                 },
                 alma: {
-                    name: 'Alma',
+                    name: "Alma",
                         templates: [
                             { 
 						        projects: { 
-						            name: '', 
-						            desc: '' 
+						            name: "", 
+						            desc: "" 
 								} 
 							}
 				        ]
                 },
                 xeroWorkflowMax: {
-                    name: 'XeroWorkflowMax',
+                    name: "XeroWorkflowMax",
                         templates: [
                             { 
 						        projects: { 
-						            name: '', 
-						            desc: '' 
+						            name: "", 
+						            desc: "" 
 								}
 							}
                         ]
                 },
                 gohighlevel: {
-                    name: 'GoHighLevel',
+                    name: "GoHighLevel",
                     templates: [
                         { 
                             projects: { 
-                                name: '', 
-                                desc: '' 
+                                name: "", 
+                                desc: "" 
                             }
                         }
                     ]
@@ -2196,7 +2245,8 @@
                     replaceText: "Replace ",
                     urlText: "URL",
                     withUserDataText: "with your data",
-                    userGuideText: "User Guide",
+					userGuideText: "User Guide",
+                    apiDocumentationText: "API documentation",
                     accountKeyText: "Account Key",
                     authenticationTypeText: "SharedKeyAuthentication",
                     storageAccountNameText: "Storage Account Name",
@@ -2420,7 +2470,7 @@
                 fiscalYearChangeValidationMsg: "Changing the Fiscal Year will invalidate filters and sorting applied on this column.",
                 tableRemoveMessage: "Removing this table will affect the filter/parameters/expression columns referring to it. Do you still want to continue?",
                 createCategoryMessage: "*Please create a category to save the dashboard",
-                differentSchema: "The new schema differs from the existing one, and so the data settings in the associated widgets cannot be retained. Do you want to continue with the schema changes?",
+                differentSchema: "The new schema differs from the existing one. If you click Yes means it will lose the previous widget and data and display the new connection table data. If you click No, means the data source will be reconnected with new credentials and the widget data will depend on the availability of the table and fields in the target connection.",
                 columnNotExist: "Some of the columns does not exist in new schema and it will affect the dashboard, if removed. Do you want to continue with the schema changes?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
@@ -2447,7 +2497,7 @@
                 slaveOverrideMessage: "The selected widget already listens to ",
                 slaveOverrideAlert: ". Do you want to make it listen to ",
                 largeFileSizeMessage: "The selected file size is too large ",
-                largeFileSizeAlert: "MB. It will take some time to import the data. Do you want to continue?",
+                largeFileSizeAlert: " MB. It will take some time to import the data. Do you want to continue?",
                 removeTableFromMergedDsMessage: "Removing this table will affect the data result. Do you want to continue?",
                 InfluxdbJoinMessage: "InfluxDB does not support join operation. Empty join window will appear.",
                 ElasticsearchJoinMessage: "Elasticsearch does not support join operation. Empty join window will appear.",
@@ -2673,6 +2723,7 @@
                 applyBtnText: "Apply",
                 cancelBtnText: "Cancel",
                 runBtnText: "Run",
+                selectedAggText: "Aggregation:",
                 greaterOrEqualErrMsgText: "The value should be greater than or equal to the start value.",
                 enterValueWatermarkText: "Enter Value"
             },
@@ -3270,115 +3321,115 @@
                 showSettlement: "Show Settlement",
             },
 			zuoraDataSource: {
-				account: 'Account',
-				accountingCode: 'Accounting Code',
-				invoice: 'Invoice',
-				order: 'Order',
-				subscription: 'Subscription',
-				allAccountingCodes: 'All Accounting Codes',
-				showAccountingCode: 'Show Accounting Code',
-				accountingPeriods: 'Accounting Periods',
-				showAccount: 'Show Account',
-				accountSummary: 'Account Summary',
-				allOrders: 'All Orders',
-				showOrder: 'Show Order',
-				subscriptionByAccount: 'Subscription By Account',
-				invoiceItems: 'Invoice Items',
-				invoicePayments: 'Invoice Payments',
+				account: "Account",
+				accountingCode: "Accounting Code",
+				invoice: "Invoice",
+				order: "Order",
+				subscription: "Subscription",
+				allAccountingCodes: "All Accounting Codes",
+				showAccountingCode: "Show Accounting Code",
+				accountingPeriods: "Accounting Periods",
+				showAccount: "Show Account",
+				accountSummary: "Account Summary",
+				allOrders: "All Orders",
+				showOrder: "Show Order",
+				subscriptionByAccount: "Subscription By Account",
+				invoiceItems: "Invoice Items",
+				invoicePayments: "Invoice Payments",
             },
             boldDeskDataSource: {
-                brands: 'Brands',
-                fields: 'Fields',
-                fieldDependencies: 'Field Dependencies',
-                contacts: 'Contacts',
-                contactGroups: 'Contact Groups',
-                users: 'Users',
-                agents: 'Agents',
-                groups: 'Groups',
-                tickets: 'Tickets',
-                satisfactionSurvey: 'Satisfaction Survey',
-                holidays: 'Holidays',
-                worklogs: 'Worklogs',
-                cannedResponses: 'Canned Responses',
-                locals: 'Locals',
-                roles: 'Roles',
-                sla: 'SLA',
-                webhooks: 'Webhooks',
-                integrations: 'Integrations',
-                allBrands: 'All Brands',
-                allUserBrands: 'All User Brands',
-                allFieldOptions: 'All Field Options',
-                allFieldDependencies: 'All Field Dependencies',
-                getFieldDependencyById: 'Get Field Dependency By Id',
-                contactByEmail: 'Contact By Email',
-                allContacts: 'All Contact',
-                getContactById: 'Get Contact By Id',
-                allContactFields: 'All Contact Fields',
-                getContactFieldById: 'Get Contact Field By Id',
-                contactGroupByContactId: 'Contact Group By Contact Id',
-                contactNotes: 'Contact Notes',
-                allContactGroups: 'All Contact Groups',
-                getContactGroupById: 'Get Contact Group By Id',
-                contactGroupByName: 'Contact Group By Name',
-                contactsByContactGroup: 'Contacts By Contact Group',
-                contactGroupDomains: 'Contact Group Domains',
-                allContactGroupFields: 'All Contact Group Fields',
-                getContactGroupFieldById: 'Get Contact Group Field By Id',
-                contactGroupNotesById: 'Contact Group Notes By Id',
-                userProfileByEmail: 'User Profile By Email',
-                userProfile: 'User Profile',
-                contactGroupsByUserId: 'Contact Groups By User Id',
-                allUserCollections: 'All User Collections',
-                allAgents: 'All Agents',
-                getAgentById: 'Get Agent By Id',
-                agentByEmail: 'Agent By Email',
-                allAgentsCollections: 'All Agent Collections',
-                getGroupById: 'Get Group By Id',
-                agentCount: 'Agent Count',
-                allGroups: 'All Groups',
-                allGroupsCollections: 'All Groups Collections',
-                membersByGroupId: 'Members By Group Id',
-                allTickets: 'All Tickets',
-                getTicketById: 'Get Ticket By Id',
-                ticketHistories: 'Ticket Histories',
-                ticketAttachment: 'Ticket Attachment',
-                deletedTickets: 'Deleted Tickets',
-                spamTickets: 'Spam Tickets',
-                ticketUpdates: 'Ticket Updates',
-                ticketNotes: 'Ticket Notes',
-                ticketPriorities: 'Ticket Priorities',
-                ticketStatus: 'Ticket Status',
-                ticketSources: 'Ticket Sources',
-                ticketFields: 'Ticket Fields',
-                ticketForms: 'Ticket Forms',
-                allTicketsUpdates: 'All Tickets Updates',
-                ticketWatchers: 'Ticket Watchers',
-                allTiceketMetrics: 'All Ticket Metrics',
-                ticketMetricsByTicket: 'Ticket Metrics By Ticket',
-                tagsByTicket: 'Tags By Tickets',
-                webLinksByTicket: 'Web Links By Ticket',
-                ticketLinksByTicket: 'Ticket Links By Ticket',
-                linksCountByTicket: 'Links Count By Ticket',
-                ticketMessages: 'Ticket Messages',
-                messageBasedOnTicketAndMessageId: 'Message Based On Ticket And Message Id',
-                satisfactionRatings: 'Satisfaction Ratings',
-                allHolidays: 'All Holidays',
-                getHolidayById: 'Get Holiday By Id',
-                allWorklogs: 'All Worklogs',
-                worklogsUsingFilters: 'Worklogs Using Filters',
-                allCannedResponses: 'All Canned Responses',
-                getCannedResponseById: 'Get Canned Response By Id',
-                cannedResponseCategories: 'Canned Response Categories',
-                timezones: 'Timezones',
-                languages: 'Languages',
-                allRoles: 'All Roles',
-                getRoleById: 'Get Role By Id',
-                membersByRoleId: 'Members By Role Id',
-                allSLAs: 'All SLAs',
-                getSLAById: 'Get SLA By Id',
-                allWebhooks: 'All Webhooks',
-                getWebhookById: 'Get webhook By Id',
-                allLinkedItems: 'All Linked Items',
+                brands: "Brands",
+                fields: "Fields",
+                fieldDependencies: "Field Dependencies",
+                contacts: "Contacts",
+                contactGroups: "Contact Groups",
+                users: "Users",
+                agents: "Agents",
+                groups: "Groups",
+                tickets: "Tickets",
+                satisfactionSurvey: "Satisfaction Survey",
+                holidays: "Holidays",
+                worklogs: "Worklogs",
+                cannedResponses: "Canned Responses",
+                locals: "Locals",
+                roles: "Roles",
+                sla: "SLA",
+                webhooks: "Webhooks",
+                integrations: "Integrations",
+                allBrands: "All Brands",
+                allUserBrands: "All User Brands",
+                allFieldOptions: "All Field Options",
+                allFieldDependencies: "All Field Dependencies",
+                getFieldDependencyById: "Get Field Dependency By Id",
+                contactByEmail: "Contact By Email",
+                allContacts: "All Contact",
+                getContactById: "Get Contact By Id",
+                allContactFields: "All Contact Fields",
+                getContactFieldById: "Get Contact Field By Id",
+                contactGroupByContactId: "Contact Group By Contact Id",
+                contactNotes: "Contact Notes",
+                allContactGroups: "All Contact Groups",
+                getContactGroupById: "Get Contact Group By Id",
+                contactGroupByName: "Contact Group By Name",
+                contactsByContactGroup: "Contacts By Contact Group",
+                contactGroupDomains: "Contact Group Domains",
+                allContactGroupFields: "All Contact Group Fields",
+                getContactGroupFieldById: "Get Contact Group Field By Id",
+                contactGroupNotesById: "Contact Group Notes By Id",
+                userProfileByEmail: "User Profile By Email",
+                userProfile: "User Profile",
+                contactGroupsByUserId: "Contact Groups By User Id",
+                allUserCollections: "All User Collections",
+                allAgents: "All Agents",
+                getAgentById: "Get Agent By Id",
+                agentByEmail: "Agent By Email",
+                allAgentsCollections: "All Agent Collections",
+                getGroupById: "Get Group By Id",
+                agentCount: "Agent Count",
+                allGroups: "All Groups",
+                allGroupsCollections: "All Groups Collections",
+                membersByGroupId: "Members By Group Id",
+                allTickets: "All Tickets",
+                getTicketById: "Get Ticket By Id",
+                ticketHistories: "Ticket Histories",
+                ticketAttachment: "Ticket Attachment",
+                deletedTickets: "Deleted Tickets",
+                spamTickets: "Spam Tickets",
+                ticketUpdates: "Ticket Updates",
+                ticketNotes: "Ticket Notes",
+                ticketPriorities: "Ticket Priorities",
+                ticketStatus: "Ticket Status",
+                ticketSources: "Ticket Sources",
+                ticketFields: "Ticket Fields",
+                ticketForms: "Ticket Forms",
+                allTicketsUpdates: "All Tickets Updates",
+                ticketWatchers: "Ticket Watchers",
+                allTiceketMetrics: "All Ticket Metrics",
+                ticketMetricsByTicket: "Ticket Metrics By Ticket",
+                tagsByTicket: "Tags By Tickets",
+                webLinksByTicket: "Web Links By Ticket",
+                ticketLinksByTicket: "Ticket Links By Ticket",
+                linksCountByTicket: "Links Count By Ticket",
+                ticketMessages: "Ticket Messages",
+                messageBasedOnTicketAndMessageId: "Message Based On Ticket And Message Id",
+                satisfactionRatings: "Satisfaction Ratings",
+                allHolidays: "All Holidays",
+                getHolidayById: "Get Holiday By Id",
+                allWorklogs: "All Worklogs",
+                worklogsUsingFilters: "Worklogs Using Filters",
+                allCannedResponses: "All Canned Responses",
+                getCannedResponseById: "Get Canned Response By Id",
+                cannedResponseCategories: "Canned Response Categories",
+                timezones: "Timezones",
+                languages: "Languages",
+                allRoles: "All Roles",
+                getRoleById: "Get Role By Id",
+                membersByRoleId: "Members By Role Id",
+                allSLAs: "All SLAs",
+                getSLAById: "Get SLA By Id",
+                allWebhooks: "All Webhooks",
+                getWebhookById: "Get webhook By Id",
+                allLinkedItems: "All Linked Items",
             },
             almaDataSource: {
                 ping: "Ping",
@@ -3529,12 +3580,11 @@
                 getsubmissionByPermission: "Get Submission By Permission",
                 viewTags: "View Tags"
             },
-            sendGridDataSource: {
+			sendGridDataSource: {
                 campaigns: "Campaigns",
                 others: "Others",
                 campaignsstats: "Campaigns Stats",
                 contacts: "Contacts",
-
                 allcampaigns: "All Campaigns",
                 senderidentities: "Sender Identities",
                 singlesends: "Single Sends",
@@ -3588,7 +3638,7 @@
                 endpointDisplayText: "API Endpoints",
                 rawBodyDisplayText: "Raw Body",
                 customRawBodyDisplayText: "Custom Raw Body",
-                emptyOrganizationsValidation: 'Cannot find any Organization for the user',
+                emptyOrganizationsValidation: "Cannot find any Organization for the user",
                 nutshellMethodDisplayText: "Nutshell Method",
                 isCustomUrlDisplayText: "Custom Url",
                 urlDisplayText: "Url",
@@ -3612,7 +3662,7 @@
                 almaApplicationText: "Application Key",
                 emptyApplicationnameValidation: "The Application name should not be empty",
                 validApplicationNameValidation: "Please enter a valid Application Key",
-                locationIdDisplayText: "Location Id",
+				locationIdDisplayText: "Location Id"
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
@@ -3829,7 +3879,7 @@
                 SpecifyFilePath: "Please select a file",
                 fileLimitInfoText: "Max file size: 200 MB",
                 fileNoteForOnpremise: "<b> Note </b> : Larger files will take more time to import",
-                fileSizeAlert:"The selected file size is very large at"
+                fileSizeAlert:"The selected file size is very large at "
 			},
             stripeDataSource: {
                 balance: "Balance",
@@ -4842,10 +4892,10 @@
                 showTheme: "Show Theme",
             },
 			quickbaseDataSource: {
-				quickbaseRealmHostNameDisplayName: 'QB-Realm-Hostname',
-				quickbaseAuthenticationDisplayName: 'Authentication',
-				quickbaseAppIdDisplayName: 'App Id',
-				quickbaseTableDisplayName: 'Table',
+				quickbaseRealmHostNameDisplayName: "QB-Realm-Hostname",
+				quickbaseAuthenticationDisplayName: "Authentication",
+				quickbaseAppIdDisplayName: "App Id",
+				quickbaseTableDisplayName: "Table",
 			},
             zendeskSunshineDataSource: {
                 customObjectRecords: "Custom Object Records",
@@ -5617,7 +5667,16 @@
                 publishAs: "Publish As"
             },
             saveDraftText: {
-                saveDraft: "Draft auto-saved "
+                saveDraft: "Draft auto-saved ",
+				draftFailedMessageText: "Draft save failed",
+				draftSavingMessageText: "Saving draft...",
+				draftUpdatedJustNowText: "just now",
+				draftUpdatedAMinsAgoText: "a minute ago",
+				draftUpdatedMinutesAgoText: "minutes ago",
+				draftUpdatedAnHourAgoText: "an hour ago",
+				draftUpdatedHoursAgoText: "hours ago",
+				draftUpdatedYesterdayText: "yesterday",
+				draftUpdatedDaysAgoText: "days ago"
             },
             banerPanel: {
                 exportTooltip: "Export",
@@ -5734,19 +5793,20 @@
                 requestConnect: "Request a connector",
                 breadcrumbSelectConnector: "SELECT CONNECTOR",
                 breadcrumbConnect: "CONNECT",
-                userGuideText: "User Guide"
+                apiDocumentationText: "API Documentation",
+				userGuideText: "User Guide"
             },
             importType: {
                 importType: "Import Type",
                 worksheets: "Worksheets",
                 tables: "Tables"
             },
-			  authenticationType: {
-                authenticationType: 'Authentication Type',
-                oauth: 'OAuth',
-                oauthText: 'OAuth 2.0',
-                service: 'Service',
-                serviceText: 'Service Account'
+			authenticationType: {
+                authenticationType: "Authentication Type",
+                oauth: "OAuth",
+                oauthText: "OAuth 2.0",
+                service: "Service",
+                serviceText: "Service Account"
             },
             thousandSeparator: {
                 decimal: "Decimal Symbol",
@@ -5765,21 +5825,21 @@
 			widgetConfiguration: {
                 enableAll: "Enable All",
                 noSelectionAlert: "Please select minimum one connection.",
-				uploading: 'Uploading...',
-				uploadFailed: 'Upload Failed.',
-				uploadCompleted: 'Upload Completed',
-				initiatingUpload: 'Initiating Upload...',
-				invalidSession: 'Invalid Session',
-				title: 'Widget configuration',
-				upload: 'Upload',
-				authenticationFailed:'Authentication failed for the request',
-				connectionRefused: 'Failed to connect to the Dashboard Service. Please check your network connection and try again',
-				dataFetchingError: 'An error occurred while fetching data',
-				fileUploadInProgress: 'File upload in progress. Please wait...',
-				invalidSessionForErrorMessage: 'Please make sure that you have logged into the dashboard site and your session is valid',
-				okBtnText: 'OK',
-				noBtnText: 'No',
-				yesBtnText: 'Yes'
+				uploading: "Uploading...",
+				uploadFailed: "Upload Failed.",
+				uploadCompleted: "Upload Completed",
+				initiatingUpload: "Initiating Upload...",
+				invalidSession: "Invalid Session",
+				title: "Widget configuration",
+				upload: "Upload",
+				authenticationFailed:"Authentication failed for the request",
+				connectionRefused: "Failed to connect to the Dashboard Service. Please check your network connection and try again",
+				dataFetchingError: "An error occurred while fetching data",
+				fileUploadInProgress: "File upload in progress. Please wait...",
+				invalidSessionForErrorMessage: "Please make sure that you have logged into the dashboard site and your session is valid",
+				okBtnText: "OK",
+				noBtnText: "No",
+				yesBtnText: "Yes"
             },
             connectionConfiguration: {
                 save: "Save",
@@ -5802,14 +5862,14 @@
                 searchWaterMarkText: "Search Connector",
                 noSelectionAlert: "Please select minimum one connection.",
                 resetConfiguration: "Reset Configuration",
-				jsonUpload: 'JSON Upload',
-				newConnector: 'Add New Connector',
-				enableCustomConnector: 'Enable Custom Connectors',
-				uploading: 'Uploading...',
-				uploadFailed: 'Upload Failed.',
-				uploadCompleted: 'Upload Completed',
-				initiatingUpload: 'Initiating Upload...',
-                dynamicDialog: 'Select your flexible data'
+				jsonUpload: "JSON Upload",
+				newConnector: "Add New Connector",
+				enableCustomConnector: "Enable Custom Connectors",
+				uploading: "Uploading...",
+				uploadFailed: "Upload Failed.",
+				uploadCompleted: "Upload Completed",
+				initiatingUpload: "Initiating Upload...",
+                dynamicDialog: "Select your flexible data"
             },
             kpiCardImageSettingsReset: {
                 titleText: "Image Settings Reset",
@@ -6030,12 +6090,19 @@
 				unMapped:"Unmapped",
 				checked:"Checked",
                 unChecked: "Unchecked",
-                includeFutureValueText: "Include items which will be added in future."
+                includeFutureValueText: "Include items which will be added in future.",
+				manualModeText: "Manual",
+				datasourceModeText: "Data Source",
+				userFilterQueryModeText: "Query"
             },
             dataPreview: {
                 dataPreview: "Data Preview",
                 noDatasourceFound: "No data sources found",
-                maximumRecordLimit: "Maximum of 1000 records can be previewed"
+                noteText: "Note:",
+                maximumRecordLimit: "A maximum of",
+                totalRecordCount: "records out of",
+                previewCountDefaultValue: "1000",
+                recordCountDisply: "are displayed in the data preview table."
             },
             popNotification: {
                 masterWidgetNoSlaveText: "There are no listener widgets for this period-over-period comparison. Please go to the Filter Configuration window to select listener widgets.",
@@ -6237,8 +6304,8 @@
                 showCategories: "Show Category",
             },
             gohighlevelDataSource: {
-                businesses: 'Businesses',
-                businessesbylocation: 'Businesses By Location',
+                businesses: "Businesses",
+                businessesbylocation: "Businesses By Location",
                 calender: "Calendar",
                 calenderEvents: "CalenderEvents",
                 campaigns: "Campaigns",
@@ -6968,7 +7035,7 @@
 			userParameter: {
 				fullName: "Current User Full Name",
 				email: "Current User Email",
-                token: 'Current User Token'
+                token: "Current User Token"
             },
             tabWidget: {
                 deleteTab: "Delete Tab",
@@ -6978,7 +7045,7 @@
                 hideTabHeader: "Hide Tab Header",
                 tabOrder: "Tab Order",
                 widgetOrder: "Widget Order"
-            },
+            }
         }
     }
 }

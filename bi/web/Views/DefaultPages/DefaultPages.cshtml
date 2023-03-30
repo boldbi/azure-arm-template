@@ -26,79 +26,93 @@
         <img class="default-pages-dashboard-image" src="@(itemType == ItemType.Dashboard ? @themeBasedImageHelper.DashboardImage() : itemType == ItemType.Schedule ? @themeBasedImageHelper.ScheduleImage() : itemType == ItemType.Datasource ? @themeBasedImageHelper.DatasourceImage() : @themeBasedImageHelper.SlideshowImage())">
         <h1 class="default-pages-header">@(itemType == ItemType.Dashboard ? @T["Dashboards"] : itemType == ItemType.Schedule ? @T["Schedules"] : itemType == ItemType.Datasource ? @T["Data Sources"] : @T["Slideshow"])</h1>
 
-        @if (itemType == ItemType.Dashboard)
+        @if (itemType == ItemType.Dashboard && model != null && model.ContainsKey(ItemType.Dashboard))
         {
-            <p class="default-pages-message">@string.Format(T["Welcome, {0}! Bring your data, choose your KPIs and go live with your dashboard in minutes."].Value, displayName)</p>
-            if (!isMobile && model != null && model.ContainsKey(ItemType.Dashboard) && model[ItemType.Dashboard])
+            if (model[ItemType.Dashboard])
             {
-                <button class="sf-primary-button app-btn-primary" data-action="create-items">@T["Create my first Dashboard"]</button>
-                <div class="dashboard-notification">
-                    <img class="stacked-column" src="@(GlobalAppSettings.CdnDomain)/static/default-pages/v1/dashboard-notification.svg">
-                    <div class="dashboard-main">
-                        <h2 class="default-pages-header">@T["Dashboard Samples"]</h2>
-                        <span class="notification-close su-close"></span>
-                        <p class="message">@T["Explore our features and see what the application is capable of achieving with our 50+ sample dashboards."]</p>
-                        <div class="explore">
-                            <a class="sf-nav-link">
-                                @T["Explore"]
-                                <span class="arrow su-arrow-right"></span>
-                            </a>
+                <p class="default-pages-message">@string.Format(T["Welcome, {0}! Bring your data, choose your KPIs and go live with your dashboard in minutes."].Value, displayName)</p>
+                if (!isMobile)
+                {
+                    <button class="sf-primary-button app-btn-primary" data-action="create-items">@T["Create my first Dashboard"]</button>
+                    <div class="dashboard-notification">
+                        <img class="stacked-column" src="@(GlobalAppSettings.CdnDomain)/static/default-pages/v1/dashboard-notification.svg">
+                        <div class="dashboard-main">
+                            <h2 class="default-pages-header">@T["Dashboard Samples"]</h2>
+                            <span class="notification-close su-close"></span>
+                            <p class="message">@T["Explore our features and see what the application is capable of achieving with our 50+ sample dashboards."]</p>
+                            <div class="explore">
+                                <a class="sf-nav-link">
+                                    @T["Explore"]
+                                    <span class="arrow su-arrow-right"></span>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-        }
-        else if (itemType == ItemType.Datasource)
-        {
-            <p class="default-pages-message">@T["Start building your dashboard by adding your first data source."]</p>
-            if (!isMobile && model != null && model.ContainsKey(ItemType.Datasource) && model[ItemType.Datasource])
-            {
-                <button id="create-datasource-connection" class="sf-primary-button app-btn-primary">@T["Create my first Data Source"]</button>
-            }
-        }
-        else if (itemType == ItemType.Schedule)
-        {
-            <p class="default-pages-message">
-                @string.Concat(T["Schedule your dashboards to export them and send them through email."].Value, !hasDashboards ? string.Concat(" ", T["Start building your dashboards to schedule them."].Value) : string.Empty)
-            </p>
-            if (!isMobile)
-            {
-                if (hasDashboards)
-                {
-                    if (model != null && model.ContainsKey(ItemType.Schedule) && model[ItemType.Schedule])
-                    {
-                        <button class="sf-primary-button create-schedule app-btn-primary">@T["Create Schedule"]</button>
-                    }
                 }
-                else if (model != null && model.ContainsKey(ItemType.Dashboard) && model[ItemType.Dashboard])
-                {
-                    <button class="sf-primary-button app-btn-primary" data-action="create-items">@T["Create Dashboard"]</button>
-                }
-            }
-        }
-        else if (itemType == ItemType.Slideshow)
-        {
-            if (hasDashboards)
-            {
-                <p class="default-pages-message">@T["Present dashboards in TV mode and embed them in slides."]</p>
             }
             else
             {
-                <p class="default-pages-message">@T["Present dashboards in TV mode and by embedding them in slides. Start building your dashboards to create slideshows using them."]</p>
+                <p class="default-pages-message">@string.Format(T["Welcome, {0}! You do not have any dashboard shared with you, or you have not created any dashboard to display here. Also, you are unable to create a new one because you don't have permission."].Value, displayName)</p>
             }
-            if (!isMobile)
+        }
+        else if (itemType == ItemType.Datasource && model != null && model.ContainsKey(ItemType.Datasource))
+        {
+            if (model[ItemType.Datasource])
+            {
+                <p class="default-pages-message">@T["Start building your dashboard by adding your first data source."]</p>
+                <button id="create-datasource-connection" class="sf-primary-button app-btn-primary @(!isMobile ? string.Empty : "hide")">@T["Create my first Data Source"]</button>
+            }
+            else
+            {
+                <p class="default-pages-message">@T["You do not have any data source shared with you, or you have not created any data source to display here. Also, you are unable to create a new one because you don't have permission."]</p>
+            }
+        }
+        else if (itemType == ItemType.Schedule && model != null && model.ContainsKey(ItemType.Schedule))
+        {
+            if (model[ItemType.Schedule])
             {
                 if (hasDashboards)
                 {
-                    if (model != null && model.ContainsKey(ItemType.Slideshow) && model[ItemType.Slideshow])
-                    {
-                        <button class="sf-primary-button create-presentation app-btn-primary">@T["Create Slideshow"]</button>
-                    }
+                    <p class="default-pages-message">@T["Schedule your dashboards to export them and send them through email."]</p>
+                    <button class="sf-primary-button create-schedule app-btn-primary @(!isMobile ? string.Empty : "hide")">@T["Create Schedule"]</button>
                 }
-                else if (model != null && model.ContainsKey(ItemType.Dashboard) && model[ItemType.Dashboard])
+                else if (!hasDashboards && model.ContainsKey(ItemType.Dashboard) && model[ItemType.Dashboard])
                 {
-                    <button class="sf-primary-button app-btn-primary" data-action="create-items">@T["Create Dashboard"]</button>
+                    <p class="default-pages-message">@T["Schedule your dashboards to export them and send them through email. Start building your dashboards to schedule them."]</p>
+                    <button class="sf-primary-button app-btn-primary @(!isMobile ? string.Empty : "hide")" data-action="create-items">@T["Create Dashboard"]</button>
                 }
+                else
+                {
+                    <p class="default-pages-message">@T["You do not have any schedule shared with you, or you have not created any schedule to display here. Also, you are unable to create a new one because you either don't have permission to create a dashboard, or there are no existing dashboards shared with you that can be used to create a schedule."]</p>
+                }
+            }
+            else
+            {
+                <p class="default-pages-message">@T["You do not have any schedule shared with you, or you have not created any schedule to display here. Also, you are unable to create a new one because you don't have permission."]</p>
+            }
+        }
+        else if (itemType == ItemType.Slideshow && model != null && model.ContainsKey(ItemType.Slideshow))
+        {
+            if (model[ItemType.Slideshow])
+            {
+                if (hasDashboards)
+                {
+                    <p class="default-pages-message">@T["Present dashboards in TV mode and embed them in slides."]</p>
+                    <button class="sf-primary-button create-presentation app-btn-primary @(!isMobile ? string.Empty : "hide")">@T["Create Slideshow"]</button>
+                }
+                else if (!hasDashboards && model.ContainsKey(ItemType.Dashboard) && model[ItemType.Dashboard])
+                {
+                    <p class="default-pages-message">@T["Present dashboards in TV mode and by embedding them in slides. Start building your dashboards to create slideshows using them."]</p>
+                    <button class="sf-primary-button app-btn-primary @(!isMobile ? string.Empty : "hide")" data-action="create-items">@T["Create Dashboard"]</button>
+                }
+                else
+                {
+                    <p class="default-pages-message">@T["You do not have any slideshow shared with you, or you have not created any slideshow to display here. Also, you are unable to create a new one because you either don't have permission to create a dashboard, or there are no existing dashboards shared with you that can be used to create a slideshow."]</p>
+                }
+            }
+            else
+            {
+                <p class="default-pages-message">@T["You do not have any slideshow shared with you, or you have not created any slideshow to display here. Also, you are unable to create a new one because you don't have permission."]</p>
             }
         }
     </div>
