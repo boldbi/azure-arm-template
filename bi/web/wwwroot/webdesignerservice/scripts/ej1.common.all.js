@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 6.1.8
+*  version : 6.2.7
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -29030,13 +29030,20 @@ BoldBIDashboard.Tooltip.Associate = {
 			var two = 2;
             var width = this.model.width;
             var left = evt.currentTarget.offsetLeft;
+            var topOffset = evt.currentTarget.offsetTop;
+            var top = 0;
             // var top = evt.clientY + top1;
-            var textWidth = this._measureText(evt.currentTarget.textContent.trim(), Textpercent, { size: "11px", fontStyle: "Normal", fontFamily: "Roboto" }).width;
-            if (bbdesigner$(evt.target).width() <= textWidth) {
+            var textElement = this._measureText(evt.currentTarget.textContent.trim(), Textpercent, { size: "11px", fontStyle: "Normal", fontFamily: "Roboto" });
+            var textWidth = textElement.width;
+            var textHeight = textElement.height;
+            var offsetWidth = evt.currentTarget.offsetWidth;
+            var scrollWidth = evt.currentTarget.scrollWidth;
+            if (offsetWidth < scrollWidth) {
                 left = (width - left > (textWidth + Ten)) ? left : left - (textWidth - (width - left)) - fifteen;
                 width = width < (textWidth + fifteen) ? width * opacity : textWidth + eight;
-				var toolTip = bbdesigner$('<div>').attr({ 'id': 'toolTip'}).
-				css({'left': String((left <= zero ? two : left)) + 'px', 'padding': '5px', 'background-color': '#fff', 'box-shadow': '0 1px 4px rgba(0,0,0,.15)', 'border': '1px solid rgba(0,0,0,.15)', 'display': 'block', 'position': 'absolute', 'z-index': '1010', 'font-size': '13px'});
+                top = topOffset + textHeight + 5;
+                var toolTip = bbdesigner$('<div>').attr({ 'id': 'toolTip'}).
+                css({'left': String((left <= zero ? two : left)) + 'px', 'top': top + 'px', 'padding': '5px', 'background-color': '#fff', 'box-shadow': '0 1px 4px rgba(0,0,0,.15)', 'border': '1px solid rgba(0,0,0,.15)', 'display': 'block', 'position': 'absolute', 'z-index': '1010', 'font-size': '13px'});
                 toolTip.html(String(evt.currentTarget.textContent));
                 this.element.append(toolTip);
             }

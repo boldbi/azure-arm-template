@@ -1667,5 +1667,16 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("YearFormatCount", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to restrict Order By clause in query string unless TOP, OFFSET, or FOR XML is also specified.
+        /// </summary>
+        internal static string RestrictOrderByErrorMessage
+        {
+            get
+            {
+                return ResourceManager.GetString("RestrictOrderByErrorMessage", resourceCulture);
+            }
+        }
     }
 }
