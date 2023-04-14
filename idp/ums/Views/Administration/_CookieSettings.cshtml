@@ -1,0 +1,38 @@
+﻿@{
+    ViewBag.Title = T["Authentication Cookie Policy"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var isCookiesTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "cookie-options") ? "active" : string.Empty;
+}
+<div role="tabpanel" class="tab-pane col-xs-12 col-lg-12 col-md-12 col-sm-12 admin-page-body @isCookiesTab" id="cookie-options">
+    <div id="cookie-options-settings-body" class="col-xs-12 no-padding">
+        <div class="col-xs-12 no-padding">
+            <label class="app-textbox-label samesite">@T["SameSite Attribute"]</label>
+        </div>
+        <div class="radio-button-section" id="lax">
+            <input type="radio" id="lax-cookie" name="cookie" class="css-radio" value="Lax" @((int) ViewBag.CookiesSettings == (int)SameSiteAttribute.Lax ? "checked" : string.Empty)/>
+            <label for="lax-cookie" class="app-textbox-label radio-btn-label notransition" id="labellax">@T["Lax"]</label>
+        </div>
+        <div class="radio-button-section" id="strict">
+            <input type="radio" id="strict-cookie" name="cookie" class="css-radio" value="Strict" @((int) ViewBag.CookiesSettings == (int)SameSiteAttribute.Strict ? "checked" : string.Empty)/>
+            <label for="strict-cookie" class="app-textbox-label radio-btn-label notransition" id="labelstrict">@T["Strict"]</label>
+        </div>
+        <div class="radio-button-section" id="none">
+            <input type="radio" id="none-cookie" name="cookie" class="css-radio" value="None" @((int) ViewBag.CookiesSettings == (int)SameSiteAttribute.None ? "checked" : string.Empty)/>
+            <label for="none-cookie" class="app-textbox-label radio-btn-label notransition" id="labelnone">@T["None"]</label>
+        </div>
+        <div class="bg-warning cookie-notification">
+        </div>
+    </div>
+    <div class="admin-page-footer col-xs-12 no-padding">
+        <div class="admin-page-actions col-xs-12 col-lg-12 no-margin">
+            <button class="secondary-button pull-right" id="cancel-settings">@T["Cancel"]</button>
+            <button type="button" title="" id="update-cookie-settings" class="primary-button pull-right">
+                @T["Save"]
+            </button>
+        </div>
+    </div>
+</div>
+<div id="samesite-dialog"></div>
+<div id="samesite-dialog-content">
+    @T["Changes to authentication cookie attributes will invalidate your current login session."]
+    <br /><br />@T["Please log in again to access the application."]
+</div>

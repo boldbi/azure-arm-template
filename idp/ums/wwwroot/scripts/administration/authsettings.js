@@ -572,6 +572,9 @@ $(document).ready(function () {
         var authSettingsData = {
             IsEnabled: scope.windowsAdEnabled,
             AuthProvider: "WindowsAD",
+            WindowsADSettings: {
+                Domain: $("input[name='windowsadSettingsDomain']").val().trim()
+                }
         };
         $.ajax({
             url: updateauthsettingsUrl,

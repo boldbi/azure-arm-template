@@ -1,0 +1,56 @@
+﻿@{
+    Layout = null;
+    var displayName = GlobalAppSettings.BrandingDisplayName;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        @Html.Raw(string.Format(T["Welcome to {0}"].Value, displayName))
+    </title>
+    <link rel="icon" href="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/favicon.ico")" />
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/error.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/auto-deployment.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/bundles/css/auto-deploy.css" asp-append-version="true" />
+
+    <script>
+    var validateAutoDeploymentUrl = "@Url.Action("ValidateAutoDeployment", "ServerConfiguration")";
+    var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
+    var startUpUrl = "@Url.Action("Startup", "ServerConfiguration")";
+    </script>
+    <style>
+        #loader {
+            position: fixed;
+            left: 0px;
+            top: 40%;
+            width: 100%;
+            height: 10%;
+            z-index: 9999;
+            background: url('images/common/loader.svg') 50% 50% no-repeat transparent;
+        }
+    </style>
+</head>
+<body class="startup-page-container-body">
+    <div id="loader"></div>
+    @await Html.PartialAsync("_Header.OnpremiseStartup")
+    <div class="auto-deploy-container"  style="display:none">
+        <div class="image-container">
+            <img class="deployment-image" src="@Url.Content("~/images/static/error-pages/v1/deployment-error.png")" />
+            <div id="auto-deployment-response">
+                <div class="response-message-header">@T["Deployment Error"]!</div>
+                <div>@T["We are unable to deploy the site using the values configured from the environment variables."] <span><a class="help-link">@T["Need help?"]</a></span></div>
+                <div id="deploy-message-container">
+                    <textarea type="text" id="deploy-error-box" disabled></textarea>
+                    <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="Click to copy"></span>
+                </div>
+                <div class="link-section">
+                    <span><a href="@Url.Action("Startup", "ServerConfiguration")?skipAutoDeploy=true">@T["Proceed to the application startup page"]</a></span>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

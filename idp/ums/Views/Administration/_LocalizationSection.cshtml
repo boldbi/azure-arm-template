@@ -1,0 +1,63 @@
+﻿<div id="localization-container"></div>
+<div id="localization-content" class="modal-body col-xs-12">
+    <div id="search-area" class="pull-right">
+        <input type="text" class="pull-left" id="search-languages" placeholder="@T["Search Language"]" />
+        <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+        <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+    </div>
+    <button class="link-button pull-right" id="add-language" onclick="uploadDialogOpen()">
+        <span>@T["Add Language"]</span>
+    </button>
+    <span class="su su-add pull-right"></span>
+    <button class="link-button pull-right" id="delete-language" onclick="languageDeleteDialogOpen()">
+        <span></span>
+    </button>
+    <p class="selected-language"></p>
+    <div class="col-xs-12 no-padding">
+        <div id="Localization_grid">
+        </div>
+    </div>
+    <script type="text/x-jsrender" id="remove-options">
+        <div>
+            <span>
+                ${if (!IsDefaultLanguage)}
+                <a href="javascript:void(0);" class="remove-language">
+                    @T["Remove"]
+                </a>
+                ${/if}
+            </span>
+        </div>
+    </script>
+    <script type="text/x-jsrender" id="localization-checkbox-row-template">
+        ${if (!IsDefaultLanguage)}
+        <input type="checkbox" class="localization-checkbox-row material-checkbox" data-checked-id="${LangaugeCode}" id="localization-row-check${LangaugeCode}" data-id="${LangaugeCode}" />
+        <input name="localization-row-check${LangaugeCode}" type="hidden" value="false">
+        <label for="localization-row-check${LangaugeCode}" class="localization-checkbox-row-label"> </label>
+        ${/if}
+    </script>
+</div>
+<div id="upload-container"></div>
+<div id="upload-content" class="upload-btn-wrapper col-xs-12 no-padding">
+    @Html.Label("language_list", T["Choose Language"].Value, new { @class = "col-lg-12 app-textbox-label", id = "default-language" })
+    <div class="select-language">
+        <input type="text" id="model-language">
+    </div>
+    @Html.Label("choose_file", T["Upload File"].Value, new { @class = "col-lg-12 app-textbox-label", id = "choose-file" })
+    <div class="upload-link">
+        <input id="upload-zipfile" class="upload-language">
+    </div>
+    <div id="message-container">
+        <input type="text" id="file-name" placeholder="@T["Choose file"]" readonly="readonly" />
+        <div class="localization-message-content">
+            <p class="validation-error-message"></p>
+        </div>
+    </div>
+    <div class="help-content">
+        <span class='help-link-content'>@Html.Raw(string.Format(T["Please check your localization zip file is a valid structure from this {0}link{1}."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.LocalizationFile) + "'>", "</a>"))
+        </span>
+     </div>
+</div>
+<div id="language-delete-dialog"></div>
+<div id="language-delete-dialog-content">
+    <p class="info-message"></p>
+</div>
