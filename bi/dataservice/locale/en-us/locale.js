@@ -531,6 +531,21 @@
 					headerFontSizeText: "Header Font Size",
 					activeTabText: "Active  Tab"
                 },
+				 chartLineStyleSettings: {
+                    series: "Series",
+                    lineWidth:"Line Width",
+                    lineStyleText: "Line Style",
+                    lineStyleCustomizeBtnText: "Customize",
+                    lineStyleDialogTitleText: "Custom Line Style Settings",
+                    lineStyleDialogOkBtnText: "Ok",
+                    lineStyleDialogCancelBtnText: "Cancel",
+                    solid: "Solid",
+                    dot: "Dot",
+                    dash: "Dash",
+                    dotDash: "DotDash",
+                    longDash: "LongDash",
+                    longDashDotDot: "LongDashDotDot"
+                },
 				PaddingSettings:{
 					top: "Top",
 					bottom: "Bottom",

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.2.7
+*  version : 6.3.3
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing

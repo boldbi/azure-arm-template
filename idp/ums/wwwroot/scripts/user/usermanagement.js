@@ -156,7 +156,7 @@ $(document).ready(function () {
             showWaitingPopup('user-add-dialog');
 
             var lastName = $('#lastname').val().trim();
-            var values = "&userName=" + userName + "&emailid=" + emailid.toLowerCase() + "&firstname=" + firstName + "&lastname=" + lastName + "&password=" + password;
+            var values = { UserName: userName, Email: emailid.toLowerCase(), FirstName: firstName, LastName: lastName, Password: password }
 
             $.ajax({
                 type: "POST", url: isPresentUserNameAndEmailId, data: { userName: userName, emailId: emailid.toLowerCase() },
@@ -712,7 +712,8 @@ $(document).on("change", ".checkbox-row", function () {
 });
 
 function enableAccessButton() {
-    $(".provide-access-button").attr("disabled", selectedTenants.length === 0);}
+    $(".provide-access-button").attr("disabled", selectedTenants.length === 0);
+}
 
 function onAddTenantsDialogClose() {
     var gridObj = document.getElementById('add_tenants_grid').ej2_instances[0];
@@ -811,7 +812,7 @@ function onSingleDeleteDialogClose() {
 
 function checkUserImported(t) {
     var ejGrid = $("#user_import_grid").data("ejGrid");
-    if (typeof ejGrid != 'undefined'  && ejGrid.getRows().length > 0) {
+    if (typeof ejGrid != 'undefined' && ejGrid.getRows().length > 0) {
         $("#messageBox_wrapper, .e-dialog-scroller, #messageBox").removeClass("failed-msg-box-height").addClass("msg-box-height"); //Message box height adjustment 
         $(".message-content").removeClass("text-center");
         messageBox("su-single-user", window.Server.App.LocalizationContent.ImportFromCSV, window.Server.App.LocalizationContent.UserImportIncomplete, "error", function () {

@@ -1,4 +1,8 @@
-﻿<div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="windows-ad-settings-tab">
+﻿@{
+    var WindowsADRegEx = @"/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}$/i";
+    var domain = ViewBag.WindowsAdSettings != null && ViewBag.WindowsAdSettings.WindowsADSettings != null && ViewBag.WindowsAdSettings.WindowsADSettings.Domain != null ? ViewBag.WindowsAdSettings.WindowsADSettings.Domain : string.Empty;
+}
+<div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="windows-ad-settings-tab">
     <div id="oauth-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
         <form id="windows-ad" name="windowsadSettingsForm" class="auth-settings-form col-lg-12 col-md-12 col-sm-12 no-padding" method="post" autocomplete="off">
             <input type="hidden" name="windowsAuthenticationProvider" value="@ViewBag.WindowsAdSettings.AuthProvider">
@@ -12,6 +16,16 @@
                 </div>
                 <div class="info-message">
                     @T["Show or hide Windows Authentication option from Login screen."]
+                </div>
+                <div class="col-md-12 no-padding input-field-margin">
+                    <div class="col-md-12 no-padding">
+                        <label class="app-textbox-label">@T["Domain"]</label>
+                    </div>
+                    <div ng-class="(windowsadSettingsForm.windowsadSettingsDomain.$dirty && windowsadSettingsForm.windowsadSettingsDomain.$invalid) ? 'has-error' : ''">
+                        <input type="text" class="form-control no-margin" ng-model="windowsadSettingsDomain" ng-init="windowsadSettingsDomain='@domain'" ng-pattern="@WindowsADRegEx" name="windowsadSettingsDomain" placeholder="@T["Active Directory Domain"]" id="windowsad-Settings-Domain" data-ng-disabled="!windowsAdEnabled" />
+                        <span class="validation-message top-padding" ng-show="windowsadSettingsForm.windowsadSettingsDomain.$error.pattern && windowsadSettingsForm.windowsadSettingsDomain.$dirty && windowsAdEnabled">@T["Please enter a valid domain."]</span>
+                    </div>
+                    <div class="info-message domain no-padding">@T["The active directory server domain name."]</div>
                 </div>
             </div>
         </form>

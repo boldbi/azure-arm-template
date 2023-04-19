@@ -157,7 +157,7 @@ $(document).ready(function () {
             showWaitingPopup('user-add-dialog');
 
             var lastName = $('#lastname').val().trim();
-            var values = "&userName=" + userName + "&emailid=" + emailid + "&firstname=" + firstName + "&lastname=" + lastName + "&password=" + password + "&tenantId=" + tenantId;
+            var values = { UserName: userName, Email: emailid, FirstName: firstName, LastName: lastName, Password: password };
 
             $.ajax({
                 type: "POST", url: isPresentUserNameAndEmailId, data: { userName: userName, emailId: emailid.toLowerCase() },
@@ -179,7 +179,7 @@ $(document).ready(function () {
                     }
                     else {
                         $.ajax({
-                            type: "POST", url: addUserUrl, data: values,
+                            type: "POST", url: addUserUrl, data: { userDetail: values, tenantInfoId: tenantId },
                             success: function (data) {
                                 if (data.Data) {
                                     hideWaitingPopup('user-add-dialog');
@@ -771,7 +771,7 @@ function removeConfirm() {
     removeUserAccess(users);
 }
 
-function removeUserAccess(users) { 
+function removeUserAccess(users) {
     var requestUrl = $("meta[name='remove-app-access-link']").attr("content") + $("#application-id").val();
     if (users.length > 0) {
         showWaitingPopup('user-remove-confirmation-dialog');
