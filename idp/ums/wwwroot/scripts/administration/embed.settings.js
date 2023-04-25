@@ -19,6 +19,7 @@ $(function () {
         var key = "IsEmbedEnabled";
         if ($("#restrict-embed-enabled").is(":checked")) {
             $("#get-embed-code").removeAttr("disabled");
+            $("#filename").val(jsonFileName);
             if (getLinkInputObj.val() != "") {
                 getLinkInputObj.removeAttr("disabled");
                 getLinkCopyLinkobj.removeAttr("disabled");
@@ -32,13 +33,18 @@ $(function () {
 
         } else {
             $("#get-embed-code").attr("disabled", "disabled");
+            $("#filename").val(window.Server.App.LocalizationContent.BrowseJsonFilePath);
+            getLinkInputObj.val("");
+            $(".secret-code-notification").hide();
             getLinkInputObj.attr("disabled", "disabled");
             getLinkCopyLinkobj.attr("disabled", "disabled");
             getLinkCopyLinkobj.tooltip("disable").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy$).tooltip("fixTitle").tooltip("disable");
             getLinkCopyLinkobj.css("cursor", "default");
             $(".download-template").hide();
             $("#trigger-file").attr("disabled", "disabled");
+            $("#cs-upload").attr("disabled", "disabled");
             $("#filename").attr("disabled", "disabled");
+            $("#cs-upload").attr("disabled", "disabled");
             $("#import-validation-msg").html("");
             var isEmbed = "false";
         }
