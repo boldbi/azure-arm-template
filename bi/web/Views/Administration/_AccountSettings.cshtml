@@ -5,6 +5,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var scopeList = ServerAppConfig.SettingsScopesList;
+    var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
 }
 
@@ -60,8 +61,8 @@
                         <label for="automatic-account-activation" class="radio-btn-label notransition" id="labelautomatic">@T["Automatic"]</label>
                     </div>
                     <div class="activation-mode" id="email">
-                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" ? "disabled" : string.Empty) />
-                        <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
+                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled" : string.Empty) />
+                        <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
                     </div>
                     @if (@ViewBag.EmailSettingResult == "failure")
                     {
