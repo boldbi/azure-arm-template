@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.card.all.js
-*  version : 6.4.5
+*  version : 7.1.9
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -110,7 +110,7 @@ var NumberFormatting = /** @class */ (function () {
             value = { fraction: zero, postFixLabel: "" }; // eslint-disable-line no-param-reassign
             format = stringFormat.replace(decimalplaces, "0");  // eslint-disable-line no-param-reassign
         }
-		if (isDecimalFormatChange) {
+        if (isDecimalFormatChange) {
             format = stringFormat.replace(decimalplaces, "0");
         }
         if (stringFormat.indexOf("N") > lessThanZero && value.fraction < pointZero) {

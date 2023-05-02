@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.4.5
+*  version : 7.1.9
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -17232,10 +17232,10 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
                         svgHeight = bbdesigner$(chartObj.svgObject).height();
 
                     // This condition is removed due to datalabel crop issue (JS-63856)
-                     if (currentseries._enableSmartLabels && (svgWidth < 250 || svgHeight < 250)) {
-                         dataLabelFont.size = "9px"; //Change pie/doughnut text size dynamically
-                         size = measureText(commonEventArgs.data.text, svgWidth, dataLabelFont);
-                         textOffset = 10;
+                     if (currentseries._enableSmartLabels && (svgWidth < 250 || svgHeight < 200)) {
+                        // dataLabelFont.size = "9px"; //Change pie/doughnut text size dynamically
+                        // size = measureText(commonEventArgs.data.text, svgWidth, dataLabelFont);
+                         textOffset = 8;
                      }
                     if (isNull(connectorLine.height))
                         textOffset = textOffset || measureText(commonEventArgs.data.text, null, dataLabelFont).height;
@@ -17257,6 +17257,7 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
                     dMidY = seriesType.getYCordinate(startY, (chartModel.innerRadius[seriesIndex]), midAngle);
 
                     connectorX = this.getXCordinate(startX, (radius) + textOffset, midAngle);
+                    connectorX = point.y != 0 ? connectorX : parseFloat(connectorX.toFixed(12));
                     connectorY = this.getYCordinate(startY, (radius) + textOffset, midAngle);
 
                     if (dataLabel.template)
