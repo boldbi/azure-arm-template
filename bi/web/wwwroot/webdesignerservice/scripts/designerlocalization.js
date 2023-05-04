@@ -225,17 +225,17 @@ var Designer = {
                 minimumToolText: "The field bind in this section will be considered as a start value of the Gauge Range. For setting static values, use the properties panel.",
 				maximumToolText: "The field bind in this section will be considered as an end value of the Gauge Range. For setting static values, use the properties panel.",
                 rangeNavigatorToolTextMessage:"Range Navigator requires at least one value and one argument to render.The argument section supports only the Date field.",
-                hiddenColumnMessage: {
-                    chart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column or Row section",
-                    radarPolarChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
-                    treeMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
-                    heatMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Size or X-Axis or Y-Axis section",
-                    map: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
-                    bingMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
-                    bubbleSactterChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the X-Axis or Label or Size or Row section",
-                    circularGauge: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Series section",
-                    comboChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section"
-                }
+				hiddenColumnMessage: {
+					chart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column or Row section",
+					radarPolarChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
+					treeMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
+					heatMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Size or X-Axis or Y-Axis section",
+					map: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
+					bingMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
+					bubbleSactterChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the X-Axis or Label or Size or Row section",
+					circularGauge: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Series section",
+					comboChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section"
+				}
             },
             propertyPanel: {
                 headerText: "Properties",
@@ -300,14 +300,14 @@ var Designer = {
 				},
                 summaryRowSettings: {
                     summaryRowTitle: "Summary Row",
-                    enableSummaryRow: "Enable Summary Row",
-                    enableSummaryHeight: "Auto Height",
-                    summaryheight: "Height",
-                    enableSummaryPadding: "Auto Padding",
-                    summaryPadding: "Padding",
-                    enableSummaryFontSize: "Auto Font Size",
-                    summaryFontSize: "Font Size",
-                    customizeButton: "Customize"
+					enableSummaryRow: "Enable Summary Row",
+					enableSummaryHeight: "Auto Height",
+					summaryheight: "Height",
+					enableSummaryPadding: "Auto Padding",
+					summaryPadding: "Padding",
+					enableSummaryFontSize: "Auto Font Size",
+					summaryFontSize: "Font Size",
+					customizeButton: "Customize"
                 },
                 filter: {
                     actAsMasterWidget: "Act As Master Widget",
@@ -499,7 +499,7 @@ var Designer = {
 					rawData: "Show Raw Data",
                     rawDataInfo:"This option will remove the aggregation in grid columns and show raw data."
                 },
-                chartLineStyleSettings: {
+				 chartLineStyleSettings: {
                     series: "Series",
                     lineWidth:"Line Width",
                     lineStyleText: "Line Style",
@@ -525,6 +525,12 @@ var Designer = {
                     top: "Top",
                     middle: "Middle",
                     bottom: "Bottom"
+                },
+                emptyPointMode:{
+                    gap: "Gap",
+                    zero: "Zero",
+                    average: "Average",
+                    connect: "Connect"
                 },
                 fontSettings: {
                     categoryDisplayName: "Font Settings",
@@ -5211,7 +5217,7 @@ var Designer = {
                 infoHeader: "Introducing Scrollable Layout",
                 infoText: "Add more rows to design dashboards with more widgets in a scrollable view. Click + to add or remove rows.",
                 knowmore: "Know more",
-                gotIt: "OK, Got it!",
+                gotIt: "Ok, Got it",
                 addRows: "Add more rows",
                 deleteRowsAlertMsg: "Please remove the widgets from the rows to be deleted and try again.",
                 done: "Done"
@@ -6177,46 +6183,40 @@ var Designer = {
                 getsubmissionByPermission: "Get Submission By Permission",
                 viewTags: "View Tags"
             },
-            sendGridDataSource: {
-                campaigns: "Campaigns",
-                others: "Others",
-                campaignsstats: "Campaigns Stats",
-                contacts: "Contacts",
-
-                allcampaigns: "All Campaigns",
-                senderidentities: "Sender Identities",
-                singlesends: "Single Sends",
-                searchsinglesends: "Search Single Sends",
-                segments: "Segments",
-                categories: "Categories",
-                filtermessages: "Filter Messages",
-                accounts: "Accounts",
-                allglobalsuppression: "All Global suppression",
-                allsuppressiongroups: "All suppression groups associated with user",
-                allsuppression: "All suppressions",
-                allinvalidemails: "All invalid emails",
-                automationstats: "Automation Stats",
-                singlesendstats: "Single Send Stats",
-                emailstats: "Email Stats for Categories",
-                sumofemailstats: "Sums of email stats for Categories",
-                globalemailstats: "Global email stats",
-                emailstatsprovince: "Email stats by State/Province",
-                emailstatsdevice: "Email stats by device",
-                emailstatsclient: "Email stats by client",
-                emailstatsmailbox: "Email stats by mailbox",
-                emailstatsbrowser: "Email stats by browser",
-                allbounces: "All Bounces",
-                allblocks: "All Blocks",
-                allspamreports: "All spam reports",
-                searchcontacts: "Search Contacts",
-                contactlists: "Contact lists",
-                recipients: "Recipients"
+            serviceNowDataSource: {
+                table: "Table",
+                serviceCatelog: "Service Catelog",
+                scorecards: "Scorecards",
+                attachment: "Attachment",
+                changes: "Changes",
+                activitySubscriptions: "Activity Subscriptions",
+        
+                viewTable: "View Table",
+                viewTableWithId: "View Table With Id",
+                allTable: "All Table",
+                cart: "Cart",
+                catalogs: "Catalogs",
+                categoriesByCatalogId: "Categories By Catalog Id",
+                viewCatalog: "View Catalog",
+                viewCategoriesById: "View Categories By Id",
+                serviceCatalogItems: "Service Catalog Items",
+                viewItem: "View Item",
+                itemByCartId: "Item By Cart Id",
+                allWishlist: "All Wishlist",
+                wishlistByCartId: "Wishlist By Cart Id",
+                allScorecards: "All Scorecards",
+                allAttachment: "All Attachment",
+                fileById: "File By Id",
+                attachmentById: "Attachment By Id",
+                allChange: "All Change",
+                allActivitySubscriptions: "All Activity Subscriptions",
             },
             helpScoutDataSource: {
                 conversation: "Conversation",
                 customer: "Customers",
                 reports: "Reports",
                 team: "Team",
+                others: "Others",
 
                 conversations: "Conversations",
                 chatthreads: "Chat Threads",
@@ -6266,6 +6266,41 @@ var Designer = {
                 workflows: "Workflows"
 
 
+            },
+            sendGridDataSource: {
+                campaigns: "Campaigns",
+                others: "Others",
+                campaignsstats: "Campaigns Stats",
+                contacts: "Contacts",
+
+                allcampaigns: "All Campaigns",
+                senderidentities: "Sender Identities",
+                singlesends: "Single Sends",
+                searchsinglesends: "Search Single Sends",
+                segments: "Segments",
+                categories: "Categories",
+                filtermessages: "Filter Messages",
+                accounts: "Accounts",
+                allglobalsuppression: "All Global suppression",
+                allsuppressiongroups: "All suppression groups associated with user",
+                allsuppression: "All suppressions",
+                allinvalidemails: "All invalid emails",
+                automationstats: "Automation Stats",
+                singlesendstats: "Single Send Stats",
+                emailstats: "Email Stats for Categories",
+                sumofemailstats: "Sums of email stats for Categories",
+                globalemailstats: "Global email stats",
+                emailstatsprovince: "Email stats by State/Province",
+                emailstatsdevice: "Email stats by device",
+                emailstatsclient: "Email stats by client",
+                emailstatsmailbox: "Email stats by mailbox",
+                emailstatsbrowser: "Email stats by browser",
+                allbounces: "All Bounces",
+                allblocks: "All Blocks",
+                allspamreports: "All spam reports",
+                searchcontacts: "Search Contacts",
+                contactlists: "Contact lists",
+                recipients: "Recipients"
             },
             freshdeskDataSource: {
                 allTickets: "All Tickets",

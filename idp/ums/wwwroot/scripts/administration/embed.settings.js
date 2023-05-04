@@ -44,6 +44,7 @@ $(function () {
             $("#trigger-file").attr("disabled", "disabled");
             $("#cs-upload").attr("disabled", "disabled");
             $("#filename").attr("disabled", "disabled");
+            $("#cs-upload").attr("disabled", "disabled");
             $("#import-validation-msg").html("");
             var isEmbed = "false";
         }
