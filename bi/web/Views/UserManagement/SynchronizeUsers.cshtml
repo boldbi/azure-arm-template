@@ -3,6 +3,18 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     ViewBag.Title = T["Synchronize Users"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncAzureAdUsers);
+    @if (ViewBag.AdSync > 0)
+    {
+        ViewBag.PageHeader = @String.Format(T["{0} Synchronization"].Value, "Active Directory");
+        ViewBag.PageDescription = @String.Format(T["Select Users to synchronize with {0}."].Value, "Active Directory");
+    }
+    @if (ViewBag.AzureAdSync > 0)
+    {
+        ViewBag.PageHeader = @String.Format(T["{0} Synchronization"].Value, "Azure AD");
+        ViewBag.PageDescription = @String.Format(T["Select Users to synchronize with {0}."].Value, "Azure AD");
+    }
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
 }
 
 @section scripts{
@@ -184,46 +196,16 @@
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
     
-
-<div class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")">
-    <div class="col-xs-12 bi-page-content no-padding">
-        <div class="bi-page-header col-xs-12" id="user-title">
-            <a href="@Url.Action("index", "UserManagement")" data-toggle="tooltip" data-placement="top" title="@T["Users"]" class="back-button pull-left">
-                <i class="su su-arrow-back back-navigaion"> </i>
-            </a>
-            @if (ViewBag.AdSync > 0)
-            {
-                <hgroup class="bi-page-header-description col-xs-6 no-padding">
-                    <h1 class="h2 page-title" id="user-title-with-count">@String.Format(T["{0} Synchronization"].Value, "Active Directory") - @Html.Raw(String.Format(T["Users {0}"].Value, "<span id='total-record-count'></span>"))</h1>
-                    @*<input type="hidden" id="user_count" value="@ViewBag.userCount">*@
-                    <h5 class="page-description">@String.Format(T["Select Users to synchronize with {0}."].Value, "Active Directory")</h5>
-                </hgroup>
-                <!--<div class="col-xs-7 page-title" id="user-title-with-count">@String.Format(T["{0} Synchronization"].Value, "Active Directory") - @Html.Raw(String.Format(T["Users {0}"].Value, "<span id='total-record-count'></span>"))</div>-->
-                @*<input type="hidden" id="user_count" value="@ViewBag.userCount">*@
-                <!--<div class="col-xs-6 page-description">
-            @String.Format(T["Select Users to synchronize with {0}."].Value, "Active Directory")
-        </div>-->
-            }
-            @if (ViewBag.AzureAdSync > 0)
-            {
-                <hgroup class="bi-page-header-description col-xs-6 no-padding">
-                    <h1 class="h2 page-title" id="user-title-with-count">@String.Format(T["{0} Synchronization"].Value, "Azure AD") - @Html.Raw(String.Format(T["Users {0}"].Value, "<span id='total-record-count'></span>"))</h1>
-                    @*<input type="hidden" id="user_count" value="@ViewBag.userCount">*@
-                    <h5 class="page-description">@String.Format(T["Select Users to synchronize with {0}."].Value, "Azure AD")</h5>
-                </hgroup>
-            }
-            <div class="hide col-xs-4 pull-right no-padding bi-header-btn" id="synchronize-users">
-                <span class="primary-button app-btn-primary pull-right" title="Synchronize Users with Active Directory" onclick="SynchronizeUsers()">@T["Synchronize"]</span>
+<div class="col-xs-12 no-padding no-margin width-alignment">
+    <div class="col-xs-12 no-padding">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "IsUserSyncPage", "true" } })
+    </div>
+    <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton" id="user-title">
+        <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section hide" id="synchronize-users">
+                    <span class="primary-button app-btn-primary pull-right" title="Synchronize Users with Active Directory" onclick="SynchronizeUsers()">@T["Synchronize"]</span>
             </div>
-        </div>
-        <div class="col-xs-12 bi-page-body">
-            <div class="col-xs-7 no-padding">
-                @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
-                {
-                    <span class="ad-userlist-info pull-left">@String.Format(T["Only users imported from the {0} configured in this organization are listed here."].Value, ViewBag.AdSync > 0 ? "Windows AD" : "Azure AD")</span>
-                }
-            </div>
-            <div id="search-area" class="pull-right @(ViewBag.AdSync > 0 ? "windows-ad-search" : "")">
+            <div id="search-area" class="pull-left col-xs-4 @(ViewBag.AdSync > 0 ? "windows-ad-search" : "")">
                 @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
                 {
                     <input type="text" id="search-ad-users" class="pull-left no-margin" placeholder="@String.Format(T["Search {0} users"].Value, ViewBag.AdSync > 0 ? "AD" : "Azure AD")" autocomplete="off" />
@@ -231,6 +213,18 @@
                 }
                 <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" data-container="body" data-toggle="tooltip" data-placement="bottom" title="@T["Clear search"]"></span>
                 <span class="su su-search search-icon pull-left no-margin search-user" data-toggle="tooltip" data-placement="bottom" title="@T["Search"]"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+    <div class="col-xs-12 bi-page-content no-padding">
+        <div class="col-xs-12 bi-page-body">
+            <div class="col-xs-7 no-padding">
+                @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
+                {
+                    <span class="ad-userlist-info pull-left">@String.Format(T["Only users imported from the {0} configured in this organization are listed here."].Value, ViewBag.AdSync > 0 ? "Windows AD" : "Azure AD")</span>
+                }
             </div>
             @if (ViewBag.AdSync > 0)
             {

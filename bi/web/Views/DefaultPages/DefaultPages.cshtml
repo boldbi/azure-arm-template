@@ -10,6 +10,7 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
     var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    ViewBag.PageHeader = itemType == ItemType.Dashboard ? @T["Dashboards"] : itemType == ItemType.Schedule ? @T["Schedules"] : itemType == ItemType.Datasource ? @T["Data Sources"] : @T["Slideshow"];
 }
 <environment include="Development,CloudDevelopment">
     <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/default-pages.css" />
@@ -21,6 +22,7 @@
     var dashboardItemCount = "@itemsCount[ItemType.Dashboard]";
 </script>
 <link href="https://fonts.googleapis.com/css?family=Bitter:400,700" rel="stylesheet">
+@await Html.PartialAsync("../Shared/_TopHeaderSection")
 <div id ="defafult-pages-container" class="col-xs-12 defafult-pages-container no-padding">
     <div class="default-pages">
         <img class="default-pages-dashboard-image" src="@(itemType == ItemType.Dashboard ? @themeBasedImageHelper.DashboardImage() : itemType == ItemType.Schedule ? @themeBasedImageHelper.ScheduleImage() : itemType == ItemType.Datasource ? @themeBasedImageHelper.DatasourceImage() : @themeBasedImageHelper.SlideshowImage())">

@@ -146,15 +146,15 @@
                 <span class="su su-options"> </span>
             </span>
             <ul class="dropdown-menu" role="menu">
-                @if (isAdmin || permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions])
-                {
-                    <li class="menu-group">
-                        <a href="@Url.Action("userpermission", "permission")?userId={{:UserId}}" title="@T["Manage Permissions"]" data-toggle="tooltip">
-                            <i class="su su-manage-permission"></i>
-                            <span class="menu-text">@T["Manage Permissions"]</span>
-                        </a>
-                    </li>
-                }
+        @if (isAdmin || permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions])
+        {
+                        <li class="menu-group">
+                            <a href="@Url.Action("userpermission", "permission")?userId={{:UserId}}" title="@T["Manage Permissions"]" data-toggle="tooltip">
+                                <i class="su su-manage-permission"></i>
+                                <span class="menu-text">@T["Manage Permissions"]</span>
+                            </a>
+                        </li>
+        }
                 <li class="menu-group">
                     <a href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}" title="@T["View"]" data-toggle="tooltip">
                         <i class="su su-eye"></i>
@@ -293,25 +293,23 @@
                     return @isAdmin.ToString().ToLower();
                 }
             });
-            });
+        });
     </script>
 }
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-
-    <div id="base-container" class="col-xs-12 bi-page-container">
-        <div class="col-xs-12 bi-page-content no-padding">
-            <div class="col-md-12 import-area bi-page-header">
-                <hgroup class="bi-page-header-description col-xs-4 no-padding">
-                    <h1 class="h2 page-title">
-                        <input type="hidden" id="user-count-text" value="@ViewBag.UserCount">
-                        @T["Users"] (<span id="user-count" value="@ViewBag.UserCount">@ViewBag.UserCount</span>)
-                    </h1>
-                    <h5 class="page-description">@T["Add and manage your users."]</h5>
-                </hgroup>
-                <ul class="pull-right col-xs-8 bi-header-btn no-padding" id="user-management-options">
-                    <li class="dropdown no-padding">
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Users"] }, { "PageDescription", @T["Add and manage your users."] }, {"IsUsersPage", "true"} })
+        <div class="col-md-12 import-area bi-page-header top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="pull-left col-xs-4">
+                    <input type="text" class="pull-left" id="search-users" placeholder="@T["Search users"]" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                </div>
+                <ul class="pull-right col-xs-8 no-padding button-section" id="user-management-options">
+                    <li class="dropdown no-padding pull-right">
                         @if (new DeviceDetection(Context).IsMobile)
                         {
                             <button class="primary-button app-btn-primary" id="new-user-dropdown" title="@T["Add new user"]" onclick="onUserAddDialogOpen()">
@@ -399,7 +397,7 @@
 
                     @if (((ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0) && (ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0)) || ((ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0) && (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)) || ((ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0) && (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)))
                     {
-                        <li class="dropdown no-padding">
+                        <li class="dropdown no-padding pull-right">
                             <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="synchronize-dropdown" title="@T["Synchronize Users"]">
                                 <span>@T["Synchronize"] </span>
                                 <span class="caret"></span>
@@ -440,35 +438,34 @@
                     {
                         if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0)
                         {
-                            <li>
+                            <li class="pull-right">
                                 <a href="@Url.Action("SynchronizeUsers", "UserManagement")" class="link-button app-btn-link synchronize-users" title="@Html.Raw(String.Format(T["Synchronize users with {0}"].Value, "Active Directory"))" data-toggle="tooltip" data-placement="left">@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Active Directory"))</a>
                             </li>
                         }
                         if (ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0)
                         {
-                            <li>
+                            <li class="pull-right">
                                 <a href="@Url.Action("SynchronizeAzureUsers", "UserManagement")" class="link-button app-btn-link synchronize-azure-users" title="@Html.Raw(String.Format(T["Synchronize users with {0}"].Value, "Azure AD"))" data-toggle="tooltip" data-placement="left">@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Azure AD"))</a>
                             </li>
                         }
                         if (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)
                         {
-                            <li>
+                            <li class="pull-right">
                                 <a href="@Url.Action("SynchronizeCustomDatabaseUsers", "UserManagement")" class="link-button app-btn-link synchronize-database-users" title="@T["Synchronize users with Custom Database"]" data-toggle="tooltip" data-placement="left">@T["Database Synchronization"]</a>
                             </li>
                         }
                     }
-                    <li class="flying-add hide" id="add-user-in-group">
-                        <button class="critical-action-button app-btn-danger user-delete-button" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">@T["Remove User"]</button>
+                    <li class="flying-add hide pull-right" id="add-user-in-group">
+                        <button class="critical-action-button app-btn-danger user-delete-button pull-left" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">@T["Remove User"]</button>
                         <button class="secondary-button app-btn-secondary user-add-group" title="@T["Assign a group to selected users"]">@T["Assign Group"]</button>
                     </li>
                 </ul>
             </div>
+        </div>
+    </div>
+    <div id="base-container" class="col-xs-12 bi-page-container">
+        <div class="col-xs-12 bi-page-content no-padding">
             <div id="user-list-container" class="list col-xs-12 bi-page-body">
-                <div id="search-area" class="pull-right">
-                    <input type="text" class="pull-left" id="search-users" placeholder="@T["Search users"]" />
-                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
-                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
-                </div>
                 <div class="col-xs-12 no-padding ">
                     <div id="user_grid">
                     </div>

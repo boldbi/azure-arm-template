@@ -992,6 +992,16 @@ CREATE TABLE {database_name}.BOLDBI_BackgroundJobs(
     IsActive tinyint NOT NULL,
     PRIMARY KEY (Id))
 ;
+
+CREATE TABLE {database_name}.SyncDS_UploadDataSourceMapping(
+	Id int NOT NULL AUTO_INCREMENT,
+	DownloadedTenantId char(38) NOT NULL,
+	DownloadedItemId varchar(255) NOT NULL,
+	UploadedItemId char(38) NOT NULL,
+	UploadedDate datetime  NULL,
+	IsActive tinyint(1) NOT NULL,
+	PRIMARY KEY (Id))
+;
 -- -- PASTE INSERT Queries below this section --------
 
 
@@ -1230,12 +1240,8 @@ INSERT into {database_name}.BOLDBI_PermissionAccess (Name, AccessId, IsActive) V
 ;
 INSERT into {database_name}.BOLDBI_PermissionAccess (Name, AccessId, IsActive) VALUES ('Read, Write, Delete',14,1)
 ;
--- INSERT into {database_name}.[BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES ('Read, Download',18,1)
--- ;
--- INSERT into {database_name}.[BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES ('Read, Write, Download',22,1)
--- ;
--- INSERT into {database_name}.[BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES ('Read, Write, Delete, Download',30,1)
--- ;
+INSERT into {database_name}.BOLDBI_PermissionAccess (Name, AccessId, IsActive) VALUES ('Download',18,1)
+;
 
 INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,1,1)
 ;																									  
@@ -1356,6 +1362,12 @@ INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, Perm
 INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (21,4,1)
 ;
 INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,4,1)
+;
+INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (12,5,1)
+;
+INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (13,5,1)
+;
+INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (14,5,1)
 ;
 
 INSERT into {database_name}.BOLDBI_PermissionLogType (Name,IsActive) VALUES ( 'PermissionAdded',1)

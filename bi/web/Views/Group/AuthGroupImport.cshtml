@@ -19,6 +19,10 @@
     var globalSettingsBaseUrl = _globalAppSettings.SystemSettings.IDPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/administration/authentication";
     var initialModifyLink = (authSettingsList[0].TenantId != Guid.Empty ? localSettingsBaseUrl : globalSettingsBaseUrl) + "?tab=" + (authSettingsList[0].AuthType == AuthType.OAuth ? "oauth-settings" : "openid-settings");
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.PageHeader = @String.Format(T["Import Groups — {0}"].Value, authTypeInfo);
+    ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, authTypeInfo);
+    ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
+    ViewBag.BackIconTitle = T["Groups"];
 }
 }
 
@@ -157,23 +161,21 @@
             });
         });
     </script>
-    <div class="auth-group-container bi-page-container col-xs-12 @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")">
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection")
+        </div>
+        <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <input type="button" disabled="" value="@T["Import groups"]" title="@T["Import the selected groups from the list"]" onclick="SaveAuthGroups()" id="import-button" class="primary-button app-btn-primary pull-right pull-right" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="auth-group-container bi-page-container col-xs-12 @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
         <div class="col-xs-12 bi-page-content no-padding">
             <div class="import-auth-group">
-                <div class="col-md-12 col-xs-12 bi-page-header">
-                    <div class="col-xs-6 no-padding import-area">
-                        <a href="@Url.Action("group","group")" data-toggle="tooltip" data-placement="top" title="@T["Groups"]" class="back-button pull-left">
-                            <i class="su su-arrow-back"> </i>
-                        </a>
-                        <hgroup class="col-xs-6 col-xs-6 col-sm-6 col-xs-12 no-padding bi-page-header-description">
-                            <h1 class="h2 page-title">@T["Import Groups"] — @authTypeInfo</h1>
-                            <h5 class="page-description">@String.Format(T["Import users from {0}."].Value, authTypeInfo)</h5>
-                        </hgroup>
-                    </div>
-                    <div class="col-xs-6 no-padding bi-header-btn">
-                        <input type="button" disabled="" value="@T["Import groups"]" title="@T["Import the selected groups from the list"]" onclick="SaveAuthGroups()" id="import-button" class="primary-button app-btn-primary pull-right pull-right" />
-                    </div>
-                </div>
                 <div class="col-md-12 col-xs-12 bi-page-body">
                     <div class="col-md-12 col-xs-12 no-padding no-margin">
                         <div class="col-md-8 col-xs-8 no-padding">

@@ -24,6 +24,8 @@
     var permissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isOAuthorOpenIdUser = ViewBag.IsYokogawaTag && (userDetail.DirectoryType == DirectoryType.OAuth2 || userDetail.DirectoryType == DirectoryType.OpenIDConnect) ? true : false;
     List<string> groupName = new List<string>();
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
 }
 
 @section scripts{
@@ -159,25 +161,16 @@
     <environment exclude="Development,CloudDevelopment">
         <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
-    <div id="view-profile-info" class="bi-page-container col-xs-12">
-        <span id="is-aduser">@ViewBag.IsAdUser</span>
-        <span id="logged-user">@ViewBag.LoggedUser</span>
-        <div id="edit-user-profile-master" role="tabpanel" class="user-permission bi-page-content col-xs-12 no-padding">
-            <div class="col-lg-12 col-md-12 co-sm-12 col-xs-12 bi-page-header tabs-header-padding">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
-                    <a class="back-button pull-left" href="@Url.Action("Index","UserManagement")" data-toggle="tooltip" data-placement="top" title="@T["Users"]" data-container="body">
-                        <i class="su su-arrow-back back-navigaion img-size"> </i>
-                    </a>
-                    <hgroup>
-                        <h2 class="h2 page-title adjust-style-for-backarrow no-margin" id="display-name">@ViewBag.UserDetail.DisplayName</h2>
-                    </hgroup>
-                </div>
-                <div class="col-md-6 col-xs-12 col-sm-6 col-xs-12 no-padding margin-top">
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @ViewBag.UserDetail.DisplayName }, { "IsViewUserProfile", "true" } })
+        <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
                     @if (userDetail.Email.ToLower() != ViewBag.LoggedUser.ToLower() && (isAdmin || (!isAdmin && !userDetail.IsAdmin && permissions[PermissionEntity.UsersandGroups])))
                     {
                         @*<input class="primary-button password-save-button pull-right @showDeactivateButton" type="button" id="deactivate-button-click" value="@T["Deactivate User"]" title="" />
-                            <input class="primary-button pull-right @showResendButton" type="button" id="resend-button-click" value="@T["Resend Activation Code"]" title="" />
-                            <input class="primary-button password-save-button pull-right @showActivationButton" type="button" id="activate-button-click" value="@T["Activate User"]" title="" />*@
+                <input class="primary-button pull-right @showResendButton" type="button" id="resend-button-click" value="@T["Resend Activation Code"]" title="" />
+                <input class="primary-button password-save-button pull-right @showActivationButton" type="button" id="activate-button-click" value="@T["Activate User"]" title="" />*@
 
                         <div id="profile-action-section" class="dropdown pull-right no-padding">
                             <a class="dropdown-toggle" data-toggle="dropdown">
@@ -225,17 +218,22 @@
                     }
                 </div>
             </div>
-            <nav class="col-xs-12 no-padding bi-page-nav-bar">
-                <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
-                    <li id="profile-tab" role="presentation" class='@isProfileTab'>
-                        <a href="#user-profile-tab" id="user-profile" aria-controls="user-profile-tab" role="tab" data-toggle="tab">@T["Profile"]</a>
-                    </li>
-                    <li id="attribute-tab" role="presentation" class='@isAttributeTab'>
-                        <a href="#user-attribute-tab" id="user-attribute" aria-controls="user-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
-                    </li>
-                </ul>
-            </nav>
-
+        </div>
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
+                <li id="profile-tab" role="presentation" class='@isProfileTab'>
+                    <a href="#user-profile-tab" id="user-profile" aria-controls="user-profile-tab" role="tab" data-toggle="tab">@T["Profile"]</a>
+                </li>
+                <li id="attribute-tab" role="presentation" class='@isAttributeTab'>
+                    <a href="#user-attribute-tab" id="user-attribute" aria-controls="user-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="view-profile-info" class="bi-page-container col-xs-12 bi-page-container-with-tab">
+        <span id="is-aduser">@ViewBag.IsAdUser</span>
+        <span id="logged-user">@ViewBag.LoggedUser</span>
+        <div id="edit-user-profile-master" role="tabpanel" class="user-permission bi-page-content col-xs-12 no-padding">
             <div class="col-xs-12 no-padding tab-content">
                 <div id="user-profile-tab" role="tabpanel" class="col-xs-12 tab-pane no-padding @isProfileTab">
                     <div class="user-profile-section col-lg-12 col-md-12 col-sm-12 col-xs-12 bi-page-body col-xs-12">

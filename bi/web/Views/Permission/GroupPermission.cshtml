@@ -6,6 +6,8 @@
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var scopeList = ServerAppConfig.SettingsScopesList;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
+    ViewBag.BackIconTitle = T["Groups"];
 }
 
 @model List<ItemDetail>
@@ -30,22 +32,21 @@
 }
 @section MainSection {
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div id="base-container" role="tabpanel" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
-        <div class="bi-page-content col-xs-12 no-padding">
-            <div id="group-header" class="col-lg-12 col-md-12 co-sm-12 col-xs-12 bi-page-header">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
-                    <a class="back-button pull-left" href="@Url.Action("group","group")" data-toggle="tooltip" data-placement="top" data-container="body" title="@T["Groups"]">
-                        <i class="su su-arrow-back back-navigaion img-size"> </i>
-                    </a>
-                    <hgroup>
-                        <h2 class="h2 page-title adjust-style-for-backarrow no-margin">@T["Manage Permissions"] - <span title="@ViewBag.groupName" maxlength="60">@ViewBag.groupName</span></h2>
-                    </hgroup>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding adjust-style-for-backarrow">
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Manage Permissions"] }, { "DisplayNameInHeader", @ViewBag.groupName } })
+        </div>
+        <div id="group-header" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
                     <input type="button" title="@T["Add Permission to the group"]" id="add-permission-button-top" value="@T["Add Permission"]" class="primary-button app-btn-primary pull-right" />
                     <a type="button" class="link-button app-btn-link pull-right margin-right" id="view-group" title="" href="@Url.Action("viewgroup","group")/@Context.Request.Query["groupid"]">@T["View Group"]</a>
                 </div>
             </div>
+        </div>
+    </div>
+    <div id="base-container" role="tabpanel" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
             <div class="active-directory-form col-xs-12 bi-page-body">
                 <div class="col-md-12 col-xs-12 col-sm-12 permission-grid">@await Html.PartialAsync("_GroupPermissionGrid", Model)</div>
                 <div class="col-md-3">

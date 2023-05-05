@@ -6244,7 +6244,7 @@ var Designer = {
                 happinessratingsreport: "Happiness Ratings Report",
                 productivityoverallreport: "Productivity Overall Report",
                 productivityfirstresponsetime: "Productivity - First Response Time",
-                productivityrepliessent: "Productivity - Replies Sent"
+                productivityrepliessent: "Productivity - Replies Sent",
                 productivityresolutiontime: "Productivity - Resolution Time",
                 productivityresolved: "Productivity - Resolved",
                 productivityresponsetime: "Productivity - Response Time",

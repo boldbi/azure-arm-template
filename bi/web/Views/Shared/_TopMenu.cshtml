@@ -1,0 +1,208 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink;
+    var showImport = requestUrl.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards");
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    var manageSitesUrl = idPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/sites";
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var showNotifications = ServerAppConfig.IsSelfHosted && customUI?.Profiles != null && customUI.Profiles[0].Notifications != null ? customUI.Profiles[0].Notifications.ShowMenu : true;
+    var showHelp = ServerAppConfig.IsSelfHosted && customUI?.Profiles != null && customUI.Profiles[0].Help != null ? customUI.Profiles[0].Help.ShowMenu : true;
+    var showProfile = ServerAppConfig.IsSelfHosted && customUI?.Profiles != null && customUI.Profiles[0].Profile != null ? customUI.Profiles[0].Profile.ShowMenu : true;
+    var showManageSite = customUI?.Profiles != null && customUI.Profiles[0].Profile != null ? customUI.Profiles[0].Profile.ShowManageSite : true;
+    var showYourSites = customUI?.Profiles != null && customUI.Profiles[0].Profile != null ? customUI.Profiles[0].Profile.ShowYourSites : true;
+    var showMyProfile = ServerAppConfig.IsSelfHosted && customUI?.Profiles != null && customUI.Profiles[0].Profile != null ? customUI.Profiles[0].Profile.ShowMyProfile : true;
+    var showLogout = ServerAppConfig.IsSelfHosted && customUI?.Profiles != null && customUI.Profiles[0].Profile != null ? customUI.Profiles[0].Profile.ShowLogout : true;
+    showProfile = showProfile && (showYourSites || showManageSite || showMyProfile || showLogout);
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId").ToString() : string.Empty;
+    var userName = Context.Session.GetString("username") != null ? Context.Session.GetString("username").ToString() : string.Empty;
+    var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var isItemPageRequested = (requestUrl.AbsolutePath == "/" || requestUrl.AbsolutePath == Url.Content("~/") || requestUrl.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0) && !isMobile;
+}
+
+@if (!isMobile)
+{
+    <nav id="top-nav" class="sf-nav-group mobile-hidden">
+        <ul class="icon-list">
+            @if (showHelp) 
+            {
+                <li class="icon-list-item help-icon-list-item">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="icon-container">
+                            <i class="su su-help"></i>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu sub-menu no-margin" role="menu">
+                        @if (!ServerAppConfig.IsSelfHosted)
+                        {
+                            if (isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard] && showImport)
+                            {
+                                <li class="sub-menu-item-title">
+                                    <div>@T["Explore"]</div>
+                                </li>
+                                <li class="sub-menu-item">
+                                    <a class="add-sample-button" href="javascript:void(0)">
+                                        @T["Sample Dashboards"]
+                                    </a>
+                                </li>
+                                <li class="sf-sub-menu-separator"></li>
+                            }
+                        }
+                        @if (!ServerAppConfig.IsHideHelpLink)
+                        {
+                            <li class="sub-menu-item-title">
+                                <div>@T["Help"]</div>
+                            </li>
+                            <li class="sub-menu-item">
+                                <a class="online-help-link" href="@(ViewBag.helpSiteBaseUrl + ViewBag.helpSiteUrl)" target="_blank">
+                                    @T["Online Help"]
+                                </a>
+                            </li>
+                            <li class="sub-menu-item">
+                                <a href="@(ViewBag.helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.GetDashboardMobile))" target="_blank">
+                                    @T["Get the mobile app"]
+                                </a>
+                            </li>
+                        }
+
+                        @if (!ServerAppConfig.IsSelfHosted)
+                        {
+                            <li class="sub-menu-item">
+                                <a href="https://www.@(GlobalAppSettings.BrandingDomain)/contact" target="_blank">
+                                    @T["Contact Us"]
+                                </a>
+                            </li>
+                            <li class="sf-sub-menu-separator"></li>
+                            <li class="sub-menu-item-title">
+                                <div>@T["Legal"]</div>
+                            </li>
+                            <li class="sub-menu-item">
+                                <a href="https://www.@(GlobalAppSettings.BrandingDomain)/privacy" target="_blank">
+                                    @T["Privacy Policy"]
+                                </a>
+                            </li>
+                            <li class="sub-menu-item">
+                                <a href="https://www.@(GlobalAppSettings.BrandingDomain)/terms-of-use" target="_blank">
+                                    @T["Terms of Use"]
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            @if (!ServerAppConfig.IsHideHelpLink)
+                            {
+                                <li class="sf-sub-menu-separator"></li>
+                            }
+                            <li class="sub-menu-item-title version-title">
+                                <div>@T["Version"]</div>
+                            </li>
+                            <li class="sub-menu-item">
+                                <span>App : @globalAppSettings.SystemSettings.ProductVersion</span>
+                            </li>
+                            <li class="sub-menu-item">
+                                <span>Database : @globalAppSettings.SystemSettings.ProductDatabaseVersion</span>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+            @if (showNotifications)
+            {
+                <li class="icon-list-item notification-icon-list-item">
+                    <span id="user-system-notification" class="icon-container" onclick="openUserNotification()">
+                        <i class="su su-notification-alert"></i>
+                    </span>
+                </li>
+            }
+            @if (showProfile)
+            {
+                <li class="icon-list-item profile-section-list" id="dropdown-profile">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="icon-container">
+                            <div class="profile-pic-tag" data-id="@idpreferenceId" data-type="user" data-display-name="@displayName" data-image-size="32" data-toggle="tooltip" title="@displayName" data-placement="bottom"></div>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu sub-menu" role="menu">
+                        @if (ServerAppConfig.IsSelfHosted)
+                        {
+                            @if (showYourSites)
+                            {
+                                <li class="sub-menu-item sub-menu-profile" id="user-sites">
+                                    <div class="sub-menu-profile-text-padding">@T["Your Sites"]</div>
+                                    <img class='loader-sites-gif' src="@dashboardServerResourceUrl/cdn/images/waitingpopup.gif" style="display:block; margin: auto; height:30px; width:30px;" />
+                                </li>
+                                <li id="more-sites-id">
+                                </li>
+                            }
+                            @if (showManageSite)
+                            {
+                                @if (showYourSites)
+                                {
+                                    <li class="sf-sub-menu-separator admin-privilege" style="display: none;"></li>
+                                }
+                                <li class="sub-menu-item sub-menu-profile admin-privilege" style="display: none;">
+                                    <a rel="alternate" hreflang="en" href="@manageSitesUrl" target="_blank">
+                                        <div class="manage-site">@T["Manage sites (Admin access)"]</div>
+                                    </a>
+                                </li>
+                            }
+                            @if (showMyProfile)
+                            {
+                                <li class="sf-sub-menu-separator"></li>
+                            }
+                        }
+                        @if (showMyProfile)
+                        {
+                            <li class="sub-menu-item sub-menu-profile">
+                                <div class="sub-menu-profile-text-padding">@T["Profile"]</div>
+                                <a href="@Url.Action("ProfilePage", "User")">
+                                    <div class="sub-menu-profile-hover">
+                                        <div class="sub-menu-user-name"><div class="sub-menu-user-name-style">@displayName</div><div class="sub-menu-user-email-style">@(ServerAppConfig.IsAutoGeneratedMail(emailAddress) ? userName : emailAddress)</div></div>
+                                        <div class="profile-pic-tag" data-id="@idpreferenceId" data-type="user" data-display-name="@displayName" data-image-size="28" data-toggle="tooltip" title="@displayName" data-placement="top"></div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                        @if (!ServerAppConfig.IsSelfHosted)
+                        {
+                            <li class="sf-sub-menu-separator"></li>
+                            <li class="sub-menu-item">
+                                <a class="request-concierge-support" href="@ServerAppConfig.AppSettings.Syncfusion.Support.CreateTicket" target="_blank">
+                                    @T["Create Incidents"]
+                                </a>
+                            </li>
+                            <li class="sub-menu-item">
+                                <a href="@ServerAppConfig.AppSettings.Syncfusion.Support.ListTicket" target="_blank">
+                                    @T["My Incidents"]
+                                </a>
+                            </li>
+                            <li class="sf-sub-menu-separator"></li>
+                            <li class="sub-menu-item">
+                                <a href="@(ServerAppConfig.AppSettings.EndPoints.TenantAppUrl.TrimEnd('/') + "/sites/" + globalAppSettings.SystemSettings.TenantId + "/subscription")" target="_blank">
+                                    @T["Subscription and Billing"]
+                                </a>
+                            </li>
+                        }
+                        @if (showLogout)
+                        {
+                            @if (!ServerAppConfig.IsSelfHosted || (showManageSite || showMyProfile || showYourSites))
+                            {
+                                <li class="sf-sub-menu-separator"></li>
+                            }
+                            <li class="sub-menu-item logout-section">
+                                <a href="@Url.Action("logout", "accounts")">
+                                    @T["Logout"]
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+
+    </nav>
+}
