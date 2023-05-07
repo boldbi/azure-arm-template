@@ -7159,7 +7159,7 @@
                 dashboardUploadedText: "Dashboards Uploaded Successfully",
                 dashboardNeedsAttentionText: "Dashboards Needs Attention",
                 configuredDashboardText: "Dashboards ready to be uploaded",
-                dashboardUploadingText: "Dashboards uploading...",
+                dashboardUploadingText: "Uploading dashboard...",
                 uploadButtonLabelText: "Upload",
                 closeButtonLabelText: "Close",
                 mapToExistingDataSource: "Map to an existing data source",
