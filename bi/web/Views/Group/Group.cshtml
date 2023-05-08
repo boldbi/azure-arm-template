@@ -297,32 +297,19 @@
 }
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-
-    <div id="group-directory-container" class="bi-page-container col-xs-12 @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")" aria-labelledby="active-directory-settings-link">
-        <div class="bi-page-content col-xs-12 no-padding">
-            <div id="email-setting" class="bi-page-header col-md-12">
-                <hgroup class="bi-page-header-description col-xs-6 no-padding">
-                    <h1 class="h2 page-title">
-                        @T["Groups"] (<span id="group-count">@ViewBag.groupCount</span>)
-                        <span class="tool-tip-description">
-                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
-                            <span class="dropdown-menu" role="menu">
-                                @T["You can use groups to create and assign a set of permissions and custom attributes to multiple users without re-creating them for each user."]
-                                @if (!@ServerAppConfig.IsHideHelpLink)
-                                {
-                                    <span>@Html.Raw(String.Format(T["Click {0}here{1} to learn how to use groups."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + groupPermissionHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
-                                }
-                                </span>
-                            </span>
-                    </h1>
-                    <h5 class="page-description">
-                        @T["Add and manage groups."]
-                    </h5>
-                </hgroup>
-                <ul id="group-header" class="pull-right col-xs-6 no-padding groups-menu bi-header-btn">
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") group-page-header">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Groups"] }, { "PageDescription", @T["Add and manage groups."] } })
+        <div class="col-md-12 bi-page-header top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="pull-left col-xs-4">
+                    <input type="text" id="search-groups" class="pull-left no-margin" placeholder="@T["Search groups"]" />
+                    <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-group pull-left no-margin" title="@T["Search"]"></span>
+                </div>
+                <ul id="group-header" class="pull-right col-xs-6 no-padding groups-menu button-section">
                     @if (!(groupImport.HideCreateGroup && groupImport.HideAzureAD && groupImport.HideOAuth && groupImport.HideOpenID && groupImport.HideWindowsAD))
                     {
-                        <li class="dropdown">
+                        <li class="dropdown no-padding">
                             @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || ViewBag.IsUserHasCreateGroupPermission)
                             {
                                 <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" id="new-user-dropdown" title="@T["Add new group"]">
@@ -443,16 +430,12 @@
                         </li>
                     }
                 </ul>
-                <input type="hidden" name="GroupCount" id="group-count-text" value="@ViewBag.groupCount" />
-                @*<input type="hidden" id="adgroup-count-text" value="@ViewBag.AdGroupCount">*@
-                <input type="hidden" id="azureadgroup-count-text" value="@ViewBag.AzureADGroupCount">
             </div>
+        </div>
+    </div>
+    <div id="group-directory-container" class="bi-page-container col-xs-12 @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")" aria-labelledby="active-directory-settings-link">
+        <div class="bi-page-content col-xs-12 no-padding">
             <div id="grid-container" class="col-xs-12 bi-page-body">
-                <div id="search-area" class="pull-right">
-                    <input type="text" id="search-groups" class="pull-left no-margin" placeholder="@T["Search groups"]" />
-                    <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
-                    <span class="su su-search search-group pull-left no-margin" title="@T["Search"]"></span>
-                </div>
                 <div id="Grid" data-gridName="Group" class="pull-left">
                 </div>
                 <div class="directory-info col-lg-8">

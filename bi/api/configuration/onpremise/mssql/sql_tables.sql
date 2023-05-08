@@ -916,6 +916,15 @@ CREATE TABLE [BOLDBI_BackgroundJobs](
     [IsActive] [bit] NOT NULL)
 ;
 
+CREATE TABLE [BOLDBI_UploadDataSourceMapping](
+    [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    [DownloadedTenantId] [uniqueidentifier] NOT NULL,
+    [DownloadedItemId] [nvarchar](255) NOT NULL,
+    [UploadedItemId] [uniqueidentifier] NOT NULL,
+    [UploadedDate] [datetime] NULL,
+    [IsActive] [bit] NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into [BOLDBI_ItemType] (Name,IsActive) VALUES (N'Category',1)
@@ -1152,12 +1161,8 @@ INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read,
 ;
 INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Write, Delete',14,1)
 ;
---INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Download',18,1)
---;
---INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Write, Download',22,1)
---;
---INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Write, Delete, Download',30,1)
---;
+INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Download',18,1)
+;
 
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,1,1)
 ;																									  
@@ -1278,6 +1283,12 @@ INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (21,4,1)
 ;
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,4,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (12,5,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (13,5,1)
+;
+INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (14,5,1)
 ;
 
 INSERT into [BOLDBI_PermissionLogType] (Name,IsActive) VALUES ( N'PermissionAdded',1)

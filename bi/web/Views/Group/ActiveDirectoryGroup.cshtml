@@ -3,6 +3,10 @@
     ViewBag.Title = String.Format(T["Synchronize {0} Groups"].Value, "Active Directory") + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncAzureAdGroups);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.PageHeader = @String.Format(T["{0} Synchronization"].Value, ViewBag.AdSync > 0 ? "Active Directory" : "Azure AD");
+    ViewBag.PageDescription = @String.Format(T["Select groups to synchronize with {0}."].Value, ViewBag.AdSync > 0 ? "Active Directory" : "Azure AD");
+    ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
+    ViewBag.BackIconTitle = T["Groups"];
 }
 
 @section scripts{
@@ -189,29 +193,16 @@
 }
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-<div class="col-xs-12 sync-container bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")">
-    <div class="bi-page-content col-xs-12 no-padding">
-        <div class="bi-page-header col-xs-12">
-            <a href="@Url.Action("group","group")" data-toggle="tooltip" data-placement="top" title="@T["Groups"]" class="back-button pull-left">
-                <i class="su su-arrow-back back-navigaion"> </i>
-            </a>
-            @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
-            {
-                <hgroup class="col-xs-6 col-xs-6 col-sm-6 col-xs-12 no-padding bi-page-header-description">
-                    <h1 class="h2 page-title"> @String.Format(T["{0} Synchronization"].Value, ViewBag.AdSync > 0 ? "Active Directory" : "Azure AD") - @Html.Raw(String.Format(T["Groups {0}"].Value, "(<span id='group-count'>" + ViewBag.groupCount + "</span>)"))</h1>
-                    <h5 class="page-description">@String.Format(T["Select groups to synchronize with {0}."].Value, ViewBag.AdSync > 0 ? "Active Directory" : "Azure AD")</h5>
-                </hgroup>
-            }
-            <div class="pull-right col-xs-6 no-padding bi-header-btn">
-                <div id="sync-button" class="tab-invisible">
-                    <input type="button" name="SyncGroups" value="@T["Synchronize"]" title="@String.Format(T["Synchronize groups with {0}"].Value, "Active Directory")" data-toggle="tooltip" data-placement="left" id="syncronize-group" class="primary-button app-btn-primary pull-right" />
-                </div>
+<div class="col-xs-12 no-padding no-margin width-alignment">
+    <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "IsGroupSyncPage", "true" } })
+    </div>
+    <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+        <div class="col-xs-12 no-padding">
+            <div id="sync-button" class="col-xs-6 no-padding button-section">
+                <input type="button" name="SyncGroups" value="@T["Synchronize"]" title="@String.Format(T["Synchronize groups with {0}"].Value, "Active Directory")" data-toggle="tooltip" data-placement="left" id="syncronize-group" class="primary-button app-btn-primary pull-right" />
             </div>
-            <input type="hidden" name="GroupCount" id="group-count-text" value="@ViewBag.groupCount" />
-        </div>
-
-        <div id="grid-container" class="bi-page-body col-xs-12">
-            <div id="search-area" class="pull-right">
+            <div id="search-area" class="pull-left col-xs-4">
                 @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
                 {
                     <input type="text" id="search-ad-groups" class="pull-left no-margin" placeholder="@String.Format(T["Search {0} groups"].Value, ViewBag.AdSync > 0 ? "AD" : "Azure AD")" autocomplete="off" />
@@ -219,7 +210,12 @@
                 <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
                 <span class="su su-search search-icon pull-left no-margin search-group" title="@T["Search"]"></span>
             </div>
-
+        </div>
+    </div>
+</div>
+<div class="col-xs-12 sync-container bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div id="grid-container" class="bi-page-body col-xs-12">
             <div id="Grid" class="col-xs-12 no-padding" data-gridName="Group">
             </div>
         </div>

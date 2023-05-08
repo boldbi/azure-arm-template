@@ -91,39 +91,38 @@
 }
 @section MainSection{
     @await Html.PartialAsync("_ProfileMenu")
-    <div id="profile-base-div" role="tabpanel" class="col-xs-12 bi-page-container">
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["My Profile"] }, { "PageDescription", @T["Manage your profile settings and privacy controls"] } })
+        <div id="profile-details-heading-div" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    @if (!ViewBag.IsAdUser && userDetail.DirectoryType != DirectoryType.Syncfusion)
+                    {
+                        <a rel="alternate" hreflang="en" href="@idpChangePasswordUrl" class="link-button app-btn-link pull-right edit-password" title="">@T["Change Password"]</a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isProfileDetailsTab">
+                    <a href="#profile-details" id="profile-details-tab" aria-controls="profile-details-tab-control" role="tab" data-toggle="tab">@T["PROFILE DETAILS"]</a>
+                </li>
+                <li role="presentation" class="@isProfileSettingsTab">
+                    <a href="#profile-settings" id="profile-settings-tab" aria-controls="profile-settings-tab-control" role="tab" data-toggle="tab">@T["SETTINGS"]</a>
+                </li>
+                <li role="presentation" class="@isProfileNotificationsTab">
+                    <a href="#profile-notifications" id="profile-notifications-tab" aria-controls="profile-notifications-tab-control" role="tab" data-toggle="tab">@T["NOTIFICATIONS"]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="profile-base-div" role="tabpanel" class="col-xs-12 bi-page-container bi-page-container-with-tab">
         <input type="hidden" class="page-name" data-content="@T["USER PROFILE"]">
         <input type="hidden" id="user-id" value="@identityResponse.User.Email;" />
         <span id="is-aduser">@ViewBag.IsAdUser</span>
         <span id="logged-user">@ViewBag.LoggedUser</span>
         <div class="col-xs-12 no-padding bi-page-content" id="user-profile-master">
-            <div id="profile-details-heading-div" class="col-xs-12 bi-page-header tabs-header-padding">
-                <div class="col-xs-12 no-padding">
-                    <hgroup class="col-xs-6 bi-page-header-description no-padding">
-                        <h1 class="section-heading page-title header">@T["My Profile"]</h1>
-                        <h5 class="no-padding page-description">@T["Manage your profile settings and privacy controls"]</h5>
-                    </hgroup>
-                    <div class="col-xs-6 no-padding button-section">
-                        @if (!ViewBag.IsAdUser && userDetail.DirectoryType != DirectoryType.Syncfusion)
-                        {
-                            <a rel="alternate" hreflang="en" href="@idpChangePasswordUrl" class="link-button app-btn-link pull-right edit-password" title="">@T["Change Password"]</a>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-12 no-padding bi-page-nav-bar">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="@isProfileDetailsTab">
-                        <a href="#profile-details" id="profile-details-tab" aria-controls="profile-details-tab-control" role="tab" data-toggle="tab">@T["PROFILE DETAILS"]</a>
-                    </li>
-                    <li role="presentation" class="@isProfileSettingsTab">
-                        <a href="#profile-settings" id="profile-settings-tab" aria-controls="profile-settings-tab-control" role="tab" data-toggle="tab">@T["SETTINGS"]</a>
-                    </li>
-                    <li role="presentation" class="@isProfileNotificationsTab">
-                        <a href="#profile-notifications" id="profile-notifications-tab" aria-controls="profile-notifications-tab-control" role="tab" data-toggle="tab">@T["NOTIFICATIONS"]</a>
-                    </li>
-                </ul>
-            </div>
             <div class="col-xs-12 no-padding tab-content">
                 <div role="tabpanel" id="profile-details" class=" profile-section profile-section-first-div col-xs-12 tab-pane bi-page-body @isProfileDetailsTab">
                     <div class="col-xs-12 no-padding profile-img-name">

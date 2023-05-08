@@ -222,46 +222,17 @@ function FormValidate() {
     $("#access-denied").css("display", "none");
     if ($("#password-field").css("display") === "none") {
         if ($("#login-form").valid()) {
-            $(".mail-loader-div").removeClass("email-loader");
-            $("#login-button").attr("disabled", "disabled");
-            var userName = $("#login-email").val();
-            $.ajax({
-                type: "POST",
-                url: validateEmailUrl,
-                data: { userName: userName, callBackUri: callBackUri },
-                success: function (result) {
-                    if (result.Value != null && result.Value != undefined) {
-                        window.location.href = result.Value;
-                    } else {
-                        $(".mail-loader-div").addClass("email-loader");
-                        $("#login-button").removeAttr("disabled");
-                        if (result.Status != null) {
-                            if (result.DirectoryTypeName === "oauth2"
-                                || result.DirectoryTypeName === "openidconnect"
-                                || result.DirectoryTypeName === "jwtsso"
-                                || result.DirectoryTypeName === "windowsad") {
-                                $("#external-email").val(userName);
-                                $("#" + result.DirectoryTypeName + "-login").trigger("click");
-                            }
-                            else if (result.DirectoryTypeName === "azuread") {
-                                $("#external-email").val(userName);
-                                $("#azureadfs-login").trigger("click");
-                            }
-                            else {
-                                $("#password-field, .login-options").slideDown();
-                                $("#password-field").children(".e-float-input").removeClass("e-error");
-                                $("#login-button").html(window.Server.App.LocalizationContent.LoginButton);
-                                $("#current-password").focus();
-                                if (showBoldSignUp.toLowerCase() === "true") {
-                                    $(".account-bg").css("height", "710px");
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+            $("#password-field, .login-options").slideDown();
+            $("#password-field").children(".e-float-input").removeClass("e-error");
+            $("#login-button").html(window.Server.App.LocalizationContent.LoginButton);
+            $("#current-password").focus();
+            if (showBoldSignUp.toLowerCase() === "true") {
+                $(".account-bg").css("height", "710px");
+            }
         }
-        return false;
+        else {
+            return false;
+        }
     } else {
 
         if ($("#login-form").valid()) {

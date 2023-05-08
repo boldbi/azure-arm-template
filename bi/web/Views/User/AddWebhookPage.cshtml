@@ -13,6 +13,7 @@
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var scopeList = ServerAppConfig.SettingsScopesList;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    ViewBag.PageDescription = ViewBag.IsEdit ? T["Edit your webhooks here"].Value : T["Add your webhooks here"].Value;
 }
 @section scripts{
     <environment include="Development,CloudDevelopment">
@@ -61,14 +62,32 @@
         }
     }
 
+    <div class="col-xs-12 no-padding no-margin @(ViewBag.IsRequestFromSettingsPage ? canShowAdminMenu ? "width-alignment" : "admin-panel-full-width" : "width-alignment"  )">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Webhooks"] } })
+        </div>
+        <div id="user-header" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    @if (isRequestFromSettingsPage)
+                    {
+                        <a href="@Url.Action("WebhookSettings", "Administration")" class="secondary-button app-btn-secondary pull-right" id="cancel-webhook-settings" title="">@T["Cancel"]</a>
+
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Webhooks", "User")" class="secondary-button app-btn-secondary pull-right" id="cancel-webhook-settings" title="">@T["Cancel"]</a>
+
+                    }
+                    <button type="button" title="" id="update-webhook-settings" name="UpdateWebhookSettings" class="primary-button app-btn-primary pull-right">
+                        @T["Save"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="add-webhook-container" class="bi-page-container @(ViewBag.IsRequestFromSettingsPage ? canShowAdminMenu ? string.Empty : "admin-panel-full-width" : string.Empty  )">
         <div class="bi-page-content col-xs-12 no-padding">
-            <div class="bi-page-header col-xs-12">
-                <hgroup class="col-xs-8 bi-page-header-description no-padding">
-                    <h1 class="page-title">@T["Webhooks"]</h1>
-                    <h5 class="no-padding page-description">@(ViewBag.IsEdit ? T["Edit your webhooks here"].Value : T["Add your webhooks here"].Value)</h5>
-                </hgroup>
-            </div>
             <div class="bi-page-body col-md-12">
                 <form class="col-xs-12 no-padding add-webhook-form-container" id="add-webhook-form" autocomplete="off">
                     <div class="webhook-info-section add-webhook-section">
@@ -230,23 +249,6 @@
                         </div>
                     </div>
                 </form>
-            </div>
-            <div class="bi-page-footer col-xs-12">
-                <div class="bi-page-actions col-lg-12 col-md-12 no-margin">
-                    @if (isRequestFromSettingsPage)
-                    {
-                        <a href="@Url.Action("WebhookSettings", "Administration")" class="secondary-button app-btn-secondary pull-right" id="cancel-webhook-settings" title="">@T["Cancel"]</a>
-
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Webhooks", "User")" class="secondary-button app-btn-secondary pull-right" id="cancel-webhook-settings" title="">@T["Cancel"]</a>
-
-                    }
-                    <button type="button" title="" id="update-webhook-settings" name="UpdateWebhookSettings" class="primary-button app-btn-primary pull-right">
-                        @T["Save"]
-                    </button>
-                </div>
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })

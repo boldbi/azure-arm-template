@@ -5,6 +5,18 @@
     ViewBag.Title = String.Format(T["{0} Users Import"].Value, ViewBag.AdImport ? "Active Directory" : "Azure AD") + " - " + globalAppSettings.SystemSettings.OrganizationName;
 
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportAzureAdUsers);
+    @if (ViewBag.AdImport)
+    {
+        ViewBag.PageHeader = @String.Format(T["Import Users — {0}"].Value, "Active Directory");
+        ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, "Active Directory");
+    }
+    else
+    {
+        ViewBag.PageHeader = @String.Format(T["Import Users — {0}"].Value, "Azure AD");
+        ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, "Azure AD");
+    }
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
 }
 
 
@@ -169,35 +181,28 @@
             });
     </script>
 
-    <div id="import-active-directory-users" class="col-lg-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")">
-        <div class="bi-page-content col-xs-12 no-padding">
-            <div class="col-lg-12 bi-page-header">
-                <div class="col-lg-6 no-padding import-area">
-                    <a href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-placement="top" title="@T["Users"]" class="back-button pull-left">
-                        <i class="su su-arrow-back"> </i>
-                    </a>
-                    <hgroup class="col-xs-6 col-xs-6 col-sm-6 col-xs-12 no-padding bi-page-header-description">
-                        @if (ViewBag.AdImport)
-                        {
-                            <h1 class="h2 page-title">@String.Format(T["Import Users — {0}"].Value, "Active Directory")</h1>
-                            <h5 class="page-description">@String.Format(T["Import users from {0}."].Value, "Active Directory")</h5>
-                        }
-
-                        else
-                        {
-                            <h1 class="h2 page-title">@String.Format(T["Import Users — {0}"].Value, "Azure AD")</h1>
-                            <h5 class="page-description">@String.Format(T["Import users from {0}."].Value, "Azure AD")</h5>
-                        }
-                    </hgroup>
-                </div>
-                <div class="col-lg-6 no-padding bi-header-btn">
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection")
+        </div>
+        <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
                     <input type="button" value="@T["Import"]" disabled="" title="@T["Import the selected users"]" onclick="SaveActiveDirectoryUsers()" id="import-button" class="primary-button app-btn-primary pull-right import-button" />
                 </div>
+                <div id="search-area" class="pull-left col-xs-4">
+                    <input type="text" id="ad-user-import" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                </div>
             </div>
-
+        </div>
+    </div>
+    <div id="import-active-directory-users" class="col-lg-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+        <div class="bi-page-content col-xs-12 no-padding">
             <div class="content-section bi-page-body col-xs-12">
                 <div class="col-md-12 col-xs-12 no-margin no-padding directory-user-search">
-                    <div class="col-md-8 col-xs-8 no-padding directorypath-area">
+                    <div class="col-md-8 col-xs-8 directorypath-area">
                         @if (ViewBag.AdImport)
                         {
                             <span class="directory-path no-padding">@T["Directory Path"] :<input type="hidden" name="url" value="@ViewBag.ActiveDirectory.LdapUrl"></span>
@@ -215,11 +220,6 @@
                             </span>
                         }
                         <div class="no-padding error-msg">@TempData["ErrorMessage"]</div>
-                    </div>
-                    <div id="search-area" class="pull-right">
-                        <input type="text" id="ad-user-import" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />
-                        <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
-                        <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
                     </div>
                 </div>
                 <div class="col-xs-12 col-md-12 no-padding">

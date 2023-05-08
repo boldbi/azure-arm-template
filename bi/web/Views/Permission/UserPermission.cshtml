@@ -4,6 +4,8 @@
     ViewBag.Title = T["User Permissions"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePermissions);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.BackIconRedirectionUrl = Url.Action("Index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
 }
 
 @model List<ItemDetail>
@@ -34,18 +36,13 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div id="base-container" class="bi-page-container user-permission col-xs-12">
-        <div class="bi-page-content col-xs-12 no-padding">
-            <div id="user-header" class="col-lg-12 col-md-12 co-sm-12 col-xs-12 bi-page-header">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding header">
-                    <a class="back-button pull-left" href="@Url.Action("Index","UserManagement")" data-toggle="tooltip" data-placement="top" data-container="body" title="@T["Users"]">
-                        <i class="su su-arrow-back back-navigaion img-size"> </i>
-                    </a>
-                    <hgroup>
-                        <h2 class="h2 page-title adjust-style-for-backarrow no-margin">@T["Manage Permissions"] - <span title="@ViewBag.DisplayName">@ViewBag.DisplayName</span></h2>
-                    </hgroup>
-                </div>
-                <div class="col-md-6 col-xs-12 col-sm-6 col-xs-12 no-padding">
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Manage Permissions"] }, { "DisplayNameInHeader", @ViewBag.DisplayName } })
+        </div>
+        <div id="user-header" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
                     <input type="button" title="@T["Add Permission to the user"]" id="add-permission-button-top" value="@T["Add Permission"]" class="primary-button app-btn-primary pull-right" />
                     @if (!ViewBag.IsAdUser)
                     {
@@ -53,6 +50,10 @@
                     }
                 </div>
             </div>
+        </div>
+    </div>
+    <div id="base-container" class="bi-page-container user-permission col-xs-12">
+        <div class="bi-page-content col-xs-12 no-padding">
             <div class="active-directory-form col-xs-12 bi-page-body">
                 <div class="col-md-12 col-xs-12 col-sm-12 permission-grid">@await Html.PartialAsync("_PermissionGrid", Model)</div>
                 <div class="col-md-3">

@@ -5,6 +5,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var scopeList = ServerAppConfig.SettingsScopesList;
+    var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
 }
 
@@ -37,18 +38,21 @@
 
 @section MainSection{
     @await Html.PartialAsync("_AdminMenu")
+<div id="user-settings-header" class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+    @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Accounts Settings"] }, { "PageDescription", @T["Configuration for managing user accounts."] } })
+    <div class="col-xs-12 bi-page-header top-nav-btn-secton">
+        <div class="col-xs-12 no-padding">
+            <div class="col-xs-6 no-padding button-section">
+                <a href="@Url.Action("Index","Home")" class="secondary-button app-btn-secondary pull-right" id="UpdateSystemSettingsCancel-bottom" title="">@T["Cancel"]</a>
+                <button type="button" title="" id="UpdateSystemSettings-bottom" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+                    <span>@T["Save"]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="user-settings-container" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
     <div class="bi-page-content col-xs-12 no-padding">
-        <div id="user-settings-header" class="col-xs-12 bi-page-header">
-            <hgroup class="bi-page-header-description">
-                <h1 class="h2 page-title">
-                    @T["Accounts Settings"]
-                </h1>
-                <h5 class="page-description">
-                    @T["Configuration for managing user accounts."]
-                </h5>
-            </hgroup>
-        </div>
         <div class="col-xs-12 bi-page-body">
             <form id="acc-activate-setting" name="accActivationSettingsForm" class="col-xs-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
                 <div class="account-activation-container col-xs-12 no-padding">
@@ -60,8 +64,8 @@
                         <label for="automatic-account-activation" class="radio-btn-label notransition" id="labelautomatic">@T["Automatic"]</label>
                     </div>
                     <div class="activation-mode" id="email">
-                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" ? "disabled" : string.Empty) />
-                        <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
+                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled" : string.Empty) />
+                        <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
                     </div>
                     @if (@ViewBag.EmailSettingResult == "failure")
                     {
@@ -90,14 +94,6 @@
                     </div>
                 </div>
             </form>
-        </div>
-        <div class="bi-page-footer col-xs-12">
-            <div class="bi-page-actions col-xs-12 col-md-12">
-                <a href="@Url.Action("Index","Home")" class="secondary-button app-btn-secondary pull-right" id="UpdateSystemSettingsCancel-bottom" title="">@T["Cancel"]</a>
-                <button type="button" title="" id="UpdateSystemSettings-bottom" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
-                    <span>@T["Save"]</span>
-                </button>
-            </div>
         </div>
     </div>
     @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })

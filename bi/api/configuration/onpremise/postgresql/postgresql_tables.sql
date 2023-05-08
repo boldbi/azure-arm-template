@@ -909,6 +909,15 @@ CREATE TABLE SyncDS_BackgroundJobs (
 	IsActive smallint NOT NULL)
 ;
 
+CREATE TABLE SyncDS_UploadDataSourceMapping (
+	Id SERIAL primary key NOT NULL,
+	DownloadedTenantId uuid NOT NULL,
+	DownloadedItemId varchar(255) NOT NULL,
+	UploadedItemId uuid NOT NULL,
+	UploadedDate timestamp  NULL,
+	IsActive smallint NOT NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into SyncDS_ItemType (Name,IsActive) VALUES (N'Category',1)
@@ -1145,12 +1154,8 @@ INSERT INTO SyncDS_PermissionAccess (Name, AccessId, IsActive) VALUES (N'Read, W
 ;
 INSERT INTO SyncDS_PermissionAccess (Name, AccessId, IsActive) VALUES (N'Read, Write, Delete',14,1)
 ;
---INSERT INTO SyncDS_PermissionAccess (Name, AccessId, IsActive) VALUES (N'Read, Download',18,1)
---;
---INSERT INTO SyncDS_PermissionAccess (Name, AccessId, IsActive) VALUES (N'Read, Write, Download',22,1)
---;
---INSERT INTO SyncDS_PermissionAccess (Name, AccessId, IsActive) VALUES (N'Read, Write, Delete, Download',30,1)
---;
+INSERT INTO SyncDS_PermissionAccess (Name, AccessId, IsActive) VALUES (N'Download',18,1)
+;
 
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,1,1)
 ;																									  
@@ -1271,6 +1276,12 @@ INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, 
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (21,4,1)
 ;
 INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (22,4,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (12,5,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (13,5,1)
+;
+INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (14,5,1)
 ;
 
 INSERT into SyncDS_PermissionLogType (Name,IsActive) VALUES ( N'PermissionAdded',1)

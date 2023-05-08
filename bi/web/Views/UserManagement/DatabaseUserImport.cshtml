@@ -4,6 +4,11 @@
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportDatabaseUsers);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var usersettings = Url.Action("administration", "administration") + "/user-settings";
+    ViewBag.PageHeader = @T["Import Users — From Database"];
+    ViewBag.PageDescription = @T["Import users from Database."];
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
 }
 <script>
     var importDatabaseQuerySchema = {};
@@ -28,7 +33,7 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    @if (globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation)
+    @if (globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation || disableEmailActivation)
     {
         <script type="text/x-jsrender" id="user-detail-validation">
             {{if IsDuplicated}}
@@ -213,23 +218,25 @@
             });
         </script>
 
-        <div id="import-database-users" class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content")">
-            <div class="col-xs-12 bi-page-content no-padding">
-                <div class="col-xs-12 bi-page-header">
-                    <div class="col-lg-6 no-padding import-area">
-                        <a href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-placement="top" title="@T["Users"]" class="back-button pull-left">
-                            <i class="su su-arrow-back"> </i>
-                        </a>
-                        <hgroup class="col-xs-6 col-xs-6 col-sm-6 col-xs-12 no-padding bi-page-header-description">
-                            <h1 class="h2 page-title">@T["Import Users — From Database"]</h1>
-                            <h5 class="page-description">@T["Import users from Database."]</h5>
-                        </hgroup>
-                    </div>
-                    <div class="col-lg-6 no-padding">
+        <div class="col-xs-12 no-padding no-margin width-alignment">
+            <div class="col-xs-12 no-padding">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection")
+            </div>
+            <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-6 no-padding button-section">
                         <input type="button" value="@T["Import Users"]" disabled="" title="@T["Import the selected users and activate their accounts"]" onclick="SaveSelectedUsers()" id="import-selected" class="primary-button app-btn-primary pull-right import-button bi-header-btn" />
                     </div>
+                    <div id="search-area" class="pull-left col-xs-4">
+                        <input type="text" id="search-database-users" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />
+                        <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                        <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                    </div>
                 </div>
-
+            </div>
+        </div>
+        <div id="import-database-users" class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+            <div class="col-xs-12 bi-page-content no-padding">
                 <div class="content-section bi-page-body col-xs-12">
                     <div class="col-md-12 col-xs-12 no-margin no-padding import-user-search">
                         <div class="col-md-9 col-xs-9 no-padding connection-string-area">
@@ -241,11 +248,6 @@
                                 <a href="@Url.Action("Administration", "Administration")/user-directory-settings?tab=database-settings" title="@T["Update Database Configuration settings"]" class="link-button app-btn-link">@T["Modify"]</a>
                             </span>
                             <div class="no-padding error-msg"></div>
-                        </div>
-                        <div id="search-area" class="pull-right">
-                            <input type="text" id="search-database-users" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />
-                            <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
-                            <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
                         </div>
                     </div>
                     <div class="col-xs-12 no-padding no-margin user-data-grid">
@@ -278,21 +280,15 @@
 
     else
     {
-        <div id="import-database-container" class="col-xs-12 container-fluid bi-page-container">
+        <div class="col-xs-12 no-padding no-margin width-alignment top-nav-header-without-btn">
+            <div class="col-xs-12 no-padding">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection")
+            </div>
+        </div>
+        <div id="import-database-container" class="col-xs-12 container-fluid bi-page-container bg-grid import-database-container-with-warning">
             <div class="col-xs-12 bi-page-content no-padding">
-                <div class="col-xs-12 bi-page-header">
-                    <div class="col-md-12 no-padding import-area">
-                        <a href="@Url.Action("Index", "UserManagement")" data-toggle="tooltip" data-placement="top" title="@T["Users"]" class="back-button pull-left">
-                            <i class="su su-arrow-back"> </i>
-                        </a>
-                        <hgroup class="col-xs-6 col-xs-6 col-sm-6 col-xs-12 no-padding bi-page-header-description">
-                            <h1 class="h2 page-title">@T["Import Users — From Database"]</h1>
-                            <h5 class="page-description">@T["Import users from Database."]</h5>
-                        </hgroup>
-                    </div>
-                </div>
                 <div class="col-xs-12 bi-page-body">
-                    @if (globalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation)
+                    @if (!disableEmailActivation && globalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation)
                     {
                         <h5 class="user-import-from-db-automatic-type">@T["Importing users from existing database is not available in automatic account activation type."]</h5>
                         <a href="@usersettings" class="admin-page-link">@T["Click here to change the account activation type"]</a>

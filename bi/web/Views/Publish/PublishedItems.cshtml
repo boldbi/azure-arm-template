@@ -22,41 +22,37 @@
         var synchronizePublishedBulkItems = "@Url.Action("SynchronizeBulkItem", "Publish")";
     </script>
 
-    <div id="base-container" class="col-xs-12 bi-page-container grid-page-container">
+    @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["PUBLISHED RESOURCES"] }, { "PageDescription", @T["You can manage the resources published to other sites online and request to download them for offline migration."] } })
+    <div class="bi-page-header col-xs-12 top-nav-btn-secton top-nav-search-secton">
+        <div id="publish-items-search-container" class="col-xs-12 no-padding no-margin">
+            <div id="search-area" class="col-xs-4 pull-left">
+                <input type="text" class="pull-left" id="search-published-items" placeholder="@T["Search resources"]" />
+                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+            </div>
+        </div>
+        <div id="download-items-search-container" class="col-xs-12 no-padding no-margin">
+            <div id="search-area" class="col-xs-4 pull-left">
+                <input type="text" class="pull-left" id="search-downloaded-items" placeholder="@T["Search resources"]" />
+                <span class="su su-inner-close close-icon pull-left" id="clear-downloadfiles-search" title="@T["Clear search"]"></span>
+                <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 no-padding bi-page-nav-bar">
+        <ul id="migration-tab-nav" class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="@isPublishedItemsTab">
+                <a href="#online-publish" id="online-publish-tab" aria-controls="online-publish-tab" role="tab" data-toggle="tab">@T["Published Online "]</a>
+            </li>
+            <li role="presentation" class="@isDownloadItemsTab">
+                <a href="#offline-files" id="offline-files-tab" aria-controls="offline-files-tab" role="tab" data-toggle="tab">@T["Offline Files"]</a>
+            </li>
+        </ul>
+    </div>
+    <div id="base-container" class="col-xs-12 bi-page-container grid-page-container bi-page-container-with-tab">
         <div class="bi-page-content col-md-12 no-padding">
-            <div class="bi-page-header col-md-12">
-                <div id="user-title" class="bi-page-header-description no-padding">
-                    <h1 class="h2 page-title">@T["PUBLISHED RESOURCES"]</h1>
-                    @if (ServerAppConfig.CanShowDownloadDashboardOption)
-                    {
-                        <h5 class="page-description">@T["You can manage the resources published to other sites online and request to download them for offline migration."]</h5>
-                    }
-                    else
-                    {
-                        <h5 class="page-description">@T["Manage the resources that are published to other internal/external sites."]</h5>
-                    }
-                </div>
-            </div>
-            <div class="col-xs-12 no-padding bi-page-nav-bar">
-                <ul id="migration-tab-nav" class="nav nav-tabs" role="tablist">                 
-                    @if (ServerAppConfig.CanShowDownloadDashboardOption)
-                    {
-                        <li role="presentation" class="@isPublishedItemsTab">
-                            <a href="#online-publish" id="online-publish-tab" aria-controls="online-publish-tab" role="tab" data-toggle="tab">@T["Published Online "]</a>
-                        </li>
-                        <li role="presentation" class="@isDownloadItemsTab">
-                            <a href="#offline-files" id="offline-files-tab" aria-controls="offline-files-tab" role="tab" data-toggle="tab">@T["Offline Files"]</a>
-                        </li>
-                    }
-                </ul>
-            </div>
             <div class="tab-content col-xs-12 no-padding" id="published-resources">
                 <div role="tabpanel" id="online-publish" class="tab-pane list col-xs-12 bi-page-body @isPublishedItemsTab">
-                    <div id="search-area" class="pull-right">
-                        <input type="text" class="pull-left" id="search-published-items" placeholder="@T["Search resources"]" />
-                        <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
-                        <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
-                    </div>
                     <div class="col-xs-12 no-padding ">
                         <div class="control-section">
                             <div class="content-wrapper">
@@ -98,7 +94,11 @@
                                 </script>
                                 <script type="text/x-jsrender" id="dashboard-template">
                                     <div class="item-dashboard grid-content" title="{{:Name}}" data-toggle="tooltip" data-placement="top">
+                                        {{if ItemType == "Dashboard"}}
                                         <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:Name}}" target="_blank">{{:Name}}</a></span>
+                                        {{else}}
+                                        <span>{{:Name}}</span>
+                                        {{/if}}
                                     </div>
                                 </script>
                                 <script type="text/x-jsrender" id="site-name-template">
@@ -170,12 +170,9 @@
                         </div>
                     </div>
                 </div>
-                @if (ServerAppConfig.CanShowDownloadDashboardOption)
-                {
-                    <div role="tabpanel" class="tab-pane list col-xs-12 bi-page-body @isDownloadItemsTab" id="offline-files">
-                        @await Html.PartialAsync("_DownloadedItems")
-                    </div>
-                }
+                <div role="tabpanel" class="tab-pane list col-xs-12 bi-page-body @isDownloadItemsTab" id="offline-files">
+                    @await Html.PartialAsync("_DownloadedItems")
+                </div>
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })

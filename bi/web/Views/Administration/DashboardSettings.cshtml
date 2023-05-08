@@ -46,56 +46,42 @@
 
 @section MainSection{
     @await Html.PartialAsync("_AdminMenu")
-
-<div id="dashboard-settings-container" role="tabpanel" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
-    <div class="bi-page-content col-xs-12 no-padding">
-        <div class="bi-page-header col-xs-12 @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty)" id="dashboard-settings-page">
-            <div id="dashboard-settings-header" class="col-xs-12 no-padding">
-                <hgroup class="bi-page-header-description">
-                    <h1 class="h2 page-title">
-                        @T["Dashboard Settings"]
-                    </h1>
-                    <h5 class="page-description">
-                        @T["Configuration for the Dashboards."]
-                    </h5>
-                </hgroup>
-            </div>
-            <div id="deployment-header" class="col-xs-12 no-padding">
-                <div id="deployment-button" class="col-xs-6 col-md-6 col-sm-6 col-xs-12 no-padding">
-                    <hgroup class="bi-page-header-description">
-                        <h1 class="h2 page-title">
-                            @T["Deployment Dashboards"]
-                        </h1>
-                        <h5 class="page-description">
-                            @T["Dashboards created in this site can be published to other site deployment."]
-                        </h5>
-                    </hgroup>
-                </div>
-                <div id="deployment-button" class="col-xs-6 col-md-6 col-sm-6 col-xs-12 no-padding">
-                    <button class="primary-button app-btn-primary pull-right" id="add-dashboard" title="@T["Add Dashboard"]">
-                        <span>@T["Add Dashboard"] </span>
-                    </button>
-                </div>
-            </div>
-            <div id="site-attribute-header" class="col-xs-12 no-padding" style="display: none">
-                <div id="site-attribute-header-div" class="col-xs-6 col-md-6 col-sm-6 col-xs-12 no-padding">
-                    <hgroup class="bi-page-header-description">
-                        <h1 class="h2 page-title">
-                            @T["Attributes"]
-                        </h1>
-                        <h5 class="page-description">
-                            @T["Configure site-level attributes."]
-                        </h5>
-                    </hgroup>
-                </div>
-                <div id="add-attribute-button" class="col-xs-6 col-md-6 col-sm-6 col-xs-12 no-padding">
-                    <button class="primary-button app-btn-primary pull-right" id="add-custom-attribute" title="@T["Add Attribute"]" onclick="addCustomAttribute('site')">
-                        <span>@T["Add Attribute"] </span>
-                    </button>
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div id="dashboard-settings-header" class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Dashboard Settings"] }, { "PageDescription", @T["Configuration for the Dashboards."] } })
+            <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-6 no-padding button-section">
+                        <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-dashboard-settings" title="">@T["Cancel"]</a>
+                        <input type="button" title="" data-url="@Url.Action("updatedashboardsettings", "administration")" id="update-dashboard-settings" class="primary-button app-btn-primary pull-right" value="@T["Save"]" />
+                    </div>
                 </div>
             </div>
         </div>
-
+        <div id="deployment-header" class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Deployment Dashboards"] }, { "PageDescription", @T["Dashboards created in this site can be published to other site deployment."] } })
+            <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div id="deployment-button" class="col-xs-6 no-padding button-section">
+                        <button class="primary-button app-btn-primary pull-right" id="add-dashboard" title="@T["Add Dashboard"]">
+                            <span>@T["Add Dashboard"] </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="site-attribute-header" class="col-xs-12 no-padding" style="display: none">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Attributes"] }, { "PageDescription", @T["Configure site-level attributes."] } })
+            <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div id="add-attribute-button" class="col-xs-6 no-padding button-section">
+                        <button class="primary-button app-btn-primary pull-right" id="add-custom-attribute" title="@T["Add Attribute"]" onclick="addCustomAttribute('site')">
+                            <span>@T["Add Attribute"] </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="col-xs-12 no-padding bi-page-nav-bar">
             <ul id="dashboards-tab-nav" class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="@isSettingsTab">
@@ -115,7 +101,10 @@
                 }
             </ul>
         </div>
+    </div>
 
+    <div id="dashboard-settings-container" role="tabpanel" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width") bi-page-container-with-tab">
+    <div class="bi-page-content col-xs-12 no-padding">
         <div class="tab-content col-xs-12 no-padding">
             <div role="tabpanel" class="tab-pane bi-page-body @isSettingsTab" id="dashboard-settings">
                 <ul id="dashboard-settings-ul" class="no-padding dashboard-listCollection">
@@ -160,17 +149,17 @@
                             }
                         </div>
                     </li>
-                    <li class="dashboard-settings-list">
-                        @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox", @autocomplete = "off" })
-                        <label for="dashboard-theming-setting">
-                            <span>@T["Theming"]</span>
-                        </label>
-                        <div class="info-message">
-                            @T["This setting will allow the user to hide or show theme options in the dashboard."]
-                        </div>
-                    </li>
                     @if (ServerAppConfig.IsSelfHosted)
                     {
+                        <li class="dashboard-settings-list">
+                            @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="dashboard-theming-setting">
+                                <span>@T["Theming"]</span>
+                            </label>
+                            <div class="info-message">
+                                @T["This setting will allow the user to hide or show theme options in the dashboard."]
+                            </div>
+                        </li>
                         <li class="dashboard-settings-list usage-analytics-list">
                             @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
                             <label for="usage-analytics-setting">
@@ -200,12 +189,6 @@
                         </div>
                     </li>
                 </ul>
-                <div class="bi-page-footer no-padding col-xs-12">
-                    <div class="bi-page-actions col-xs-12 col-md-12">
-                        <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-dashboard-settings" title="">@T["Cancel"]</a>
-                        <input type="button" title="" data-url="@Url.Action("updatedashboardsettings", "administration")" id="update-dashboard-settings" class="primary-button app-btn-primary pull-right" value="@T["Save"]" />
-                    </div>
-                </div>
             </div>
             <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isDeploymentTab " id="deployment-dashboards">
                 @await Html.PartialAsync("_DeploymentDashboards")

@@ -98,22 +98,18 @@
 @section MainSection{
     @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Datasource) && itemsCount[ItemType.Datasource] > 0)
     {
-        <div id="item-grid-container" data-grid-name="datasources" class="bi-page-container grid-page-container">
-            <div class="bi-page-content col-md-12 no-padding">
-                <input type="hidden" class="page-name" data-content="@T["DATA SOURCES"]">
-                @if (!isMobile)
-                {
-                    <div class="import-area col-xs-12 bi-page-header">
-                        <div class="bi-page-header-description col-xs-6 no-padding">
-                            <h1 class="h2 page-title">
-                                @T["DATA SOURCES"]
-                                <feature name=@FeatureManagement.Yokogawa>
-                                <span style="display: none" id="data-source-text">(<span id="data-source-count"></span>) </span>
-                                </feature>
-                            </h1>
-                            <h5 class="page-description">@T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."]</h5>
+        @if (!isMobile)
+        {
+            <div class="col-xs-12 no-padding no-margin">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["DATA SOURCES"] }, { "PageDescription", @T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."] } })
+                <div class="import-area col-xs-12 bi-page-header top-nav-btn-secton">
+                    <div class="col-xs-12 no-padding">
+                        <div id="search-area" class="pull-left col-xs-4">
+                            <input type="text" id="search-items" class="pull-left no-margin" placeholder="@T["Search data sources"]" />
+                            <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-item pull-left no-margin" title="@T["Search data sources"]"></span>
                         </div>
-                        <div class="col-xs-6 no-padding bi-header-btn">
+                        <div class="col-xs-6 no-padding button-section">
                             @if (itemPermissions[ItemType.Datasource])
                             {
                                 <button type="button" id="create-datasource-connection" class="pull-right primary-button app-btn-primary">@T["Create Data Source"]</button>
@@ -125,13 +121,15 @@
                             }
                         </div>
                     </div>
+                </div>
+            </div>
+        }
+        <div id="item-grid-container" data-grid-name="datasources" class="bi-page-container grid-page-container">
+            <div class="bi-page-content col-md-12 no-padding">
+                <input type="hidden" class="page-name" data-content="@T["DATA SOURCES"]">
+                @if (!isMobile)
+                {
                     <div class="col-xs-12 bi-page-body">
-                        <div id="search-area" class="pull-right">
-                            <input type="text" id="search-items" class="pull-left no-margin" placeholder="@T["Search data sources"]" />
-                            <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" title="@T["Clear search"]"></span>
-                            <span class="su su-search search-item pull-left no-margin" title="@T["Search data sources"]"></span>
-                        </div>
-
                         <div class="grid-container grid">
                             @await Html.PartialAsync("../Items/_ItemsGrid", new ViewDataDictionary(ViewData) { { "gridName", "datasources" }, { "Permissions", @itemPermissions }, { "SearchQuery", ViewBag.FilterKey } })
                         </div>

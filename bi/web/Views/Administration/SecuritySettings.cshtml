@@ -53,32 +53,37 @@
 @section MainSection{
 
     @await Html.PartialAsync("_AdminMenu")
-
-    <div id="security-container" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
-        <div class="bi-page-content col-xs-12 no-padding">
-            <div class="bi-page-header col-xs-12" id="security-settings-page">
-                <div id="security-settings-header" class="col-xs-12 no-padding">
-                    <hgroup class="bi-page-header-description">
-                        <h1 class="h2 page-title">
-                            @T["Security"]
-                        </h1>
-                        <h5 class="page-description">
-                            @T["Configure security-related settings for your site."]
-                        </h5>
-                    </hgroup>
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Security"] }, { "PageDescription", @T["Configure security-related settings for your site."] } })
+        </div>
+        <div  id="security-settings-page" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div id="security-settings-header" class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-site-settings" title="">@T["Cancel"]</a>
+                    <button type="button" title="" id="update-csp-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+                        @T["Save"]
+                    </button>
+                    <button type="button" title="" id="update-x-frame-options-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+                        @T["Save"]
+                    </button>
                 </div>
             </div>
+        </div>
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul id="cors-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isCSPTab">
+                    <a href="#csp-settings" id="csp-settings-tab" aria-controls="csp-settings-tab" role="tab" data-toggle="tab">Content Security Policy</a>
+                </li>
+                <li role="presentation" class="@isXFrameTab">
+                    <a href="#x-frame-options" id="x-frame-options-tab" aria-controls="x-frame-options-tab" role="tab" data-toggle="tab">X-Frame-Options</a>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-            <div class="col-xs-12 no-padding bi-page-nav-bar">
-                <ul id="cors-tab-nav" class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="@isCSPTab">
-                        <a href="#csp-settings" id="csp-settings-tab" aria-controls="csp-settings-tab" role="tab" data-toggle="tab">Content Security Policy</a>
-                    </li>
-                    <li role="presentation" class="@isXFrameTab">
-                        <a href="#x-frame-options" id="x-frame-options-tab" aria-controls="x-frame-options-tab" role="tab" data-toggle="tab">X-Frame-Options</a>
-                    </li>
-                </ul>
-            </div>
+    <div id="security-container" class="bi-page-container bi-page-container-with-tab @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
             <div class="tab-content col-xs-12 no-padding">
                 <div role="tabpanel" class="tab-pane bi-page-body @isCSPTab" id="csp-settings">
                     <div id="csp-settings-body" class="col-xs-12 no-padding">
@@ -176,14 +181,6 @@
                                 <span class="frame-src-validation validation-errors"></span>
                             </div>
                         </form>
-                    </div>
-                    <div class="bi-page-footer col-xs-12 no-padding">
-                        <div class="bi-page-actions col-xs-12 col-md-12 no-margin">
-                            <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-site-settings" title="">@T["Cancel"]</a>
-                            <button type="button" title="" id="update-csp-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
-                                @T["Save"]
-                            </button>
-                        </div>
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isXFrameTab" id="x-frame-options">
