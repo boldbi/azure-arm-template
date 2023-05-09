@@ -53,7 +53,13 @@
         <div class="bi-page-content col-md-12 no-padding">
             <div class="tab-content col-xs-12 no-padding" id="published-resources">
                 <div role="tabpanel" id="online-publish" class="tab-pane list col-xs-12 bi-page-body @isPublishedItemsTab">
-                    <div class="col-xs-12 no-padding ">
+                    @if (ViewBag.IsShowSyncIgnoredWarning)
+                        {
+                            <div class="col-xs-9 site-deleted-warning">
+                                @T["The synchronization process will disregard deleted sites during the bulk sync process. To synchronize the latest changes, please delete the published dashboard/data source and publish it again."]
+                            </div>
+                        }
+                    <div class="col-xs-12 no-padding">
                         <div class="control-section">
                             <div class="content-wrapper">
                                 <script type="text/x-jsrender" id="options">
@@ -62,7 +68,14 @@
                                             <span class="su su-options"> </span>
                                         </span>
                                         <ul class="dropdown-menu" role="menu">
-                                            {{if PublishJobHistory[0].Status == "Failed" || PublishJobHistory[0].Status == "Success"}}
+                                            {{if (IsPublishedSiteActive != null && !IsPublishedSiteActive) || (!IsPublishedUserActive && IsPublishedUserDeleted)}}
+                                            <li class="menu-group">
+                                                <a href="javascript:void(0);" title="@T["Deleted"]" data-toggle="tooltip">
+                                                    <i class="su su-synchronize disabled-icon-color"></i>
+                                                    <span class="menu-text disabled-icon-color">@T["Synchronize"]</span>
+                                                </a>
+                                            </li>
+                                            {{else PublishJobHistory[0].Status == "Failed" || PublishJobHistory[0].Status == "Success"}}
                                             <li class="menu-group">
                                                 <a href="javascript:void(0);" title="@T["Synchronize"]" onclick="onConfirmSynchronizeDialog()">
                                                     <i class="su su-synchronize"></i>
@@ -103,7 +116,12 @@
                                 </script>
                                 <script type="text/x-jsrender" id="site-name-template">
                                     <div class="item-dashboard grid-content" title="{{:SiteURL}}" data-toggle="tooltip" data-placement="top">
+                                      {{if (IsPublishedSiteActive != null && !IsPublishedSiteActive) || (!IsPublishedUserActive && IsPublishedUserDeleted)}}
+                                        <span class="site-deleted">{{:TenantName}}</span>
+                                        <span class="badge badge-secondary1 badge-secondary2">@T["Deleted"]</span>
+                                        {{else}}
                                         <span>{{:TenantName}}</span>
+                                        {{/if}}
                                     </div>
                                 </script>
                                 <script type="text/x-jsrender" id="status-template">
