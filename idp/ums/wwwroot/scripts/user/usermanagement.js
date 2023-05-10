@@ -329,7 +329,7 @@ function fnOnUserGridLoad(args) {
 }
 
 function fnbeforeDataBound(args) {
-    if (args.count == 0) {
+    if (args.count == 0 && !(args.actual.status)) {
         WarningAlert(window.Server.App.LocalizationContent.Users, window.Server.App.LocalizationContent.FailedToGetUsers, args.result, 7000);
     }
 }
