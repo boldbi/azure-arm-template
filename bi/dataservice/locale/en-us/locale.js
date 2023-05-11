@@ -2127,6 +2127,7 @@
                     googleBigQuery: "Google BigQuery",
                     dropbox: "Dropbox",
                     googleAnalytics: "Google Analytics",
+                    googleAnalytics4: "Google Analytics 4",
                     googleAds: "Google Ads",
                     twitter: "Twitter",
                     googleplus: "Google+",
@@ -2519,7 +2520,8 @@
                 exportingContent: "Your export request has been submitted successfully. It may take a few seconds to complete.",
                 exportingSuccessContent: "export was completed successfully. If the download does not begin, please",
                 exportingSuccessClick: "click here",
-				exportingSuccessEndContent: " to download the file."
+				exportingSuccessEndContent: " to download the file.",
+                connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.'
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
