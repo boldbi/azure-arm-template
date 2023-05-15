@@ -200,7 +200,7 @@ CREATE TABLE {database_name}.BOLDTC_UserLogin (
 	DirectoryTypeId int not null,
 	ClientToken nvarchar(4000) NOT NULL,
 	LoggedInDomain nvarchar(255) NOT NULL,
-	IpAddress nvarchar(50) NOT NULL,
+	IpAddress nvarchar(255) NOT NULL,
 	Browser nvarchar(255) NULL,
 	LoggedInTime datetime NOT NULL,
 	LastActive datetime NULL,

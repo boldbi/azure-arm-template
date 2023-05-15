@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Http.Extensions;
 @{
+    var isDashboardListEmpty = ViewBag.isDashboardListEmpty == null ? false : ViewBag.isDashboardListEmpty;
     var globalAppSettings = _globalAppSettings;
     var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
     ViewBag.Title = T["Permission Denied"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
@@ -54,7 +55,17 @@
                     }
                     else if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) != -1)
                     {
-                        @T["You do not have permission to view this dashboard."]<br>@contactAdmin
+                        @if (isDashboardListEmpty)
+                        {
+                            @T["This dashboard has been configured to show tabs based on individual dashboard permissions. You do not have the permission to view any of the tabs in this dashboard."]
+                        }
+                        else
+                        {
+                            @T["You do not have permission to view this dashboard."]
+                        }
+                        
+                        <br>
+                        @contactAdmin
                     }
                     else
                     {
