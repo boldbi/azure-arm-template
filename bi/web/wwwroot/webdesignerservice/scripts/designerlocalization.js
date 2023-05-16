@@ -5238,6 +5238,7 @@ var Designer = {
             userFilterLocale: {
                 useSelectedText: "Use Selected",
                 useFilterFrom: "Use filter from",
+				RelativeDateFilter: "Relative Date Filter",
                 noUserError: "There are no users in the group",
                 noUsersError: "There are no users in the Server",
                 noUsersAndGroupError: "There are no users and groups in the Server",

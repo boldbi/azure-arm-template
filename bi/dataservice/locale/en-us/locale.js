@@ -5366,7 +5366,7 @@
                 categoryName: "&nbspcategory name",
                 datasourceName: "&nbspdatasource name",
                 invalid: "Invalid",
-                notSupportedChar: ".The following characters are not supported:&nbsp&nbsp&nbsp&nbsp\'&nbsp+&nbsp,&nbsp;&nbsp[&nbsp]&nbsp%&nbsp#",
+                notSupportedChar: ".The following characters are not supported: * | / : < > , % ; \ \\\" + & ? #",
                 invalidCharText: "Invalid characters in the",
                 invalidDatasourceName: "Invalid datasource name",
                 notSupportedCharDatasourceName: ".The following characters are not supported: \" + , ; [ ] % #",
@@ -6167,6 +6167,7 @@
             userFilterLocale: {
                 useSelectedText: "Use Selected",
                 useFilterFrom: "Use filter from",
+				RelativeDateFilter: "Relative Date Filter",
                 noUserError: "There are no users in the group",
                 noUsersError: "There are no users in the Server",
                 noUsersAndGroupError: "There are no users and groups in the Server",

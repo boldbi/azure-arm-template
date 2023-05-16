@@ -775,6 +775,14 @@ CREATE TABLE {database_name}.BOLDBI_PublishJobs(
     CompletedDate datetime NOT NULL,
     Status varchar(255) NOT NULL,
     IsActive tinyint NOT NULL,
+	Type int NOT NULL,
+	PRIMARY KEY (Id))
+;
+
+CREATE TABLE {database_name}.BOLDBI_PublishType(
+	Id int NOT NULL AUTO_INCREMENT,
+	Name varchar(100) NOT NULL,
+	IsActive tinyint NOT NULL,
 	PRIMARY KEY (Id))
 ;
 
@@ -1004,6 +1012,14 @@ CREATE TABLE {database_name}.SyncDS_UploadDataSourceMapping(
 ;
 -- -- PASTE INSERT Queries below this section --------
 
+INSERT into {database_name}.BOLDBI_PublishType (Name, IsActive) Values ('Publish',1)
+;
+
+INSERT into {database_name}.BOLDBI_PublishType (Name, IsActive) Values ('Lock',1)
+;
+
+INSERT into {database_name}.BOLDBI_PublishType (Name, IsActive) Values ('Unlock',1)
+;
 
 INSERT into {database_name}.BOLDBI_ItemType (Name,IsActive) VALUES ('Category',1)
 ;
@@ -1917,6 +1933,12 @@ INSERT INTO {database_name}.BOLDBI_EventPayloadsMapping (EventType, PayloadType,
 ;
 
 -- -- PASTE ALTER Queries below this section --------
+
+ALTER TABLE {database_name}.BOLDBI_PublishJobs ADD Type int NOT NULL DEFAULT 1
+;
+
+ALTER TABLE  {database_name}.BOLDBI_PublishJobs  ADD FOREIGN KEY(Type) REFERENCES {database_name}.BOLDBI_PublishType (Id)
+;
 
 ALTER TABLE  {database_name}.BOLDBI_UserGroup  ADD FOREIGN KEY(GroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
 ;

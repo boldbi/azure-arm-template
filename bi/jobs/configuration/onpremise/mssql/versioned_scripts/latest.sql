@@ -1,18 +1,21 @@
-CREATE TABLE [BOLDBI_UploadDataSourceMapping](
-    [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
-    [DownloadedTenantId] [uniqueidentifier] NOT NULL,
-    [DownloadedItemId] [nvarchar](255) NOT NULL,
-    [UploadedItemId] [uniqueidentifier] NOT NULL,
-    [UploadedDate] [datetime] NULL,
-    [IsActive] [bit] NULL)
+CREATE TABLE [BOLDBI_PublishType](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[Name] [nvarchar](100) NOT NULL UNIQUE,
+	[IsActive] [bit] NOT NULL
+
+);
+
+INSERT into [BOLDBI_PublishType] (Name,IsActive) VALUES ( N'Publish',1)
 ;
 
-INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Download',18,1)
+INSERT into [BOLDBI_PublishType] (Name,IsActive) VALUES ( N'Lock',1)
 ;
 
-INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (12,5,1)
+INSERT into [BOLDBI_PublishType] (Name,IsActive) VALUES ( N'Unlock',1)
 ;
-INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (13,5,1)
+
+ALTER TABLE [BOLDBI_PublishJobs]  ADD [Type] [int] NOT NULL DEFAULT 1
 ;
-INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (14,5,1)
+
+ALTER TABLE [BOLDBI_PublishJobs]  ADD FOREIGN KEY([Type]) REFERENCES [BOLDBI_PublishType] ([Id])
 ;
