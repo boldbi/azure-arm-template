@@ -6,6 +6,7 @@
     var isDownloadItemsTab = (Context.Request.Query["tab"].ToString() == "offline-files") ? "active" : string.Empty;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
 }
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
 @section MainSection{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/published-items.css" />
@@ -20,6 +21,7 @@
         var synchronizeSitesUrl = { "dashboard": "@Url.Action("SynchronizePublishedItem", "Publish")", "datasource": "@Url.Action("SynchronizeDataSourcePublishedItem", "Publish")" };
         var removePublishedItemUrl = "@Url.Action("RemovePublishedItem", "Publish")";
         var synchronizePublishedBulkItems = "@Url.Action("SynchronizeBulkItem", "Publish")";
+        var editPublishedItem = "@Url.Action("LockUnlockPublishedItem", "Publish")";
     </script>
 
     @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["PUBLISHED RESOURCES"] }, { "PageDescription", @T["You can manage the resources published to other sites online and request to download them for offline migration."] } })
@@ -53,7 +55,13 @@
         <div class="bi-page-content col-md-12 no-padding">
             <div class="tab-content col-xs-12 no-padding" id="published-resources">
                 <div role="tabpanel" id="online-publish" class="tab-pane list col-xs-12 bi-page-body @isPublishedItemsTab">
-                    <div class="col-xs-12 no-padding ">
+                    @if (ViewBag.IsShowSyncIgnoredWarning)
+                        {
+                            <div class="col-xs-9 site-deleted-warning">
+                                @T["The synchronization process will disregard deleted sites during the bulk sync process. To synchronize the latest changes, please remove dashboards/data sources of the deleted sites and publish it again."]
+                            </div>
+                        }
+                    <div class="col-xs-12 no-padding">
                         <div class="control-section">
                             <div class="content-wrapper">
                                 <script type="text/x-jsrender" id="options">
@@ -62,7 +70,14 @@
                                             <span class="su su-options"> </span>
                                         </span>
                                         <ul class="dropdown-menu" role="menu">
-                                            {{if PublishJobHistory[0].Status == "Failed" || PublishJobHistory[0].Status == "Success"}}
+                                            {{if (IsPublishedSiteActive != null && !IsPublishedSiteActive) || (!IsPublishedUserActive && IsPublishedUserDeleted)}}
+                                            <li class="menu-group">
+                                                <a href="javascript:void(0);" title="@T["Deleted"]" data-toggle="tooltip">
+                                                    <i class="su su-synchronize disabled-icon-color"></i>
+                                                    <span class="menu-text disabled-icon-color">@T["Synchronize"]</span>
+                                                </a>
+                                            </li>
+                                            {{else LastPublishedStatus == "Failed" || LastPublishedStatus == "Success"}}
                                             <li class="menu-group">
                                                 <a href="javascript:void(0);" title="@T["Synchronize"]" onclick="onConfirmSynchronizeDialog()">
                                                     <i class="su su-synchronize"></i>
@@ -70,6 +85,19 @@
                                                 </a>
                                             </li>
                                             {{/if}}
+                                            <li class="menu-group">
+                                                {{if !IsLocked}}
+                                                <a href="javascript:void(0);" title="@T["Lock Edit"]" onclick="lockOrUnlockEditDialog(true)">
+                                                    <i class="su su-edit-lock"></i>
+                                                    <span class="menu-text">@T["Lock Edit"]</span>
+                                                </a>
+                                                {{else}}
+                                                <a href="javascript:void(0);" title="@T["Unlock Edit"]" onclick="lockOrUnlockEditDialog(false)">
+                                                    <i class="su su-edit-unlock"></i>
+                                                    <span class="menu-text">@T["Unlock Edit"]</span>
+                                                </a>
+                                                {{/if}}
+                                            </li>
                                             <li class="menu-group">
                                                 <a href="javascript:void(0);" title="@T["Info"]" onclick="openPublishInfo()">
                                                     <i class="su su-info"></i>
@@ -103,7 +131,12 @@
                                 </script>
                                 <script type="text/x-jsrender" id="site-name-template">
                                     <div class="item-dashboard grid-content" title="{{:SiteURL}}" data-toggle="tooltip" data-placement="top">
+                                      {{if (IsPublishedSiteActive != null && !IsPublishedSiteActive) || (!IsPublishedUserActive && IsPublishedUserDeleted)}}
+                                        <span class="site-deleted">{{:TenantName}}</span>
+                                        <span class="badge badge-secondary1 badge-secondary2">@T["Deleted"]</span>
+                                        {{else}}
                                         <span>{{:TenantName}}</span>
+                                        {{/if}}
                                     </div>
                                 </script>
                                 <script type="text/x-jsrender" id="status-template">

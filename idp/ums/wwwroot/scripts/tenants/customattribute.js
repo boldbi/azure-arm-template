@@ -417,7 +417,7 @@ function updateSiteLevelAttribute(customAttribute) {
 
 function removeSiteAttribute() {
     var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
-    addSiteAttribute.splice(siteAttributesGrid.getSelectedRowIndexes());
+    addSiteAttribute.splice(siteAttributesGrid.getSelectedRowIndexes(),1);
     siteAttributesGrid.refresh();
 }
 

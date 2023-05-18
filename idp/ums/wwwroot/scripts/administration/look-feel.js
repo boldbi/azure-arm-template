@@ -167,6 +167,15 @@ $(document).on("change", "#font-file", function (e) {
     $(".validation").closest("div").removeClass("has-error");
     $(".validation-message").css("display", "none");
     $("#upload-font").attr("disabled", false);
+    var fontFamily = document.getElementById("fontfamily").ej2_instances[0];
+    var fontFamilyList = fontFamily.getItems();
+    for (var item = 0; item < fontFamilyList.length; item++) {
+        if (fontName === fontFamilyList[item].dataset.value.toLowerCase()) {
+            $('.validation').closest('div').addClass("has-error");
+            $(".validation-message").css("display", "block").text(window.Server.App.LocalizationContent.CssFileExist);
+            $('#upload-font').attr("disabled", true);
+        }
+    }
 
 });
 

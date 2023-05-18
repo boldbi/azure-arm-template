@@ -198,7 +198,7 @@ CREATE TABLE BOLDTC_UserLogin (
 	DirectoryTypeId int NOT NULL,
 	ClientToken varchar(4000) NOT NULL,
 	LoggedInDomain varchar(255) NOT NULL,
-	IpAddress varchar(50) NOT NULL,
+	IpAddress varchar(255) NOT NULL,
 	Browser varchar(255) NULL,
 	LoggedInTime timestamp NOT NULL,
 	LastActive timestamp NULL,

@@ -707,6 +707,13 @@ CREATE TABLE SyncDS_PublishJobs(
 	CreatedDate timestamp NOT NULL,
 	CompletedDate timestamp NOT NULL,
 	Status varchar(255) NOT NULL,
+	IsActive smallint NOT NULL,
+	Type int NOT NULL)
+;
+
+CREATE TABLE SyncDS_PublishType(
+	Id SERIAL primary key NOT NULL,
+	Name varchar(100) NOT NULL UNIQUE,
 	IsActive smallint NOT NULL)
 ;
 
@@ -919,6 +926,15 @@ CREATE TABLE SyncDS_UploadDataSourceMapping (
 ;
 
 ---- PASTE INSERT Queries below this section --------
+
+INSERT INTO SyncDS_PublishType (Name, IsActive) Values (N'Publish',1)
+;
+
+INSERT INTO SyncDS_PublishType (Name, IsActive) Values (N'Lock',1)
+;
+
+INSERT INTO SyncDS_PublishType (Name, IsActive) Values (N'Unlock',1)
+;
 
 INSERT into SyncDS_ItemType (Name,IsActive) VALUES (N'Category',1)
 ;
@@ -1831,6 +1847,12 @@ INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUE
 ;
 
 ---- PASTE ALTER Queries below this section --------
+
+ALTER TABLE SyncDS_PublishJobs ADD COLUMN Type int not null DEFAULT 1
+;
+
+ALTER TABLE SyncDS_PublishJobs  ADD FOREIGN KEY(Type) REFERENCES SyncDS_PublishType (Id)
+;
 
 ALTER TABLE SyncDS_UserGroup  ADD FOREIGN KEY(GroupId) REFERENCES SyncDS_Group (Id)
 ;

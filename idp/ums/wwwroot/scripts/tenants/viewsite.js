@@ -954,8 +954,12 @@ function enableIsolationCode() {
         $("#isolation-code-validation").html(window.Server.App.LocalizationContent.IsolationCodeValidator);
     }
     else {
-        $("#isolation-code-validation").html("");
-        $("#update-isolation-code").attr("disabled", false);
+        if (isEnabled) {
+            if (ValidateIsolationCode($("#isolation-code").val(), "#isolation-code")) {
+                $("#isolation-code-validation").html("");
+                $("#update-isolation-code").attr("disabled", false);
+            }
+        }   
     }
 }
 

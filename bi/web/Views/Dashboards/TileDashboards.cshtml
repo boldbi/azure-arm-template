@@ -1,4 +1,5 @@
 ﻿@using Newtonsoft.Json
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
 @{
     var globalAppSettings = _globalAppSettings;
     ViewBag.Title = T["Dashboards"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
@@ -59,6 +60,7 @@
         var deleteConfirmationUrl = "@Url.Action("deleteconfirmation", "items")";
         var getViewsByItemIdUrl = "@Url.Action("GetViewsByItemId","Items")";
         var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
+            var itemSettingsAccessUrl = "@Url.Action("itemsettingsaccess", "dashboards")";
         var downloadIframeUrl = "@Url.Action("DownloadViewItem", "items")";
         var downloadedResourcesUrl = "@Url.Action("GetPublishedItems", "publish")" + "?tab=offline-files";
         var uploadIframeUrl = "@Url.Action("UploadIframe", "Dashboards")";
@@ -500,6 +502,12 @@
                                                                     <span>@T["Security"]</span>
                                                                 </span>
                                                             </li>
+                                                            <li ng-if="(dashboardItem.CreatedById == currentUserId || isAdmin) && dashboardItem.IsMultiDashboard" ng-hide="activeMenu === @((int)DisplayCategory.UsageAnalytics)">
+                                                                <span title="" class="option-click" ng-click="tabSecurityConfirmation()">
+                                                                        <i class="su su-tab-security"></i>
+                                                                        <span>@T["Tab Security"]</span>
+                                                                </span>
+                                                            </li>
                                                             <li ng-if="(dashboardItem.CanMove || dashboardItem.CanCopy || dashboardItem.CanClone) && !isTablet && !dashboardItem.IsLocked" role="separator" class="divider" ng-hide="schemesDetails != null && !schemesDetails.Move"></li>
                                                             <li ng-if="dashboardItem.CanMove && dashboardItem.CanDelete && !isTablet && !dashboardItem.IsMultiDashboard && !dashboardItem.IsLocked" ng-hide="schemesDetails != null && !schemesDetails.Move">
                                                                 <span title="" class="moveItem option-click" data-action="Move" ng-click="moveDashboard()">
@@ -837,6 +845,18 @@
     {
         @await Html.PartialAsync("../DefaultPages/DefaultPages", new ViewDataDictionary(ViewData) { { "Permissions", permisions }, { "ItemType", ItemType.Dashboard } })
     }
+    
+    <div id="tab-security" style="display:none">
+        <div id="tab-security-content">@T["Enabling tab-level security will restrict tab visibility to users with the individual dashboard permission when dashboards are added as tabs. By default, all tabs will be visible to the user if the user has access to a multitab dashboard."]</div>
+        <span>
+            <input type="checkbox" class="material-checkbox" id="tab-security-checkbox">
+            <input id="tab-security-checkbox" type="hidden">
+            <label for="tab-security-checkbox" class="label-database">@T["Enable tab-level security"]</label>
+        </span>
+        <div class="bg-warning tab-security-note">
+            <Span>@T["All tabs will be visible to the dashboard owner and administrators. Public dashboards added as tabs will also be visible."]</Span>
+        </div>
+    </div>
 
     <div id="popup-container" style="display:none" class="no-padding">
         <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>

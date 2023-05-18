@@ -1686,7 +1686,8 @@ var Designer = {
                     zoom: "Zoom",
                     fitbit: "Fitbit",
                     xeroWorkflowMax: "Xero WorkflowMax",
-                    gohighlevel: "GoHighLevel"
+                    gohighlevel: "GoHighLevel",
+                    helpScout: "Help Scout"
                 },
                 errorMessageForTotalExpressionContainsRowExpression: "Total expression must not contains any ROW expression.",
                 parameterMustBeAnAggregated: "Parameter must be an aggregated expression.",
@@ -2022,7 +2023,8 @@ var Designer = {
                 exportingContent: "Your export request has been submitted successfully. It may take a few seconds to complete.",
                 exportingSuccessContent: "export was completed successfully. If the download does not begin, please",
                 exportingSuccessClick: "click here",
-				exportingSuccessEndContent: " to download the file."
+				exportingSuccessEndContent: " to download the file.",
+                connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.'
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -5236,6 +5238,7 @@ var Designer = {
             userFilterLocale: {
                 useSelectedText: "Use Selected",
                 useFilterFrom: "Use filter from",
+				RelativeDateFilter: "Relative Date Filter",
                 noUserError: "There are no users in the group",
                 noUsersError: "There are no users in the Server",
                 noUsersAndGroupError: "There are no users and groups in the Server",
@@ -6266,6 +6269,40 @@ var Designer = {
                 workflows: "Workflows"
 
 
+            },
+            twilioDataSource: {
+                calls: "Calls",
+                recordings: "Recordings",
+                phonenumbers: "Phone Numbers",
+                messageservices: "Message Services",
+                availablephonenumbercountries: "Available Phone Number Countries",
+                accounts: "Accounts",
+                accountusagerecords: "Account Usage Records",
+                others: "Others",
+
+                allcalls: "All Calls",
+                allcallrecordings: "All call Recordings",
+                callnotifications: "Call Notifications",
+                callfeedback: "Call Feedback",
+                allaccountrecordings: "All Account Recordings",
+                allrecordingtranscriptions: "All Recording Transcriptions",
+                alltranscriptions: "All Transcriptions",
+                allconferences: "All Conferences",
+                allqueues: "All Queues",
+                allmessages: "All Messages",
+                alloutgoingcallerids: "All Outgoing Caller Ids",
+                alladdress: "All Address",
+                allavailablephonenumbercountries: "All Available Phone Number Countries",
+                allsmsshortcodes: "All Sms Short Codes",
+                allincomingphonenumbers: "All Incoming Phone Numbers",
+                allincomingphonenumberlocals: "All Incoming Phone Number Locals",
+                allincomingphonenumbermobiles: "All Incoming Phone Number Mobiles",
+                allincomingphonenumbertolltrees: "All Incoming Phone Number Toll Frees",
+                account: "Account",
+                allaccounts: "All Accounts",
+                allusagerecords: "All Usage Records",
+                allusagerecordalltimes: "All Usage Record All Times",
+                allusagerecordthismonths: "All Usage Record This Months"
             },
             sendGridDataSource: {
                 campaigns: "Campaigns",
