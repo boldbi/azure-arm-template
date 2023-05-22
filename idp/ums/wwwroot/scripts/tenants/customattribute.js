@@ -226,6 +226,7 @@ function beforeCloseAttributeDialog() {
     updateValidationMessages();
     isAttributeEdit = false;
     customAttributeInfo = "";
+    $("#custom-attribute-form").find(".e-input-group").removeClass("e-error");
 }
 
 $(document).on("keyup focusout", "#custom-attribute-name", function (e) {
