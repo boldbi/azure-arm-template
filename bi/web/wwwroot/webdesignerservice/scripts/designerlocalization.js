@@ -1629,6 +1629,12 @@ var Designer = {
                             { projects: { name: '', desc: '' } }
                         ]
                     },
+                    youScan: {
+                        name: 'YouScan',
+                        templates: [
+                            { projects: { name: '', desc: '' } }
+                        ]
+                    }
                 },
                 oauthConnectors: {
                     facebook: "Facebook",
@@ -2855,6 +2861,8 @@ var Designer = {
                 emptyApplicationnameValidation: "The Application name should not be empty",
                 validApplicationNameValidation: "Please enter a valid Application Key",
                 locationIdDisplayText: "Location Id",
+                relativeDateDisplayText: "Relative Date",
+                isSinceSeqFilterDisplayText:"SinceSeq Filter",
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
@@ -6035,6 +6043,36 @@ var Designer = {
                 allSurveys: "All Surveys",
                 allUsers: "All Users",
                 allWorkFlows: "All Work Flows",
+            },
+            customWebDsDateRange  :{
+                today : 'Today',
+                pastWeek : 'Past Week',
+                pastMonth : 'Past Month',
+                past3Months : 'Past 3 Months',
+                past6Months : 'Past 6 Months',
+                custom :'Custom'
+            },
+            youScanDataSource: {
+                topics: "Topics",
+                statistics: "Statistics",
+                mentionStream: "Mention Stream",
+
+                allTopics: "All Topics",
+                topicHistroy: "Topic Histroy",
+                topictags: "Topic Tags",
+                statisticsSentiments : "Statistics Sentiments",
+                statisticsTags: "Statistics Tags",
+                statisticsWords: "Statistics Words", 
+                statisticsCountries: "Statistics Countries",
+                statisticsCities: "Statistics Cities",
+                statisticsRegionsSentiment: "Statistics Regions Sentiment",
+                statisticsSourcesSentiment: "Statistics Sources Sentiment",
+                statisticsRegionsSourcesSentiment: "Statistics Regions Sources Sentiment",
+                statisticsHistogram: "Statistics Histogram",
+                statisticsGender: "Statistics Gender",
+                statisticsAges: "Statistics Ages",
+                statisticsLink: "Statistics Links",
+                mentions:"Mentions"
             },
             almaDataSource: {
                 ping: "Ping",

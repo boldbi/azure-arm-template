@@ -2116,6 +2116,12 @@
                         }
                     ]
                 },
+                youScan: {
+                    name: 'YouScan',
+                    templates: [
+                        { projects: { name: '', desc: '' } }
+                    ]
+                }
                 },
                 oauthConnectors: {
                     facebook: "Facebook",
@@ -3449,6 +3455,36 @@
                 getWebhookById: "Get webhook By Id",
                 allLinkedItems: "All Linked Items",
             },
+            customWebDsDateRange  :{
+                today : 'Today',
+                pastWeek : 'Past Week',
+                pastMonth : 'Past Month',
+                past3Months : 'Past 3 Months',
+                past6Months : 'Past 6 Months',
+                custom :'Custom'
+            },
+            youScanDataSource: {
+                topics: "Topics",
+                statistics: "Statistics",
+                mentionStream: "Mention Stream",
+
+                allTopics: "All Topics",
+                topicHistroy: "Topic Histroy",
+                topictags: "Topic Tags",
+                statisticsSentiments : "Statistics Sentiments",
+                statisticsTags: "Statistics Tags",
+                statisticsWords: "Statistics Words", 
+                statisticsCountries: "Statistics Countries",
+                statisticsCities: "Statistics Cities",
+                statisticsRegionsSentiment: "Statistics Regions Sentiment",
+                statisticsSourcesSentiment: "Statistics Sources Sentiment",
+                statisticsRegionsSourcesSentiment: "Statistics Regions Sources Sentiment",
+                statisticsHistogram: "Statistics Histogram",
+                statisticsGender: "Statistics Gender",
+                statisticsAges: "Statistics Ages",
+                statisticsLink: "Statistics Links",
+                mentions:"Mentions"
+            },
             almaDataSource: {
                 ping: "Ping",
                 districts: "Districts",
@@ -3796,7 +3832,9 @@
                 almaApplicationText: "Application Key",
                 emptyApplicationnameValidation: "The Application name should not be empty",
                 validApplicationNameValidation: "Please enter a valid Application Key",
-				locationIdDisplayText: "Location Id"
+				locationIdDisplayText: "Location Id",
+                relativeDateDisplayText: "Relative Date",
+                isSinceSeqFilterDisplayText:"SinceSeq Filter"
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
