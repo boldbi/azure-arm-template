@@ -7287,7 +7287,9 @@
                 mbText: "MB",
                 documentationText: "Documentation",
                 ofText: " OF ",
-				previewText: "PREVIEW",
+		previewText: "PREVIEW",
+		oauthDriveButtonLable: 'Select a file from the drive',
+                oauthDriveButtonText:'Browse',
             }
         }
     }
