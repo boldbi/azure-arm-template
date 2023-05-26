@@ -1010,6 +1010,9 @@
                 dynamicConnectionString: "Dynamic Connection String",
                 dynamicConnectionStringTitle: "Dynamic Connection String Configuration",
                 dynamicConnectionStringTooltipInfo: "Know more",
+				applicationClientId: "ApplicationClientId",
+				applicationKey: "ApplicationKey",
+				authority: "Authority",
                 enableSSL: "Enable SSL",
                 mode: "Mode",
                 live: "Live",
@@ -1132,6 +1135,7 @@
                     sqlite: "SQLite",
                     clickHouse:"ClickHouse",
                     Clickhouse:"Clickhouse",
+					azureDataExplorer: "Azure Data Explorer",
                     redShift:"Redshift",
                     azureSQLDataWarehouse:"AzureSQLDataWarehouse",
                     jira: {
@@ -2821,7 +2825,10 @@
                 getReportScheduleCount: "Report Schedule Count",
                 listOrders: "Orders",
                 listMarketplaceParticipations: "Marketplace Participations",
-                listMatchingProducts:"Matching Products"
+                listMatchingProducts:"Matching Products",
+				applicationClientId: "ApplicationClientId",
+				applicationKey: "ApplicationKey",
+				authority: "Authority"
             },
             linkedInCustomUIDataSource: {
                 organizationAccessControl: "Organization Access Control",
