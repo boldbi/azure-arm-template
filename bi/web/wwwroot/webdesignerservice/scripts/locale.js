@@ -83,8 +83,8 @@
                     bingmapsDesc: "Showcase markers encoded through latitude and longitude.",
                     treeMapDesc: "Visualize large amounts of data as clustered rectangles with a color scale.",
                     cardDesc: "Measure trends through key performance indicators like values and goals.",
-                    pieChartDesc: "Showcase the proportions of each item\'&nbsps contribution to the total in the form of pie slices.",
-                    doughnutChartDesc: "Showcase the proportions of each item\'&nbsps contribution to the total in the form of doughnut slices.",
+                    pieChartDesc: "Showcase the proportions of each item's contribution to the total in the form of pie slices.",
+                    doughnutChartDesc: "Showcase the proportions of each item's contribution to the total in the form of doughnut slices.",
                     pyramidChartDesc: "Proportional comparison between values showcased in a progressively increasing manner.",
                     funnelChartDesc: "Proportional comparison between values showcased in a progressively decreasing manner.",
                     areaChartDesc: "Compare values for a set of unordered items across categories through filled curves ordered vertically.",
@@ -242,7 +242,7 @@
                 headerText: "Properties",
                 propertyText: "PROPERTIES",
                 assignDataText: "ASSIGN DATA",
-                propertyPanelCommonItems: "Property panel doesn\'t support to show common properties for multiple items",
+                propertyPanelCommonItems: "Property panel doesn't support to show common properties for multiple items",
                 promptWindowContent: "Do you want to reset the data source?",
                 enableCommentingTooltip: "Show/Hide the comment icon in dashboard published to dashboard server through which users can post comments and collaborate",
                 widgetName: "Name",
@@ -386,9 +386,9 @@
                         parameterizedUrl: "Parameterized URL"
                     },
                     backgroundImage: {
-                        recommendedFiles: " Recommended files: ",
+                        recommendedFiles: "Recommended files",
                         files: " png, jpeg, jpg ",
-                        recommendedSizes: " Recommended size: ",
+                        recommendedSizes: "Recommended size",
                         size: " Maximum 5 MB ",                        
                         initiatingUpload: "Initiating upload...",
                         uploading: "Uploading...",
@@ -887,7 +887,7 @@
 				dataCacheON: "ON",
 				dataCacheONtext: ":Results will be cached.",
 				dataCacheOFF: "OFF",
-				dataCacheOFFtext: ":Results will not be cached, your existing cache will be deleted.",
+				dataCacheOFFtext: "Results will not be cached, your existing cache will be deleted.",
 				dataCacheInfo: "Data refreshed at ",
 				dataCacheMemory: "Maximum Memory Size",
 				dataCacheApply: "Apply",
@@ -2123,7 +2123,12 @@
                 youScan: {
                     name: 'YouScan',
                     templates: [
-                        { projects: { name: '', desc: '' } }
+                        { 
+							projects: { 
+								name: "", 
+								desc: "" 
+							} 
+						}
                     ]
                 }
                 },
@@ -2390,9 +2395,9 @@
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
-                fileExistInCategory: "\" already exists in the category",
+                fileExistInCategory: "Already exists in the category",
                 doYouWantToReplace: ". Do you want to replace it?",
-                dashboardNameErrorMsg: "The following characters are not supported:&nbsp&nbsp&nbsp&nbsp\'&nbsp+&nbsp,&nbsp;&nbsp[&nbsp]&nbsp%&nbsp#",
+                dashboardNameErrorMsg: "The following characters are not supported",
                 dashboardNameEmptyErr: "Please enter a name for dashboard",
                 createCategory: "Please create a category to continue",
                 loadCategoryErr: "An error occurred while fetching category information.",
@@ -2433,7 +2438,7 @@
                 updateButtonText: "Update",
                 resetAllCustomizationText: "This action will reset the customization done. Do you want to continue?",
                 selectWidget: "Select a Widget",
-                masterWidget: "Widget master\'s",
+                masterWidget: "Widget master's",
                 profileNameEditAdd: "Only one item can be edited or added",
                 filterKeyEmpty: "Profile name cannot be empty.",
                 filterKeyExist: "A filter profile with the same name already exists.",
@@ -2744,14 +2749,14 @@
             },
             measureFilterWindow: {
                 measureFilterTitle: "Measure Filter",
-                columnLabelText: "Column:",
+                columnLabelText: "Column",
                 rangeLabelText: "Ranges",
                 andLabelText: "and",
                 resetBtnText: "Reset",
                 applyBtnText: "Apply",
                 cancelBtnText: "Cancel",
                 runBtnText: "Run",
-                selectedAggText: "Aggregation:",
+                selectedAggText: "Aggregation",
                 greaterOrEqualErrMsgText: "The value should be greater than or equal to the start value.",
                 enterValueWatermarkText: "Enter Value"
             },
@@ -3462,19 +3467,18 @@
                 getWebhookById: "Get webhook By Id",
                 allLinkedItems: "All Linked Items",
             },
-            customWebDsDateRange  :{
-                today : 'Today',
-                pastWeek : 'Past Week',
-                pastMonth : 'Past Month',
-                past3Months : 'Past 3 Months',
-                past6Months : 'Past 6 Months',
-                custom :'Custom'
+            customWebDsDateRange: {
+                today : "Today",
+                pastWeek : "Past Week",
+                pastMonth : "Past Month",
+                past3Months : "Past 3 Months",
+                past6Months : "Past 6 Months",
+                custom : "Custom"
             },
             youScanDataSource: {
                 topics: "Topics",
                 statistics: "Statistics",
                 mentionStream: "Mention Stream",
-
                 allTopics: "All Topics",
                 topicHistroy: "Topic Histroy",
                 topictags: "Topic Tags",
@@ -3648,7 +3652,6 @@
                 attachment: "Attachment",
                 changes: "Changes",
                 activitySubscriptions: "Activity Subscriptions",
-        
                 viewTable: "View Table",
                 viewTableWithId: "View Table With Id",
                 allTable: "All Table",
@@ -3675,7 +3678,6 @@
                 reports: "Reports",
                 team: "Team",
                 others: "Others",
-
                 conversations: "Conversations",
                 chatthreads: "Chat Threads",
                 customers: "Customers",
@@ -3732,7 +3734,6 @@
                 accounts: "Accounts",
                 accountusagerecords: "Account Usage Records",
                 others: "Others",
-
                 allcalls: "All Calls",
                 allcallrecordings: "All call Recordings",
                 callnotifications: "Call Notifications",
@@ -5361,7 +5362,7 @@
             allUsers: "All Users",
             },
 			dateSettingsDialog: {
-				columnLabelText:"Column:",
+				columnLabelText:"Column",
 				cancelButtonText: "Cancel",
 				okButtonText: "OK",
 				format: "Format",				
@@ -5383,7 +5384,15 @@
                 closeButtonText: "Close",
                 configureButtonText: "Configure",
                 updateButtonText: "Update",
-				selectColumnButtonText:"Select Column"
+				selectColumnButtonText: "Select Column",
+				include: "Include",
+				exclude: "Exclude",
+				iterative: "Iterative",
+				single: "Single",
+				trueValue: "True",
+				falseValue: "False",
+				manualType: "Manual",
+				dataSourceType: "Data Source"
             },
             dateRangeFilterDialog: {
                 titleText: "Range Filter",
@@ -5411,10 +5420,10 @@
                 categoryName: "&nbspcategory name",
                 datasourceName: "&nbspdatasource name",
                 invalid: "Invalid",
-                notSupportedChar: ".The following characters are not supported: * | / : < > , % ; \ \\\" + & ? #",
+                notSupportedChar: ".The following characters are not supported ",
                 invalidCharText: "Invalid characters in the",
                 invalidDatasourceName: "Invalid datasource name",
-                notSupportedCharDatasourceName: ".The following characters are not supported: \" + , ; [ ] % #",
+                notSupportedCharDatasourceName: ".The following characters are not supported ",
                 datasourceNameWaterMarkTxt: "Enter datasource name",
                 organizationIdWaterMarkText: "Organization ID",
 				invalidOrganizationId: "Organization ID can’t be empty"
@@ -5483,7 +5492,7 @@
                 layout: "Layout",
                 saving: "Saving...",
                 lastSave: "Last successful save: ",
-                draftError: "There was an error saving the draft.<br/>Last successful save: "
+                draftError: "There was an error saving the draft.<br/>Last successful save "
             },
             refreshWindow: {
                 title: "Refresh Settings",
@@ -6059,7 +6068,7 @@
                 dialogContentText: "Background image has already been configured in the Properties window. Do you want to reset the background image settings and use this column?"
             },
             rtePropertySettings: {
-                rtePropertyPanel: "Properties are handled in editor\'s toolbar. Double click on text for inline toobar or expand widget to enable floating toolbar"
+                rtePropertyPanel: "Properties are handled in editor's toolbar. Double click on text for inline toobar or expand widget to enable floating toolbar"
             },
             CardImageRestrictionInfo: {
                 text: "We cannot show more than one image per card , so this option is disabled."
@@ -6174,7 +6183,13 @@
                 defaultValueText: "default value",
                 showInViewer: "Show in Viewer",
                 dateFormat: "date format",
-                isFirstValue: "Set first value"
+                isFirstValue: "Set first value",
+				listType: "List",
+				literalType: "Literal",
+				dateFormat: "Date",
+				stringFormat: "String",
+				boolFormat: "Boolean",
+				numberFormat: "Number"
             },
             viewData: {
                 viewData: "View Underlying Data"
@@ -6278,7 +6293,7 @@
             dataPreview: {
                 dataPreview: "Data Preview",
                 noDatasourceFound: "No data sources found",
-                noteText: "Note:",
+                noteText: "Note",
                 maximumRecordLimit: "A maximum of",
                 totalRecordCount: "records out of",
                 previewCountDefaultValue: "1000",
@@ -6286,7 +6301,7 @@
             },
             popNotification: {
                 masterWidgetNoSlaveText: "There are no listener widgets for this period-over-period comparison. Please go to the Filter Configuration window to select listener widgets.",
-                slaveWidgetNoVirtualColumText: "The selected comparison period\'s visualization will be shown in a preview or when published."
+                slaveWidgetNoVirtualColumText: "The selected comparison period's visualization will be shown in a preview or when published."
             },
             gridColumnCustomize: {
                 columnCustomize: "Column Settings",
@@ -7256,7 +7271,7 @@
 				uploadedSuccessfully: "Uploaded successfully",
 				configurationCompleted: "Configuration completed",
 				createNewCategory: "Create new Category ",
-                categoryErrorMessage: "There was an error in creating Category: ",
+                categoryErrorMessage: "There was an error in creating Category",
 				retryMessage: ". Please retry",          
 				uploadDashboardFirstPage: "Upload Dashboards (1/2)",
 				nextButtonLabelText: "Next",
@@ -7280,7 +7295,7 @@
 				uploadPageDialogCloseContent: "The changes made to to the dashboard is saved as drafts. You can restart the upload process from the ",
 				dashboardUploadFailedText: "Uploading Failed",
 				uploadDraft: "Upload Drafts",
-				failed: "Failed:",
+				failed: "Failed",
 				knowMore: " know more",
 				uploadError: "Upload Error",
 				dashboardUploadFailed: " Dashboards Upload Failed",
@@ -7295,8 +7310,10 @@
                 documentationText: "Documentation",
                 ofText: " OF ",
 		previewText: "PREVIEW",
-		oauthDriveButtonLable: 'Select a file from the drive',
-                oauthDriveButtonText:'Browse',
+		oauthDriveButtonLable: "Select a file from the drive",
+                oauthDriveButtonText:"Browse",
+				fileUploadFailedText: "Please upload a file to continue",
+				uploadingProgressText: "Uploading in progress. Please wait for the upload to complete or you can remove the uploading item to continue.",
             }
         }
     }

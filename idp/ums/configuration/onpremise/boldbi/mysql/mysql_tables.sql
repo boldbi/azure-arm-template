@@ -244,7 +244,7 @@ CREATE TABLE {database_name}.BOLDBI_ExportType(
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleDetail(
 	Id int NOT NULL AUTO_INCREMENT,
-	ScheduleId Char(38) NOT NULL,
+	ScheduleId Char(38) NOT NULL UNIQUE,
 	ItemId Char(38) NOT NULL,
 	Name varchar(150) NOT NULL,
 	RecurrenceTypeId int NULL,
@@ -350,6 +350,18 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleLog(
 	ModifiedDate datetime NOT NULL,
 	Message text NULL,
 	IsOnDemand tinyint NOT NULL DEFAULT 0,
+	IsActive tinyint NOT NULL,
+	RequestId Char(38) NULL,
+	LogExist tinyint NOT NULL DEFAULT 0,
+	PRIMARY KEY (Id))
+;
+
+CREATE TABLE {database_name}.ScheduleMissingLogs(
+	Id int NOT NULL AUTO_INCREMENT,
+	ScheduleId Char(38) NOT NULL,
+	MissingType int NOT NULL,
+	StartDate datetime NOT NULL,
+	EndDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
 	PRIMARY KEY (Id))
 ;
@@ -1085,6 +1097,8 @@ INSERT into {database_name}.BOLDBI_SettingsType (Name,IsActive) Values ( 'Integr
 INSERT into {database_name}.BOLDBI_SettingsType (Name,IsActive) VALUES ( 'CORS Settings',1)
 ;
 INSERT into {database_name}.BOLDBI_SettingsType (Name,IsActive) VALUES ( 'Look and Feel',1)
+;
+INSERT into {database_name}.BOLDBI_SettingsType (Name,IsActive) VALUES ('Site Credentials',1)
 ;
 
 INSERT into {database_name}.BOLDBI_ItemLogType (Name,IsActive) VALUES ( 'Added',1)
@@ -1938,6 +1952,9 @@ ALTER TABLE {database_name}.BOLDBI_PublishJobs ADD Type int NOT NULL DEFAULT 1
 ;
 
 ALTER TABLE  {database_name}.BOLDBI_PublishJobs  ADD FOREIGN KEY(Type) REFERENCES {database_name}.BOLDBI_PublishType (Id)
+;
+
+ALTER TABLE  {database_name}.BOLDBI_ScheduleMissingLogs  ADD FOREIGN KEY(ScheduleId) REFERENCES {database_name}.BOLDBI_ScheduleDetail (ScheduleId)
 ;
 
 ALTER TABLE  {database_name}.BOLDBI_UserGroup  ADD FOREIGN KEY(GroupId) REFERENCES {database_name}.BOLDBI_Group (Id)

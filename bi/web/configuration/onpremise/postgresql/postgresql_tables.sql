@@ -224,7 +224,7 @@ CREATE TABLE SyncDS_ExportType(
 
 CREATE TABLE SyncDS_ScheduleDetail(
 	Id SERIAL PRIMARY KEY NOT NULL,
-	ScheduleId uuid NOT NULL,
+	ScheduleId uuid NOT NULL UNIQUE,
 	ItemId uuid NOT NULL,
 	Name varchar(150) NOT NULL,
 	RecurrenceTypeId int NULL,
@@ -322,6 +322,17 @@ CREATE TABLE SyncDS_ScheduleLog(
 	ModifiedDate timestamp NOT NULL,
 	Message text NULL,
 	IsOnDemand smallint NOT NULL DEFAULT (0),
+	IsActive smallint NOT NULL,
+	RequestId uuid NULL,
+	LogExist smallint NOT NULL DEFAULT (0))
+;
+
+CREATE TABLE SyncDS_ScheduleMissingLogs(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	ScheduleId uuid NOT NULL,
+	MissingType int NOT NULL,
+	StartDate timestamp NOT NULL,
+	EndDate timestamp NOT NULL,
 	IsActive smallint NOT NULL)
 ;
 
@@ -1000,6 +1011,8 @@ INSERT into SyncDS_SettingsType (Name,IsActive) Values (N'Integrations',1)
 INSERT into SyncDS_SettingsType (Name, IsActive) Values (N'CORS Settings',1)
 ;
 INSERT into SyncDS_SettingsType (Name,IsActive) Values (N'Look and Feel',1)
+;
+INSERT into SyncDS_SettingsType (Name, IsActive) VALUES (N'Site Credentials',1)
 ;
 
 INSERT into SyncDS_ItemLogType (Name,IsActive) VALUES ( N'Added',1)
@@ -1847,6 +1860,8 @@ INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUE
 ;
 
 ---- PASTE ALTER Queries below this section --------
+ALTER TABLE SyncDS_ScheduleMissingLogs  ADD FOREIGN KEY(ScheduleId) REFERENCES SyncDS_ScheduleDetail (ScheduleId)
+;
 
 ALTER TABLE SyncDS_PublishJobs ADD COLUMN Type int not null DEFAULT 1
 ;
