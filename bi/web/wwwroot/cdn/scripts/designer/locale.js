@@ -294,6 +294,7 @@
 				customizeBtnText: "Customize",
 				changeButtonText: "Change",
 				persistenceNotificationsText: "Maintains the expanded and collapsed state of the nodes",
+                performanceDelayNotificationsText: "Enabling this property will disable virtualization in the Pivot grid, which can cause performance delays when working with large sets of records",
 				imagePaddingSettingsText: "Padding Settings",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
@@ -3468,12 +3469,18 @@
                 allLinkedItems: "All Linked Items",
             },
             customWebDsDateRange: {
-                today : "Today",
-                pastWeek : "Past Week",
-                pastMonth : "Past Month",
-                past3Months : "Past 3 Months",
-                past6Months : "Past 6 Months",
-                custom : "Custom"
+                today : 'Today',
+                yesterDay :'YesterDay',
+                pastWeek : 'Past Week',
+                past2Weeks : 'Past 2 Weeks',
+                pastMonth :'Past Month',
+                past2Months : 'Past 2 Months',
+                past3Months : 'Past 3 Months',
+                currentWeek : 'Current Week',
+                currentMonth : 'Current Month',
+                lastWeek : 'Last Week',
+                lastMonth : 'Last Month',
+                custom : 'Custom'
             },
             youScanDataSource: {
                 topics: "Topics",
@@ -5467,7 +5474,7 @@
                 description: "Description",
                 columns: "columns",
                 retrieved: "Retrieved",
-                record: "Record",
+                record: "record",
                 tryConnectButton: "Try Again",
                 schemaLoadErrorMsg: "Error occurred while fetching the schema",
                 selectedMultipleValuesInComboBox: "Multiple Values",
@@ -5475,7 +5482,10 @@
                 liveDataPreviewEnableToolTipText: "Enable auto update",
                 liveDataPreviewDisableToolTipText: "Disable auto update",
                 showDataTooltip: "Show",
-                hideDataTooltip: "Hide"
+                hideDataTooltip: "Hide",
+                maximumRecordLimit: "A maximum of",
+                totalRecordCount: "out of",
+                recordCountDisply: "are displayed"
             },
             toolBar: {
                 publish: "Publish",
@@ -6091,6 +6101,7 @@
                     var: "Var",
                     custom: "Agg",
 					median: "Median",
+                    customagg: "Custom",
                 },
                 fieldView: {
                     MeasureFieldDisplayName: "Measures",
@@ -7254,6 +7265,8 @@
                 configureDataSourceLabelText: "CONFIGURE DATA SOURCE",
                 selectDataSource: "Please select a data source to map.",
 				configureDataSource: "Configure the data source",
+                mappedExistingDatasourceText: "Mapped with data source",
+                mappedConfiguredDatasourceText: "Configured with data source",
                 dashboardUploadedText: "Dashboards Uploaded Successfully",
                 dashboardNeedsAttentionText: "Dashboards Needs Attention",
                 configuredDashboardText: "Dashboards ready to be uploaded",

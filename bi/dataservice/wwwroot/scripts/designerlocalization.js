@@ -4448,7 +4448,7 @@ var Designer = {
                 description: "Description",
                 columns: "columns",
                 retrieved: "Retrieved",
-                record: "Record",
+                record: "record",
                 tryConnectButton: "Try Again",
                 schemaLoadErrorMsg: "Error occurred while fetching the schema",
                 selectedMultipleValuesInComboBox: "Multiple Values",
@@ -4456,7 +4456,10 @@ var Designer = {
                 liveDataPreviewEnableToolTipText: "Enable auto update",
                 liveDataPreviewDisableToolTipText: "Disable auto update",
                 showDataTooltip: "Show",
-                hideDataTooltip: "Hide"
+                hideDataTooltip: "Hide",
+                maximumRecordLimit: "A maximum of",
+                totalRecordCount: "out of",
+                recordCountDisply: "are displayed"
             },
             toolBar: {
                 publish: "Publish",
@@ -6046,11 +6049,17 @@ var Designer = {
             },
             customWebDsDateRange  :{
                 today : 'Today',
+                yesterDay :'YesterDay',
                 pastWeek : 'Past Week',
-                pastMonth : 'Past Month',
+                past2Weeks : 'Past 2 Weeks',
+                pastMonth :'Past Month',
+                past2Months : 'Past 2 Months',
                 past3Months : 'Past 3 Months',
-                past6Months : 'Past 6 Months',
-                custom :'Custom'
+                currentWeek : 'Current Week',
+                currentMonth : 'Current Month',
+                lastWeek : 'Last Week',
+                lastMonth : 'Last Month',
+                custom : 'Custom'
             },
             youScanDataSource: {
                 topics: "Topics",
