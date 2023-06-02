@@ -405,15 +405,15 @@
                                 </div>
                                 <ul class="dashboard-list-section col-xs-12 no-padding ng-hide" ng-show="dashboardDataBindComplete">
                                     <li ng-repeat="dashboardItem in currentDashboards | limitTo: (isMobile ? totalDashboardCount : pageLimit)" class="col-xs-12 no-padding dashboard-tile" ng-class="{'dashboard-tile-hide-author': (hideAuthorName && ((dashboardItem.IsMultiDashboard && hideMultitabText) || !dashboardItem.IsMultiDashboard)) && activeMenu !== @((int)DisplayCategory.UsageAnalytics), 'dashboard-tile-hide-description': !dashboardItem.Description, 'dashboard-draft-height' : ((dashboardItem.IsDraft && !dashboardItem.IsUploadDraft)  || activeMenu == @((int)DisplayCategory.UsageAnalytics)) }" my-post-repeat-directive>
-                                        <div ng-if="!dashboardItem.IsDraft" class="col-xs-12 no-padding" ng-class="{'dashboard-draft-height' : activeMenu == @((int)DisplayCategory.UsageAnalytics)}">
+                                        <div ng-if="!dashboardItem.IsDraft" class="col-xs-12 no-padding" ng-class="{'dashboard-draft-height' : activeMenu == @((int)DisplayCategory.UsageAnalytics)}" ng-click="canPreventDashboardOpenNavigation($event) ? null : redirectToDashboard(viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name))">
                                             <div class="dashboard-info-section col-xs-12" ng-class="{'dashboard-tile-hide-description-div': !dashboardItem.Description, 'dashboard-usage-height' : activeMenu == @((int)DisplayCategory.UsageAnalytics)}">
-                                                <div class="dashboard-select-list col-xs-1 no-padding" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
+                                                <div class="dashboard-select-list col-xs-1 no-padding prevent-dashboard-navigation" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
                                                     @Html.CheckBox("{{dashboardItem.Id}}", false, new { @id="{{dashboardItem.Id}}", @class = "dashboard-select-individual material-checkbox", @autocomplete = "off" })
                                                     <label for="{{dashboardItem.Id}}" ng-if="!isTablet && !isMobile && !samePagePreview"></label>
                                                     <span class="su favorite favorite-icon" ng-class="{'favorite-hide-author': (hideAuthorName && ((dashboardItem.IsMultiDashboard && hideMultitabText) || !dashboardItem.IsMultiDashboard)), 'su-favorite': (!dashboardItem.IsDraft && dashboardItem.IsFavorite), 'su-dis-favorite': (!dashboardItem.IsDraft && !dashboardItem.IsFavorite)}" ng-hide="schemesDetails != null && !schemesDetails.Favorite || activeMenu === @((int)DisplayCategory.UsageAnalytics)" data-favorite="{{dashboardItem.IsFavorite}}" ng-click="toggleFavorite($event)"></span>
                                                 </div>
                                                 <div class="open-link no-padding" ng-class="setWidthForDashboardName()">
-                                                    <a class="col-xs-12 no-padding" ng-click="preventDefault($event)" href="{{viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name)}}" target="_blank">
+                                                    <a class="col-xs-12 no-padding" ng-click="preventDefault($event)">
                                                         <span class="col-xs-12 no-padding no-margin">
                                                             <span class="dashboard-name no-padding no-margin col-xs-12">
                                                                 {{dashboardItem.Name}}
@@ -424,7 +424,7 @@
                                                         </span>
                                                     </a>
                                                 </div>
-                                                <div class="col-xs-2 no-padding icon-menu ng-hide" ng-show="!hideOptionMenu">
+                                                <div class="col-xs-2 no-padding icon-menu prevent-dashboard-navigation ng-hide" ng-show="!hideOptionMenu">
                                                     <div class="no-padding options context-menu" ng-class="{'options-hide-author': (hideAuthorName && ((dashboardItem.IsMultiDashboard && hideMultitabText) || !dashboardItem.IsMultiDashboard)) && activeMenu !== 12}" ng-hide="schemesDetails != null && !schemesDetails.ContextMenu">
                                                         <span class="dropdown-toggle su su-options-menu options-area" data-toggle="dropdown"></span>
                                                         <ul class="dropdown-menu dashboard-options" role="menu">
