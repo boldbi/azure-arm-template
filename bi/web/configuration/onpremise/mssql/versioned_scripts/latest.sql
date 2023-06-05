@@ -1,3 +1,6 @@
+UPDATE [BOLDBI_SettingsType] SET Name='Site Credentials' WHERE Id = 20
+;
+
 INSERT INTO [BOLDBI_SettingsType] (Name, IsActive) SELECT 'Site Credentials', 1
 WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_SettingsType] WHERE Name = 'Site Credentials')
 ;

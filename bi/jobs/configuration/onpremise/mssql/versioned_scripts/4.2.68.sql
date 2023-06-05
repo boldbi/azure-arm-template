@@ -36,8 +36,8 @@ WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_SettingsType] WHERE Name = 'Dashboard
 INSERT INTO [BOLDBI_SettingsType] (Name, IsActive) SELECT 'Embed Settings', 1
 WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_SettingsType] WHERE Name = 'Embed Settings')
 ;
-INSERT INTO [BOLDBI_SettingsType] (Name, IsActive) SELECT 'Data Store Settings', 1
-WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_SettingsType] WHERE Name = 'Data Store Settings')
+INSERT INTO [BOLDBI_SettingsType] (Name, IsActive) SELECT 'Data Process', 1
+WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_SettingsType] WHERE Name = 'Data Process')
 ;
 INSERT INTO [BOLDBI_SettingsType] (Name, IsActive) SELECT 'Connectors', 1
 WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_SettingsType] WHERE Name = 'Connectors')

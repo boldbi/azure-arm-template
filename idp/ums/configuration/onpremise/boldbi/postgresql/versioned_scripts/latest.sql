@@ -1,3 +1,6 @@
+UPDATE SyncDS_SettingsType SET Name='Site Credentials' WHERE Id = 20
+;
+
 INSERT INTO SyncDS_SettingsType (Name, IsActive) SELECT N'Site Credentials', 1
 WHERE NOT EXISTS (SELECT Name FROM SyncDS_SettingsType WHERE Name = N'Site Credentials')
 ;
