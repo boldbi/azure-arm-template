@@ -1,6 +1,8 @@
 ﻿@inject ServerPrincipal _identityResponse
 @using Newtonsoft.Json
 @{
+    var refreshDisabledContent = T["Refresh Disabled"];
+    var failureAttempt = T["Failure at "];
     var gridName = ViewBag.gridName;
     var permissionData = ViewBag.Permissions;
     var userId = _identityResponse.User.UserId;
@@ -425,16 +427,33 @@
     <div>
         {{if ScheduleStatus=="@((int)ScheduleStatus.Success)"}}
         <div>
-            <span data-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Successful at {0}"].Value,"{{:LastAttemptAt}}"))">
-                <span class="success data-refresh-status su su-schedule-status"></span>
-                <span>@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))</span>
-            </span>
+            {{if !IsScheduleEnabled}}
+                <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value,"{{:LastAttemptAt}}"))" data-status="success" title="@T["Refresh Disabled"]">
+                    <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'success'}}"></span>
+                    <Span class="data-refresh">@T["Refresh Disabled"]</Span>
+                </span>
+                <div class="success-refresh">
+                    <Span class="lastsuccessful">@Html.Raw(String.Format(T["Last Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
+                </div>
+            {{else}}
+                <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="success" data-status="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))" data-refresh-status="success" title="@Html.Raw(String.Format(T["Successful at {0}"].Value,"{{:LastAttemptAt}}"))">
+                    <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'success'}}"></span>
+                    <Span class="data-refresh">@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
+                </span>
+                <div class="success-refresh hide">
+                    <Span class="lastsuccessful">@Html.Raw(String.Format(T["Last Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
+                </div>
+            {{/if}}
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.Fail)"}}
         <div>
-            <span data-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Failure at {0}"].Value,"{{:LastAttemptAt}}"))">
+            <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["Failure at {0}"].Value,"{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
                 <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
-                <span>@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
+                {{if !IsScheduleEnabled}}
+                       <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                  {{else}}
+                       <span class="data-refresh">@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
+                 {{/if}}
             </span>
             {{if LastSuccessfulAttemptAt != null}}
             <div>
@@ -446,9 +465,9 @@
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.Run)"}}
         <div>
-            <span data-toggle="tooltip" data-placement="top" title="@T["Refresh Started"]">
+            <span data-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Refresh Started at {0}"].Value, "{{:LastAttemptAt}}"))">
                 <span class="refresh-started data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
-                <span>@T["Refresh Started"]</span>
+                <span>@Html.Raw(String.Format(T["Refresh Started at {0}"].Value, "{{:LastAttemptAt}}"))</span>
             </span>
             {{if LastSuccessfulAttemptAt != null}}
             <div>
@@ -460,16 +479,20 @@
         </div>
         {{else !IsScheduleConfigured}}
         <div>
-            <span data-toggle="tooltip" data-placement="top" title="@T["Refresh schedule not configured"]">
+            <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="not-refreshed" data-last-attempt="" data-status="refreshnotconfigured" title="@T["Refresh schedule not configured"]">
                 <span class="not-refreshed data-refresh-status su su-schedule-status"></span>
-                <span class="refresh-status">@T["Refresh schedule not configured"]</span>
+                <span class="data-refresh">@T["Refresh schedule not configured"]</span>
             </span>
         </div>
         {{else}}
         <div>
-            <span data-toggle="tooltip" data-placement="top" title="@T["Not refreshed yet"]">
-                <span class="not-refreshed data-refresh-status su su-schedule-status"></span>
-                <span class="refresh-status">@T["Not refreshed yet"]</span>
+            <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="not-refreshed" data-last-attempt="" data-status="notrefreshed" title="{{:!IsScheduleEnabled ? "@T["Refresh Disabled"]" : "@T["Not refreshed yet"]" }}">
+                <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'not-refreshed'}}"></span>
+                {{if !IsScheduleEnabled}}
+                     <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                {{else}}
+                     <span class="data-refresh">@T["Not refreshed yet"]</span>
+                {{/if}}
             </span>
         </div>
         {{/if}}
@@ -637,6 +660,9 @@
             },
             renderDoubleQuotes: function (inputString) {
                 return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+            },
+            refreshEncode: function (IsScheduleEnabled, LastAttemptAt) {
+                return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
             }
         });
     });

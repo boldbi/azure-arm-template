@@ -38,8 +38,8 @@ WHERE NOT EXISTS (SELECT Name FROM SyncDS_SettingsType WHERE Name = N'Dashboard 
 INSERT INTO SyncDS_SettingsType (Name, IsActive) SELECT N'Embed Settings', 1
 WHERE NOT EXISTS (SELECT Name FROM SyncDS_SettingsType WHERE Name = N'Embed Settings')
 ;
-INSERT INTO SyncDS_SettingsType (Name, IsActive) SELECT N'Data Store Settings', 1
-WHERE NOT EXISTS (SELECT Name FROM SyncDS_SettingsType WHERE Name = N'Data Store Settings')
+INSERT INTO SyncDS_SettingsType (Name, IsActive) SELECT N'Data Process', 1
+WHERE NOT EXISTS (SELECT Name FROM SyncDS_SettingsType WHERE Name = N'Data Process')
 ;
 INSERT INTO SyncDS_SettingsType (Name, IsActive) SELECT N'Connectors', 1
 WHERE NOT EXISTS (SELECT Name FROM SyncDS_SettingsType WHERE Name = N'Connectors')

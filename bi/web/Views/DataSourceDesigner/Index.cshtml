@@ -39,6 +39,11 @@
     var homepagePageUrl = System.Net.WebUtility.UrlDecode(Url.Action("Homepages", "Boards"));
     var isMobile = new DeviceDetection(Context).IsMobile;
     var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
+    var isDataSourceConnection = string.Empty;
+    if((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true"))
+    {
+      isDataSourceConnection = ViewBag.isDataSourceConnection;
+    }  
     var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -158,6 +163,7 @@
         var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
         var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
+        var isDataSourceConnection = "@isDataSourceConnection";
     </script>
     <script type="text/javascript">
         window.addEventListener("beforeunload", function (e) {

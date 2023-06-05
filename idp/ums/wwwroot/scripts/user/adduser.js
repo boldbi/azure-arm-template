@@ -165,6 +165,7 @@
 function onUserAddDialogClose() {
     document.getElementById("user-add-dialog").ej2_instances[0].hide();
     $("#password_policy_rules").remove();
+    $("#dialog-container").find("div").removeClass("e-error");
 }
 
 function onUserAddDialogOpen() {
@@ -176,5 +177,6 @@ function onUserAddDialogOpen() {
     $(".e-dialog-icon").attr("title", "Close");
     $(".validation").closest("div").removeClass("has-error");
     $(".useradd-validation-messages").css("display", "none");
+    $("#dialog-container").find("div").removeClass("e-error");
     CheckMailSettingsAndNotify(window.Server.App.LocalizationContent.ToSendAccountActivation, $(".validation-message"), "");
 }

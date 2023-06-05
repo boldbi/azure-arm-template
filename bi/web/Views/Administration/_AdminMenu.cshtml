@@ -30,6 +30,7 @@
     var widgetUrl = Url.Action("CustomWidgets", "Administration");
     var securitySettingsUrl = Url.Action("SecuritySettings", "Administration");
     var corsSettingsUrl = Url.Action("CORSSettings", "Administration");
+    var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : _globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
 }
 
 <environment include="Development,CloudDevelopment">
@@ -44,9 +45,9 @@
 <nav id="bi-side-nav-bar" class="no-margin admin-nav-bar">
     <h2 class="header">@T["Settings"]</h2>
 
-    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.SiteSettings] || model[SettingsScopes.DashboardSettings] || model[SettingsScopes.EmbedSettings] || model[SettingsScopes.LookAndFeel] || (model.ContainsKey(SettingsScopes.SupportSettings) && model[SettingsScopes.SupportSettings]))))
+    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.SiteSettings] || model[SettingsScopes.DashboardSettings] || model[SettingsScopes.EmbedSettings] || model[SettingsScopes.LookAndFeel] || (model.ContainsKey(SettingsScopes.SupportSettings) && model[SettingsScopes.SupportSettings] || (enablePublishModule && model[SettingsScopes.SiteCredentials])))))
     {
-            <label for="admin-menu-category-general">@T["General"]</label>
+        <label for="admin-menu-category-general">@T["General"]</label>
         <ul class="admin-menu-category" id="admin-menu-category-general">
             @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.SiteSettings])))
             {
@@ -81,6 +82,16 @@
                     <a id="embed-settings-link" href="@embedSettingsUrl">
                         <i class="su su-embed"></i>
                         <span>@T["Embed"]</span>
+                    </a>
+                </li>
+            }
+
+            @if (enablePublishModule && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.SiteCredentials]))))
+            {
+                <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(credentialsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="credential-link" class="" href="@credentialsUrl">
+                        <i class="su su-credentials"></i>
+                        <span>@T["Site Credentials"]</span>
                     </a>
                 </li>
             }
@@ -253,18 +264,6 @@
         </ul>
     }
 
-    //Hiding Credential section
-    @*@if (ServerAppConfig.EnablePublishModule)
-    {
-        <ul>
-            <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(credentialsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
-                <a id="credential-link" class="" href="@credentialsUrl">
-                    <i class="su su-credentials"></i>
-                    <span>@T["Credentials"]</span>
-                </a>
-            </li>
-        </ul>
-    }*@
 
     @*else
         {

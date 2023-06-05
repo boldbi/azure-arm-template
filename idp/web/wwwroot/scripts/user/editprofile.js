@@ -404,7 +404,7 @@ function SaveProfile() {
                 if (result.IsUserNameExist) {
                     if (result.IsUserNameExist) {
                         $('#user-username').closest('div').addClass("has-error");
-                        $("#username-duplicate-validation").html(window.Server.App.LocalizationContent.IsUserNameExist).css("display", "block");
+                        $("#username-duplicate-validation").html(window.Server.App.LocalizationContent.UsernameExists).css("display", "block");
                         $(".validation-message").css("display", "block");
                         hideWaitingPopup('content-area');
                     }

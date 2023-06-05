@@ -37,8 +37,8 @@ WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='D
 INSERT INTO {database_name}.BOLDBI_SettingsType (Name, IsActive) SELECT 'Embed Settings', 1 FROM DUAL
 WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='Embed Settings' LIMIT 1)
 ;
-INSERT INTO {database_name}.BOLDBI_SettingsType (Name, IsActive) SELECT 'Data Store Settings', 1 FROM DUAL
-WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='Data Store Settings' LIMIT 1)
+INSERT INTO {database_name}.BOLDBI_SettingsType (Name, IsActive) SELECT 'Data Process', 1 FROM DUAL
+WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='Data Process' LIMIT 1)
 ;
 INSERT INTO {database_name}.BOLDBI_SettingsType (Name, IsActive) SELECT 'Connectors', 1 FROM DUAL
 WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='Connectors' LIMIT 1)

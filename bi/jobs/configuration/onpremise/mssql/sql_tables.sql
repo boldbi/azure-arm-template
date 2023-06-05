@@ -231,7 +231,7 @@ CREATE TABLE [BOLDBI_ExportType](
 
 CREATE TABLE [BOLDBI_ScheduleDetail](
 	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
-	[ScheduleId] [uniqueidentifier] NOT NULL,
+	[ScheduleId] [uniqueidentifier] NOT NULL UNIQUE,
 	[ItemId] [uniqueidentifier] NOT NULL,
 	[Name] [nvarchar](150) NOT NULL,
 	[RecurrenceTypeId] [int] NULL,
@@ -300,6 +300,15 @@ CREATE TABLE [BOLDBI_ScheduleLogUser](
 	[IsActive] [bit] NOT NULL)
 ;
 
+CREATE TABLE [BOLDBI_ScheduleMissingLogs](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[ScheduleId] [uniqueidentifier] NOT NULL,
+	[MissingType] [int] NOT NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NOT NULL,
+	[IsActive] [bit] NOT NULL)	
+;
+
 CREATE TABLE [BOLDBI_ScheduleLogGroup](
 	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
 	[ScheduleId] [uniqueidentifier] NOT NULL,
@@ -329,7 +338,9 @@ CREATE TABLE [BOLDBI_ScheduleLog](
 	[Message] [nvarchar](max) NULL,
 	[ModifiedDate] [datetime] NOT NULL,
 	[IsOnDemand] [bit] NOT NULL DEFAULT (0),
-	[IsActive] [bit] NOT NULL)
+	[IsActive] [bit] NOT NULL,
+	[RequestId] [uniqueidentifier] NULL,
+	[LogExist] [bit] NOT NULL DEFAULT (0))
 ;
 
 CREATE TABLE [BOLDBI_SystemSettings](
@@ -1000,6 +1011,8 @@ INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Integrations',1)
 INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'CORS Settings',1)
 ;
 INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Look and Feel',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Site Credentials',1)
 ;
 INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Added',1)
 ;
@@ -1862,6 +1875,9 @@ ALTER TABLE [BOLDBI_PublishJobs]  ADD [Type] [int] NOT NULL DEFAULT 1
 ;
 
 ALTER TABLE [BOLDBI_PublishJobs]  ADD FOREIGN KEY([Type]) REFERENCES [BOLDBI_PublishType] ([Id])
+;
+
+ALTER TABLE [BOLDBI_ScheduleMissingLogs]  ADD FOREIGN KEY([ScheduleId]) REFERENCES [BOLDBI_ScheduleDetail] ([ScheduleId])
 ;
 
 ALTER TABLE [BOLDBI_UserGroup]  ADD FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
