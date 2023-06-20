@@ -13,6 +13,9 @@
     var permissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var customUI = _globalAppSettings.SystemSettings.CustomUI;
     var userImport = new UserImport();
+    var isImportInProgress = ViewBag.IsInProgressImport;
+    var importType = ViewBag.ImportType;
+    var importCount = ViewBag.ImportCount;
     if (customUI?.Profiles != null)
     {
         userImport = customUI?.Profiles[0]?.UserImport != null ? customUI?.Profiles[0]?.UserImport[0] : new UserImport();
@@ -299,7 +302,7 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div class="col-xs-12 no-padding no-margin width-alignment">
+    <div class="@(isImportInProgress ? "user-page-header" : string.Empty) col-xs-12 no-padding no-margin width-alignment">
         @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Users"] }, { "PageDescription", @T["Add and manage your users."] }, {"IsUsersPage", "true"} })
         <div class="col-md-12 import-area bi-page-header top-nav-btn-secton">
             <div class="col-xs-12 no-padding">
@@ -455,15 +458,21 @@
                             </li>
                         }
                     }
-                    <li class="flying-add hide pull-right" id="add-user-in-group">
-                        <button class="critical-action-button app-btn-danger user-delete-button pull-left" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">@T["Remove User"]</button>
+                    <li>
+                        <a href="@Url.Action("BulkImportResult", "UserManagement")" class="link-button app-btn-link bulk-import-result" title="@T["Shows the bulk user import detail"]" data-toggle="tooltip" data-placement="left">@T["Bulk Import Result"]</a>
+                    </li>
+                    <li class="flying-add hide" id="add-user-in-group">
+                        <button class="critical-action-button app-btn-danger user-delete-button" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">@T["Remove User"]</button>
                         <button class="secondary-button app-btn-secondary user-add-group" title="@T["Assign a group to selected users"]">@T["Assign Group"]</button>
                     </li>
                 </ul>
             </div>
         </div>
+        <div class="@(isImportInProgress ? "import-messages" : string.Empty)" style="display:none">
+            @Html.Raw(String.Format(T["The import of {0} users from {1} is still in progress"].Value, importCount, importType))
+        </div>
     </div>
-    <div id="base-container" class="col-xs-12 bi-page-container">
+    <div id="base-container" class="col-xs-12 bi-page-container @(isImportInProgress ? "user-page-container" : string.Empty)">
         <div class="col-xs-12 bi-page-content no-padding">
             <div id="user-list-container" class="list col-xs-12 bi-page-body">
                 <div class="col-xs-12 no-padding ">

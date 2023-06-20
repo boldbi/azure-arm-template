@@ -1,14 +1,17 @@
-UPDATE {database_name}.BOLDBI_SettingsType SET Name='Site Credentials' WHERE Id = 20
+DROP TABLE {database_name}.SyncDS_UploadDataSourceMapping
 ;
 
-INSERT INTO {database_name}.BOLDBI_SettingsType (Name, IsActive) SELECT 'Site Credentials', 1 FROM DUAL
-WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='Site Credentials' LIMIT 1)
+CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
+	Id int NOT NULL AUTO_INCREMENT,
+	DownloadedTenantId char(38) NOT NULL,
+	DownloadedItemId varchar(255) NOT NULL,
+	UploadedItemId char(38) NOT NULL,
+	UploadedDate datetime  NULL,
+	IsActive tinyint(1) NOT NULL,
+	PRIMARY KEY (Id))
 ;
 
-ALTER TABLE {database_name}.BOLDBI_ScheduleLog ADD RequestId Char(38) NULL
-;
-
-ALTER TABLE {database_name}.BOLDBI_ScheduleLog ADD LogExist tinyint NOT NULL DEFAULT 0
+DROP TABLE {database_name}.ScheduleMissingLogs
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleMissingLogs(
@@ -20,8 +23,6 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleMissingLogs(
 	IsActive tinyint NOT NULL,
 	PRIMARY KEY (Id))
 ;
-
-ALTER TABLE {database_name}.BOLDBI_ScheduleDetail ADD UNIQUE (ScheduleId);
 
 ALTER TABLE  {database_name}.BOLDBI_ScheduleMissingLogs  ADD FOREIGN KEY(ScheduleId) REFERENCES {database_name}.BOLDBI_ScheduleDetail (ScheduleId)
 ;

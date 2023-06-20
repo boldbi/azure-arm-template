@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.card.all.js
-*  version : 6.6.12
+*  version : 6.7.11
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -5416,7 +5416,7 @@ var BoldBIDashboardSparkline;
         },
         updateKPIValue: function() {
             var value = this.getFormattedValue(this.model.kpiValue.type, this.model.valueRepresentation);
-            this.element.find('.e-kpi-card-middle-value-text').css({ 'color': this.model.kpiValue.followDirectionColor && !this.model.kpiValue.isColorCustomized ? this.getDirectionColor() : this.model.kpiValue.foreground, 'font-size': this.getResolutionBasedFontSize(this.model.kpiValue.fontSize) + 'px', 'font-weight': this.model.kpiValue.fontWeight, 'font-family': this.model.kpiValue.fontFamily, 'line-height': 1 }).html(value).attr({ 'data-tooltip': value }); // should depends upon type
+            this.element.find('.e-kpi-card-middle-value-text').css({ 'color': this.model.kpiValue.followDirectionColor && !this.model.kpiValue.isColorCustomized ? this.getDirectionColor() : this.model.kpiValue.foreground, 'font-size': this.getResolutionBasedFontSize(this.model.kpiValue.fontSize) + 'px', 'font-weight': this.model.kpiValue.fontWeight, 'font-family': this.model.kpiValue.fontFamily, 'line-height': 1.25 }).html(value).attr({ 'data-tooltip': value }); // should depends upon type
         },
         updateIcon: function() {
             this.updateIconType();

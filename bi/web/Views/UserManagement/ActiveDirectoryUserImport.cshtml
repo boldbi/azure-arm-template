@@ -21,7 +21,7 @@
 
 
 @section scripts
-{
+    {
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-active-directory.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-active-directory.js"></script>
@@ -44,6 +44,12 @@
             var SearchActiveDirectoryUsersUrl = "@Url.Action("SearchAzureADUsers", "UserManagement")";
         </script>
     }
+
+    <script>
+        var userImportSuccessUrl = "@Url.Action("BulkImportResult", "UserManagement")";
+        var viewCurrentImportUrl = "@Url.Action("BulkUserImportResult", "UserManagement")";
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "UserManagement")";
+    </script>
 }
 
 @section MainSection{
@@ -85,11 +91,6 @@
         </span>
     </script>
 
-    <script type="text/x-jsrender" id="checkbox-header-template">
-        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
-        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
-    </script>
-
     <script type="text/x-jsrender" id="full-name-header">
         <span class="item-header">@T["Name"]</span>
     </script>
@@ -112,7 +113,7 @@
     <script type="text/javascript">
 
         $(function () {
-                $("#ad-user-import").val("");
+            $("#ad-user-import").val("");
                 addPlacehoder("#search-area");
                 @if(ViewBag.AdImport)
                 {
@@ -157,10 +158,6 @@
                     rowDataBound: function () {
                         $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
                     },
-                    dataBound: function () {
-                        $("#checkbox-header").change(headCheckboxOnChange);
-                        this.model.indexes = {}; /* Additional property*/
-                    },
                     columns: [
                         { headerTemplateID: "#checkbox-header-template", template: true, templateID: "#checkbox-row-template", textAlign: ej.TextAlign.Center, width: 10, allowFiltering: false },
                         { field: "FullName", cssClass: "full-name", headerText: "@T["Name"]",  templateID: "#full-name-template", headerTemplateID: "#full-name-header", width: 40, type: "string" },
@@ -178,9 +175,8 @@
                         return inputString.replace(new RegExp("\"", 'g'), '&quot;');
                     }
                 });
-            });
+        });
     </script>
-
     <div class="col-xs-12 no-padding no-margin width-alignment">
         <div class="col-xs-12 no-padding">
             @await Html.PartialAsync("../Shared/_TopHeaderSection")
@@ -188,7 +184,8 @@
         <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
             <div class="col-xs-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">
-                    <input type="button" value="@T["Import"]" disabled="" title="@T["Import the selected users"]" onclick="SaveActiveDirectoryUsers()" id="import-button" class="primary-button app-btn-primary pull-right import-button" />
+                    <input type="button" value="@T["Import Selected Users"]" disabled="" title="@T["Import the selected users"]" onclick="SaveActiveDirectoryUsers()" id="import-button" class="primary-button app-btn-primary pull-right import-button" />
+                    <input type="button" value="@T["Import All Users"]" title="@T["Import all users and activate their accounts"]" id="import-all" class="primary-button app-btn-primary pull-right import-button bi-header-btn" style="margin :0px 23px 0px 0px" />
                 </div>
                 <div id="search-area" class="pull-left col-xs-4">
                     <input type="text" id="ad-user-import" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />

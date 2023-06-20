@@ -1,4 +1,4 @@
-CREATE TABLE {database_name}.SyncDS_UploadDataSourceMapping(
+CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
 	Id int NOT NULL AUTO_INCREMENT,
 	DownloadedTenantId char(38) NOT NULL,
 	DownloadedItemId varchar(255) NOT NULL,

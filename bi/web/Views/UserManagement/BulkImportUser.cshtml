@@ -1,0 +1,202 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.Title = T["Bulk import Result"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncDatabaseUsers);
+}
+
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
+    </environment>
+
+    <script>
+        var deleteImportUserJobs = "@Url.Action("DeleteBulkImportResult", "UserManagement")";
+        var suspendImportUserJobs = "@Url.Action("SuspendBulkImportResult", "UserManagement")";
+    </script>
+
+    <script type="text/x-jsrender" id="job-id-template">
+        <span class="grid-content" title="{{:JobId}}" data-toggle="tooltip">{{:JobId}}</span>
+    </script>
+    <script type="text/x-jsrender" id="import-type-template">
+        <span class="grid-content" title="{{:ImportSource}}" data-toggle="tooltip">{{:ImportSource}}</span>
+    </script>
+    <script type="text/x-jsrender" id="started-on-template">
+        <span class="grid-content" title="{{:CreatedDateString}}" data-toggle="tooltip">{{:CreatedDateString}}</span>
+    </script>
+    <script type="text/x-jsrender" id="created-by-template">
+        <span class="grid-content" title="{{:CreatedBy}}" data-toggle="tooltip">{{:CreatedBy}}</span>
+    </script>
+    <script type="text/x-jsrender" id="status-template">
+        {{if ImportJobStatus == "Completed" || ImportJobStatus == "In progress"}}
+        <span class="grid-content inprogress-or-completed-job"  title="{{:ImportJobStatus}}" data-toggle="tooltip">{{:ImportJobStatus}}</span>
+        {{else ImportJobStatus == "Suspended"}}
+        <span class="grid-content suspended-job"  title="{{:ImportJobStatus}}" data-toggle="tooltip">{{:ImportJobStatus}}</span>
+        {{else ImportJobStatus == "Yet to start"}}
+        <span class="grid-content yet-to-start-job"  title="{{:ImportJobStatus}}" data-toggle="tooltip">{{:ImportJobStatus}}</span>
+        <span class="grid-content su su-help" title="@T["The user import process will start on or before 3 minutes from the job creation time."]" data-toggle="tooltip"></span>
+        {{/if}}
+    </script>
+
+    <script type="text/x-jsrender" id="jobid-header">
+        <div class="item-name">@T["Job Id"]</div>
+    </script>
+    <script type="text/x-jsrender" id="type-of-import-header">
+        <div class="user-name">@T["Import Type"]</div>
+    </script>
+    <script type="text/x-jsrender" id="started-header">
+        <div class="item-header">@T["Started On"]</div>
+    </script>
+    <script type="text/x-jsrender" id="created-by-header">
+        <div class="item-header">@T["Created By"]</div>
+    </script>
+    <script type="text/x-jsrender" id="status-header">
+        <div class="item-header">@T["Status"]</div>
+    </script>
+    <script type="text/x-jsrender" id="options">
+        <div class="dropdown context-menu" data-content="{{:JobId}}">
+            <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+
+                <li class="menu-group">
+                    <a href="@Url.Action("BulkUserImportResult", "UserManagement")?id={{:JobId}}" title="@T["View"]" data-toggle="tooltip">
+                        <i class="su su-eye"></i>
+                        <span class="menu-text">@T["View"]</span>
+                    </a>
+                </li>
+                {{if ImportJobStatus == "Yet to start" || ImportJobStatus == "In progress"}}
+                <li class="menu-group">
+                    <a href="javascript:void(0);" class="suspend-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Suspend"]" data-toggle="tooltip">
+                        <i class="su su-disable"></i>
+                        <span class="menu-text">@T["Suspend"]</span>
+                    </a>
+                </li>
+                {{else ImportJobStatus == "Completed" || ImportJobStatus == "Suspended"}}
+                <li class="menu-group">
+                    <a href="javascript:void(0);" class="delete-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Delete"]" data-toggle="tooltip">
+                        <i class="su su-delete"></i>
+                        <span class="menu-text">@T["Delete"]</span>
+                    </a>
+                </li>
+                {{/if}}
+
+            </ul>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        var data = @Html.Raw(Json.Serialize(ViewBag.ImportResult));
+        $(function () {
+            data = ej.parseJSON(data);
+            GridLocalization();
+            $("#user_grid").ejGrid({
+                dataSource: data,
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                enableAltRow: false,
+                enableRowHover: true,
+                allowSorting: true,
+                allowSelection: true,
+                allowScrolling: false,
+                allowFiltering: false,
+                allowSearching: true,
+                actionBegin: "fnActionBegin",
+                locale: "en-US",
+                selectionType: ej.Grid.SelectionType.Multiple,
+                pageSettings: { pageSize: 20 },
+                templateRefresh: "refreshTemplate",
+                filterSettings: { filterType: "menu" },
+                selectionSettings: { selectionMode: ["row"] },
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                    this.model.indexes = {};
+                },
+                columns: [
+                    {
+                        template: true,
+                        allowSorting: true,
+                        templateID: "#job-id-template",
+                        headerText: "@T["Job Id"]",
+                        width: 60,
+                        headerTemplateID: "#jobid-header",
+                        field: "JobId",
+                        type: "string"
+                    },
+                    {
+                        field: "ImportSource",
+                        templateID: "#import-type-template",
+                        headerText: "@T["Type Of import"]",
+                        width: 82,
+                        headerTemplateID: "#type-of-import-header",
+                        type: "string"
+                    },
+                    {
+                        field: "CreatedDateString",
+                        templateID: "#started-on-template",
+                        headerText: "@T["Started On"]",
+                        headerTemplateID: "#started-header",
+                        type: "string",
+                        width: 100
+                    },
+                    {
+                        field: "CreatedBy",
+                        headerText: "@T["Created By"]",
+                        headerTemplateID: "#created-by-header",
+                        templateID: "#created-by-template",
+                        width: 118,
+                        allowFiltering: false
+                    },
+                    {
+                        field: "ImportJobStatus",
+                        headerText: "@T["Status"]",
+                        headerTemplateID: "#status-header",
+                        templateID: "#status-template",
+                        width: 70,
+                        allowFiltering: false
+                    },
+                    {
+                        template: true,
+                        allowSorting: false,
+                        templateID: "#options",
+                        width: 35,
+                        allowFiltering: false
+                    }
+                ]
+
+            });
+        });
+    </script>
+
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") top-nav-header-without-btn">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Bulk Import Result"] }, { "PageDescription", @T["Shows a list of all bulk user import jobs."] } })
+    </div>
+    <div id="base-container" class="col-xs-12 bi-page-container bulk-import-result-list">
+        <div class="col-xs-12 bi-page-content no-padding">
+            <div id="user-list-container" class="list col-xs-12 bi-page-body">
+                <div class="col-xs-12 no-padding ">
+                    <div id="user_grid">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+
+    </div>>
+}
+
