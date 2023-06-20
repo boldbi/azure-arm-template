@@ -1678,5 +1678,26 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("RestrictOrderByErrorMessage", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to FETCH NEXT {0} ROWS ONLY.
+        /// </summary>
+        internal static string SqlFetch
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlFetch", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to  OFFSET {0} ROWS .
+        /// </summary>
+        internal static string SqlOffset
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlOffset", resourceCulture);
+            }
+        }
     }
 }

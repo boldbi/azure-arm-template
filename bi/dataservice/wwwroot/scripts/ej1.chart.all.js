@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.6.12
+*  version : 6.7.11
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -21404,7 +21404,7 @@ var Gradient = function (colors) {
                                 }
                             }
                             if (!(currentSeries._hiloTypes)) {
-                                currentSeries.points[k].YValues[0] = currentSeries.points[k].y;
+                                currentSeries.points[k].YValues[0] = currentSeries.points[k].y == "" ? 0 : currentSeries.points[k].y;
 
                                 if (!BoldBIDashboard.util.isNullOrUndefined(currentSeries.points[k].size))
                                     currentSeries.points[k].YValues[1] = currentSeries.points[k].size;

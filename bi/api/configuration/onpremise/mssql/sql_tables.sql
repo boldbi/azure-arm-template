@@ -726,8 +726,7 @@ CREATE TABLE [BOLDBI_PublishJobs](
     [CompletedDate] [datetime] NOT NULL,
     [Status] [nvarchar](255) NOT NULL,
     [IsActive] [bit] NOT NULL,
-	[Type] [int] NOT NULL)
-	
+	[Type] [int] NOT NULL)	
 ;
 
 CREATE TABLE [BOLDBI_PublishType](

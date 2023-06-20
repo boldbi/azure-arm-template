@@ -28,6 +28,11 @@
         var getSearchedResultUrl = "@Url.Action("GetDataWithSearchForImport", "UserManagement")";
         var saveSelectedUsersUrl = "@Url.Action("ImportSelectedUsersFromDatabase", "UserManagement")";
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+        var userImportSuccessUrl = "@Url.Action("BulkImportResult", "UserManagement")";
+        var viewCurrentImportUrl = "@Url.Action("BulkUserImportResult", "UserManagement")";
+        var isDatabaseUserImport = true;
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "UserManagement")";
+        var bulkImportFileName = @ViewBag.FileName;
     </script>
 }
 
@@ -87,11 +92,6 @@
             {{/if}}
         </script>
 
-        <script type="text/x-jsrender" id="checkbox-header-template">
-            @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
-            @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
-        </script>
-
         <script type="text/x-jsrender" id="full-name-header">
             <span class="item-header">@T["Name"]</span>
         </script>
@@ -108,7 +108,7 @@
             <div class="item-header">@T["Username"]</div>
         </script>
         <script type="text/javascript">
-                var gridData = @Html.Raw(Json.Serialize(ViewBag.ExternalDatabaseUsers));
+            var gridData = @Html.Raw(Json.Serialize(ViewBag.ExternalDatabaseUsers));
         </script>
 
         <script type="text/javascript">
@@ -147,10 +147,6 @@
                         enableAltRow: false,
                         rowDataBound: function () {
                             $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
-                        },
-                        dataBound: function () {
-                            $("#checkbox-header").change(headCheckboxOnChange);
-                            this.model.indexes = {}; /* Additional property*/
                         },
                         columns: [
                             {
@@ -225,7 +221,8 @@
             <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
                 <div class="col-xs-12 no-padding">
                     <div class="col-xs-6 no-padding button-section">
-                        <input type="button" value="@T["Import Users"]" disabled="" title="@T["Import the selected users and activate their accounts"]" onclick="SaveSelectedUsers()" id="import-selected" class="primary-button app-btn-primary pull-right import-button bi-header-btn" />
+                        <input type="button" value="@T["Import Selected Users"]" disabled="" title="@T["Import the selected users and activate their accounts"]" onclick="SaveSelectedUsers()" id="import-selected" class="primary-button app-btn-primary pull-right import-button bi-header-btn" />
+                        <input type="button" value="@T["Import All Users"]" title="@T["Import all users and activate their accounts"]" id="import-all" class="primary-button app-btn-primary pull-right import-button bi-header-btn" style="margin-right : 23px" />
                     </div>
                     <div id="search-area" class="pull-left col-xs-4">
                         <input type="text" id="search-database-users" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />

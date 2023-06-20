@@ -1,6 +1,7 @@
 ﻿@{
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var fileName = ViewBag.FileName;
 
     ViewBag.Title = T["Users"].Value + " - " + String.Format(T["{0} Import"].Value, "CSV") + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportCsvUsers);
@@ -33,7 +34,11 @@
         var userPageUrl = "@Url.Action("Index", "UserManagement")";
         var saveSelectedCSVUserUrl = "@Url.Action("SaveSelectedCSVUser", "UserManagement")";
         var deleteSingleFromUserListUrl = "@Url.Action("DeleteSingleFromUserList", "UserManagement")";
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "UserManagement")";
+        var userImportSuccessUrl = "@Url.Action("BulkImportResult", "UserManagement")";
+        var viewCurrentImportUrl = "@Url.Action("BulkUserImportResult", "UserManagement")";
         var isAutomaticActivation = @Json.Serialize(globalAppSettings.SystemSettings.ActivationType == ActivationType.AutomaticActivation);
+        var bulkImportFileName = "@fileName";
     </script>
     <script type="text/x-jsrender" id="csv-user-name">
         {{if Username != ""}}
@@ -87,7 +92,8 @@
                 $("#user_import_grid").ejGrid({
                     dataSource: data,
                     gridLines: ej.Grid.GridLines.None,
-                    allowPaging: false,
+                    allowPaging: true,
+                    pageSettings: { pageSize: 20 },
                     allowSorting: false,
                     allowSelection: false,
                     allowScrolling: false,

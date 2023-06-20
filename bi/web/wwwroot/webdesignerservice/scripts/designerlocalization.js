@@ -825,6 +825,8 @@ var Designer = {
                 useExistingText: "USE EXISTING",
                 headerEditConnectionText: "Edit Connection",
 				headerDataSampleText: "Data Sampling",
+				thresHold: "Threshold",
+				thresHoldLimit: "Threshold Data Limit",
 				dataSampling: "Data Sampling",
 				dataLimit: "Data Limit",
                 headerNewConnectionText: "NEW CONNECTION",
@@ -969,6 +971,7 @@ var Designer = {
                 doNotUseCredentials: "Do not use credentials",
 				dataSamplingMessage: "Data sampling will provide a better designing experience when creating dashboards with millions of data. It has no effect on the dashboard preview.",
                 dataSampleContextMenu: "Data sampling is enabled, so while designing dashboards with this data source, values may be inaccurate. For accurate values, please click and preview the dashboard.",
+				thresHoldMessage:"Threshold is enabled , It is limit usage of code view mode data for better performance. It will affect the dashboards.",
                 editContextMenu: "Edit",
                 deleteContextMenu: "Remove",
                 specifyServerName: "Server name cannot be empty.",
@@ -6049,7 +6052,7 @@ var Designer = {
             },
             customWebDsDateRange  :{
                 today : 'Today',
-                yesterDay :'YesterDay',
+                yesterday :'Yesterday',
                 pastWeek : 'Past Week',
                 past2Weeks : 'Past 2 Weeks',
                 pastMonth :'Past Month',
@@ -6685,7 +6688,9 @@ var Designer = {
 			userParameter: {
 				fullName: "Current User Full Name",
 				email: "Current User Email",
-                token: 'Current User Token'
+                token: 'Current User Token',
+				tenantURL: 'Tenant URL',
+                siteIdentifier: 'Site Identifier'
 			},
         }
     }
