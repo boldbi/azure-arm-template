@@ -135,16 +135,18 @@ function openCustomAttributeDialog(attributeId, name) {
 function saveAttribute() {
     if ($("#custom-attribute-form").valid() && !$("#custom-attribute-name").hasClass("e-error")) {
         if (isAttributeEdit) {
-            var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
-            var editAttributeName = $("#custom-attribute-name").val().trim();
-            for (var listItem = 0; listItem < siteAttributesGrid.dataSource.length; listItem++) {
-                if (siteAttributesGrid.dataSource[listItem].Name == editAttributeName && siteAttributesGrid.dataSource[listItem].CustomAttributeId != editCustomAttributeId) {
-                    $("#custom-attribute-name").closest("div").addClass("e-error");
-                    $("#custom-attribute-name").closest(".e-outline").addClass("e-error");
-                    $("#custom-attribute-name").closest(".e-outline").siblings(".custom-attr-validation-errors").html(window.Server.App.LocalizationContent.IsAttributeNameExist);
-                }
-                if (siteAttributesGrid.dataSource[listItem].CustomAttributeId == editCustomAttributeId) {
-                    currentIndex = listItem;
+            if (addSiteAttribute.length != 0) {
+                var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+                var editAttributeName = $("#custom-attribute-name").val().trim();
+                for (var listItem = 0; listItem < siteAttributesGrid.dataSource.length; listItem++) {
+                    if (siteAttributesGrid.dataSource[listItem].Name == editAttributeName && siteAttributesGrid.dataSource[listItem].CustomAttributeId != editCustomAttributeId) {
+                        $("#custom-attribute-name").closest("div").addClass("e-error");
+                        $("#custom-attribute-name").closest(".e-outline").addClass("e-error");
+                        $("#custom-attribute-name").closest(".e-outline").siblings(".custom-attr-validation-errors").html(window.Server.App.LocalizationContent.IsAttributeNameExist);
+                    }
+                    if (siteAttributesGrid.dataSource[listItem].CustomAttributeId == editCustomAttributeId) {
+                        currentIndex = listItem;
+                    }
                 }
             }
             if (!$("#custom-attribute-name").closest("div").hasClass("e-error")) {

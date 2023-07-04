@@ -132,9 +132,7 @@
 @section MainSection{
     <div class="col-xs-12 no-padding">
         @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Pinboards"] }, { "IsDefaultPage", "true" } })
-    </div>
-    <div id="homepage-page-container" ng-app="serverApp" ng-controller="homepagesController" class="col-xs-12 no-padding">
-        <div id="homepage-header">
+        <div id="homepage-header" class="col-xs-12 no-padding" ng-app="serverApp" ng-controller="homepagesController">
             <div id="element-container">
                 @if (allHomepagesCount != 0)
                 {
@@ -203,74 +201,78 @@
 
             </div>
         </div>
-        @if (!isMobile)
-        {
-            <div id="initial-message" class="hidden"><span id="message"><span class="su su-info"></span><span>@T["You have not added any widget to the pinboard yet. Start tracking data from multiple dashboards. Click pin icon on dashboard widgets to add widgets to the pinboard."]</span><span id="close-icon"><span class="su su-close" title="@T["Close"]"></span></span></span></div>
-        }
-        <div id="widget-container" data-homepage-id="" data-current-layout="" data-virtual-homepage="">
-            @if (allHomepagesCount != 0 && (!isDefaultHomepage && !isHomePageInfoByName) && isHomepageExists)
+    </div>
+    <div id="homepage-page-container" ng-app="serverApp" ng-controller="homepagesController" class="col-xs-12 no-padding">
+        <div class="col-xs-12 no-padding" id="widget-elemnt-container">
+            @if (!isMobile)
             {
-                <div id="default-homepage-detail">
-                    @if (isSyncfusionIdentifier)
-                    {
-                        <div>@T["The pinboard is the initial screen. It can either contain individual widgets from other dashboards or have entire dashboards added to it."]</div>
-                    }
-                    else
-                    {
-                        <div>@T["The pinboard is the initial screen. It can contain individual widgets from other dashboards."]</div>
-                    }
-                    <div id="select-default-content">@T["Select a pinboard to set as default."]</div>
-                </div>
-                <div id="no-default-homepage-container">
-                    <select class="selectpicker" id="select-default-homepage" data-live-search="true" data-size="10" title="" data-original-value="" data-none-results-text="@T["No results match"]">
-                        <option data-hidden="true" value="">@T["Select a default pinboard"]</option>
-                        <option ng-repeat="homepage in allHomepages|orderBy:'Name'" value="{{homepage.Id}}">{{homepage.Name}}</option>
-                    </select>
-                    <input type="button" id="set-default-button" class="btn primary-button app-btn-primary" value="@T["Apply"]">
-                </div>
+                <div id="initial-message" class="hidden"><span id="message"><span class="su su-info"></span><span>@T["You have not added any widget to the pinboard yet. Start tracking data from multiple dashboards. Click pin icon on dashboard widgets to add widgets to the pinboard."]</span><span id="close-icon"><span class="su su-close" title="@T["Close"]"></span></span></span></div>
             }
-            @if (allHomepagesCount <= 0 && isHomepageExists)
-            {
-                <div id="homepage-detail">
-                    <div id="default-content-detail">
+            <div id="widget-container" data-homepage-id="" data-current-layout="" data-virtual-homepage="">
+                @if (allHomepagesCount != 0 && (!isDefaultHomepage && !isHomePageInfoByName) && isHomepageExists)
+                {
+                    <div id="default-homepage-detail">
                         @if (isSyncfusionIdentifier)
                         {
-                            <div>
-                                @T["The pinboard is the initial screen. It can either contain individual widgets from other dashboards or have entire dashboards added to it. It is possible to create multiple pinboards, but only one can be active at a time."]
-                            </div>
+                            <div>@T["The pinboard is the initial screen. It can either contain individual widgets from other dashboards or have entire dashboards added to it."]</div>
                         }
                         else
                         {
-                            <div>
-                                @T["The pinboard is the initial screen. It can contain individual widgets from other dashboards. It is possible to create multiple pinboards, but only one can be active at a time."]
-                            </div>
+                            <div>@T["The pinboard is the initial screen. It can contain individual widgets from other dashboards."]</div>
                         }
-
-                        @if (isMobile)
-                        {
-                            <div id="login-message">@T["You need to log in with a desktop client to be able to create and configure pinboards."]</div>
-                        }
+                        <div id="select-default-content">@T["Select a pinboard to set as default."]</div>
                     </div>
-                </div>
-                if (!isMobile)
-                {
-                    <div id="add-button-wrapper">
-                        <div id="add-button-container">
-                            <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="add-button" title="@T["Add Pinboard"]">
-                                <span>@T["Add Pinboard"]</span>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" id="add-homepage-options" role="menu">
-                                <li id="add-homepage">@T["Empty Pinboard"]</li>
-                                @if (isSyncfusionIdentifier)
-                                {
-                                    <li id="add-dashboard-homepage">@T["From Dashboard"]</li>
-                                }
-                            </ul>
-                        </div>
+                    <div id="no-default-homepage-container">
+                        <select class="selectpicker" id="select-default-homepage" data-live-search="true" data-size="10" title="" data-original-value="" data-none-results-text="@T["No results match"]">
+                            <option data-hidden="true" value="">@T["Select a default pinboard"]</option>
+                            <option ng-repeat="homepage in allHomepages|orderBy:'Name'" value="{{homepage.Id}}">{{homepage.Name}}</option>
+                        </select>
+                        <input type="button" id="set-default-button" class="btn primary-button app-btn-primary" value="@T["Apply"]">
                     </div>
                 }
-            }
+                @if (allHomepagesCount <= 0 && isHomepageExists)
+                {
+                    <div id="homepage-detail">
+                        <div id="default-content-detail">
+                            @if (isSyncfusionIdentifier)
+                            {
+                                <div>
+                                    @T["The pinboard is the initial screen. It can either contain individual widgets from other dashboards or have entire dashboards added to it. It is possible to create multiple pinboards, but only one can be active at a time."]
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    @T["The pinboard is the initial screen. It can contain individual widgets from other dashboards. It is possible to create multiple pinboards, but only one can be active at a time."]
+                                </div>
+                            }
+
+                            @if (isMobile)
+                            {
+                                <div id="login-message">@T["You need to log in with a desktop client to be able to create and configure pinboards."]</div>
+                            }
+                        </div>
+                    </div>
+                    if (!isMobile)
+                    {
+                        <div id="add-button-wrapper">
+                            <div id="add-button-container">
+                                <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="add-button" title="@T["Add Pinboard"]">
+                                    <span>@T["Add Pinboard"]</span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="add-homepage-options" role="menu">
+                                    <li id="add-homepage">@T["Empty Pinboard"]</li>
+                                    @if (isSyncfusionIdentifier)
+                                    {
+                                        <li id="add-dashboard-homepage">@T["From Dashboard"]</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
     </div>
@@ -284,7 +286,7 @@
                         <div class="col-xs-4 no-padding text-right text-label">@T["Name"]<span class="mandatory">*</span></div>
                         <div class="col-xs-1 no-padding"></div>
                         <div class="col-xs-7 no-padding">
-                            <input type="text" id="homepage-new-name" name="homepagenewname" maxlength="255" value="" class="form-control site-orgname-fields text" autofocus />
+                            <input type="text" id="homepage-new-name" name="homepagenewname" data-maxlength="255" value="" class="form-control site-orgname-fields text" autofocus />
                             <span class="validation-errors"></span>
                         </div>
                     </div>
