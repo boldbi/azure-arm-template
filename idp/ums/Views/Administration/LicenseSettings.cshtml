@@ -12,6 +12,7 @@
     var isBoldReportsLicenseAvailable = boldReportsLicense != null;
     var isAzureApplication = string.IsNullOrEmpty(GlobalAppSettings.Configuration.GetSection("AppSettings")["IsAzureApplication"]) ? false : Convert.ToBoolean(GlobalAppSettings.Configuration.GetSection("AppSettings")["IsAzureApplication"]);
     var licenseExpired = await LicenseManagement.ValidateBoldLicense();
+    var environment = EnvironmentHelper.GetEnvironment();
 }
 
 @section styles{
@@ -73,7 +74,7 @@
                                     <div id="details-information">
                                         <div class="col-xs-6 no-margin no-padding">
                                             <h3 class="title sub-title display-inline">@T["Subscription Information"]</h3>
-                                            <a license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)" class="title edit-link display-inline">@T["Edit Subscription"]</a>
+                                            <a license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)" class="title edit-link display-inline">@T["Edit Subscription"]</a>
                                         </div>
                                         <div class="col-xs-6 no-margin no-padding" id="subscription-information">
                                             <table class="table active-subscription-table-section">
@@ -84,7 +85,7 @@
                                                         <p class="display-none">@boldBiLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-bi"><a class="subscription-link" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldBiLicense.SubscriptionInfo.TenantId)" target="_blank">@boldBiLicense.SubscriptionInfo.TenantId</a></p>
                                                         <button data-toggle="tooltip" class="pull-right secondary-button" data-original-title="@T["Click to copy"]" onclick="copyToClipboard('#subscription-id-bi', '#subscription-copy-bi')" id="subscription-copy-bi">@T["Copy"]</button>
-                                                        <button class="pull-right secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Refresh License"]</button>
+                                                        <button class="pull-right secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Refresh License"]</button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -118,7 +119,7 @@
                                             @T["See Clearly. Act Boldly."]
                                         </span>
                                         <div class="btn-holder">
-                                            <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}")" class="primary-button content-display">@T["Login to activate account"]</button>
+                                            <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
                                         </div>
                                         <div class="col-xs-12 align-center">
                                             <span class="link-header">@T["Behind Firewall?"] <a class="offline-license-acion" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Upload license file"]</a></span>
@@ -158,7 +159,7 @@
                                     <div id="details-information">
                                         <div class="col-xs-6 no-margin no-padding">
                                             <h3 class="title sub-title display-inline">@T["Subscription Information"]</h3>
-                                            <a license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)" class="title edit-link display-inline">@T["Edit Subscription"]</a>
+                                            <a license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)" class="title edit-link display-inline">@T["Edit Subscription"]</a>
                                         </div>                                      
                                         <div class="col-xs-7 no-margin no-padding" id="subscription-information">
                                             <table class="table active-subscription-table-section">
@@ -169,7 +170,7 @@
                                                         <p class="display-none">@boldReportsLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-reports"><a class="subscription-link" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldReportsLicense.SubscriptionInfo.TenantId)" target="_blank">@boldReportsLicense.SubscriptionInfo.TenantId</a></p>
                                                         <button data-toggle="tooltip" class="pull-right secondary-button" data-original-title="@T["Click to copy"]" onclick="copyToClipboard('#subscription-id-reports', '#subscription-copy-bi')" id="subscription-copy-bi">@T["Copy"]</button>
-                                                        <button class="pull-right secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Refresh License"]</button>
+                                                        <button class="pull-right secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Refresh License"]</button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -202,7 +203,7 @@
                                             @T["See Clearly. Act Boldly."]
                                         </span>
                                         <div class="btn-holder">
-                                            <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}")" class="primary-button content-display">@T["Login to activate account"]</button>
+                                            <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
                                         </div>
                                         <div class="col-xs-12 align-center">
                                             <span class="link-header">@T["Behind Firewall?"] <a class="offline-license-acion" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Upload license file"]</a></span>

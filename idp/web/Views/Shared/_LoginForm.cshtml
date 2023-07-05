@@ -5,6 +5,7 @@
     var demoAccount = (DemoAccount)ViewBag.DemoAccount;
     var demoUsername = demoAccount != null && !string.IsNullOrWhiteSpace(demoAccount.Username) ? demoAccount.Username : string.Empty;
     var demoPassword = demoAccount != null && !string.IsNullOrWhiteSpace(demoAccount.Password) ? demoAccount.Password : string.Empty;
+    var showDemoAccount = demoAccount != null && demoAccount.IsEnabled ? "block" : "none";
 }
 
 <div id="alert-notification"></div>
@@ -27,14 +28,14 @@
         <div class="input-field-form email">
             <input id="hidden-email" type="hidden" value="@uname" />
             <input type="text" required md-no-asterisk ng-model="uname" value="@uname" name="userName" id="login-email" class="login-email" placeholder="@T["Username / Email Address"]" maxlength="100" />
-            <span class="demo-username" style="font-weight: bold; display: @TempData["show_demo_account"]">Username : @demoUsername</span>
+            <span class="demo-username" style="font-weight: bold; display: @showDemoAccount">Username : @demoUsername</span>
             <span class="validation-holder"></span>
             <span class="special-char-msg-login"></span>
         </div>
         <div class="input-field-form" id="password-field" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
             <input required md-no-asterisk ng-model="pwd" name="password" type="password" id="current-password" autocomplete="current-password" placeholder="@T["Password"]" value="">
             <span class="su su-show show-hide-password" id="show-newpassword" data-toggle="tooltip" data-original-title="@T["Click to view"]"></span>
-            <span class="demo-password" style="font-weight: bold; display: @TempData["show_demo_account"]">Password: @demoPassword</span>
+            <span class="demo-password" style="font-weight: bold; display: @showDemoAccount">Password: @demoPassword</span>
             <span id="error-password" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
                 @TempData["errorMessage"]
             </span>

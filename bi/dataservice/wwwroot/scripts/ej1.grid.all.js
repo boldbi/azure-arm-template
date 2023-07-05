@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 6.7.11
+*  version : 6.8.9
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -1698,7 +1698,7 @@
             var td = bbdesigner$(this._contexttarget);
             if (td.hasClass("e-rowcell") && this.model.allowSelection)
                 if (!this.model.isEdit)
-                    this.selectRows(this.getIndexByRow(td.parent()), null, td);
+                    this.selectRows(this.getIndexByRow(td.parent()), null, td, sender);
             if ((targetelement.hasClass("e-ascending") || targetelement.hasClass("e-descending")) && !targetelement.parent().hasClass("e-headercelldiv"))
                 return false;
             if (targetelement.hasClass("e-filtericon") || targetelement.hasClass("e-headercelldiv"))
@@ -2583,8 +2583,13 @@
                             else {
                                 if (!BoldBIDashboard.isNullOrUndefined(e.scrollData) && e.scrollData.handler == "e-hhandle" && proxy.model.allowFiltering && (proxy.model.filterSettings.filterType == "menu" || proxy._isExcelFilter))
                                     !proxy._isExcelFilter ? proxy._closeFilterDlg() : proxy._excelFilter.closeXFDialog();
-                                    e["reachedEnd"] = this.content()[0].scrollHeight - e.scrollTop == this.content()[0].clientHeight;
-                           if ((e.source == "button" || e.source == "key" || e.source == "wheel") && proxy.model != null)
+                                    if(this._hScroll) {
+                                      e["reachedEnd"] = this.content()[0].scrollHeight - e.scrollTop + e.model.scrollerSize == this.content()[0].clientHeight;
+                                    }
+                                    else{
+                                      e["reachedEnd"] = this.content()[0].scrollHeight - e.scrollTop  == this.content()[0].clientHeight;
+                                    }
+                                if ((e.source == "button" || e.source == "key" || e.source == "wheel") && proxy.model != null)
                                     proxy._virtualScroll(e);
                                 if (e.source == "wheel" && e.scrollTop != proxy._scrollValue)
                                     e.scrollTop = proxy._scrollValue;
@@ -3768,7 +3773,7 @@
                             lastRow = this.getRows()[0].length - 1;
                         if (this._selectedRow() <= lastRow && this._selectedRow() != -1) {
                             var selectedRow = this._selectedRow() + 1, fromIndex = this._previousIndex;
-                            this.selectRows(fromIndex, selectedRow, bbdesigner$target);
+                            this.selectRows(fromIndex, selectedRow, bbdesigner$target, e);
                             if ((selectedRow - 1) == lastRow) {
                                 this.selectRows(fromIndex, lastRow);
                                 selectedRow = lastRow;
@@ -3786,7 +3791,7 @@
                         if (this._selectedRow() >= 0 && this._selectedRow() >= -1) {
 
                             var selectedRow = this._selectedRow() - 1, fromIndex = this._previousIndex;
-                            this.selectRows(fromIndex, selectedRow, bbdesigner$target);
+                            this.selectRows(fromIndex, selectedRow, bbdesigner$target, e);
                             if (selectedRow < 0) {
                                 this.selectRows(fromIndex, firstRow);
                                 selectedRow = firstRow;
@@ -9925,7 +9930,7 @@
     BoldBIDashboard.gridFeatures = BoldBIDashboard.gridFeatures || {};
     BoldBIDashboard.gridFeatures.selection = {
         
-        selectRows: function (rowIndex, toIndex, target) {
+        selectRows: function (rowIndex, toIndex, target, e) {
             if (!this._allowrowSelection)
                 return false;
             if (this._traverseRow != rowIndex)
@@ -10065,7 +10070,7 @@
 						rowIndex = bbdesigner$(document.getElementsByName(pageto * pageSize)[rowIndex % pageSize]).index();
 				}
             }
-            args = { rowIndex: bbdesigner$rowIndex, row: bbdesigner$gridRows.eq(rowIndex), data: Data, target: target,  prevRow: bbdesigner$prevRow, prevRowIndex: bbdesigner$prevIndex };
+            args = { rowIndex: bbdesigner$rowIndex, row: bbdesigner$gridRows.eq(rowIndex), data: Data, target: target,  prevRow: bbdesigner$prevRow, prevRowIndex: bbdesigner$prevIndex, parentTarget: e  };
             if (this._trigger("rowSelecting", args))
                 return;
             var bbdesigner$gridRows = bbdesigner$(this.getRows());
@@ -10184,7 +10189,7 @@
                 this._selectedRow(bbdesigner$rowIndex);
             Data = this._virtualScrollingSelection ? this._virtualSelRecords : Data;
 			var selectedIndex = this.model.scrollSettings.enableVirtualization ? bbdesigner$rowIndex : this._selectedRow();
-            var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: Data, target: target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex };
+            var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: Data, target: target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex, parentTarget: e };
             this._previousIndex = this.selectedRowsIndexes.length ? rowIndex :this._previousIndex;
 			if(this.model.scrollSettings.enableVirtualization){
 				this._prevSelIndex = bbdesigner$rowIndex; 
@@ -14706,7 +14711,7 @@
                             if (this._allowcellSelection && rowIndex > -1)
                                 this.selectCells([[rowIndex, [columnIndex]]]);
                             if (this._allowrowSelection && rowIndex > -1)
-                                this.selectRows(this._previousIndex, this.getIndexByRow(bbdesigner$target.closest('tr')), bbdesigner$target);
+                                this.selectRows(this._previousIndex, this.getIndexByRow(bbdesigner$target.closest('tr')), bbdesigner$target, e);
                                 this._selectedRow(this.getIndexByRow(bbdesigner$target.closest('tr')));
                             if (this._allowcolumnSelection && bbdesigner$target.hasClass("e-headercell") && !bbdesigner$target.hasClass("e-stackedHeaderCell") && ((e.clientY - bbdesigner$target.offset().top) < (bbdesigner$target.height() / 4)))
                                 this.selectColumns(this._previousColumnIndex, columnIndex);
@@ -14738,7 +14743,7 @@
                             if (this.model.selectionSettings.enableToggle && this.getSelectedRecords().length == 1 && bbdesigner$.inArray(this.getIndexByRow(bbdesigner$target.closest('tr')), this.selectedRowsIndexes) != -1)
                                 this.clearSelection(selectedIndex);
                             else
-                                this.selectRows(this.getIndexByRow(bbdesigner$target.closest('tr')), null, bbdesigner$target);
+                                this.selectRows(this.getIndexByRow(bbdesigner$target.closest('tr')), null, bbdesigner$target, e);
                         }
                         if (this._allowcolumnSelection && bbdesigner$target.hasClass("e-headercell") && !bbdesigner$target.hasClass("e-stackedHeaderCell") && ((e.clientY - bbdesigner$target.offset().top) < (bbdesigner$target.height() / 4))) {
                             if (this.model.selectionSettings.enableToggle && this.selectedColumnIndexes.length == 1 && bbdesigner$.inArray(columnIndex, this.selectedColumnIndexes) != -1)

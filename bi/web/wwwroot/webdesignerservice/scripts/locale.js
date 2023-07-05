@@ -251,6 +251,7 @@
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
                 basicSettingsText: "Basic Settings",
+                tooltipSettingsText: "Tooltip Settings",
                 linkText: "Link",
                 filterText: "Filter",
                 headerSettingsText: "Header Settings",
@@ -332,6 +333,7 @@
                     columnText: "Column",
                     chooseField: "Choose Field",
                     urlText: "URL",
+                    urlLinkInfo: "Please follow the below syntax to create a dynamic dashboard link.\n@{{:CURRENT.SITEURL}}/dashboards?dashboardName={dashboard_name}&categoryName={category_name}",
                     appendColumn: "Append Column",
                     urlPreview: "URL Preview",
                     linkDestination: "Link Destination",
@@ -435,7 +437,6 @@
                     showLegendAsDropDown: "Show Legend Items as Dropdown",
                     showLegendTitle: "Show Title",
 		            showTooltip:"Show Tooltip",
-					showValueInTooltip: "Show Value In Tooltip",
                     legend: "Legend",
 					legendShapeText: "Legend Shape",
                     legendPosition: "Legend Position",
@@ -530,9 +531,21 @@
 					tabWidgetHideTabText: "Hide Tab",
 					headerColorText: "Header Color",
 					headerFontSizeText: "Header Font Size",
-					activeTabText: "Active  Tab"
+					activeTabText: "Active  Tab",
+                    apiType:"API Type"
                 },
-				 chartLineStyleSettings: {
+                tooltipSettings: {
+                    showTooltip: "Show Tooltip",
+                    showValueInTooltip: "Show Value In Tooltip",
+                    customizeTooltip: "Customize Tooltip",
+                    customizeTooltipBtnText: "Customize Tooltip",
+                    customizeTooltipDialogTitleText: "Customize Tooltip Settings",
+                    customizeTooltipDialogOkBtnText: "OK",
+                    customizeTooltipDialogCancelBtnText: "Cancel",
+                    columnNameHeaderText: "Column Name",
+                    visibilityHeaderText: "Visibility"
+                },
+				chartLineStyleSettings: {
                     series: "Series",
                     lineWidth:"Line Width",
                     lineStyleText: "Line Style",
@@ -7246,8 +7259,8 @@
 				fullName: "Current User Full Name",
 				email: "Current User Email",
                 token: "Current User Token",
-				tenantURL: "Tenant URL",
-				siteIdentifier: "Site Identifier"
+				tenantURL: "Current Site URL",
+				siteIdentifier: "Current Site Identifier"
             },
             tabWidget: {
                 deleteTab: "Delete Tab",
@@ -7336,6 +7349,12 @@
 		oauthDriveButtonLable: "Select a file from the drive",
                 oauthDriveButtonText:"Browse",
 				fileUploadFailedText: "Please upload a file to continue",
+				alertDialogContent: "This data source uses the following data sources in its configuration. Please complete the configuration of the below data sources first.",
+				linkedDsContent1: "This data source is used by the following data sources",
+				linkedDsContent2: ". Please complete the configuration of this data source first to prevent errors when configuring the mentioned data sources.",
+				alertDialogue: "alertDialogue",
+				okText: "Ok",
+				noText: "No",
 				uploadingProgressText: "Uploading in progress. Please wait for the upload to complete or you can remove the uploading item to continue.",
             }
         }

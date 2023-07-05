@@ -989,7 +989,18 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlLeft", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to CROSS JOIN.
+        /// </summary>
+        internal static string SqlCross
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlCross", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to LEFT JOIN.
         /// </summary>
@@ -1169,7 +1180,7 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlOn", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OR.
         /// </summary>

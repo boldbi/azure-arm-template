@@ -25,5 +25,4 @@ CREATE TABLE [BOLDTC_QueryMetrics] (
   [Id] ASC
   ) WITH (IGNORE_DUP_KEY = OFF)
 )
-;
 END;

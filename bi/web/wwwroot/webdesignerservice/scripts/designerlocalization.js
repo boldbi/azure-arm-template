@@ -250,6 +250,7 @@ var Designer = {
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
                 basicSettingsText: "Basic Settings",
+                tooltipSettingsText: "Tooltip Settings",
 				PaddingSettings:"Padding Settings",
                 linkText: "Link",
                 filterText: "Filter",
@@ -325,6 +326,7 @@ var Designer = {
                     columnText: "Column",
                     chooseField: "Choose Field",
                     urlText: "URL",
+                    urlLinkInfo: "Please follow the below syntax to create a dynamic dashboard link.\n@{{:CURRENT.SITEURL}}/dashboards?dashboardName={dashboard_name}&categoryName={category_name}",
                     appendColumn: "Append Column",
                     urlPreview: "URL Preview",
                     linkDestination: "Link Destination",
@@ -429,7 +431,7 @@ var Designer = {
                     textwidth: "Text Width",
                     showValueLabels: "Show Value Labels",
                     isInversed:"Inverse Scroll Bar",
-		    enableSmoothScroll: "Enable Smooth Scroll",
+		            enableSmoothScroll: "Enable Smooth Scroll",
                     pageSize:"Page Size",
                     chartSize:"Chart Size",
                     valueLabelRotation: "Value Label Rotation",
@@ -497,9 +499,21 @@ var Designer = {
                     lineWidth:"Line Width",
                     emptyCellsContent:"Empty Cell Content",
 					rawData: "Show Raw Data",
-                    rawDataInfo:"This option will remove the aggregation in grid columns and show raw data."
+                    rawDataInfo:"This option will remove the aggregation in grid columns and show raw data.",
+                    apiType:"API Type"
                 },
-				 chartLineStyleSettings: {
+                tooltipSettings: {
+                    showTooltip: "Show Tooltip",
+                    showValueInTooltip: "Show Value In Tooltip",
+                    customizeTooltip: "Customize Tooltip",
+                    customizeTooltipBtnText: "Customize Tooltip",
+                    customizeTooltipDialogTitleText: "Customize Tooltip Settings",
+                    customizeTooltipDialogOkBtnText: "OK",
+                    customizeTooltipDialogCancelBtnText: "Cancel",
+                    columnNameHeaderText: "Column Name",
+                    visibilityHeaderText: "Visibility"
+                },
+				chartLineStyleSettings: {
                     series: "Series",
                     lineWidth:"Line Width",
                     lineStyleText: "Line Style",
@@ -6689,8 +6703,8 @@ var Designer = {
 				fullName: "Current User Full Name",
 				email: "Current User Email",
                 token: 'Current User Token',
-				tenantURL: 'Tenant URL',
-                siteIdentifier: 'Site Identifier'
+				tenantURL: 'Current Site URL',
+                siteIdentifier: 'Current Site Identifier'
 			},
         }
     }

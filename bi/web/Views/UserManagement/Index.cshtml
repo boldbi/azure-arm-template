@@ -398,9 +398,9 @@
                         }
                     </li>
 
-                    @if (((ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0) && (ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0)) || ((ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0) && (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)) || ((ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0) && (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)))
+                    @if ((ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0) || (ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0) || (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0))
                     {
-                        <li class="dropdown no-padding pull-right">
+                        <li class="dropdown no-padding pull-right synchronize-button">
                             <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="synchronize-dropdown" title="@T["Synchronize Users"]">
                                 <span>@T["Synchronize"] </span>
                                 <span class="caret"></span>
@@ -437,33 +437,28 @@
                         </li>
 
                     }
-                    else
-                    {
-                        if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0)
-                        {
-                            <li class="pull-right">
-                                <a href="@Url.Action("SynchronizeUsers", "UserManagement")" class="link-button app-btn-link synchronize-users" title="@Html.Raw(String.Format(T["Synchronize users with {0}"].Value, "Active Directory"))" data-toggle="tooltip" data-placement="left">@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Active Directory"))</a>
-                            </li>
-                        }
-                        if (ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0)
-                        {
-                            <li class="pull-right">
-                                <a href="@Url.Action("SynchronizeAzureUsers", "UserManagement")" class="link-button app-btn-link synchronize-azure-users" title="@Html.Raw(String.Format(T["Synchronize users with {0}"].Value, "Azure AD"))" data-toggle="tooltip" data-placement="left">@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Azure AD"))</a>
-                            </li>
-                        }
-                        if (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)
-                        {
-                            <li class="pull-right">
-                                <a href="@Url.Action("SynchronizeCustomDatabaseUsers", "UserManagement")" class="link-button app-btn-link synchronize-database-users" title="@T["Synchronize users with Custom Database"]" data-toggle="tooltip" data-placement="left">@T["Database Synchronization"]</a>
-                            </li>
-                        }
-                    }
-                    <li>
+                    <li class="bulk-import-result-button">
                         <a href="@Url.Action("BulkImportResult", "UserManagement")" class="link-button app-btn-link bulk-import-result" title="@T["Shows the bulk user import detail"]" data-toggle="tooltip" data-placement="left">@T["Bulk Import Result"]</a>
                     </li>
-                    <li class="flying-add hide" id="add-user-in-group">
-                        <button class="critical-action-button app-btn-danger user-delete-button" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">@T["Remove User"]</button>
-                        <button class="secondary-button app-btn-secondary user-add-group" title="@T["Assign a group to selected users"]">@T["Assign Group"]</button>
+                    <li class="flying-add hide dropdown" id="add-user-in-group">
+                         <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="more-options-dropdown" title="@T["More options"]">
+                                    <span>@T["More Options"] </span>
+                                    <span class="caret"></span>
+                         </button>
+                         <ul class="dropdown-menu sync-user-dropdown multi-level" role="menu" id="dropdown-options">
+                            <li>
+                                <a class="dropdown-toggle user-delete-button" data-toggle="tooltip" data-placement="left" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">
+                                    <i class="su su-delete"> </i>
+                                    <span>@T["Remove User"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-toggle user-add-group" data-toggle="tooltip" data-placement="left" title="@T["Assign a group to selected users"]">
+                                    <i class="su su-group-1"> </i>
+                                    <span>@T["Assign Group"]</span>
+                                </a>
+                            </li>
+                         </ul>
                     </li>
                 </ul>
             </div>
