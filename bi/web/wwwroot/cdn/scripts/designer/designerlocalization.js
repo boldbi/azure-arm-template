@@ -345,6 +345,10 @@ var Designer = {
                     height: "Height",
                     width: "Width"
                 },
+                rteBasicSettings: {
+                    autofitContent: "Autofit Content",
+                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
+                },
                 containerApperance: {
                     containerTitleAlignText: "Title Alignment",
                     containerTitleColorText: "Title Color",
@@ -443,6 +447,7 @@ var Designer = {
                     showItemsWithNoData: "Show Items With No Data",
 					emptyPointMode: "Empty Point Mode",
                     enableMultiSelect: "Enable Multiselect",
+                    showAll: "Show All",
                     allowFilter: "Allow Filter",
                     defaultPosition: "Default Positions",
                     rangeSelection: "Range Selection",

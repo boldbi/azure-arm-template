@@ -359,6 +359,10 @@
 					lineWidgetPadding: "Padding",
 					lineWidgetType: "Line Type"
 				},
+                rteBasicSettings: {
+                    autofitContent: "Autofit Content",
+                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
+                },
                 containerApperance: {
                     containerTitleAlignText: "Title Alignment",
                     containerTitleColorText: "Title Color",
@@ -463,6 +467,7 @@
 					emptyPointMode: "Empty Point Mode",
                     enableMultiSelect: "Enable Multiselect",
                     allowFilter: "Allow Filter",
+                    showAll: "Show All",
                     defaultPosition: "Default Positions",
                     rangeSelection: "Range Selection",
                     orientation: "Orientation",
@@ -6214,7 +6219,7 @@
                 isFirstValue: "Set first value",
 				listType: "List",
 				literalType: "Literal",
-				dateFormat: "Date",
+				date: "Date",
 				stringFormat: "String",
 				boolFormat: "Boolean",
 				numberFormat: "Number"
