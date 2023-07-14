@@ -2052,7 +2052,8 @@ var Designer = {
                 exportingSuccessContent: "export was completed successfully. If the download does not begin, please",
                 exportingSuccessClick: "click here",
 				exportingSuccessEndContent: " to download the file.",
-                connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.'
+                connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.',
+                fileNotFoundError: "The shape data file was not found. Please add the file and try again."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -2134,7 +2135,8 @@ var Designer = {
                 SlaveWidgetOverrideTitle: "Period-over-Period Configuration",
                 LargeFileSizeAlert: "Confirm File Import",
                 JoinAlert: "Join Alert",
-                relativeDatesAlert: "Relative Dates Alert"
+                relativeDatesAlert: "Relative Dates Alert",
+                fileNotFound: "File Not Found"
             },
             linkedAccountsWindow: {
                 title: "Accounts",
