@@ -212,7 +212,22 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlAndNot", resourceCulture);
             }
         }
-        
+
+        internal static string SqlAndGroup
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlAndGroup", resourceCulture);
+            }
+        }
+        internal static string SqlOrGroup
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlOrGroup", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to AS.
         /// </summary>
