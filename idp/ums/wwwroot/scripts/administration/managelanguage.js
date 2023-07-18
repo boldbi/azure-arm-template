@@ -10,6 +10,7 @@ var isApplicationLanguage = false;
 var rowchecked;
 var isavailableLanguage = false;
 $(document).ready(function () {
+    createWaitingPopup("localization-container");
     var localizationDialog = new ejs.popups.Dialog({
         width: "900px",
         height: "712px",
@@ -350,6 +351,7 @@ function uploadDialogClose() {
     document.getElementById("upload-container").ej2_instances[0].hide();
     localizationGrid.clearSelection();
     localizationGrid.refresh();
+    dropDownList.refresh();
     dropDownList.value = null;
 }
 
@@ -410,7 +412,7 @@ function languageDeleteDialogOpen()
         else {
             isApplicationLanguage = false;
             $("#language-delete-dialog-content").addClass("warning-message");
-            $(".info-message").html(window.Server.App.LocalizationContent.RemoveLanguages);
+            $(".info-message").html(window.Server.App.LocalizationContent.RemoveLanguage);
             document.getElementById("language-delete-dialog").ej2_instances[0].show();
         }
     }
@@ -430,6 +432,7 @@ function languageDeleteDialogClose() {
 
 function deleteLanguages()
 {
+    showWaitingPopup("localization-container");
     doAjaxPost("POST", removeLocalizationUrl, "languageName=" + fileName, function (data) {
         if (data.Status) {
             document.getElementById("language-delete-dialog").ej2_instances[0].hide();
@@ -455,4 +458,5 @@ function deleteLanguages()
     count = 0;
     $(".selected-language").hide();
     $("#delete-language").hide();
+    hideWaitingPopup("localization-container");
 }

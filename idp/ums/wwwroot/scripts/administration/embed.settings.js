@@ -15,6 +15,10 @@ $(function () {
         $("#filename").attr("disabled", "disabled");
     }
 
+    $(document).ready(function () {
+        getLinkCopyLinkobj.tooltip("enable").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy$).tooltip("fixTitle").tooltip("enable");
+    })
+
     $(document).on('click', '#restrict-embed-enabled', function () {
         var key = "IsEmbedEnabled";
         if ($("#restrict-embed-enabled").is(":checked")) {
@@ -22,15 +26,14 @@ $(function () {
             $("#filename").val(jsonFileName);
             if (getLinkInputObj.val() != "") {
                 getLinkInputObj.removeAttr("disabled");
-                getLinkCopyLinkobj.removeAttr("disabled");
-                getLinkCopyLinkobj.css("cursor", "pointer");
-                getLinkCopyLinkobj.tooltip("enable").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy$).tooltip("fixTitle").tooltip("enable");
+                getLinkCopyLinkobj.removeAttr("disabled"); 
             }
             var isEmbed = "true";
             $(".download-template").show();
             $("#trigger-file").removeAttr("disabled");
             $("#filename").removeAttr("disabled");
-
+            getLinkCopyLinkobj.css("cursor", "pointer");
+            getLinkCopyLinkobj.tooltip("enable").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy$).tooltip("fixTitle").tooltip("enable");
         } else {
             $("#get-embed-code").attr("disabled", "disabled");
             $("#filename").val(window.Server.App.LocalizationContent.BrowseJsonFilePath);
@@ -72,20 +75,15 @@ $(function () {
         });
     });
 
-    getLinkCopyLinkobj.on("click", function (e) {
-        if (!getLinkInputObj.is(":disabled")) {
-            getLinkCopyLinkobj.tooltip("hide").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy$).tooltip("fixTitle").tooltip("show");
-            getLinkInputObj.select();
-            if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) {
-                getLinkCopyLinkobj.removeClass("su su-copy");
-                getLinkCopyLinkobj.attr("data-original-title", "");
-            }
-            else {
-                document.execCommand('copy');
-                getLinkCopyLinkobj.attr("data-original-title", window.Server.App.LocalizationContent.Copied);
-                getLinkCopyLinkobj.tooltip("hide").attr("data-original-title", window.Server.App.LocalizationContent.Copied).tooltip("fixTitle").tooltip("show");
-                setTimeout(function () { getLinkCopyLinkobj.attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy); getLinkCopyLinkobj.tooltip(); }, 3000);
-            }
+    $(document).on('click', '#restrict-embed-enabled', function () {
+        if (!$('#restrict-embed-enabled').is(":checked")) {
+            $("#secret-code-copy").attr("disabled", true).tooltip("enable").css("cursor","pointer");
+        }
+    });
+
+    $(document).on('click', '#secret-code-copy', function () {
+        if ($('#secret-code').val() != '') {
+            copyToClipboard('#secret-code', '#secret-code-copy')
         }
     });
 
@@ -114,6 +112,7 @@ function getEmbedSecret() {
                 if (data.status) {
                     secretCodeChange(data);
                     $("#get-embed-code").html(window.Server.App.LocalizationContent.ResetHeader);
+                    $("#secret-code-copy").removeAttr("disabled");
                 }
             }
         });

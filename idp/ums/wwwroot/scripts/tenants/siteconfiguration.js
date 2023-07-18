@@ -296,9 +296,17 @@ function changeTenantType(args) {
             item = "reports";
             $("#enable-ssl").val(reportScheme);
             $("#input-domain").val(reportDomain);
-            $(".get-data-security").css("display", "none");
-            $("#selection-data-security").css("display", "none");
-            $(".selector").removeClass("selector-alignment");
+            if (isBoldReportsTenantType()) {
+                $(".get-data-security").css("display", "inline");
+                $("#selection-data-security").css("display", "inline");
+                $(".selector").addClass("selector-alignment");
+                $(".select-intermediate-database").html(window.Server.App.LocalizationContent.SiteDataStore);
+            }
+            else { 
+                $(".get-data-security").css("display", "none");
+                $("#selection-data-security").css("display", "none");
+                $(".selector").removeClass("selector-alignment");
+            }
             $(".select-storage").html(window.Server.App.LocalizationContent.SelectStorage);
             $("#header-description").html(window.Server.App.LocalizationContent.BoldReportsMultiTenancy);
             $(".make-master-checkbox").hide();
@@ -315,6 +323,10 @@ function changeTenantType(args) {
 
             document.getElementById("branding-type").ej2_instances[0].value = "Enterprise Reporting";
             $(".isolation-part").addClass("hide");
+            if (isBoldReportsTenantType()) {
+                $(".attribute-part-bi").addClass("hide");
+                $(".attribute-part-report").removeClass("hide");
+            }
             $(".data-security-note").html(window.Server.App.LocalizationContent.BoldReportsDataSecurityNote);
         }
         else {
@@ -334,13 +346,17 @@ function changeTenantType(args) {
             else {
                 $(".site-default-text").html("").html(boldBiPath);
             }
-        
+
             if (isCommonLogin) {
                 document.getElementById("branding-type").ej2_instances[0].list.querySelectorAll('li')[0].style.display = "block";
                 document.getElementById("branding-type").ej2_instances[0].list.querySelectorAll('li')[1].style.display = "none";
             }
             document.getElementById("branding-type").ej2_instances[0].value = "Embedded BI";
             $(".isolation-part").removeClass("hide");
+            if (isBoldReportsTenantType()) {
+                $(".attribute-part-bi").removeClass("hide");
+                $(".attribute-part-report").addClass("hide");
+            }
             $(".data-security-note").html(window.Server.App.LocalizationContent.BoldBIDataSecurityNote);
         }
     }

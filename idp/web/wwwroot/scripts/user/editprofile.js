@@ -397,7 +397,6 @@ function SaveProfile() {
                 firstname: $("#user-firstname").val(),
                 lastname: $("#user-lastname").val(),
                 mobile: $("#user-phonenumber").val(),
-                userid: userId,
                 returnurl: $("#hidden-return-url").val()
             },
             function (result) {
@@ -487,7 +486,6 @@ function uploadImage() {
             "Height": parseInt($('input[name=height]').val() || 0),
             "Width": parseInt($('input[name=width]').val() || 0),
             "UserName": $("#user-name").val(),
-            "UserId": userId,
             "ImageName": $("#image").val(),
             "IsNewFile": isNewFile
         };
@@ -558,27 +556,24 @@ function uploadImage() {
 
 function deleteUserAvatar() {
     showWaitingPopup('content-area');
-    doAjaxPost('POST', deleteavatarUrl, { id: $("#userId").val() },
-        function (result) {
-            showWaitingPopup('content-area');
-            if (result.status) {
-                location.reload();
-                SuccessAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarSuccess, 7000);
-                var isLoggedUser = $("#logged-user").html().toLowerCase();
-                $("#user-profile-picture").attr("src", getdefaultavatarUrl);
-                $("#user-profile-picture").siblings("#avatar-delete-click").remove();
-                if ($("#user-email").val() == isLoggedUser) {
-                    $(".profile-picture,#profile-picture-menu").find("img").attr("src", getdefaultavatarUrl);
-                }
-
+    $.ajax({
+        type: "POST",
+        url: deleteavatarUrl,
+        success: function (result) {
+            location.reload();
+            SuccessAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarSuccess, 7000);
+            var isLoggedUser = $("#logged-user").html().toLowerCase();
+            $("#user-profile-picture").attr("src", getdefaultavatarUrl);
+            $("#user-profile-picture").siblings("#avatar-delete-click").remove();
+            if ($("#user-email").val() == isLoggedUser) {
+                $(".profile-picture,#profile-picture-menu").find("img").attr("src", getdefaultavatarUrl);
             }
-            else {
-                WarningAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarError, result.Message, 7000);
-            }
-            hideWaitingPopup('content-area');
-
+        },
+        error: function (result) {
+            WarningAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarError, result.Message, 7000);
         }
-    );
+    });
+    hideWaitingPopup('content-area');
 }
 
 function SetCookie() {

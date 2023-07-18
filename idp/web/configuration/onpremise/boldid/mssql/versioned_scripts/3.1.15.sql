@@ -3,7 +3,7 @@ CREATE TABLE [BOLDTC_AzureBlob] (
 	TenantInfoId uniqueidentifier NOT NULL,
 	AccountName nvarchar(max) NOT NULL,
 	AccessKey nvarchar(max) NOT NULL,
-	Uri nvarchar(max) NOT NULL,
+	Uri nvarchar(max) NULL,
 	ContainerName nvarchar(max) NOT NULL,
 	ConnectionType nvarchar(max) NOT NULL,
 	ConnectionString nvarchar(max) NOT NULL,
