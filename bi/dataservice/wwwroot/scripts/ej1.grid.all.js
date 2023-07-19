@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 6.8.9
+*  version : 6.9.10
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -4578,6 +4578,7 @@
 						this.element.children(".e-gridfooter").remove();
 						if (this.model.showSummary && this.model.currentViewData.length > 0) {
 						    this._renderGridFooter().insertAfter(bbdesigner$content);
+                            this.refreshScrollerEvent();
 						}
                         if (this._gridRecordsCount && this.model.allowFiltering) {
                             this._initColumns(this.model.currentViewData[0] != undefined ? this.model.currentViewData[0] : this.model.currentViewData.value);

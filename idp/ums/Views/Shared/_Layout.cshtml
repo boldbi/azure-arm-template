@@ -1,7 +1,7 @@
 ﻿@{
     var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
 
-    var currentUserId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+    var currentUserId = Context.User.GetUserId();
 
     var showMenuBar = Context.User.Identity.IsAuthenticated && (ViewBag.ShowMenuBar == null || ViewBag.ShowMenuBar) && Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) || await new UserManagement().IsTenantMangementUser(currentUserId);
 

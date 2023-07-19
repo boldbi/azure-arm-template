@@ -359,6 +359,10 @@
 					lineWidgetPadding: "Padding",
 					lineWidgetType: "Line Type"
 				},
+                rteBasicSettings: {
+                    autofitContent: "Autofit Content",
+                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
+                },
                 containerApperance: {
                     containerTitleAlignText: "Title Alignment",
                     containerTitleColorText: "Title Color",
@@ -463,6 +467,7 @@
 					emptyPointMode: "Empty Point Mode",
                     enableMultiSelect: "Enable Multiselect",
                     allowFilter: "Allow Filter",
+                    showAll: "Show All",
                     defaultPosition: "Default Positions",
                     rangeSelection: "Range Selection",
                     orientation: "Orientation",
@@ -901,6 +906,7 @@
 				thresHold: "Threshold",
 				thresHoldLimit: "Threshold Data Limit",
 				dataSampling: "Data Sampling",
+				appendDsText: "Append Data Source",
 				dataLimit: "Data Limit",
 				dataCacheON: "ON",
 				dataCacheONtext: "Results will be cached.",
@@ -950,6 +956,18 @@
                 dataSourceNameText: "Data Source name",
                 dataSourceText: "Data Source",
                 dsnNameText: "Dsn Name",
+		        appendTextBoxName: "Data Source Name",
+                appendFileRadioBtnText: 'Append data from file',
+                appendDatasourceRadioBtnText: 'Append data from data store',
+                appendDsSaveBtn: 'Save',
+                appendDsSaveAsBtn: "Save as",
+                appendDsAppendBtn: "Append",
+                appendDsCloseBtn: "Close",
+                appendDsChooseFile: 'Choose File',
+                appendDsEstimatedFileSize: "upto(200MB/File)",
+                appendDsBrowseText: "Browse File",
+                appendDsSelectedTables: "Selected Tables",
+                appendDsdragAndDropText: "Drop files here or ",
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
                 enableSSH: "Enable SSH",
@@ -2556,7 +2574,8 @@
                 exportingSuccessContent: "export was completed successfully. If the download does not begin, please",
                 exportingSuccessClick: "click here",
 				exportingSuccessEndContent: " to download the file.",
-                connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.'
+                connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.',
+                fileNotFoundError: "The shape data file was not found. Please add the file and try again."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -2637,7 +2656,8 @@
                 SlaveWidgetOverrideTitle: "Period-over-Period Configuration",
                 LargeFileSizeAlert: "Confirm File Import",
                 JoinAlert: "Join Alert",
-                relativeDatesAlert: "Relative Dates Alert"
+                relativeDatesAlert: "Relative Dates Alert",
+                fileNotFound: "File Not Found"
             },
             linkedAccountsWindow: {
                 title: "Accounts",
@@ -6214,7 +6234,7 @@
                 isFirstValue: "Set first value",
 				listType: "List",
 				literalType: "Literal",
-				dateFormat: "Date",
+				date: "Date",
 				stringFormat: "String",
 				boolFormat: "Boolean",
 				numberFormat: "Number"

@@ -1,9 +1,11 @@
 ﻿@using Syncfusion.Server.Base;
 @using Syncfusion.Server.Base.DataClasses;
+@using Microsoft.AspNetCore.Http;
 @{
     Layout = null;
     var imageHelper = new ImageHelper();
     var errorstacktrace = GlobalAppSettings.ReplaceErrorStackTrace(ViewBag.Errorstacktrace);
+    var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
 }
 <!DOCTYPE html>
 <html>
@@ -33,11 +35,21 @@
                 </div>
                 @if (ViewBag.ErrorMessage != null)
                 {
-                    <div id="deploy-error-container">
-                        <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@ViewBag.ErrorMessage
-                            @T["ErrorStacktrace"]:@errorstacktrace</textarea>
-                        <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
-                    </div>
+                    @if (GlobalAppSettings.SystemSettings.ShowStackTrace || isAdmin)
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@ViewBag.ErrorMessage 
+@T["ErrorStacktrace"]:@errorstacktrace</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@ViewBag.ErrorMessage</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
                     <div class="take-me-back-to-home-page">
                         @Html.Raw(string.Format(T["{0}Go to home page{1} or {2}Create a support ticket{3} with application logs by referring to this {4}link{5}."].Value,
                     $"<span class='error-page-cursor'><a class='error-to-back-text-color' href='{Url.Action("Homepage", "Home")}'>",

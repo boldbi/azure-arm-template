@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.8.9
+*  version : 6.9.10
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -17187,7 +17187,7 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
                     commonEventArgs, textsize,
                     positionX = 0, textWidth, textHeight,
                     positionY = 0,
-                    pointColor;
+                    pointColor, chartHeight = !legend.visible? 200 : 250;
 
                 if ((type == "pyramid" || type == "funnel") && _labelPosition == 'outsideextended')
                     _labelPosition = 'inside';
@@ -17231,11 +17231,13 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
                         svgWidth = bbdesigner$(chartObj.svgObject).width(),
                         svgHeight = bbdesigner$(chartObj.svgObject).height();
 
-                    // This condition is removed due to datalabel crop issue (JS-63856)
-                     if (currentseries._enableSmartLabels && (svgWidth < 250 || svgHeight < 250)) {
-                         dataLabelFont.size = "9px"; //Change pie/doughnut text size dynamically
-                         size = measureText(commonEventArgs.data.text, svgWidth, dataLabelFont);
-                         textOffset = 10;
+                    // This condition is removed due to datalabel crop issue (JS-63856)                     
+					  if (currentseries._enableSmartLabels && (svgWidth < 250 || svgHeight < chartHeight)) {
+                        //if(!legend.visible){
+							//dataLabelFont.size = "11.5px"; //Change pie/doughnut text size dynamically
+							//size = measureText(commonEventArgs.data.text, svgWidth, dataLabelFont);
+						//}
+                         textOffset = !legend.visible? 8 : 10;
                      }
                     if (isNull(connectorLine.height))
                         textOffset = textOffset || measureText(commonEventArgs.data.text, null, dataLabelFont).height;
@@ -17522,6 +17524,9 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
                       //      point.hide = true;
                       //  }
                         // To check the datalabel overlaps with chart bounds - (End)
+						if ((textOptions.y - textsize.height/2) < 0 || textOptions.y > svgHeight) {
+                            point.hide = true;
+                        }
 						if (!point.hide) chartObj.svgRenderer.drawText(textOptions, datalabelText, chartObj.gSeriesTextEle[seriesIndex]);
 
                         var datalabelSize = measureText(datalabelText, datalabelText.length, dataLabelFont);
