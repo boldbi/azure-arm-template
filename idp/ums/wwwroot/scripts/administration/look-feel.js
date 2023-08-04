@@ -341,3 +341,30 @@ $(document).on("keyup", "#dashboardtheme-name", function () {
 function uploadformValidation() {
     return $(".upload-form").valid();
 }
+
+$(document).on("keydown keyup", "#font-name", function () {
+    if ($("#font-name").val() == '') {
+        $("#upload-font").attr("disabled", true);
+    }
+    else {
+        $("#upload-font").removeAttr("disabled");
+    }
+});
+
+$(document).on("keydown keyup", "#applicationtheme-name", function () {
+    if ($("#applicationtheme-name").val() == '') {
+        $("#upload-applicationtheme").attr("disabled", true);
+    }
+    else {
+        $("#upload-applicationtheme").removeAttr("disabled");
+    }
+});
+
+$(document).on("keydown keyup", "#dashboardtheme-name", function () {
+    if ($("#dashboardtheme-name").val() == '') {
+        $("#upload-dashboardtheme").attr("disabled", true);
+    }
+    else {
+        $("#upload-dashboardtheme").removeAttr("disabled");
+    }
+});

@@ -3,11 +3,10 @@
     ViewBag.Title = T["Security Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
-    var isCSPTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "csp-settings") ? "active" : string.Empty;
-    var isXFrameTab = (Context.Request.Query["tab"].ToString() == "x-frame-options") ? "active" : string.Empty;
+    var isXFrameTab = (Context.Request.Query["tab"].ToString().ToLower() == "x-frame-options") ? "active" : string.Empty;
+    var isCSPTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "csp-settings" || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isXFrameTab))) ? "active" : string.Empty;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
     var styleSources = contentSecurityPolicySettings.StyleSource != null ? contentSecurityPolicySettings.StyleSource.Split(',') : contentSecurityPolicySettings.StyleSource;
     var scriptSources = contentSecurityPolicySettings.ScriptSource != null ? contentSecurityPolicySettings.ScriptSource.Split(',') : contentSecurityPolicySettings.ScriptSource;

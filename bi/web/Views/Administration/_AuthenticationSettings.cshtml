@@ -18,8 +18,7 @@
     var isAzureApplication = ServerAppConfig.IsAzureApplication;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var isAdmin = _identityResponse.IsAdmin;
     var isOpenIdIdentityProviderOptionEnabled = ViewBag.OpendIdentityProviderInfo != null ? ViewBag.OpendIdentityProviderInfo.IsIdentityProviderInfoOptionEnabled : false;
     var isOAuthIdIdentityProviderOptionEnabled = ViewBag.OAuthdIdentityProviderInfo != null ? ViewBag.OAuthdIdentityProviderInfo.IsIdentityProviderInfoOptionEnabled : false;
@@ -275,7 +274,7 @@
                                                 <input type="hidden" id="openid-control-type" value="@AuthType.OIDC">
                                                 <label for="enable-global-openid">
                                                     <span>
-                                                    @string.Format(T["Enable Global {0} Settings"].Value, "OpendID Connect")
+                                                    @string.Format(T["Enable Global {0} Settings"].Value, "OpenID Connect")
                                                     </span>
                                                 </label>
                                                 <div class="info-message">
@@ -442,7 +441,7 @@
                                                         <div class="form-control su su-copy text focus" id="oauth-callback-link-copy" readonly="" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></div>
                                                     </div>
                                                 </div>
-                                                <feature name=@FeatureManagement.Yokogawa negate="true">
+                                                <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory negate="true">
                                                     <div class="col-md-12 auth-fields-margin no-padding">
                                                         <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["Mobile App Redirect {0}"].Value, "URI")</label>
                                                         <div class="col-xs-12 no-padding">
@@ -502,7 +501,7 @@
                                                 </div>
                                             </div>
 
-                                            <feature name=@FeatureManagement.Yokogawa>
+                                            <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory>
                                                 <div class="col-xs-12 separator-margin yokogawa-top-margin">
                                                     <div class="col-xs-12 no-padding ">
                                                     @Html.CheckBox("configure-oauth-identity-provider-info", new { @class = "material-checkbox", ng_model = "oauthIdentityProviderInfoIsEnabled", ng_disabled = "!oauthIsEnabled" })
@@ -664,7 +663,7 @@
                                                         <div class="form-control su su-copy text focus" id="openid-callback-link-copy" readonly="" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></div>
                                                     </div>
                                                 </div>
-                                                <feature name=@FeatureManagement.Yokogawa negate="true">
+                                                <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory negate="true">
                                                     <div class="col-md-12 auth-fields-margin no-padding">
                                                         <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["Mobile App Redirect {0}"].Value, "URI")</label>
                                                         <div class="col-xs-12 no-padding">
@@ -691,7 +690,7 @@
                                                 @await Html.PartialAsync("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OpenIDSettings.OIDCAuthSettings.GroupImportSettings, new ViewDataDictionary(ViewData) { { "AuthType", AuthType.OIDC } })
                                                 </div>
                                             </div>
-                                            <feature name=@FeatureManagement.Yokogawa>
+                                            <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory>
                                                 <div class="col-xs-12 separator-margin yokogawa-top-margin">
                                                     <div class="col-xs-12 no-padding ">
                                                     @Html.CheckBox("configure-openid-identity-provider-info", new { @class = "material-checkbox", ng_model = "openIdIdentityProviderInfoIsEnabled", ng_disabled = "!openidIsEnabled" })

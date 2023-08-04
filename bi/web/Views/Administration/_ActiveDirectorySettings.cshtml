@@ -20,8 +20,7 @@
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isAdmin = _identityResponse.IsAdmin;
     var loginDisclaimerObject = ServerAppConfig.IsSelfHosted ? string.Empty : ViewBag.SystemSettings.LoginDisclaimer;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 <script>
     var defaultAuthentication = "";
@@ -532,25 +531,16 @@
 
             }
 
-            <div id="select-existing-join">
+            <div id="select-existing-join" style="display:none">
                 <div class="col-xs-12 no-padding">
-                    <div class="col-xs-12 no-padding">
-                        <h3>@T["Select Relation"]</h3>
-                    </div>
                     <div class="col-xs-12 no-padding table-content">
                         <table class="relation-list"></table>
                     </div>
                 </div>
-                <div class="col-xs-12 btn-relation-holder">
-                    <button type="button" id="select-relation" class="primary-button app-btn-primary pull-right">@T["Apply"]</button>
-                </div>
             </div>
 
-            <div id="get-join-details">
+            <div id="get-join-details" style="display:none">
                 <div class="col-xs-12 no-padding">
-                    <div class="col-xs-12 no-padding">
-                        <span class="join-dialog-title">@T["Form Relation"]</span>
-                    </div>
                     <div class="col-xs-12 no-padding relation-select-content">
                         <div class="col-xs-5 no-padding">
                             <h5>@T["Left table"]</h5>
@@ -578,14 +568,6 @@
                                 <ul></ul>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-xs-12 btn-relation-holder">
-                    <div class="col-xs-6">
-                    </div>
-                    <div class="col-xs-6 rightAlign">
-                        <button type="button" id="apply-relation" class="app-button app-primary-button app-btn-primary" disabled="disabled">@T["Apply"]</button>
-                        <input type="button" title="" class="app-button app-secondary-button app-btn-secondary" onclick="closeJoinsPopup()" value="@T["Cancel"]" tabindex="1">
                     </div>
                 </div>
             </div>

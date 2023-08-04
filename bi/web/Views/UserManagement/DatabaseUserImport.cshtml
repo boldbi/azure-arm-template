@@ -1,5 +1,6 @@
 ﻿@{
     var globalAppSettings = _globalAppSettings;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     ViewBag.Title = T["Database User Import"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportDatabaseUsers);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -9,6 +10,7 @@
     ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
     ViewBag.BackIconTitle = T["Users"];
     var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 <script>
     var importDatabaseQuerySchema = {};
@@ -146,6 +148,7 @@
                         actionBegin: "fnOnUserGridActionBegin",
                         enableAltRow: false,
                         rowDataBound: function () {
+                            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                             $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
                         },
                         columns: [
@@ -209,12 +212,12 @@
                     }
                 });
                 $("#Grid").data("ejGrid").refreshContent();
-                $('[data-toggle="tooltip"]').tooltip();
+                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                 $("#content-area").ejWaitingPopup("hide");
             });
         </script>
 
-        <div class="col-xs-12 no-padding no-margin width-alignment">
+        <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
             <div class="col-xs-12 no-padding">
                 @await Html.PartialAsync("../Shared/_TopHeaderSection")
             </div>
@@ -232,7 +235,7 @@
                 </div>
             </div>
         </div>
-        <div id="import-database-users" class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+        <div id="import-database-users" class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
             <div class="col-xs-12 bi-page-content no-padding">
                 <div class="content-section bi-page-body col-xs-12">
                     <div class="col-md-12 col-xs-12 no-margin no-padding import-user-search">
@@ -277,12 +280,12 @@
 
     else
     {
-        <div class="col-xs-12 no-padding no-margin width-alignment top-nav-header-without-btn">
+        <div class="col-xs-12 no-padding no-margin width-alignment top-nav-header-without-btn @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
             <div class="col-xs-12 no-padding">
                 @await Html.PartialAsync("../Shared/_TopHeaderSection")
             </div>
         </div>
-        <div id="import-database-container" class="col-xs-12 container-fluid bi-page-container bg-grid import-database-container-with-warning">
+        <div id="import-database-container" class="col-xs-12 container-fluid bi-page-container bg-grid import-database-container-with-warning @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
             <div class="col-xs-12 bi-page-content no-padding">
                 <div class="col-xs-12 bi-page-body">
                     @if (!disableEmailActivation && globalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation)

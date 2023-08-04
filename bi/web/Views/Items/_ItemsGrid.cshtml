@@ -9,10 +9,13 @@
     var globalAppSettings = _globalAppSettings;
     var isMobile = new DeviceDetection(Context).IsMobile;
     var query = ViewBag.SearchQuery;
+    var theme = ViewBag.Theme;
     var customUI = globalAppSettings.SystemSettings.CustomUI;
     var schemes = customUI?.Profiles != null && customUI.Profiles[0].DataSources != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].DataSources.Scheme).FirstOrDefault() : null;
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var providerTypeUrl = dashboardDesignerResourceUrl + "/cdn/css/designer" + theme;
 }
 <script>
     var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
@@ -54,6 +57,9 @@
 <script type="text/x-jsrender" id="ownerheader">
     <div class="item-header">@T["Owner"]</div>
 </script>
+<script type="text/x-jsrender" id="displayname">
+    <div class="item-header">@T["Data Type"]</div>
+</script>
 <script type="text/x-jsrender" id="last-modified-header">
     <div class="item-header">@T["Last Modified"]</div>
 </script>
@@ -88,6 +94,19 @@
         {{:ModifiedDate}}
     </div>
 </script>
+
+@*<script type="text/x-jsrender" id="data-source-display-name">
+        {{if DatasourceType=="@((int)ConnectionMode.FailedToFetch)"}}
+        <div>
+            <span class="failed data-refresh-status su-schedule-status"></span><span>@T["Failed to fetch"]</span>
+        </div>
+        {{else}}
+    <img class="service-image" title="{{:DisplayName}}" data-toggle="tooltip" src="@providerTypeUrl/images/datasource/{{toLowerCase:ProviderType}}/{{toLowerCase:IconName}}.png" style="width:20px;height:20px">
+        <span title="{{:DisplayName}}" data-toggle="tooltip" data-placement="top">
+            {{:DisplayName}}
+        </span>
+        {{/if}} 
+</script>*@
 
 
 <script type="text/x-jsrender" id="itemname">
@@ -568,7 +587,7 @@
                 if (location.pathname.toLowerCase() === "/" || location.pathname.split("/")[location.pathname.split("/").length - 1].toLowerCase() == "dashboards") {
                     refreshScroller();
                 }
-                $('[data-toggle="tooltip"]').tooltip();
+                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
             },
             enableRowHover: true,
             columns: [
@@ -668,6 +687,16 @@
             refreshEncode: function (IsScheduleEnabled, LastAttemptAt) {
                 return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
             }
+        });
+        
+        $.views.converters("toLowerCase", function (name) {
+            if (name != null) {
+                name = String(name).trim();
+                if (name !== '') {
+                    return name.toLowerCase();
+                }
+            }
+            return '';
         });
     });
 </script>

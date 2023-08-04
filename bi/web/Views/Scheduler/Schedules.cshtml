@@ -44,7 +44,8 @@
         var scheduleHistoryScheduleId = "@ViewBag.ScheduleId";
         var scheduleHistoryScheduleName = "@ViewBag.ScheduleName";
         var scheduleHistoryItemType = "@Convert.ToInt32(ItemType.Schedule)";
-         var cdnLink = "@cdnLink";
+        var cdnLink = "@cdnLink";
+        var appVersion = "@ServerAppConfig.ProductVersion";
     </script>
 
     @if (!isMobile)
@@ -91,10 +92,9 @@
                             searchSettings: { fields: ["Name", "ItemName", "CreatedByDisplayName", "LastRunString", "NextScheduleString", "Status"], key: "", ignoreCase: false },
                             actionBegin: "fnActionBegin",
                             actionComplete: function(args) {
-                                $('[data-toggle="tooltip"]').tooltip();
+                                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                                 if (args.model.currentViewData.length === 0) {
                                     rowBound();
-                                    showOrHideLastRun();
                                 }
 
                                 showOrHideGridPager("#scheduleGrid");
@@ -107,7 +107,7 @@
                                 }
                             },
                             dataBound: function(args) {
-                                $("[data-toggle='tooltip']").tooltip();
+                                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                             },
                             columns: [
                                 {

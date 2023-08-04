@@ -29,9 +29,9 @@
     var cultureLanguageObj = new CultureInfo(!string.IsNullOrWhiteSpace(languagePreference) ? languagePreference : "en-us");
     var nativeNameTitleCase = cultureLanguageObj.TextInfo.ToTitleCase(cultureLanguageObj.NativeName);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var isProfileDetailsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "profile-details") ? "active" : string.Empty;
-    var isProfileSettingsTab = (Context.Request.Query["tab"].ToString() == "profile-settings") ? "active" : string.Empty;
-    var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString() == "profile-notifications") ? "active" : string.Empty;
+    var isProfileDetailsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "profile-details") ? "active" : string.Empty;
+    var isProfileSettingsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-settings") ? "active" : string.Empty;
+    var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-notifications") ? "active" : string.Empty;
     List<string> groupName = new List<string>();
     var isUserLanguagePreferenceDisabled = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference;
 }
@@ -98,7 +98,7 @@
                 <div class="col-xs-6 no-padding button-section">
                     @if (!ViewBag.IsAdUser && userDetail.DirectoryType != DirectoryType.Syncfusion)
                     {
-                        <a rel="alternate" hreflang="en" href="@idpChangePasswordUrl" class="link-button app-btn-link pull-right edit-password" title="">@T["Change Password"]</a>
+                        <a rel="alternate" hreflang="en" href="@idpChangePasswordUrl" target="@(ViewBag.HasOAuthOpenIDProviderUrl ? "_blank": "_self")" class="link-button app-btn-link pull-right edit-password" title="">@T["Change Password"]</a>
                     }
                 </div>
             </div>
@@ -133,7 +133,7 @@
                             <label class="display-name">@userDetail.DisplayName</label>
                             <label id="edit-button">
                                 <span class="bg-info" id="id-account-link">
-                                    <a hreflang="en" href="@idpProfileUrl" id="edit-link">@T["Edit Account"]</a>
+                                    <a hreflang="en" href="@idpProfileUrl" target="@(ViewBag.HasOAuthOpenIDProviderUrl ? "_blank": "_self")" id="edit-link">@T["Edit Account"]</a>
                                 </span>
                             </label>
                         </div>

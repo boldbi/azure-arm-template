@@ -16,16 +16,15 @@
     var publicDashboardsHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardSiteSettings);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var enableIsolation = globalAppSettings.SystemSettings.IsIsolationCodeEnabled;
-    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "dashboard-settings") ? "active" : string.Empty;
-    var isAttributeTab = (Context.Request.Query["tab"].ToString() == "attributes") ? "active" : string.Empty;
-    var isDeploymentTab = (Context.Request.Query["tab"].ToString() == "deployment-dashboards") ? "active" : string.Empty;
+    var isAttributeTab = (Context.Request.Query["tab"].ToString().ToLower() == "attributes") ? "active" : string.Empty;
+    var isDeploymentTab = (Context.Request.Query["tab"].ToString().ToLower() == "deployment-dashboards") ? "active" : string.Empty;
+    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "dashboard-settings") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isAttributeTab) && string.IsNullOrWhiteSpace(isDeploymentTab)) ? "active" : string.Empty;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var deploymentDashboard = ViewBag.DeploymentDashboard;
     var isMaster = globalAppSettings.SystemSettings.IsMaster;
     var usageAnalytics = Convert.ToBoolean(ViewBag.UsageAnalytics);
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 
 @section scripts{
@@ -150,30 +149,28 @@
                             }
                         </div>
                     </li>
-                    @if (ServerAppConfig.IsSelfHosted)
+                    @*Hide the theme option in the dashboard settings for designer team request*@
+                    @*<li class="dashboard-settings-list">
+                        @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="dashboard-theming-setting">
+                            <span>@T["Theming"]</span>
+                        </label>
+                        <div class="info-message">
+                            @T["This setting will allow the user to hide or show theme options in the dashboard."]
+                        </div>
+                    </li>*@
+                    @if (ServerAppConfig.IsSelfHosted || (!ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.PreviewFeatures != null && globalAppSettings.SystemSettings.PreviewFeatures.UsageAnalytics))
                     {
-                        <li class="dashboard-settings-list">
-                            @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox", @autocomplete = "off" })
-                            <label for="dashboard-theming-setting">
-                                <span>@T["Theming"]</span>
+                        <li class="dashboard-settings-list usage-analytics-list">
+                            @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="usage-analytics-setting">
+                                <span>@T["Usage analytics"]</span>
                             </label>
                             <div class="info-message">
-                                @T["This setting will allow the user to hide or show theme options in the dashboard."]
+                                @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
                             </div>
                         </li>
                     }
-                        @if (ServerAppConfig.IsSelfHosted || (!ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.PreviewFeatures != null && globalAppSettings.SystemSettings.PreviewFeatures.UsageAnalytics))
-                        {
-                            <li class="dashboard-settings-list usage-analytics-list">
-                                @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
-                                <label for="usage-analytics-setting">
-                                    <span>@T["Usage analytics"]</span>
-                                </label>
-                                <div class="info-message">
-                                    @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
-                                </div>
-                            </li>
-                        }
                     <li class="dashboard-settings-list">
                         @Html.CheckBox("get-emebed-code-dashboard", getDashboardEmbedcode, new { @class = "material-checkbox", @autocomplete = "off" })
                         <label for="get-emebed-code-dashboard">
