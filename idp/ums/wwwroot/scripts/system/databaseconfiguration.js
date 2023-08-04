@@ -92,13 +92,13 @@
                 required: window.Server.App.LocalizationContent.TheDatabaseValidator
             },
             databaseName: {
-                required: window.Server.App.LocalizationContent.ExistingDatabaseValidator
+                required: window.Server.App.LocalizationContent.TheDatabaseValidator
             },
             serverdbname: {
                 required: window.Server.App.LocalizationContent.TheTenantServerDatabaseValidator
             },
             serverexistingdbname: {
-                required: window.Server.App.LocalizationContent.ExistingDatabaseValidator
+                required: window.Server.App.LocalizationContent.TheTenantServerDatabaseValidator
             },
             designerdbname: {
                 required: window.Server.App.LocalizationContent.TheDesignerDatabaseValidator
@@ -698,3 +698,11 @@ function removeError() {
     $(".validation-txt-errors").hide();
     $(".database-error").hide();
 }
+
+$(document).on("change", "#existing-db", function () {
+        $(".data-store-hide").removeClass("show").addClass("hidden");
+});
+
+$(document).on("change", "#new-db", function () {
+    $(".data-store-hide").removeClass("hidden").addClass("show");
+});

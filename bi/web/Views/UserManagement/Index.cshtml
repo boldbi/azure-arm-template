@@ -21,6 +21,7 @@
         userImport = customUI?.Profiles[0]?.UserImport != null ? customUI?.Profiles[0]?.UserImport[0] : new UserImport();
     }
     var passwordPolicy = ServerAppConfig.PasswordPolicy;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(permissions, _identityResponse.IsAdmin, _featureManager);
 }
 
 @section scripts{
@@ -220,7 +221,7 @@
                     }
                 },
                 dataBound: function (args) {
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     $("#checkbox-header").change(headCheckboxOnChange);
                     this.model.indexes = {}; /* Additional property*/
                 },
@@ -302,7 +303,7 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div class="@(isImportInProgress ? "user-page-header" : string.Empty) col-xs-12 no-padding no-margin width-alignment">
+    <div class="@(isImportInProgress ? "user-page-header" : string.Empty) col-xs-12 no-padding no-margin width-alignment @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Users"] }, { "PageDescription", @T["Add and manage your users."] }, {"IsUsersPage", "true"} })
         <div class="col-md-12 import-area bi-page-header top-nav-btn-secton">
             <div class="col-xs-12 no-padding">
@@ -467,7 +468,7 @@
             @Html.Raw(String.Format(T["The import of {0} users from {1} is still in progress"].Value, importCount, importType))
         </div>
     </div>
-    <div id="base-container" class="col-xs-12 bi-page-container @(isImportInProgress ? "user-page-container" : string.Empty)">
+    <div id="base-container" class="col-xs-12 bi-page-container @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") @(isImportInProgress ? "user-page-container" : string.Empty)">
         <div class="col-xs-12 bi-page-content no-padding">
             <div id="user-list-container" class="list col-xs-12 bi-page-body">
                 <div class="col-xs-12 no-padding ">

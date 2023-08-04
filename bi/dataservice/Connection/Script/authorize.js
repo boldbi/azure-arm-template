@@ -96,6 +96,9 @@ function authorize() {
         $('.e-account-settings-content-wrapper #list-properties').on('change', $.proxy(this.onPropertySelection, this));
         $('.e-account-settings-content-wrapper #list-views').on('change', $.proxy(this.onViewSelection, this));
     }
+    this.wireXeroEvents = function () {
+        $('.e-account-settings-content-wrapper #list-orgs').on('change', $.proxy(this.onOrganizationSelection, this));
+    }
     this.onAccFetchSuccess = function (data, args) {
         if (args.Status) {
             if (args.Data && args.Data.length !== 0) {
@@ -177,6 +180,7 @@ function authorize() {
                 if ($("#account-settings-container").find('.e-account-settings-content-wrapper').length <= 0) {
                     $("#account-settings-container").append(this.renderXeroOrganizationsSettings());
                 }
+                this.wireXeroEvents();
                 this.getOrganizationsSettings();
             }
         } else if (serviceName !== undefined && serviceName.toLowerCase() === 'azuredevops' && $('#account-settings-container').css('display') === "none") {

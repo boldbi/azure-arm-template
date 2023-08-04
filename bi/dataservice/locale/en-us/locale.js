@@ -424,6 +424,10 @@
                     allowExportingText: "Allow Exporting",
 					showHeaderText: "Show Header"
                 },
+				viewDataActions: {
+                    allowViewDataExporting: "Allow Exporting",
+                    allowViewDataColumnSelection: "Allow Column Selection"
+                },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
                     allowResizeToFit: "Fit To Content",
@@ -968,6 +972,9 @@
                 appendDsBrowseText: "Browse File",
                 appendDsSelectedTables: "Selected Tables",
                 appendDsdragAndDropText: "Drop files here or ",
+				appendDsWaitingPopupText: "The upload files are currently being appended.",
+                appendDsSuccessPopupText: "The files have been appended successfully.",
+                appendDsFailurePopupText: "The files have failed to be appended successfully.",
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
                 enableSSH: "Enable SSH",
@@ -2148,6 +2155,17 @@
                 },
                 gohighlevel: {
                     name: "GoHighLevel",
+                    templates: [
+                        { 
+                            projects: { 
+                                name: "", 
+                                desc: "" 
+                            }
+                        }
+                    ]
+                },
+                tdengine: {
+                    name: "TDengine",
                     templates: [
                         { 
                             projects: { 
@@ -3506,6 +3524,7 @@
                 allLinkedItems: "All Linked Items",
             },
             customWebDsDateRange: {
+                none : "None",
                 today : "Today",
                 yesterDay :"Yesterday",
                 pastWeek : "Past Week",
@@ -3886,6 +3905,7 @@
                 validApplicationNameValidation: "Please enter a valid Application Key",
 				locationIdDisplayText: "Location Id",
                 relativeDateDisplayText: "Relative Date",
+                dateRangeDisplayText: "Date Range",
                 isSinceSeqFilterDisplayText:"SinceSeq Filter"
             },
             asanaWebDataSource: {
@@ -4917,6 +4937,14 @@
                 webhooks: "Webhooks",
                 oauthApp: "OAuth App",
             },
+            tdengineDataSource: {
+                tdEngineCloud: "TDengine Cloud",
+                tdEngineServer: "TDengine Server",
+                cloudToken: "Cloud Token",
+                database: "Database",
+                table: "Table",
+                databaseError: "Database cannot be empty"
+            },
             facebookDataSource: {
                 insightsDisplayText: "Insights",
                 graphAPIDisplayText: "Graph API",
@@ -5716,6 +5744,10 @@
                     substrEx: "SUBSTR(string_expression, starting_index, length_of_the_string)",
                     upperDesc: "Returns an upper case converted string value from a given string expression.",
                     upperEx: "UPPER(string_expression)",
+					htmlParseDesc: "Returns a string value with the HTML tags stripped from the specified string expression.",
+                    htmlParseEx: "HTML_Parse(string_expression)",
+                    xmlParseDesc: "Returns a string value with the XML tags stripped from the specified string expression.",
+                    xmlParseEx: "XML_Parse(string_expression)",
                     avgDesc: "Returns the average of the values in the given expression.",
                     avgEx: "AVG(numeric_expression)",
 					sumdDesc: "Returns the sum of the Distinct values in the given expression.",
@@ -6259,7 +6291,8 @@
                 gotIt: "Ok, Got it",
                 addRows: "Add more rows",
                 deleteRowsAlertMsg: "Please remove the widgets from the rows to be deleted and try again.",
-                done: "Done"
+                performanceAlertMsg: "Adding more rows might affect the performance of the dashboard.",
+				done: "Done"
             },
             initialFilter: {
                 dialogTitle: "Query Filters",

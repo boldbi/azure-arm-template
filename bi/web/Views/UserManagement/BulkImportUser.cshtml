@@ -38,12 +38,14 @@
         <span class="grid-content" title="{{:CreatedBy}}" data-toggle="tooltip">{{:CreatedBy}}</span>
     </script>
     <script type="text/x-jsrender" id="status-template">
-        {{if ImportJobStatus == "Completed" || ImportJobStatus == "In progress"}}
-        <span class="grid-content inprogress-or-completed-job"  title="{{:ImportJobStatus}}" data-toggle="tooltip">{{:ImportJobStatus}}</span>
+        {{if ImportJobStatus == "Completed"}}
+        <span class="grid-content inprogress-or-completed-job"  title="@T["Completed"]" data-toggle="tooltip">@T["Completed"]</span>
+        {{else ImportJobStatus == "In progress"}}
+        <span class="grid-content inprogress-or-completed-job"  title="@T["In progress"]" data-toggle="tooltip">@T["In progress"]</span>
         {{else ImportJobStatus == "Suspended"}}
-        <span class="grid-content suspended-job"  title="{{:ImportJobStatus}}" data-toggle="tooltip">{{:ImportJobStatus}}</span>
+        <span class="grid-content suspended-job"  title="@T["Suspended"]" data-toggle="tooltip">@T["Suspended"]</span>
         {{else ImportJobStatus == "Yet to start"}}
-        <span class="grid-content yet-to-start-job"  title="{{:ImportJobStatus}}" data-toggle="tooltip">{{:ImportJobStatus}}</span>
+        <span class="grid-content yet-to-start-job"  title="@T["Yet to start"]" data-toggle="tooltip">@T["Yet to start"]</span>
         <span class="grid-content su su-help" title="@T["The user import process will start on or before 3 minutes from the job creation time."]" data-toggle="tooltip"></span>
         {{/if}}
     </script>
@@ -120,7 +122,7 @@
                 filterSettings: { filterType: "menu" },
                 selectionSettings: { selectionMode: ["row"] },
                 dataBound: function (args) {
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     this.model.indexes = {};
                 },
                 columns: [

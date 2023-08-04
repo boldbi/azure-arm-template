@@ -3,8 +3,8 @@
     var globalAppSettings = _globalAppSettings;
     ViewBag.Title = T["Groups"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageGroups);
-    var isGeneralTab = ViewBag.ActiveTab == null || ViewBag.ActiveTab == "general" ? "active" : string.Empty;
-    var isAttributeTab = ViewBag.ActiveTab != null && ViewBag.ActiveTab == "attributes" ? "active" : string.Empty;
+    var isAttributeTab = ViewBag.ActiveTab != null && ViewBag.ActiveTab.ToString().ToLower() == "attributes" ? "active" : string.Empty;
+    var isGeneralTab = ViewBag.ActiveTab == null || ViewBag.ActiveTab.ToString().ToLower() == "general" || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isAttributeTab)) ? "active" : string.Empty;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isAdmin = _identityResponse.IsAdmin;
@@ -12,8 +12,7 @@
     var isSelfHosted = ServerAppConfig.IsSelfHosted;
     var disabled = ViewBag.IsLocalDirectory ? "" : "disabled";
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var passwordPolicy = ServerAppConfig.PasswordPolicy;
     ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
     ViewBag.BackIconTitle = T["Groups"];
@@ -32,6 +31,7 @@
     </environment>
     <script type="text/javascript">
         var groupDetails =@Html.Raw(ViewBag.groupDetails);
+        groupDetails.GroupName = $('<div/>').html(groupDetails.GroupName).text();
         groupDetails.GroupDescription = $('<div/>').html(groupDetails.GroupDescription).text();
         var groupId = @ViewBag.groupId;
         var groupAttributesUrl = "@Url.Action("GetGroupAttributes", "CustomAttribute")";
@@ -73,7 +73,7 @@
                     if (location.pathname.toLowerCase() === "/" || location.pathname.split("/")[location.pathname.split("/").length-1].toLowerCase() == "dashboards") {
                         refreshScroller();
                     }
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                 },
                 enableRowHover: true,
                 columns: [
@@ -135,7 +135,7 @@
                     enableAltRow: false,
                     create: "initialGroupGridCreate",
                     dataBound: function (args) {
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     },
                     columns: [
                         { field: 'Name', templateID: "#attribute-name-template", headerText: "@T["Name"]", width: 40, allowSorting: true, allowFiltering: true },
@@ -199,12 +199,12 @@
         --
         {{/if}}
     </script>
-    <feature name=@FeatureManagement.Yokogawa>
+    <feature name=@FeatureManagement.EnableNavigateToUserProfileFromGroupView>
         <script type="text/x-jsrender" id="NameTemplate">
             <a class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}">{{:DisplayName}}</a>
         </script>
     </feature>
-    <feature name=@FeatureManagement.Yokogawa negate="true">
+    <feature name=@FeatureManagement.EnableNavigateToUserProfileFromGroupView negate="true">
         <script type="text/x-jsrender" id="NameTemplate">
             <span class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
         </script>

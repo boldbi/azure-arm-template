@@ -5,6 +5,8 @@
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncDatabaseUsers);
     ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
     ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 
 @section scripts{
@@ -93,7 +95,7 @@
                 filterSettings: { filterType: "menu" },
                 selectionSettings: { selectionMode: ["row"] },
                 dataBound: function (args) {
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     $("#checkbox-header").change(headCheckboxOnChange);
                     this.model.indexes = {}; /* Additional property*/
                     var selecteduserIdValues = [];
@@ -170,7 +172,7 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-<div class="col-xs-12 no-padding no-margin width-alignment">
+<div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
     <div class="col-xs-12 no-padding">
             @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Database User Synchronization"] }, { "PageDescription", @T["Select Users to synchronize with Existing Database."] }, { "IsUserSyncPage", "true" } })
     </div>
@@ -187,7 +189,7 @@
         </div>
     </div>
 </div>
-<div class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+<div class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
     <div class="col-xs-12 bi-page-content no-padding">
         <div class="col-xs-12 bi-page-body col-lg-12">
             <div class="col-xs-7 no-padding">

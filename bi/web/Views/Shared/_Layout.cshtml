@@ -150,6 +150,7 @@
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var cdnLink = "@dashboardServerResourceUrl";
+        var appVersion = "@ServerAppConfig.ProductVersion";
 
         window.onload = function () {
             var preloadStyles = @Json.Serialize(preloadStylesFiles);
@@ -201,18 +202,19 @@
                 <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
             </environment>
         }
-
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
     }
     else
     {
         <environment include="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout-mobile.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout-mobile.min.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
         </environment>
     }
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
     <script type="text/javascript">
         $.extend(ej, Syncfusion);
         var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
@@ -224,6 +226,7 @@
         var getNotificationCountUrl = "@Url.Action("GetNotificationCount", "PartialView")";
         var getTenantStatusUrl = "@Url.Action("GetTenantStatus", "PartialView")";
         var helpSiteBaseUrl = "@helpSiteBaseUrl";
+        var isSessionActiveUrl = "@Url.Action("IsSessionActive", "Accounts")";
         var setPermissionUrl = "@Url.Action("SetCookieStoragePermission", "Accounts")";
         var feedbackSendUrl = "@Url.Action("AddUserFeedback", "Feedback")";
         var feedbackCookieUrl = "@Url.Action("SetUserFeedbackCookies", "FeedBack")";
@@ -253,6 +256,7 @@
         $(document).ready(function () {
             generateProfileAvatar();
         });
+        var canCheckSession = "@ServerAppConfig.IsSelfHosted";
     </script>
     @if (isMobile)
     {

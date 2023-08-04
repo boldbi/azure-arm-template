@@ -1,5 +1,6 @@
 ﻿@{
     var globalAppSettings = _globalAppSettings;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var fileName = ViewBag.FileName;
 
@@ -8,6 +9,7 @@
     ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, "CSV");
     ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
     ViewBag.BackIconTitle = T["Users"];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 
 @section scripts{
@@ -140,7 +142,7 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div class="col-xs-12 no-padding no-margin width-alignment">
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="col-xs-12 no-padding">
             @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Import Users"] } })
         </div>
@@ -152,7 +154,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid bi-page-container col-xs-12">
+    <div class="container-fluid bi-page-container col-xs-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="bi-page-content col-xs-12 no-padding">
             <div class="content-section bi-page-body">
                 <form action="@Url.Action("UploadFileFormAction", "UserManagement")" method="post" onsubmit="" enctype="multipart/form-data">

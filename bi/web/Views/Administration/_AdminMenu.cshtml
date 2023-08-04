@@ -2,8 +2,7 @@
 @{
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isAdmin = _identityResponse.IsAdmin;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = isAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, isAdmin, _featureManager);
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var currentUrl = requestUrl.LocalPath.TrimEnd('/');
     var adminHomeUrl = Url.RouteUrl(new { controller = "Administration", action = "Administration" });
@@ -147,13 +146,13 @@
             </ul>
         }
     }
-    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings] || (ServerAppConfig.IsSelfHosted && model[SettingsScopes.Accounts]) || model[SettingsScopes.AuthenticationSettings] || model[PermissionEntity.UsersandGroups] || model[PermissionEntity.AllGroups] || model[PermissionEntity.SpecificGroup])))
+    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings] || (ServerAppConfig.IsSelfHosted && model[SettingsScopes.Accounts]) || model[SettingsScopes.AuthenticationSettings] || model[PermissionEntity.UsersandGroups] || model[PermissionEntity.AllGroups] || model[PermissionEntity.SpecificGroup] || (await _featureManager.IsEnabledAsync(@FeatureManagement.AllUsersPermissionEntity) && model[PermissionEntity.AllUsers]))))
     {
             <label for="admin-menu-category-UserandAuthentication">@T["User and Authentication"]</label>
         <ul class="admin-menu-category" id="admin-menu-category-UserandAuthentication">
-            @if (isAdmin || (model != null && model[PermissionEntity.UsersandGroups]))
+            @if (isAdmin || (model != null && model[PermissionEntity.UsersandGroups]) || (await _featureManager.IsEnabledAsync(@FeatureManagement.AllUsersPermissionEntity) && model[PermissionEntity.AllUsers]))
             {
-                <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("users") || currentUrl.IndexOf(userPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("users") || currentUrl.Contains("bulk-import-result") || currentUrl.IndexOf(userPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                     <a id="license-settings-link" class="" href="@userPageUrl">
                         <i class="su su-user-1"></i>
                         <span>@T["Users"]</span>

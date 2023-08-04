@@ -934,7 +934,6 @@ function updateTenantStatus(actionUrl, tenantId, action) {
     });
 }
 
-
 function enableIsolationCode() {
     isolationCode = isIsolationCodeUpdated ? $("#isolation-code").val().trim() : isolationCode;
     var isEnabled = $("#isolation-enable-switch").is(":checked");
@@ -959,7 +958,7 @@ function enableIsolationCode() {
                 $("#isolation-code-validation").html("");
                 $("#update-isolation-code").attr("disabled", false);
             }
-        }   
+        }
     }
 }
 
@@ -976,7 +975,6 @@ $(document).on("click", "#update-isolation-code", function (e) {
             if (result.Status) {
                 isIsolationCodeUpdated = true;
                 SuccessAlert(window.Server.App.LocalizationContent.IsolationCode, window.Server.App.LocalizationContent.IsolationCodeSucess, 7000);
-                $("#update-isolation-code").attr("disabled", true);
             } else {
                 WarningAlert(window.Server.App.LocalizationContent.IsolationCode, window.Server.App.LocalizationContent.IsolationCodeError, result.Message, 7000);
             }

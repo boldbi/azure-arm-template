@@ -3,11 +3,10 @@
     ViewBag.Title = T["Published Resources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
-    var isPublishedItemsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "online-publish") ? "active" : string.Empty;
-    var isDownloadItemsTab = !enablePublishModule ? "active" : (Context.Request.Query["tab"].ToString() == "offline-files") ? "active" : string.Empty;
+    var isDownloadItemsTab = !enablePublishModule ? "active" : (Context.Request.Query["tab"].ToString().ToLower() == "offline-files") ? "active" : string.Empty;
+    var isPublishedItemsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "online-publish") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isDownloadItemsTab)) ? "active" : string.Empty;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
 }
-@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
 @section MainSection{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/published-items.css" />

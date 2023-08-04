@@ -4,8 +4,7 @@
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePermissions);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
     ViewBag.BackIconTitle = T["Groups"];
 }
@@ -118,7 +117,7 @@
                     pageSettings: { pageSize: 10 },
                     actionBegin: "fnOnGroupPermissionActionBegin",
                     actionComplete: function (args) {
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                         if (args.model.currentViewData.length == 0) {
                             rowBound();
                         }
@@ -132,7 +131,7 @@
                         }
                     },
                     dataBound: function (args) {
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     },
                     enableRowHover: true,
                     columns: [

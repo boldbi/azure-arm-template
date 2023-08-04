@@ -6,6 +6,8 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     ViewBag.BackIconRedirectionUrl = Url.Action("Index", "UserManagement");
     ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 
 @model List<ItemDetail>
@@ -36,7 +38,7 @@
 
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
-    <div class="col-xs-12 no-padding no-margin width-alignment">
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="col-xs-12 no-padding">
             @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Manage Permissions"] }, { "DisplayNameInHeader", @ViewBag.DisplayName } })
         </div>
@@ -52,7 +54,7 @@
             </div>
         </div>
     </div>
-    <div id="base-container" class="bi-page-container user-permission col-xs-12">
+    <div id="base-container" class="bi-page-container user-permission col-xs-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="bi-page-content col-xs-12 no-padding">
             <div class="active-directory-form col-xs-12 bi-page-body">
                 <div class="col-md-12 col-xs-12 col-sm-12 permission-grid">@await Html.PartialAsync("_PermissionGrid", Model)</div>
@@ -129,7 +131,7 @@
                     pageSettings: { pageSize: 10 },
                     actionBegin: "fnOnUserPermissionActionBegin",
                     actionComplete: function (args) {
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                         if (args.model.currentViewData.length == 0) {
                             rowBound();
                         }
@@ -143,7 +145,7 @@
                         }
                     },
                     dataBound: function (args) {
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     },
                     enableRowHover: true,
                     columns: [

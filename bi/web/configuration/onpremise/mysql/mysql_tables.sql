@@ -1217,6 +1217,8 @@ INSERT into {database_name}.BOLDBI_PermissionEntity (Name,EntityType,ItemTypeId,
 ;
 INSERT into {database_name}.BOLDBI_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES ('All Groups',1,12,1)
 ;
+INSERT into {database_name}.BOLDBI_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES ('All Users',1,12,1)
+;
 
 INSERT into {database_name}.BOLDBI_Group (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsActive) VALUES ('System Administrator','Has administrative rights for the dashboards','#ff0000',null,NOW(), 1, 1)
 ;
@@ -1398,6 +1400,8 @@ INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, Perm
 INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (13,5,1)
 ;
 INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (14,5,1)
+;
+INSERT into {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) VALUES (30,3,1)
 ;
 
 INSERT into {database_name}.BOLDBI_PermissionLogType (Name,IsActive) VALUES ( 'PermissionAdded',1)

@@ -1,8 +1,8 @@
 ﻿@{
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var isImportedUserTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "imported-users") ? "active" : string.Empty;
-    var isFailedUserTab = (Context.Request.Query["tab"].ToString() == "failed-users") ? "active" : string.Empty;
+    var isFailedUserTab = (Context.Request.Query["tab"].ToString().ToLower() == "failed-users") ? "active" : string.Empty;
+    var isImportedUserTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "imported-users") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isFailedUserTab)) ? "active" : string.Empty;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var scopeList = ServerAppConfig.SettingsScopesList;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
@@ -132,19 +132,32 @@
                         <div class="form-element-label">
                             <div class="show input-field">
                                 <label>@T["Status"]:</label>
-                                @if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended")
+                                @if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended" && !string.IsNullOrWhiteSpace(ViewBag.jobDetails.BulkImportDetails.ErrorMessage))
                                 {
                                     <span value="@ViewBag.jobDetails.ImportJobStatus)">@ViewBag.jobDetails.ImportJobStatus</span>
+                                    <span class="su su-help" title="@T["The import job has been suspended by system due to some unexpected error."]" data-toggle="tooltip"></span>
+                                }
+                                else if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Suspended"]</span>
                                     <span class="su su-help" title="@T["The import has been suspended by system due to 5 consecutive Failure."]" data-toggle="tooltip"></span>
                                 }
                                 else if (ViewBag.jobDetails.BulkImportDetails.CreatedBy != 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended")
                                 {
-                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@ViewBag.jobDetails.ImportJobStatus</span>
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Suspended"]</span>
                                     <span class="su su-help" title="@T[$"The import has been suspended by {ViewBag.jobDetails.CreatedBy}."]" data-toggle="tooltip"></span>
                                 }
-                                else
+                                else if (ViewBag.jobDetails.ImportJobStatus == "Completed")
                                 {
-                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@ViewBag.jobDetails.ImportJobStatus</span>
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Completed"]</span>
+                                }
+                                else if (ViewBag.jobDetails.ImportJobStatus == "In progress")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["In progress"]</span>
+                                }
+                                else if (ViewBag.jobDetails.ImportJobStatus == "Yet to start")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Yet to start"]</span>
                                 }
                             </div>
                         </div>

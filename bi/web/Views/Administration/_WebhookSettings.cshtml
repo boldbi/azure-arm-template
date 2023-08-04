@@ -2,11 +2,10 @@
     var globalAppSettings = _globalAppSettings;
     ViewBag.Title = T["Webhook Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "webhook-settings") ? "active" : string.Empty;
-    var isLogsTab = (Context.Request.Query["tab"].ToString() == "webhook-logs") ? "active" : string.Empty;
+    var isLogsTab = (Context.Request.Query["tab"].ToString().ToLower() == "webhook-logs") ? "active" : string.Empty;
+    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "webhook-settings") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isLogsTab)) ? "active" : string.Empty;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
-    var scopeList = ServerAppConfig.SettingsScopesList;
-    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 
 @section styles{
@@ -113,7 +112,7 @@
                 load: "fnOnGridLoad",
                 actionBegin: "fnActionBegin",
                 actionComplete: function (args) {
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                     showOrHideGridPager("#webhooksGridSettings");
                     if (args.model.currentViewData.length === 0) {
                         this.getContentTable().find("tbody .emptyrecord").html(window.Server.App.Localization.NoWebhookRecords);
@@ -125,10 +124,10 @@
                     if (height != null) {
                         rowBound();
                     }
-                    $("[data-toggle='tooltip']").tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                 },
                 dataBound: function (args) {
-                    $("[data-toggle='tooltip']").tooltip();
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
                 },
                 columns: [
                     {

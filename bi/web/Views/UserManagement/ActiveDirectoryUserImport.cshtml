@@ -17,6 +17,8 @@
     }
     ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
     ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
 
 
@@ -177,7 +179,8 @@
                 });
         });
     </script>
-    <div class="col-xs-12 no-padding no-margin width-alignment">
+
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="col-xs-12 no-padding">
             @await Html.PartialAsync("../Shared/_TopHeaderSection")
         </div>
@@ -195,7 +198,7 @@
             </div>
         </div>
     </div>
-    <div id="import-active-directory-users" class="col-lg-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+    <div id="import-active-directory-users" class="col-lg-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="bi-page-content col-xs-12 no-padding">
             <div class="content-section bi-page-body col-xs-12">
                 <div class="col-md-12 col-xs-12 no-margin no-padding directory-user-search">
