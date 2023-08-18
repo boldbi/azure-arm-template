@@ -1022,6 +1022,19 @@ CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
 	IsActive tinyint(1) NOT NULL,
 	PRIMARY KEY (Id))
 ;
+
+CREATE TABLE {database_name}.BOLDBI_ScheduleRunHistory(
+	Id int NOT NULL AUTO_INCREMENT,
+	ScheduleStatusId int NOT NULL,
+	ScheduleId Char(38) NOT NULL,
+	StartedDate datetime NOT NULL,
+	ModifiedDate datetime NOT NULL,
+	Message text NULL,
+	IsOnDemand tinyint NOT NULL DEFAULT 0,
+	IsActive tinyint NOT NULL,
+	PRIMARY KEY (Id))
+;
+
 -- -- PASTE INSERT Queries below this section --------
 
 INSERT into {database_name}.BOLDBI_PublishType (Name, IsActive) Values ('Publish',1)
@@ -1133,6 +1146,10 @@ INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('Word', 1)
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('Image', 1)
 ;
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('Refresh', 1)
+;
+INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('PPT', 1)
+;
+INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('CSV', 1)
 ;
 
 INSERT into {database_name}.BOLDBI_RecurrenceType (Name,IsActive) VALUES ('Daily', 1)

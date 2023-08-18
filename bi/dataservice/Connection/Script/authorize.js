@@ -321,6 +321,8 @@ function authorize() {
                 return 'Infusionsoft';
             case "asana":
                 return "Asana";
+            case "freshdesk":
+                return "FreshDesk";
 
         }
     };
@@ -330,6 +332,9 @@ function authorize() {
             case 'zendesk':
             case 'servicenow':
                 this.validateDomainBasicAuthConnection();
+                break;
+            case 'freshdesk':
+                this.validateDomainTokenAuthConnection();
                 break;
             case 'salesforce':
             case 'google':
@@ -369,6 +374,8 @@ function authorize() {
                 return this.getDomainBasicAuthTemplate('https://yourdomain.atlassian.net', 'Jira');
             case 'Zendesk':
                 return this.getDomainBasicAuthTemplate('{domain-name}.zendesk.com', 'Zendesk');
+            case 'FreshDesk':
+                return this.getDomainTokenAuthTemplate('<:your_domain>.freshdesk.com', 'FreshDesk');
             case 'Salesforce':
             case 'Google Analytics':
             case 'Google Ads':
@@ -437,7 +444,6 @@ function authorize() {
             this.doAjaxPost('GET', window.authData.designerService + this.api.validateCredentials + '?' + this.portObjToUrl(obj.data), obj.data, this.onFetchSuccess);
         }
     };
-
 this.validateTokenAuthConnection = function () {
     $('.e-auth-content-wrapper').removeClass('e-req-error');
     var obj = { status: false, data: '' };
@@ -467,7 +473,7 @@ this.validateTokenAuthConnection = function () {
             origin: window.authData.origin
         };
         this.doAjaxPost('GET', window.authData.designerService + this.api.validateCredentials + '?' + this.portObjToUrl(obj.data), obj.data, this.onFetchSuccess);
-    }
+    }        
 };
     this.validateDomainBasicAuthConnection = function () {
         $('.e-domain-url').removeClass('e-req-error');
@@ -488,6 +494,35 @@ this.validateTokenAuthConnection = function () {
             }
             if ($("#username").val().trim() === '') {
                 $('.e-domain-username').addClass('e-req-error');
+            }
+            if ($("#password").val().trim() === '') {
+                $('.e-domain-pwd').addClass('e-req-error');
+            }
+        }
+        if (obj.status) {
+            var request = {
+                provider: window.authData.provider,
+                service: window.authData.service,
+                data: obj.data,
+                origin: window.authData.origin
+            };
+            this.doAjaxPost('GET', window.authData.designerService + this.api.validateCredentials + '?' + this.portObjToUrl(obj.data), obj.data, this.onFetchSuccess);
+        }
+    }
+    this.validateDomainTokenAuthConnection = function () {
+        $('.e-domain-url').removeClass('e-req-error');
+        $('.e-domain-pwd').removeClass('e-req-error');
+        var obj = { status: false, data: '' };
+        var data = {};
+        if ($("#url").val().trim() !== '' && this.validateDomain($("#url").val().trim()) && $("#password").val().trim() !== '') {
+            data.url = $('#url').val().trim();
+            data.password = $('#password').val().trim();
+            obj.status = true;
+            obj.data = JSON.stringify(data);
+        } else {
+            obj.status = false;
+            if ($("#url").val().trim() === '' || !this.validateDomain($("#url").val().trim())) {
+                $('.e-domain-url').addClass('e-req-error');
             }
             if ($("#password").val().trim() === '') {
                 $('.e-domain-pwd').addClass('e-req-error');
@@ -615,6 +650,33 @@ this.validateTokenAuthConnection = function () {
             '<label>Username</label>' +
             '</span>' +
             ' <input type="text" class=" e-domain-username e-required" id="username" placeholder="Username"/>' +
+            '</div>' +
+            '<div class="e-div">' +
+            '<span>' +
+            ' <label style="float:left;">' + passwordLabel + '</label>' + (infoUrl !== undefined && infoUrl !== '' ? this.getHelpIconTemplate(infoUrl) : '') +
+            '</span>' +
+            ' <input type="password" class="e-domain-pwd e-required" id="password" placeholder="**********"/>' +
+            ' </div>';
+    };
+    this.getDomainTokenAuthTemplate = function (domainUrl, service) {
+        let passwordLabel = 'API Token';
+        let infoUrl;
+        let url = 'Domain Name';
+        switch (service.toLowerCase()) {
+            case 'freshdesk':
+                infoUrl = 'https://support.freshdesk.com/en/support/solutions/articles/215517-how-to-find-your-api-key';
+                break;
+            default:
+                break;
+        }
+        return '<div class="e-div">' +
+            '<span>' +
+            '<label>' + url + '</label>' +
+            '</span>' +
+            '<input type="text" class="e-domain-url e-required" id="url" placeholder="' + domainUrl + '"/>' +
+            '</div>' +
+            '<div class="e-div">' +
+            ' <span>' +
             '</div>' +
             '<div class="e-div">' +
             '<span>' +

@@ -243,7 +243,7 @@
                 propertyText: "PROPERTIES",
                 assignDataText: "ASSIGN DATA",
                 propertyPanelCommonItems: "Property panel doesn't support to show common properties for multiple items",
-                promptWindowContent: "Do you want to reset the data source?",
+                promptWindowContent: "Any unmatched fields will be removed from the widgets when switching the data source. Would you like to continue?",
                 enableCommentingTooltip: "Show/Hide the comment icon in dashboard published to dashboard server through which users can post comments and collaborate",
                 widgetName: "Name",
                 subHeaderText: "Subtitle",
@@ -889,7 +889,11 @@
 					popCustomizationText: "PoP Customization",
 					primaryBackgroundText: "Primary Background",
 					secondaryBackgroundText: "Secondary Background"
-				}
+				},
+                comboBox: {
+                    defaultplaceHolderText: "All",
+                    placeHolderPropertylabel: "Place Holder"
+                },
             },
             designPanel: {
                 editLabel: "Edit Label",
@@ -968,7 +972,7 @@
                 appendDsAppendBtn: "Append",
                 appendDsCloseBtn: "Close",
                 appendDsChooseFile: 'Choose File',
-                appendDsEstimatedFileSize: "upto(200MB/File)",
+                appendDsEstimatedFileSize: "upto(200MB)",
                 appendDsBrowseText: "Browse File",
                 appendDsSelectedTables: "Selected Tables",
                 appendDsdragAndDropText: "Drop files here or ",
@@ -2593,7 +2597,8 @@
                 exportingSuccessClick: "click here",
 				exportingSuccessEndContent: " to download the file.",
                 connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.',
-                fileNotFoundError: "The shape data file was not found. Please add the file and try again."
+                fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
+                filesNotValid: "The following file has schema mismatch when comparing with initial file uploaded. Do you want to remove and continue ?"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -2639,7 +2644,7 @@
                 dashboardServer: "Dashboard Server",
                 createCategory: "Add Category",
                 SwitchDataView: "Switch Data View",
-                ResetDataSource: "Reset Data Source",
+                ResetDataSource: "Switch Data Source",
                 SaveDataSource: "Save Data Source",
                 SelectTable: "Select Table",
                 CancelDataSourceCreation: "Cancel Data Connection",
@@ -4123,7 +4128,25 @@
                 SpecifyFilePath: "Please select a file",
                 fileLimitInfoText: "Max file size: 200 MB",
                 fileNoteForOnpremise: "Larger files will take more time to import",
-                fileSizeAlert:"The selected file size is very large at "
+                fileSizeAlert:"The selected file size is very large at ",
+                fileSizeAlert:"The selected file size is very large at ",
+                fileUploadBrowseText: "Browse File",
+                fileUploaddragAndDropText: "Drop files here or ",
+                fileuploadEstimatedFileSize: "(up to 200MB)",
+                uploadedSuccessfully: "Uploaded successfully",
+                ofText: " OF ",
+                invalidFileText: "Uploaded failed",
+                exceededFileSizeText: "Exceeds File Size",
+                mbText: "MB",
+                uploadingText: "Uploading...",
+                matchingPattern: "Matching Pattern (Optional)",
+                InvalidFiles: "File(s) Need Attention",
+                existingUploadedfilesText: "Existing Uploaded Files",
+                filesText: "files",
+                expandText: "Expand",
+                collapseText: "Collapse",
+                folderInfoToolTip: "The files within subfolders will be uploaded.",
+                fileNotAllowedText: "File type is not allowed"
 			},
             stripeDataSource: {
                 balance: "Balance",
@@ -5748,6 +5771,8 @@
                     htmlParseEx: "HTML_Parse(string_expression)",
                     xmlParseDesc: "Returns a string value with the XML tags stripped from the specified string expression.",
                     xmlParseEx: "XML_Parse(string_expression)",
+                    string_aggDesc: "Concatenates a list of strings and places a separator between them.",
+                    string_aggEx: "STRING_AGG(string_expression, separator)",
                     avgDesc: "Returns the average of the values in the given expression.",
                     avgEx: "AVG(numeric_expression)",
 					sumdDesc: "Returns the sum of the Distinct values in the given expression.",
@@ -5808,7 +5833,7 @@
                 refreshColumnTitle: "Incremental Refresh Settings"
             },
             driveFilePicker: {
-                folderEmptyText: "This folder does not have any CSV/JSON files.",
+                folderEmptyText: "This folder does not contain any valid file(s).",
                 selectButtonText: "Select",
                 cancelButtonText: "Cancel",
                 backContainerText: "My Drive",
@@ -6067,6 +6092,11 @@
                 importType: "Import Type",
                 worksheets: "Worksheets",
                 tables: "Tables"
+            },
+            filePathType: {
+                filePathType: "File Path",
+                files: "File",
+                folder: "Folder"
             },
 			authenticationType: {
                 authenticationType: "Authentication Type",
@@ -7095,6 +7125,10 @@
                 scenarioAutomations: "Scenario Automations",
                 slaPolicies: "SLA Policies",
                 settings: "Settings",
+				agent: "Agent",
+			    allAgent: "All Agent",
+                currentAgent: "Current Agent",
+                viewAgent:"View Agent",
             },            			
             nutshellDataSource: {
                 allAccounts: "All Accounts",

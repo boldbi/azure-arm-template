@@ -1,7 +1,17 @@
-INSERT INTO [BOLDBI_PermissionEntity] (Name, EntityType, ItemTypeId, IsActive) SELECT 'All Users', 1, 12, 1
-WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_PermissionEntity] WHERE Name = 'All Users')
+CREATE TABLE [BOLDBI_ScheduleRunHistory](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[ScheduleStatusId] [int] NOT NULL,
+	[ScheduleId] [uniqueidentifier] NOT NULL,
+	[StartedDate] [datetime] NOT NULL,
+	[Message] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+	[IsOnDemand] [bit] NOT NULL DEFAULT (0),
+	[IsActive] [bit] NOT NULL)
 ;
 
-INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) SELECT 30, 3, 1
-WHERE NOT EXISTS (SELECT * FROM [BOLDBI_PermissionAccEntity] WHERE PermissionEntityId = 30 AND PermissionAccessId = 3)
+INSERT INTO [BoldBI_ExportType] (Name, IsActive) SELECT 'PPT', 1
+WHERE NOT EXISTS (SELECT Name FROM [BoldBI_ExportType] WHERE Name = 'PPT')
+;
+INSERT INTO [BoldBI_ExportType] (Name, IsActive) SELECT 'CSV', 1
+WHERE NOT EXISTS (SELECT Name FROM [BoldBI_ExportType] WHERE Name = 'CSV')
 ;

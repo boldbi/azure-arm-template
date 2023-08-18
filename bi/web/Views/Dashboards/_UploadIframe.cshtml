@@ -6,6 +6,8 @@
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var uploadDashboardId = ViewBag.ItemId;
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
+    var enableManualOverWrite = ViewData["EnableManualOverWrite"] != null ? Convert.ToBoolean(ViewData["EnableManualOverWrite"]) : false;
 }
 <head>
     <meta name="designer_service:url" content="@ServerAppConfig.InternalAppDataRefreshServiceUrl" />
@@ -29,6 +31,8 @@
         var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
         var custombrandName = "@ServerAppConfig.CustomBrandName";
         var appVersion = "@ServerAppConfig.ProductVersion";
+        var canCreateCategory = @Json.Serialize(canCreateCategory);
+        var enableManualOverWrite = @Json.Serialize(enableManualOverWrite);
     </script>
     <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
 </head>

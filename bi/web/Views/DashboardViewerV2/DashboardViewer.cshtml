@@ -49,6 +49,7 @@
     var getWidgetEmbedCode = globalAppSettings.SystemSettings.GetWidgetEmbedCode;
     var isViewNotFound = (ViewBag.ViewNotFound != null && ViewBag.ViewNotFound ) ? true : false;
     var isCommentNotFound = (ViewBag.CommentNotFound != null && ViewBag.CommentNotFound) ? true : false;
+    var isInvalidComment = (ViewBag.InValidCommentId != null && ViewBag.InValidCommentId) ? true : false;
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
@@ -166,7 +167,7 @@
         var isPublic = @Json.Serialize(isPublic);
         var embedConfig = @Html.Raw(Json.Serialize(embedConfig));
         var Commentswidgets = "@Url.Action("WidgetCommentPartialView", "Comments")";
-        var editDashboardUrl = encodeURI("@Url.Action("DashboardDesigner", "Designer")" + "/@itemDetail.Id/@itemDetail.CategoryName/@itemDetail.Name");
+        var editDashboardUrl = "@Url.Action("DashboardDesigner", "Designer")" + "/@itemDetail.Id";
         var myDashboardsUrl = encodeURI("@Url.Action("Dashboards", "Dashboards")" + "?view=all");
         var editDashboardEmbedUrl = "@Url.Action("DashboardDesigner", "Designer")";
         var isSlideshow = @Json.Serialize(isSlideshow);
@@ -211,6 +212,7 @@
         var parentItemId = "@ViewBag.ParentItemId";
         var isViewNotFound = @Html.Raw(Json.Serialize(isViewNotFound));
         var isCommentNotFound = @Html.Raw(Json.Serialize(isCommentNotFound));
+        var isInvalidComment = @Html.Raw(Json.Serialize(isInvalidComment));
         var dashboardCustomThemename = "@dashboardCutomTheme";
         var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
         var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";

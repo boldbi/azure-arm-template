@@ -443,10 +443,16 @@ $(document).ready(function () {
                 $("#save-db-settings").hide();
                 $("#connect-database").hide();
                 $("#change-connection").hide();
-
             }
 
         }
+        // SSL certificate check box information in UI
+        //if (ignoreSslValidation) {
+        //    $("#ssl-certificate").prop("checked", true);
+        //}
+        //else {
+        //    $("#ssl-certificate").prop("checked", false);
+        //}
     });
 
     $(document).on("change", "#enablepoweredbysyncfusion", function () {
@@ -472,7 +478,7 @@ $(document).ready(function () {
             $("#copyrightinfo").removeClass("show").hide();
             $("#site-copyright").attr('disabled', 'disabled');
             $("#site-copyright-error").hide();
-            $("#site-copyright").attr("style", "border-color:var(--input-box-border-normal-color) !important");         
+            $("#site-copyright").attr("style", "border-color:var(--input-box-border-normal-color) !important");
         }
         else {
             $("#copyrightinfo").removeClass("hide").show();
@@ -580,6 +586,7 @@ $(document).ready(function () {
             IsEnableCopyrightInfo: $("#enablecopyrightinfo").is(":checked"),
             CopyrightInformation: $("#site-copyright").val(),
             TimeFormat: document.getElementById("time_format").ej2_instances[0].value,
+            IgnoreSslValidation: $("#ssl-certificate").is(":checked")
         };
 
         $.ajax({
@@ -597,26 +604,23 @@ $(document).ready(function () {
                         window.location.href = getSslValue() + "://" + location.host + location.pathname;
                     }
                 } else {
-                    if (isMainLogoChange)
-                    {
+                    if (isMainLogoChange) {
                         $("#application-logo").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.MainScreenLogo);
                     }
-                       
-                    if (isPowerdbyLogoChange)
-                    {
+
+                    if (isPowerdbyLogoChange) {
                         $("#poweredbysyncfusion img").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.PoweredByLogo);
                     }
-                   
+
                     $("#copyrightinfo").html(systemSettingsData.CopyrightInformation);
-                    if (isFavIconChange)
-                    {
+                    if (isFavIconChange) {
                         var link = document.createElement("link");
                         link.type = "image/x-icon";
                         link.rel = "shortcut icon";
                         link.href = window.baseRootUrl + "content/images/application/" + systemSettingsData.FavIcon;
                         document.getElementsByTagName("head")[0].appendChild(link);
                     }
-                        
+
                     var pageTitle = document.title.split("-")[0] + " - " + $("#site-orgname").val();
                     document.title = pageTitle;
                 }
@@ -639,7 +643,7 @@ $(document).ready(function () {
                     }
                     SuccessAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
                     SetCookie();
-                    
+
                 } else {
                     WarningAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.Message, 7000);
                     $(".error-message, .success-message").css("display", "none");
