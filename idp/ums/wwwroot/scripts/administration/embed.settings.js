@@ -26,7 +26,7 @@ $(function () {
             $("#filename").val(jsonFileName);
             if (getLinkInputObj.val() != "") {
                 getLinkInputObj.removeAttr("disabled");
-                getLinkCopyLinkobj.removeAttr("disabled"); 
+                getLinkCopyLinkobj.removeAttr("disabled");
             }
             var isEmbed = "true";
             $(".download-template").show();
@@ -77,7 +77,7 @@ $(function () {
 
     $(document).on('click', '#restrict-embed-enabled', function () {
         if (!$('#restrict-embed-enabled').is(":checked")) {
-            $("#secret-code-copy").attr("disabled", true).tooltip("enable").css("cursor","pointer");
+            $("#secret-code-copy").attr("disabled", true).tooltip("enable").css("cursor", "pointer");
         }
     });
 

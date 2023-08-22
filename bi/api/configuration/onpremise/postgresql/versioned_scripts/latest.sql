@@ -1,7 +1,17 @@
-INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) SELECT 'All Users',1,12,1
-WHERE NOT EXISTS ( SELECT Name FROM SyncDS_PermissionEntity WHERE Name = 'All Users')
+CREATE TABLE SyncDS_ScheduleRunHistory(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	ScheduleStatusId int NOT NULL,
+	ScheduleId uuid NOT NULL,
+	StartedDate timestamp NOT NULL,
+	ModifiedDate timestamp NOT NULL,
+	Message text NULL,
+	IsOnDemand smallint NOT NULL DEFAULT (0),
+	IsActive smallint NOT NULL)
 ;
 
-INSERT INTO SyncDS_PermissionAccEntity (PermissionEntityId, PermissionAccessId, IsActive) SELECT 30,3,1
-WHERE NOT EXISTS ( SELECT PermissionEntityId FROM SyncDS_PermissionAccEntity WHERE PermissionEntityId = 30 AND PermissionAccessId = 3)
+INSERT INTO SyncDS_ExportType (Name, IsActive) SELECT N'PPT', 1
+WHERE NOT EXISTS (SELECT Name FROM SyncDS_ExportType WHERE Name = N'PPT')
+;
+INSERT INTO SyncDS_ExportType (Name, IsActive) SELECT N'CSV', 1
+WHERE NOT EXISTS (SELECT Name FROM SyncDS_ExportType WHERE Name = N'CSV')
 ;

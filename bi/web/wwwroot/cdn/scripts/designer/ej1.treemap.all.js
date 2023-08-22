@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.treemap.all.js
-*  version : 6.10.12
+*  version : 6.11.10
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -280,6 +280,8 @@
 				this._levelItemCollections = [];
 			this._levelChangedItemCollections = [];
 			this._drillDownLevelData = null;
+			this._allowDoubleClick = false;
+            this._allowItemSelectEvent = false;
         },
 
         _setModel: function (options) {
@@ -715,6 +717,7 @@
 
         _tmClick: function(e){
             var eventArgs, end, treeMap = this;
+			this._allowDoubleClick = false;
             if(this.model.click != ''){
                 eventArgs = { model: this.model, data:{ event: e }};
                 this._trigger("click", eventArgs);
@@ -734,6 +737,7 @@
 				}
                 if(this._doubleTapTimer != null && (end - this._doubleTapTimer < 300))
                 {
+					this._allowDoubleClick = true;
                     !eventArgs && (eventArgs = { model: this.model, data:{ event: e }, selectedItems: [item.Data], doubleClick:true});
                     this._trigger("doubleClick", eventArgs);
                 }
@@ -1674,6 +1678,7 @@
                 var isContain, isSelected = false;
                 var ctrlkey = event.ctrlKey;
                 var clientX = event.clientX || this.getClientX(event), clientY = event.clientY || this.getClientY(event);
+				treeMap._allowItemSelectEvent = false;
                 if (treeMap.highlightGroupOnSelection()) {
                     for (var i = 0; i < treeMap.treemapgroups.length; i++) {
                         var item = treeMap.treemapgroups[i];
@@ -1800,7 +1805,10 @@
                         }
                         setTimeout(function(){
 						if(!event.public)
-							treeMap._trigger("treeMapItemSelected", { selectedItem: item, isSelected: isSelected, selectedItems: treeMap.selectedItems, originalEvent: event, rightClick: false, treeMap: treeMap, doubleClick: (treeMap._doubleTapTimer != null && (new Date() - treeMap._doubleTapTimer < 300)) });
+							if(!treeMap._allowItemSelectEvent) {
+                                treeMap._allowItemSelectEvent = true;
+                                treeMap._trigger("treeMapItemSelected", { selectedItem: item, isSelected: isSelected, selectedItems: treeMap.selectedItems, originalEvent: event, rightClick: false, treeMap: treeMap, doubleClick: treeMap._allowDoubleClick });
+                            }
 						}, 500);
 					}
                     

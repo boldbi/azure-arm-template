@@ -944,6 +944,17 @@ CREATE TABLE [BOLDBI_UploadDataSourceMapping](
     [IsActive] [bit] NULL)
 ;
 
+CREATE TABLE [BOLDBI_ScheduleRunHistory](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[ScheduleStatusId] [int] NOT NULL,
+	[ScheduleId] [uniqueidentifier] NOT NULL,
+	[StartedDate] [datetime] NOT NULL,
+	[Message] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+	[IsOnDemand] [bit] NOT NULL DEFAULT (0),
+	[IsActive] [bit] NOT NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into [BOLDBI_ItemType] (Name,IsActive) VALUES (N'Category',1)
@@ -1045,6 +1056,10 @@ INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'Word', 1)
 INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'Image', 1)
 ;
 INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'Refresh', 1)
+;
+INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'PPT', 1)
+;
+INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'CSV', 1)
 ;
 
 INSERT into [BOLDBI_RecurrenceType] (Name,IsActive) VALUES (N'Daily', 1)

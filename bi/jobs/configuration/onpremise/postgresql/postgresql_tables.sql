@@ -936,6 +936,17 @@ CREATE TABLE SyncDS_UploadDataSourceMapping (
 	IsActive smallint NOT NULL)
 ;
 
+CREATE TABLE SyncDS_ScheduleRunHistory(
+	Id SERIAL PRIMARY KEY NOT NULL,
+	ScheduleStatusId int NOT NULL,
+	ScheduleId uuid NOT NULL,
+	StartedDate timestamp NOT NULL,
+	ModifiedDate timestamp NOT NULL,
+	Message text NULL,
+	IsOnDemand smallint NOT NULL DEFAULT (0),
+	IsActive smallint NOT NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT INTO SyncDS_PublishType (Name, IsActive) Values (N'Publish',1)
@@ -1047,6 +1058,10 @@ INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'Word', 1)
 INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'Image', 1)
 ;
 INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'Refresh', 1)
+;
+INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'PPT', 1)
+;
+INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'CSV', 1)
 ;
 
 INSERT into SyncDS_RecurrenceType (Name,IsActive) VALUES (N'Daily', 1)

@@ -109,7 +109,7 @@ $(document).ready(function () {
         var fontFamily = null;
         var theme = null;
         if (document.getElementById("fontfamily") != null) {
-            fontFamily =document.getElementById("fontfamily").ej2_instances[0].value;
+            fontFamily = document.getElementById("fontfamily").ej2_instances[0].value;
         }
 
         if (document.getElementById("application-theme") != null) {
@@ -142,7 +142,7 @@ $(document).ready(function () {
     });
 
     $(document).on("click", "#upload-font", function () {
-        showWaitingPopup('body');     
+        showWaitingPopup('body');
     });
 });
 
@@ -187,7 +187,7 @@ function onChangeTheme(defaultTheme) {
     }
     var themeElements = document.getElementsByClassName("theme-ref");
     themeElements[0].href = baseRootUrl + "bundles/css/" + appearanceTheme;
-    
+
     var applicationElements = document.getElementsByClassName("application-theme-ref");
     applicationElements[0].href = applicationThemeReferenceUrl + "?theme=" + defaultTheme;
 }
@@ -315,7 +315,7 @@ function keyvalidation(id) {
     var themeList = theme.getItems();
     if (name != "") {
         for (var item = 0; item < themeList.length; item++) {
-            if ( name.toLowerCase().trim() === themeList[item].dataset.value.toLowerCase() || name.toLowerCase().trim() == "light" || name.toLowerCase().trim() == "dark") {
+            if (name.toLowerCase().trim() === themeList[item].dataset.value.toLowerCase() || name.toLowerCase().trim() == "light" || name.toLowerCase().trim() == "dark") {
                 $(id).closest('div').addClass("has-error");
                 $(invalid).html(window.Server.App.LocalizationContent.CssFileExist);
                 $('.upload-theme').attr("disabled", "disabled");

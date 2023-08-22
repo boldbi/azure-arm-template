@@ -302,7 +302,7 @@ function changeTenantType(args) {
                 $(".selector").addClass("selector-alignment");
                 $(".select-intermediate-database").html(window.Server.App.LocalizationContent.SiteDataStore);
             }
-            else { 
+            else {
                 $(".get-data-security").css("display", "none");
                 $("#selection-data-security").css("display", "none");
                 $(".selector").removeClass("selector-alignment");

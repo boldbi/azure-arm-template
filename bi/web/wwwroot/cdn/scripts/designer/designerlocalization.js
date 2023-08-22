@@ -827,6 +827,10 @@ var Designer = {
                     columnHeaderText:"Column Header",
                     valueText:"Value"
                 },
+                comboBox: {
+                    defaultplaceHolderText: "All",
+                    placeHolderPropertylabel: "Place Holder"
+                },
             },
             designPanel: {
                 editLabel: "Edit Label",
@@ -869,7 +873,7 @@ var Designer = {
                 appendDsAppendBtn: "Append",
                 appendDsCloseBtn: "Close",
                 appendDsChooseFile: 'Choose File',
-                appendDsEstimatedFileSize: "upto(200MB/File)",
+                appendDsEstimatedFileSize: "upto(200MB)",
                 appendDsBrowseText: "Browse File",
                 appendDsSelectedTables: "Selected Tables",
                 appendDsdragAndDropText: "Drop files here or ",
@@ -2075,7 +2079,8 @@ var Designer = {
                 exportingSuccessClick: "click here",
 				exportingSuccessEndContent: " to download the file.",
                 connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.',
-                fileNotFoundError: "The shape data file was not found. Please add the file and try again."
+                fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
+                filesNotValid: "The following file has schema mismatch when comparing with initial file uploaded. Do you want to remove and continue ?"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -3126,7 +3131,24 @@ var Designer = {
                 SpecifyFilePath: "Please select a file",
                 fileLimitInfoText: "Max file size: 200 MB",
                 fileNoteForOnpremise: "<b> Note </b> : Larger files will take more time to import",
-                fileSizeAlert:"The selected file size is very large at "
+                fileSizeAlert: "The selected file size is very large at ",
+                fileUploadBrowseText: "Browse File",
+                fileUploaddragAndDropText: "Drop files here or ",
+                fileuploadEstimatedFileSize: "(up to 200MB)",
+                uploadedSuccessfully: "Uploaded successfully",
+                ofText: " OF ",
+                invalidFileText: "Uploaded failed",
+                exceededFileSizeText: "Exceeds File Size",
+                mbText: "MB",
+                uploadingText: "Uploading...",
+                matchingPattern: "Matching Pattern (Optional)",
+                InvalidFiles: "File(s) Need Attention",
+                existingUploadedfilesText: "Existing Uploaded Files",
+                filesText: "files",
+                expandText: "Expand",
+                collapseText: "Collapse",
+                folderInfoToolTip: "The files within subfolders will be uploaded.",
+                fileNotAllowedText: "File type is not allowed"
 			},
             stripeDataSource: {
                 balance: "Balance",
@@ -4768,6 +4790,9 @@ var Designer = {
                     xmlParseDesc: "Returns a string value with the XML tags stripped from the specified string expression.",
                     xmlParseEx: "XML_Parse(string_expression)",
 
+                    string_aggDesc: "Concatenates a list of strings and places a separator between them.",
+                    string_aggEx: "STRING_AGG(string_expression, separator)",
+
                     avgDesc: "Returns the average of the values in the given expression.",
                     avgEx: "AVG(numeric_expression)",
 					
@@ -4843,7 +4868,7 @@ var Designer = {
                 refreshColumnTitle: "Incremental Refresh Settings"
             },
             driveFilePicker: {
-                folderEmptyText: "This folder does not have any CSV/JSON files.",
+                folderEmptyText: "This folder does not contain any valid file(s).",
                 selectButtonText: "Select",
                 cancelButtonText: "Cancel",
                 backContainerText: "My Drive",
@@ -5092,6 +5117,11 @@ var Designer = {
                 importType: "Import Type",
                 worksheets: "Worksheets",
                 tables: "Tables"
+            },
+            filePathType: {
+                filePathType: "File Path",
+                files: "File",
+                folder: "Folder"
             },
             thousandSeparator: {
                 decimal: "Decimal Symbol",
@@ -6532,6 +6562,10 @@ var Designer = {
                 scenarioAutomations: "Scenario Automations",
                 slaPolicies: "SLA Policies",
                 settings: "Settings",
+				agent: "Agent",
+				allAgent: "All Agent",
+                currentAgent: "Current Agent",
+                viewAgent:"View Agent",
             },            			
             nutshellDataSource: {
                 allAccounts: "All Accounts",
