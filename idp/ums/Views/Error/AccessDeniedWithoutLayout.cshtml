@@ -1,0 +1,37 @@
+﻿@{
+    Layout = null;
+    var currentUserEmail = (Context.User.Identity).Name;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var absoluteUrl = @Url.Action("logout", "accounts") + "?returnUrl=" + @WebUtility.UrlEncode(requestUrl.AbsoluteUri);
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Syncfusion Cloud Management - Access Denied</title>
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="base-container-bg">
+        <div class="base-conatiner" id="base-conatiner">
+            <div id="main-div">
+                <div class="app-logo">
+                    <img alt="@T["Login Logo"]" src="@Url.Content("~/logos?type=login")" onerror="this.onerror=null;this.src='@Url.Content("~/content/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.LoginLogo)';" />
+                </div>
+                <div class="secondary-div">
+                    <div class="page-title">
+                        @T["Access Denied"]
+                    </div>
+                    <div class="page-content login-message">@Html.Raw(string.Format(T["You were signed in as {0}{1}{2}. If this wasn't the account you intended to use, please {3}sign out and sign in{4} again using the intended account."].Value, "<b>", currentUserEmail, "</b>", "<a href='" + absoluteUrl + "'>", "</a>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

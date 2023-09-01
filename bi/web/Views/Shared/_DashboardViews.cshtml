@@ -1,0 +1,127 @@
+﻿@inject ServerPrincipal _identityResponse
+@{
+    var enableComment = "false";
+    var isUserAuthenticated = "false";
+    if (_identityResponse != null && _identityResponse.IsAuthenticated)
+    {
+        enableComment = "true";
+        isUserAuthenticated = "true";
+    }
+    else
+    {
+        enableComment = "false";
+        isUserAuthenticated = "false";
+    }
+}
+<script>
+    $(document).ready(function () {
+        var dashboardViewWaitingPopupTemplateId = createLoader("dashboard-view-toogle");
+		$("#dashboard-view-toogle").ejWaitingPopup({ template:$("#" + dashboardViewWaitingPopupTemplateId) });
+        if (@enableComment == true)
+        {
+            $(".options li#comments").css("display", "block");
+        }
+        else
+        {
+            $(".options li#comments").css("display", "none");
+        }
+
+        if ((@ViewBag.IsPublic == true && @isUserAuthenticated == true)) {
+            $("#save-view, #reset-view").attr("disabled", false);
+            $("[data-toggle=tooltip]").tooltip("enable");
+        }
+        else if((@ViewBag.IsPublic == true && @isUserAuthenticated == false)) {
+            $("#save-view, #reset-view").attr("disabled", true);
+            $("[data-toggle=tooltip]").tooltip("disable");
+        }
+
+        $("#messageBox").ejDialog({
+            width: ((sameOrigin ? parent.window.innerWidth : window.innerWidth) > 460) ? "450px" : ((sameOrigin ? parent.window.innerWidth : window.innerWidth) - 10),
+            height: "150px",
+            showOnInit: false,
+            allowDraggable: true,
+            enableResize: false,
+            showHeader: false,
+            enableModal: true,
+            close: "onMessageDialogClose"
+        });
+    });
+</script>
+<ul class="options">
+    <li id="comments" data-toggle="tooltip" data-placement="left" data-original-title="@T["Comments"]">
+        <span class="@(ViewBag.IsDashboardCommented == "true" ? "su-with-comment" : "su-without-comment")"></span>
+    </li>
+    <li id="filters" data-toggle="tooltip" data-placement="left" data-original-title="@T["Filters"]">
+        <span class="su-filter"></span>
+    </li>
+    <li id="views" data-toggle="tooltip" data-placement="left" data-original-title="@T["Views"]">
+        <span class="su-view"></span>
+    </li>
+</ul>
+<div id="filter-view" style="display: block">
+    <div id="close-filter">
+        <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" style="display: none"><span class="su su-close"></span></a>
+    </div>
+</div>
+<div class="list-group server-dashboard-view" id="dashboard-view-toogle" style="display: block">
+    <div class="header-section col-xs-12 no-padding">
+        <div id="header-pane" class="col-xs-10 no-padding">
+            <span class="view-heading " id="view-heading" style="display: none">
+                @T["VIEWS"]
+            </span>
+        </div>
+        <div class="col-xs-2 no-padding" id="close-container">
+            <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" style="display: none"><span class="su su-close"></span></a>
+        </div>
+    </div>
+    <nav class="list-group" style="display: none" id="dashboard-views">
+        <div id="no-filters" style="float: left; display: none">
+            <div class="cursor-default">
+                <label class="cursor-default txt-overflow">@T["No views found."]</label>
+                <br style="clear: both">
+            </div>
+        </div>
+        <div id="saved-filter" style="display: block;float: left">
+        </div>
+    </nav>
+</div>
+
+<div id="delete-div" style="display: none" class="col-lg-12 no-padding">
+    <div id="PopupContainerDelete">
+        <div class="col-md-12 header-menu header-pad-top header-menu-margin">
+            <div class="col-xs-6 no-padding">
+                <span class="su su-delete Head-icon"></span>
+                <span class="PopupTitle">@T["Delete View"]</span>
+            </div>
+            <div class="col-xs-6 no-padding">
+                <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="onDeleteItemDialogClose()"><span class="su su-close"></span></a>
+            </div>
+        </div>
+        <div class="dialogBody col-xs-12 no-padding delete-dialog-body">
+            <div>
+                <div class="deleteItem">
+                    <span id="delete-content">@Html.Raw("<span>" + string.Format(T["Are you sure you want to delete the view — {0}?"].Value, "</span><span id='delete_item_name' class='delete-item-body highlight-name delete_item_name'></span>"))</span>
+                    <span style="white-space: nowrap; float: left; display: none" class="centerAlign no-padding" id="delete-confirmation">@T["View has been deleted successfully."]</span>
+                    <span style="white-space: nowrap; float: left; display: none" class="centerAlign no-padding " id="delete-error">@T["Try again later"]</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 dialogFooter">
+            <div class="col-xs-4"></div>
+            <div class="col-xs-8 no-padding rightAlign validationArea" id="deleteview-validationArea">
+                <input type="button" class="app-button app-critical-action-button app-btn-danger" value="@T["Yes"]" id="delete_item" tabindex="1" autofocus />
+                <input type="button" id="CancelDelete" class="app-button app-secondary-button app-btn-secondary" value="@T["No"]" onclick="onDeleteItemDialogClose()" tabindex="2" />
+            </div>
+            <div class="col-xs-8 no-padding centerAlign successArea" style="display: none">
+                <input title="" type="button" id="ok-button" class="secondary-button app-btn-secondary PopupClose pull-center" value="@T["OK"]" onclick="onDeleteItemDialogClose()" tabindex="3" autofocus />
+            </div>
+        </div>
+    </div>
+</div>
+<div id="messageBox">
+    <div class="message-header"></div>
+    <div class="message-box-close"></div>
+    <div class="message-content text-center"></div>
+    <div class="message-box-btn-holder"></div>
+</div>

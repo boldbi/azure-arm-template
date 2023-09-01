@@ -1,0 +1,899 @@
+﻿@using Microsoft.AspNetCore.Mvc.Routing;
+@inject Microsoft.AspNetCore.Mvc.Infrastructure.IActionContextAccessor actionContextAccessor
+@inject ServerPrincipal _identityResponse
+@{
+    var globalAppSettings = _globalAppSettings;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var gridName = ViewBag.gridName;
+    var categoryName = ViewBag.CategoryName;
+    var absolutePath = string.Empty;
+    var itemId = string.Empty;
+    var itemName = string.Empty;
+    var category = string.Empty;
+    var currentSection = string.Empty;
+    var tabName = ViewBag.tabName;
+    var sectionName = ViewBag.sectionName;
+    var culture = ViewBag.cultureinfo;
+    var userId = _identityResponse.User.UserId;
+    var dashboardUrl = Url.Action("dashboards", "dashboards");
+    var host = Context.Request.Host.ToString();
+    var fragement = new Uri(Context.Request.GetDisplayUrl()).Fragment;
+    var url = new URLHelper(actionContextAccessor.ActionContext).GenerateUrl("http", host, null, fragement);
+
+    if (!string.IsNullOrWhiteSpace(ViewBag.itemName))
+    {
+        absolutePath = dashboardUrl;
+        itemId = ViewBag.ItemId;
+        itemName = ViewBag.itemName;
+        category = ViewBag.category;
+        currentSection = ViewBag.sectionName;
+    }
+}
+<script>
+    var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
+    var moveIframeUrl = "@Url.Action("moveviewitem", "items")";
+    var versionIframeUrl = "@Url.Action("itemversion", "items")";
+    var deleteConfirmationUrl = "@Url.Action("deleteconfirmation", "items")";
+    var deleteItemUrl = "@Url.Action("deleteitem", "items")";
+    var makePublicUrl = "@Url.Action("makeitempublic", "items")";
+    var removePublicUrl = "@Url.Action("RemovePublic", "items")";
+    var designerUrl =
+        "@Url.Action(globalAppSettings.SystemSettings.InstallationFolder + "dashboarddesigner.exe", "dashboarddesigner")";
+    var favoriteItemUrl = "@Url.Action("MakeFavorite", "items")";
+    var getCategoryItem = "@Url.Action("RefreshCategoryList", "Dashboards")";
+    var getItemUrl = "@Url.Action("GetItems", "Dashboards")";
+    var getViewsByItemIdUrl = "@Url.Action("GetViewsByItemId","Items")";
+    var dashboards = "@Url.Action("dashboards", "dashboards")";
+    var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl" + "/dashboards/view/";
+    var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
+    var checkDashboardCreationLimit = "@Url.Action("CheckDashboardCreationLimit", "Designer")";
+</script>
+
+<div id="items" class="item-grid">
+</div>
+
+<script type="text/x-jsrender" id="favoriteHeader">
+    <div class=""></div>
+</script>
+
+<script type="text/x-jsrender" id="itemNameHeader">
+    <div class="item-name">@T["Name"]</div>
+</script>
+<script type="text/x-jsrender" id="descriptionHeader">
+    <div class="item-header">@T["Description"]</div>
+</script>
+<script type="text/x-jsrender" id="categoryHeader">
+    <div class="item-header">@T["Category"]</div>
+</script>
+<script type="text/x-jsrender" id="ownerHeader">
+    <div class="item-header">@T["Owner"]</div>
+</script>
+<script type="text/x-jsrender" id="lastModifiedHeader">
+    <div class="item-header">@T["Last Modified"]</div>
+</script>
+<script type="text/x-jsrender" id="Description">
+    <div class="item-description" title="{{:~renderDoubleQuotes(Description)}}" data-toggle="tooltip" data-placement="top">
+        <span>
+            {{:Description}}
+        </span>
+    </div>
+</script>
+
+<script type="text/x-jsrender" id="Category">
+    <span title="{{:CategoryName}}" data-toggle="tooltip" data-placement="top">
+        {{:CategoryName}}
+    </span>
+</script>
+
+<script type="text/x-jsrender" id="CreatedByDisplayName">
+    <span title="{{:CreatedByDisplayName}}" data-toggle="tooltip" data-placement="top">
+        {{:CreatedByDisplayName}}
+    </span>
+</script>
+
+<script type="text/x-jsrender" id="modifiedDate">
+    <div title="{{:ModifiedDate}}" data-toggle="tooltip" data-placement="top">
+        {{:ModifiedDate}}
+    </div>
+</script>
+
+<script type="text/x-jsrender" id="favoriteItem">
+    {{if ItemType=="@((int)ItemType.Dashboard)"}}
+    {{if IsFavorite== true}}
+    <div class="su su-favorite favorite favoriteItem" title="{{:Favorite}}" data-toggle="tooltip" data-placement="top" data-itemid="{{:Id}}" data-value="False" data-original-title="@T["Remove from favorites"]">
+    </div>
+    {{else}}
+    <div class="su su-dis-favorite favoriteItem" title="{{:Favorite}}" data-toggle="tooltip" data-placement="top" data-itemid="{{:Id}}" data-value="True" data-original-title="@T["Mark as favorite"]">
+    </div>
+    {{/if}}
+    {{/if}}
+
+</script>
+
+<script type="text/x-jsrender" id="itemName">
+    {{if ItemType == "@((int)ItemType.Dashboard)"}}
+    {{if !IsChildDashboard}}
+    <a class="item-link col-lg-12 col-md-12 col-sm-12 col-xs-12 disabled" href="{{if IsDraft}} {{:~draftDesignerEditUrlEncode(Name, Id)}} {{else}} {{:~urlWithSection(CategoryName, Name, Id)}} {{/if}}" data-culture="/@culture" role="tab" data-toggle="tooltip" data-placement="@(!isMobile ? "right" : "auto top")" data-name="{{:Name}}" data-itemid="{{:Id}}" data-category-name="{{:CategoryName}}" data-isdraft="{{:IsDraft}}" data-html="true" data-container="body" title="@T["Name"] : {{:Name}} <br> {{if Description}} @T["Description"]: {{:~renderDoubleQuotes(Description)}} <br> {{/if}} {{if CategoryName}} @T["Category"] : {{:CategoryName}} <br> {{/if}} @T["Added Date"] : {{:CreatedDate}}">
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 name-and-options" data-href="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+            {{if ItemType=="@((int)ItemType.Dashboard)"}}
+            {{if IsDraft}}
+            <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding"></span>
+            {{else}}
+            {{if IsFavorite== true}}
+            <span class="su su-favorite favorite favorite-item col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" data-itemid="{{:Id}}" data-value="False" data-original-title="@T["Remove from favorites"]">
+            </span>
+            {{else}}
+            <span class="su su-dis-favorite favorite-item col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" data-itemid="{{:Id}}" data-value="True" data-original-title="@T["Mark as favorite"]">
+            </span>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+            {{if !IsMultiDashboard}}
+            <span class="item-name col-lg-9 col-md-9 col-sm-9 col-xs-9 no-padding" data-href="{{:~urlWithoutSection(CategoryName, Name, Id)}}" data-container="body">{{:Name}}</span>
+            {{else}}
+            <span class="item-name col-lg-8 col-md-8 col-sm-8 col-xs-8 no-padding" data-href="{{:~urlWithoutSection(CategoryName, Name, Id)}}" data-container="body">{{:Name}}</span>
+            <span class="su-multi-tabbed multi-dashboard-icon col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" data-toggle="tooltip" data-container="body" data-placement="bottom" title="@T["Contains multiple dashboards"]"></span>
+            {{/if}}
+            {{if !IsDraft}}
+            <i class="su su-open-link-newtab col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" id="open-dashboard" data-isdraft="{{:IsDraft}}" data-href="{{:~urlWithoutSection(CategoryName, Name, Id)}}" data-toggle="tooltip" data-container="body" data-placement="bottom" title="@T["Open Dashboard in new tab"]"></i>
+            {{/if}}
+            {{if IsDraft}}
+            {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+            <span class="dropdown col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding options" id="context-menu">
+                <span class="dropdown-toggle su su-options-menu options-area" data-toggle="dropdown">
+                </span>
+                <ul class="dropdown-menu dashboard-options" role="menu">
+                    <li>
+                        <span class="web-designer option-click" title="" href="{{:~draftDesignerEditUrlEncode(Name, Id)}}" data-itemid="{{:Id}}" data-name="{{:Name}}" data-category-name="draft">
+                            <i class="su su-edit"></i>
+                            <span>@T["Edit"]</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span title="" class="item-delete option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                            <i class="su su-delete"></i>
+                            <span>@T["Delete"]</span>
+                        </span>
+                    </li>
+                </ul>
+            </span>
+            {{/if}}
+            {{else}}
+            <span class="dropdown col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding options" id="context-menu">
+                <span class="dropdown-toggle su su-options-menu options-area" data-toggle="dropdown">
+                </span>
+                <ul class="dropdown-menu dashboard-options" role="menu">
+                    {{if ~checkMobile()}}
+                    {{if ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)"}}
+                    <li>
+                        {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                        <span class="open-item option-click" href="{{:~urlWithoutSection(CategoryName, Name, Id)}}" title="" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span>@T["Open"]</span>
+                        </span>
+                        {{else ItemType=="@((int)ItemType.Widget)" }}
+                        <span class="open-item option-click" href="{{:~widgetUrlEncode(Name, Id)}}" title="" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span>@T["Open"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+                    {{if CanWrite}}
+                    <li>
+                        <span class="web-designer option-click" title="" href="{{:~designerEditUrlEncode(CategoryName,Name, Id)}}" data-itemid="{{:Id}}" data-name="{{:Name}}" data-category-name="{{:CategoryName}}">
+                            <i class="su su-edit"></i>
+                            <span>@T["Edit"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ((ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)") && (CreatedById==@(userId)))}}
+                    <li>
+                        {{if !IsPublic}}
+                        {{if ItemType == "@((int)ItemType.Dashboard)"}}
+                        <span title="" class="make-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                            <i class="su su-public"></i>
+                            <span>@T["Make Public"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" class="make-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-public"></i>
+                            <span>@T["Make Public"]</span>
+                        </span>
+                        {{/if}}
+
+                        {{else}}
+
+                        {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                        <span title="" class="remove-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                            <i class="su su-remove-public"><span class="su-remove-public path1"></span><span class="su-remove-public path2"></span><span class="su-remove-public path3"></span></i>
+                            <span>@T["Make Private"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" class="remove-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-remove-public"><span class="su-remove-public path1"></span><span class="su-remove-public path2"></span><span class="su-remove-public path3"></span></i>
+                            <span>@T["Make Private"]</span>
+                        </span>
+                        {{/if}}
+
+                        {{/if}}
+                    </li>
+                    {{/if}}
+
+                    {{if (ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)")}}
+                    <li>
+                        {{if ItemType == "@((int)ItemType.Dashboard)"}}
+                        <span title="" ispublic="{{:IsPublic}}" class="get-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                            <i class="su su-link"></i>
+                            <span>@T["Get Link"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" ispublic="{{:IsPublic}}" class="get-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-link"></i>
+                            <span>@T["Get Link"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+
+                    @*{{if (ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)")}}
+        <li>
+            {{if ItemType == "@((int)ItemType.Dashboard)"}}
+            <span title="" ispublic="{{:IsPublic}}" class="embed-code option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name)}}">
+                <i class="su su-embed2"></i>
+                <span>@T["Get Embed code"]</span>
+            </span>
+            {{else ItemType == "@((int)ItemType.Widget)"}}
+            <span title="" ispublic="{{:IsPublic}}" class="embed-code option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                <i class="su su-embed2"></i>
+                <span>@T["Get Embed code"]</span>
+            </span>
+            {{/if}}
+        </li>
+        {{/if}}*@
+
+                    @*{{if CanDownload}}
+        <li>
+            {{if ItemType == "@((int)ItemType.Report)"}}
+            <span class="option-click" href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download Report"]</span>
+            </span>
+            {{else ItemType == "@((int)ItemType.Dashboard)"}}
+            <span class="download-item option-click" href="@UrlHelper.GenerateUrl("DashboardDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:CategoryName}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download Dashboard"]</span>
+            </span>
+            {{else}}
+            <span class="download-item option-click" href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download"]</span>
+            </span>
+            {{/if}}
+        </li>
+        {{/if}}*@
+
+                    {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                    {{if !IsMultiDashboard}}
+                    <li class="dropdown dashboard-views" data-load="true">
+                        <span href="javascript:void(0);" class="dropdown-toggle views" data-item-id="{{:Id}}" data-toggle="dropdown">
+                            <i class="su su-filter"></i>
+                            <span>@T["Views"]</span>
+                        </span>
+                        <ul class="dropdown-menu item-views" role="menu">
+                            <li>
+                                <span class="view-name" href="javascript:void(0);">
+                                    @T["Loading..."]
+                                </span>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span class="view-schedule option-click" href="@Url.Action("Schedules", "Scheduler")?dashboard={{:Name}}">
+                            <i class="su su-nav-schedule"></i>
+                            <span>@T["View Schedules"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                    {{if ~checkMobile()}}
+                    {{if (ItemType == "@((int)ItemType.Report)" || ItemType == "@((int)ItemType.Dashboard)") && CanMove || CanCopy || CanClone) }}
+                    <li role="separator" class="divider"></li>
+
+                    {{if CanMove}}
+                    <li>
+                        <span title="" class="moveItem option-click" data-itemid="{{:Id}}" data-action="Move">
+                            <i class="su su-move"></i>
+                            <span>@T["Move"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{if CanCopy}}
+                    <li>
+                        <span title="" class="copyItem option-click" data-itemid="{{:Id}}" data-action="Copy">
+                            <i class="su su-copy"></i>
+                            <span>@T["Copy"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{if CanClone}}
+                    <li>
+                        <span title="" class="copyItem option-click" data-itemid="{{:Id}}" data-action="Clone">
+                            <i class="su su-clone"></i>
+                            <span>@T["Clone"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkTablet()}}
+
+                    {{if CanSchedule || CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+                    <li role="separator" class="divider"></li>
+                    {{/if}}
+
+                    {{if (ItemType == "@((int)ItemType.Report)" || ItemType == "@((int)ItemType.Dashboard)") && CanSchedule}}
+                    <li>
+                        <span href="javascript:void(0);" class="schedule-dashboards option-click" title="" data-category-name="{{:CategoryName}}" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-category-id="{{:CategoryId}}">
+                            <i class="su su-nav-schedule"></i>
+                            <span>@T["Create Schedule"]</span>
+                        </span>
+                    </li>
+
+                    {{/if}}
+                    {{/if}}
+                    {{if ~checkMobile()}}
+                    {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+                    <li>
+                        <span class="item-permissions option-click" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                            <i class="su su-manage-permission"></i>
+                            <span>@T["Sharing Permissions"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <span class="version-button option-click" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                            <i class="su su-versions"></i>
+                            <span>@T["Version History"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+                    {{if CanWrite || CanDelete || ItemType=="@((int)ItemType.Report)"}}
+                    <li role="separator" class="divider"></li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if CanWrite}}
+                    {{if ~checkMobile()}}
+                    <li>
+                        <span title="" class="item-edit option-click" data-item-id="{{:Id}}">
+                            <i class="su su-edit"></i>
+                            <span>@T["Update"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if CanWrite}}
+                    {{if ~checkMobile()}}
+                    {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                    <li>
+                        <span href="javascript:void(0);" title="" class="update-datasource option-click" data-item-id="{{:Id}}">
+                            <i class="su su-nav-datasource"></i>
+                            <span>@T["Update Data Source(s)"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                    {{/if}}
+                    {{if ~checkMobile()}}
+                    {{if CanDelete}}
+                    <li>
+                        <span title="" class="item-delete option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                            <i class="su su-delete"></i>
+                            <span>@T["Delete"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                </ul>
+            </span>
+            {{/if}}
+        </span>
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 item-info no-padding">
+            <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding"></span>
+            <span class="owner-name col-lg-5 col-md-5 col-sm-5 col-xs-5 no-padding">{{:CreatedByDisplayName}}</span>
+            <time class="modified-time pull-right col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding">{{:ModifiedDate}}</time>
+        </span>
+    </a>
+    {{else}}
+    <a class="item-link col-lg-12 col-md-12 col-sm-12 col-xs-12 disabled" href="{{:~childUrlWithSection(ParentCategoryName, CategoryName, Name, CategoryId)}}" data-culture="/@culture" data-toggle="tooltip" data-placement="@(!isMobile ? "right" : "auto top")" data-name="{{:Name}}" data-itemid="{{:Id}}" data-category-name="{{:ParentCategoryName}}" data-isdraft="{{:IsDraft}}" data-html="true" data-container="body" title="@T["Name"] : {{:Name}} <br> {{if Description}} @T["Description"]: {{:~renderDoubleQuotes(Description)}} <br> {{/if}} @T["Category"] : {{:ParentCategoryName}} <br> @T["Added Date"] : {{:CreatedDate}}">
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 name-and-options" data-href="{{:~childUrlWithoutSection(ParentCategoryName, CategoryName, Name, CategoryId)}}">
+            {{if ItemType=="@((int)ItemType.Dashboard)"}}
+            {{if IsFavorite== true}}
+            <span class="su su-favorite favorite favorite-item col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" data-itemid="{{:Id}}" data-value="False" data-original-title="@T["Remove from favorites"]">
+            </span>
+            {{else}}
+            <span class="su su-dis-favorite favorite-item col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" data-itemid="{{:Id}}" data-value="True" data-original-title="@T["Mark as favorite"]">
+            </span>
+            {{/if}}
+            {{/if}}
+            {{if !IsMultiDashboard}}
+            <span class="item-name col-lg-9 col-md-9 col-sm-9 col-xs-9 no-padding" data-href="{{:~childUrlWithoutSection(ParentCategoryName, CategoryName, Name, CategoryId)}}" data-container="body">{{:Name}}</span>
+            {{else}}
+            <span class="item-name col-lg-8 col-md-8 col-sm-8 col-xs-8 no-padding" data-href="{{:~childUrlWithoutSection(ParentCategoryName, CategoryName, Name, CategoryId)}}" data-container="body">{{:Name}}</span>
+            <span class="su-calendar-1 multi-dashboard-icon col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding"></span>
+            {{/if}}
+            <i class="su su-open-link-newtab col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" id="open-dashboard" data-href="{{:~childUrlWithoutSection(ParentCategoryName, CategoryName, Name, CategoryId)}}" data-toggle="tooltip" data-container="body" data-isdraft="{{:IsDraft}}" data-placement="bottom" title="@T["Open Dashboard in new tab"]"></i>
+            <span class="dropdown col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding options" id="context-menu">
+                <span class="dropdown-toggle su su-options-menu options-area" data-toggle="dropdown">
+                </span>
+                <ul class="dropdown-menu dashboard-options" role="menu">
+                    {{if ~checkMobile()}}
+                    {{if ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)"}}
+                    <li>
+                        {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                        <span class="open-item option-click" href="{{:~childUrlWithoutSection(ParentCategoryName, CategoryName, Name, CategoryId)}}" title="" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span>@T["Open"]</span>
+                        </span>
+                        {{else ItemType=="@((int)ItemType.Widget)" }}
+                        <span class="open-item option-click" href="{{:~widgetUrlEncode(Name, Id)}}" title="" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span>@T["Open"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if (ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)")}}
+                    <li>
+                        {{if ItemType == "@((int)ItemType.Dashboard)"}}
+                        <span title="" ispublic="{{:IsPublic}}" class="get-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~childUrlWithoutSection(ParentCategoryName, CategoryName, Name, CategoryId)}}">
+                            <i class="su su-link"></i>
+                            <span>@T["Get Link"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" ispublic="{{:IsPublic}}" class="get-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-link"></i>
+                            <span>@T["Get Link"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+
+                    @*{{if (ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)")}}
+                        <li>
+                            {{if ItemType == "@((int)ItemType.Dashboard)"}}
+                            <span title="" ispublic="{{:IsPublic}}" class="embed-code option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                                <i class="su su-embed2"></i>
+                                <span>@T["Get Embed code"]</span>
+                            </span>
+                            {{else ItemType == "@((int)ItemType.Widget)"}}
+                            <span title="" ispublic="{{:IsPublic}}" class="embed-code option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                                <i class="su su-embed2"></i>
+                                <span>@T["Get Embed code"]</span>
+                            </span>
+                            {{/if}}
+                        </li>
+                        {{/if}}*@
+
+
+                    {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                    {{if !IsMultiDashboard}}
+                    <li class="dropdown dashboard-views" data-load="true">
+                        <span href="javascript:void(0);" class="dropdown-toggle views" data-is-childdashboard="{{:IsChildDashboard}}" data-child-dashboard-name="{{:Name}}" data-parent-category-name="{{:ParentCategoryName}}" data-parent-itemname="{{:CategoryName}}" data-item-id="{{:Id}}" data-parent-item-id="{{:CategoryId}}" data-toggle="dropdown">
+                            <i class="su su-filter"></i>
+                            <span>@T["Views"]</span>
+                        </span>
+                        <ul class="dropdown-menu item-views" role="menu">
+                            <li>
+                                <span class="view-name" href="javascript:void(0);">
+                                    @T["Loading..."]
+                                </span>
+                            </li>
+                        </ul>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkTablet()}}
+                    {{if (ItemType == "@((int)ItemType.Report)" || ItemType == "@((int)ItemType.Dashboard)") && CanSchedule}}
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <span href="javascript:void(0);" class="schedule-dashboards option-click" title="" data-category-name="{{:ParentCategoryName}}" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-multidashboard-name="{{:CategoryName}}">
+                            <i class="su su-nav-schedule"></i>
+                            <span>@T["Create Schedule"]</span>
+                        </span>
+                    </li>
+
+                    {{/if}}
+                    {{/if}}
+                </ul>
+            </span>
+        </span>
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 item-info no-padding">
+            <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding"></span>
+            <span class="owner-name col-lg-5 col-md-5 col-sm-5 col-xs-5 no-padding">{{:CreatedByDisplayName}}</span>
+            <time class="modified-time pull-right col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding">{{:ModifiedDate}}</time>
+        </span>
+    </a>
+    {{/if}}
+    {{else ItemType == "@((int)ItemType.Widget)"}}
+    <a class="item-link widgets col-lg-12 col-md-12 col-sm-12 col-xs-12" href="{{:~widgetUrlEncode(Name, Id)}}" data-toggle="tooltip" data-placement="@(!isMobile ? "right" : "auto top")" data-isdraft="{{:IsDraft}}" data-html="true" data-container="body" title="@T["Name"] : {{:Name}} <br> {{if Description}} @T["Description"] : {{:~renderDoubleQuotes(Description)}} <br> {{/if}} @T["Added Date"] : {{:CreatedDate}}">
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 name-and-options" data-href="{{:~widgetUrlEncode(Name, Id)}}">
+            <span class="item-name col-lg-10 col-md-10 col-sm-10 col-xs-10 no-padding" data-href="{{:~widgetUrlEncode(Name, Id)}}">{{:Name}}</span>
+            <i class="su su-open-link-newtab col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" id="open-widget" data-href="{{:~widgetUrlEncode(Name, Id)}}" data-isdraft="{{:IsDraft}}" data-toggle="tooltip" data-placement="bottom" data-container="body" title="@T["Open Widget in new tab"]"></i>
+            <span class="dropdown col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding options" id="context-menu">
+                <span class="dropdown-toggle su su-options-menu options-area" data-toggle="dropdown">
+                </span>
+                <ul class="dropdown-menu dashboard-options" role="menu">
+                    {{if ~checkMobile()}}
+                    {{if ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)"}}
+                    <li>
+                        {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                        <span class="open-item option-click" href="{{:~urlWithoutSection(CategoryName, Name, Id)}}" title="" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span>@T["Open"]</span>
+                        </span>
+                        {{else ItemType=="@((int)ItemType.Widget)" }}
+                        <span class="open-item option-click" href="{{:~widgetUrlEncode(Name, Id)}}" title="" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span>@T["Open"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    @*{{if ~checkMobile()}}
+        {{if CanWrite}}
+        <li>
+            <span title="Open with Dashboard Designer" class="option-click" id="launcher" data-itemid="{{:Id}}">
+                <span id="designerArgument" style="display:none">{{:DesignerArgument}}</span>
+                <i class="su su-edit"></i>
+                <span>@T["Open with Dashboard Designer"]</span>
+            </span>
+        </li>
+        {{/if}}
+        {{/if}}*@
+
+                    {{if ((ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)") && CreatedById==@(userId))}}
+                    <li>
+                        {{if !IsPublic}}
+                        {{if ItemType == "@((int)ItemType.Dashboard)"}}
+                        <span title="" class="make-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                            <i class="su su-public"></i>
+                            <span>@T["Make Public"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" class="make-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-public"></i>
+                            <span>
+                                @T["Make Public"]
+                            </span>
+                        </span>
+                        {{/if}}
+
+                        {{else}}
+
+                        {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                        <span title="" class="remove-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                            <i class="su su-remove-public"><span class="su-remove-public path1"></span><span class="su-remove-public path2"></span><span class="su-remove-public path3"></span></i>
+                            <span>@T["Make Private"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" class="remove-public option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-remove-public"><span class="su-remove-public path1"></span><span class="su-remove-public path2"></span><span class="su-remove-public path3"></span></i>
+                            <span>@T["Make Private"]</span>
+                        </span>
+                        {{/if}}
+
+                        {{/if}}
+                    </li>
+                    {{/if}}
+
+                    {{if (ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)")}}
+                    <li>
+                        {{if ItemType == "@((int)ItemType.Dashboard)"}}
+                        <span title="" ispublic="{{:IsPublic}}" class="get-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name, Id)}}">
+                            <i class="su su-link"></i>
+                            <span>@T["Get Link"]</span>
+                        </span>
+                        {{else ItemType == "@((int)ItemType.Widget)"}}
+                        <span title="" ispublic="{{:IsPublic}}" class="get-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                            <i class="su su-link"></i>
+                            <span>@T["Get Link"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+
+                    @*{{if (ItemType=="@((int)ItemType.Dashboard)" || ItemType=="@((int)ItemType.Widget)")}}
+        <li>
+            {{if ItemType == "@((int)ItemType.Dashboard)"}}
+            <span title="" ispublic="{{:IsPublic}}" class="embed-code option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~urlWithoutSection(CategoryName, Name)}}">
+                <i class="su su-embed2"></i>
+                <span>@T["Get Embed code"]</span>
+            </span>
+            {{else ItemType == "@((int)ItemType.Widget)"}}
+            <span title="" ispublic="{{:IsPublic}}" class="embed-code option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" data-url="{{:~widgetUrlEncode(Name, Id)}}">
+                <i class="su su-embed2"></i>
+                <span>@T["Get Embed code"]</span>
+            </span>
+            {{/if}}
+        </li>
+        {{/if}}*@
+
+
+                    @*{{if CanDownload}}
+        <li>
+            {{if ItemType == "@((int)ItemType.Report)"}}
+            <span class="option-click" href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download Report"]</span>
+            </span>
+            {{else ItemType == "@((int)ItemType.Dashboard)"}}
+            <span class="download-item option-click" href="@UrlHelper.GenerateUrl("DashboardDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:CategoryName}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download Dashboard"]</span>
+            </span>
+            {{else}}
+            <span class="download-item option-click" href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download"]</span>
+            </span>
+            {{/if}}
+        </li>
+        {{/if}}*@
+
+                    {{if ~checkMobile()}}
+                    {{if (ItemType == "@((int)ItemType.Report)" || ItemType == "@((int)ItemType.Dashboard)") &&(CanMove || CanCopy || CanClone) }}
+                    <li role="separator" class="divider"></li>
+                    {{if CanMove}}
+                    <li>
+                        <span title="" class="moveItem option-click" data-itemid="{{:Id}}" data-action="Move">
+                            <i class="su su-move"></i>
+                            <span>@T["Move"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{if CanCopy}}
+                    <li>
+                        <span title="" class="copyItem option-click" data-itemid="{{:Id}}" data-action="Copy">
+                            <i class="su su-copy"></i>
+                            <span>@T["Copy"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{if CanClone}}
+                    <li>
+                        <span title="" class="copyItem option-click" data-itemid="{{:Id}}" data-action="Clone">
+                            <i class="su su-clone"></i>
+                            <span>@T["Clone"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkTablet()}}
+                    {{if (ItemType == "@((int)ItemType.Report)" || ItemType == "@((int)ItemType.Dashboard)") && CanSchedule}}
+                    <li>
+                        <span class="schedule-dashboards option-click" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                            <i class="su su-nav-schedule"></i>
+                            <span>@T["Create Schedule"]</span>
+                        </span>
+                    </li>
+
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+
+                    {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+                    <li role="separator" class="divider"></li>
+
+                    <li>
+                        {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+                        <span class="item-permissions option-click" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                            <i class="su su-manage-permission"></i>
+                            <span>@T["Sharing Permissions"]</span>
+                        </span>
+                        {{/if}}
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <span class="version-button option-click" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                            <i class="su su-versions"></i>
+                            <span>@T["Version History"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+                    {{if CanWrite || CanDelete || ItemType=="@((int)ItemType.Report)"}}
+                    <li role="separator" class="divider"></li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if CanWrite}}
+                    {{if ~checkMobile()}}
+                    <li>
+                        <span title="" class="item-edit option-click" data-item-id="{{:Id}}">
+                            <i class="su su-edit"></i>
+                            <span>@T["Update"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+
+                    {{if ~checkMobile()}}
+                    {{if CanDelete}}
+                    <li>
+                        <span title="" class="item-delete option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                            <i class="su su-delete"></i>
+                            <span>@T["Delete"]</span>
+                        </span>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                </ul>
+            </span>
+        </span>
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 item-info no-padding">
+            <span class="owner-name col-lg-5 col-md-5 col-sm-5 col-xs-5 no-padding">{{:CreatedByDisplayName}}</span>
+            <time class="modified-time pull-right col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding">{{:ModifiedDate}}</time>
+        </span>
+    </a>
+    {{else ItemType == "@((int)ItemType.Category)"}}
+    <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:Name}}" target="_blank">{{:Name}}</a></span>
+    {{else ItemType == "@((int)ItemType.File)"}}
+<span><a href="@url/{{:ItemTypeString}}/{{:Name}}" target="_blank">{{:Name}}</a></span>
+    {{else}}
+    <span>{{:Name}}</span>
+    {{/if}}
+</script>
+
+<div id="ItemAction" style="display:none" title="Item Actions" class="no-padding"><iframe></iframe></div>
+<div><iframe id="hiddeniframe" src="" style="width:0;margin:0;border:0;height:0; display:inherit"></iframe></div>
+<input type="hidden" id="applauncherinputhidden" style="width:0;margin:0;border:0;height:0; display:inherit" />
+
+<input type="hidden" value="@ViewContext.RouteData.Values["section"]" id="url-section" />
+<input type="hidden" value="@ViewContext.RouteData.Values["category"]" id="url-category" />
+<input type="hidden" value="@ViewContext.RouteData.Values["dashboard"]" id="url-name" />
+
+<script type="text/javascript" language="javascript">
+    var gridName = $("#item-grid-container").attr("data-grid-name");
+    var gridHeight = ($(window).height() - ($(".item-navigation").outerHeight() + $("#header-area").outerHeight() + $("#category-listing").outerHeight())) - 0;
+    var toolbarItems = [{ templateID: "#OpenTemplate" }, { templateID: "#openwithdashboarddesignerTemplate" }, { templateID: "#DownloadTemplate" }, { templateID: "#Separator1" }, { templateID: "#CanEditTemplate" }, { templateID: "#CanDeleteTemplate" }, { templateID: "#Separator2" }, { templateID: "#MoveTemplate" }, { templateID: "#CopyTemplate" }, { templateID: "#CloneTemplate" }, { templateID: "#Separator3" }, { templateID: "#ScheduleTemplate" }, { templateID: "#Separator4" }, { templateID: "#VersionTemplate" }];
+    var categoryName = "@categoryName";
+    var filters = { filterType: "menu" };
+    if ("@gridName" === "dashboards" && categoryName !== "") {
+        filters = { filterType: "menu", filteredColumns: [{ field: "CategoryName", operator: "equal", value: categoryName }] };
+    }
+
+    $(document).ready(function () {
+
+        $(document).on("click", "a.view-name", function () {
+            var url = $(this).attr("href");
+            window.open(url, '_blank');
+        });
+
+        $('[data-toggle="tooltip"]').tooltip();
+        ej.support.enableLocalizedSort = true;
+        $("#items").ejGrid({
+            dataSource: ej.DataManager({ url: "@Url.Action("GetItems", (string)gridName)", adaptor: "UrlAdaptor" }),
+            allowScrolling: true,
+            scrollSettings: { height: gridHeight, allowVirtualScrolling: true, thumbMove: OnGridScroll, virtualScrollMode: ej.Grid.VirtualScrollMode.Continuous, buttonSize: 0, autoHide: false },
+            gridLines: ej.Grid.GridLines.Horizontal,
+            pageSettings: { pageSize: 50 },
+            allowSorting: true,
+            allowSearching: true,
+            allowSelection: true,
+            enableAltRow: false,
+            allowFiltering: true,
+            filterSettings: filters,
+            actionBegin: "fnActionBegin",
+            actionComplete: "fnActionComplete",
+            actionFailure: "fnActionFailure",
+            rowSelecting: function (args) {
+                if (args.target.hasClass("favoriteItem")) {
+                    args.cancel = true;
+                }
+            },
+            dataBound: function () {
+                if (!navigator.userAgent.match(/Windows Phone/i)) // To avoid tooltips in windows phone.
+                {
+                    $("[data-toggle='tooltip']").tooltip();
+                }
+                refreshScrollerForCategory();
+
+                if (("@itemName" != "")) {
+                    DashboardRender("@absolutePath", "@itemId", "@category", "@itemName", "@currentSection", "@tabName");
+                }
+            },
+            rowDataBound: function () {
+                refreshScrollerForCategory();
+                var itemGridWaitingPopupTemplateId = createLoader("item-grid-container");
+                $("#item-grid-container").ejWaitingPopup({ template: $("#" + itemGridWaitingPopupTemplateId) });
+                if ($('#server-items-container .category-collapse').css('display') == 'none') {
+                    $("#item-grid-container").ejWaitingPopup("show");
+                }
+            },
+            enableRowHover: true,
+            columns: [
+                {
+                    template: true,
+                    templateID: "#itemName",
+                    field: "Name",
+                    type: "string"
+                }
+            ]
+        });
+
+        $.views.helpers({
+            urlWithSection: function (category, item, id) {
+                if (window.innerWidth < 1041) {
+                    return encodeURI(rootUrlAction + "/dashboards/" + id + "/" + category + "/" + item);
+                } else {
+                    return encodeURI(rootUrlAction + "/dashboards" + "/" + id + "/" + category + "/" + item);
+                }
+            },
+            urlWithoutSection: function (category, item, id) {
+                return encodeURI(rootUrlAction + "/dashboards" + "/" + id + "/" + category + "/" + item);
+            },
+            childUrlWithSection: function (parentCategory, parentName, name, id) {
+                if (window.innerWidth < 1041) {
+                    return encodeURI(rootUrlAction + "/dashboards" + "/" + id + "/" + parentCategory + "/" + parentName + "?tab=" + name);
+                }
+                else {
+                    return encodeURI(rootUrlAction + "/dashboards" + "/" + id + "/" + parentCategory + "/" + parentName + "?tab=" + name);
+                }
+            },
+            childUrlWithoutSection: function (parentCategory, parentName, name, id) {
+                return encodeURI(rootUrlAction + "/dashboards" + "/" + id + "/" + parentCategory + "/" + parentName + "?tab=" + name);
+            },
+            widgetUrlEncode: function (item, id) {
+                return encodeURI(rootUrlAction + "/widgets/" + id + "/" + item);
+            },
+            draftDesignerEditUrlEncode: function (name, id) {
+                return encodeURI("@Url.Action("DashboardDesigner", "Designer")" + "/" + id + "/draft/" + name);
+            },
+            designerEditUrlEncode: function (categoryname, name, id) {
+                return encodeURI("@Url.Action("DashboardDesigner", "Designer")" + "/" + id + "/" + categoryname + "/" + name);
+            },
+            checkMobile: function () {
+                return ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1040));
+            },
+            checkTablet: function () {
+                return window.innerWidth > 900;
+            },
+            renderDoubleQuotes: function (inputString) {
+                return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+            }
+        });
+    });
+
+    function OnGridScroll(args) {
+        $(".item-link").parents("td").removeClass("active");
+        $(".tooltip").hide();
+    }
+</script>

@@ -1,0 +1,70 @@
+﻿@{
+    Layout = null;
+    var model = Model as List<string>;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var applyScaling = Convert.ToBoolean(ViewBag.ApplyScaling);
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8" />
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon';" />
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/slideshow.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/slideshow.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow.min.js"></script>
+    </environment>
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+    <script>
+            var sources = @Html.Raw(Json.Serialize(ViewBag.UrlList));
+            var loopInterval = "@ViewBag.LoopInterval";
+            var applyScaling = @Json.Serialize(applyScaling);
+    </script>
+</head>
+<body style="margin: 0px;">
+    <div class="loader-blue loader-icon" id="layout-body-loader-icon">
+        <svg class="circular">
+            <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+        </svg>
+    </div>
+    <div class="content-container-fluid" style="display:none">
+        <div class="row">
+            <div class="cols-sample-area">
+                <div class="frame">
+                    <ul id="sliderContent">
+                        @foreach (var slideId in model)
+                        {
+                            <li><iframe id='@slideId' width='100%' height='100%' frameborder='0' src=''></iframe></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls-container" style="display: none">
+        <div id="controls">
+            <button id="slide-previous" class="ctrl-btn su su-left"></button>
+            <button id="slide-play-pause" class="ctrl-btn btn pause">
+                <span class="bar bar-1"></span>
+                <span class="bar bar-2"></span>
+                <span class="bar bar-3"></span>
+            </button>
+            <button id="slide-next" class="ctrl-btn su su-right"></button>
+            <button id="slide-maximize" class="ctrl-btn su su-maximize-1"></button>
+        </div>
+        <hr class="pager-separator" />
+        <div id="pager">1 of 3</div>
+    </div>
+</body>
+</html>

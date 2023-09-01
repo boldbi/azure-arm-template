@@ -1,0 +1,59 @@
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    var cdnLink = string.Empty;
+    var faviconLogo = string.Empty;
+    var dashboardServerResourceUrl = string.Empty;
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        cdnLink = (GlobalAppSettings.HttpPathBase.ToString().Equals("/") ? string.Empty : GlobalAppSettings.HttpPathBase.ToString()) + ServerAppConfig.AppSettings.EndPoints.CdnLink + "/cdn/images";
+        dashboardServerResourceUrl = GlobalAppSettings.HttpPathBase + ServerAppConfig.AppSettings.EndPoints.CdnLink;
+        faviconLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon";
+    }
+    else
+    {
+        cdnLink = @GlobalAppSettings.CdnDomain;
+        dashboardServerResourceUrl = ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
+        faviconLogo = dashboardServerResourceUrl + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + @IconFileNames.Favicon;
+    }
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Subscription Payment Paused"] - @GlobalAppSettings.BrandingDisplayName</title>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.min.css" />
+    </environment>
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon') this.href = '@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon';" />
+</head>
+<body>
+    <div class="suspended-container-bg">
+        <div class="suspended-conatiner" id="suspended-conatiner">
+            <div id="suspended-main-div">
+                <div class="suspended-logo">
+                    <img src="@themeBasedImageHelper.AccessDeniedImage()" />
+                </div>
+                <div class="suspended-secondary-div">
+                    <div class="suspended-page-title">
+                        @T["Access Denied"]
+                    </div>
+                    <div class="suspended-page-content">@T["Subscription payment has been paused."]<br/>@Html.Raw(string.Format(T["Please {0}contact support{1} for more details."].Value, "<a href='https://www.boldbi.com/support'>", "</a>"))</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

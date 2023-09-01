@@ -1,0 +1,249 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.Title = T["Synchronize Users"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncAzureAdUsers);
+    @if (ViewBag.AdSync > 0)
+    {
+        ViewBag.PageHeader = @String.Format(T["{0} Synchronization"].Value, "Active Directory");
+        ViewBag.PageDescription = @String.Format(T["Select Users to synchronize with {0}."].Value, "Active Directory");
+    }
+    @if (ViewBag.AzureAdSync > 0)
+    {
+        ViewBag.PageHeader = @String.Format(T["{0} Synchronization"].Value, "Azure AD");
+        ViewBag.PageDescription = @String.Format(T["Select Users to synchronize with {0}."].Value, "Azure AD");
+    }
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/users-groups-sync.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/users-groups-sync.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.min.js"></script>
+    </environment>
+
+    @if (ViewBag.AdSync > 0)
+    {
+        <script>
+            var synchronizeSelectedUsersUrl = "@Url.Action("SynchronizeSelectedUsers", "UserManagement")";
+        </script>
+    }
+    @if (ViewBag.AzureAdSync > 0)
+    {
+        <script>
+            var synchronizeSelectedUsersUrl = "@Url.Action("SynchronizeSelectedAzureUsers", "UserManagement")";
+        </script>
+    }
+    <script type="text/x-jsrender" id="user-profile-template">
+        <a class="user-name" title="{{:~renderDoubleQuotes(FullName)}}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}">{{:TrimmedFullName}}</a>
+    </script>
+
+    <script type="text/x-jsrender" id="username-template">
+        <span title="{{:Username}}" class="grid-content" data-toggle="tooltip">
+            {{:Username}}
+        </span>
+    </script>
+
+    <script type="text/x-jsrender" id="email-template">
+        <span title="" class="grid-content" data-toggle="tooltip">
+            {{:CanShowEmail ? EmailId : ""}}
+        </span>
+    </script>
+
+
+    <script type="text/x-jsrender" id="checkbox-row-template">
+        <input type="checkbox" class="checkbox-row material-checkbox" name="checkbox-row" data-checked-id="{{:UserId}}" id="row-check{{:UserId}}" />
+        <input name="row-check{{:UserId}}" type="hidden" value="false">
+        <label for="row-check{{:UserId}}"> </label>
+    </script>
+
+    <script type="text/x-jsrender" id="checkbox-header-template">
+        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
+        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+    </script>
+
+    <script type="text/x-jsrender" id="name-header">
+        <div class="item-header">@T["Name"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="username-header">
+        <div class="item-header">@T["Username"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="email-header">
+        <div class="item-header">@T["Email Address"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="userid-header">
+        <div class="item-header">@T["User id"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="user-detail-validation">
+        {{if IsDuplicated}}
+        <div class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></div>
+        {{/if}}
+    </script>
+
+    <script type="text/javascript" language="javascript">
+        ej.support.stableSort = false;
+        $("#search-ad-users").val("");
+        var data = @Html.Raw(Json.Serialize(ViewBag.ActiveDirectoryUsers));
+        $(function () {
+            $.views.helpers({
+                renderDoubleQuotes: function (inputString) {
+                    return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                }
+            });
+            data = ej.parseJSON(data);
+            GridLocalization(window.Server.App.Localization.SynchronizationUsersEmpty);
+            $("#user_grid").ejGrid({
+                dataSource: data,
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                enableAltRow: false,
+                enableRowHover: true,
+                allowSorting: true,
+                allowSelection: true,
+                allowScrolling: false,
+                allowFiltering: true,
+                allowSearching: true,
+                actionBegin: "fnActionBegin",
+                locale: "en-US",
+                selectionType: ej.Grid.SelectionType.Multiple,
+                pageSettings: { pageSize: 20 },
+                templateRefresh: "refreshTemplate",
+                filterSettings: { filterType: "menu" },
+                selectionSettings: { selectionMode: ["row"] },
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    $("#checkbox-header").change(headCheckboxOnChange);
+                    this.model.indexes = {}; /* Additional property*/
+                    var selecteduserIdValues = [];
+                },
+
+                recordClick: "fnRecordClick",
+                create: "fnOnUserGridCreate",
+                actionComplete: "fnOnUserGridActionComplete",
+                columns: [
+                    {
+                        headerTemplateID: "#checkbox-header-template",
+                        template: true,
+                        templateID: "#checkbox-row-template",
+                        textAlign: ej.TextAlign.Center,
+                        allowFiltering: false,
+                        width: 20
+                    },
+                    {
+                        template: true,
+                        allowSorting: true,
+                        templateID: "#user-profile-template",
+                        headerText: "@T["Name"]",
+                        headerTemplateID: "#name-header",
+                        width: 65,
+                        field: "FullName",
+                        allowFiltering: true,
+                        type: "string"
+                    },
+                    {
+                        field: "Username",
+                        headerText: "@T["Username"]",
+                        templateID: "#username-template",
+                        headerTemplateID: "#username-header",
+                        type: "string",
+                        allowFiltering: true,
+                        width: 100,
+                        visible: isSelfHosted
+                    },
+                    {
+                        field: "EmailId",
+                        headerText: "@T["Email Address"]",
+                        templateID: "#email-template",
+                        headerTemplateID: "#email-header",
+                        type: "string",
+                        allowFiltering: true,
+                        width: 100
+                    },
+                    {
+                        field: "UserId",
+                        headerText: "@T["User id"]",
+                        headerTemplateID: "#userid-header",
+                        type: "string",
+                        cssClass: "user-id",
+                        allowFiltering: true,
+                        width: 100,
+                        visible: false
+                    },
+
+                    {
+                        field: "",
+                        width: 15,
+                        templateID: "#user-detail-validation",
+                        allowFiltering: false,
+                        visible: true
+                    }
+                ]
+
+            });
+        });
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    
+<div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+    <div class="col-xs-12 no-padding">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "IsUserSyncPage", "true" } })
+    </div>
+    <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton" id="user-title">
+        <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section hide" id="synchronize-users">
+                    <span class="primary-button app-btn-primary pull-right" title="Synchronize Users with Active Directory" onclick="SynchronizeUsers()">@T["Synchronize"]</span>
+            </div>
+            <div id="search-area" class="pull-left col-xs-4 @(ViewBag.AdSync > 0 ? "windows-ad-search" : "")">
+                @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
+                {
+                    <input type="text" id="search-ad-users" class="pull-left no-margin" placeholder="@String.Format(T["Search {0} users"].Value, ViewBag.AdSync > 0 ? "AD" : "Azure AD")" autocomplete="off" />
+
+                }
+                <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" data-container="body" data-toggle="tooltip" data-placement="bottom" title="@T["Clear search"]"></span>
+                <span class="su su-search search-icon pull-left no-margin search-user" data-toggle="tooltip" data-placement="bottom" title="@T["Search"]"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+    <div class="col-xs-12 bi-page-content no-padding">
+        <div class="col-xs-12 bi-page-body">
+            <div class="col-xs-7 no-padding">
+                @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
+                {
+                    <span class="ad-userlist-info pull-left">@String.Format(T["Only users imported from the {0} configured in this organization are listed here."].Value, ViewBag.AdSync > 0 ? "Windows AD" : "Azure AD")</span>
+                }
+            </div>
+            @if (ViewBag.AdSync > 0)
+            {
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 bg-warning windows-ad-user-import-warning">
+                    <div class="warning-icon-container no-padding">
+                        <span class="su su-info"></span>
+                    </div>
+                    <span class="no-padding text-warning">@String.Format(T["A user without an email address will be assigned a {0} or system-generated email address."].Value, "User Principal Name (UPN)")</span>
+                </div>
+            }
+            <div id="user_grid"  class="col-xs-12 no-padding @(ViewBag.AdSync > 0 ? "windows-ad-content-margin" : "")"></div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+    @if (!ViewBag.ThirdPartyLogins)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

@@ -1,0 +1,37 @@
+﻿@using System.Reflection
+@using Syncfusion.Server.Base.Logger
+
+@inject ControllerContext ControllerContext
+
+@{
+    ViewBag.Title = @T["Internal Server Error"];
+    ViewBag.MessageBox = false;
+    LogExtension.LogError(new Uri(Context.Request.GetDisplayUrl()).ToString(), "Application Error ", Model.Exception, MethodBase.GetCurrentMethod());
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/js/bootstrap/bootstrapjs.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/js/bootstrap/bootstrapjs.min.js"></script>
+    </environment>
+}
+
+
+@section MainSection{
+    <h2>@T["Internal Server Error"]</h2>
+
+    <div class="hidden">
+        <hgroup class="title">
+            <h1 class="error">@T["Error."]</h1>
+            <h2 class="error">@T["An error occurred while processing your request."]</h2>
+        </hgroup>
+
+        <p>@T["Controller"]: @ControllerContext.ActionDescriptor.ControllerName</p>
+        <p> @T["Action"]: @ControllerContext.ActionDescriptor.ActionName</p>
+        @*<p>@T["Exception"]: @Model.Exception</p>*@
+    </div>
+}

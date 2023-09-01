@@ -1,0 +1,117 @@
+﻿@{
+    Layout = null;
+}
+
+@await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+
+<script>
+    $(document).ready(function () {
+        $("#item-link-copy").removeClass("focusdiv");
+        $("#item-link").on("focusin", function () {
+            $("#item-link-copy").addClass("focusdiv");
+        });
+        $("#item-link").on("focusout", function () {
+            $("#item-link-copy").removeClass("focusdiv");
+        });
+    });
+
+    var sameOrigin;
+    try {
+        sameOrigin = window.parent.location.host == window.location.host;
+    }
+    catch (e) {
+        sameOrigin = false;
+    }
+
+    function load() {
+        if ((sameOrigin ? $(parent.window).width() : $(window).width()) > 1400) {
+            $(".dialog").addClass("iframe");
+        }
+
+        if ((sameOrigin ? $(parent.window).width() : $(window).width()) < 1400) {
+            $(".dialog").removeClass("iframe");
+        }
+    }
+</script>
+
+<body onload="load()">
+    <div id="get_item_link" class="col-xs-12 no-padding dialog custom-bootstrap-styles" style="display:none">
+        <div class="dialog-body col-xs-12 no-padding">
+                <div class="get-link-body">
+                    <div class="col-sm-12 col-xs-12 no-padding">
+                        <span class="get-link-label" style="white-space:normal;float:left;margin-bottom:-5px">
+
+                            <span class="dashboard-link" style="display:none">@T["Link to Dashboard"]:</span>
+
+                            <span class="widget-link" style="display:none">@T["Link to Widget"]:</span>
+
+                            <span class="file-link" style="display:none">@T["Link to File"]:</span>
+
+                            <span class="link" style="display:none">@T["Link"]:</span>
+
+                            <span class="slideshow-link" style="display:none">@T["Link to Slideshow"]:</span>
+                        </span>
+                    </div>
+
+                    <span class="update-link small" style="float:right;margin-right:14px;margin-bottom:2px;color: green;visibility: hidden">@T["Link updated."]</span>
+                    <input onClick="this.setSelectionRange(0, this.value.length)" id="item-link" class="form-control" readonly />
+                    <div class="form-control su su-copy text focus" id="item-link-copy" readonly="" data-original-title="@T["Click to copy"]"></div>
+
+                    <div class="col-sm-12 col-xs-12 file-link no-padding" style="margin-top:15px;display:none">
+                        <div class="col-sm-5 col-xs-5 resolution no-padding">
+                            <strong class="enable-compression">@T["Download as"] .zip</strong>
+                        </div>
+                        <span class="material-switch text-left">
+                            <input type="checkbox" name="Enabled" id="compressed-link" />
+                            <label class="label-primary" for="compressed-link"></label>
+                        </span>
+                    </div>
+
+                    <strong style="padding-top:15px;float:left" class="note">@T["Note"]:</strong>
+
+                    <span class="private-note" style="padding-top:5px;white-space:normal;float:left;display:none">
+
+                        <span class="dashboard-link" style="display:none">
+                            @T["Anyone can navigate to this link, but only users with the appropriate permissions will be able to view the Dashboard."]
+                        </span>
+
+                        <span class="widget-link" style="display:none">
+                            @T["Anyone can navigate to this link, but only users with the appropriate permissions will be able to view the Widget"]
+                        </span>
+
+                        <span class="file-link" style="display:none">
+                            @T["Anyone can navigate to this link, but only users with the appropriate permissions will be able to view the File"]
+                        </span>
+
+                        <span class="link" style="display:none">
+                            @T["Anyone can navigate to this link, but only users with the appropriate permissions will be able to view."]
+                        </span>
+
+                        <span class="slideshow-link" style="display:none">
+                            @T["Anyone can navigate to this link, but only users with the appropriate permissions will be able to view dashboards in the slideshow."]
+                        </span>
+                    </span>
+                    <span class="public-note" style="white-space:normal;float:left;padding-top:5px;display:none">
+                        <span class="dashboard-link" style="display:none">
+                            @T["This Dashboard has been marked public, so anyone with this link will be able to view the contents of the Dashboard."]
+                        </span>
+
+                        <span class="widget-link" style="display:none">
+                            @T["This Widget has been marked public, so anyone with this link will be able to view the contents of the Widget."]
+                        </span>
+
+                        <span class="link" style="display:none">
+                            @T["This has been marked public, so anyone with this link will be able to view the contents."]
+                        </span>
+                    </span>
+                    <span class="unlist-note" style="white-space:normal;float:left;padding-top:5px;display:none">
+                        <span class="dashboard-link" style="display:none">
+                            @T["This Dashboard has been unlisted, so this Dashboard will not be listed anywhere. Anyone with this link will be able to view the contents of the Dashboard."]
+                        </span>
+                    </span>
+
+                </div>
+        </div>
+    </div>
+</body>

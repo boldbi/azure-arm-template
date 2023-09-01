@@ -1,0 +1,41 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var themeTemplateZipUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/theme-template.zip";
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var lookAndFeelHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.LookAndFeelSettings);
+}
+<div id="application-theme-upload-dialog-popup">
+    <div class="modal" tabindex="-1" role="dialog">
+        <div id="application-theme-upload-dialog" class="modal-dialog applicationtheme-upload-dialog" role="document">
+            <form action="@Url.Action("UploadApplicationFile", "Administration")" onsubmit="return false" method="post" enctype="multipart/form-data" class="col-lg-12 no-padding modal-content" id="upload-application-theme-form" autocomplete="off">
+                <div class="col-xs-12 dialog-content">
+                    <div class="col-xs-12 field-padding">
+                        <label class="font-label">@T["Choose Theme File"]</label>
+                        <div class="upload-box">
+                            <input type="text" class="form-control no-margin applicationtheme-file-name" id="application-theme-file-name" tabindex="-1" value="" placeholder="@T["Choose Theme File"]" readonly>
+                            <span id="trigger-application-file" class="input-group-addon upload-file-btn">...</span>
+                            <input type="file" accept=".css" name="applicationthemefile" id="applicationtheme-file" class="upload-btn">
+                            <span class="applicationthemefileupload-validation-messages validation-message" id="invalid-applicationthemefile-name"></span>
+                            <p class="css-valid-link">@Html.Raw(string.Format(T["Please ensure your custom theme file is valid by uploading it into this {0}online validation helper{1}."].Value, "<a class='app-hyperlink' href='https://jigsaw.w3.org/css-validator/#validate-by-upload' target='_blank'>", "</a>"))</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 field-padding padding-bottom">
+                        <label class="font-label">@T["Theme Name"]</label>
+                        <div class="">
+                            <input type="text" id="applicationtheme-name" maxlength="254" class="form-control validation theme-name" placeholder="@T["Theme Name"]" name="applicationthemename" data-name="applicationtheme name" required disabled>
+                            <span class="applicationthemeupload-validation-messages validation-message" id="invalid-applicationtheme-name"></span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 field-padding padding-bottom">
+                        <p class="no-margin no-padding font-label">@Html.Raw(string.Format(T["Please download the default color definition files for dark and light themes from this {0}link{1}."].Value, "<a class='app-hyperlink' href='" + themeTemplateZipUrl + "' target='_blank'>", "</a>")) @T["You can customize the color code in this definition file and upload it to the application."] @Html.Raw(string.Format(T["Please refer to this {0}link{1} to learn more about how to customize color codes."].Value, "<a class='app-hyperlink' href='" + helpSiteBaseUrl + lookAndFeelHelpSiteUrl + "' target='_blank'>", "</a>"))</p>
+                    </div>
+                </div>
+                <div class="col-xs-12 modal-footer">
+                    <input type="button" id="cancel-applicationtheme-upload" class="secondary-button  app-btn-secondary popup-close" value="@T["Cancel"]" onclick="onUploadApplicationThemeDialogCancel()" />
+                    <input type="submit" id="upload-applicationtheme" class="primary-button app-btn-primary upload-applicationtheme" value="@T["Upload"]" disabled />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

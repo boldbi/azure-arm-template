@@ -1,0 +1,24 @@
+﻿@{
+    Layout = null;
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var orgName = @GlobalAppSettings.BrandingDisplayName + " Enterprise Dashboards";
+    var favLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon";
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Registration - @orgName</title>
+    <link rel="icon" href="@favLogo" />
+    <script>
+        window.onload = function () {
+            document.getElementById('form-token').submit();
+        }
+    </script>
+</head>
+<body>
+    <form action="@Url.Action("TenantRegistrationConfirmation", "ServerConfiguration")" id="form-token" method="post">
+        <input type="hidden" name="RegistrationData" id="RegistrationData" value="@Context.Request.Query["token"]" />
+    </form>
+</body>
+</html>

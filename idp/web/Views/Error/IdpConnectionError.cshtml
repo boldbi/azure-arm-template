@@ -1,0 +1,58 @@
+﻿@{ 
+    Layout = null;
+    var imageHelper = new ImageHelper();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Login Error"]</title>
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+    @await Html.PartialAsync("~/Views/Shared/_Favicon.cshtml")
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" class="error-image-1"/>
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@imageHelper.LoginFailedImage()" alt="@T["Login Failed"]" class="error-image-2" style="width:250px;height:150px">
+                </div>
+                <div class="error-type">@T["Login Error!"]</div>
+                @if (ViewBag.IsCorrelationFailed)
+                {
+                    <div class="error-text">
+                        <span>@T["Looks like something went wrong while login. Please login again."]</span>
+                        <br />
+                        <span>@T["If the problem persists, please contact your administrator."]</span>
+                    </div>
+                    <div class="take-me-back-to-home-page">
+                        <span class="error-page-cursor">
+                            <a class="error-to-back-text-color" href="@Url.Action("Logout", "Accounts")">
+                                @T["Try Login"]
+                            </a>
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <div class="error-text">
+                        <span>@T["Looks like something went wrong while establishing a connection. Please refresh the page and try again."]</span>
+                        <br />
+                        <span>@T["If the problem persists, please contact your administrator."]</span>
+                    </div>
+                    <div class="take-me-back-to-home-page">
+                        <span class="error-page-cursor">
+                            <a class="error-to-back-text-color" href="javascript:window.location.reload(true)">@T["Refresh the page"]</a>
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+﻿@{
+    Layout = null;
+    var itemType = (ItemType)Model.Value;
+    var itemTypeName = itemType.ToString().ToLower() == "datasource" ? T["Data Source"].Value : itemType.ToString();
+}
+<script>
+    var removeItemPublicUrl = "@Url.Action("RemoveItemPublic", "items")";
+    var removeItemUnlistUrl = "@Url.Action("RemoveItemUnlist", "items")";
+
+    function load() {
+        if (($(parent.window).width()) > 1400) {
+            $(".dialog").addClass("iframe");
+        }
+
+        if (($(parent.window).width()) < 1400) {
+            $(".dialog").removeClass("iframe");
+        }
+    }
+</script>
+
+
+@await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+
+<body onload="load()">
+    <div class="col-lg-12 no-padding dialog" id="PopupContainer">
+        <input type="hidden" id="remove-public" data-item-id="@ViewData["ItemId"]" data-item-type="@itemTypeName"/>
+        <div class="dialog-body col-xs-12 no-padding" style="height:auto;">
+
+                <div class="deleteItem" id="removepublicitem" style="font-size:14px !important">
+                    <span style="white-space:normal;float:left;width:100%" class="text">
+                        @T["Are you sure you want to make this Dashboard private?"]
+                    </span>
+
+                    <strong style="float:left;padding-top:15px;width:100%" class="note">@T["Note:"]</strong>
+
+                    <span class="note text" style="white-space:normal;float:left;padding-top:10px">
+                        @T["If made private, the dashboard will only be visible to users with the appropriate permissions."]
+                    </span>
+                </div>
+
+                <div id="error-msg" class="error-msg deleteItem text" style="display:none">
+                    @Html.Raw("<span style='white-space:nowrap; float:left'>" + String.Format(T["Unable to Remove this Dashboard — {0} from Public access. Internal server error. Please try again."].Value, "</span><span id='item_name' class='delete-item-body highlight-name'>" + @ViewData["ItemName"] + "</span>"))
+                </div>
+
+                <div id="success-msg" class="error-msg deleteItem text" style="display:none;font-size:14px !important">
+                    @Html.Raw("<span style='white-space:nowrap;float:left'>" + String.Format(T["Dashboard— {0} is now private."].Value, "</span><span id = 'item_name' class='delete-item-body highlight-name'>" + @ViewData["ItemName"] + "</span>"))
+                </div>
+        </div>
+        <div class="col-xs-8 no-padding centerAlign validationArea" id="remove-close" style="display:none">
+        </div>
+    </div>
+</body>

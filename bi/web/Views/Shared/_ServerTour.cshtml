@@ -1,0 +1,158 @@
+﻿@{
+    var model = Model as Dictionary<ItemType, bool>;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl()).ToString();
+    var isImageRequest = requestUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                 requestUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                 requestUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                 requestUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
+    var isDashboardsPage = false;
+    var showAdminMenuTour = isImageRequest == false && Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin")) && !new DeviceDetection(Context).IsMobile;
+    var showCreateMenu = model != null && (model[ItemType.Dashboard] || model[ItemType.Category] || model[ItemType.Widget] || model[ItemType.Schedule] || model[ItemType.File]);
+    var totalTour = 5 - (isDashboardsPage ? 0 : 1) - (showCreateMenu ? 0 : 1) - (showAdminMenuTour ? 0 : 2);
+}
+
+<script>
+    var IsDashboardsPage = @(isDashboardsPage ? "true" : "false");
+    var ShowAdminMenuTour = @(showAdminMenuTour ? "true" : "false");
+    var ShowCreateMenu = @(showCreateMenu ? "true" : "false");
+    var TotalTour = @totalTour;
+</script>
+
+<div id="tour-container" style="display: none">
+    <div id="tour-div-1">
+        <div class="server-tour-container">
+            <div class="server-tour-title">
+                <span class="title-text text-h4 text-semibold">[[[App Menu]]]</span>
+                <span class="su su-close"></span>
+            </div>
+            <div class="server-tour-body text-body">
+                <div class="tour-description-div">
+                    [[[Navigate within the app through this left side menu.]]]
+                </div>
+            </div>
+            <div class="tour-footer col-xs-12 no-padding">
+                @if (totalTour > 1)
+                {
+                    <div class="tour-page text-small col-xs-6 no-padding">1/@totalTour</div>
+                    <div class="tour-navigation-div text-button col-xs-6 no-padding">
+                        <span class="next-nav">[[[NEXT]]]</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="tour-navigation-div text-button col-xs-12 no-padding">
+                        <span class="end-nav">[[[START]]]</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (isDashboardsPage)
+    {
+        <div id="tour-div-2">
+            <div class="server-tour-container">
+                <div class="server-tour-title">
+                    <span class="title-text text-h4 text-semibold">[[[Dashboard Menu]]]</span>
+                    <span class="su su-close"></span>
+                </div>
+                <div class="server-tour-body text-body">
+                    <div class="tour-description-div">
+                        [[[Choose your dashboard collection from these simple navigation tabs.]]]
+                    </div>
+                </div>
+                <div class="tour-footer col-xs-12 no-padding">
+                    <div class="tour-page text-small col-xs-6 no-padding">2/@totalTour</div>
+                    <div class="tour-navigation-div text-button col-xs-6 no-padding">
+                        <span class="prev-nav">[[[PREV]]]</span>
+                        @if (showCreateMenu || showAdminMenuTour)
+                        {
+                            <span class="next-nav">[[[NEXT]]]</span>
+                        }
+                        else
+                        {
+                            <span class="end-nav">[[[START]]]</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    if (showCreateMenu)
+    {
+    <div id="tour-div-3">
+        <div class="server-tour-container">
+            <div class="server-tour-title">
+                <span class="title-text text-h4 text-semibold">[[[New Dashboards]]]</span>
+                <span class="su su-close"></span>
+            </div>
+            <div class="server-tour-body text-body">
+                <div class="tour-description-div">
+                    [[[Start from designing dashboards or load any dashboard from our gallery.]]]
+                </div>
+            </div>
+            <div class="tour-footer col-xs-12 no-padding">
+                <div class="tour-page text-small col-xs-6 no-padding">@(2 + (isDashboardsPage ? 1 : 0) + (showAdminMenuTour ? 2 : 0)) / @totalTour</div>
+                <div class="tour-navigation-div text-button col-xs-6 no-padding">
+                    <span class="prev-nav">[[[PREV]]]</span>
+                    <span class="end-nav">[[[START]]]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    @if (showAdminMenuTour)
+    {
+        <div id="tour-div-4">
+            <div class="server-tour-container">
+                <div class="server-tour-title">
+                    <span class="title-text text-h4 text-semibold">[[[Site Administration]]]</span>
+                    <span class="su su-close"></span>
+                </div>
+                <div class="server-tour-body text-body">
+                    <div class="tour-description-div">
+                        [[[Rebrand your site and manage your subscription and payments from here.]]]
+                    </div>
+                </div>
+                <div class="tour-footer col-xs-12 no-padding">
+                    <div class="tour-page text-small col-xs-6 no-padding">@(2 + (isDashboardsPage ? 1 : 0))/@totalTour</div>
+                    <div class="tour-navigation-div text-button col-xs-6 no-padding">
+                        <span class="prev-nav">[[[PREV]]]</span>
+                        <span class="next-nav">[[[NEXT]]]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tour-div-5">
+            <div class="server-tour-container">
+                <div class="server-tour-title">
+                    <span class="title-text text-h4 text-semibold">[[[User Management]]]</span>
+                    <span class="su su-close"></span>
+                </div>
+                <div class="server-tour-body text-body">
+                    <div class="tour-description-div">
+                        [[[Manage your users and groups, give access for them to view a dashboard, or import users from your own directory from here.]]]
+                    </div>
+                </div>
+                <div class="tour-footer col-xs-12 no-padding">
+                    <div class="tour-page text-small col-xs-6 no-padding">@(3 + (isDashboardsPage ? 1 : 0))/@totalTour</div>
+                    <div class="tour-navigation-div text-button col-xs-6 no-padding">
+                        <span class="prev-nav">[[[PREV]]]</span>
+                        @if (showCreateMenu)
+                        {
+                            <span class="next-nav">[[[NEXT]]]</span>
+                        }
+                        else
+                        {
+                            <span class="end-nav">[[[START]]]</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div id="backdropFallback" class="tour-backdrop "></div>
