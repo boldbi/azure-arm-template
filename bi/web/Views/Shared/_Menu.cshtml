@@ -26,7 +26,9 @@
 
     var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     var isMobile = new DeviceDetection(Context).IsMobile;
-    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
+    var themeAppearance = globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + themeAppearance + "/" + IconFileNames.MainLogo;
+    var isDefaultLogo = globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(IconFileNames.MainLogo);
     var appLogo = (globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(IconFileNames.MainLogo) || globalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : globalAppSettings.SystemSettings.MainScreenLogo;
     var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
     var navigationUrl = Url.Action("Index", "Home");
@@ -83,7 +85,7 @@
         <ul id="items-menu" class="sf-main-nav">
             <li class="app-logo-block mobile-hidden">
                 <a href="@navigationUrl" class="home-link" title="@globalAppSettings.SystemSettings.OrganizationName">
-                    <div data-alt="Application-Logo" data-id="application-logo" data-src="@appLogo" data-default="@defaultAppLogo" class="lazyload img-loader app-logo"></div>
+                    <div data-alt="Application-Logo" data-id="application-logo" data-src="@appLogo" data-default="@defaultAppLogo" data-isdefault="@isDefaultLogo" class="lazyload img-loader app-logo"></div>
                 </a>
             </li>
             <li class="sf-nav-separator logo-separator mobile-hidden">
