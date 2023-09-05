@@ -1,18 +1,23 @@
-CREATE TABLE {database_name}.BOLDBI_ScheduleRunHistory(
-	Id int NOT NULL AUTO_INCREMENT,
-	ScheduleStatusId int NOT NULL,
-	ScheduleId Char(38) NOT NULL,
-	StartedDate datetime NOT NULL,
-	ModifiedDate datetime NOT NULL,
-	Message text NULL,
-	IsOnDemand tinyint NOT NULL DEFAULT 0,
-	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+ALTER TABLE {database_name}.BOLDBI_ScheduleDetail ADD DashboardWidgetId Char(38) NULL
 ;
 
-INSERT INTO {database_name}.BOLDBI_ExportType (Name, IsActive) SELECT 'PPT', 1 FROM DUAL
-WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_ExportType WHERE Name='PPT' LIMIT 1)
+CREATE TABLE {database_name}.BOLDBI_DSMetrics (
+   Id SERIAL PRIMARY KEY,
+   DataSourceID VARCHAR(255),
+   IsRefresh BOOLEAN,
+   RefreshStartTime VARCHAR(255),
+   RefreshEndTime VARCHAR(255),
+   IsIncremental VARCHAR(255),
+   TableDetails VARCHAR(255),
+   RowsUpdated INTEGER,
+   TotalRows INTEGER,
+   CustomQuery VARCHAR(700),
+   SourceConnectionDetails VARCHAR(255),
+   IncrementalRefreshDetails VARCHAR(255),
+   ExtractType VARCHAR(255),
+   RefreshStatus VARCHAR(255),
+   RefreshException VARCHAR(255))
 ;
-INSERT INTO {database_name}.BOLDBI_ExportType (Name, IsActive) SELECT 'CSV', 1 FROM DUAL
-WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_ExportType WHERE Name='CSV' LIMIT 1)
+
+ALTER TABLE {database_name}.BOLDBI_PublishedItem ADD ExternalSiteId int NOT NULL DEFAULT 0
 ;

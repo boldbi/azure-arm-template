@@ -46,6 +46,7 @@
         var scheduleHistoryItemType = "@Convert.ToInt32(ItemType.Schedule)";
         var cdnLink = "@cdnLink";
         var appVersion = "@ServerAppConfig.ProductVersion";
+        var scheduleExist = "@ViewBag.ScheduleExist";
     </script>
 
     @if (!isMobile)
@@ -205,10 +206,12 @@
             </script>
             <script type="text/x-jsrender" id="dashboard-template">
                 <div class="item-dashboard grid-content" title="{{:ItemName}}" data-toggle="tooltip" data-placement="top">
-                    {{if IsScheduledItemDeleted}}
+                    {{if IsScheduledItemDeleted || (IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
                     <span class="schedule-deleted-name">{{:DeletedItemName}}</span><span class="badge badge-secondary1 badge-secondary2">@T["Deleted"]</span>
                     {{else MultiDashboardName}}
                     <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{else DashboardWidgetId != "@Guid.Empty"}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}" target="_blank">{{:ItemName}}</a></span>
                     {{else}}
                     <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
                     {{/if}}
@@ -246,7 +249,7 @@
                         <span class="su su-options"> </span>
                     </span>
                     <ul class="dropdown-menu" role="menu">
-                        {{if !IsScheduledItemDeleted}}
+                        {{if !IsScheduledItemDeleted  && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
                         <li class="menu-group @(schemes != null && !schemes.RunNow ? "hide" : string.Empty)">
                             <a href="javascript:void(0);" title="@T["Run now"]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
                                 <i class="su su-play" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
@@ -271,7 +274,7 @@
                         {{if CanWrite}}
                         <li class="divider @(schemes != null && !schemes.Info ? "hide" : string.Empty)"></li>
                         {{if Status=="Active"}}
-                        {{if !IsScheduledItemDeleted}}
+                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
                         <li class="menu-group @(schemes != null && !schemes.Disable ? "hide" : string.Empty)">
                             <a href="javascript:void(0);" title="@T["Disable"]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
                                 <i class="su su-disable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
@@ -281,7 +284,7 @@
                         {{/if}}
 
                         {{else Status=="Inactive"}}
-                        {{if !IsScheduledItemDeleted}}
+                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
                         <li class="menu-group @(schemes != null && !schemes.Enable ? "hide" : string.Empty)">
                             <a href="javascript:void(0);" title="@T["Enable"]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
                                 <i class="su su-enable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>

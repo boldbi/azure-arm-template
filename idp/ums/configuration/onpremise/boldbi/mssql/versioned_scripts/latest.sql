@@ -1,17 +1,23 @@
-CREATE TABLE [BOLDBI_ScheduleRunHistory](
-	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
-	[ScheduleStatusId] [int] NOT NULL,
-	[ScheduleId] [uniqueidentifier] NOT NULL,
-	[StartedDate] [datetime] NOT NULL,
-	[Message] [nvarchar](max) NULL,
-	[ModifiedDate] [datetime] NOT NULL,
-	[IsOnDemand] [bit] NOT NULL DEFAULT (0),
-	[IsActive] [bit] NOT NULL)
+ALTER TABLE [BOLDBI_ScheduleDetail] ADD [DashboardWidgetId] uniqueidentifier Null
 ;
 
-INSERT INTO [BoldBI_ExportType] (Name, IsActive) SELECT 'PPT', 1
-WHERE NOT EXISTS (SELECT Name FROM [BoldBI_ExportType] WHERE Name = 'PPT')
+CREATE TABLE [BoldBI_DSMetrics]  (
+   Id INT IDENTITY(1,1) PRIMARY KEY,
+   DataSourceID VARCHAR(255),
+   IsRefresh bit,
+   RefreshStartTime VARCHAR(255),
+   RefreshEndTime VARCHAR(255),
+   IsIncremental VARCHAR(255),
+   TableDetails VARCHAR(255),
+   RowsUpdated INTEGER,
+   TotalRows INTEGER,
+   CustomQuery VARCHAR(700),
+   SourceConnectionDetails VARCHAR(255),
+   IncrementalRefreshDetails VARCHAR(255),
+   ExtractType VARCHAR(255),
+   RefreshStatus VARCHAR(255),
+   RefreshException VARCHAR(255))
 ;
-INSERT INTO [BoldBI_ExportType] (Name, IsActive) SELECT 'CSV', 1
-WHERE NOT EXISTS (SELECT Name FROM [BoldBI_ExportType] WHERE Name = 'CSV')
+
+ALTER TABLE [BOLDBI_PublishedItem] ADD [ExternalSiteId] [int] NOT NULL DEFAULT 0
 ;

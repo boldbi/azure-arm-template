@@ -1,1 +1,0 @@
-UPDATE {database_name}.BOLDTC_User SET username = email WHERE isdeleted = 1 LIMIT 1000;

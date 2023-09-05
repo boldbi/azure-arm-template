@@ -253,6 +253,7 @@ function closeLocalizationDialog() {
     localizationGrid.refresh();
     document.getElementById("localization-container").ej2_instances[0].hide();
     count = 0;
+    window.location.reload();
 }
 
 function uploadDialogOpen() {

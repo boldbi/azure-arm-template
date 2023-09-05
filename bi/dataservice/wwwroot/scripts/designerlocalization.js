@@ -851,7 +851,7 @@ var Designer = {
 				thresHold: "Threshold",
 				thresHoldLimit: "Threshold Data Limit",
 				dataSampling: "Data Sampling",
-				appendDsText: "Append Data Source",
+				appendDsText: "Append Data",
 				dataLimit: "Data Limit",
                 headerNewConnectionText: "NEW CONNECTION",
                 newDataSourceText: "NEW DATA SOURCE",
@@ -873,11 +873,11 @@ var Designer = {
                 appendDsAppendBtn: "Append",
                 appendDsCloseBtn: "Close",
                 appendDsChooseFile: 'Choose File',
-                appendDsEstimatedFileSize: "upto(200MB)",
+                appendDsEstimatedFileSize: "(up to 200MB)",
                 appendDsBrowseText: "Browse File",
                 appendDsSelectedTables: "Selected Tables",
                 appendDsdragAndDropText: "Drop files here or ",
-				appendDsWaitingPopupText: "The upload files are currently being appended.",
+				appendDsWaitingPopupText: "Appending data from the uploaded file(s).",
                 appendDsSuccessPopupText: "The files have been appended successfully.",
                 appendDsFailurePopupText: "The files have failed to be appended successfully.",
                 serverNameText: "Server name",
@@ -4562,6 +4562,8 @@ var Designer = {
                 refreshWidget: "Refresh Selected Widgets Only",
                 timeInterval: "Time Interval",
                 removeLoader: "Hide Loading Indicator",
+				commonTimeInterval: "Common Time Interval",
+				differentTimeInterval: "Differed Time Interval",
                 removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data"
             },
             dialogText: {
@@ -4824,7 +4826,7 @@ var Designer = {
                     varEx: "VAR(numeric_expression)",
 
                     totalDesc: "Returns the total values in the given expression.",
-                    totalEx: "TOTAL(numeric_expression)",
+                    totalEx: "TOTAL(AGG(numeric_expression))",
 
                     runningCountDesc: "Returns Running Count of each Row.",
                     runningCountEx: "RUNNINGCOUNT(aggregate_expression)",

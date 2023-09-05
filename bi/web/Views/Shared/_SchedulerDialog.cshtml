@@ -9,7 +9,10 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var dns = url.GetLeftPart(UriPartial.Authority);
-
+    var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
+    var widgetName = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetName != null ? @T[ViewBag.WidgetName].Value : string.Empty;
+    var widgetId = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetId != null ? @ViewBag.WidgetId : string.Empty;
+    bool IsWidgetDeleted = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsWidgetDeleted != null ? ViewBag.IsWidgetDeleted : false;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -130,7 +133,7 @@
                         </div>
                         <div class="col-sm-12 col-xs-12 no-padding">
                             <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Dashboard "]<span class="mandatory">*</span></label></div>
-                            <div class="dashboard-dropdown col-sm-4 col-xs-4">
+                            <div id="dashboard-dropdown" class="dashboard-dropdown col-sm-4 col-xs-4">
                                 <select id="selected_dashboard" data-live-search="true" title='@T["Select dashboard"]' name="dashboardId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
                                     @if (Context.Request.Query["actionType"].ToString().ToLower() == "create")
                                     {
@@ -184,6 +187,31 @@
                                     </div>
                                 </div>*@
                         </div>
+                        @if (enableWidgetScheduleExport)
+                        {
+                            <div class="col-sm-12 col-xs-12 no-padding">
+                                <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Widget "]</label></div>
+                                <div class="widget-dropdown col-sm-4 col-xs-4">
+                                    <select id="selected_widget" data-live-search="true" title='@T["Select widget"]' name="widgetId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
+                                        @if (Context.Request.Query["actionType"].ToString().ToLower() == "create")
+                                        {
+                                            <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select widget"]</option>
+                                        }
+                                        else
+                                        {
+                                            @if (!string.IsNullOrWhiteSpace(widgetId.ToString()) && !string.IsNullOrWhiteSpace(widgetName.ToString()))
+                                            {
+                                                <option value="@widgetId" selected="selected">@widgetName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select widget"]</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        }
                         <div class="col-sm-12 col-xs-12 no-padding">
                             <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Schedule Name"]<span class="mandatory">*</span></label></div>
                             <div class="col-sm-4 col-xs-4 name-field">
@@ -300,6 +328,10 @@
     var cdnLink = "@cdnLink";
     var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
     var appVersion = "@ServerAppConfig.ProductVersion";
+    var enableWidgetScheduleExport = @Json.Serialize(enableWidgetScheduleExport);
+    var isWidgetDeleted = @Json.Serialize(IsWidgetDeleted);
+    var widgetName = "@widgetName";
+    var getwidgetsDetailUrl = "@Url.Action("GetWidgetsDetails", "scheduler")";
 
     $("#selected_dashboard,#selected_category").selectpicker();
     $("#selected_childdashboard").attr("disabled", true);
@@ -307,7 +339,7 @@
         createSchedule(itemId, itemName, categoryName, multiDashboardName);
     }
     else {
-        editSchedule(scheduleId, itemId, itemName, categoryName, multiDashboardName, isScheduledItemDeleted);
+        editSchedule(scheduleId, itemId, itemName, categoryName, multiDashboardName, isScheduledItemDeleted, isWidgetDeleted);
     }
     if (($(parent.window).width()) > 1400) {
         $(".schedule-dialog").addClass("lg-schedule-flexible");

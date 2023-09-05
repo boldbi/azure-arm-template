@@ -3,7 +3,7 @@
     ViewBag.Title = T["Published Resources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
-    var isDownloadItemsTab = !enablePublishModule ? "active" : (Context.Request.Query["tab"].ToString().ToLower() == "offline-files") ? "active" : string.Empty;
+    var isDownloadItemsTab = (Context.Request.Query["tab"].ToString().ToLower() == "offline-files") ? "active" : string.Empty;
     var isPublishedItemsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "online-publish") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isDownloadItemsTab)) ? "active" : string.Empty;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
 }
@@ -88,6 +88,7 @@
                                                 </a>
                                             </li>
                                             {{/if}}
+                                            {{if DestinationItemId != "@Guid.Empty"}}
                                             <li class="menu-group">
                                                 {{if !IsLocked}}
                                                 <a href="javascript:void(0);" title="@T["Lock Edit"]" onclick="lockOrUnlockEditDialog(true)">
@@ -101,6 +102,7 @@
                                                 </a>
                                                 {{/if}}
                                             </li>
+                                            {{/if}}
                                             <li class="menu-group">
                                                 <a href="javascript:void(0);" title="@T["Info"]" onclick="openPublishInfo()">
                                                     <i class="su su-info"></i>

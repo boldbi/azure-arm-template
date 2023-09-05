@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.11.10
+*  version : 6.12.12
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -4524,6 +4524,7 @@ BoldBIDashboard.EjSvgRender.utils = {
                 else if (intersectAction == 'rotate90')
                     intersectRotation = 90;
                 labelRotation = labelRotation!=null || orientation== "vertical" ? labelRotation : intersectRotation;
+                labelRotation = typeof(labelRotation) === "string" ? parseFloat(labelRotation) : labelRotation;
                 axis.rotationValue = labelRotation;
                 if (labelRotation) {                
                     rotateLabel = (!BoldBIDashboard.isNullOrUndefined(rotateLabel)) ? rotateLabel : '';
@@ -5107,6 +5108,7 @@ BoldBIDashboard.EjSvgRender.utils = {
         return (value <= range.max) && (value >= range.min);
     },
     _logBase: function (val, base) {
+        val = val < 0? Math.abs(val) : val;
         return Math.log(val) / Math.log(base);
     },
     _correctRect: function (x1, y1, x2, y2) {

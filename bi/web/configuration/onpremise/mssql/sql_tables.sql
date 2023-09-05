@@ -233,6 +233,7 @@ CREATE TABLE [BOLDBI_ScheduleDetail](
 	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
 	[ScheduleId] [uniqueidentifier] NOT NULL UNIQUE,
 	[ItemId] [uniqueidentifier] NOT NULL,
+	[DashboardWidgetId] [uniqueidentifier] NULL,
 	[Name] [nvarchar](150) NOT NULL,
 	[RecurrenceTypeId] [int] NULL,
 	[RecurrenceInfo] [nvarchar](4000) NULL,
@@ -714,7 +715,8 @@ CREATE TABLE [BOLDBI_PublishedItem](
 	[CreatedById] [int] NOT NULL,
 	[CreatedDate] [datetime] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
-    [IsActive] [bit] NOT NULL)
+    [IsActive] [bit] NOT NULL,
+	[ExternalSiteId] [int] NOT NULL DEFAULT 0)
 ;
 
 CREATE TABLE [BOLDBI_PublishJobs](
@@ -953,6 +955,23 @@ CREATE TABLE [BOLDBI_ScheduleRunHistory](
 	[ModifiedDate] [datetime] NOT NULL,
 	[IsOnDemand] [bit] NOT NULL DEFAULT (0),
 	[IsActive] [bit] NOT NULL)
+;
+CREATE TABLE [BoldBI_DSMetrics]  (
+   Id INT IDENTITY(1,1) PRIMARY KEY,
+   DataSourceID VARCHAR(255),
+   IsRefresh bit,
+   RefreshStartTime VARCHAR(255),
+   RefreshEndTime VARCHAR(255),
+   IsIncremental VARCHAR(255),
+   TableDetails VARCHAR(255),
+   RowsUpdated INTEGER,
+   TotalRows INTEGER,
+   CustomQuery VARCHAR(700),
+   SourceConnectionDetails VARCHAR(255),
+   IncrementalRefreshDetails VARCHAR(255),
+   ExtractType VARCHAR(255),
+   RefreshStatus VARCHAR(255),
+   RefreshException VARCHAR(255))
 ;
 
 ---- PASTE INSERT Queries below this section --------

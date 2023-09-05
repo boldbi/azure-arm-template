@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.card.all.js
-*  version : 6.11.10
+*  version : 6.12.12
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -5510,7 +5510,9 @@ var BoldBIDashboardSparkline;
 		},		
         updateImage: function() {
             var imageContainer = this.element.find('.e-kpi-card-image-container');
-            this.updateImageData(imageContainer, this.model.image.data, this.model.image);
+            this.model.image.visibility ? this.updateImageData(imageContainer, this.model.image.data, this.model.image) : imageContainer.css({
+                "background-image": "none"
+            });
             this.updateImagePosition(imageContainer, this.model.image.mode, this.model.image.data);
 			this.updateContentWidth();
 			this.swapImage();
@@ -7299,7 +7301,9 @@ var BoldBIDashboardSparkline;
         _updateImage: function() {
 			this.element.find('.e-number-card-image-wrapper').css({'height': '40px' , 'width': '40px' });
             var imageContainer = this.element.find('.e-number-card-image-container');
-            this._updateImageData(imageContainer, this.model.image.data, this.model.image);
+            this.model.image.visibility ? this._updateImageData(imageContainer, this.model.image.data, this.model.image) : imageContainer.css({
+                "background-image": "none"
+            });
             this._updateImagePosition(imageContainer, this.model.image.mode, this.model.image.data);
 			this._swapImage();
         },

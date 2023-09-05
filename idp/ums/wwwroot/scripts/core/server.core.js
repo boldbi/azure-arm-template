@@ -751,7 +751,7 @@ function IsEmail(email) {
 }
 
 function UsernameValidation(username) {
-    var filter = /^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){1,252}[a-zA-Z0-9]$/;
+    var filter = /^(?:(?!\.{2}|_{2}|-{2})[\p{L}\p{N}0-9_.-]+@[\p{L}\p{N}\-]+(\.[\p{L}\-]+)*|[\p{L}\p{N}0-9_.-]+)$/u;
     if (filter.test(username)) {
         return true;
     }

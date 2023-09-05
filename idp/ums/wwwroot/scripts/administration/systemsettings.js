@@ -446,13 +446,12 @@ $(document).ready(function () {
             }
 
         }
-        // SSL certificate check box information in UI
-        //if (ignoreSslValidation) {
-        //    $("#ssl-certificate").prop("checked", true);
-        //}
-        //else {
-        //    $("#ssl-certificate").prop("checked", false);
-        //}
+        if (ignoreSslValidation) {
+            $("#ssl-certificate").prop("checked", true);
+        }
+        else {
+            $("#ssl-certificate").prop("checked", false);
+        }
     });
 
     $(document).on("change", "#enablepoweredbysyncfusion", function () {

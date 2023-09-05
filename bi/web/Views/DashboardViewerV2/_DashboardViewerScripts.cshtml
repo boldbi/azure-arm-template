@@ -10,6 +10,7 @@
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var isMultiTab = ViewBag.MultiTabId != null && ViewBag.MultiTabId.ToString() != string.Empty;
     var isPinWidget = ViewBag.PinWidget;
+    var isBingMapRequired = (ViewBag.IsBingMapRequired != null && ViewBag.IsBingMapRequired) ? true : false;
 }
 
 @if (isPinWidget)
@@ -49,7 +50,11 @@ else
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
 </environment>
 
-<script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+@if (isBingMapRequired)
+{
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+}
+
 <script>
     var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
 </script>

@@ -226,6 +226,7 @@ CREATE TABLE SyncDS_ScheduleDetail(
 	Id SERIAL PRIMARY KEY NOT NULL,
 	ScheduleId uuid NOT NULL UNIQUE,
 	ItemId uuid NOT NULL,
+	DashboardWidgetId uuid NULL,
 	Name varchar(150) NOT NULL,
 	RecurrenceTypeId int NULL,
 	RecurrenceInfo varchar(4000) NULL,
@@ -707,7 +708,8 @@ CREATE TABLE SyncDS_PublishedItem(
 	CreatedById int NOT NULL,
 	CreatedDate timestamp NOT NULL,
 	ModifiedDate timestamp NOT NULL,
-	IsActive smallint NOT NULL)
+	IsActive smallint NOT NULL,
+	ExternalSiteId int not null DEFAULT 0)
 ;
 
 CREATE TABLE SyncDS_PublishJobs(
@@ -945,6 +947,24 @@ CREATE TABLE SyncDS_ScheduleRunHistory(
 	Message text NULL,
 	IsOnDemand smallint NOT NULL DEFAULT (0),
 	IsActive smallint NOT NULL)
+;
+
+CREATE TABLE SyncDS_DSMetrics (
+   Id SERIAL PRIMARY KEY,
+   DataSourceID VARCHAR(255),
+   IsRefresh BOOLEAN,
+   RefreshStartTime VARCHAR(255),
+   RefreshEndTime VARCHAR(255),
+   IsIncremental VARCHAR(255),
+   TableDetails VARCHAR(255),
+   RowsUpdated INTEGER,
+   TotalRows INTEGER,
+   CustomQuery VARCHAR(700),
+   SourceConnectionDetails VARCHAR(255),
+   IncrementalRefreshDetails VARCHAR(255),
+   ExtractType VARCHAR(255),
+   RefreshStatus VARCHAR(255),
+   RefreshException VARCHAR(255))
 ;
 
 ---- PASTE INSERT Queries below this section --------

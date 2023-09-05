@@ -71,7 +71,7 @@
             <div class="@(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport) ? "import-user-message" : string.Empty)" style="display:none">
                 @if (ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart")
                 {
-                    @T["The user import process will start on or before 3 minutes from the job creation time."]
+                    @T["The importing process will begin either within 3 minutes of the job creation time or after the completion of other import tasks already in the queue."]
                 }
                 else if (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)
                 {
@@ -132,7 +132,7 @@
                         <div class="form-element-label">
                             <div class="show input-field">
                                 <label>@T["Status"]:</label>
-                                @if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended" && !string.IsNullOrWhiteSpace(ViewBag.jobDetails.BulkImportDetails.ErrorMessage))
+                                @if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended" && ViewBag.jobDetails.BulkImportDetails.ErrorType == 3)
                                 {
                                     <span value="@ViewBag.jobDetails.ImportJobStatus)">@ViewBag.jobDetails.ImportJobStatus</span>
                                     <span class="su su-help" title="@T["The import job has been suspended by system due to some unexpected error."]" data-toggle="tooltip"></span>

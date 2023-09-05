@@ -3,6 +3,7 @@
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardExportScheduleFailure);
+    var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -20,6 +21,7 @@
         var canExport = @Html.Raw(Json.Serialize(ViewBag.CanExport));
         var webhookevent = @Html.Raw(Json.Serialize(ViewBag.webhookEvent));
         var validateFTPCredentials = "@Url.Action("ValidateFTPCredentials", "scheduler")";
+        var enableWidgetScheduleExport = @Json.Serialize(enableWidgetScheduleExport);
     </script>
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecipients.js"></script>

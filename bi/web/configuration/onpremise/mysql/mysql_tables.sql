@@ -246,6 +246,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleDetail(
 	Id int NOT NULL AUTO_INCREMENT,
 	ScheduleId Char(38) NOT NULL UNIQUE,
 	ItemId Char(38) NOT NULL,
+	DashboardWidgetId Char(38) NULL,
 	Name varchar(150) NOT NULL,
 	RecurrenceTypeId int NULL,
 	RecurrenceInfo varchar(4000) NULL,
@@ -775,6 +776,7 @@ CREATE TABLE {database_name}.BOLDBI_PublishedItem(
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
     IsActive tinyint NOT NULL,
+	ExternalSiteId int NOT NULL DEFAULT 0,
 	PRIMARY KEY (Id))
 ;
 
@@ -1033,6 +1035,24 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleRunHistory(
 	IsOnDemand tinyint NOT NULL DEFAULT 0,
 	IsActive tinyint NOT NULL,
 	PRIMARY KEY (Id))
+;
+
+CREATE TABLE {database_name}.BOLDBI_DSMetrics (
+   Id SERIAL PRIMARY KEY,
+   DataSourceID VARCHAR(255),
+   IsRefresh BOOLEAN,
+   RefreshStartTime VARCHAR(255),
+   RefreshEndTime VARCHAR(255),
+   IsIncremental VARCHAR(255),
+   TableDetails VARCHAR(255),
+   RowsUpdated INTEGER,
+   TotalRows INTEGER,
+   CustomQuery VARCHAR(700),
+   SourceConnectionDetails VARCHAR(255),
+   IncrementalRefreshDetails VARCHAR(255),
+   ExtractType VARCHAR(255),
+   RefreshStatus VARCHAR(255),
+   RefreshException VARCHAR(255))
 ;
 
 -- -- PASTE INSERT Queries below this section --------

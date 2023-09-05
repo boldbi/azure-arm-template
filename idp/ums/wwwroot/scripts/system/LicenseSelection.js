@@ -78,13 +78,27 @@ function checkWindowRef(addButtonObj) {
 function handleApplyLicense(addButtonObj, evt) {
     if (evt.originalEvent.data.isSuccess !== undefined) {
         if (evt.originalEvent.data.isSuccess === true) {
+            var currentUrl = window.location.href;
+            var targetSubappName = "ums";
+            var urlObject = new URL(currentUrl);
+            var path = urlObject.pathname.replace(/^\/|\/$/g, '');
+            var pathSegments = path.split('/');
+
+            var targetIndex = pathSegments.indexOf(targetSubappName);
+            if (targetIndex > 0) {
+                var subappNameOrDomain = pathSegments[targetIndex - 1];
+                currentUrl = window.location.origin + '/' + subappNameOrDomain;
+            }
+            else {
+                currentUrl = window.location.origin;
+            }
 
             var refreshToken = evt.originalEvent.data.refreshtoken != undefined ? evt.originalEvent.data.refreshtoken : "";
             var boldLicenseToken = evt.originalEvent.data.boldLicenseToken != undefined && evt.originalEvent.data.boldLicenseToken != null ? evt.originalEvent.data.boldLicenseToken : "";
             $.ajax({
                 type: "POST",
                 url: updateLicenseKeyUrl,
-                data: { licenseKey: evt.originalEvent.data.licenseKey, refreshToken: refreshToken, licenseType: "1", boldLicenseToken: boldLicenseToken, currentUrl: window.location.origin },
+                data: { licenseKey: evt.originalEvent.data.licenseKey, refreshToken: refreshToken, licenseType: "1", boldLicenseToken: boldLicenseToken, currentUrl: currentUrl },
                 beforeSend: showWaitingPopup('startup-page-container-waiting-element'),
                 success: function (result) {
                     if (result.Status) {

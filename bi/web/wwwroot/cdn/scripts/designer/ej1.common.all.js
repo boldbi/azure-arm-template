@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 6.11.10
+*  version : 6.12.12
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -28948,6 +28948,6834 @@ BoldBIDashboard.Tooltip.Associate = {
             this._on(this.element, "keyup", this._keyUpOnInput);
         }
     });
+})(bbdesigner$, SyncfusionBoldBIDashboard);;
+;
+/**
+* @fileOverview Plugin provides support to display calendar within your web page and allows to pick the date.
+* @copyright Copyright SyncfusionBoldBIDashboard Inc. 2001 - 2015. All rights reserved.
+*  Use of this code is subject to the terms of our license.
+*  A copy of the current license can be obtained at any time by e-mailing
+*  licensing@syncfusion.com. Any infringement will be prosecuted under
+*  applicable laws. 
+* @version 12.1 
+* @author <a href="mailto:licensing@syncfusion.com">SyncfusionBoldBIDashboard Inc</a>
+*/
+
+(function (bbdesigner$, BoldBIDashboard, undefined) {
+
+    BoldBIDashboard.widget("BoldBIDashboardDatePicker", "BoldBIDashboard.DatePicker", {
+
+        element: null,
+        _rootCss: "e-datepicker",
+
+        model: null,
+        validTags: ["input", "div", "span"],
+        _setFirst: false,
+        _addToPersist: ["value"],
+        _cancelValue: false,
+        type: "editor",
+        angular: {
+            require: ['?ngModel', '^?form', '^?ngModelOptions'],
+            requireFormatters: true
+        },
+
+
+        defaults: {
+
+            dayHeaderFormat: "min",
+
+            showPopupButton: true,
+
+            enableAnimation: true,
+
+            showFooter: true,
+
+            displayInline: false,
+
+            htmlAttributes: {},
+
+            dateFormat: '',
+
+            watermarkText: "Select date",
+
+            value: null,
+            minDate: new Date("01/01/1900"),
+
+            maxDate: new Date("12/31/2099"),
+
+            startLevel: "month",
+
+            depthLevel: "",
+
+            cssClass: "",
+
+            startDay: -1,
+
+            stepMonths: 1,
+
+            locale: "en-US",
+
+            showOtherMonths: true,
+
+            enableStrictMode: false,
+
+            enablePersistence: false,
+
+            enabled: true,
+
+            width: "",
+
+            height: "",
+
+            enableRTL: false,
+
+            showRoundedCorner: false,
+
+            headerFormat: 'MMMM yyyy',
+
+            buttonText: 'Today',
+
+            readOnly: false,
+
+            specialDates: null,
+
+            fields: {
+
+                date: "date",
+
+                tooltip: "tooltip",
+
+                iconClass: "iconClass",
+
+                cssClass: "cssClass"
+            },
+
+            showTooltip: true,
+
+            showDisabledRange: true,
+
+            highlightSection: "none",
+
+            highlightWeekend: false,
+
+            validationRules: null,
+
+            validationMessage: null,
+            validationMessages: null,
+
+            allowEdit: true,
+
+            tooltipFormat: "ddd MMM dd yyyy",
+
+            allowDrillDown: true,
+
+            blackoutDates: [],
+
+            beforeDateCreate: null,
+
+            open: null,
+
+            close: null,
+
+            select: null,
+
+            change: null,
+
+            focusIn: null,
+
+            focusOut: null,
+
+            beforeOpen: null,
+
+            beforeClose: null,
+
+            navigate: null,
+
+            create: null,
+
+            destroy: null,
+
+            weekNumber: false
+
+        },
+
+
+        dataTypes: {
+            startDay: "number",
+            stepMonths: "number",
+            showOtherMonths: "boolean",
+            enableStrictMode: "boolean",
+            showRoundedCorner: "boolean",
+            enableRTL: "boolean",
+            displayInline: "boolean",
+            showPopupButton: "boolean",
+            locale: "string",
+            readOnly: "boolean",
+            cssClass: "string",
+            dateFormat: "string",
+            watermarkText: "string",
+            headerFormat: "string",
+            buttonText: "string",
+            specialDates: "data",
+            showTooltip: "boolean",
+            highlightSection: "enum",
+            highlightWeekend: "boolean",
+            enableAnimation: "boolean",
+            validationRules: "data",
+            validationMessage: "data",
+            validationMessages: "data",
+            htmlAttributes: "data",
+            tooltipFormat: "string",
+            allowEdit: "boolean",
+            allowDrillDown: "boolean",
+            weekNumber: "boolean"
+
+        },
+
+        _renderPopup: function () {
+            this.sfCalendar = BoldBIDashboard.buildTag('div.e-datepicker e-popup e-widget ' + this.model.cssClass + ' e-calendar ' + (this.model.specialDates ? (this.model.specialDates[0][this._mapField._icon] ? 'e-icons ' : '') : ''), "", {}, { id: (this._id ? 'e-' + this._id : "") }).attr({ 'aria-hidden': 'true' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                     .insertBefore(this.element);
+            if (this.model.displayInline && !this.element.is("input"))
+                this.sfCalendar.addClass('e-inline');
+            this.popup = this.sfCalendar;
+            if (!BoldBIDashboard.isTouchDevice()) this.sfCalendar.addClass('e-ntouch');
+            this._setRestrictDateState(this.model.showDisabledRange);
+            this._createCalender();
+            this._setDisplayInline(this.model.displayInline);
+            this._resizeCalender();
+            this._setRTL(this.model.enableRTL);
+            this._setRoundedCorner(this.model.showRoundedCorner);
+            this._wireCalendarEvents();
+        },
+
+        _setModel: function (jsondata) {
+            if (BoldBIDashboard.isNullOrUndefined(this.sfCalendar)) this._renderPopup();
+            var callRefresh = false, start = false, validate = false;
+            for (var key in jsondata) {
+                switch (key) {
+                    case "dayHeaderFormat":
+                        this.model.dayHeaderFormat = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "weekNumber":
+                        this.model.weekNumber = jsondata[key];
+                        this._refreshDatepicker();
+                        break;
+                    case "showPopupButton":
+                        this._renderDateIcon(jsondata[key], true);
+                        break;
+                    case "displayInline":
+                        if (!jsondata[key]) this._bindDateButton();
+                        this._setDisplayInline(jsondata[key]);
+                        if (!this.model.allowEdit && !jsondata[key] && this._isInputBox)
+                            this.element.on("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+                        break;
+                    case "value":
+                        if (BoldBIDashboard.isPlainObject(jsondata[key])) jsondata[key] = null;
+                        if (BoldBIDashboard.isNullOrUndefined(jsondata["minDate"]) && BoldBIDashboard.isNullOrUndefined(jsondata["maxDate"])) {
+                            this._setDateValue(jsondata[key]);
+                            if (this._specificFormat())
+                                this._stopRefresh = true;
+                            jsondata[key] = this.model.value;
+                        }
+                        else
+                            this._updateDateValue(jsondata[key]);
+                        validate = callRefresh = start = true;
+                        break;
+                    case "specialDates":
+                        this.model.specialDates = jsondata[key];
+                        this._createSpecialDateObject();
+                        callRefresh = start = true;
+                        break;
+                    case "fields":
+                        this.model.fields = jsondata[key];
+                        this._mapField = this._getMapper();
+                        callRefresh = start = true;
+                        break;
+                    case "showTooltip":
+                        this.model.showTooltip = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "highlightWeekend":
+                        this.model.highlightWeekend = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "highlightSection":
+                        this.model.highlightSection = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "dateFormat":
+                        this.model.dateFormat = jsondata[key];
+                        this._ensureValue();
+                        break;
+                    case "minDate":
+                        this._setMinDate(jsondata[key]);
+                        jsondata[key] = this.model.minDate;
+                        this._ensureValue();
+                        validate = callRefresh = start = true;
+                        break;
+                    case "maxDate":
+                        this._setMaxDate(jsondata[key]);
+                        jsondata[key] = this.model.maxDate;
+                        this._ensureValue();
+                        validate = callRefresh = start = true;
+                        break;
+                    case "locale":
+                        this.model.locale = jsondata[key];
+                        this.model.startDay = ((BoldBIDashboard.isNullOrUndefined(this._options.startDay)) && (this.model.startDay === this.culture.calendar.firstDay))
+                            ? -1 : (this._options.startDay === this.defaults.startDay) ? -1 : this.model.startDay;
+                        this.model.dateFormat = ((BoldBIDashboard.isNullOrUndefined(this._options.dateFormat)) && (this.model.dateFormat === this.culture.calendar.patterns.d))
+                            ? '' : this.model.dateFormat;
+                        this._setCulture(jsondata[key]);
+                        if (this.model.value) this._setDateValue(this.model.value);
+                        jsondata[key] = this.model.locale;
+                        callRefresh = start = true;
+                        break;
+                    case "showOtherMonths":
+                        this.model.showOtherMonths = jsondata[key];
+                        this._otherMonthsVisibility();
+                        break;
+                    case "enableStrictMode":
+                        this.model.enableStrictMode = jsondata[key];
+                        validate = callRefresh = start = true;
+                        break;
+                    case "validationRules":
+                        if (this.model.validationRules != null) {
+                            this.element.rules('remove');
+                            this.model.validationMessages = null;
+                        }
+                        this.model.validationRules = jsondata[key];
+                        if (this.model.validationRules != null) {
+                            this._initValidator();
+                            this._setValidation();
+                        }
+                        break;
+                    case "validationMessages":
+                        this.model.validationMessages = jsondata[key];
+                        if (this.model.validationRules != null && this.model.validationMessages != null) {
+                            this._initValidator();
+                            this._setValidation();
+                        }
+                        break;
+                    case "validationMessage":
+                        this.model.validationMessages = jsondata[key];
+                        if (this.model.validationRules != null && this.model.validationMessages != null) {
+                            this._initValidator();
+                            this._setValidation();
+                        }
+                        break;
+                    case "readOnly":
+                        this.model.readOnly = jsondata[key];
+                        this._disbleMaualInput();
+                        break;
+                    case "width":
+                        this._setWidth(jsondata[key]);
+                        break;
+                    case "height":
+                        this._setHeight(jsondata[key]);
+                        break;
+                    case "cssClass":
+                        this._setSkin(jsondata[key]);
+                        break;
+                    case "enableRTL":
+                        this._setRTL(jsondata[key]);
+                        break;
+                    case "showRoundedCorner":
+                        this._setRoundedCorner(jsondata[key]);
+                        break;
+                    case "enabled":
+                        if (!jsondata[key]) this.disable();
+                        else this.enable();
+                        break;
+                    case "buttonText":
+                        if (BoldBIDashboard.isNullOrUndefined(this._options)) this._options = {};
+                        this._options["buttonText"] = this.model.buttonText = jsondata[key];
+                        this._localizedLabels.buttonText = this.model.buttonText;
+                        this._setFooterText(jsondata[key]);
+                        break;
+                    case "showFooter":
+                        this._enableFooter(jsondata[key]);
+                        break;
+                    case "watermarkText":
+                        if (BoldBIDashboard.isNullOrUndefined(this._options)) this._options = {};
+                        this._options["watermarkText"] = this.model.watermarkText = jsondata[key];
+                        this._localizedLabels.watermarkText = this.model.watermarkText;
+                        this._setWaterMark();
+                        break;
+                    case "startDay":
+                        var initial = jsondata[key];
+                        if (parseInt(jsondata[key]) < 0 || parseInt(jsondata[key]) > 6) {
+                            jsondata[key] = this.culture.calendar.firstDay;
+                            initial = -1;
+                        }
+                        this.model.startDay = jsondata[key];
+                        if (BoldBIDashboard.isNullOrUndefined(this._options)) this._options = {};
+                        this._options["startDay"] = initial;
+                        callRefresh = start = true;
+                        break;
+                    case "startLevel":
+                        this.model.startLevel = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "headerFormat":
+                        this.model.headerFormat = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "depthLevel":
+                        this.model.depthLevel = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "htmlAttributes": this._addAttr(jsondata[key]); break;
+                    case "allowEdit": this._changeEditable(jsondata[key]); break;
+                    case "tooltipFormat":
+                        this.model.tooltipFormat = jsondata[key];
+                        callRefresh = start = true;
+                        break;
+                    case "allowDrillDown":
+                        this._allowQuickPick(jsondata[key]);
+                        callRefresh = start = true;
+                        break;
+                    case "showDisabledRange":
+                        this._setRestrictDateState(jsondata[key]);
+                        break;
+                    case "blackoutDates":
+                        this.model.blackoutDates = jsondata[key];
+                        this._initDisableObj(this.model.blackoutDates);
+                        callRefresh = start = true;
+                        break;
+                }
+            }
+            if (validate) {
+                this._validateMinMaxDate();
+                jsondata["value"] = this.model.value;
+                jsondata["maxDate"] = this.model.maxDate;
+                jsondata["minDate"] = this.model.minDate;
+            }
+            this._setWaterMark();
+
+            if (callRefresh && (this.isValidState || this.model.displayInline))
+                this._refreshDatepicker();
+            if (start) this._startLevel(this.model.startLevel);
+            this._triggerChangeEvent();
+            this._checkErrorClass();
+        },
+        observables: ["value"],
+
+        _destroy: function () {
+            if (this.model.displayInline)
+                bbdesigner$(window).off("resize", bbdesigner$.proxy(this._OnWindowResize, this));
+            if (this._isOpen)
+                this.hide();
+            this.sfCalendar && this.sfCalendar.remove();
+            if (this.wrapper) {
+                this.element.insertAfter(this.wrapper);
+                this.wrapper.remove();
+            }
+            this._cloneElement.removeClass("e-js e-input").removeClass(BoldBIDashboard.util.getNameSpace(this.sfType));
+            this._cloneElement.insertAfter(this.element);
+            this.element.remove();
+        },
+
+        _init: function (options) {
+            this._options = options;
+            this._cloneElement = this.element.clone();
+            this._dt_drilldown = false;
+            this._ISORegex();
+            this._initDisableObj(this.model.blackoutDates);
+            this.animation = {
+                open: { duration: 200 },
+                close: { duration: 100 }
+            };
+            this._animating = false;
+            this._isInputBox = this._isInputBox();
+            this._isSupport = document.createElement("input").placeholder == undefined ? false : true;
+            this._checkAttribute();
+            this._setValues();
+            this._createDatePicker();
+            if (!BoldBIDashboard.isNullOrUndefined(options) && !BoldBIDashboard.isNullOrUndefined(options.validationMessage))
+                this.model.validationMessages = this.model.validationMessage;
+            if (this.model.validationRules != null) {
+                this._initValidator();
+                this._setValidation();
+            }
+            if (options && options.value != undefined && options.value != this.element.val()) {
+                this._trigger("_change", { value: this.element.val() });
+            }
+        },
+
+        _ISORegex: function () {
+            this._tokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g,
+            // complex case for iso 8601 regex only
+            this._extISORegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?/,
+            this._basicISORegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?/,
+            this._numberRegex = {
+                2: /\d\d?/,
+                4: /^\d{4}/,
+                "z": /Z|[+-]\d\d(?::?\d\d)?/gi,
+                "t": /T/,
+                "-": /\-/,
+                ":": /:/
+            };
+            this._zeroRegex = /Z|[+-]\d\d(?::?\d\d)?/;
+            this._dates = [
+                ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
+                ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
+                ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
+                ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
+                ['YYYY-DDD', /\d{4}-\d{3}/],
+                ['YYYY-MM', /\d{4}-\d\d/, false],
+                ['YYYYYYMMDD', /[+-]\d{10}/],
+                ['YYYYMMDD', /\d{8}/],
+                // YYYYMM is NOT allowed by the standard
+                ['GGGG[W]WWE', /\d{4}W\d{3}/],
+                ['GGGG[W]WW', /\d{4}W\d{2}/, false],
+                ['YYYYDDD', /\d{7}/]
+            ];
+
+            // iso time formats and regexes
+            this._times = [
+                ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
+                ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
+                ['HH:mm:ss', /\d\d:\d\d:\d\d/],
+                ['HH:mm', /\d\d:\d\d/],
+                ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
+                ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
+                ['HHmmss', /\d\d\d\d\d\d/],
+                ['HHmm', /\d\d\d\d/],
+                ['HH', /\d\d/]
+            ];
+        },
+
+        _initValidator: function () {
+            (!this.element.closest("form").data("validator")) && this.element.closest("form").validate();
+        },
+        _setValidation: function () {
+            this.element.rules("add", this.model.validationRules);
+            var validator = this.element.closest("form").data("validator");
+            validator = validator ? validator : this.element.closest("form").validate();
+            name = this.element.attr("name");
+            validator.settings.messages[name] = {};
+            for (var ruleName in this.model.validationRules) {
+                var message = null;
+                if (!BoldBIDashboard.isNullOrUndefined(this.model.validationRules[ruleName])) {
+                    if (!BoldBIDashboard.isNullOrUndefined(this.model.validationRules["messages"] && this.model.validationRules["messages"][ruleName]))
+                        message = this.model.validationRules["messages"][ruleName];
+                    else {
+                        validator.settings.messages[name][ruleName] = bbdesigner$.validator.messages[ruleName];
+                        for (var msgName in this.model.validationMessages)
+                            ruleName == msgName ? (message = this.model.validationMessages[ruleName]) : "";
+                    }
+                    validator.settings.messages[name][ruleName] = message != null ? message : bbdesigner$.validator.messages[ruleName];
+                }
+            }
+        },
+        _checkAttribute: function () {
+            var attr = ["min", "max", "readonly", "disabled"], propName = ["minDate", "maxDate", "readOnly", "enabled"], value, propValue;
+            for (var i = 0; i < attr.length; i++) {
+                value = this.element.attr(attr[i]); propValue = propName[i];
+                if (!BoldBIDashboard.isNullOrUndefined(value)) {
+                    if (BoldBIDashboard.isNullOrUndefined(this._options))
+                        this.model[propValue] = ((propValue != "enabled") && (propValue != "readOnly")) ? new Date(value) : propValue == "readOnly" ? this.element.is("[readonly]") : !this.element.is("[disabled]");
+                    else if (BoldBIDashboard.isNullOrUndefined(this._options[propValue]))
+                        this.model[propValue] = ((propValue != "enabled") && (propValue != "readOnly")) ? new Date(value) : propValue == "readOnly" ? this.element.is("[readonly]") : !this.element.is("[disabled]");
+                }
+            }
+        },
+        _updateDateValue: function (value) {
+            var date = this._checkDateObject(value);
+            if (date != null) {
+                this.isValidState = true;
+                if (date == "") {
+                    this.element.val("");
+                    this.model.value = null;
+                } else {
+                    this.model.value = date;
+                    this._preTxtValue = this.element.val(this._formatter(this.model.value, this.model.dateFormat));
+                }
+            }
+            else {
+                (typeof date === "string" && this.model.enableStrictMode) ? this.element.val(value) : this.element.val("");
+                this.model.value = null;
+                this.isValidState = (this.element.val() == "") ? true : false;
+            }
+            this._removeWatermark();
+        },
+        _ensureValue: function () {
+            var dateValue = this._parseDate(this.element.val(), this.model.dateFormat);
+            if (this.model.value)
+                this._setDateValue(this.model.value);
+            else if (dateValue)
+                this._setDateValue(dateValue);
+        },
+        _changeEditable: function (bool) {
+            var action = bool ? "_on" : "_off";
+            if (this.element.is(":input")) {
+                if (bool) {
+                    if (!this.model.readOnly) this.element.attr("readonly", false);
+                    this.element.off("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+                }
+                else {
+                    if (!this.model.readOnly) this.element.attr("readonly", "readonly");
+                    if (!this.model.displayInline) this.element.on("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+                }
+                this[action](this.element, "blur", this._onFocusOut);
+                this[action](this.element, "focus", this._onFocusIn);
+                this[action](this.element, "keydown", this._onKeyDown);
+            }
+        },
+        _allowQuickPick: function (value) {
+            bbdesigner$('.e-datepicker-headertext', this.sfCalendar)[value ? "on" : "off"]("click", bbdesigner$.proxy(this._forwardNavHandler, this));
+        },
+        _setRestrictDateState: function (value) {
+            var action = value ? "addClass" : "removeClass";
+            this.sfCalendar[action]("e-dp-restrict-show");
+        },
+        _setValues: function () {
+            this.Date = new Date();
+            this._id = this.element[0].id;
+            this.isValidState = true;
+            this._setCulture(this.model.locale);
+            this._setMinDate(this.model.minDate);
+            this._setMaxDate(this.model.maxDate);
+            this._calendarDate = this._zeroTime(new Date());
+            if (this.model.startDay < 0 || this.model.startDay > 6) this.model.startDay = 0;
+            this.Date.firstDayOfWeek = this.model.startDay;
+            this.Date.fullYearStart = '20';
+            this._showHeader = true;
+            if (BoldBIDashboard.isNullOrUndefined(this.model.value) && this.element[0].value != "")
+                this.model.value = this.element[0].value;
+            this._validateMinMaxDate();
+            this._dateValue = new Date(this._calendarDate.toString());
+            this._isIE7 = this._checkIE7();
+            this._isIE8 = (BoldBIDashboard.browserInfo().name == "msie") && (BoldBIDashboard.browserInfo().version == "8.0") ? true : false;
+            this._isIE9 = (BoldBIDashboard.browserInfo().name == "msie") && (BoldBIDashboard.browserInfo().version == "9.0") ? true : false;
+            // this variable is set to true in DateTimePicker control
+            this._getInternalEvents = false;
+            this._flag = true;
+            this._ejHLWeekEnd = false;
+            this._isOpen = false;
+            this._prevDate = null;
+            this._preValue = null;
+            this._isFocused = false;
+        },
+        _addAttr: function (htmlAttr) {
+            var proxy = this;
+            bbdesigner$.map(htmlAttr, function (value, key) {
+                var keyName = key.toLowerCase();
+                if (keyName == "class") proxy.wrapper.addClass(value);
+                else if (keyName == "disabled") proxy.disable();
+                else if (keyName == "readOnly") proxy.model.readOnly = true;
+                else if (keyName == "style" || keyName == "id") proxy.wrapper.attr(key, value);
+                else if (BoldBIDashboard.isValidAttr(proxy.element[0], key)) proxy.element.attr(key, value);
+                else proxy.wrapper.attr(key, value);
+
+            });
+        },
+        _createDatePicker: function () {
+            this._createWrapper();
+            this._wireEvents();
+            if (this.model.displayInline) {
+                this.show();
+            }
+            if (this.model.enableRTL) this._setRTL(true);
+            if (this.model.showRoundedCorner) this._setRoundedCorner(true);
+        },
+        _checkNameAttr: function () {
+            if (!this.element.attr("name") && this._isInputBox)
+                this.element.attr("name", this.element[0].id);
+            if (this.model.displayInline && !this._isInputBox)
+                this._hiddenInput.attr("name", this.element[0].id);
+        },
+        _createWrapper: function () {
+            this._getMapper();
+            if (this.model.specialDates)
+                this._createSpecialDateObject();
+			this.element.attr("tabindex","0");
+            if (this._isInputBox) {
+                this.element.addClass("e-input").attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'aria-expanded':'false','role':'combobox' });
+                this.wrapper = BoldBIDashboard.buildTag("span.e-datewidget e-widget " + this.model.cssClass);
+                this.wrapper.attr("style", this.element.attr("style"));
+                this.element.removeAttr('style');
+                if (!BoldBIDashboard.isTouchDevice()) this.wrapper.addClass('e-ntouch');
+                this.innerWrapper = BoldBIDashboard.buildTag("span.e-in-wrap e-box e-padding");
+                this.wrapper.append(this.innerWrapper).insertBefore(this.element);
+                this.innerWrapper.append(this.element);
+                this.dateIcon = BoldBIDashboard.buildTag("span.e-select#" + this._id + "-img", "", {}, (this._isIE8) ? { 'unselectable': 'on' } : {})
+                    .append(BoldBIDashboard.buildTag("span.e-icon e-calendar", "", {}, { 'aria-label': 'Select' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})).insertAfter(this.element);
+            }
+            if (!this._isSupport || (this.model.displayInline && !this._isInputBox)) {
+                this._hiddenInput = BoldBIDashboard.buildTag("input.e-input e-placeholder ", "", {}, { type: "text" }).insertAfter(this.element);
+                if (this._isInputBox) this._hiddenInput.val(this._localizedLabels.watermarkText);
+                this._hiddenInput.css("display", "block");
+                var proxy = this;
+                bbdesigner$(this._hiddenInput).focus(function () {
+                    proxy.element.focus();
+                });
+            }
+            this._checkNameAttr();
+            if (!this.model.height) this.model.height = this.element.attr("height"); if (!this.model.width) this.model.width = this.element.attr("width");
+            this._setHeight(this.model.height);
+            this._setWidth(this.model.width);
+            if (this._id)
+                bbdesigner$("#e-" + this._id).remove();
+            this._setDateValue(this.model.value);
+            this._preValue = this._parseDate(this.element.val(), this.model.dateFormat);
+            this._setWaterMark();
+            this._dateValue = new Date(this._calendarDate.toString());
+            if (this.model.displayInline) this._renderPopup();
+            else if (this._isInputBox) this._renderDateIcon(this.model.showPopupButton, false);
+            if (this.model.readOnly) this._disbleMaualInput();
+            if (!this.model.enabled) this.disable();
+            else if (this.model.enabled && bbdesigner$(this.element).hasClass("e-disable")) this.enable();
+            this._layoutChanged();
+            this._checkErrorClass();
+            this._addAttr(this.model.htmlAttributes);
+        },
+        _isInputBox: function () {
+            return (this.element.is("input") && (this.element.is("input[type=text]") || !this.element.attr('type')));
+        },
+
+        _renderDateIcon: function (bool, reRender) {
+            if (reRender && this.model.showPopupButton == bool) return;
+            if (!bool && this.dateIcon) {
+                this._bindInputEvent();
+                this.dateIcon.css('display', 'none');
+                this.innerWrapper.removeClass('e-padding');
+            }
+            else {
+                if (this.innerWrapper) {
+                    this.innerWrapper.addClass('e-padding');
+                    this.dateIcon.css('display', 'block');
+                }
+                if (!this.model.displayInline)
+                    this._bindDateButton();
+            }
+            this.model.showPopupButton = bool;
+        },
+
+        _resizeCalender: function () {
+            if ((this.model.dayHeaderFormat == "short") || (this.model.dayHeaderFormat == "min") || (this.model.dayHeaderFormat == "none"))
+                this.sfCalendar.removeClass("e-headerlong");
+            else if (this.model.dayHeaderFormat == "long") {
+                this.sfCalendar.addClass("e-headerlong");
+            }
+        },
+
+        _setWidth: function (value) {
+            if (value) {
+                if (this.wrapper) this.wrapper.width(value);
+                else this.element.width(value);
+            }
+            else
+                this.model.width = this.wrapper ? this.wrapper.outerWidth() : this.element.width();
+        },
+        _setHeight: function (value) {
+            if (value) {
+                if (this.wrapper) this.wrapper.height(value);
+                else this.element.height(value);
+            }
+            else
+                this.model.height = this.wrapper ? this.wrapper.outerHeight() : this.element.height();
+            if (this._isIE7) this.element.height(this.innerWrapper.height());
+        },
+        _setRTL: function (isRTL) {
+            if (isRTL) {
+                if (this.wrapper) {
+                    this.wrapper.addClass("e-rtl");
+                }
+                this.sfCalendar && this.sfCalendar.addClass("e-rtl");
+            }
+            else {
+                if (this.wrapper) {
+                    this.wrapper.removeClass("e-rtl");
+                }
+                this.sfCalendar && this.sfCalendar.removeClass("e-rtl");
+            }
+        },
+        _setRoundedCorner: function (bool) {
+            if (bool) {
+                if (this.innerWrapper)
+                    this.innerWrapper.addClass("e-corner");
+                this.sfCalendar && this.sfCalendar.addClass("e-corner");
+            }
+            else {
+                if (this.innerWrapper)
+                    this.innerWrapper.removeClass("e-corner");
+                this.sfCalendar && this.sfCalendar.removeClass("e-corner");
+            }
+        },
+
+        _refreshDatepicker: function () {
+            if (this._stopRefresh) {
+                this._stopRefresh = false
+                return;
+            }
+            var _currentVal = this.element.val();
+            //  For checking the year maximum range....
+            if (this._specificFormat() && this._formatter(this._preValue, this.model.dateFormat, this.model.locale) != _currentVal)
+                var currentValue = this._parseDate(_currentVal, true);
+            else var currentValue = this._parseDate(_currentVal);
+            currentValue = this._validateYearValue(currentValue);
+            this._setDateValue(currentValue);
+            if (this._specificFormat() && this._compareDate(this.model.value, this._calendarDate))
+                this.element.val(_currentVal)
+            bbdesigner$(".e-datepicker-headertext", this.sfCalendar).text(this._formatter(this._calendarDate, this.model.headerFormat));
+            this._resizeCalender();
+            this._dateValue = new Date(this._calendarDate.toString());
+            this._hoverDate = this._calendarDate.getDate() - 1;
+            this._renderCalendar(this, this._dateValue);
+            this._setFooterText(this._localizedLabels.buttonText);
+            this._enableFooter(this.model.showFooter);
+            this._layoutChanged();
+        },
+        _validateYearValue: function (value) {
+            if (value != null) {
+                var twoDigitYearMax = BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard.twoDigitYearMax;
+                twoDigitYearMax = typeof twoDigitYearMax === "string" ? new Date().getFullYear() % 100 + parseInt(twoDigitYearMax, 10) : twoDigitYearMax;
+                if (this._calendarDate.getFullYear() - value.getFullYear() == 100) {
+                    if (this._calendarDate.getFullYear() > twoDigitYearMax)
+                        value.setFullYear(this._calendarDate.getFullYear())
+                }
+            }
+            return value;
+        },
+        _setFooterText: function (footerText) {
+            bbdesigner$('.e-footer-text', this.sfCalendar).html(footerText);
+        },
+        _setSkin: function (skin) {
+            if (this.wrapper) {
+                this.wrapper.removeClass(this.model.cssClass);
+                this.wrapper.addClass(skin);
+            }
+            else {
+                this.element.removeClass(this.model.cssClass);
+                this.element.addClass(skin);
+            }
+            this.sfCalendar.removeClass(this.model.cssClass);
+            this.sfCalendar.addClass(skin);
+        },
+        _setDisplayInline: function (isDisplayInline) {
+            this.model.displayInline = isDisplayInline;
+            if (isDisplayInline && this._isInputBox) {
+                this.sfCalendar.insertAfter(this.wrapper);
+                this._setDatePickerPosition();
+            }
+            else if (isDisplayInline) {
+                this.element.append(this.sfCalendar);
+                if (!this._isSupport || !this._isInputBox) this._hiddenInput.css("display", "none");
+            }
+            else {
+                this.sfCalendar.css('display', 'none');
+                bbdesigner$('body').append(this.sfCalendar);
+                this._isOpen = false;
+            }
+            if (isDisplayInline) {
+                this.show();
+                this._off(this.dateIcon, "mousedown", this._showDatePopUp);
+                this.element.off("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+            }
+
+        },
+
+        _disbleMaualInput: function () {
+            if (this.model.readOnly) {
+                bbdesigner$(this.element).attr("readonly", "readonly");
+                if (!this.model.displayInline) this.hide();
+            }
+            else if (this.model.allowEdit)
+                bbdesigner$(this.element).prop("readonly", false);
+
+        },
+        _checkDateObject: function (date, val) {
+            if (!date || (typeof JSON === "object" && JSON.stringify(date) === "{}")) return date = null;
+            else if (!(date instanceof Date)) {
+                if (this._specificFormat())
+                    var val = this._parseDate(date, true);
+                else
+                    var val = this._parseDate(date, val);
+                date = val ? val : (val = this._checkJSONString(date)) ? val : null;
+            }
+            if (!isNaN(Date.parse(date))) {
+                this._dateValue = this._calendarDate = this._zeroTime(date)
+                if (this._validateDate(date))
+                    return this._dateValue;
+            }
+            return null;
+        },
+        _checkJSONString: function (date) {
+            // Validate the string value
+            if (!isNaN(Date.parse(date))) {
+                if ((new Date(date).toJSON() === date) || (new Date(date).toDateString() === date) || (new Date(date).toGMTString() === date) ||
+                    (new Date(date).toISOString() === date) || (new Date(date).toLocaleString() === date) ||
+                    (new Date(date).toString() === date) || (new Date(date).toUTCString() === date)) {
+                    return new Date(new Date(date).getTime() + (BoldBIDashboard.serverTimezoneOffset * 60 * 60 * 1000));
+                }
+                else if (typeof date == "string") return this._dateFromISO(date);
+            } else if (this._extISORegex.exec(date) || this._basicISORegex.exec(date)) return this._dateFromISO(date);
+        },
+        _dateFromISO: function (date) {
+            var result = this._extISORegex.exec(date) || this._basicISORegex.exec(date), dateFormat = '', timeFormat = '', zeroFormat = '', format;
+            if (result) {
+                for (var i = 0; i < this._dates.length; i++) {
+                    if (this._dates[i][1].exec(result[1])) {
+                        dateFormat = this._dates[i][0];
+                        break;
+                    }
+                }
+                if (result[3]) {
+                    for (var k = 0; k < this._times.length; k++) {
+                        if (this._times[k][1].exec(result[3])) {
+                            // result[2] should be 'T' (time) or space
+                            timeFormat = (result[2] || ' ') + this._times[k][0];
+                            break;
+                        }
+                    }
+                }
+                if (result[4]) if (this._zeroRegex.exec(result[4])) zeroFormat = 'Z';
+                format = dateFormat + timeFormat + zeroFormat;
+                var token = format.match(this._tokens), input, val = [], literal, char;
+                for (var j = 0; j < token.length; j++) {
+                    var str = token[j];
+                    literal = this._checkLiteral(token[j]);
+                    var rg = this._numberRegex[literal ? token[j].toLowerCase() : str.length] || new RegExp('^\\d{1,' + str.length + '}');
+                    input = date.match(rg);
+                    if (input) {
+                        if (date.substr(0, date.indexOf(input)) >= 0 && !literal) token[j].indexOf('M') >= 0 ? val.push(parseInt(input[0]) - 1) : val.push(parseInt(input[0]));
+                        date = date.slice(date.indexOf(input[0]) + input[0].length);
+                    }
+                }
+                //if you want to get the value in UTC format use the "new Date(Date.UTC.apply(null, val)"
+                //return the date object value as exact as given input value
+                //new Date(year, month, day, hour, minute, seconds);
+                return result[4] == "Z" ? new Date(Date.UTC.apply(null, val)) : new Date(val[0], val[1], val[2], val[3], val[4], val[5]);
+            }
+            else {
+                return new Date(date + "");
+            }
+        },
+        _checkLiteral: function (str) {
+            char = str.toLowerCase();
+            return (char == 't' || char == 'z' || char == ':' || char == '-') ? true : false;
+        },
+        _checkInstanceType: function (date) {
+            date = this._stringToObject(date);
+            if (!date) return null;
+            else if (!(date instanceof Date)) {
+                date = this._parseDate(date);
+            }
+            if (!isNaN(Date.parse(date))) return this._zeroTime(date);
+            return null;
+        },
+        _stringToObject: function (value) {
+            if (typeof value === "string") {
+                var val = BoldBIDashboard.parseDate(value, this.model.dateFormat, this.model.locale);
+                value = (val != null) ? val : new Date(value);
+            }
+            return value;
+        },
+        _validateMinMaxDate: function () {
+            var dateChange = false, valueExceed = false;
+            if (this.model.maxDate < this.model.minDate) this.model.minDate = this.model.maxDate;
+            if (!this.model.enableStrictMode) {
+                if (this.model.value) {
+                    if (this.model.value < this.model.minDate) {
+                        this._calendarDate = this.model.value = this.model.minDate;
+                        dateChange = true;
+                    }
+                    else if (this.model.value > this.model.maxDate) {
+                        this._calendarDate = this.model.value = this.model.maxDate;
+                        dateChange = true;
+                    }
+                }
+                else {
+                    this.element.val("");
+                    if (this._calendarDate < this.model.minDate) this._calendarDate = this.model.minDate;
+                    else if (this._calendarDate > this.model.maxDate) this._calendarDate = this.model.maxDate;
+                }
+                this.isValidState = true;
+            }
+            else {
+                if (this.model.value) {
+                    if (this.model.value < this.model.minDate) {
+                        this._calendarDate = this.model.minDate;
+                        this.isValidState = false;
+                        valueExceed = true;
+                    }
+                    else if (this.model.value > this.model.maxDate) {
+                        this._calendarDate = this.model.maxDate;
+                        this.isValidState = false;
+                        valueExceed = true;
+                    }
+                    else this.isValidState = true;
+                }
+                else {
+                    if (this._calendarDate < this.model.minDate) this._calendarDate = this.model.minDate;
+                    else if (this._calendarDate > this.model.maxDate) this._calendarDate = this.model.maxDate;
+                }
+            }
+            if (dateChange) this.element.val(this._formatter(this.model.value, this.model.dateFormat));
+            if (valueExceed && this._getInternalEvents) this._trigger("outOfRange");
+        },
+        _setCulture: function (culture) {
+            this.culture = BoldBIDashboard.preferredCulture(culture);
+            if (this.culture) {
+                this.model.locale = this.culture.name == "en" ? "en-US" : this.culture.name;
+                this.Date.dayNames = this.culture.calendar.days.names;
+                this.Date.dayNamesMin = this.culture.calendar.days.namesShort;
+                this.Date.abbrDayNames = this.culture.calendar.days.namesAbbr;
+                this.Date.monthNames = this.culture.calendar.months.names;
+                this.Date.abbrMonthNames = this.culture.calendar.months.namesAbbr;
+                this.Date.format = this.culture.calendar.patterns.d;
+                if (this.model.dateFormat == '') this.model.dateFormat = this.culture.calendar.patterns.d;
+                if (this.model.startDay == -1) this.model.startDay = this.culture.calendar.firstDay;
+            }
+            this._separator = this._getSeparator();
+            this._localizedLabels = this._getLocalizedLabels();
+
+            if (!BoldBIDashboard.isNullOrUndefined(this._options)) {
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.watermarkText))
+                    this._localizedLabels.watermarkText = this._options.watermarkText;
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.buttonText))
+                    this._localizedLabels.buttonText = this._options.buttonText;
+            }
+            this._localizedLabelToModel();
+        },
+
+        _localizedLabelToModel: function () {
+            this.model.watermarkText = this._localizedLabels.watermarkText;
+            this.model.buttonText = this._localizedLabels.buttonText;
+        },
+
+        _setWaterMark: function () {
+            if (this.element != null && this.element.hasClass("e-input")) {
+                if (this._localizedLabels.watermarkText && this.element.val() == "") {
+                    this.isValidState = true;
+                    this._checkErrorClass();
+                }
+                if ((!this._isSupport) && this.element.val() == "") {
+                    this._hiddenInput.css("display", "block").val(this._localizedLabels.watermarkText);
+                }
+                else {
+                    bbdesigner$(this.element).attr("placeholder", this._localizedLabels.watermarkText);
+                }
+                return true;
+            }
+        },
+
+        _setDatePickerPosition: function () {
+            if (!this.model.displayInline || this._isInputBox) {
+                var elementObj = this.element.is('input') ? this.wrapper : this.element;
+                var pos = this._getOffset(elementObj), winLeftWidth, winRightWidth,
+                winBottomHeight = bbdesigner$(document).scrollTop() + bbdesigner$(window).height() - (pos.top + bbdesigner$(elementObj).outerHeight()),
+                winTopHeight = pos.top - bbdesigner$(document).scrollTop(),
+                popupHeight = this.sfCalendar.outerHeight(),
+                popupWidth = this.sfCalendar.outerWidth(),
+                left = pos.left,
+                totalHeight = elementObj.outerHeight(),
+                border = (totalHeight - elementObj.height()) / 2,
+                maxZ = this._getZindexPartial(), popupmargin = 3,
+                topPos = (popupHeight < winBottomHeight || popupHeight > winTopHeight) ? pos.top + totalHeight + popupmargin : pos.top - popupHeight - popupmargin; // popupmargin denotes space b/w the element and the popup.
+                winLeftWidth = bbdesigner$(document).scrollLeft() + bbdesigner$(window).width() - left;
+                winRightWidth = bbdesigner$(document).scrollLeft() + left + elementObj.width();
+                if (this.model.enableRTL || popupWidth > winLeftWidth && (popupWidth < left + elementObj.outerWidth()) && !BoldBIDashboard.isNullOrUndefined(this.wrapper))
+                    left += this.wrapper.width() - this.sfCalendar.width();
+                if (popupWidth > winRightWidth) left = pos.left;
+                this.sfCalendar.css({
+                    "left": left + "px",
+                    "top": topPos + "px",
+                    "z-index": maxZ
+                });
+            }
+        },
+
+        _getOffset: function (ele) {
+            return BoldBIDashboard.util.getOffset(ele);
+        },
+
+        _getZindexPartial: function () {
+            return BoldBIDashboard.util.getZindexPartial(this.element, this.sfCalendar);
+        },
+
+        _setMinDate: function (d) {
+            this.model.minDate = this._checkInstanceType(d);
+            if (!this.model.minDate) {
+                this.model.minDate = (new Date('11/31/1899'));
+            }
+        },
+
+        _setMaxDate: function (d) {
+            this.model.maxDate = this._checkInstanceType(d);
+            if (!this.model.maxDate) {
+                this.model.maxDate = (new Date('12/31/2099')); // using the JS Date.parse function which expects mm/dd/yyyy
+            }
+        },
+        _setDateValue: function (date, val) {
+            var newDate = this._checkDateObject(date, val);
+            if (newDate != null) {
+                this.isValidState = true;
+                this.model.value = new Date(newDate.toString());
+                if (!this.model.displayInline)
+                    this.wrapper.addClass('e-valid');
+                this._validateMinMaxDate();
+                this._preTxtValue = this.element.val(this._formatter(this.model.value, this.model.dateFormat));
+            }
+            else {
+                if (date instanceof Date) {
+                    this._validateMinMaxDate();
+                    date = this._formatter(date, this.model.dateFormat);
+                }
+                (this.model.enableStrictMode) ? this.element.val(date) : this.element.val(null);
+                this.model.value = null; //updating model value as null to avoid the recursive call to this method
+                if (!this.model.displayInline)
+                    this.wrapper.removeClass('e-valid');
+                this._triggerChangeEvent();
+                this.isValidState = (this.element.val() == "" || BoldBIDashboard.isNullOrUndefined(this.element.val())) ? true : false;
+            }
+            this._removeWatermark();
+        },
+        _updateInputVal: function () {
+            var val = this._validateValue();
+            if ((val != null || !this.model.enableStrictMode) && this.sfCalendar && this.sfCalendar.find('.e-datepicker-days').is(':visible'))
+                this._refreshDatepicker();
+        },
+        _validateInputVal: function () {
+            var val = this._validateValue();
+            if (val != null) {
+                if (!this.model.enableStrictMode) {
+                    if (val <= this.model.maxDate && val >= this.model.minDate)
+                        this.isValidState = true;
+                    else {
+                        this.model.value = null;
+                        this.isValidState = true;
+                    }
+                }
+            }
+        },
+
+        _validateValue: function () {
+            if (this._specificFormat() && this.element.val() != this._formatter(this._preValue, this.model.dateFormat, this.model.locale))
+                var value = this._parseDate(this.element.val(), true);
+            else var value = this._parseDate(this.element.val());
+            return this._validateYearValue(value);
+        },
+        _getSeparator: function () {
+            var formats;
+            if (this.culture) {
+                formats = this.culture.calendar.patterns.d;
+            }
+            else formats = this.model.dateFormat;
+            var regex = new RegExp("^[a-zA-Z0-9]+$");
+            for (var i = 0; i < formats.length; i++) {
+                if (!regex.test(formats[i])) return formats[i];
+            }
+        },
+        _checkIE7: function () {
+            if (navigator.appName == 'Microsoft Internet Explorer') {
+                var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})"), version = -1;
+                if (re.exec(navigator.userAgent) != null)
+                    version = parseFloat(RegExp.$1);
+                if (version >= 7 && version < 8) return true;
+            }
+            return false;
+        },
+        _isValidDate: function (dateObj) {
+            return dateObj && typeof dateObj.getTime === "function" && isFinite(dateObj.getTime());
+        },
+
+        //Date formatter - Convert date object to specific date format
+        _formatter: function (date, format) {
+            var newFormat = this._checkFormat(format);
+            return BoldBIDashboard.format(date, newFormat, this.model.locale);
+        },
+        _parseDate: function (date, type) {
+            var newFormat = this._checkFormat(this.model.dateFormat);
+            var DateValue = date;
+            if ((this._specificFormat()) && DateValue != undefined && date != "" && type != true && !(BoldBIDashboard.format(BoldBIDashboard.parseDate(DateValue, newFormat, this.model.locale), this.model.dateFormat, this.model.locale) == DateValue)) {
+                return this._dateValue;
+            }
+            else return BoldBIDashboard.parseDate(date, newFormat, this.model.locale);
+        },
+        _checkFormat: function (format) {
+            var proxy = this;
+            var dateFormatRegExp = this._regExp();
+            return format.replace(dateFormatRegExp, function (match) {
+                match = match === "/" ? BoldBIDashboard.preferredCulture(proxy.model.locale).calendars.standard['/'] !== "/" ? "'/'" : match : match;
+                return match;
+            });
+        },
+        _regExp: function () {
+            return /\/dddd|ddd|dd|d|MMMM|MMM|MM|M|yyyy|yy|HH|H|hh|h|mm|m|fff|ff|f|tt|ss|s|zzz|zz|z|gg|g|"[^"]*"|'[^']*'|[/]/g;
+        },
+
+        isLeapYear: function (year) {
+            return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+        },
+        //Sets the time component of this Date to zero for cleaner, easier comparison of dates where time is not relevant.
+        _zeroTime: function (date) {
+            var newDate = typeof date === "string" ? this._parseDate(date) : new Date(date);
+            newDate.setMilliseconds(0);
+            newDate.setSeconds(0);
+            newDate.setMinutes(0);
+            newDate.setHours(0);
+            return newDate;
+        },
+
+        _getDaysInMonth: function (date) {
+            return [31, (this.isLeapYear(date) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][date.getMonth()];
+        },
+
+        _addDays: function (d, number) {
+            d.setDate(d.getDate() + number);
+            return d;
+        },
+
+        _addYears: function (d, number) {
+            d.setFullYear(d.getFullYear() + number);
+            return d;
+        },
+
+        _addMonths: function (d, number) {
+            var tempDatedateMonth = d.getDate();
+            d.setMonth(d.getMonth() + number);
+            if (tempDatedateMonth > d.getDate())
+                this._addDays(d, -d.getDate());
+            return d;
+        },
+        //Checks if the day is a weekend day (Sat or Sun).
+        _isWeekend: function (date) {
+            return date.getDay() == 0 || date.getDay() == 6;
+        },
+
+        _isSpecialDates: function (dates) {
+            if (this.model.specialDates) {
+                for (var i = 0; i < this.model.specialDates.length; i++) {
+                    if (this.model.specialDates[i] && this.model.specialDates[i][this._mapField._date]) {
+                        if (dates.getDate() == this.model.specialDates[i][this._mapField._date].getDate() && dates.getMonth() == this.model.specialDates[i][this._mapField._date].getMonth() && dates.getFullYear() == this.model.specialDates[i][this._mapField._date].getFullYear()) {
+                            this._getIndex = i;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        },
+        _getMapper: function () {
+            var mapper = this.model.fields;
+            this._mapField = {};
+            this._mapField["_date"] = (mapper && mapper.date) ? mapper["date"] : "date";
+            this._mapField["_tooltip"] = (mapper && mapper.tooltip) ? mapper["tooltip"] : "tooltip";
+            this._mapField["_icon"] = (mapper && mapper.iconClass) ? mapper["iconClass"] : "iconClass";
+            this._mapField["_custom"] = (mapper && mapper.cssClass) ? mapper["cssClass"] : "cssClass";
+        },
+        _createSpecialDateObject: function () {
+            for (var i = 0; i < this.model.specialDates.length; i++) {
+                this.model.specialDates[i][this._mapField._date] = this._checkInstanceType(this.model.specialDates[i][this._mapField._date]);
+            }
+        },
+
+        _getMonthName: function (abbreviated, date) {
+            return abbreviated ? this.Date.abbrMonthNames[date.getMonth()] : this.Date.monthNames[date.getMonth()];
+        },
+
+
+
+        _displayNewMonth: function (m, y) {
+            this._setDisplayedMonth(this.displayedMonth + m, this.displayedYear + y, true);
+            return false;
+        },
+
+        _setDisplayedMonth: function (m, y, rerender) {
+            if (this.model.minDate == undefined || this.model.maxDate == undefined) {
+                return;
+            }
+            var s = new Date(this.model.minDate.getTime());
+            s.setDate(1);
+            var e = new Date(this.model.maxDate.getTime());
+            e.setDate(1);
+
+            var t;
+            if ((!m && !y) || (isNaN(m) && isNaN(y))) {
+
+                t = this._zeroTime(new Date());
+                t.setDate(1);
+            } else if (isNaN(m)) {
+
+                t = new Date(y, this.displayedMonth, 1);
+            } else if (isNaN(y)) {
+
+                t = new Date(this.displayedYear, m, 1);
+            } else {
+
+                t = new Date(y, m, 1);
+            }
+
+            if (t.getTime() < s.getTime()) {
+                t = s;
+            } else if (t.getTime() > e.getTime()) {
+                t = e;
+            }
+            var oldMonth = this.displayedMonth;
+            var oldYear = this.displayedYear;
+            this.displayedMonth = t.getMonth();
+            this.displayedYear = t.getFullYear();
+            var tempDate = t;
+            if (rerender && (this.displayedMonth != oldMonth || this.displayedYear != oldYear)) {
+                this._renderCalendar(this, tempDate);
+                this._dateValue = tempDate;
+                this._trigger("monthChanged", [this.displayedMonth, this.displayedYear]);
+            }
+        },
+        _clearSelected: function () {
+            this.numSelected = 0;
+            if (!BoldBIDashboard.isNullOrUndefined(this.sfCalendar)) {
+                if (this.model.highlightSection == "week") {
+                    bbdesigner$('td.e-active', this.sfCalendar).removeClass('e-active').addClass('e-state-hover').attr('aria-selected', false).parent().removeClass('e-selected-week');
+                }
+                else if (this.model.highlightSection == "month") {
+                    bbdesigner$('td.e-active', this.sfCalendar).removeClass('e-active').addClass('e-state-hover').attr('aria-selected', false).parent().parent().removeClass('e-selected-month');
+                }
+                else if (this.model.highlightSection == "workdays") {
+                    bbdesigner$('td.e-active', this.sfCalendar).removeClass('e-active').addClass('e-state-hover').attr('aria-selected', false).parent().removeClass('e-work-week');
+                }
+                else
+                    bbdesigner$('td.e-active', this.sfCalendar).removeClass('e-active').addClass('e-state-hover').attr('aria-selected', false);
+            }
+
+        },
+        _addSelected: function () {
+            if (this.model.highlightSection == "week") {
+                bbdesigner$('td.e-active', this.sfCalendar).parent().addClass('e-selected-week');
+            }
+            else if (this.model.highlightSection == "month") {
+                bbdesigner$('td.e-active, this.sfCalendar').parent().parent().addClass('e-selected-month');
+            }
+            else if (this.model.highlightSection == "workdays") {
+                bbdesigner$('td.e-active', this.sfCalendar).parent().addClass('e-work-week');
+            }
+        },
+
+        _hideOtherMonths: function (sfCalendar) {
+            bbdesigner$('td.other-month', sfCalendar).css("visibility", "hidden");
+        },
+        _showOtherMonths: function (sfCalendar) {
+            bbdesigner$('td.other-month', sfCalendar).css({ 'visibility': 'visible' });
+        },
+        _otherMonthsVisibility: function () {
+            if (this.model.showOtherMonths)
+                this._showOtherMonths(this.sfCalendar);
+            else
+                this._hideOtherMonths(this.sfCalendar);
+        },
+
+        _createCalender: function () {
+            BoldBIDashboard.buildTag("div.e-header").attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                    .append(BoldBIDashboard.buildTag("span.e-prev").append(BoldBIDashboard.buildTag('a.e-icon e-arrow-sans-left').attr({ 'role': 'button' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                    .append(BoldBIDashboard.buildTag("span.e-text").append(BoldBIDashboard.buildTag("span.e-datepicker-headertext").text(this._formatter(this._calendarDate, this.model.headerFormat)).attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'role': 'heading' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                    .append(BoldBIDashboard.buildTag("span.e-next").append(BoldBIDashboard.buildTag('a.e-icon e-arrow-sans-right').attr({ 'role': 'button' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                    .appendTo(this.sfCalendar);
+            this._enableHeader(this._showHeader);
+            var table = BoldBIDashboard.buildTag("table.e-dp-viewdays", "", {}).data("e-table", "data").attr({ 'role': 'grid'}).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this.sfCalendar.append(table);
+            this._renderCalendar(this);
+            this._startLevel(this.model.startLevel);
+            BoldBIDashboard.buildTag("div.e-footer")
+                .append(BoldBIDashboard.buildTag("span.e-footer-icon"))
+                .append(BoldBIDashboard.buildTag("span.e-footer-text"))
+                .appendTo(this.sfCalendar);
+            bbdesigner$('.e-footer-text', this.sfCalendar).html(this._localizedLabels.buttonText);
+            this._enableFooter(this.model.showFooter);
+        },
+        _enableHeader: function (show) {
+            if (show) bbdesigner$(".e-header", this.sfCalendar).show();
+            else bbdesigner$(".e-header", this.sfCalendar).hide();
+        },
+        _enableFooter: function (show) {
+            if (show) bbdesigner$('.e-footer', this.sfCalendar).show();
+            else bbdesigner$('.e-footer', this.sfCalendar).hide();
+            this._todayBtnDisable();
+        },
+        _todayBtnDisable: function () {
+            var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+            if (!(+this.model.minDate <= +today && +this.model.maxDate >= +today)) {
+                bbdesigner$('.e-footer', this.sfCalendar).addClass('e-footer-disable')
+            } else {
+                bbdesigner$('.e-footer', this.sfCalendar).removeClass('e-footer-disable')
+            }
+        },
+        _checkArrows: function (min, max) {
+            this._preArrowCondition(min, this.model.minDate.getFullYear());
+            this._nextArrowCondition(max, this.model.maxDate.getFullYear());
+        },
+        _checkDateArrows: function () {
+            this._preArrowCondition(this._tempMinDate, this.model.minDate);
+            this._nextArrowCondition(this._tempMaxDate, this.model.maxDate);
+        },
+        _preArrowCondition: function (val1, val2) {
+            if (val1 <= val2) this.sfCalendar.find(".e-arrow-sans-left").addClass("e-disable").attr({ "aria-disabled": true });
+            else this.sfCalendar.find(".e-arrow-sans-left").removeClass("e-disable").attr({ "aria-disabled": false });
+        },
+        _nextArrowCondition: function (val1, val2) {
+            if (val1 >= val2) this.sfCalendar.find(".e-arrow-sans-right").addClass("e-disable").attr({ "aria-disabled": true });
+            else this.sfCalendar.find(".e-arrow-sans-right").removeClass("e-disable").attr({ "aria-disabled": false });
+        },
+
+        _previousNextHandler: function (event) {
+            if (this.model.readOnly || !this.model.enabled || bbdesigner$(event.target).hasClass("e-disable")) return false;
+            event.preventDefault();
+            var prevTable = bbdesigner$("table", this.sfCalendar), navFrom;
+            navFrom = this._navigateFrom(prevTable);
+            var element = (bbdesigner$(event.target).is('a')) ? bbdesigner$(event.target.parentNode) : bbdesigner$(event.target);
+            var progress = element.hasClass('e-prev') ? true : false;
+            this._processNextPrevDate(progress);
+            var currentTable = bbdesigner$("table", this.sfCalendar), tClassName, navTo;
+            tClassName = currentTable.get(0).className;
+            switch (tClassName) {
+                case "e-dp-viewdays": navTo = "month"; break;
+                case "e-dp-viewmonths": navTo = "year"; break;
+                case "e-dp-viewyears": navTo = "decade"; break;
+                case "e-dp-viewallyears": navTo = "century"; break;
+            }
+            this._trigger("navigate", { date: this._dateValue, value: this._formatter(this._dateValue, this.model.dateFormat), navigateTo: navTo, navigateFrom: navFrom });
+        },
+        _processNextPrevDate: function (progress) {
+            if (this._DRPdisableFade) {
+                var s = new Date(this.sfCalendar.find("td.current-month").attr("data-date"));
+                this._dateValue = s;
+            }
+            if (progress && this.sfCalendar.find(".e-arrow-sans-left").hasClass("e-disable")) return false;
+            else if (!progress && this.sfCalendar.find(".e-arrow-sans-right").hasClass("e-disable")) return false;
+
+            var currentTable = bbdesigner$("table", this.sfCalendar), temp;
+            var tClassName = currentTable.get(0).className;
+            switch (tClassName) {
+                case 'e-dp-viewdays':
+                    var step = this.model.stepMonths;
+                    if (progress) {
+                        if (this._dateValue <= this.model.minDate) {
+                            this._flag = false;
+                            return false;
+                        }
+                    } else {
+                        if (this._dateValue >= this.model.maxDate) {
+                            this._flag = false;
+                            return false;
+                        }
+                    }
+                    this._flag = true;
+                    this._addMonths(this._dateValue, (progress ? -step : step));
+                    if (this._clickedDate)
+                        this._calendarDate = this._clickedDate;
+                    this._dateValue = this._dateValue < this.model.minDate ? new Date(this.model.minDate.toString()) : this._dateValue;
+                    this._dateValue = this._dateValue > this.model.maxDate ? new Date(this.model.maxDate.toString()) : this._dateValue;
+                    this._renderCalendar(this, this._dateValue);
+                    bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text(this._formatter(this._dateValue, this.model.headerFormat));
+                    this._addFocus('day', this._hoverDate);
+                    var dateRange = this._findFirstLastDay(new Date(this._dateValue.toString()));
+                    this._preArrowCondition(dateRange.firstDay, this.model.minDate);
+                    this._nextArrowCondition(dateRange.lastDay, this.model.maxDate);
+                    break;
+                case 'e-dp-viewmonths':
+                    var dateValue = this._dateValue;
+                    dateValue.setFullYear(bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text())
+                    if (progress) {
+                        if (dateValue.getFullYear() <= this.model.minDate.getFullYear()) {
+                            this._flag = false;
+                            return false;
+                        }
+                    } else {
+                        if (dateValue.getFullYear() >= this.model.maxDate.getFullYear()) {
+                            this._flag = false;
+                            return false;
+                        }
+                    }
+                    this._flag = true;
+                    this._addYears(dateValue, (progress ? -1 : 1));
+                    this._renderCalendar(this, dateValue);
+                    temp = dateValue.getFullYear();
+                    bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text(temp);
+                    bbdesigner$('tbody,tr.e-week-header', currentTable).not('.e-datepicker-months').hide();
+                    bbdesigner$(bbdesigner$(currentTable).find('.e-datepicker-months')).show();
+                    this._addFocus('month', this._hoverMonth);
+                    this._checkArrows(temp, temp);
+                    break;
+                case 'e-dp-viewyears':
+                    var yearValue;
+                    yearValue = this._dateValue
+                    yearValue.setFullYear(bbdesigner$(currentTable).find(".e-state-hover").text());
+                    if (progress) {
+                        if (parseInt(bbdesigner$('td.e-year-first:first').text()) <= this.model.minDate.getFullYear()) {
+                            this._flag = false;
+                            return false;
+                        }
+                    } else {
+                        if (parseInt(bbdesigner$('td.e-year-last:first').prev().text()) >= this.model.maxDate.getFullYear()) {
+                            this._flag = false;
+                            return false;
+                        }
+                    }
+                    this._flag = true;
+                    if ((bbdesigner$(currentTable).find(".e-state-hover").hasClass('e-year-first') && progress) || (bbdesigner$(currentTable).find(".e-state-hover").hasClass('e-year-last') && !progress))
+                        this._dateValue.setFullYear(yearValue.getFullYear());
+                    else if ((bbdesigner$(currentTable).find(".e-state-hover").hasClass('e-year-first') && !progress))
+                        this._dateValue.setFullYear(yearValue.getFullYear() + 11);
+                    else if ((bbdesigner$(currentTable).find(".e-state-hover").hasClass('e-year-last') && progress))
+                        this._dateValue.setFullYear(yearValue.getFullYear() - 11);
+                    else
+                        this._dateValue.setFullYear(yearValue.getFullYear() + (progress ? -10 : 10));
+                    this._renderCalendar(this, this._dateValue);
+                    var setYear = parseInt(this._dateValue.getFullYear()) - ((parseInt(this._dateValue.getFullYear()) % 10) + 1);
+                    bbdesigner$(".e-datepicker-headertext", this.sfCalendar).text((setYear + 1) + ' - ' + (setYear + 10));
+                    bbdesigner$('tbody,tr.e-week-header', currentTable).not('.e-datepicker-years').hide();
+                    bbdesigner$(bbdesigner$(currentTable).find('.e-datepicker-years')).show();
+                    this._addFocus('year', this._hoverYear + (!(bbdesigner$('.e-year-first.e-hidedate').length) ? 0 : -1));
+                    this._checkArrows(setYear + 1, setYear + 10);
+                    break;
+                case 'e-dp-viewallyears':
+                    var headYears;
+                    if (progress) {
+                        headYears = parseFloat(bbdesigner$('td.e-allyear-first', currentTable.get(0)).text().split('-')[1]);
+                        if (headYears <= this.model.minDate.getFullYear()) {
+                            this._flag = false;
+                            return false;
+                        } else {
+                            this._flag = true;
+                        }
+
+                    } else {
+                        headYears = parseFloat(bbdesigner$('td.e-allyear-last', currentTable.get(0)).prev().text().split('-')[1]);
+                        if (headYears >= this.model.maxDate.getFullYear()) {
+                            this._flag = false;
+                            return false;
+                        } else
+                            this._flag = true;
+                    }
+                    this._dateValue.setFullYear((!(this._lastHoveredYear) ? this._dateValue.getFullYear() : this._lastHoveredYear) + (progress ? -100 : 100));
+                    this._lastHoveredYear = this._dateValue.getFullYear();
+                    this._renderCalendar(this, this._dateValue);
+                    var setYear = parseInt(this._dateValue.getFullYear()) - ((parseInt(this._dateValue.getFullYear()) % 100) + 1);
+                    temp = parseFloat(bbdesigner$('td.e-allyear-last', currentTable.get(0)).prev().text().split('-')[1]);
+                    bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text((setYear + 1) + ' - ' + temp);
+                    bbdesigner$('tbody,tr.e-week-header', currentTable).not('.e-datepicker-allyears').hide();
+                    bbdesigner$(bbdesigner$(currentTable).find('.e-datepicker-allyears')).show();
+                    this._addFocus('allyear', this._hoverAllYear + (!(bbdesigner$('.e-allyear-first.e-hidedate').length) ? 0 : -1));
+                    this._checkArrows(setYear + 1, temp);
+                    break;
+            }
+            this._layoutChanged();
+        },
+        _addFocus: function (selection, index) {
+            var cls = 'e-current-' + selection;
+            if (selection == 'day') cls = 'current-month';
+            var items = this.sfCalendar.find('tbody tr td.' + cls);
+            if (selection == "month") {
+                bbdesigner$(items).each(function (i, ele) {
+                    if (parseInt(bbdesigner$(ele).attr("data-index")) == parseInt(index)) {
+                        index = i;
+                        return;
+                    }
+                });
+            }
+            var cell = items[index];
+            if (!cell) cell = items.last();
+            this.sfCalendar.find('table td').removeClass("e-state-hover");
+            bbdesigner$(cell).addClass("e-state-hover");
+            this._setActiveState(selection);
+            return index;
+        },
+        _setActiveState: function (selection) {
+            if (!(this.model.value instanceof Date)) return;
+            var items = this.sfCalendar.find('tbody tr td.e-current-' + selection), cell, proxy = this;
+            var indx = -1;
+            switch (selection) {
+                case "month":
+                    if (this.model.value.getFullYear() === parseInt(bbdesigner$('.e-text', this.sfCalendar).text())) {
+                        bbdesigner$(items).each(function (i, ele) {
+                            if (parseInt(bbdesigner$(ele).attr("data-index")) == parseInt(proxy.model.value.getMonth())) {
+                                indx = i;
+                                return;
+                            }
+                        });
+                    }
+                    break;
+                case "year":
+                    var value = this.model.value.getFullYear();
+                    bbdesigner$(items).each(function (i, ele) {
+                        if (parseInt(ele.innerHTML) == parseInt(value)) {
+                            indx = i;
+                            return;
+                        }
+                    });
+                    break;
+                case "allyear":
+                    var start = parseInt(this.model.value.getFullYear()) - ((parseInt(this.model.value.getFullYear()) % 10) + 1);
+                    var active = (start + 1) + ' - ' + (start + 10);
+                    bbdesigner$(items).each(function (i, ele) {
+                        if (parseInt(ele.innerHTML) == parseInt(active)) {
+                            indx = i;
+                            return;
+                        }
+                    });
+                    break;
+            }
+            cell = items[indx];
+            if (cell) {
+                this.sfCalendar.find('table td').removeClass("e-active");
+                if (!bbdesigner$(cell).hasClass('e-hidedate'))
+                    bbdesigner$(cell).addClass("e-active");
+            }
+        },
+        _setFocusByName: function (name, value) {
+            var allValues = this.sfCalendar.find('tbody tr td.e-current-' + name), index, cell;
+            bbdesigner$(allValues).each(function (i, ele) {
+                if (parseInt(ele.innerHTML) == parseInt(value)) {
+                    index = i;
+                    return;
+                }
+            });
+            cell = allValues[index];
+            if (!cell) cell = allValues.last();
+            this.sfCalendar.find('table td').removeClass("e-state-hover");
+            bbdesigner$(cell).addClass("e-state-hover");
+            this._setActiveState(name);
+            return index;
+        },
+        _getHeaderTxt: function () {
+            return this.sfCalendar.find(".e-datepicker-headertext").text();
+        },
+        _findFirstLastDay: function (value) {
+            var y = value.getFullYear(), m = value.getMonth();
+            var firstDay = new Date(y, m, 1);
+            var lastDay = new Date(y, m + 1, 0);
+            return { firstDay: firstDay, lastDay: lastDay }
+        },
+        _forwardNavHandler: function (event) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            if (event) event.preventDefault();
+
+            var currentTable = bbdesigner$("table", this.sfCalendar);
+            var tclassName = bbdesigner$("table", this.sfCalendar).get(0).className, proxy = this, headerTxt, navTo;
+            var navFrom = this._navigateFrom(currentTable);
+            switch (tclassName) {
+                case 'e-dp-viewdays':
+                    this._hoverMonth = this._getDateObj(currentTable.find(".e-state-hover")).getMonth() ||
+                                this._getDateObj(currentTable.find(".e-active")).getMonth() || 0;
+                    if (this._DRPdisableFade) {
+                        this._renderCalendar(this, this._calendarDate);
+                        bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text(this._formatter(this._dateValue, this.model.headerFormat));
+                    }
+                    this._startLevel("year"); navTo = "year";
+                    this._addFocus('month', this._hoverMonth);
+                    break;
+                case 'e-dp-viewmonths':
+                    headerTxt = this._getHeaderTxt();
+                    this._startLevel("decade"); navTo = "decade";
+                    this._hoverYear = this._setFocusByName('year', headerTxt);
+                    break;
+                case 'e-dp-viewyears':
+                    headerTxt = this._getHeaderTxt();
+                    this._startLevel("century"); navTo = "century";
+                    this._hoverAllYear = this._setFocusByName('allyear', headerTxt);
+                    break;
+            }
+            if (navFrom != "century") this._trigger("navigate", { date: this._dateValue, value: this._formatter(this._dateValue, this.model.dateFormat), navigateTo: navTo, navigateFrom: navFrom });
+            this._layoutChanged();
+        },
+        _cellSelection: function () {
+            var currentTable = bbdesigner$("table", this.sfCalendar);
+            var tclassName = bbdesigner$("table", this.sfCalendar).get(0).className;
+            switch (tclassName) {
+                case 'e-dp-viewmonths':
+                    this._hoverMonth = this._addFocus('month', this._dateValue.getMonth());
+                    break;
+                case 'e-dp-viewyears':
+                    var dateValue = new Date(this._dateValue.toString());
+                    // Navigate to Prev/Next year Calendar while selecting the first/last year in the calendar view.
+                    this._navigationToPrevNext('year');
+                    // Reasssign the old value
+                    this._dateValue = dateValue;
+                    this._hoverYear = this._setFocusByName('year', this._dateValue.getFullYear());
+                    break;
+                case 'e-dp-viewallyears':
+                    var dateValue = new Date(this._dateValue.toString());
+                    // Navigate to Prev/Next year Calendar while selecting the first/last year in the calendar view.
+                    this._navigationToPrevNext('allyear');
+                    // Reasssign the old value
+                    this._dateValue = dateValue;
+                    var setYear = parseInt(this._dateValue.getFullYear()) - ((parseInt(this._dateValue.getFullYear()) % 10) + 1);
+                    this._hoverAllYear = this._setFocusByName('allyear', setYear + 1 + ' - ' + setYear + 10);
+                    break;
+            }
+            this._layoutChanged();
+        },
+        _navigationToPrevNext: function (name) {
+            var allValues = this.sfCalendar.find('tbody tr td.e-current-' + name), index, cell;
+            var value = this._dateValue.getFullYear();
+            bbdesigner$(allValues).each(function (i, ele) {
+                if (parseInt(ele.innerHTML) == parseInt(value)) {
+                    index = i;
+                    return;
+                }
+            });
+            cell = allValues[index];
+            if (cell) {
+                if (bbdesigner$(cell).hasClass('e-' + name + '-last'))
+                    this._processNextPrevDate(false)
+                else if (bbdesigner$(cell).hasClass('e-' + name + '-first'))
+                    this._processNextPrevDate(true);
+            }
+        },
+        _navigateFrom: function (prevTable) {
+            var tPrevClassName = prevTable.get(0).className, navFrom;
+            switch (tPrevClassName) {
+                case "e-dp-viewdays": navFrom = "month"; break;
+                case "e-dp-viewmonths": navFrom = "year"; break;
+                case "e-dp-viewyears": navFrom = "decade"; break;
+                case "e-dp-viewallyears": navFrom = "century"; break;
+            }
+            return navFrom;
+        },
+        _backwardNavHandler: function (event) {
+            this._animating = true;
+            if (this.model.readOnly || !this.model.enabled) return false;
+            var element;
+            if (event.type) {
+                event.preventDefault();
+                element = bbdesigner$(event.currentTarget);
+            }
+            else element = event;
+            var cTable = bbdesigner$("table", this.sfCalendar), temp;
+            var tclassName = bbdesigner$("table", this.sfCalendar).get(0).className, proxy = this, navTo;
+            var navFrom = this._navigateFrom(cTable);
+            switch (tclassName) {
+                case 'e-dp-viewmonths':
+                    cTable.removeClass("e-dp-viewmonths").addClass("e-dp-viewdays");
+                    this._lastHoveredMonth = parseInt(bbdesigner$(element).attr('data-index'));
+                    this._dateValue = new Date(this._dateValue.getFullYear(), this._lastHoveredMonth, 1);
+                    if (this._DRPdisableFade) this._trigger("_month_Loaded", { currentTarget: event.currentTarget });
+                    this._renderCalendar(this, this._dateValue);
+                    bbdesigner$('tbody', cTable).not('.e-datepicker-days,.e-week-header').hide();
+                    bbdesigner$(bbdesigner$(cTable).find('.e-datepicker-days,.e-week-header')).fadeIn("fast", function () {
+                        proxy._addFocus('day', proxy._hoverDate || 0);
+                        proxy._animating = false;
+                    });
+                    bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text(this._formatter(this._dateValue, this.model.headerFormat)); navTo = "month";
+                    break;
+                case 'e-dp-viewyears':
+                    cTable.removeClass("e-dp-viewyears").addClass("e-dp-viewmonths");
+                    this._lastHoveredYear = parseInt(element.text());
+                    this._dateValue.setFullYear(this._lastHoveredYear);
+                    this._renderCalendar(this, this._dateValue);
+                    bbdesigner$('tbody,tr.e-week-header', cTable).not('.e-datepicker-months').hide();
+                    if (BoldBIDashboard.isNullOrUndefined(this._hoverMonth) && !BoldBIDashboard.isNullOrUndefined(this._dateValue)) this._hoverMonth = this._dateValue.getMonth();
+                    bbdesigner$(bbdesigner$(cTable).find('.e-datepicker-months')).fadeIn("fast", function () {
+                        proxy._addFocus('month', proxy._hoverMonth || 0);
+                        proxy._animating = false;
+                    });
+                    temp = element.text();
+                    bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text(temp);
+                    this._checkArrows(temp, temp); navTo = "year";
+                    break;
+                case 'e-dp-viewallyears':
+                    var headYears = element.text().split('-');
+                    cTable.removeClass("e-dp-viewallyears").addClass("e-dp-viewyears");
+                    if (headYears[0] < this.model.minDate.getFullYear()) headYears[0] = this.model.minDate.getFullYear().toString();
+                    else if (headYears[0] > this.model.maxDate.getFullYear()) headYears[0] = this.model.maxDate.getFullYear().toString();
+                    this._renderCalendar(this, (new Date(headYears[0], 0, 1)));
+                    bbdesigner$('tbody,tr.e-week-header', cTable).not('.e-datepicker-years').hide();
+                    bbdesigner$(bbdesigner$(cTable).find('.e-datepicker-years')).fadeIn("fast", function () {
+                        proxy._addFocus('year', proxy._hoverYear || 0);
+                        proxy._animating = false;
+                    });
+                    bbdesigner$('.e-datepicker-headertext', this.sfCalendar).text(headYears[0] + ' - ' + headYears[1]);
+                    this._checkArrows(headYears[0], headYears[1]); navTo = "decade";
+                    this._dateValue = new Date(this._dateValue.setFullYear(parseInt(bbdesigner$.trim(headYears[0])) + ((!this._lastHoveredYear) ? this._dateValue.getFullYear() % 10 : this._lastHoveredYear % 10)));
+                    break;
+                default:
+                    this._clearSelected();
+                    this.sfCalendar.find('table td').removeClass("e-state-hover");
+                    element.not('td.other-month.e-hidedate').addClass('e-active').attr('aria-selected', true);
+                    this._addSelected();
+
+                    this._hoverDate = this._getDateObj(element).getDate() - 1;
+                    this._dateValue = new Date(element.attr('data-date'));
+                    this._clickedDate = new Date(element.attr('data-date'));
+                    this._animating = false;
+                    break;
+            }
+            if (navFrom != "month") this._trigger("navigate", { date: this._dateValue, value: this._formatter(this._dateValue, this.model.dateFormat), navigateTo: navTo, navigateFrom: navFrom });
+            this._layoutChanged();
+        },
+
+        _startLevel: function (start) {
+            var cTable = bbdesigner$("table", this.sfCalendar);
+            var headerText = bbdesigner$(".e-datepicker-headertext", this.sfCalendar), s, e;
+            var dateValue = this._dateValue;
+            switch (start) {
+                case "decade":
+                    cTable.removeClass("e-dp-viewallyears e-dp-viewmonths e-dp-viewdays").addClass("e-dp-viewyears");
+                    bbdesigner$('tbody,tr.e-week-header', cTable).not('.e-datepicker-years').hide();
+                    bbdesigner$(bbdesigner$(cTable).find('.e-datepicker-years')).show();
+                    if (this.model.enableStrictMode && this._calendarDate < this._dateValue) dateValue = this._calendarDate;
+                    else dateValue = dateValue;
+                    var setYear = parseInt(dateValue.getFullYear()) - ((parseInt(dateValue.getFullYear()) % 10) + 1);
+                    s = setYear + 1;
+                    e = setYear + 10;
+                    headerText.text(s + ' - ' + e);
+                    this._checkArrows(s, e);
+                    this._hoverYear = this._setFocusByName('year', dateValue.getFullYear());
+                    break;
+                case "century":
+                    if (!(this._calendarDate < this._dateValue)) this._renderCalendar(this, dateValue);
+                    cTable.removeClass("e-dp-viewyears e-dp-viewdays e-dp-viewmonths").addClass("e-dp-viewallyears");
+                    bbdesigner$('tbody,tr.e-week-header', cTable).not('.e-datepicker-allyears').hide();
+                    bbdesigner$(bbdesigner$(cTable).find('.e-datepicker-allyears')).show();
+                    s = parseFloat(bbdesigner$('td.e-allyear-first', cTable.get(0)).text().split('-')[1]) + 1;
+                    e = parseFloat(bbdesigner$('td.e-allyear-last', cTable.get(0)).prev().text().split('-')[1]);
+                    var headYears = s + ' - ' + e;
+                    headerText.text(headYears);
+                    this._checkArrows(s, e);
+                    var setYear = parseInt(dateValue.getFullYear()) - ((parseInt(dateValue.getFullYear()) % 10) + 1);
+                    this._hoverAllYear = this._setFocusByName('allyear', (setYear + 1) + ' - ' + (setYear + 10));
+                    break;
+                case "year":
+                    cTable.removeClass("e-dp-viewyears e-dp-viewallyears e-dp-viewdays").addClass("e-dp-viewmonths");
+                    bbdesigner$('tbody,tr.e-week-header', cTable).hide();
+                    bbdesigner$(bbdesigner$(cTable).find('.e-datepicker-months')).show();
+                    if (this.model.enableStrictMode && this._calendarDate < this._dateValue) s = this._calendarDate.getFullYear();
+                    else s = dateValue.getFullYear();
+                    headerText.text(s);
+                    this._checkArrows(s, s);
+                    this._hoverMonth = dateValue.getMonth();
+                    this._addFocus('month', this._hoverMonth);
+                    break;
+                case "month":
+                    cTable.removeClass("e-dp-viewyears e-dp-viewallyears e-dp-viewmonths").addClass("e-dp-viewdays ");
+                    break;
+            }
+        },
+        _depthLevel: function (depth) {
+            var calendarTable = this.sfCalendar;
+            switch (depth) {
+                case "year":
+                    bbdesigner$(calendarTable.find('.e-current-year,.e-current-allyear')).on("click", bbdesigner$.proxy(this._backwardNavHandler, this));
+                    this._on(bbdesigner$('.e-current-month', this.sfCalendar), "click", bbdesigner$.proxy(this._onDepthSelectHandler, this));
+                    break;
+                case "decade":
+                    bbdesigner$(calendarTable.find('.e-current-allyear')).on("click", bbdesigner$.proxy(this._backwardNavHandler, this));
+                    bbdesigner$('.e-current-year', this.sfCalendar).on("click", bbdesigner$.proxy(this._onDepthSelectHandler, this));
+                    break;
+                case "century":
+                    bbdesigner$(calendarTable.find('.e-current-allyear')).on("click", bbdesigner$.proxy(this._onDepthSelectHandler, this));
+                    break;
+                case "month":
+                    this._on(calendarTable.find('.current-month,.other-month,.e-current-month,.e-current-year,.e-current-allyear'), "click", bbdesigner$.proxy(this._backwardNavHandler, this));
+                    this._on(calendarTable.find('.current-month , .other-month'), "click", bbdesigner$.proxy(this._onSetCancelDateHandler, this));
+            }
+        },
+        _onDepthSelectHandler: function (e) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            if (bbdesigner$(e.target).hasClass("e-current-month"))
+                this._dateValue = new Date(this._dateValue.setMonth(parseInt(e.target.attributes["data-index"].value)));
+            else if (bbdesigner$(e.target).hasClass("e-current-year"))
+                this._dateValue = new Date(this._dateValue.setFullYear(parseInt(e.target.innerHTML)));
+            else if (bbdesigner$(e.target).hasClass("e-current-allyear"))
+                this._dateValue = new Date(this._dateValue.setFullYear(parseInt(e.target.innerHTML)));
+            this._onSetCancelDateHandler(e);
+        },
+
+        _datepickerMonths: function (tbody, calendarTable, currentDate) {
+            var dc = function (a) {
+                return document.createElement(a);
+            };
+            var month = 0;
+            for (var i = 0; i < 3; i++) {
+                var row = bbdesigner$(dc('tr'));
+                for (var j = 0; j < 4; j++) {
+                    var td = bbdesigner$(dc('td'))
+                        .addClass('e-current-month e-state-default')
+                        .attr({ 'data-index': month }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                        .html(this.Date.abbrMonthNames[month++]);
+                    if (currentDate.getFullYear() < this.model.minDate.getFullYear() || currentDate.getFullYear() > this.model.maxDate.getFullYear()) {
+                        td.addClass('e-hidedate');
+                        td.removeClass('e-current-month');
+                    }
+                    else if ((currentDate.getFullYear() <= this.model.minDate.getFullYear() && month < this.model.minDate.getMonth() + 1) ||
+                        (currentDate.getFullYear() >= this.model.maxDate.getFullYear() && month > this.model.maxDate.getMonth() + 1)) {
+                        td.addClass('e-hidedate');
+                        td.removeClass('e-current-month');
+                    }
+                    row.append(td);
+                }
+                tbody.append(row);
+            }
+            calendarTable.append(tbody);
+            var s = currentDate.getFullYear();
+            this._checkArrows(s, s);
+        },
+
+        _datepickerYears: function (tbody, calendarTable, currentYear) {
+            var dc = function (a) {
+                return document.createElement(a);
+            };
+            var Year = parseInt(currentYear) - ((parseInt(currentYear) % 10) + 1);
+            var years = [];
+            for (var j = 0; j < 12; j++) {
+                years.push(Year + j);
+            }
+            var year = 0;
+            for (var i = 0; i < 3; i++) {
+                var row = bbdesigner$(dc('tr'));
+                for (var j = 0; j < 4; j++) {
+                    var td = bbdesigner$(dc('td'));
+                    td.attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                    if (year == 0)
+                        td.addClass('e-year-first e-current-year ');
+                    else if (year == 11)
+                        td.addClass('e-year-last e-current-year ');
+                    else
+                        td.addClass('e-current-year e-state-default');
+                    if (years[year] < this.model.minDate.getFullYear() || years[year] > this.model.maxDate.getFullYear()) {
+                        td.addClass('e-hidedate');
+                        td.removeClass('e-current-year');
+                    }
+                    td.html(years[year++]);
+                    row.append(td);
+                }
+                tbody.append(row);
+            }
+            calendarTable.append(tbody);
+            this._checkArrows(years[0], years[years.length]);
+        },
+
+        _datepickerAllYears: function (tbody, calendarTable, currentYear) {
+            var Year = parseInt(currentYear) - ((parseInt(currentYear) % 100) + 10);
+            var headYear = Year;
+            var years = [], newline = this._isIE8 || this._isIE9 ? "" : "\n";
+
+            for (var j = 0; j < 12; j++) {
+                years.push(parseInt(Year) + " -" + newline + parseInt(Year + 9));
+                Year = Year + 10;
+            }
+            var year = 0;
+            for (var i = 0; i < 3; i++) {
+                var row = bbdesigner$(document.createElement('tr'));
+                for (var j = 0; j < 4; j++) {
+                    var td = bbdesigner$(document.createElement('td'));
+                    td.attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                    if (year == 0)
+                        td.addClass('e-allyear-first e-current-allyear ');
+                    else if (year == 11)
+                        td.addClass('e-allyear-last e-current-allyear ');
+                    else
+                        td.addClass('e-current-allyear e-state-default');
+                    if (parseInt(years[year].split('-\n')[1]) < this.model.minDate.getFullYear() || parseInt(years[year].split('-\n')[0]) > this.model.maxDate.getFullYear()) {
+                        td.addClass('e-hidedate');
+                        td.removeClass('e-current-allyear');
+                    }
+                    td.html(years[year++]);
+                    row.append(td);
+                }
+                tbody.append(row);
+            }
+            calendarTable.append(tbody);
+        },
+        _renderHeader: function (dpObject) {
+            var thead = bbdesigner$(document.createElement('thead'));
+            var cultureObj = BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard.days;
+            if (dpObject.model.dayHeaderFormat != "none") {
+                var headRow = BoldBIDashboard.buildTag("tr.e-week-header").attr({ 'role': 'row' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                if (this.model.weekNumber == true) {
+                    var WeekCulture = BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard.week;
+                    var day = WeekCulture.name;
+                    var headerday;
+                    if (dpObject.model.dayHeaderFormat == "short")
+                        headerday = WeekCulture.nameAbbr;
+                    else if (dpObject.model.dayHeaderFormat == "long") headerday = week;
+                    else headerday = WeekCulture.nameShort;
+                    var tr = BoldBIDashboard.buildTag("th", "", {}, { 'scope': 'col', 'abbr': day, 'data-date': day, 'title': this._formatter(day, "dddd") }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                        .html(headerday);
+                    headRow.append(tr);
+                }
+                for (var i = this.Date.firstDayOfWeek; i < this.Date.firstDayOfWeek + 7; i++) {
+                    var weekday = i % 7;
+                    var day = cultureObj.names[weekday];
+                    var headerday;
+                    if (dpObject.model.dayHeaderFormat == "short")
+                        headerday = cultureObj.namesAbbr[weekday];
+                    else if (dpObject.model.dayHeaderFormat == "long") headerday = day;
+                    else headerday = cultureObj.namesShort[weekday];
+                    var th = BoldBIDashboard.buildTag("th", "", {}, { 'scope': 'col', 'abbr': day, 'data-date': day, 'title': this._formatter(day, "dddd"), 'class': (weekday == 0 || weekday == 6 ? 'e-week-end' : 'e-week-day') }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                            .html(headerday);
+                    headRow.append(th);
+                }
+            };
+            return thead.append(headRow);
+        },
+
+        _renderCalendar: function (dpObject, date) {
+            var proxy = this, today;
+            dpObject = bbdesigner$.extend({}, BoldBIDashboard.DatePicker.prototype.defaults, dpObject);
+            this.Date.firstDayOfWeek = this.model.startDay;
+            if (date) today = date;
+            else if (this._calendarDate) today = this._calendarDate;
+            else today = proxy._zeroTime(new Date());
+            var calendarTable = bbdesigner$('table', this.sfCalendar);
+            calendarTable.empty();
+
+            calendarTable.append(this._renderHeader(dpObject));
+
+            var tbody = BoldBIDashboard.buildTag('tbody.e-datepicker-allyears', "", { 'display': 'none' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._datepickerAllYears(tbody, calendarTable, today.getFullYear());
+
+            tbody = BoldBIDashboard.buildTag("tbody.e-datepicker-years", "", { 'display': 'none' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._datepickerYears(tbody, calendarTable, today.getFullYear());
+            var month = dpObject.model.month == undefined ? today.getMonth() : dpObject.model.month;
+            var year = dpObject.model.year || today.getFullYear();
+            var currentDate = (new Date(year, month, 1, 0, 0, 0));
+            var firstDayOffset = this.Date.firstDayOfWeek - currentDate.getDay() + 1;
+            if (firstDayOffset > 1) firstDayOffset -= 7;
+            var weeksToDraw = Math.ceil(((-1 * firstDayOffset + 1) + this._getDaysInMonth(currentDate)) / 7);
+            this._addDays(currentDate, (firstDayOffset - 1));
+            var newdate = proxy._zeroTime(new Date());
+            var selected = this._calendarDate;
+            tbody = BoldBIDashboard.buildTag('tbody.e-datepicker-months', "", { 'display': 'none' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+
+            this._datepickerMonths(tbody, calendarTable, today);
+
+            tbody = BoldBIDashboard.buildTag('tbody.e-datepicker-days', "", { 'display': 'none' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            var w = 0, _first = true, _last = true;
+            while (w++ < weeksToDraw) {
+                var r = bbdesigner$(document.createElement('tr')).attr({'role':'row'});
+                if (this.model.weekNumber == true)
+                {
+                    var week = this._weekDate(currentDate);
+                    week = bbdesigner$(document.createElement('td')).attr({}).addClass('e-weeknumber').html(week)
+                    r.append(week);
+                }
+                for (var i = 0; i < 7; i++) {
+                    var thisMonth = currentDate.getMonth() == month;
+                    var checkSpecialDate = this._isSpecialDates(currentDate);
+                    var disable = this._checkDisableRange(currentDate);
+                    var index = this._getIndex;
+                    var d = bbdesigner$(document.createElement('td')).
+                        html(checkSpecialDate ? '<span></span>' + currentDate.getDate() : currentDate.getDate() + '')
+                        .attr({
+
+                            'data-date': currentDate.toDateString(),
+                            'title': (this.model.showTooltip ? (checkSpecialDate && this.model.specialDates[index][this._mapField._tooltip] ? this.model.specialDates[index][this._mapField._tooltip] : this._formatter(currentDate, this.model.tooltipFormat)) : ''),
+                            'aria-selected': false,
+                            'role': 'gridcell'
+                        }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                        .addClass((thisMonth ? 'current-month e-state-default ' : 'other-month e-state-default ') +
+                            (this._isWeekend(currentDate) ? (this._ejHLWeekEnd ? 'e-dp-weekend e-week-end ' : (this.model.highlightWeekend ? 'e-week-end ' : '')) : 'e-week-day ') +
+                            (thisMonth && currentDate.getTime() == newdate.getTime() ? 'today ' : ''));
+
+                    d.find('span:first-of-type').addClass((checkSpecialDate ? (this.model.specialDates[index][this._mapField._icon] ? 'e-special-date-icon ' + this.model.specialDates[index][this._mapField._icon] + ' ' : 'e-special-day') : ''));
+                    d.addClass(checkSpecialDate ? (this.model.specialDates[index][this._mapField._custom] ? this.model.specialDates[index][this._mapField._custom] : '') : '');
+                    if (disable) this._disableDates({ date: currentDate, element: d });
+                    if (selected.getTime() == currentDate.getTime() && thisMonth) {
+                        if (!d.hasClass('e-hidedate'))
+                            if (this.model.value) {
+                                d.addClass('e-active').attr({ 'aria-selected': true });
+                                if (this.model.highlightSection == "week") {
+                                    r.addClass('e-selected-week');
+                                }
+                                if (this.model.highlightSection == "month") {
+                                    tbody.addClass('e-selected-month');
+                                }
+                                if (this.model.highlightSection == "workdays") {
+                                    r.addClass('e-work-week');
+                                }
+                            }
+                            else { if(this.model.value!=null)d.addClass('e-state-hover').attr({ 'aria-selected': false }); }
+                        if (!this._hoverDate) {
+                            if (!d.hasClass('e-hidedate')) d.addClass('e-state-hover');
+                            this._hoverDate = currentDate.getDate() - 1;
+                        }
+                    }
+                    var cond = true;
+                    if (currentDate < this.model.minDate || currentDate > this.model.maxDate) {
+                        d.addClass('e-hidedate');
+                        d.removeClass('current-month');
+                        if (this.model.showOtherMonths) d.removeClass('other-month');
+                        cond = _last = false;
+                    }
+                    if (thisMonth) {
+                        if (cond && _first) {
+                            this._tempMinDate = currentDate;
+                            _first = false; _last = true;
+                        }
+                        if (_last) this._tempMaxDate = currentDate;
+                    }
+                    this._trigger("beforeDateCreate", { date: currentDate, value: this._formatter(currentDate, this.model.dateFormat), element: d });
+                    r.append(d);
+                    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1, 0, 0, 0);
+                }
+                tbody.append(r);
+            }
+            calendarTable.append(tbody);
+            if (this._DRPdisableFade) {
+                bbdesigner$(tbody).css("display", "block");
+                bbdesigner$(tbody).css({ display: "table-row-group", "vertical-align": "middle", "border-color": "inherit" });
+            }
+            else {
+                (this._isIE8 || this._isIE7) ? bbdesigner$(tbody).css("display", "block") : bbdesigner$(tbody).fadeIn("fast");
+            }
+            if (this.model.startLevel === this.model.depthLevel)
+                this._depthLevel(this.model.depthLevel);
+            else if (this.model.depthLevel != "month" && this.model.depthLevel != "") {
+                if (this.model.startLevel == "century")
+                    this._depthLevel(this.model.depthLevel);
+                else if (this.model.startLevel == "decade" && this.model.depthLevel != "century")
+                    this._depthLevel(this.model.depthLevel);
+                else if (this.model.startLevel == "year" && this.model.depthLevel != "decade" && this.model.depthLevel != "century")
+                    this._depthLevel(this.model.depthLevel);
+                else {
+                    this._on(calendarTable.find('.current-month,.other-month,.e-current-month,.e-current-year,.e-current-allyear'), "click", bbdesigner$.proxy(this._backwardNavHandler, this));
+                    this._on(calendarTable.find('.current-month , .other-month'), "click", bbdesigner$.proxy(this._onSetCancelDateHandler, this));
+                }
+            }
+            else {
+                this._on(calendarTable.find('.current-month,.other-month,.e-current-month,.e-current-year,.e-current-allyear'), "click", bbdesigner$.proxy(this._backwardNavHandler, this));
+                this._on(calendarTable.find('.current-month , .other-month'), "click", bbdesigner$.proxy(this._onSetCancelDateHandler, this));
+            }
+
+            this._otherMonthsVisibility();
+            this._checkDateArrows();
+        },
+
+        _checkDisableRange: function (value) {
+            if (!BoldBIDashboard.isNullOrUndefined(this._disableCollection[value.getFullYear()]))
+                if (bbdesigner$.inArray(value.getMonth(), this._disableCollection[value.getFullYear()]) !== -1)
+                    return true;
+            return false;
+        },
+        _initDisableObj: function (disableDates) {
+            this._disableCollection = {};
+            for (var i = 0; i < this.model.blackoutDates.length; i++) {
+                var dateObj = this._checkInstanceType(this.model.blackoutDates[i]);
+                if (dateObj) {
+                    var year = dateObj.getFullYear();
+                    var month = dateObj.getMonth();
+                    if (BoldBIDashboard.isNullOrUndefined(this._disableCollection[year])) this._disableCollection[year] = [];
+                    if (bbdesigner$.inArray(month, this._disableCollection[year]) == -1) this._disableCollection[year].push(month);
+                }
+            }
+        },
+
+        _disableDates: function (args) {
+            for (var i = 0; i < this.model.blackoutDates.length; i++) {
+                var dateObj = this._checkInstanceType(this.model.blackoutDates[i]);
+                if (dateObj && +args.date === +dateObj)
+                    args.element.removeClass('current-month').addClass('e-hidedate');
+            }
+        },
+
+        _keyboardNavigation: function (e) {
+            if (this._animating) return false;
+            if ((this._isOpen) && (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 36 || e.keyCode == 35)) {
+                e.preventDefault && e.preventDefault();
+                if (e.altKey) { if (e.keyCode == 13) { this._setCurrDate(e); return false; } else return; }
+                var t = { row: null, col: null };
+
+                t.col = this.sfCalendar.find('tbody tr td.e-state-hover').index();
+                t.row = this.sfCalendar.find('tbody tr td.e-state-hover').parent().index();
+
+                t.col = (t.col != -1) ? t.col + 1 : this.sfCalendar.find('tbody tr td.e-active').index() + 1;
+                t.row = (t.row != -1) ? t.row + 1 : this.sfCalendar.find('tbody tr td.e-active').parent().index() + 1;
+
+                var tableClass = this.sfCalendar.find('table')[0].className, next, rowLength = 3, colLength = 4;
+                switch (tableClass) {
+                    case "e-dp-viewallyears":
+                        next = this._changeRowCol(t, e.keyCode, rowLength, colLength, "yearall", e.ctrlKey);
+                        if (!e.ctrlKey) this._hoverAllYear = this.sfCalendar.find('tbody.e-datepicker-allyears tr td').index(next);
+                        break;
+                    case "e-dp-viewyears":
+                        next = this._changeRowCol(t, e.keyCode, rowLength, colLength, "year", e.ctrlKey);
+                        if (!e.ctrlKey) this._hoverYear = this.sfCalendar.find('tbody.e-datepicker-years tr td').index(next);
+                        break;
+                    case "e-dp-viewmonths":
+                        next = this._changeRowCol(t, e.keyCode, rowLength, colLength, "month", e.ctrlKey);
+                        if (!e.ctrlKey) this._hoverMonth = this.sfCalendar.find('tbody.e-datepicker-months tr td').index(next);
+                        break;
+                    case "e-dp-viewdays":
+                        rowLength = this.sfCalendar.find('tbody.e-datepicker-days tr').length, colLength = 7;
+                        next = this._changeRowCol(t, e.keyCode, rowLength, colLength, "day", e.ctrlKey);
+                        if (!e.ctrlKey) this._hoverDate = this._getDateObj(next).getDate() - 1;
+                        break;
+                }
+                if (!e.ctrlKey) {
+                    this.sfCalendar.find('table td').removeClass("e-state-hover");
+                    next.addClass("e-state-hover");
+                }
+            }
+            else if (!this.model.displayInline && (e.keyCode == 27 || e.keyCode == 9)) { this.hide(); }
+            else if (e.altKey && e.keyCode == 40) { this.show(); return false; }
+        },
+        _changeRowCol: function (t, key, rows, cols, target, ctrlKey) {
+            var eleClass, cls = { parent: null, child: null };
+            switch (target) {
+                case "day": eleClass = "tbody.e-datepicker-days tr td.current-month";
+                    cls.parent = ".e-datepicker-days", cls.child = ".current-month";
+                    break;
+                case "month": eleClass = "tbody.e-datepicker-months tr td.e-current-month";
+                    cls.parent = ".e-datepicker-months", cls.child = ".e-current-month";
+                    break;
+                case "year": eleClass = "tbody.e-datepicker-years tr td.e-current-year";
+                    cls.parent = ".e-datepicker-years", cls.child = ".e-current-year";
+                    break;
+                case "yearall": eleClass = "tbody.e-datepicker-allyears tr td.e-current-allyear";
+                    cls.parent = ".e-datepicker-allyears", cls.child = ".e-current-allyear";
+                    break;
+            }
+            if (t.row <= 0 && t.col <= 0)
+                return this.sfCalendar.find(eleClass + ':first');
+            var cell, proxy = this;
+            switch (key) {
+                case 36:
+                    return this.sfCalendar.find(eleClass + ':first');
+                case 35:
+                    return this.sfCalendar.find(eleClass + ':last');
+                case 38:
+                    if (ctrlKey && this.model.allowDrillDown) {
+                        this._forwardNavHandler();
+                    }
+                    else if (t.row > 1) {
+                        t.row -= 1;
+                    }
+                    else {
+                        this._processNextPrevDate(true);
+                        cell = this.sfCalendar.find(eleClass + ':nth-child(' + t.col + '):last');
+                        return cell;
+                    }
+                    cell = this._getCell(t, cls);
+                    if (cell.length <= 0) {
+                        cell = this._findVisible(t, cls, "up");
+                        if (cell !== null) return cell;
+                        this._processNextPrevDate(true);
+                        cell = this.sfCalendar.find(eleClass + ':nth-child(' + t.col + '):last');
+                    }
+                    return cell;
+                case 37:
+                    if (ctrlKey) {
+                        this._processNextPrevDate(true);
+                        return this.sfCalendar.find('tbody tr td.e-state-hover');
+                    }
+                    else if (t.col > 1)
+                        t.col -= 1;
+                    else if (t.row > 1) {
+                        t = { row: t.row - 1, col: cols }
+                    }
+                    else {
+                        this._processNextPrevDate(true);
+                        cell = this.sfCalendar.find(eleClass + ':last');
+                        return cell;
+                    }
+                    cell = this._getCell(t, cls);
+                    if (cell.length <= 0) {
+                        cell = this._findVisible(t, cls, "left");
+                        if (cell !== null) return cell;
+                        this._processNextPrevDate(true);
+                        cell = this.sfCalendar.find(eleClass + ':last');
+                    }
+                    return cell;
+                case 39:
+                    if (ctrlKey) {
+                        this._processNextPrevDate(false);
+                        return this.sfCalendar.find('tbody tr td.e-state-hover');
+                    }
+                    else if (t.col < cols)
+                        t.col += 1;
+                    else if (t.row < rows) {
+                        t = { row: t.row + 1, col: 1 }
+                    }
+                    else {
+                        this._processNextPrevDate(false);
+                        cell = this.sfCalendar.find(eleClass + ':first');
+                        return cell;
+                    }
+                    cell = this._getCell(t, cls);
+                    if (cell.length <= 0) {
+                        cell = this._findVisible(t, cls, "right");
+                        if (cell !== null) return cell;
+                        this._processNextPrevDate(false);
+                        cell = this.sfCalendar.find(eleClass + ':first');
+                    }
+                    return cell;
+                case 40:
+                    if (!ctrlKey) {
+                        if (t.row < rows) {
+                            t.row += 1;
+                        }
+                        else {
+                            this._processNextPrevDate(false);
+                            cell = this.sfCalendar.find(eleClass + ':nth-child(' + t.col + '):first');
+                            return cell;
+                        }
+                        cell = this._getCell(t, cls);
+                        if (cell.length <= 0) {
+                            cell = this._findVisible(t, cls, "down");
+                            if (cell !== null) return cell;
+                            this._processNextPrevDate(false);
+                            cell = this.sfCalendar.find(eleClass + ':nth-child(' + t.col + '):first');
+                        }
+                        return cell;
+                    }
+                case 13:
+                    var tclassName = bbdesigner$("table", this.sfCalendar).get(0).className, ele, element;
+                    ele = this._getCell(t, cls); element = bbdesigner$(ele)[0];
+                    if (tclassName == "e-dp-viewmonths" && this.model.startLevel == "year" && this.model.depthLevel == "year") {
+                        this._dateValue = new Date(this._dateValue.setMonth(parseInt(element.attributes["data-index"].value)));
+                        this._onSetCancelDateHandler({ type: null, target: ele });
+                    }
+                    else if ((tclassName == "e-dp-viewyears" && this.model.startLevel == "decade" && this.model.depthLevel == "decade") ||
+                        (tclassName == "e-dp-viewallyears" && this.model.startLevel == "century" && this.model.depthLevel == "century")) {
+                        this._dateValue = new Date(this._dateValue.setFullYear(parseInt(element.innerHTML)));
+                        this._onSetCancelDateHandler({ type: null, target: ele });
+                    }
+                    else if (tclassName == "e-dp-viewdays") {
+                        this._backwardNavHandler(ele);
+                        this._onSetCancelDateHandler({ type: null, target: ele });
+                    }
+                    else
+                        this._backwardNavHandler(ele);
+                    break;
+            }
+            return this._getCell(t, cls);
+        },
+        _findVisible: function (t, cls, key) {
+            var cols = t.col, rows = t.row, requiredClass = cls.child.slice(1, cls.child.length);
+            for (i = 0; i >= 0; i++) {
+                nextElement = this.sfCalendar.find('tbody' + cls.parent + ' tr:nth-child(' + rows + ') td:nth-child(' + cols + ')');
+                if (nextElement.length <= 0) {
+                    return null;
+                }
+                if (nextElement.hasClass('e-hidedate') || !nextElement.is(":visible")) {
+                    key == "right" || key == "left" ? (key == "right" ? cols++ : cols--) : (key == "down" ? rows++ : rows--);
+                    if ((rows <= 0) || (rows > this.sfCalendar.find('tbody' + cls.parent + ' tr').length)) {
+                        // No more rows there in popup.
+                        return null;
+                    }
+                    // Column exceeds the range. 
+                    if (cols > this.sfCalendar.find('tbody' + cls.parent + ' tr:nth-child(' + rows + ') td').length) {
+                        //move to next row and select first column
+                        rows++;
+                        cols = 1;
+                    }
+                    if (cols <= 0) {
+                        //move to previous row and select last column
+                        rows--;
+                        cols = this.sfCalendar.find('tbody' + cls.parent + ' tr:nth-child(' + rows + ') td').length;
+                    }
+                    // Row exceeds the range.
+                    if ((rows <= 0) || (rows > this.sfCalendar.find('tbody' + cls.parent + ' tr').length)) {
+                        // No more rows there in popup.
+                        return null;
+                    }
+                } else if (nextElement.hasClass('other-month')) {
+                    return null;
+                } else if (nextElement.hasClass(requiredClass)) {
+                    t.col = cols; t.row = rows;
+                    return nextElement;
+                }
+            }
+        },
+        _getCell: function (t, cls) {
+            return this.sfCalendar.find('tbody' + cls.parent + ' tr:nth-child(' + t.row + ') td' + cls.child + ':nth-child(' + t.col + ')');
+        },
+        _getDateObj: function (element) {
+            return new Date(element.attr("data-date"));
+        },
+        _touchCalendar: function (e) {
+            var tableClass = this.sfCalendar.find('table')[0].className;
+            switch (e.type) {
+                case "pinchin":
+                    if (tableClass != "e-dp-viewdays")
+                        this._keyboardNavigation({ keyCode: 13 });
+                    break;
+                case "pinchout":
+                    if (tableClass != "e-dp-viewallyears" && this.model.allowDrillDown)
+                        this._forwardNavHandler();
+                    break;
+                case "swipeleft":
+                    this._processNextPrevDate(false);
+                    break;
+                case "swiperight":
+                    this._processNextPrevDate(true);
+                    break;
+            }
+        },
+
+        show: function (e) {
+            if (BoldBIDashboard.isNullOrUndefined(this.sfCalendar)) this._renderPopup();
+            if (this._isOpen) return false;
+            var proxy = this;
+            this._popupOpen = true;
+            var previous = this._preValue != null ? new Date(this._preValue.toString()) : this._preValue;
+            if (!this.model.enabled) return;
+            if (!this.model.displayInline) this._setDatePickerPosition();
+            if (this._trigger("beforeOpen", { element: this.sfCalendar, events: e })) return false;
+            this.sfCalendar.attr({ 'aria-hidden': 'false' });
+            proxy._isOpen = true;
+            this.sfCalendar.slideDown(this.model.enableAnimation ? this.animation.open.duration : 0, function () {
+                if (proxy.model && !proxy.model.displayInline)
+                    bbdesigner$(document).on("mousedown", bbdesigner$.proxy(proxy._onDocumentClick, proxy));
+            });
+            if (this._isIE8) {
+                if (this.element.val() && this._compareDate(new Date(this.element.val()), previous)) this._updateInputVal();
+            }
+            else this._updateInputVal();
+            this._refreshLevel(previous);
+            this._trigger("open", { prevDate: previous, date: this.model.value, value: this._formatter(this.model.value, this.model.dateFormat) });
+            bbdesigner$(window).on("resize", bbdesigner$.proxy(this._OnWindowResize, this));
+            if (!this.model.displayInline) {
+              this._on(BoldBIDashboard.getScrollableParents(this.wrapper), "scroll", this.hide);
+              this._on(BoldBIDashboard.getScrollableParents(this.wrapper), "touchmove", this.hide);
+			}
+            this._isInputBox && this.wrapper.addClass("e-active");
+        },
+
+
+        hide: function (e) {
+            if (!this._isOpen || this._getInternalEvents) return false;
+            if (this._trigger("beforeClose", { element: this.sfCalendar, events: e })) return false;
+            var proxy = this;
+            this._popupOpen = false;
+            this.sfCalendar.attr({ 'aria-hidden': 'true' });
+            if (this._popClose && e != undefined && e.type != "click") {
+                return;
+            }
+            this.sfCalendar.slideUp(this.model.enableAnimation ? this.animation.close.duration : 0, function () {
+                proxy._isOpen = false;
+                bbdesigner$(document).off("mousedown", bbdesigner$.proxy(proxy._onDocumentClick, proxy));
+                proxy._setWaterMark();
+            });
+            if (this.element.val() != "") this._validateInputVal();
+            this._trigger("close", { prevDate: this._prevDate, date: this.model.value, value: this._formatter(this.model.value, this.model.dateFormat) });
+            bbdesigner$(window).off("resize", bbdesigner$.proxy(this._OnWindowResize, this));
+            this._off(BoldBIDashboard.getScrollableParents(this.wrapper), "scroll", this.hide);
+            this._off(BoldBIDashboard.getScrollableParents(this.wrapper), "touchmove", this.hide);
+            this._isInputBox && this.wrapper.removeClass("e-active");
+        },
+
+
+        enable: function () {
+            this.model.enabled = true;
+            this.wrapper && this.wrapper.removeClass('e-disable');
+            this.element.removeClass('e-disable').attr({ "aria-disabled": false });
+            this.element.prop("disabled", false);
+            if (this.dateIcon) this.dateIcon.removeClass('e-disable').attr({ "aria-disabled": false });
+            if (this._isIE8 && this.dateIcon) this.dateIcon.children().removeClass("e-disable");
+            this.element.prop("disabled", false);
+            if (!this._isSupport)
+                this._hiddenInput.prop("disabled", false);
+            this.sfCalendar && this.sfCalendar.removeClass('e-disable').attr({ "aria-disabled": false });
+        },
+
+
+        disable: function () {
+            this.model.enabled = false;
+            this.wrapper && this.wrapper.addClass('e-disable');
+            this.element.addClass('e-disable').attr({ "aria-disabled": true });
+            this.element.attr("disabled", "disabled");
+            if (this.dateIcon) this.dateIcon.addClass('e-disable').attr({ "aria-disabled": true });
+            if (this._isIE8 && this.dateIcon) this.dateIcon.children().addClass("e-disable");
+            this.element.attr("disabled", "disabled");
+            if (!this._isSupport)
+                this._hiddenInput.attr("disabled", "disabled");
+            this.sfCalendar && this.sfCalendar.addClass('e-disable').attr({ "aria-disabled": true });
+            if (this._isOpen) {
+                if (this.element.is(':input')) this.element.blur();
+                if (!this.model.displayInline) this.hide();
+            }
+        },
+
+        getValue: function () { return this._formatter(this.model.value, this.model.dateFormat); },
+
+        _wireCalendarEvents: function () {
+            this._allowQuickPick(this.model.allowDrillDown);
+            this._on(bbdesigner$('.e-next', this.sfCalendar), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+            this._on(bbdesigner$('.e-prev', this.sfCalendar), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+            if (!this.model.displayInline) {
+                this.sfCalendar.on("mouseenter touchstart", bbdesigner$.proxy(function () { this._popClose = true; }, this));
+                this.sfCalendar.on("mouseleave touchend", bbdesigner$.proxy(function () { this._popClose = false; }, this));
+            }
+            if (this.model.showFooter)
+                this._on(bbdesigner$('.e-footer', this.sfCalendar), "click", this._setCurrDate);
+            this.sfCalendar && this._on(this.sfCalendar, "pinchin pinchout swipeleft swiperight", bbdesigner$.proxy(this._touchCalendar, this));
+        },
+
+        _wireEvents: function () {
+            if (this.element.is(":input") && (this.model.allowEdit)) {
+                this._on(this.element, "blur", this._onFocusOut);
+                this._on(this.element, "focus", this._onFocusIn);
+                this._on(this.element, "keydown", this._onKeyDown);
+            }
+
+            if (!this.model.allowEdit) {
+                this.element.attr("readonly", "readonly");
+                this.element.on("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+            }
+        },
+        _bindDateButton: function () {
+            this._on(this.dateIcon, "mousedown", this._showDatePopUp);
+            if (this.model.allowEdit)
+                this.element.off("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+        },
+        _bindInputEvent: function () {
+            this._off(this.dateIcon, "mousedown", this._showDatePopUp);
+        },
+
+        _specificFormat: function () {
+            var parseInfo = BoldBIDashboard.globalize._getDateParseRegExp(BoldBIDashboard.globalize.findCulture(this.model.locale).calendar, this.model.dateFormat);
+            return (bbdesigner$.inArray("dddd", parseInfo.groups) > -1 || bbdesigner$.inArray("ddd", parseInfo.groups) > -1)
+        },
+
+        _onFocusOut: function (e) {
+            this._isFocused = false;
+            var previous = this._preValue != null ? new Date(this._preValue.toString()) : this._preValue;
+            this._validateOnFocusOut(this._validateValue(), e);
+            this.wrapper.removeClass("e-focus");
+            (BoldBIDashboard.isNullOrUndefined(this.model.value)) ? this.wrapper.removeClass('e-valid') : this.wrapper.addClass('e-valid');
+            if ((!this._isOpen || this.model.displayInline) && !this._setWaterMark() && !this._compareDate(this._preValue, this._parseDate(this.element.val(), this.model.dateFormat))) this._updateInputVal();
+            if ((!this._isOpen || this.model.displayInline)) this._refreshLevel(previous);
+            if (this.element.val() != "" && (!this._isOpen || this.model.displayInline)) { this._validateInputVal(); }
+            this.element.off("keydown", bbdesigner$.proxy(this._keyboardNavigation, this));
+            if (!this.model.showPopupButton) this._off(this.element, "click", this._elementClick);
+            var _currentVal = this.element.val();
+            var data = { prevDate: this._prevDate, value: _currentVal };
+            if (this._specificFormat()) {
+                if (this._prevDate != _currentVal)
+                    this._setDateValue(_currentVal, true);
+            }
+            else
+                this._setDateValue(_currentVal);
+            if (!this.model.value) this._clearSelected();
+            this._trigger("focusOut", data);
+            this._checkErrorClass();
+        },
+        _onFocusIn: function (e) {
+            if (this._isSupport) {
+                e.preventDefault();
+                this._isFocused = true;
+            }
+            this.wrapper.removeClass('e-error');
+            this.isValidState = true;
+            this.wrapper.addClass("e-focus");
+            this.wrapper.addClass('e-valid');
+            if (this.model.readOnly)
+                return;
+            if (!this._isSupport) this._hiddenInput.css("display", "none");
+            this.element.on("keydown", bbdesigner$.proxy(this._keyboardNavigation, this));
+            if (!this.model.showPopupButton && !this.model.readOnly) this.show(e);
+            if (!this.model.showPopupButton) this._on(this.element, "click", this._elementClick);
+            this._trigger("focusIn", { date: this.model.value, value: this._formatter(this.model.value, this.model.dateFormat) });
+        },
+        _elementClick: function (e) {
+            if (!this._popupOpen) this.show(e);
+        },
+        _removeWatermark: function () {
+            if (this.element.val() != "" && !this._isSupport)
+                this._hiddenInput.css("display", "none");
+        },
+        _refreshPopup: function () {
+            this._refreshDatepicker();
+            this._startLevel(this.model.startLevel);
+        },
+        _weekDate: function (currentDate) {
+            var time, checkDate = new Date(currentDate.getTime());
+            checkDate.setDate(checkDate.getDate() + 4 - (checkDate.getDay() || 7));
+            time = checkDate.getTime();
+            checkDate.setMonth(0);
+            checkDate.setDate(1);
+            return Math.floor(Math.round((time - checkDate) / 86400000) / 7) + 1;
+
+        },
+        _refreshLevel: function (previous) {
+            if ((this.model.startLevel == this.model.depthLevel) && this.model.startLevel != "month") {
+                var val = this._stringToObject(this.element.val());
+                val = this._validateYearValue(val);
+                if (val)
+                    if (!this._compareDate(previous, val))
+                        this._refreshPopup();
+            }
+        },
+        _validateOnFocusOut: function (val, e) {
+            var dateVal = this._preValue != null ? this._calendarDate : this._preValue;
+            var calenderDate = this._formatter(dateVal, this.model.dateFormat);
+            if (this._specificFormat() && (val > this.model.minDate) && (val < this.model.maxDate)) {
+                if (val == null) this.model.value = dateVal
+                else {
+                    this.model.value = val;
+                    var currDate = this._formatter(val, this.model.dateFormat, this.model.locale);
+                }
+            }
+            else var currDate = this._formatter(this._parseDate((this._formatter(new Date(), "MM/dd/yyyy"))), this.model.dateFormat);
+            var dateChange = false, valueExceed = false;
+            if (val != null && !this.model.enableStrictMode) {
+                if (BoldBIDashboard.isNullOrUndefined(this.model.value))
+                    this.model.value = this._parseDate(this.element.val());
+                if (this.model.maxDate < this.model.minDate) this.model.minDate = this.model.maxDate;
+                if (!this.model.enableStrictMode) {
+                    if (val) {
+                        if ((val < this.model.minDate) || (val > this.model.maxDate)) {
+                            dateChange = true,
+                            this._calendarDate = val = val < this.model.minDate ? this.model.minDate : this.model.maxDate
+                        }
+                    }
+                    else {
+                        this.element.val("");
+                        if (this._calendarDate < this.model.minDate) this._calendarDate = this.model.minDate;
+                        else if (this._calendarDate > this.model.maxDate) this._calendarDate = this.model.maxDate;
+                    }
+                    this.isValidState = true;
+                }
+                if (dateChange) this.element.val(this._formatter(val, this.model.dateFormat));
+                if (!this._compareDate(this._preValue, this._parseDate(this.element.val(), true))) this._triggerChangeEvent(e);
+            }
+            else if (val == null && !this.model.enableStrictMode) {
+                if (this._preTxtValue == null || this.element.val() == "") {
+                    this.element.val("");
+                    if (!this._isSupport) this._hiddenInput.css("display", "block");
+                } else
+                    this.element.val(calenderDate);
+                this._triggerChangeEvent(e);
+            }
+            else {
+                if (val) {
+                    if ((val < this.model.minDate) || (val > this.model.maxDate)) {
+                        this.isValidState = false, valueExceed = true,
+                        this._calendarDate = val < this.model.minDate ? this.model.minDate : this.model.maxDate
+                    }
+                    else
+                        this.isValidState = true;
+                    this._triggerChangeEvent(e);
+                    if (valueExceed && this._getInternalEvents) this._trigger("outOfRange");
+                }
+                else {
+                    this.isValidState = false;
+                    if (this._calendarDate < this.model.minDate) this._calendarDate = this.model.minDate;
+                    else if (this._calendarDate > this.model.maxDate) this._calendarDate = this.model.maxDate;
+                }
+            }
+        },
+        _onKeyDown: function (e) {
+            if (e.keyCode === 13) {
+                var previous = this._preValue != null ? new Date(this._preValue.toString()) : this._preValue;
+                this._validateOnFocusOut(this._validateValue(), e);
+                if ((!this._isOpen || this.model.displayInline) && !this._setWaterMark() && !this._compareDate(this._preValue, this._parseDate(this.element.val(), this.model.dateFormat))) this._updateInputVal();
+                if ((!this._isOpen || this.model.displayInline)) this._refreshLevel(previous);
+                if (this.element.val() != "" && (!this._isOpen || this.model.displayInline)) { this._validateInputVal(); }
+                this._checkErrorClass();
+            }
+        },
+        _showhidePopup: function (e) {
+            if (!this.model.enabled) return false;
+            if (this._isOpen) {
+                if (!this._isFocused && this.element.is(':input') && (!BoldBIDashboard.isTouchDevice())) this.element.focus();
+                if (!this._cancelValue) this.hide(e);
+            }
+            else {
+                if (!this._isFocused && this.element.is(':input') && (!BoldBIDashboard.isTouchDevice())) this.element.focus();
+                this.show(e);
+            }
+        },
+        _compareDate: function (first, second) {
+            var result = (+first === +second) ? true : false;
+            return result;
+        },
+        _validateDate: function (val) {
+            var result = true;
+            if (val != null) {
+                for (var i = 0; i < this.model.blackoutDates.length; i++) {
+                    var dateObj = this._checkInstanceType(this.model.blackoutDates[i]);
+                    if (dateObj && +val === +dateObj)
+                        result = false;
+                }
+                if ((val < this.model.minDate || val > this.model.maxDate) && this.model.enableStrictMode) {
+                    result = false;
+                    this.isValidState = false;
+                }
+            }
+
+            return result;
+        },
+
+        _triggerChangeEvent: function (e) {
+            var currentValue;
+            var _currentVal = this.element.val() == "" ? null : this.element.val();
+            this._prevDate = this._formatter(this._preValue, this.model.dateFormat);
+            var data = { prevDate: this._prevDate, value: _currentVal, isInteraction: !!e };
+            if (this._specificFormat() && e != undefined && e.type == "keydown" && this._formatter(this._preValue, this.model.dateFormat, this.model.locale) != this.element.val())
+                currentValue = this._parseDate(this.element.val(), true);
+            else if ((this._specificFormat() && e != undefined && e.type == "blur"))
+                currentValue = this.model.value;
+            else currentValue = this._parseDate(_currentVal);
+            currentValue = this._validateYearValue(currentValue);
+            if (!this._validateDate(currentValue)) currentValue = null;
+            if (!this._compareDate(this._preValue, currentValue)) {
+                this._preValue = this.model.value = currentValue;
+                data.value = this._formatter(this.model.value, this.model.dateFormat);
+                if (this.model.value) this._clickedDate = this._calendarDate = this.model.value;
+                if (this.model.displayInline && !this._isInputBox) this._hiddenInput.attr('value', _currentVal);
+                if (!this.model.value && !this.model.enableStrictMode) this._setDateValue(this.model.value);
+                data.value = _currentVal;
+                this._trigger("_change", data);
+                data.value = this._formatter(this.model.value, this.model.dateFormat);
+                this._trigger("change", data);
+                this._checkErrorClass();
+            }
+            else if (!(this.element.val() == "" && this._prevDate == null) && this.element.val() != this._prevDate) {
+                data.value = this.element.val();
+                this._trigger("_change", data);
+            }
+        },
+
+        _triggerSelectEvent: function (e) {
+            var val = this.element.val();
+            if (this._parseDate(val)) {
+                var data = { prevDate: this._prevDate, date: this.model.value, value: val, isSpecialDay: this._isSpecialDates(this.model.value) };
+                if (this._prevDate != val) {
+                    if (this._parseDate(data.value) && (this.model.value >= this.model.minDate && this.model.value <= this.model.maxDate)) {
+                        this._cancelValue = this._trigger("select", data);
+                    }
+                }
+                if (this._dt_drilldown) this._trigger("dt_drilldown", data);
+            }
+        },
+
+        _onDocumentClick: function (e) {
+            if (this.model) {
+                if (!bbdesigner$(e.target).is(this.popup) && !bbdesigner$(e.target).parents(".e-popup").is(this.popup) &&
+                    !bbdesigner$(e.target).is(this.wrapper) && !bbdesigner$(e.target).parents(".e-datewidget").is(this.wrapper)) {
+                    this.hide(e);
+                }
+                else if (bbdesigner$(e.target).is(this.popup) || bbdesigner$(e.target).parents(".e-popup").is(this.popup)) {
+                    e.preventDefault();
+                }
+            }
+        },
+
+        _OnWindowResize: function (e) {
+            if (this.sfCalendar) this._setDatePickerPosition();
+        },
+
+        _showDatePopUp: function (e) {
+            var isRightClick = false;
+            if (e.button)
+                isRightClick = (e.button == 2);
+            else if (e.which)
+                isRightClick = (e.which == 3); //for Opera
+            if (isRightClick) return;
+            if (!this._isSupport && !this.model.showPopupButton) {
+                e.preventDefault();
+                this._onFocusIn();
+            }
+            if (this.model.readOnly) return;
+            e.preventDefault();
+            if (!this.model.enabled && this.model.displayInline) return false;
+            this._showhidePopup(e);
+        },
+        _layoutChanged: function (e) {
+            // this event internally used to observe the layout change in "DateTimePicker" control
+            if (this._getInternalEvents) this._trigger("layoutChange");
+        },
+        _setCurrDate: function (e) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            if (e) e.preventDefault();
+            var proxy = this;
+            this._prevDate = this._formatter(this.model.value, this.model.dateFormat);
+            this._dateValue = this._zeroTime(new Date());
+            this.model.value = this._calendarDate = new Date(this._dateValue.toString());
+            this._setDateValue(this.model.value);
+            this._triggerSelectEvent(e);
+            this._triggerChangeEvent(e);
+            this._refreshDatepicker();
+            this._changeDayClass();
+            this._startLevel(this.model.startLevel);
+            this._onSetCancelDateHandler(e);
+            this._layoutChanged();
+        },
+        _changeDayClass: function () {
+            var className = this.popup.children("table")[0].className;
+            if (className != "e-dp-viewdays") {
+                this.popup.children("table").removeClass(className).addClass("e-dp-viewdays");
+            }
+        },
+
+        _onSetCancelDateHandler: function (e) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            if (e && (bbdesigner$(e.target).hasClass("e-disable") || bbdesigner$(e.target).hasClass("e-hidedate"))) return false;
+            if (e && e.type) e.preventDefault();
+            if (this._specificFormat()) this._prevDate = this.element.val();
+            else this.model.value = this._parseDate(this.element.val());
+            this._prevDate = this._formatter(this.model.value, this.model.dateFormat);
+            this._setDateValue(this._dateValue);
+            this._triggerSelectEvent(e);
+            this._triggerChangeEvent(e);
+            this._dateValue = (this.model.value == null)? null:new Date(this.model.value.toString());
+            if (this.element.is(':input') && !this.model.displayInline) {
+                this._showhidePopup(e);
+            }
+            if (e && bbdesigner$(e.currentTarget).hasClass("other-month"))
+                this._refreshDatepicker();
+            this._cellSelection();
+        },
+        _closeCalendar: function (ele) {
+            if (!ele || ele == this.element) {
+                this.sfCalendar.empty().remove();
+            }
+        },
+        //Error class for input value validation
+        _checkErrorClass: function () {
+            if (this.wrapper) {
+                if (this.isValidState) this.wrapper.removeClass("e-error");
+                else this.wrapper.addClass("e-error");
+            }
+        },
+        _getLocalizedLabels: function () {
+            return BoldBIDashboard.getLocalizedConstants(this.sfType, this.model.locale);
+        }
+    });
+
+    BoldBIDashboard.DatePicker.Locale = BoldBIDashboard.DatePicker.Locale || {};
+
+    BoldBIDashboard.DatePicker.Locale['default'] = BoldBIDashboard.DatePicker.Locale['en-US'] = {
+        watermarkText: "Select date",
+        buttonText: 'Today'
+    };
+
+
+    BoldBIDashboard.DatePicker.Header = {
+        /**  Removes the day header */
+        None: "none",
+        /**  Shows the day header format in short like Sun, Mon, Tue … */
+        Short: "short",
+        /**  Shows the day header format in min like Su, Mo, Tu … */
+        Min: "min",
+        /**  Shows the day header format in long like Sunday, Monday, Tuesday … */
+        Long: "long"
+    };
+
+    BoldBIDashboard.DatePicker.HighlightSection = {
+        /**  Highlight the Current Month. */
+        Month: "month",
+        /**  Highlight the Current Week. */
+        Week: "week",
+        /**  Highlight the Current WorkDays. */
+        WorkDays: "workdays",
+        /** Don't Highlight Anything. */
+        None: "none"
+    };
+
+
+    BoldBIDashboard.DatePicker.Level = {
+        /**  Starts from month level view. */
+        Month: "month",
+        /**  Starts from year level view. */
+        Year: "year",
+        /**  Starts from year decade level view. */
+        Decade: "decade",
+        /**  Starts from century level view.  */
+        Century: "century"
+    };
+})(bbdesigner$, SyncfusionBoldBIDashboard);;
+;
+/// <reference path="../../common/jquery.d.ts" />
+/// <reference path="../../BoldBIDashboard.web.all.d.ts" />
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+
+var BoldBIDashboardDateRangePicker = (function (_super) {
+    __extends(BoldBIDashboardDateRangePicker, _super);
+    function BoldBIDashboardDateRangePicker(element, options) {
+        _super.call(this);
+        this._rootCSS = "e-daterangepicker";
+        this._setFirst = false;
+        this.PluginName = "BoldBIDashboardDateRangePicker";
+        this.id = "myDateRange";
+        this._addToPersist = ["value"];
+        this.type = "editor";
+        this.angular = {
+            require: ['?ngModel', '^?form', '^?ngModelOptions'],
+            requireFormatters: true
+        };
+        this._requiresID = true;
+        this.model = null;
+        this.validTags = ["input"];
+        this.defaults = {
+            height: "",
+            width: "",
+            value: "",
+            cssClass: "",
+            enabled: true,
+            startDate: null,
+            endDate: null,
+            enableTimePicker: false,
+            ranges: null,
+            locale: "en-US",
+            separator: "-",
+            watermarkText: "Select Range",
+            dateFormat: "",
+            timeFormat: "",
+            showPopupButton: true,
+            showRoundedCorner: false,
+            allowEdit: true,
+            enablePersistence: false,
+            create: null,
+            change: null,
+            beforeClose: null,
+            beforeOpen: null,
+            close: null,
+            open: null,
+            hover: null,
+            click: null,
+            clear: null,
+            destroy: null,
+			select: null,
+			htmlAttributes: {},
+
+        };
+        this._isIE8 = (BoldBIDashboard.browserInfo().name == "msie") && (BoldBIDashboard.browserInfo().version == "8.0") ? true : false;
+        this._prevValue = null;
+        this._validState = null;
+        BoldBIDashboardDateRangePicker.prototype.observables = ["value"];
+        if (element) {
+            if (!element["jquery"]) {
+                element = bbdesigner$("#" + element);
+            }
+            if (element.length) {
+                return bbdesigner$(element).BoldBIDashboardDateRangePicker().data(this.PluginName);
+            }
+        }
+    }
+    BoldBIDashboardDateRangePicker.prototype.setModel = function (opt, forceSet) {
+        this.setModel(opt, forceSet);
+    };
+    BoldBIDashboardDateRangePicker.prototype.option = function (opt, forceSet) {
+        this.option(opt, forceSet);
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._setModel = function (options) {
+        if (!this.popup) {
+			 this._onMainFocusOut();
+            this._renderPopup();
+            this._updateValues();
+		}
+        var option;
+        for (option in options) {
+            switch (option) {
+                case "allowEdit":
+                    if (!options[option]) {
+                        this.element.attr("readonly", "readonly");
+                        this.element.on("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+                        this.element.off("blur", bbdesigner$.proxy(this._onMainFocusOut, this));
+                    }
+                    break;
+                case "startDate":
+                    var status = this._validateValues(options[option], "left");
+                    if (status == false)
+                        options[option] = null;
+                    else {
+                        if (!this._startEndValidation() && this.model.endDate != null) {
+                            this._resetValues();
+                            this.model.endDate = null;
+                        }
+                        this._updateValues();
+                        this._selectedStartDate = this.model.startDate;
+                        options[option] = this.model.startDate;
+                    }
+
+                    break;
+                case "endDate":
+                    var status = this._validateValues(options[option], "right");
+                    if (status == false)
+                        options[option] = null;
+                    else {
+                        if (!this._startEndValidation()) {
+                            this._rightDP.element.parents(".e-datewidget").addClass("e-val-error");
+                            this.model.endDate = null;
+                        }
+                        this._updateValues();
+                        options[option] = this.model.endDate;
+                    }
+                    break;
+                case "enableTimePicker":
+                    this.model.enableTimePicker = options[option];
+                    if (options[option]) {
+                        this._renderTimePicker();
+                    } else
+                        this._removeTimePicker();
+                    if (this._scrollerObj) {
+                        this._scrollerObj.model.height = this.datePopup.height();
+                        this._scrollerObj.refresh();
+                    }
+                    break;
+                case "locale":
+                    this._setCulture(options[option]);
+                    options[option] = this.model.locale;
+                    break;
+                case "separator":
+                    this.model.separator = options[option];
+                    this._mainValue();
+                    break;
+                case "dateFormat":
+                    if (this._leftDP)
+                        this._leftDP.option(option, options[option]);
+                    if (this._rightDP)
+                        this._rightDP.option(option, options[option]);
+                    this.model.dateFormat = options[option];
+                    this._getDateTimeFormat();
+                    this._updateInput();
+                    break;
+                case "timeFormat":
+                    if (this._leftTP)
+                        this._leftTP.option(option, options[option]);
+                    if (this._rightTP)
+                        this._rightTP.option(option, options[option]);
+                    this.model.timeFormat = options[option];
+                    this._getDateTimeFormat();
+                    this._updateInput();
+                    break;
+                case "watermarkText":
+                    if (BoldBIDashboard.isNullOrUndefined(this._options))
+                        this._options = {};
+                    this._options["watermarkText"] = this.model.watermarkText = options[option];
+                    this._localizedLabels.watermarkText = this.model.watermarkText;
+                    this._setWaterMark();
+                    break;
+                case "cssClass":
+                    this._changeSkin(options[option]);
+                    break;
+
+                case "showRoundedCorner":
+                    this._setRoundedCorner(options[option]);
+                    break;
+                case "showPopupButton":
+                    this._renderDateIcon(options[option]);
+                    break;
+
+                case "value":
+                    this.element.val(options[option]);
+                    this._onMainFocusOut();
+                    options[option] = this.model.value;
+                    break;
+
+                case "height":
+                    this.wrapper.height(options[option]);
+                    break;
+                case "width":
+                    this.wrapper.width(options[option]);
+                    break;
+                case "enabled":
+                    if (options[option])
+                        this.enable();
+                    else
+                        this.disable();
+                    break;
+                case "htmlAttributes":
+                    this._addAttr(options[option]);
+                    break;
+            }
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._init = function (options) {
+        this._cloneElement = this.element.clone();
+        this._options = options;
+        this._flagevents = false;
+        this._id = this.element.attr("id");
+        this._isSupport = document.createElement("input").placeholder == undefined ? false : true;
+		if (!this._startEndValidation()) this.model.endDate = null;
+        if (this.element.val() == "" && this.model.value) {
+            this.element.val(this.model.value);
+        }
+		this._getDateTimeFormat();
+        if (this.element.val())
+            this._setInitValue();
+		else if (this.model.startDate != null && this.model.endDate != null && this._startEndValidation()) this._mainValue();
+        this._createWrapper();
+        if (this._validState == false && this.element.val())
+            this.wrapper.addClass("e-error");
+        this._popupOpen = false, this._isPopScroll = false;
+        if (!this.model.enabled) this.disable();
+        this._wireEvents();
+    };
+    BoldBIDashboardDateRangePicker.prototype._setInitValue = function () {
+        var datestring = this.element.val().split(this.model.separator), _startdate = BoldBIDashboard.parseDate(datestring[0], this._dateTimeFormat, this.model.locale), _enddate = BoldBIDashboard.parseDate(datestring[1], this._dateTimeFormat, this.model.locale);
+        if (_startdate && _enddate) {
+            this.model.startDate = _startdate;
+            this.model.endDate = _enddate;
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._getNextMonth = function (current) {
+        var local = current;
+        if (!(local instanceof Date))
+            return new Date();
+        var month = local.getMonth();
+        if (month == 11) {
+            var year = local.getFullYear() + 1;
+            month = -1;
+        } else
+            var year = local.getFullYear();
+        var dummy = new Date();
+        dummy = new Date(dummy.setFullYear(year));
+        dummy = new Date(dummy.setMonth(month + 1));
+        dummy = new Date(dummy.setDate(1));
+        return dummy;
+    };
+    BoldBIDashboardDateRangePicker.prototype._getDateTimeFormat = function () {
+        var pattern = BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard.patterns;
+        if (!this.model.dateFormat) this.model.dateFormat = pattern.d;
+        if (this.model.enableTimePicker) {
+            if (!this.model.timeFormat) this.model.timeFormat = pattern.t;
+            this._dateTimeFormat = this.model.dateFormat + " " + this.model.timeFormat;
+        }
+        else
+            this._dateTimeFormat = this.model.dateFormat;
+    };
+    BoldBIDashboardDateRangePicker.prototype._setValues = function () {
+        this._leftDP.option("value", this.model.startDate);
+        this._rightDP.option("value", this.model.endDate || null);
+        if (this.model.startDate) this._setStartDate(this.model.startDate, bbdesigner$('.current-month[data-date="' + this.model.startDate.toDateString() + '"]'), true);
+        if (this.model.endDate) this._setEndDate(this.model.endDate, bbdesigner$('.current-month[data-date="' + this.model.endDate.toDateString() + '"]'), true);
+        this._rangeRefresh(this._setArgs(this._leftDP.popup));
+        this._rangeRefresh(this._setArgs(this._rightDP.popup));
+        this._rightDP.element.parents(".e-datewidget").removeClass("e-error");
+        if (this.model.enableTimePicker) {
+            this._leftTP.option("value", this.model.startDate);
+            this._rightTP.option("value", this.model.endDate);
+        }
+        this._updateRanges("left");
+        this._updateRanges("right");
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._customSet = function () {
+        this._selectedStartDate = this.model.startDate;
+        this._selectedEndDate = this.model.endDate;
+        this._resetValues();
+        if (this.popup) this._setValues();
+        if (!this._popupOpen)
+            this._mainValue();
+        this._refreshMinMax();
+        this._setWaterMark();
+    };
+    BoldBIDashboardDateRangePicker.prototype._setCulture = function (culture) {
+        culture = BoldBIDashboard.preferredCulture(culture).name;
+        this.model.locale = culture;
+        this._setOption("locale", culture);
+        this._localizedLabels = this._getLocalizedLabels();
+        this._setLocalizedText();
+        this._updateInput();
+    };
+    BoldBIDashboardDateRangePicker.prototype._setRoundedCorner = function (boolean) {
+        if (boolean) {
+            this._input_innerWrapper.addClass("e-corner");
+            if (this.popup) this.popup.addClass("e-corner");
+        } else {
+            this._input_innerWrapper.removeClass("e-corner");
+            if (this.popup) this.popup.removeClass("e-corner");
+        }
+        this._setOption("showRoundedCorner", boolean);
+    };
+    BoldBIDashboardDateRangePicker.prototype._renderDateIcon = function (boolean) {
+        if (boolean) {
+            this.dateRangeIcon = BoldBIDashboard.buildTag("span.e-select#" + this.id + "-img", "", {}, (this._isIE8) ? { 'unselectable': 'on' } : {}).append(BoldBIDashboard.buildTag("span.e-icon e-calendar", "", {}, { 'aria-label': 'Select' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})).insertAfter(this.element);
+            this._input_innerWrapper.addClass('e-padding');
+            this._on(this.dateRangeIcon, "mousedown", this._showDatePopUp);
+            this._off(this.dateRangeIcon, "click", this._showDatePopUp);
+
+        }
+        else {
+            if (this.dateRangeIcon) {
+                this.dateRangeIcon.remove();
+            }
+            this._input_innerWrapper.removeClass('e-padding');
+            this._off(this.dateRangeIcon, "click", this._showDatePopUp);
+        }
+    },
+	BoldBIDashboardDateRangePicker.prototype._validateValues = function (val, cal_type) {
+	    var obj = cal_type == "right" ? this._rightDP : this._leftDP;
+	    var datavalu = val;
+	    if (datavalu != null && typeof datavalu == "string") {
+	        if (cal_type == "left") {
+	            this.model.startDate = BoldBIDashboard.parseDate(val, this.model.dateFormat, this.model.locale) || null;
+	            this.model.startDate = (this.model.startDate != null) ? this.model.startDate : new Date(datavalu);
+	        }
+	        else {
+	            this.model.endDate = BoldBIDashboard.parseDate(val, this.model.dateFormat, this.model.locale) || null;
+	            this.model.endDate = (this.model.endDate != null) ? this.model.endDate : new Date(datavalu);
+	        }
+	    } else {
+	        if (val instanceof Date) {
+	            if (cal_type == "left") {
+	                this.model.startDate = val;
+	                if (!isNaN(val.getDate())) {
+	                    if (typeof this._formatter(this.model.startDate, this.model.locale) != "string")
+	                        this.model.startDate = BoldBIDashboard.parseDate(this._formatter(this.model.startDate, this.model.locale), this.model.dateFormat);
+	                } else
+	                    return false;
+	            } else if (cal_type == "right") {
+	                this.model.endDate = val;
+	                if (!isNaN(val.getDate())) {
+	                    if (typeof this._formatter(this.model.endDate, this.model.locale) != "string")
+	                        this.model.endDate = BoldBIDashboard.parseDate(this._formatter(this.model.endDate, this.model.locale), this.model.dateFormat);
+	                } else
+	                    return false;
+	            }
+	        } else
+	            return false;
+	    }
+	    return true;
+	};
+    //Date formatter - Convert date object to specific date format
+    BoldBIDashboardDateRangePicker.prototype._formatter = function (date, format) {
+        var newFormat = this._checkFormat(format);
+        return BoldBIDashboard.format(date, newFormat, this.model.locale);
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._checkFormat = function (format) {
+        var proxy = this;
+        var dateFormatRegExp = this._regExp();
+        return format.replace(dateFormatRegExp, function (match) {
+            match = match === "/" ? BoldBIDashboard.preferredCulture(proxy.model.locale).calendars.standard['/'] !== "/" ? "'/'" : match : match;
+            return match;
+        });
+    };
+    BoldBIDashboardDateRangePicker.prototype._regExp = function () {
+        return /\/dddd|ddd|dd|d|MMMM|MMM|MM|M|yyyy|yy|HH|H|hh|h|mm|m|fff|ff|f|tt|ss|s|zzz|zz|z|gg|g|"[^"]*"|'[^']*'|[/]/g;
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._setArgs = function (element) {
+        var date = new Date(bbdesigner$(element.find(".current-month")[0]).attr("data-date"));
+        this.args = {};
+        this.args.element = element;
+        this.args.month = date.getMonth();
+        this.args.year = date.getFullYear();
+        return this.args;
+    };
+    BoldBIDashboardDateRangePicker.prototype._changeSkin = function (skin) {
+        this.wrapper.removeClass(this.model.cssClass).addClass(skin);
+        this.popup.removeClass(this.model.cssClass).addClass(skin);
+
+        this._setOption("cssClass", skin);
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._renderDatePicker = function () {
+        this.calendar_left = BoldBIDashboard.buildTag("input.leftDate_wrapper#" + this.element[0].id + "leftDate_wrapper", "", {}, { "type": "text" });
+        this._leftDiv.append(this.calendar_left);
+        this.calendar_right = BoldBIDashboard.buildTag("input.rightDate_wrapper#" + this.element[0].id + "rightDate_wrapper", "", {}, { "type": "text" });
+        this._rightDiv.append(this.calendar_right);
+        var proxy = this;
+        var DPSettings = {
+            displayInline: true,
+            showFooter: false,
+            watermarkText: "",
+            enableStrictMode: true,
+            locale: this.model.locale,
+            dateFormat: this.model.dateFormat,
+            _month_Loaded: function (e) {
+                proxy._previousNextHandler(e);
+            },
+            enablePersistence: this.model.enablePersistence
+        }
+        this.calendar_left.BoldBIDashboardDatePicker(DPSettings);
+        this.calendar_left.BoldBIDashboardDatePicker("option", "layoutChange", function (e) {
+            proxy._refreshEvents("left");
+            proxy._updateRanges("left");
+            if (!proxy.popup.hasClass("e-daterange-responsive")) {
+                if (proxy._scrollerObj) {
+                    proxy._scrollerObj.model.height = proxy.datePopup.height();
+                    proxy._scrollerObj.refresh();
+                }
+            }
+        })
+        this._leftDP = this.calendar_left.data("BoldBIDashboardDatePicker");
+        this._leftDP.option("showPopupButton", false);
+        this._leftDP._getInternalEvents = true, this._leftDP._DRPdisableFade = true;
+        this._leftDP.popup.css({ "position": "static", "visibility": "inherit" });
+        this.calendar_right.BoldBIDashboardDatePicker(DPSettings);
+        this.calendar_right.BoldBIDashboardDatePicker("option", "layoutChange", function (e) {
+            proxy._refreshEvents("right");
+            proxy._updateRanges("right");
+            if (!proxy.popup.hasClass("e-daterange-responsive")) {
+                if (proxy._scrollerObj) {
+                    proxy._scrollerObj.model.height = proxy.datePopup.height();
+                    proxy._scrollerObj.refresh();
+                }
+            }
+        })
+        this._rightDP = this.calendar_right.data("BoldBIDashboardDatePicker");
+        this._rightDP.option("showPopupButton", false);
+        this._rightDP._getInternalEvents = true, this._rightDP._DRPdisableFade = true; // to get the layout change client side event
+        this._rightDP.popup.css({ "position": "static", "visibility": "inherit" });
+        this._on(bbdesigner$(this._leftDP.sfCalendar.find('table .e-datepicker-months td')), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+        this._on(this._leftDP.element, "keydown", this._onKeyDown);
+        this._on(this._rightDP.element, "keydown", this._onKeyDown);
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._renderPopup = function () {
+        this.popup = BoldBIDashboard.buildTag("div.e-daterangepicker-popup e-popup e-widget e-box" + this.model.cssClass + "#" + this.element[0].id + "_popup").css("display", "none");
+        bbdesigner$('body').append(this.popup);
+        this.datePopup = BoldBIDashboard.buildTag("div.e-datepickers-popup");
+        this.popup.append(this.datePopup);
+        this._leftDiv = BoldBIDashboard.buildTag("div.e-left-datepicker");
+        this._rightDiv = BoldBIDashboard.buildTag("div.e-right-datepicker");
+        this.datePopup.append(this._leftDiv);
+        this.datePopup.append(this._rightDiv);
+        this._renderDatePicker();
+        if (this.model.ranges)
+            this._renderRanges();
+        if (this.model.enableTimePicker)
+            this._renderTimePicker();
+        this._renderButton();
+        this._bindDateButton();
+        this._refreshEvents("left");
+        this._refreshEvents("right");
+        this._updateRanges("left");
+        this._updateRanges("right");
+        this._setRoundedCorner(this.model.showRoundedCorner);
+        this._addAttr(this.model.htmlAttributes);
+        this._on(this.popup.find(".leftDate_wrapper.e-datepicker.e-js.e-input"), "blur", this._onPopupFocusOut);
+        this._on(this.popup.find(".rightDate_wrapper.e-datepicker.e-js.e-input"), "blur", this._onPopupFocusOut);
+        this._on(this.popup.find(".leftDate_wrapper.e-timepicker.e-js.e-input"), "blur", this._onPopupFocusOut);
+        this._on(this.popup.find(".rightDate_wrapper.e-timepicker.e-js.e-input"), "blur", this._onPopupFocusOut);
+        this.popup.on("mouseenter touchstart", bbdesigner$.proxy(function () { this._isPopScroll = true; }, this));
+        this.popup.on("mouseleave touchend", bbdesigner$.proxy(function () { this._isPopScroll = false; }, this));
+        this._on(bbdesigner$(window), "resize", this._resizePopup);
+		this._wirePopupEvents();
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._createWrapper = function () {
+        this._localizedLabels = this._getLocalizedLabels();
+        this.element.addClass("e-input").attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'tabindex': '0', 'role':'combobox', 'aria-expanded':'false', 'name' : this.element.attr('name') == undefined ? this._id : this.element.attr('name') }); 
+        if (!this._isSupport) {
+            this._hiddenInput = BoldBIDashboard.buildTag("input.e-input e-placeholder ", "", {}, { type: "text" }).insertAfter(this.element);
+            this._hiddenInput.val(this._localizedLabels.watermarkText);
+            this._hiddenInput.css("display", "block");
+            var proxy = this;
+            bbdesigner$(this._hiddenInput).focus(function () {
+                proxy.element.focus();
+            });
+        }
+        this.wrapper = BoldBIDashboard.buildTag("span.e-daterangewidget e-widget " + this.model.cssClass);
+        if (!BoldBIDashboard.isTouchDevice())
+            this.wrapper.addClass('e-ntouch');
+        this._input_innerWrapper = BoldBIDashboard.buildTag("span.e-in-wrap e-box");
+        this.wrapper.append(this._input_innerWrapper).insertBefore(this.element);
+        this._input_innerWrapper.append(this.element);
+        this._input_innerWrapper.addClass('e-padding');
+
+        var proxy = this;
+        this.culture = BoldBIDashboard.preferredCulture(this.model.locale);
+        this._setRoundedCorner(this.model.showRoundedCorner);
+        this._renderDateIcon(this.model.showPopupButton);
+        if (this.wrapper) {
+            if (this.model.width) this.wrapper.width(this.model.width);
+            if (this.model.height) this.wrapper.height(this.model.height);
+        }
+        this._setWaterMark();
+    };
+    BoldBIDashboardDateRangePicker.prototype._updateOnRender = function (e) {
+        if (this.model.enableTimePicker) {
+            if (this._rightTime) {
+                this._rightTP = this._rightTime.BoldBIDashboardTimePicker("instance");
+                this._updateValues();
+            }
+        } else {
+            if (this.calendar_right) {
+                this._rightDP = this.calendar_right.BoldBIDashboardDatePicker("instance");
+                this._updateValues();
+            }
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._updateRangesList = function () {
+        bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-active").removeClass("e-active");
+        bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-custompic").addClass("e-active");
+    }
+    BoldBIDashboardDateRangePicker.prototype._updateValues = function () {
+        this._updateRangesList();
+        this._getDateTimeFormat();
+        if (this._startEndValidation() || (this.model.startDate != null && this.model.endDate == null)) {
+            this._validateValues(this.model.startDate, "left");
+            this._validateValues(this.model.endDate, "right");
+            if (this.popup) this._setValues();
+            this._mainValue();
+        } else {
+            this._clearRanges();
+            this.element.val("");
+        }
+        this._refreshMinMax();
+        this._setWaterMark();
+    };
+    BoldBIDashboardDateRangePicker.prototype._startEndValidation = function () {
+        if (this.model.startDate && this.model.endDate) {
+            var start = this.model.startDate, end = this.model.endDate;
+            return !(end && start > end);
+        }
+        return false;
+    };
+    BoldBIDashboardDateRangePicker.prototype._addAttr=function (htmlAttr) {
+        var proxy = this;
+        bbdesigner$.map(htmlAttr, function (value, key) {
+            var keyName = key.toLowerCase();
+            if (keyName == "class") proxy.wrapper.addClass(value);
+            else if (keyName == "disabled") proxy.disable();
+            else if (keyName == "readOnly") proxy.model.readOnly = true;
+            else if (keyName == "style" || keyName == "id") proxy.wrapper.attr(key, value);
+            else if (BoldBIDashboard.isValidAttr(proxy.element[0], key)) proxy.element.attr(key, value);
+            else proxy.wrapper.attr(key, value);
+
+        });
+    },
+    BoldBIDashboardDateRangePicker.prototype._renderButton = function () {
+        this._buttonDiv = BoldBIDashboard.buildTag("div.e-drpbuttons");
+        var _reset = BoldBIDashboard.buildTag("div.e-drp-button e-drp-reset e-btn e-select e-flat").attr({ 'tabindex': '0' });
+        var _apply = BoldBIDashboard.buildTag("div.e-drp-button e-drp-apply e-disable e-btn e-select e-flat").attr({ 'tabindex': '0' });
+        var _cancel = BoldBIDashboard.buildTag("div.e-drp-button e-drp-cancel e-btn e-select e-flat").attr({ 'tabindex': '0' });
+        this._buttonDiv.append(_reset);
+        this._buttonDiv.append(_apply);
+        this._buttonDiv.append(_cancel);
+        this.popup.append(this._buttonDiv);
+        this._setLocalizedText();
+        this._on(bbdesigner$(this._buttonDiv.find("div.e-drp-reset")), "click", this.clearRanges);
+        var bbdesigner$this = this;
+        this._on(bbdesigner$(this._buttonDiv.find("div.e-drp-apply")), "click", function (e) {
+            if (bbdesigner$this._buttonDiv.find(".e-drp-apply").hasClass("e-disable")) {
+                return;
+            }
+            bbdesigner$this._isPopScroll = false;
+            bbdesigner$this._updateInput();
+            bbdesigner$this._showhidePopup();
+            bbdesigner$this._buttonDiv.find(".e-drp-apply").addClass("e-disable");
+            this._trigger("change", { value: this.model.value, startDate: this.model.startDate, endDate: this.model.endDate });
+            this._trigger("select", { startDate: this.model.startDate, endDate: this.model.endDate, value: this.model.value });
+        });
+        this._on(bbdesigner$(this._buttonDiv.find("div.e-drp-cancel")), "click", this._cancelButton);
+    };
+    BoldBIDashboardDateRangePicker.prototype._setLocalizedText = function () {
+        if (!BoldBIDashboard.isNullOrUndefined(this._options)) {
+            if (!BoldBIDashboard.isNullOrUndefined(this._options.buttonText))
+                bbdesigner$.extend(this._localizedLabels.ButtonText, this._options.buttonText);
+            if (!BoldBIDashboard.isNullOrUndefined(this._options.watermarkText))
+                this._localizedLabels.watermarkText = this._options.watermarkText;
+        }
+        this.model.buttonText = this._localizedLabels.ButtonText;
+        bbdesigner$(this._buttonDiv.find("div.e-drp-reset")).text(this.model.buttonText.reset);
+        bbdesigner$(this._buttonDiv.find("div.e-drp-apply")).text(this.model.buttonText.apply);
+        bbdesigner$(this._buttonDiv.find("div.e-drp-cancel")).text(this.model.buttonText.cancel);
+        if (this._customRangePicker && this._customRangePicker.find("ul li.e-custompic").length > 0)
+            (this._customRangePicker.find("ul li.e-custompic")).text(this._localizedLabels.customPicker);
+        this._setWaterMark();
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._renderRanges = function () {
+        this._renderRangesWrapper();
+        this.popup.append(this._customRangePicker);
+        this._ranges_li = "";
+        var proxy = this;
+        if (this.model.ranges) {
+            for (var i = 0; i < this.model.ranges.length; i++) {
+                var s = this.model.ranges[i];
+                var value = s.range;
+                if (value.length === 2) {
+                    var start = new Date(value[0]);
+                    var end = new Date(value[1]);
+                    if (BoldBIDashboard.isNullOrUndefined(start))
+                        start = new Date(value[0]);
+                    if (BoldBIDashboard.isNullOrUndefined(end))
+                        end = new Date(value[1]);
+                    if (start <= end) {
+                        proxy._ranges_li += "<li role='menuitem' title='" + s.label + "' class='rangeItem' data-e-range='" + JSON.stringify(value) + "' data-e-value='" + s.range + "'>" + s.label + "</li>";
+                    }
+                }
+            }
+        }
+        this._ranges_li += "<li role='menuitem' class='rangeItem e-active e-custompic' data-e-range='customPicker'>" + this._localizedLabels.customPicker + "</li>";
+        this.popup.find("div.e-custom-dateranges ul").append(this._ranges_li);
+        this._on(this._customRangePicker.find("ul li.rangeItem"), "click", this._customSelection);
+        this._customRangePicker.BoldBIDashboardScroller({ height: this.datePopup.height(), width: 0, scrollerSize: 15 });
+        proxy._scrollerObj = this._customRangePicker.BoldBIDashboardScroller("instance");
+    };
+    BoldBIDashboardDateRangePicker.prototype._removeTimePicker = function () {
+        this._leftDiv.removeClass("e-left-timepicker");
+        this._rightDiv.removeClass("e-right-timepicker");
+        this._leftTP.destroy();
+        this._rightTP.destroy();
+        this._rightTP = null;
+        this._leftTP = null;
+        this._leftTime.remove();
+        this._rightTime.remove();
+        this._setOption("width", "");
+        this._setOption("width", "100%");
+        this._updateValues();
+    };
+    BoldBIDashboardDateRangePicker.prototype._setOption = function (option, value) {
+        if (this._leftDP)
+            this._leftDP.option(option, value);
+        if (this._rightDP)
+            this._rightDP.option(option, value);
+        if (this.model.enableTimePicker) {
+            if (this._leftTP)
+                this._leftTP.option(option, value);
+            if (this._rightTP)
+                this._rightTP.option(option, value);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._renderTimePicker = function () {
+        if (this.model.timeFormat == '')
+            this.model.timeFormat = this.culture.calendar.patterns.t;
+        this._leftTime = BoldBIDashboard.buildTag("input.leftTime#" + this._id + "_lTime");
+        this._leftDiv.append(this._leftTime);
+        this._leftDiv.addClass("e-left-timepicker");
+        var proxy = this;
+        var TPSettings = {
+            popupWidth: "115px",
+            locale: this.model.locale,
+            timeFormat: this.model.timeFormat,
+            open: function () {
+                this.popup.addClass("e-daterange-timepopup");
+                this.model.open = null;
+            }
+        }
+        this._leftTime.BoldBIDashboardTimePicker(TPSettings);
+        this._leftTime.BoldBIDashboardTimePicker({
+            "select": function (e) {
+                if (proxy.model.startDate && proxy.model.endDate) {
+                    if (proxy._rightTP && proxy.model.startDate.toLocaleDateString() == proxy.model.endDate.toLocaleDateString())
+                        proxy._rightTP.option("minTime", e.value);
+                    proxy._buttonDiv.find(".e-drp-apply").removeClass("e-disable");
+                }
+            }
+        })
+        this._leftTP = this._leftTime.BoldBIDashboardTimePicker("instance");
+        this._rightTime = BoldBIDashboard.buildTag("input.rightTime#" + this._id + "_rTime");
+        this._rightDiv.append(this._rightTime);
+        this._rightDiv.addClass("e-right-timepicker");
+        this._rightTime.BoldBIDashboardTimePicker(TPSettings);
+        this._leftTime.BoldBIDashboardTimePicker({
+            "select": function (e) {
+                if (proxy.model.startDate && proxy.model.endDate) {
+                    proxy._buttonDiv.find(".e-drp-apply").removeClass("e-disable");
+                }
+            }
+        })
+        this._rightTP = this._rightTime.BoldBIDashboardTimePicker("instance");
+        this._on(this._leftTP.element, "keydown", this._onKeyDown);
+        this._on(this._rightTP.element, "keydown", this._onKeyDown);
+        //below code for position the timepicker and datepicker
+        this._setTimePickerPos();
+    };
+    BoldBIDashboardDateRangePicker.prototype._setTimePickerPos = function () {
+        bbdesigner$("#" + this._id + "_lTime_timewidget").css({
+            position: "absolute",
+            top: 0,
+            left: this._leftDP.popup.width() + this._leftDP.popup.position().left - this.popup.find(bbdesigner$("#" + this._id + "_lTime_timewidget")).outerWidth()
+        });
+        bbdesigner$("#" + this._id + "_rTime_timewidget").css({
+            position: "absolute",
+            top: !this.popup.hasClass("e-daterange-responsive") ? 0 : this._rightDP.wrapper.position().top,
+            left: this._rightDP.popup.width() + this._rightDP.popup.position().left - this.popup.find(bbdesigner$("#" + this._id + "_rTime_timewidget")).outerWidth()
+        });
+    };
+    BoldBIDashboardDateRangePicker.prototype._updateInput = function (e) {
+        if (!(this.model.startDate && this.model.endDate)) {
+            if (this.model.value)
+                this.element.val(this.model.value);
+            if (this._popupOpen)
+                this.popupHide();
+            return;
+        }
+        this._resetValues();
+        this.wrapper.removeClass("e-error");
+        this._mainValue();
+        this._refreshMinMax();
+    };
+    BoldBIDashboardDateRangePicker.prototype._removeWatermark = function () {
+        if (this.element.val() != "" && !this._isSupport)
+            this._hiddenInput.css("display", "none");
+    };
+    BoldBIDashboardDateRangePicker.prototype._mainValue = function () {
+		var startDt = this.model.startDate, endDt = this.model.endDate;
+        var lefttime = BoldBIDashboard.format(startDt, this.model.timeFormat, this.model.locale), righttime = BoldBIDashboard.format(endDt, this.model.timeFormat, this.model.locale);
+        var _startDateString = BoldBIDashboard.format(startDt, this.model.dateFormat, this.model.locale);
+        var _endDateString = BoldBIDashboard.format(endDt, this.model.dateFormat, this.model.locale);
+        if (this.model.enableTimePicker) {
+			if (this.popup && this._leftTP && this._rightTP && this._leftTP.model.value && this._rightTP.model.value) {
+				lefttime = this._leftTP.model.value;
+				righttime = this._rightTP.model.value;
+			}
+			_startDateString = BoldBIDashboard.format(_startDateString + " " + lefttime, this._dateTimeFormat, this.model.locale);
+			_endDateString = BoldBIDashboard.format(_endDateString + " " + righttime, this._dateTimeFormat, this.model.locale);
+			this.model.startDate = BoldBIDashboard.parseDate(_startDateString, this._dateTimeFormat, this.model.locale);
+			this.model.endDate = BoldBIDashboard.parseDate(_endDateString, this._dateTimeFormat, this.model.locale);
+            }
+		else {
+			if (this.popup) {
+			this.model.startDate = BoldBIDashboard.parseDate(_startDateString, this._leftDP.model.dateFormat, this.model.locale);
+			this.model.endDate = BoldBIDashboard.parseDate(_endDateString, this._rightDP.model.dateFormat, this.model.locale);
+			}
+		}
+        if (_startDateString != null && _endDateString != null) {
+            this.model.value = _startDateString + " " + this.model.separator + " " + _endDateString;
+            this.element.val(this.model.value);
+            if (this._hiddenInput)
+                this._hiddenInput.attr('value', this.model.value);
+            this._removeWatermark();
+            this._validState = true;
+        } else {
+            this.model.value = null;
+            this._setWaterMark();
+            this._validState = false;
+        }
+        this._prevValue = this.model.value;
+        if (this._buttonDiv)
+            this._buttonDiv.find(".e-drp-apply").addClass("e-disable");
+        this._trigger("_change", { value: this.model.value });
+    };
+    BoldBIDashboardDateRangePicker.prototype._bindDateButton = function () {
+        if (this.dateRangeicon)
+            this._on(this.dateRangeIcon, "click", this._showDatePopUp);
+        if (!this.model.allowEdit) {
+            this.element.attr("readonly", "readonly");
+            this.element.on("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+            this.element.off("blur", bbdesigner$.proxy(this._onMainFocusOut, this));
+        }
+        if (this.model.allowEdit) {
+            this.element.off("mousedown", bbdesigner$.proxy(this._showDatePopUp, this));
+        }
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._showDatePopUp = function (e) {
+        if (!this.model.enabled)
+            return false;
+        var isRightClick = false;
+        if (e.button)
+            isRightClick = (e.button == 2);
+        else if (e.which)
+            isRightClick = (e.which == 3); //for Opera
+        if (isRightClick)
+            return;
+        this._showhidePopup(e);
+    };
+    BoldBIDashboardDateRangePicker.prototype._showhidePopup = function (e) {
+        if (this._popupOpen) {
+            if (!this._isFocused && this.element.is(':input') && (!BoldBIDashboard.isTouchDevice())) {
+                this.wrapper.addClass('e-focus');
+            }
+            this.popupHide(e);
+        } else {
+            if (!this._isFocused && this.element.is(':input') && (!BoldBIDashboard.isTouchDevice())) {
+                this.wrapper.addClass('e-focus');
+            }
+            this.popupShow(e);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype.popupHide = function (e) {
+	   if ( e && (e.type == "touchmove" || e.type== "scroll")) {
+		   if (bbdesigner$(e.target).parents("#"+this.popup[0].id).length > 0)
+			   return;
+	   }
+        if (!this._popupOpen || this._isPopScroll) return false;
+        var proxy = this;
+        this._trigger("beforeClose", { element: this.popup, events: e });
+        this.popup.attr({ 'aria-hidden': 'true' });
+		this.element.attr({'aria-expanded':'false'})
+        if (this._leftTP && !this._leftTP._popupOpen)
+            this._leftTP.hide();
+        if (this._rightTP && !this._rightTP._popupOpen)
+            this._rightTP.hide();
+        this.popup.css("visibility", "visible").slideUp(100, function () {
+            proxy._popupOpen = false;
+        });
+        this._off(BoldBIDashboard.getScrollableParents(this.wrapper), "scroll", this.popupHide);
+        this._off(BoldBIDashboard.getScrollableParents(this.wrapper), "touchmove", this.popupHide);
+        this._trigger("close", { element: this.popup, events: e });
+        this.wrapper.removeClass("e-active");
+    };
+
+    BoldBIDashboardDateRangePicker.prototype.popupShow = function (e) {
+        if (!this.popup) {
+            this._onMainFocusOut();
+            this._renderPopup();
+            this._updateValues();
+        }
+        if (!this.model.enabled)
+            return false;
+        if (this._popupOpen)
+            return false;
+        var proxy = this;
+        this._trigger("beforeOpen", { element: this.popup, events: e });
+        this.wrapper.addClass('e-focus');
+        this.popup.attr({ 'aria-hidden': 'false' });
+		this.element.attr({'aria-expanded':'true'})
+        proxy._popupOpen = true;
+        this.popup.css({ 'visibility': 'hidden', 'display': 'block' });
+        this._resizePopup();
+        this.popup.css({ 'display': 'none', 'visibility': 'visible' }).slideDown(100, function () {
+        });
+        this._on(BoldBIDashboard.getScrollableParents(this.wrapper), "scroll", this.popupHide);
+        this._on(BoldBIDashboard.getScrollableParents(this.wrapper), "touchmove", this.popupHide);
+        this._trigger("open", { element: this.popup, events: e });
+        this.wrapper.addClass("e-active");
+    };
+    BoldBIDashboardDateRangePicker.prototype._resizePopup = function () {
+        var proxy = this, range_width = 0, ran_height = 0;
+        var cal_width = proxy.datePopup.find(".e-popup.e-calendar").outerWidth();
+        var cal_height = proxy.datePopup.find(".e-popup.e-calendar").height();
+        if (this._customRangePicker && this._customRangePicker.height() <= 0)
+            this._customRangePicker.height(this.datePopup.height());
+        if (this.model.ranges && this.model.ranges.length > 0)
+            var ran_height = this._customRangePicker.find("ul").height(), range_width = proxy._customRangePicker.outerWidth();
+        if (bbdesigner$(window).width() - this.wrapper.position().left < ((cal_width * 2) + range_width) + 25) {
+            proxy.popup.addClass("e-daterange-responsive");
+            proxy._setOption("width", "95%");
+            if (this.model.enableTimePicker) {
+                this._setOption("width", "47%");
+                this._setDatePickerPosition();
+                bbdesigner$("#" + this._id + "_lTime_timewidget").css({
+                    left: this._leftDP.wrapper.outerWidth() + 5
+                });
+
+                bbdesigner$("#" + this._id + "_rTime_timewidget").css({
+                    left: this._rightDP.wrapper.outerWidth() + 5
+                });
+                if (proxy._scrollerObj) {
+                    proxy._scrollerObj.model.height = ran_height < cal_height ? ran_height + 10 : cal_height;
+                    proxy._scrollerObj.refresh();
+                }
+                return;
+            }
+            if (proxy._scrollerObj) {
+                proxy._scrollerObj.model.height = ran_height < cal_height ? ran_height + 10 : cal_height;
+                proxy._scrollerObj.refresh();
+            }
+        } else {
+            proxy.popup.removeClass("e-daterange-responsive");
+            if (this.model.enableTimePicker) {
+                this._leftTP.option("width", "115px");
+                this._rightTP.option("width", "115px");
+                this._setTimePickerPos();
+            }
+            if (proxy._scrollerObj) {
+                proxy._scrollerObj.model.height = this.datePopup.height();
+                proxy._scrollerObj.refresh();
+            }
+        }
+        this._setDatePickerPosition();
+    };
+    BoldBIDashboardDateRangePicker.prototype._onDocumentClick = function (e) {
+        if (this.model) {
+            if (!this.popup) this.wrapper.removeClass('e-focus');
+            else if (this.popup && !bbdesigner$(e.target).is(this.popup) && !bbdesigner$(e.target).parents(".e-popup").is(this.popup) && !bbdesigner$(e.target).is(this.wrapper) && !bbdesigner$(e.target).parents(".e-daterangewidget").is(this.wrapper)) {
+                if (!this.model.enableTimePicker) {
+                    if (this._popupOpen)
+                        this.popupHide(e);
+                    this.wrapper.removeClass('e-focus');
+                }
+                else if (this.model.enableTimePicker && !bbdesigner$(e.target).is(this._leftTP.popup) && !bbdesigner$(e.target).parents(".e-popup").is(this._leftTP.popup) && !bbdesigner$(e.target).is(this._rightTP.popup) && !bbdesigner$(e.target).parents(".e-popup").is(this._rightTP.popup)) {
+                    if (this._popupOpen)
+                        this.popupHide(e);
+                    this.wrapper.removeClass('e-focus');
+                }
+            }
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._getOffset = function (ele) {
+        var pos = ele.offset() || { left: 0, top: 0 };
+        if (bbdesigner$("body").css("position") != "static") {
+            var bodyPos = bbdesigner$("body").offset();
+            pos.left -= bodyPos.left;
+            pos.top -= bodyPos.top;
+        }
+        return pos;
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._getZindexPartial = function (element, popupEle) {
+        if (!BoldBIDashboard.isNullOrUndefined(element) && element.length > 0) {
+            var parents = element.parents(), bodyEle;
+            bodyEle = bbdesigner$('body').children();
+            if (!BoldBIDashboard.isNullOrUndefined(element) && element.length > 0)
+                bodyEle.splice(bodyEle.index(popupEle), 1);
+            bbdesigner$(bodyEle).each(function (i, ele) {
+                parents.push(ele);
+            });
+
+            var maxZ = Math.max.apply(maxZ, bbdesigner$.map(parents, function (e, n) {
+                if (bbdesigner$(e).css('position') != 'static')
+                    return parseInt(bbdesigner$(e).css('z-index')) || 1;
+            }));
+            if (!maxZ || maxZ < 10000)
+                maxZ = 10000;
+            else
+                maxZ += 1;
+            return maxZ;
+        }
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._setDatePickerPosition = function () {
+        var elementObj = this.element.is('input') ? this.wrapper : this.element;
+        var pos = this._getOffset(elementObj), winLeftWidth, winRightWidth, winBottomHeight = bbdesigner$(document).scrollTop() + bbdesigner$(window).height() - (pos.top + bbdesigner$(elementObj).outerHeight()), winTopHeight = pos.top - bbdesigner$(document).scrollTop(), popupHeight = this.popup.outerHeight(), popupWidth = this.popup.outerWidth(), left = pos.left, totalHeight = elementObj.outerHeight(), border = (totalHeight - elementObj.height()) / 2, maxZ = this._getZindexPartial(this.element, this.popup), popupmargin = 3, topPos = (popupHeight < winBottomHeight || popupHeight > winTopHeight) ? pos.top + totalHeight + popupmargin : pos.top - popupHeight - popupmargin;
+        winLeftWidth = bbdesigner$(document).scrollLeft() + bbdesigner$(window).width() - left;
+        if (popupWidth > winLeftWidth && (popupWidth < left + elementObj.outerWidth()))
+            left -= this.popup.outerWidth() - elementObj.outerWidth();
+
+        this.popup.css({
+            "left": left + "px",
+            "top": topPos + "px",
+            "z-index": maxZ
+        });
+
+        if (this.model.enableTimePicker) {
+            bbdesigner$("#" + this._id + "_lTime_timewidget").css({
+                position: "absolute",
+                top: 0,
+                left: this._leftDP.popup.width() + this._leftDP.popup.position().left - bbdesigner$("#" + this._id + "_lTime_timewidget").width()
+            });
+            bbdesigner$("#" + this._id + "_rTime_timewidget").css({
+                position: "absolute",
+                top: !this.popup.hasClass("e-daterange-responsive") ? 0 : this._rightDP.wrapper.position().top,
+                left: this._rightDP.popup.width() + this._rightDP.popup.position().left - bbdesigner$("#" + this._id + "_rTime_timewidget").width()
+            });
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._dateEleClicked = function (e) {
+        this._updateRangesList();
+        this._activeItem = bbdesigner$(e.currentTarget);
+        if (this._activeItem.hasClass("e-hidedate")) {
+            e.stopPropagation();
+            return;
+        }
+        if (this._activeItem.hasClass("other-month")) {
+            this._refreshMinMax();
+        }
+        var dateString = this._activeItem.attr("data-date");
+        var cal_type = (bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0) ? "left" : "right";
+        if (BoldBIDashboard.isNullOrUndefined(dateString) || dateString === "")
+            return;
+        var currentDate = new Date(dateString);
+        if (this._selectedStartDate != null && this._selectedEndDate != null)
+            this._selectedStartDate = null;
+        if (this._selectedStartDate == null) {
+            this._selectedStartDate = currentDate;
+            this._selectedEndDate = null;
+            if (this._startDate)
+                this._startDate.date = null;
+            this._rightDP.element.val(null);
+            if (cal_type == "right") {
+                this._leftDP._stopRefresh = true;
+                this._leftDP.option("value", this._selectedStartDate);
+                this._leftDP.element.val(this._selectedStartDate.toLocaleDateString());
+            }
+            if (this._rightTP)
+                this._rightTP.option("value", "");
+            this.popup.find(".in-range").removeClass("in-range");
+            this.datePopup.find("td.e-state-default.e-active").removeClass("e-active");
+            this._rightDP.element.parents(".e-datewidget").removeClass("e-error");
+            var startElement = bbdesigner$(this.datePopup.find('.current-month[data-date="' + dateString + '"]'));
+            this._selectedStartDate = new Date(startElement.attr("data-date"));
+            this._setStartDate(this._selectedStartDate, startElement, true);
+        } else if ((this._selectedStartDate !== null && this._selectedEndDate == null) && !(currentDate < this._selectedStartDate)) {
+            var minDate = currentDate;
+            var dateString = bbdesigner$(e.currentTarget).attr("data-date");
+            this._rightDP._stopRefresh = true;
+            this._rightDP.option("value", new Date(dateString));
+            this._rightDP._stopRefresh = false;
+            if (this._rightTP)
+                this._rightTP.option("value", new Date(dateString));
+            this._rightDP.element.parents(".e-datewidget").removeClass("e-error");
+            var endElement = bbdesigner$(this.datePopup.find('.current-month[data-date="' + dateString + '"]'));
+            this._selectedStartDate = this.model.startDate;
+            this._selectedEndDate = new Date(dateString);
+            this._setEndDate(this._selectedEndDate, endElement, true);
+            this._startDate = {};
+            this._startDate.date = this._selectedStartDate;
+            this._updateRanges("left");
+            this._updateRanges("right");
+            if (cal_type == "left") {
+                this._leftDP._stopRefresh = true;
+                this._leftDP.option("value", this.model.startDate);
+                this._leftDP.element.val(this.model.startDate.toLocaleDateString());
+            }
+        } else {
+            this._selectedStartDate = currentDate;
+            this._selectedEndDate = null;
+            if (this._endDate)
+                this._endDate.date = null;
+            this.popup.find(".in-range").removeClass("in-range");
+            this._rightDP.option("value", null);
+            if (this._rightTP)
+                this._rightTP.option("value", "");
+            if (cal_type == "right") {
+                this._leftDP._stopRefresh = true;
+                this._leftDP.option("value", this._selectedStartDate);
+                this._leftDP.element.val(this._selectedStartDate.toLocaleDateString());
+            }
+            this._setStartDate(this._selectedStartDate, this._activeItem, true);
+            this._updateRanges("left");
+            this._updateRanges("right");
+        }
+        this._trigger("click", { element: bbdesigner$(e.currentTarget), startDate: this.model.startDate, endDate: this.model.endDate, value: new Date(bbdesigner$(e.currentTarget).attr("data-date")) });
+    };
+    BoldBIDashboardDateRangePicker.prototype._setStartDate = function (value, current_element, newset) {
+        this._startDate = {};
+        this._startDate.date = value;
+        if (newset) {
+            this._endDate = {};
+            this._endDate.date = null;
+        }
+        this._leftDP._checkDateArrows();
+        this.datePopup.find("td.e-state-default").removeClass("e-select e-start-date e-active showrange e-end-date e-state-hover");
+        this.popup.find(".in-range").removeClass("in-range");
+        current_element.addClass("e-start-date");
+        this.model.startDate = value;
+        if (this._buttonDiv)
+            this._buttonDiv.find(".e-drp-apply").addClass("e-disable");
+        if (!this.model.enableTimePicker)
+            return;
+        var bbdesigner$this = this._leftTP;
+        var _value = BoldBIDashboard.format(this._leftTP.model.value || this._leftDP.model.value, bbdesigner$this.model.timeFormat, this.model.locale);
+        if (_value)
+            this._rightTP.option("minTime", _value);
+        if (_value)
+            this._leftTP.option("value", _value);
+    };
+    BoldBIDashboardDateRangePicker.prototype._setEndDate = function (value, current_element, newset) {
+        this._rightDP.element.parents(".e-datewidget").removeClass("e-val-error");
+        this._endDate = {};
+        this._endDate.date = value;
+        this.popup.find("td.e-end-date").removeClass("e-select e-end-date");
+        current_element.addClass("e-end-date");
+        if (this._buttonDiv)
+            this._buttonDiv.find(".e-disable").removeClass("e-disable");
+        this.model.endDate = value;
+        if (this._startDate.date.getFullYear() == this._endDate.date.getFullYear()) {
+            if (this._startDate.date.getMonth() == this._endDate.date.getMonth()) {
+                return;
+            }
+        }
+        if (!this.model.enableTimePicker)
+            return;
+        if (this.model.startDate.getDate() == this.model.endDate.getDate()) {
+            this._rightTP.option("minTime", this._leftTP.option("value") || "");
+            this._rightTP.option("value", this._leftTP.option("value") || "");
+        } else {
+            var bbdesigner$this = this._rightTP;
+            var _value = BoldBIDashboard.format(this._rightTP.model.value, bbdesigner$this.model.timeFormat, this.model.locale);
+            if (_value)
+                this._rightTP.option("minTime", _value);
+            if (_value)
+                this._rightTP.option("value", _value);
+        }
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._rangeRefresh = function (args) {
+        var startElement, endElement;
+        if (this._rightDP) {
+            var popup = args.element.parent().hasClass("e-left-datepicker") ? this._leftDP.popup : this._rightDP.popup;
+        }
+        if (this._startDate && this._startDate.date && this._startDate.date.getMonth() == args.month && this._startDate.date.getFullYear() == args.year) {
+            startElement = bbdesigner$(popup.find('.current-month[data-date="' + this._startDate.date.toDateString() + '"]'));
+            this._setStartDate(this._startDate.date, startElement, false);
+            if (this._startDate.date.getDate() + 1 == startElement.next("td").text())
+                bbdesigner$(startElement).addClass("showrange");
+        }
+        if (this._endDate && this._endDate.date && this._endDate.date.getMonth() == args.month && this._endDate.date.getFullYear() == args.year) {
+            endElement = bbdesigner$(popup.find('.current-month[data-date="' + this._endDate.date.toDateString() + '"]'));
+            this._setEndDate(this._endDate.date, endElement, false);
+        }
+        if (startElement == endElement)
+            bbdesigner$(startElement).removeClass("showrange");
+        if (this._rightDP)
+            if ((this._startDate && this._startDate.date) && (this._endDate && this._endDate.date)) {
+                if (this._startDate.date.getFullYear() <= args.year && this._endDate.date.getFullYear() >= args.year) {
+                    var s = args.element.parent().hasClass("e-left-datepicker") ? bbdesigner$(popup.find('td.current-month')[0]) : bbdesigner$(popup.find('td.current-month')[0]);
+                    var type = args.element.parent().hasClass("e-left-datepicker") ? "left" : "right";
+                    this._updateRanges(type);
+                }
+            }
+    };
+    BoldBIDashboardDateRangePicker.prototype._renderRangesWrapper = function () {
+        if (BoldBIDashboard.isNullOrUndefined(this._customRangePicker)) {
+            this._customRangePicker = BoldBIDashboard.buildTag("div.e-custom-dateranges").css("height", this.datePopup.height());
+            this.popup.append(this._customRangePicker);
+            this._customRangePicker.insertBefore(this._buttonDiv);
+            this._ranges_li = "<ul class='e-dateranges-ul' role=menu></ul>";
+            this._customRangePicker.append(this._ranges_li);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype.setRange = function (range) {
+        var startDate, endDate, ranges;
+        this._clearRanges();
+        if (typeof range == "string") {
+            for (var i = 0; i < this.model.ranges.length; i++) {
+                ranges = this.model.ranges[i];
+                if (ranges.label == range) {
+                    this.model.startDate = ranges.range[0];
+                    this.model.endDate = ranges.range[1];
+                    this._updatePreRanges();
+                    return;
+                }
+            }
+        } else if (typeof range == "object") {
+            if (range.length == 2) {
+                this.model.startDate = range[0];
+                this.model.endDate = range[1];
+                this._updatePreRanges();
+                return;
+            }
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._updatePreRanges = function () {
+        this._selectedStartDate = this.model.startDate;
+        this._selectedEndDate = this.model.endDate;
+        this._resetValues();
+        if (this.popup) this._setValues();
+        this._refreshMinMax();
+        if (!this._popupOpen)
+            this._mainValue();
+        this._setWaterMark();
+    };
+    BoldBIDashboardDateRangePicker.prototype.destroy = function () {
+        this.destroy();
+    };
+    BoldBIDashboardDateRangePicker.prototype._destroy = function () {
+        if (this._popupOpen)
+            this._showhidePopup();
+        if (this.wrapper) {
+            this.element.removeClass("e-input");
+            this.element.removeAttr("aria-atomic aria-live placeholder");
+            !this._cloneElement.attr("tabindex") && this.element.attr("tabindex") && this.element.removeAttr("tabindex");
+            this.element.insertAfter(this.wrapper);
+            this.wrapper.remove();
+        }
+        if (!BoldBIDashboard.isNullOrUndefined(this._leftDP))
+            this._leftDP.destroy();
+        if (!BoldBIDashboard.isNullOrUndefined(this._rightDP))
+            this._rightDP.destroy();
+        if (!BoldBIDashboard.isNullOrUndefined(this._rightTP))
+            this._rightTP.destroy();
+        if (!BoldBIDashboard.isNullOrUndefined(this._leftTP))
+            this._leftTP.destroy();
+        if (!BoldBIDashboard.isNullOrUndefined(this._scrollerObj))
+            this._scrollerObj.destroy();
+        this.popup.remove();
+    };
+    BoldBIDashboardDateRangePicker.prototype.addRanges = function (args) {
+        var proxy = this, _ranges_li = "", title;
+        if (args) {
+            for (var i = 0; i < args.length; i++) {
+                var s = args[i];
+                var value = s.range;
+                if (value.length === 2) {
+                    var start = new Date(value[0]);
+                    var end = new Date(value[1]);
+                    if (BoldBIDashboard.isNullOrUndefined(start))
+                        start = new Date(value[0]);
+                    if (BoldBIDashboard.isNullOrUndefined(end))
+                        end = new Date(value[1]);
+                    if (start <= end) {
+                        if (!s.label)
+                            s.label = "PreDefined Ranges";
+                        _ranges_li += "<li aria-selected='false' title='" + s.label + "'class='rangeItem' data-e-range='" + JSON.stringify(value) + "' data-e-value='" + s.range + "'>" + s.label + "</li>";
+                    }
+                }
+            }
+        }
+        this._renderRangesWrapper();
+        this._customRangePicker.find(".e-dateranges-ul").append(_ranges_li);
+        this._off(this._customRangePicker.find("ul li.rangeItem"), "click", this._customSelection);
+        this._on(this._customRangePicker.find("ul li.rangeItem"), "click", this._customSelection);
+        if (this._scrollerObj)
+            this._scrollerObj.refresh();
+    };
+    BoldBIDashboardDateRangePicker.prototype._righthoverRange = function (e) {
+        this._activeItem = bbdesigner$(e.currentTarget);
+        if (this._activeItem.hasClass("e-hidedate")) {
+            e.stopPropagation();
+
+            return;
+        }
+        this.popup.find(".range-hover").removeClass("range-hover");
+        if (this._activeItem.hasClass("in-range"))
+            this._activeItem.addClass("range-hover");
+        var dateString = this._activeItem.attr("data-date");
+        var currentDate = new Date(dateString);
+        this._trigger("hover", { element: e.currentTarget, events: e, value: new Date(this._activeItem.attr("data-date")) });
+
+        var that = this;
+        if (!BoldBIDashboard.isNullOrUndefined(that._selectedStartDate) && (BoldBIDashboard.isNullOrUndefined(that._selectedEndDate)))
+            this.popup.find(".current-month").each(function (index, el) {
+                var element = bbdesigner$(el);
+                var dateString = element.attr("data-date");
+                if (BoldBIDashboard.isNullOrUndefined(dateString) || dateString === "")
+                    return;
+                var date = new Date(dateString);
+                if (date > that._startDate.date && date < currentDate) {
+                    element.addClass("in-range");
+                } else {
+                    element.removeClass("in-range");
+                }
+                if (date.getTime() === that._selectedStartDate.getTime() && element.next().length !== 0 && element.next("td.current-month").length !== 0 && currentDate > that._selectedStartDate && new Date(new Date(that._selectedStartDate.getTime()).setDate(that._selectedStartDate.getDate() + 1)).getTime() !== currentDate.getTime()) {
+                    element.addClass("showrange");
+                } else {
+                    element.removeClass("showrange");
+                }
+            });
+    };
+    BoldBIDashboardDateRangePicker.prototype._customSelection = function (e) {
+        this._customRangePicker.find(".e-active").removeClass("e-active");
+        if (bbdesigner$(e.currentTarget).attr("data-e-range") != "customPicker") {
+            var range = bbdesigner$(e.currentTarget).attr("data-e-value").split(",");
+            this.model.startDate = new Date(range[0]);
+            this.model.endDate = new Date(range[1]);
+            this._rightDP.element.parents(".e-datewidget").removeClass("e-error");
+            this._customSet();
+        } else {
+            this.model.startDate = null;
+            this.model.endDate = null;
+            this._clearRanges();
+        }
+        bbdesigner$(e.currentTarget).addClass("e-active");
+    };
+    BoldBIDashboardDateRangePicker.prototype._setWaterMark = function () {
+        if (this.element != null && this.element.hasClass("e-input")) {
+            if ((!this._isSupport) && this.element.val() == "") {
+                this._hiddenInput.css("display", "block").val(this._localizedLabels.watermarkText);
+            }
+            else {
+                bbdesigner$(this.element).attr("placeholder", this._localizedLabels.watermarkText);
+            }
+            return true;
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._clearRanges = function (e) {
+        this._updateRangesList();
+        this._setOption("value", "");
+        if (this.popup) this._rightDP.element.parents(".e-datewidget").removeClass("e-val-error");
+        this._selectedStartDate = null;
+        this._selectedEndDate = null;
+        if (this._startDate)
+            this._startDate.date = null;
+        if (this._endDate)
+            this._endDate.date = null;
+        if (this.popup) this.popup.find("td").removeClass("e-start-date e-end-date in-range e-active e-state-hover today");
+        this.model.value = null;
+        this.model.startDate = null;
+        this.model.endDate = null;
+        if (this._buttonDiv)
+            this._buttonDiv.find(".e-drp-apply").addClass("e-disable");
+    };
+    BoldBIDashboardDateRangePicker.prototype.clearRanges = function () {
+        this._clearRanges();
+        this._refreshMinMax();
+        this.element.val("");
+        this._trigger("_change", { value: this.model.value });
+        this._trigger("change", { value: this.model.value, startDate: this.model.startDate, endDate: this.model.endDate });
+        this._trigger("clear", {});
+    };
+    BoldBIDashboardDateRangePicker.prototype._getLocalizedLabels = function () {
+        return BoldBIDashboard.getLocalizedConstants("BoldBIDashboard.DateRangePicker", this.model.locale);
+    };
+    BoldBIDashboardDateRangePicker.prototype._unWireEvents = function () {
+        this._off(bbdesigner$('.e-next', this.popup), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+        this._off(bbdesigner$('.e-prev', this.popup), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+        this._off(bbdesigner$(this._buttonDiv.find("div.e-drp-cancel")), "click", this._cancelButton);
+        this._off(bbdesigner$(this._buttonDiv.find("div.e-drp-reset")), "click", this.clearRanges);
+        this._off(this.popup.find(".leftDate_wrapper.e-datepicker.e-js.e-input"), "blur", this._onPopupFocusOut);
+        this._off(this.popup.find(".rightDate_wrapper.e-datepicker.e-js.e-input"), "blur", this._onPopupFocusOut);
+        if (this.model.allowEdit) {
+            this._off(this.element, "blur", this._onMainFocusOut);
+            this._off(this.element, "focus", this._onFocusIn);
+            this._off(this.element, "keydown", this._onKeyDown);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._onDocumentKeyDown = function (e) {
+        if (e.keyCode != "13")
+            return;
+        if (!this._buttonDiv.find(".e-drp-apply").hasClass("e-disable") && this.wrapper.hasClass("e-focus")) {
+            this._buttonDiv.find(".e-drp-apply").click();
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._wirePopupEvents = function () {
+		this._on(bbdesigner$('.e-next', this.popup), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+        this._on(bbdesigner$('.e-prev', this.popup), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+	};
+    BoldBIDashboardDateRangePicker.prototype._wireEvents = function () {
+        bbdesigner$(document).on("mousedown", bbdesigner$.proxy(this._onDocumentClick, this));
+        bbdesigner$(document).on("keydown", bbdesigner$.proxy(this._onDocumentKeyDown, this));
+        if (this.model.allowEdit) {
+            this._on(this.element, "blur", this._onMainFocusOut);
+            this._on(this.element, "focus", this._onFocusIn);
+            this._on(this.element, "keydown", this._onKeyDown);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._onFocusIn = function (e) {
+        if (this._isSupport) {
+            e.preventDefault();
+            this._isFocused = true;
+        }
+        if (this.wrapper.hasClass("e-error")) {
+            this._validState = false;
+            this.wrapper.removeClass('e-error');
+        }
+        if (!this.model.showPopupButton && !this.model.readOnly) this.popupShow(e);
+        if (!this.model.showPopupButton) this._on(this.element, "click", this._elementClick);
+        this.wrapper.addClass("e-focus");
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._onKeyDown = function (e) {
+        if (e.keyCode == 13) {
+            if (bbdesigner$(e.currentTarget).hasClass("e-datepicker")) {
+                this._validateValues(bbdesigner$(e.currentTarget).val(), bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0 ? "left" : "right");
+                bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0 ? this._leftDP.model.value = this.model.startDate : this._rightDP.model.value = this.model.endDate;
+                this._onPopupFocusOut(e);
+            } else {
+                bbdesigner$(e.currentTarget).hasClass("leftTime") && this._leftTP && this._rightTP ? this._leftTP._trigger("select") : this._rightTP._trigger("select");
+            }
+        }
+        e.stopImmediatePropagation();
+    };
+    BoldBIDashboardDateRangePicker.prototype._cancelButton = function () {
+        this._prevValue = null, this._isPopScroll = false;
+        this._clearRanges();
+        this._onMainFocusOut();
+        this._showhidePopup();
+    };
+    BoldBIDashboardDateRangePicker.prototype._updateRanges = function (cal_type) {
+        var cal = cal_type == "left" ? this._leftDP : this._rightDP;
+        var proxy = this;
+        cal.popup.find("td.current-month").each(function (index, el) {
+            var element = bbdesigner$(el);
+            var dateString = element.attr("data-date");
+            if (BoldBIDashboard.isNullOrUndefined(dateString) || dateString === "")
+                return;
+            var date = new Date(dateString);
+            if (!BoldBIDashboard.isNullOrUndefined(proxy._startDate) && !BoldBIDashboard.isNullOrUndefined(proxy._startDate.date) && !BoldBIDashboard.isNullOrUndefined(proxy._endDate.date))
+                if (date > proxy._startDate.date && date < proxy._endDate.date) {
+                    element.addClass("in-range");
+                } else {
+                    element.removeClass("in-range");
+                }
+            if (!BoldBIDashboard.isNullOrUndefined(proxy._startDate) && !BoldBIDashboard.isNullOrUndefined(proxy._startDate.date) && date.toDateString() == proxy._startDate.date.toDateString()) {
+                element.addClass("e-start-date");
+                if (!BoldBIDashboard.isNullOrUndefined(proxy._endDate) && !BoldBIDashboard.isNullOrUndefined(proxy._endDate.date) && proxy._startDate.date.toDateString() != proxy._endDate.date.toDateString())
+                    element.addClass("showrange");
+                element.removeClass("in-range");
+            }
+            if (!BoldBIDashboard.isNullOrUndefined(proxy._endDate) && !BoldBIDashboard.isNullOrUndefined(proxy._endDate.date))
+                if (!BoldBIDashboard.isNullOrUndefined(proxy._endDate) && date.toDateString() == proxy._endDate.date.toDateString()) {
+                    element.addClass("e-end-date");
+                    element.removeClass("in-range");
+                }
+        });
+        if (cal.popup.find(".e-start-date").length > 0) {
+            if (bbdesigner$(cal.popup.find(".e-start-date")).next("td.in-range").length > 0)
+                return;
+            else
+                bbdesigner$(cal.popup.find(".e-start-date")).removeClass("showrange");
+        }
+    };
+
+    BoldBIDashboardDateRangePicker.prototype.getSelectedRange = function () {
+        var args = { startDate: this.model.startDate, endDate: this.model.endDate };
+        return args;
+    };
+    BoldBIDashboardDateRangePicker.prototype.enable = function () {
+        this.element[0].disabled = false;
+        this.model.enabled = true;
+        this.wrapper.removeClass('e-disable');
+        this.element.removeClass("e-disable");
+        this.element.attr("aria-disabled", "false");        
+        if (!this._isSupport)
+            this._hiddenInput.attr("enabled", "enabled");
+        if (this.dateRangeIcon)
+            this.dateRangeIcon.removeClass("e-disable").attr("aria-disabled", "false");
+        if (this.popup) this.popup.children("div").removeClass("e-disable").attr("aria-disabled", "false");
+        this._setOption("enabled", true);
+    };
+    BoldBIDashboardDateRangePicker.prototype.disable = function () {
+        this.element[0].disabled = true;
+        this.model.enabled = false;
+        this.wrapper.addClass('e-disable');
+        this.element.addClass("e-disable");
+        this.element.attr("aria-disabled", "true");
+        this.element.attr("disabled", "disabled");
+        if (!this._isSupport)
+            this._hiddenInput.attr("disabled", "disabled");
+        if (this.dateRangeIcon)
+            this.dateRangeIcon.addClass("e-disable").attr("aria-disabled", "true");
+        if (this.popup) this.popup.children("div").addClass("e-disable").attr("aria-disabled", "true");
+        this.popupHide();
+        this._setOption("enabled", false);
+    };
+
+    BoldBIDashboardDateRangePicker.prototype._onMainFocusOut = function (e) {
+        var element_value = this.element.val(), setError;
+        this.wrapper.removeClass('e-focus');
+        if (this.element.val() == "" && this._prevValue == null) return;
+        if (this._prevValue && this._prevValue == this.element.val()) {
+            this._validState ? this.wrapper.removeClass('e-error') : this.wrapper.addClass('e-error');
+            return;
+        }
+        else this._updateRangesList();
+        if (this.element.val() == "") {
+            this.wrapper.removeClass('e-error');
+            this._clearRanges();
+            this._setWaterMark();
+            this._refreshMinMax();
+            this._trigger("change", { value: this.model.value, startDate: null, endDate: null });
+            this._trigger("_change", { value: this.model.value });
+            return;
+        }
+        this.wrapper.removeClass("e-error");
+        var datestring = this.element.val().split(this.model.separator), _startdate = BoldBIDashboard.parseDate(datestring[0], this._dateTimeFormat, this.model.locale), _enddate = BoldBIDashboard.parseDate(datestring[1], this._dateTimeFormat, this.model.locale);
+        this._validState = true;
+        if (!this._validateValues(_startdate, "left") || !this._validateValues(_enddate, "right") || !this._startEndValidation()) {
+            this._clearRanges();
+            this._refreshMinMax();
+            setError = true;
+        }
+        if (element_value != "" && setError) {
+            this.element.val(element_value);
+            this.wrapper.addClass("e-error");
+            this.model.value = null;
+            this._validState = false;
+            this._trigger("_change", { value: this.element.val() });
+            this._trigger("change", { value: this.model.value, startDate: null, endDate: null });
+            return;
+        }
+        this._resetValues();
+        if (this.popup) this._setValues();
+        this._refreshMinMax();
+        this.model.value = this._validState && element_value != "" ? element_value : null;
+        if (!this._popupOpen)
+            this._mainValue();
+        this._prevValue = this.model.value;
+        this._validState ? this.wrapper.removeClass('e-error').removeClass("e-focus") : this.wrapper.addClass('e-error').removeClass("e-focus");
+        this._trigger("change", { value: this.model.value, startDate: this.model.startDate, endDate: this.model.endDate });
+    };
+    BoldBIDashboardDateRangePicker.prototype._onPopupFocusOut = function (e) {
+        if (BoldBIDashboard.format(this._selectedStartDate, "M/d/yyyy") != bbdesigner$("#daterangeleftDate_wrapper").val() || BoldBIDashboard.format(this._selectedEndDate, "M/d/yyyy") != bbdesigner$("#daterangerightDate_wrapper").val()) {
+            this._updateRangesList();
+        }
+        var picker = bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0 ? this._leftDP : this._rightDP;
+        this._validateValues(bbdesigner$(e.currentTarget).val(), bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0 ? "left" : "right");
+        bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0 ? this._leftDP.model.value = this.model.startDate : this._rightDP.model.value = this.model.endDate;
+        var _prevStartValue = this.model.startDate;
+        var _prevEndValue = this.model.endDate, stop = false;
+        this._rightDP.element.parents(".e-datewidget").removeClass("e-val-error");
+        if (!this._startEndValidation()) {
+            if (bbdesigner$(e.currentTarget).parents(".e-left-datepicker").length > 0) {
+                this._clearRanges();
+                this.model.startDate = _prevStartValue;
+                this._selectedStartDate = this.model.startDate;
+            } else {
+                this._rightDP.element.parents(".e-datewidget").addClass("e-val-error");
+                this.model.endDate = null;
+                stop = true;
+            }
+        }
+        if (_prevStartValue == null) {
+            this._clearRanges();
+            return;
+        }
+        this._selectedStartDate = this.model.startDate;
+        this._selectedEndDate = this.model.endDate;
+        this._resetValues();
+        if (this.popup) this._setValues();
+        if (!this.model.showPopupButton) this._off(this.element, "click", this._elementClick);
+        this._refreshMinMax();
+        if (!this._popupOpen)
+            this._mainValue();
+        if (stop)
+            this._rightDP.element.val(_prevEndValue.toLocaleDateString());
+        this._setWaterMark();
+    };
+    BoldBIDashboardDateRangePicker.prototype._resetValues = function () {
+        if (this.popup) {
+            this._leftDP.option("maxDate", null);
+            this._rightDP.option("minDate", null);
+            this._leftDP.option("value", this._leftDP.model.value);
+            this._rightDP.option("value", this._rightDP.model.value);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._resetRanges = function () {
+        if (this.popup) {
+            this._leftDP.option("maxDate", null);
+            this._rightDP.option("minDate", null);
+            this._leftDP.option("value", this._leftDP.model.value);
+            this._rightDP.option("value", this._rightDP.model.value);
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._refreshMinMax = function () {
+        if (this.popup) {
+            var local = this._getNextMonth(this._leftDP._calendarDate);
+            if (local.toDateString() > this._rightDP._calendarDate.toDateString()) {
+                var temp = this._rightDP.model.value;
+                this._rightDP._calendarDate = local;
+                this._rightDP._dateValue = local;
+                this._rightDP.option("value", local);
+            }
+            this._rightDP.option("minDate", local);
+            this._rightDP.option("value", temp);
+            var temp = this._rightDP._calendarDate, y = temp.getFullYear(), m = temp.getMonth();
+            this._leftDP.option("maxDate", new Date(y, m, 0));
+        }
+    };
+    BoldBIDashboardDateRangePicker.prototype._refreshEvents = function (cal_type) {
+        this._off(this._rightDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "click", this._dateEleClicked);
+        this._off(this._leftDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "click", this._dateEleClicked);
+        this._off(this._rightDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "mouseover", this._righthoverRange);
+        this._off(this._leftDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "mouseover", this._righthoverRange);
+        this._on(this._leftDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "mouseover", this._righthoverRange);
+        this._on(this._leftDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "click", this._dateEleClicked);
+        this._on(this._rightDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "mouseover", this._righthoverRange);
+        this._on(this._rightDP.sfCalendar.find('table .e-datepicker-days td.e-state-default'), "click", this._dateEleClicked);
+        this._on(bbdesigner$(this._leftDP.sfCalendar.find('table .e-datepicker-months td')), "click", bbdesigner$.proxy(this._previousNextHandler, this));
+    };
+    BoldBIDashboardDateRangePicker.prototype._previousNextHandler = function (e) {
+        var selectedCalender = bbdesigner$(e.currentTarget).closest(".e-calendar").parent();
+        var cal_type = selectedCalender.hasClass("e-left-datepicker") ? "left" : "right", leftDateString, rightDateString;
+        if (e.type == "_month_Loaded") {
+            if (cal_type == "left") {
+                rightDateString = bbdesigner$(this._rightDP.popup.find("td.current-month")[0]).attr("data-date");
+                leftDateString = this._leftDP._dateValue.toDateString();
+            } else if (cal_type == "right") {
+                leftDateString = bbdesigner$(this._leftDP.popup.find("td.current-month")[0]).attr("data-date");
+                rightDateString = this._rightDP._dateValue.toDateString();
+            }
+        } else {
+            rightDateString = bbdesigner$(this._rightDP.popup.find("td.current-month")[0]).attr("data-date");
+            leftDateString = bbdesigner$(this._leftDP.popup.find("td.current-month")[0]).attr("data-date");
+        }
+        var leftDate = new Date(leftDateString);
+        var rightDate = new Date(rightDateString);
+        leftDate.setHours(0, 0, 0, 0);
+        rightDate.setHours(0, 0, 0, 0);
+        var status = true;
+        if (cal_type == "right") {
+            var cls = bbdesigner$("table", this._leftDP.sfCalendar).get(0).className;
+            if (cls == "e-dp-viewdays")
+                this._leftDP._stopRefresh = true;
+            this._rightDP._stopRefresh = false;
+            var temp = rightDate, y = temp.getFullYear(), m = temp.getMonth();
+            this._leftDP.option("maxDate", new Date(y, m, 0));
+            if (cls == "e-dp-viewmonths")
+                this._leftDP._startLevel("year");
+            this._leftDP._checkDateArrows();
+        } else {
+            var cls = bbdesigner$("table", this._rightDP.sfCalendar).get(0).className;
+            if (bbdesigner$("table", this._rightDP.sfCalendar).get(0).className == "e-dp-viewdays")
+                this._rightDP._stopRefresh = true;
+            this._leftDP._stopRefresh = false;
+            this._rightDP.option("minDate", this._getNextMonth(leftDate));
+            if (cls == "e-dp-viewmonths")
+                this._rightDP._startLevel("year");
+            this._rightDP._checkDateArrows();
+        }
+
+        this._rightDP.element.parents(".e-datewidget").removeClass("e-error");
+    };
+    return BoldBIDashboardDateRangePicker;
+})(BoldBIDashboard.WidgetBase);
+window.BoldBIDashboard.widget("BoldBIDashboardDateRangePicker", "BoldBIDashboard.DateRangePicker", new BoldBIDashboardDateRangePicker());
+window["BoldBIDashboardDateRangePicker"] = null;
+
+BoldBIDashboard.DateRangePicker.Locale = {};
+
+BoldBIDashboard.DateRangePicker.Locale = BoldBIDashboard.DateRangePicker.Locale || {};
+
+BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePicker.Locale['en-US'] = {
+    ButtonText: {
+        apply: "Apply",
+        cancel: "Cancel",
+        reset: "Reset"
+    },
+    watermarkText: "Select Range",
+    customPicker: "Custom Picker"
+};
+//# sourceMappingURL=BoldBIDashboard.daterangepicker.js.map
+;;
+/**
+* @fileOverview Plugin to select the date and time values.
+* @copyright Copyright SyncfusionBoldBIDashboard Inc. 2001 - 2015. All rights reserved.
+*  Use of this code is subject to the terms of our license.
+*  A copy of the current license can be obtained at any time by e-mailing
+*  licensing@syncfusion.com. Any infringement will be prosecuted under
+*  applicable laws. 
+* @version 12.1 
+* @author <a href="mailto:licensing@syncfusion.com">SyncfusionBoldBIDashboard Inc</a>
+*/
+(function (bbdesigner$, BoldBIDashboard, undefined) {
+
+    BoldBIDashboard.widget("BoldBIDashboardDateTimePicker", "BoldBIDashboard.DateTimePicker", {
+
+        element: null,
+
+        model: null,
+        validTags: ["input"],
+        _addToPersist: ["value"],
+        _setFirst: false,
+        _rootCSS: "e-datetimepicker",
+        type: "editor",
+        angular: {
+            require: ['?ngModel', '^?form', '^?ngModelOptions'],
+            requireFormatters: true
+        },
+        _requiresID: true,
+
+
+        defaults: {
+
+            cssClass: "",
+
+            locale: "en-US",
+
+            readOnly: false,
+
+            showRoundedCorner: false,
+
+            enableRTL: false,
+
+            htmlAttributes: {},
+            allowEdit: true,
+
+            enabled: true,
+
+            value: "",
+
+            name: null,
+
+            minDateTime: new Date("1/1/1900 12:00:00 AM"),
+
+            maxDateTime: new Date("12/31/2099 11:59:59 PM"),
+
+            height: "",
+
+            width: "",
+
+            dateTimeFormat: "",
+
+            showPopupButton: true,
+
+            enableStrictMode: false,
+
+            buttonText: {
+
+                today: "Today",
+
+                timeNow: "Time Now",
+
+                done: "Done",
+
+                timeTitle: "Time"
+            },
+
+            watermarkText: "Select datetime",
+
+            enablePersistence: false,
+
+            interval: 30,
+
+            timeDisplayFormat: "",
+
+            timePopupWidth: 105,
+            popupPosition: "bottom",
+
+            dayHeaderFormat: "short",
+
+            startLevel: "month",
+
+            depthLevel: "",
+
+            startDay: -1,
+
+            stepMonths: 1,
+
+            showOtherMonths: true,
+
+            enableAnimation: true,
+
+            headerFormat: 'MMMM yyyy',
+
+            validationRules: null,
+
+            validationMessage: null,
+
+            validationMessages: null,
+            timeDrillDown: {
+                enabled: false,
+                interval: 5,
+                showMeridian: false,
+                autoClose: true,
+                showFooter: true
+            },
+
+            beforeOpen: null,
+
+            beforeClose: null,
+
+            open: null,
+
+            close: null,
+
+            change: null,
+
+            create: null,
+
+            destroy: null,
+
+            focusIn: null,
+
+            focusOut: null
+
+        },
+
+
+        dataTypes: {
+            allowEdit: "boolean",
+            cssClass: "string",
+            locale: "string",
+            readOnly: "boolean",
+            showRoundedCorner: "boolean",
+            enableRTL: "boolean",
+            enabled: "boolean",
+            enableAnimation: "boolean",
+            dateTimeFormat: "string",
+            showPopupButton: "boolean",
+            buttonText: "data",
+            watermarkText: "string",
+            enablePersistence: "boolean",
+            enableStrictMode: "boolean",
+            interval: "number",
+            timeDrillDown: "data",
+            timeDisplayFormat: "string",
+            dayHeaderFormat: "string",
+            startLevel: "string",
+            depthLevel: "string",
+            startDay: "number",
+            stepMonths: "number",
+            showOtherMonths: "boolean",
+            headerFormat: "string",
+            validationRules: "data",
+            validationMessage: "data",
+            validationMessages: "data",
+            htmlAttributes: "data"
+        },
+
+        _setModel: function (options) {
+            if (!this.popup) this._renderDropdown();
+            var option, validate = false;
+            for (option in options) {
+                switch (option) {
+                    case "allowEdit": this._changeEditable(options[option]); break;
+                    case "cssClass": this._changeSkin(options[option]); break;
+                    case "locale": this._localize(options[option]); break;
+                    case "readOnly": this._readOnly(options[option]); break;
+                    case "showRoundedCorner": this._setRoundedCorner(options[option]); break;
+                    case "enableRTL": this._setRtl(options[option]); break;
+                    case "enabled": this._enabled(options[option]); break;
+                    case "validationRules":
+                        if (this.model.validationRules != null) {
+                            this.element.rules('remove');
+                            this.model.validationMessages = null;
+                        }
+                        this.model.validationRules = options[option];
+                        if (this.model.validationRules != null) {
+                            this._initValidator();
+                            this._setValidation();
+                        }
+                        break;
+                    case "validationMessage":
+                        this.model.validationMessages = options[option];
+                        if (this.model.validationRules != null && this.model.validationMessages != null) {
+                            this._initValidator();
+                            this._setValidation();
+                        }
+                        break;
+                    case "validationMessages":
+                        this.model.validationMessages = options[option];
+                        if (this.model.validationRules != null && this.model.validationMessages != null) {
+                            this._initValidator();
+                            this._setValidation();
+                        }
+                        break;
+                    case "value":
+                        options[option] = this._setValue(options[option]);
+                        if (this._specificFormat())
+                            this._stopRefresh = true
+                        validate = true;
+                        this._prevDateTime = this._prevDateTimeVal || this._preVal;
+                        break;
+                    case "enableStrictMode":
+                        this.model.enableStrictMode = options[option];
+                        validate = true;
+                        break;
+                    case "minDateTime":
+                        var temp = this._stringToObject(options[option]);
+                        var mintime = this._getFormat(temp, this.timePicker.model.timeFormat);
+                        if (this._isValidDate(temp)) {
+                            this.datePicker.option("minDate", temp);
+                            this.timePicker.option("minTime", mintime);
+                            options[option] = temp;
+                            this.model.minDateTime = temp;
+                        }
+                        else options[option] = this.model[option];
+                        validate = true;
+                        break;
+                    case "maxDateTime":
+                        var temp = this._stringToObject(options[option]);
+                        var maxtime = this._getFormat(options[option], this.timePicker.model.timeFormat);
+                        if (this._isValidDate(temp)) {
+                            this.datePicker.option("maxDate", temp);
+                            this.timePicker.option("maxTime", maxtime);
+                            options[option] = temp;
+                            this.model.maxDateTime = temp;
+                        }
+                        else options[option] = this.model[option];
+                        validate = true; break;
+                    case "height": this.wrapper.height(options[option]); break;
+                    case "width": this.wrapper.width(options[option]); break;
+                    case "dateTimeFormat":
+                        this.model.dateTimeFormat = options[option];
+                        if (this.isValidState) this._setValue(this.model.value);
+                        break;
+                    case "showPopupButton": this._showButton(options[option]); break;
+                    case "watermarkText":
+                        if (BoldBIDashboard.isNullOrUndefined(this._options)) this._options = {};
+                        this._options[option] = this.model.watermarkText = options[option];
+                        this._localizedLabels.watermarkText = this.model.watermarkText;
+                        this._setWaterMark();
+                        break;
+                    case "buttonText":
+                        if (!BoldBIDashboard.isNullOrUndefined(this._options))
+                            this._options["buttonText"] = this.model.buttonText = options[option];
+                        this._localizedLabels.buttonText = this.model.buttonText;
+                        this._buttonText(options[option]); break;
+                    case "interval":
+                        this._updateTimeHeight();
+                        this.timePicker.option("interval", options[option]); break;
+                    case "timeDisplayFormat":
+                        this._updateTimeHeight();
+                        this.timePicker.option("timeFormat", options[option]); break;
+                    case "timePopupWidth":
+                        this._updateTimeHeight();
+                        this.timePicker.option("popupWidth", options[option]);
+                        break;
+                    case "dayHeaderFormat": this.datePicker.option("dayHeaderFormat", options[option]); break;
+                    case "startLevel": this.datePicker.option("startLevel", options[option]); break;
+                    case "depthLevel": this.datePicker.option("depthLevel", options[option]); break;
+                    case "startDay": this.datePicker.option("startDay", options[option]);
+                        this.model.startDay = this.datePicker.model.startDay;
+                        options[option] = this.model.startDay; break;
+                    case "stepMonths": this.datePicker.option("stepMonths", options[option]); break;
+                    case "showOtherMonths": this.datePicker.option("showOtherMonths", options[option]); break;
+                    case "headerFormat": this.datePicker.option("headerFormat", options[option]); break;
+                    case "htmlAttributes": this._addAttr(options[option]); break;
+                    case "popupPosition": this.model.popupPosition = options[option]; this._setListPosition(); break;
+                    case "timeDrillDown":
+
+                        // For timeDrillDown.enabled
+                        if (!BoldBIDashboard.isNullOrUndefined(options[option].enabled)) {
+                            this.model.timeDrillDown.enabled = options[option].enabled; this._changeDesign();
+                        }
+
+                        // For timeDrillDown.interval
+                        if (!BoldBIDashboard.isNullOrUndefined(options[option].interval)) {
+                            this.model.timeDrillDown.interval = options[option].interval;
+                            this._generateMins(bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this._datetimeValue), "HH:00", this.model.locale)));
+                        }
+
+                        // For timeDrillDown.showMeridian
+                        if (!BoldBIDashboard.isNullOrUndefined(options[option].showMeridian)) {
+                            this.model.timeDrillDown.showMeridian = options[option].showMeridian;
+                            this._sfTimeHour.empty(); this._renderHourTable();
+                        }
+
+                        // For timeDrillDown.showFooter
+                        if (!BoldBIDashboard.isNullOrUndefined(options[option].showFooter)) {
+                            this.model.timeDrillDown.showFooter = options[option].showFooter;
+                            this._changeDesign();
+                        }
+                        break;
+
+                }
+            }
+            if (validate) this._validateMinMax();
+            this._valueChange(true);
+            if (option == "value") options[option] = this.model.value;
+            this._updateTimeHeight();
+            this._checkErrorClass();
+        },
+        observables: ["value"],
+
+        _destroy: function () {
+            if (this.isPopupOpen)
+                this._hideResult();
+            if (this.wrapper) {
+                this.element.insertAfter(this.wrapper);
+                this.wrapper.remove();
+            }
+            this._cloneElement.removeClass("e-js e-input").removeClass(BoldBIDashboard.util.getNameSpace(this.sfType));
+            this._cloneElement.insertAfter(this.element);
+            this.element.remove();
+            if (!BoldBIDashboard.isNullOrUndefined(this.datePicker))
+                this.datePicker.destroy();
+            if (!BoldBIDashboard.isNullOrUndefined(this.timePicker))
+                this.timePicker.destroy();
+			if(this.popup)this.popup.remove();
+        },
+
+
+        _init: function (options) {
+            if (!this.element.is("input") || (this.element.attr('type') && this.element.attr('type') != "text")) return false;
+            this._options = options;
+            this._cloneElement = this.element.clone();
+            this._ISORegex();
+            this._isSupport = document.createElement("input").placeholder == undefined ? false : true;
+            this._validateMeridian();
+            this._checkAttribute();
+            this._initialize();
+            this._initial = true;
+            this._interval = 60;
+            this._render();
+            this._wireEvents();
+            this._addAttr(this.model.htmlAttributes);
+            if (!BoldBIDashboard.isNullOrUndefined(options) && !BoldBIDashboard.isNullOrUndefined(options.validationMessage))
+                this.model.validationMessages = this.model.validationMessage;
+            if (this.model.validationRules != null) {
+                this._initValidator();
+                this._setValidation();
+            }
+			this._removeWatermark();
+            if (options && options.value != undefined && options.value != this.element.val()) {
+                this._trigger("_change", { value: this.element.val() });
+            }
+        },
+        _ISORegex: function () {
+            this._tokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g,
+            // complex case for iso 8601 regex only
+            this._extISORegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?/,
+            this._basicISORegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?/,
+            this._numberRegex = {
+                2: /\d\d?/,
+                4: /^\d{4}/,
+                "z": /Z|[+-]\d\d(?::?\d\d)?/gi,
+                "t": /T/,
+                "-": /\-/,
+                ":": /:/
+            };
+            this._zeroRegex = /Z|[+-]\d\d(?::?\d\d)?/;
+            this._dates = [
+                ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
+                ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
+                ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
+                ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
+                ['YYYY-DDD', /\d{4}-\d{3}/],
+                ['YYYY-MM', /\d{4}-\d\d/, false],
+                ['YYYYYYMMDD', /[+-]\d{10}/],
+                ['YYYYMMDD', /\d{8}/],
+                // YYYYMM is NOT allowed by the standard
+                ['GGGG[W]WWE', /\d{4}W\d{3}/],
+                ['GGGG[W]WW', /\d{4}W\d{2}/, false],
+                ['YYYYDDD', /\d{7}/]
+            ];
+
+            // iso time formats and regexes
+            this._times = [
+                ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
+                ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
+                ['HH:mm:ss', /\d\d:\d\d:\d\d/],
+                ['HH:mm', /\d\d:\d\d/],
+                ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
+                ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
+                ['HHmmss', /\d\d\d\d\d\d/],
+                ['HHmm', /\d\d\d\d/],
+                ['HH', /\d\d/]
+            ];
+        },
+        _changeDesign: function () {
+            if (this.model.timeDrillDown.enabled) {
+                var state = this.model.timeDrillDown.showFooter ? "block" : "none";
+                this.popup.addClass("e-drill-down");
+                this._timeContainer.css("display", "none");
+                this._buttonContainer.css("display", "none");
+                this.datePicker.option("showFooter", this.model.timeDrillDown.showFooter);
+                bbdesigner$('.e-footer', this._sfTimeHour).css("display", state);
+                bbdesigner$('.e-footer', this._sfTimeMins).css("display", state);
+            }
+            else {
+                this.popup.removeClass("e-drill-down");
+                this._sfTimeHour.hide();
+                this._sfTimeMins.hide();
+                this._updateTimeHeight();
+                this._dateContainer.show();
+                this._timeContainer.show();
+                this._buttonContainer.show();
+                this.datePicker.option("showFooter", false);
+                this.timePicker._refreshScroller();
+                this.timePicker._changeActiveEle();
+            }
+        },
+        _initValidator: function () {
+            (!this.element.closest("form").data("validator")) && this.element.closest("form").validate();
+        },
+        _checkAttribute: function () {
+            this.model.value = this.model.value === "" ? this.element[0].value : this.model.value;
+            if (!this._options.minDateTime) this.model.minDateTime = this.element[0].min;
+            if (!this._options.maxDateTime) this.model.maxDateTime = this.element[0].max;
+            if (BoldBIDashboard.isNullOrUndefined(this._options.readOnly)) this.model.readOnly = this.element.is("[readonly]");
+            if (BoldBIDashboard.isNullOrUndefined(this._options.enabled)) this.model.enabled = !this.element.is("[disabled]");
+        },
+        _setValidation: function () {
+            this.element.rules("add", this.model.validationRules);
+            var validator = this.element.closest("form").data("validator");
+            validator = validator ? validator : this.element.closest("form").validate();
+            name = this.element.attr("name");
+            validator.settings.messages[name] = {};
+            for (var ruleName in this.model.validationRules) {
+                var message = null;
+                if (!BoldBIDashboard.isNullOrUndefined(this.model.validationRules[ruleName])) {
+                    if (!BoldBIDashboard.isNullOrUndefined(this.model.validationRules["messages"] && this.model.validationRules["messages"][ruleName]))
+                        message = this.model.validationRules["messages"][ruleName];
+                    else {
+                        validator.settings.messages[name][ruleName] = bbdesigner$.validator.messages[ruleName];
+                        for (var msgName in this.model.validationMessages)
+                            ruleName == msgName ? (message = this.model.validationMessages[ruleName]) : "";
+                    }
+                    validator.settings.messages[name][ruleName] = message != null ? message : bbdesigner$.validator.messages[ruleName];
+                }
+            }
+        },
+        _addAttr: function (htmlAttr) {
+            var proxy = this;
+            bbdesigner$.map(htmlAttr, function (value, key) {
+                var keyName = key.toLowerCase();
+                if (keyName == "class") proxy.wrapper.addClass(value);
+                else if (keyName == "disabled") proxy._enabled(false);
+                else if (keyName == "readOnly") proxy._readOnly(true);
+                else if (keyName == "style" || keyName == "id") proxy.wrapper.attr(key, value);
+                else if (BoldBIDashboard.isValidAttr(proxy.element[0], keyName)) proxy.element.attr(keyName, value);
+                else proxy.wrapper.attr(keyName, value);
+            });
+        },
+        _validateMeridian: function () {
+            var culture = BoldBIDashboard.preferredCulture(this.model.locale);
+            if (culture) this.model.locale = culture.name == "en" ? "en-US" : culture.name;
+            if (!BoldBIDashboard.isNullOrUndefined(this._options)) {
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.timeDrillDown)) {
+                    if (BoldBIDashboard.isNullOrUndefined(this._options.timeDrillDown.showMeridian))
+                        this.model.timeDrillDown.showMeridian = BoldBIDashboard.isNullOrUndefined(BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard["AM"]) ? false : true;
+                }
+                else this.model.timeDrillDown.showMeridian = BoldBIDashboard.isNullOrUndefined(BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard["AM"]) ? false : true;
+            }
+            else
+                this.model.timeDrillDown.showMeridian = BoldBIDashboard.isNullOrUndefined(BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard["AM"]) ? false : true;
+        },
+        _initialize: function () {
+            var val;
+            this.popup = null;
+            this.isPopupOpen = false;
+            this.isValidState = true;
+            this._localizedLabels = this._getLocalizedLabels();
+            if (!BoldBIDashboard.isNullOrUndefined(this._options)) {
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.buttonText))
+                    bbdesigner$.extend(this._localizedLabels.buttonText, this._options.buttonText);
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.watermarkText))
+                    this._localizedLabels.watermarkText = this._options.watermarkText;
+            }
+            this._localizedLabelToModel();
+            if (this.model.startDay == -1) this.model.startDay = BoldBIDashboard.preferredCulture(this.model.locale).calendar.firstDay;
+            this._isIE8 = (BoldBIDashboard.browserInfo().name == "msie") && (BoldBIDashboard.browserInfo().version == "8.0") ? true : false;
+            this._isIE9 = (BoldBIDashboard.browserInfo().name == "msie") && (BoldBIDashboard.browserInfo().version == "9.0") ? true : false;
+            if (!this.model.dateTimeFormat || !this.model.timeDisplayFormat) this._getDateTimeFormat();
+            if (!this.model.value || (typeof JSON === "object" && JSON.stringify(this.model.value) === "{}")) val = null;
+            else if (!(this.model.value instanceof Date)) {
+                var dateTimeObj = BoldBIDashboard.parseDate(this.model.value, this.model.dateTimeFormat, this.model.locale);
+                val = dateTimeObj ? dateTimeObj : (dateTimeObj = this._checkJSONString(this.model.value)) ? dateTimeObj : null;
+            }
+            else val = this.model.value;
+            if (val) this.model.value = val;
+            var min = this.model.minDateTime = this._stringToObject(this.model.minDateTime);
+            if (!min || !this._isValidDate(min)) this.model.minDateTime = this.defaults.minDateTime;
+            var max = this.model.maxDateTime = this._stringToObject(this.model.maxDateTime);
+            if (!max || !this._isValidDate(max)) this.model.maxDateTime = this.defaults.maxDateTime;
+        },
+        _checkJSONString: function (dateTimeString) {
+            // Validate the string value
+            var dateTimeObj = new Date(dateTimeString);
+            if (!isNaN(Date.parse(dateTimeObj))) {
+                if ((dateTimeObj.toJSON() === this.model.value) || (dateTimeObj.toGMTString() === this.model.value) ||
+                    (dateTimeObj.toISOString() === this.model.value) || (dateTimeObj.toLocaleString() === this.model.value) ||
+                    (dateTimeObj.toString() === this.model.value) || (dateTimeObj.toUTCString() === this.model.value))
+                    return dateTimeObj;
+                else if (typeof dateTimeString == "string") return this._dateFromISO(dateTimeString);
+            } else if (this._extISORegex.exec(dateTimeString) || this._basicISORegex.exec(dateTimeString)) return this._dateFromISO(dateTimeString);
+        },
+        _render: function () {
+            this._renderWrapper();
+            this._renderIcon();
+            this._setDimentions();
+            this._checkProperties();
+        },
+
+        _renderWrapper: function () {
+            this.element.addClass("e-input").attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', "tabindex": "0", 'role':'combobox','aria-expanded':'false' });
+            this.wrapper = BoldBIDashboard.buildTag("span.e-datetime-wrap e-widget " + this.model.cssClass + "#" + this.element[0].id + "_wrapper").insertAfter(this.element);
+            this._setValue(this.model.value);
+            this.wrapper.attr("style", this.element.attr("style"));
+            this.element.removeAttr("style");
+            if (!BoldBIDashboard.isTouchDevice()) this.wrapper.addClass('e-ntouch');
+            this.container = BoldBIDashboard.buildTag("span.e-in-wrap e-box").append(this.element);
+            this.wrapper.append(this.container);
+            if (!this._isSupport) {
+                this._hiddenInput = BoldBIDashboard.buildTag("input.e-input e-placeholder ", "", {}, { type: "text" }).insertAfter(this.element);
+                this._hiddenInput.val(this._localizedLabels.watermarkText);
+                this._hiddenInput.css("display", "block");
+                var proxy = this;
+                bbdesigner$(this._hiddenInput).focus(function () {
+                    proxy.element.focus();
+                });
+            }
+        },
+        _removeWatermark: function () {
+            if (this.element.val() != "" && !this._isSupport && this._hiddenInput)
+                this._hiddenInput.css("display", "none");
+        },
+        _renderIcon: function () {
+            if (!this.model.showPopupButton) return false;
+            this.datetimeIcon = BoldBIDashboard.buildTag("span.e-select", "", {}).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            var icon = BoldBIDashboard.buildTag("span.e-icon e-datetime", "", {}, { "aria-label": "select" }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this.datetimeIcon.append(icon);
+            this.container.append(this.datetimeIcon).addClass("e-padding");
+            this._on(this.datetimeIcon, "click", this._iconClick);
+            this._on(this.datetimeIcon, "mousedown", function (e) { e.preventDefault(); });
+        },
+        _setDimentions: function () {
+            if (!this.model.height) this.model.height = this.element.attr("height"); if (!this.model.width) this.model.width = this.element.attr("width");
+            this.wrapper.height(this.model.height);
+            this.wrapper.width(this.model.width);
+        },
+
+        _renderDropdown: function () {
+            var oldWrapper = bbdesigner$("#" + this.element[0].id + "_popup").get(0);
+            if (oldWrapper)
+                bbdesigner$(oldWrapper).remove();
+            this.popup = BoldBIDashboard.buildTag("div.e-datetime-popup e-popup e-widget e-box " + this.model.cssClass + "#" + this.element[0].id + "_popup").css("visibility", "hidden");
+            if (!BoldBIDashboard.isTouchDevice()) this.popup.addClass('e-ntouch');
+            bbdesigner$('body').append(this.popup);
+            this._renderControls();
+
+            var _timeTitle, _dateContainer, popupContainer, _today, _now, _done;
+
+            _timeTitle = BoldBIDashboard.buildTag("div.e-header", this._localizedLabels.buttonText.timeTitle).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._dateContainer = BoldBIDashboard.buildTag("div.e-datecontainer").append(this.datePicker.popup).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._timeContainer = BoldBIDashboard.buildTag("div.e-timecontainer").append(_timeTitle, this.timePicker.popup).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._drillDownContainer = BoldBIDashboard.buildTag("div.e-drillDowncontainer").append().attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            popupContainer = BoldBIDashboard.buildTag("div.e-popup-container").append(this._dateContainer, this._timeContainer, this._drillDownContainer).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+
+            _today = BoldBIDashboard.buildTag("div.e-dt-button e-dt-today e-btn e-select e-flat", this._localizedLabels.buttonText.today).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            _now = BoldBIDashboard.buildTag("div.e-dt-button e-dt-now e-btn e-select e-flat", this._localizedLabels.buttonText.timeNow).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            _done = BoldBIDashboard.buildTag("div.e-dt-button e-dt-done e-btn e-select e-flat", this._localizedLabels.buttonText.done).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._buttonContainer = BoldBIDashboard.buildTag("div.e-button-container").append(_today, _now, _done).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._renderDrillDown();
+            this.popup.append(popupContainer, this._buttonContainer);
+            this._checkForResponsive();
+            this._updateTimeHeight();
+
+            this._bindOperations();
+            this._updateValues();
+            this.popup.css({ "visibility": "visible", "display": "none" });
+
+            this._on(_today, "click", this._todayClick);
+            this._on(_now, "click", this._nowClick);
+            this._on(_done, "click", this._doneClick);
+            this.popup.on("mouseenter touchstart", bbdesigner$.proxy(function () { this._popClose = true; }, this));
+            this.popup.on("mouseleave touchend", bbdesigner$.proxy(function () { this._popClose = false; }, this));
+            this._changeDesign();
+        },
+        _renderControls: function () {
+            this._renderDateControl();
+            this._renderTimeControl();
+
+            var tempContainer = BoldBIDashboard.buildTag("span").append(this.datePicker.wrapper, this.timePicker.wrapper);
+            tempContainer.find("span").css("display", "none");
+            this.popup.append(tempContainer);
+        },
+        _renderDrillDown: function () {
+            this._renderHourPopup();
+            this._renderMinsPopup();
+        },
+        _renderHourPopup: function () {
+            var table;
+            this._sfTimeHour = BoldBIDashboard.buildTag('div.e-timepicker e-popup e-widget ' + this.model.cssClass + ' e-time-hours ', "", {}, { id: (this._id ? 'e-hours-' + this._id : "") }).attr({ 'aria-hidden': 'true' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+            if (!BoldBIDashboard.isTouchDevice()) this._sfTimeHour.addClass('e-ntouch');
+            this._drillDownContainer.append(this._sfTimeHour);
+            this._renderHourTable();
+        },
+        _renderHourTable: function () {
+            // Rendering header template
+            BoldBIDashboard.buildTag("div.e-header").attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                   .append(BoldBIDashboard.buildTag("span.e-prev").append(BoldBIDashboard.buildTag('a.e-icon e-arrow-sans-left').attr({ 'role': 'button' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                   .append(BoldBIDashboard.buildTag("span.e-text").append(BoldBIDashboard.buildTag("span.e-hours-headertext").text("October 2015").attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'role': 'heading' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                   .append(BoldBIDashboard.buildTag("span.e-next").append(BoldBIDashboard.buildTag('a.e-icon e-arrow-sans-right').attr({ 'role': 'button' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                   .appendTo(this._sfTimeHour);
+
+            // Render meridian calendar popup.
+            if (this._interval < 1) return false;
+            var start, end, timeVal, rowCount, table, tr, interval = this._interval * 60000;
+            var tableCount = this.model.timeDrillDown.showMeridian ? 2 : 1; rowCount = this.model.timeDrillDown.showMeridian ? 6 : 4;
+            var timeDisplayFormat = this.model.timeDrillDown.showMeridian ? "hh" : "HH:00";
+            var meridianText = ["AM", "PM"], count = 0, meridianClass = "";
+
+            start = this.timePicker._createObject("12:00:00 AM");
+            end = this.model.timeDrillDown.showMeridian ? this.timePicker._createObject("11:59:59 AM") : this.timePicker._createObject("11:59:59 PM");
+
+            for (var i = 0; i < tableCount; i++) {
+                if (this.model.timeDrillDown.showMeridian) {
+                    meridianClass = meridianText[i].toLowerCase();
+                    var txt = !BoldBIDashboard.isNullOrUndefined(BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard[meridianText[i]]) ? BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard[meridianText[i]][0] : "";
+                    BoldBIDashboard.buildTag("div.e-header-" + meridianClass).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                      .append(BoldBIDashboard.buildTag("span.e-text").append(BoldBIDashboard.buildTag("span.e-hours-meridiantxt-" + meridianClass).text(txt)
+                      .attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'role': 'heading' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                      .appendTo(this._sfTimeHour);
+                }
+
+                // Table for Time Value
+                table = BoldBIDashboard.buildTag("table.e-dp-viewhours", "", {}).data("e-table", "data").attr({ 'role': 'grid' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                this._sfTimeHour.append(table);
+
+                var tbody = BoldBIDashboard.buildTag('tbody.e-timepicker-hours').attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+
+                tr = BoldBIDashboard.buildTag('tr', "").attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+
+                while (this.timePicker._compareTime(end, start, true)) {
+                    timeVal = this._localizeTime(start, timeDisplayFormat);
+                    var tdtag = BoldBIDashboard.buildTag("td.e-hour e-state-default", timeVal);
+                    this.model.timeDrillDown.showMeridian && tdtag.addClass("e-hour-" + meridianClass);
+                    if (this._isIE8) tdtag.attr("unselectable", "on");
+                    tr.append(tdtag);
+                    count++;
+                    if (count >= rowCount) {
+                        count = 0;
+                        tbody.append(tr);
+                        tr = BoldBIDashboard.buildTag('tr', "").attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                    }
+                    start = this.timePicker._createObject(start).getTime() + interval;
+                }
+
+                //tbody.append(tr);
+                table.append(tbody);
+
+                if (this.model.timeDrillDown.showMeridian) {
+                    start = this.timePicker._createObject("12:00:00 PM");
+                    end = this.timePicker._createObject("11:59:59 PM");
+                }
+            }
+
+            // Rendering the footer template
+            BoldBIDashboard.buildTag("div.e-footer")
+              .append(BoldBIDashboard.buildTag("span.e-footer-icon"))
+              .append(BoldBIDashboard.buildTag("span.e-footer-text"))
+              .appendTo(this._sfTimeHour);
+            bbdesigner$('.e-footer-text', this._sfTimeHour).html(this._localizedLabels.buttonText.timeNow);
+            bbdesigner$(".e-hours-headertext", this._sfTimeHour).text(BoldBIDashboard.format(this.datePicker.model.value, "dd MMM yyyy"));
+
+            // Bind action to the item.
+            this._on(this._sfTimeHour.find('.e-hour'), "click", bbdesigner$.proxy(this._hourNavHandler, this));
+            this._on(bbdesigner$('.e-next', this._sfTimeHour), "click", bbdesigner$.proxy(this._prevNextHourHandler, this));
+            this._on(bbdesigner$('.e-prev', this._sfTimeHour), "click", bbdesigner$.proxy(this._prevNextHourHandler, this));
+            this._on(bbdesigner$('.e-footer', this._sfTimeHour), "click", this._todayBtn);
+            bbdesigner$('.e-hours-headertext', this._sfTimeHour).on("click", bbdesigner$.proxy(this._forwardNavHandler, this));
+
+            this._sfTimeHour.hide();
+        },
+        _localizeTime: function (value, format) {
+            return bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(value), format, this.model.locale));
+        },
+        _renderMinsPopup: function () {
+            this._sfTimeMins = BoldBIDashboard.buildTag('div.e-timepicker e-popup e-widget ' + this.model.cssClass + ' e-time-minitues ', "", {}, { id: (this._id ? 'e-time-minitues-' + this._id : "") }).attr({ 'aria-hidden': 'true' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+            if (!BoldBIDashboard.isTouchDevice()) this._sfTimeMins.addClass('e-ntouch');
+            this._drillDownContainer.append(this._sfTimeMins);
+
+            // Rendering header template
+            BoldBIDashboard.buildTag("div.e-header").attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                   .append(BoldBIDashboard.buildTag("span.e-prev").append(BoldBIDashboard.buildTag('a.e-icon e-arrow-sans-left').attr({ 'role': 'button' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                   .append(BoldBIDashboard.buildTag("span.e-text").append(BoldBIDashboard.buildTag("span.e-minitues-headertext").attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'role': 'heading' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                   .append(BoldBIDashboard.buildTag("span.e-next").append(BoldBIDashboard.buildTag('a.e-icon e-arrow-sans-right').attr({ 'role': 'button' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                   .appendTo(this._sfTimeMins);
+
+            // Meridian Header template
+            BoldBIDashboard.buildTag("div.e-mins-header").attr((this._isIE8) ? { 'unselectable': 'on' } : {})
+                          .append(BoldBIDashboard.buildTag("span.e-text").append(BoldBIDashboard.buildTag("span.e-minitues-meridiantxt").text("AM")
+                          .attr({ 'aria-atomic': 'true', 'aria-live': 'assertive', 'role': 'heading' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {})))
+                          .appendTo(this._sfTimeMins);
+
+            // Table for Time Value
+            var table = BoldBIDashboard.buildTag("table.e-dp-viewmins", "", {}).data("e-table", "data").attr({ 'role': 'grid' }).attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            this._sfTimeMins.append(table);
+
+            var tbody = BoldBIDashboard.buildTag('tbody.e-timepicker-mins').attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+
+            // Render Time value
+            if (this._intervall < 1) return false;
+            var start, end, timeVal, interval = this._interval * 60000;
+            start = this.timePicker._createObject("12:00:00 AM");
+            end = this.timePicker._createObject("11:59:59 PM");
+            var tr = BoldBIDashboard.buildTag('tr', "").attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            var count = 0;
+            while (this.timePicker._compareTime(end, start, true)) {
+                timeVal = this._localizeTime(start, "HH:00");
+                var tdtag = BoldBIDashboard.buildTag("td.e-mins e-state-default", timeVal);
+                if (this._isIE8)
+                    tdtag.attr("unselectable", "on");
+                tr.append(tdtag);
+                count++;
+                if (count >= 4) {
+                    count = 0;
+                    tbody.append(tr);
+                    tr = BoldBIDashboard.buildTag('tr', "").attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                }
+                start = this.timePicker._createObject(start).getTime() + interval;
+            }
+            //tbody.append(tr);
+            table.append(tbody);
+            bbdesigner$('.e-minitues-headertext', this._sfTimeMins).text(bbdesigner$('.e-hours-headertext', this._sfTimeHour).text());
+
+            // Rendering the footer template
+            BoldBIDashboard.buildTag("div.e-footer")
+               .append(BoldBIDashboard.buildTag("span.e-footer-icon"))
+               .append(BoldBIDashboard.buildTag("span.e-footer-text"))
+               .appendTo(this._sfTimeMins);
+            bbdesigner$('.e-footer-text', this._sfTimeMins).html(this._localizedLabels.buttonText.timeNow);
+            bbdesigner$(".e-minitues-headertext", this._sfTimeMins).text(BoldBIDashboard.format(this.datePicker.model.value, "dd MMM yyyy"));
+            !this.model.timeDrillDown.showMeridian && bbdesigner$(".e-mins-header", this._sfTimeMins).css("display", "none");
+
+            // Bind action to the item.
+            this._on(table.find('.e-mins'), "click", bbdesigner$.proxy(this._minsNavHandler, this));
+            this._on(bbdesigner$('.e-next', this._sfTimeMins), "click", bbdesigner$.proxy(this._prevNextMinsHandler, this));
+            this._on(bbdesigner$('.e-prev', this._sfTimeMins), "click", bbdesigner$.proxy(this._prevNextMinsHandler, this));
+            this._on(bbdesigner$('.e-footer', this._sfTimeMins), "click", this._todayBtn);
+            bbdesigner$('.e-minitues-headertext', this._sfTimeMins).on("click", bbdesigner$.proxy(this._forwardNavHandler, this));
+            this._sfTimeMins.hide();
+        },
+        _todayBtn: function () {
+            this._nowClick();
+            this._hideResult();
+        },
+        _hourNavHandler: function (e) {
+            var value;
+            if (this.model.readOnly || !this.model.enabled) return false;
+            if (e && bbdesigner$(e.target).hasClass("e-disable")) return false;
+            if (e && e.type) e.preventDefault();
+
+            bbdesigner$("table", this._sfTimeHour).find("td").removeClass("e-active");
+            bbdesigner$(e.target).addClass("e-active");
+
+            this._sfTimeHour.hide();
+            this._sfTimeMins.show();
+            this._addFocus(this._sfTimeMins);
+            if (this.model.timeDrillDown.showMeridian) {
+                var txt = bbdesigner$(e.target).hasClass("e-hour-am") ? "AM" : "PM";
+                value = bbdesigner$(e.target).text() + ":00 " + txt;
+            }
+            else
+                value = bbdesigner$(e.target).text();
+            this._generateMins(value);
+            var temp = new Date(this._datetimeValue.toString()).setMinutes(this.model.value.getMinutes());
+            var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(temp), "HH:mm", this.model.locale));
+            var val2 = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(temp), "HH:00", this.model.locale));
+            var index = (this.timePicker._parse(val) - this.timePicker._parse(val2)) / (this.model.timeDrillDown.interval * 60000);
+            index = Math.ceil(index);
+            this._hoverMins = this._setFocusByIndex("mins", index, this._sfTimeMins);
+        },
+        _minsNavHandler: function (e) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            if (e && bbdesigner$(e.target).hasClass("e-disable")) return false;
+            if (e && e.type) e.preventDefault();
+            bbdesigner$("table", this._sfTimeMins).find("td").removeClass("e-active").removeClass("e-state-hover");
+            bbdesigner$(e.target).addClass("e-active");
+            if (this.model.timeDrillDown.showMeridian) {
+                var value = bbdesigner$(e.target).text() + " " + BoldBIDashboard.format(this._datetimeValue, "tt", "en-US");
+                value = this.timePicker._localizeTime(value)
+            }
+            else
+                value = bbdesigner$(e.target).text();
+            this.timePicker.option("value", value);
+            this.datePicker.option("value", this._datetimeValue);
+            this._datetimeValue = new Date(this.model.value.toString());
+            this._updateInput();
+            this.model.timeDrillDown.autoClose && this._hideResult(e);
+        },
+        _generateMins: function (value) {
+            var minsTable = bbdesigner$('table', this._sfTimeMins);
+            minsTable.empty();
+            this.model.timeDrillDown.showMeridian ? bbdesigner$(".e-mins-header", this._sfTimeMins).show() : bbdesigner$(".e-mins-header", this._sfTimeMins).hide()
+            var displayFormat = this.model.timeDrillDown.showMeridian ? "hh:mm" : "HH:mm";
+            bbdesigner$('.e-minitues-headertext', this._sfTimeMins).text(bbdesigner$('.e-hours-headertext', this._sfTimeHour).text());
+            var tbody = BoldBIDashboard.buildTag('tbody.e-timepicker-mins').attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            var start, tr, end, timeVal, count = 0, interval = this.model.timeDrillDown.interval * 60000;
+            start = this.timePicker._createObject(value);
+            this._datetimeValue.setHours(start.getHours());
+            end = this.timePicker._createObject(start).getTime() + 59 * 60000;
+            tr = BoldBIDashboard.buildTag('tr', "").attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+            tbody.append(tr);
+            while (this.timePicker._compareTime(end, start, true)) {
+                if (count >= 4) {
+                    count = 0;
+                    tr = BoldBIDashboard.buildTag('tr', "").attr((this._isIE8) ? { 'unselectable': 'on' } : {});
+                    tbody.append(tr);
+                }
+                timeVal = this._localizeTime(start, displayFormat);
+                var tdtag = BoldBIDashboard.buildTag("td.e-mins e-state-default", timeVal);
+                if (this._isIE8)
+                    tdtag.attr("unselectable", "on");
+                tr.append(tdtag);
+                count++;
+                start = this.timePicker._createObject(start).getTime() + interval;
+            }
+            minsTable.append(tbody);
+            bbdesigner$(".e-mins-header", this._sfTimeMins).find('.e-minitues-meridiantxt').text(BoldBIDashboard.format(this._datetimeValue, "tt", this.model.locale))
+            this._disableRange("mins");
+            this._on(minsTable.find('.e-mins'), "click", bbdesigner$.proxy(this._minsNavHandler, this));
+        },
+        _prevNextHourHandler: function (event) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            event.preventDefault();
+            var element = (bbdesigner$(event.target).is('a')) ? bbdesigner$(event.target.parentNode) : bbdesigner$(event.target);
+            var progress = element.hasClass('e-prev') ? true : false;
+            this._processNextPrev(progress, this._sfTimeHour);
+        },
+        _prevNextMinsHandler: function (event) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            event.preventDefault();
+            var element = (bbdesigner$(event.target).is('a')) ? bbdesigner$(event.target.parentNode) : bbdesigner$(event.target);
+            var progress = element.hasClass('e-prev') ? true : false;
+            this._processNextPrev(progress, this._sfTimeMins);
+        },
+        _processNextPrev: function (progress, wrapper) {
+            if (progress && wrapper.find(".e-arrow-sans-left").hasClass("e-disable")) return false;
+            else if (!progress && wrapper.find(".e-arrow-sans-right").hasClass("e-disable")) return false;
+            var currentTable = bbdesigner$("table", wrapper), temp;
+            var incVal, tClassName = currentTable.get(0).className;
+            switch (tClassName) {
+                case "e-dp-viewhours":
+                    incVal = progress ? -1 : 1;
+                    this._datetimeValue.setDate(this._datetimeValue.getDate() + incVal);
+                    this._disableRange("hour");
+
+                    this._hoverHour = this._setFocusByIndex("hour", this._hoverHour, this._sfTimeHour);
+                    bbdesigner$(".e-hours-headertext", this._sfTimeHour).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+                    bbdesigner$(".e-minitues-headertext", this._sfTimeMins).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+                    break;
+                case "e-dp-viewmins":
+                    incVal = progress ? -1 : 1;
+                    this._datetimeValue.setHours(this._datetimeValue.getHours() + incVal);
+                    this._generateMins(bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this._datetimeValue), "HH:00", this.model.locale)));
+
+                    var temp = new Date(this._datetimeValue.toString()).setMinutes(this.model.value.getMinutes());
+                    var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(temp), "HH:mm", this.model.locale));
+                    var val2 = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(temp), "HH:00", this.model.locale));
+
+                    var index = (this.timePicker._parse(val) - this.timePicker._parse(val2)) / (this.model.timeDrillDown.interval * 60000);
+                    index = Math.ceil(index);
+
+                    this._disableRange("mins");
+
+                    this._hoverMins = this._setFocusByIndex("mins", index, this._sfTimeMins);
+
+                    bbdesigner$(".e-hours-headertext", this._sfTimeHour).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+                    bbdesigner$(".e-minitues-headertext", this._sfTimeMins).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+                    break;
+            }
+        },
+        _forwardNavHandler: function (event, table) {
+            if (this.model.readOnly || !this.model.enabled) return false;
+            var hclassName, proxy = this;
+            if (event) event.preventDefault();
+            if (event)
+                hclassName = bbdesigner$(event.currentTarget).get(0).className;
+            else
+                hclassName = table.find(".e-text>span").get(0).className;
+
+            switch (hclassName) {
+                case "e-hours-headertext":
+                    this._sfTimeHour.css("display", "none");
+                    this._dateContainer.css("display", "block");
+                    this._addFocus(this._dateContainer.find('.e-datepicker'));
+                    break;
+                case "e-minitues-headertext":
+                    this._sfTimeMins.css("display", "none");
+                    this._disableRange("hour");
+
+                    var start = this._localizeTime(this.timePicker._createObject("12:00:00 AM"), "HH:00")
+                    var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this._datetimeValue), "HH:00", this.model.locale));
+                    indx = (this.timePicker._parse(val) - this.timePicker._parse(start)) / (this._interval * 60000);
+                    indx = Math.floor(indx);
+
+                    this._hoverHour = this._setFocusByIndex("hour", indx, this._sfTimeHour);
+
+                    bbdesigner$(".e-hours-headertext", this._sfTimeHour).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+                    bbdesigner$(".e-minitues-headertext", this._sfTimeMins).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+                    this._sfTimeHour.css("display", "block");
+                    this._addFocus(this._sfTimeHour);
+                    break;
+            }
+        },
+        _renderDateControl: function () {
+            var dateInput = BoldBIDashboard.buildTag("input#" + this.element[0].id + "_date", "", {}, { "type": "text" });
+            this.popup.append(dateInput);
+            dateInput.BoldBIDashboardDatePicker({
+
+                height: "0px", width: "0px",
+                displayInline: true,
+                showDateIcon: false,
+                showFooter: this.model.timeDrillDown.enabled ? this.model.timeDrillDown.showFooter : false,
+                enableStrictMode: true,
+                buttonText: this._localizedLabels.buttonText.today,
+
+                minDate: this._stringToObject(this.model.minDateTime),
+                maxDate: this._stringToObject(this.model.maxDateTime),
+
+                dayHeaderFormat: this.model.dayHeaderFormat,
+                startLevel: this.model.startLevel,
+                depthLevel: this.model.depthLevel,
+                startDay: this.model.startDay,
+                stepMonths: this.model.stepMonths,
+                showOtherMonths: this.model.showOtherMonths,
+                headerFormat: this.model.headerFormat,
+
+                enabled: this.model.enabled,
+                enableRTL: this.model.enableRTL,
+                showRoundedCorner: this.model.showRoundedCorner,
+                readOnly: this.model.readOnly,
+                cssClass: this.model.cssClass,
+                locale: this.model.locale
+            });
+            if (!BoldBIDashboard.isNullOrUndefined(this.model.value))
+                this._datetimeValue = new Date(this.model.value.toString());
+            this.datePicker = dateInput.data("BoldBIDashboardDatePicker");
+            this._datetimeValue = new Date(this.datePicker._dateValue.toString());
+            this.model.startDay = this.datePicker.model.startDay;
+            this.datePicker._getInternalEvents = true;
+            this.datePicker._dt_drilldown = true;
+            this.datePicker.popup.css({ "position": "static", "display": "block" });
+        },
+        _renderTimeControl: function () {
+            var timeInput = BoldBIDashboard.buildTag("input#" + this.element[0].id + "_time", "", {}, { "type": "text" });
+            this.popup.append(timeInput);
+
+            timeInput.BoldBIDashboardTimePicker({
+                height: "0px", width: "0px",
+                interval: this.model.interval,
+                timeFormat: this.model.timeDisplayFormat,
+                popupWidth: this.model.timePopupWidth,
+                enabled: this.model.enabled,
+                enableRTL: this.model.enableRTL,
+                showRoundedCorner: this.model.showRoundedCorner,
+                readOnly: this.model.readOnly,
+                cssClass: this.model.cssClass,
+                locale: this.model.locale
+            });
+            this.timePicker = timeInput.data("BoldBIDashboardTimePicker");
+            this.timePicker._renderDropdown();
+            this.timePicker.popup.css({ "position": "static", "display": "block" });
+            this.timePicker._getInternalEvents = true;
+            this.timePicker.showDropdown = true;
+            this.timePicker._dateTimeInternal = true;
+            var min = (this.model.minDateTime) ? this._stringToObject(this.model.minDateTime) : this.defaults.minDateTime;
+            var max = (this.model.maxDateTime) ? this._stringToObject(this.model.maxDateTime) : this.defaults.maxDateTime;
+
+        },
+        _updateTimeHeight: function () {
+            var height = this.popup.find(".e-timecontainer .e-header").is(":visible") ? this.datePicker.popup.height() - this.popup.find(".e-header").height() : this.datePicker.popup.height();
+            height = this.popup.hasClass("e-dt-responsive") ? "98px" : height;
+            this.timePicker.option("popupHeight", height);
+        },
+
+        _bindOperations: function () {
+            var proxy = this;
+            this.datePicker.option("layoutChange", function () { proxy._updateTimeHeight(); });
+            this.datePicker.option("outOfRange", function () { proxy.isValidState = false; });
+            this.timePicker.option("outOfRange", function () { proxy.isValidState = false; });
+            this.datePicker.option("change", function (a) {
+                proxy._refreshTimes(a);
+            });
+            this.datePicker.option("select", function (e) {
+                proxy._updateInput(e);
+            });
+            this.datePicker.option("dt_drilldown", function (e) {
+                if (proxy.model.timeDrillDown.enabled) {
+                    proxy._updateInput(e);
+                    proxy._switchToDrilDown(e);
+                }
+            });
+            this.timePicker.option("select", function () { proxy._updateInput(); });
+        },
+        _switchToDrilDown: function (e) {
+            this._dateContainer.hide();
+            this._sfTimeHour.show();
+            this._addFocus(this._sfTimeHour);
+            var selected = new Date(this.model.value.toString());
+            this._datetimeValue = new Date(selected.setHours(this._datetimeValue.getHours(), this._datetimeValue.getMinutes(), this._datetimeValue.getSeconds(), this._datetimeValue.getMilliseconds()));
+
+            // To hide the hours that exceeds the min and max.
+            this._disableRange("hour");
+
+            var start = this._localizeTime(this.timePicker._createObject("12:00:00 AM"), "HH:00")
+            var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this._datetimeValue), "HH:00", this.model.locale));
+            var indx = (this.timePicker._parse(val) - this.timePicker._parse(start)) / (this._interval * 60000);
+            indx = Math.floor(indx);
+
+            this._hoverHour = this._setFocusByIndex("hour", indx, this._sfTimeHour);
+
+            bbdesigner$(".e-hours-headertext", this._sfTimeHour).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+            bbdesigner$(".e-minitues-headertext", this._sfTimeMins).text(BoldBIDashboard.format(this._datetimeValue, "dd MMM yyyy"));
+        },
+        _disableRange: function (view) {
+            var interval = view == "hour" ? this._interval : this.model.timeDrillDown.interval, table = view == "hour" ? this._sfTimeHour : this._sfTimeMins
+            var addClassName = view == "hour" ? "e-hide-hour e-disable" : "e-hide-mins e-disable";
+            table.find('tbody tr td.e-' + view).removeClass(addClassName);
+            table.find('.e-arrow-sans-left').removeClass("e-disable");
+            table.find('.e-arrow-sans-right').removeClass("e-disable");
+            var start = view == "hour" ? this._localizeTime(this.timePicker._createObject("12:00:00 AM"), "HH:00") :
+                this._localizeTime(bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this._datetimeValue), "HH:00", this.model.locale)), "HH:00");
+
+            if (this._compareDate(this.model.minDateTime, this._datetimeValue)) {
+                if (view == "mins")
+                    if (!(this.model.minDateTime.getHours() === this._datetimeValue.getHours())) return false;
+                var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this.model.minDateTime), "HH:mm", this.model.locale));
+                indx = (this.timePicker._parse(val) - this.timePicker._parse(start)) / (interval * 60000);
+                indx = view == "hour" ? Math.floor(indx) : Math.ceil(indx);
+                for (i = 0; i < indx; i++) {
+                    var allValues = table.find('tbody tr td.e-' + view), cell;
+                    cell = allValues[i];
+                    bbdesigner$(cell).addClass(addClassName);
+                }
+                table.find('.e-arrow-sans-left').addClass("e-disable");
+            }
+            if (this._compareDate(this.model.maxDateTime, this._datetimeValue)) {
+                if (view == "mins")
+                    if (!(this.model.maxDateTime.getHours() === this._datetimeValue.getHours())) return false;
+                var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this.model.maxDateTime), "HH:mm", this.model.locale));
+                indx = (this.timePicker._parse(val) - this.timePicker._parse(start)) / (interval * 60000);
+                indx = Math.floor(indx) + 1;
+                var length = table.find('tbody tr td.e-' + view).length
+                for (i = indx; i < length; i++) {
+                    var allValues = table.find('tbody tr td.e-' + view), cell;
+                    cell = allValues[i];
+                    bbdesigner$(cell).addClass(addClassName);
+                }
+                table.find('.e-arrow-sans-right').addClass("e-disable");
+            }
+        },
+        _setFocusByName: function (name, value, table) {
+            var allValues = table.find('tbody tr td.e-' + name), index, cell;
+            bbdesigner$(allValues).each(function (i, ele) {
+                if (ele.innerHTML == value) {
+                    index = i;
+                    return;
+                }
+            });
+            cell = allValues[index];
+            if (!cell) cell = allValues.last();
+            table.find('table td').removeClass("e-state-hover").removeClass('e-active');
+            if (!bbdesigner$(cell).hasClass("e-hide-" + name))
+                bbdesigner$(cell).addClass("e-state-hover");
+            this._setActiveState(name, table);
+            return index;
+        },
+
+        _setFocusByIndex: function (name, index, table) {
+            var allValues = table.find('tbody tr td.e-' + name), cell;
+            cell = allValues[index];
+            if (!cell) cell = allValues.last();
+            table.find('table td').removeClass("e-state-hover").removeClass('e-active');
+            if (!bbdesigner$(cell).hasClass("e-hide-" + name))
+                bbdesigner$(cell).addClass("e-state-hover");
+            this._setActiveState(name, table);
+            return index;
+        },
+
+        _setActiveState: function (selection, table) {
+            var items = table.find('tbody tr td.e-' + selection), cell, proxy = this;
+            var indx = -1;
+            switch (selection) {
+                case "hour":
+                    if (this._compareDate(this.model.value, this._datetimeValue)) {
+
+                        var start = this._localizeTime(this.timePicker._createObject("12:00:00 AM"), "HH:00")
+                        var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(this.model.value), "HH:00", this.model.locale));
+                        indx = (this.timePicker._parse(val) - this.timePicker._parse(start)) / (this._interval * 60000);
+                        indx = Math.floor(indx);
+
+                    }
+                    break;
+                case "mins":
+                    if (this._compareDate(this.model.value, this._datetimeValue) && (this.model.value.getHours() === this._datetimeValue.getHours())) {
+
+                        var temp = new Date(this._datetimeValue.toString()).setMinutes(this.model.value.getMinutes());
+                        var val = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(temp), "HH:mm", this.model.locale));
+                        var val2 = bbdesigner$.trim(BoldBIDashboard.format(this.timePicker._createObject(temp), "HH:00", this.model.locale));
+
+                        indx = (this.timePicker._parse(val) - this.timePicker._parse(val2)) / (this.model.timeDrillDown.interval * 60000);
+                        indx = Math.ceil(indx);
+                    }
+                    break;
+            }
+            cell = items[indx];
+            if (cell) {
+                table.find('table td').removeClass("e-active");
+                bbdesigner$(cell).removeClass("e-state-hover").addClass("e-active");
+            }
+        },
+
+        _compareDate: function (first, second) {
+            var val1 = new Date(first.toString()).setHours(0, 0, 0, 0);
+            var val2 = new Date(second.toString()).setHours(0, 0, 0, 0);
+            var result = (+val1 === +val2) ? true : false;
+            return result;
+        },
+
+        _updateInput: function (e) {
+            var minVal = new Date().setHours(0, 0, 0, 0);
+            var date = this._getDate() || new Date(), time = this._getTime() || this.timePicker._createObject(minVal);
+            this.model.value = new Date(date.getFullYear(), date.getMonth(), date.getDate(),
+                time.getHours(), time.getMinutes(), time.getSeconds());
+            this._updateDateTime();
+            this._raiseChangeEvent();
+            this._updateModel(e, true);
+            if (e)
+                e.cancel = true;
+        },
+        _updateDateTime: function () {
+            this.isValidState = true;
+            var datetime = this._objectToString(this.model.value);
+            this.element.val(datetime);
+            this._removeWatermark();
+        },
+        _refreshTimes: function (args) {
+            var value = this._getDateObj(args.value, this.datePicker.model.dateFormat);
+            if (!value) return false;
+            this.isValidState = true;
+
+            if (this._compare(value, this._setEmptyTime(this.model.minDateTime))) {
+                var mintime = this._getFormat(this.model.minDateTime, this.timePicker.model.timeFormat);
+                var preTime = this._getTime();
+                this.timePicker.option("minTime", mintime);
+                if (!this.model.enableStrictMode) {
+                    this._updateInput();
+                }
+            }
+            else
+                this.timePicker.option("minTime", this._defaultMinVal());
+
+            if (this._compare(value, this._setEmptyTime(this.model.maxDateTime))) {
+                var maxtime = this._getFormat(this.model.maxDateTime, this.timePicker.model.timeFormat);
+                var preTime = this._getTime();
+                this.timePicker.option("maxTime", maxtime);
+                if (!this.model.enableStrictMode) {
+                    this._updateInput();
+                }
+            }
+            else
+                this.timePicker.option("maxTime", this._defaultMaxVal());
+
+            this.timePicker._changeActiveEle();
+        },
+
+        _defaultMinVal: function () {
+            var minVal = new Date().setHours(0, 0, 0, 0);
+            var minTimeVal = BoldBIDashboard.format(this.timePicker._createObject(minVal), this.timePicker.model.timeFormat, this.timePicker.model.locale);
+            return minTimeVal;
+        },
+        _defaultMaxVal: function () {
+            var maxval = new Date().setHours(23, 59, 59, 59);
+            var maxTimeVal = BoldBIDashboard.format(this.timePicker._createObject(maxval), this.timePicker.model.timeFormat, this.timePicker.model.locale);
+            return maxTimeVal;
+        },
+        _updateValues: function () {
+            var dateValue = this.model.value;
+            if (this.model.value != null) {
+                this.datePicker.option("value", this.model.value);
+                this.timePicker.option("value", this.model.value);
+            }
+            this._setValue(dateValue);
+            this._validateMinMax();
+            this._preVal = this.element.val();
+            this._checkErrorClass();
+        },
+        _specificFormat: function () {
+            var parseInfo = BoldBIDashboard.globalize._getDateParseRegExp(BoldBIDashboard.globalize.findCulture(this.model.locale).calendar, this.model.dateFormat);
+            return (bbdesigner$.inArray("dddd", parseInfo.groups) > -1 || bbdesigner$.inArray("ddd", parseInfo.groups) > -1)
+        },
+        _changeEditable: function (bool) {
+            var action = bool ? "_on" : "_off";
+            if (this.element.is(":input")) {
+                if (bool) {
+                    if (!this.model.readOnly) this.element.attr("readonly", false);
+                    this.element.off("mousedown", bbdesigner$.proxy(this._showhidePopup, this));
+                }
+                else {
+                    if (!this.model.readOnly) this.element.attr("readonly", "readonly");
+                    this.element.on("mousedown", bbdesigner$.proxy(this._showhidePopup, this));
+                }
+                this[action](this.element, "blur", this._targetBlur);
+                this[action](this.element, "focus", this._targetFocus);
+                this[action](this.element, "keydown", this._keyDownOnInput);
+            }
+            this._change("allowEdit", bool);
+        },
+        _setValue: function (value) {
+            if (!value || (typeof JSON === "object" && JSON.stringify(value) === "{}")) {
+                this.element.val("");
+                this.model.value = null;
+                this.isValidState = true;
+                this.wrapper.removeClass('e-valid');
+            }
+            else if (typeof value === "string") {
+                if (this._extISORegex.exec(value) || this._basicISORegex.exec(value)) this._checkObject(this._dateFromISO(value));
+                else {
+                    this.element.val(value);
+                    this._updateModel();
+                    this._validateMinMax();
+                    this._checkStrictMode();
+                    this.wrapper.addClass('e-valid');
+                }
+            }
+            else if (value instanceof Date && this._isValidDate(value)) {
+                this._checkObject(value);
+            }
+            this._checkErrorClass();
+            return this.model.value;
+        },
+        _checkObject: function (value) {
+            if (value instanceof Date && this._isValidDate(value)) {
+                this.model.value = value;
+                this._updateDateTime();
+                this._validateMinMax();
+                this._checkStrictMode();
+            }
+        },
+        _dateFromISO: function (date) {
+            var result = this._extISORegex.exec(date) || this._basicISORegex.exec(date), dateFormat = '', timeFormat = '', zeroFormat = '', format;
+            if (result) {
+                for (var i = 0; i < this._dates.length; i++) {
+                    if (this._dates[i][1].exec(result[1])) {
+                        dateFormat = this._dates[i][0];
+                        break;
+                    }
+                }
+                if (result[3]) {
+                    for (var k = 0; k < this._times.length; k++) {
+                        if (this._times[k][1].exec(result[3])) {
+                            // result[2] should be 'T' (time) or space
+                            timeFormat = (result[2] || ' ') + this._times[k][0];
+                            break;
+                        }
+                    }
+                }
+                if (result[4]) if (this._zeroRegex.exec(result[4])) zeroFormat = 'Z';
+                format = dateFormat + timeFormat + zeroFormat;
+                var token = format.match(this._tokens), input, val = [], literal, char;
+                for (var j = 0; j < token.length; j++) {
+                    var str = token[j];
+                    literal = this._checkLiteral(token[j]);
+                    var rg = this._numberRegex[literal ? token[j].toLowerCase() : str.length] || new RegExp('^\\d{1,' + str.length + '}');
+                    input = date.match(rg);
+                    if (input) {
+                        if (date.substr(0, date.indexOf(input)) >= 0 && !literal) token[j].indexOf('M') >= 0 ? val.push(parseInt(input[0]) - 1) : val.push(parseInt(input[0]));
+                        date = date.slice(date.indexOf(input[0]) + input[0].length);
+                    }
+                }
+                //if you want to get the value in UTC format use the "new Date(Date.UTC.apply(null, val)"
+                //return the date object value as exact as given input value
+                //new Date(year, month, day, hour, minute, seconds);
+                return result[4] == "Z" ? new Date(Date.UTC.apply(null, val)) : new Date(val[0], val[1], val[2], val[3], val[4], val[5]);
+            }
+            else {
+                return new Date(date + "");
+            }
+        },
+        _checkLiteral: function (str) {
+            char = str.toLowerCase();
+            return (char == 't' || char == 'z' || char == ':' || char == '-') ? true : false;
+        },
+        _validateValue: function (value) {
+            var dateObj = BoldBIDashboard.parseDate(value, this.model.dateTimeFormat);
+            if (!dateObj || dateObj < this.model.minDateTime || dateObj > this.model.maxDateTime) {
+                this.model.value = null;
+                this._change("value", this.model.value);
+                this.isValidState = false;
+            }
+            else {
+                this._change("value", this.model.value);
+                this.isValidState = true;
+            }
+        },
+        _validateMinMax: function () {
+            var value, min, max;
+            value = (this.model.value) ? this._stringToObject(this.model.value) : null;
+            min = (this.model.minDateTime) ? this._stringToObject(this.model.minDateTime) : this.defaults.minDateTime;
+            max = (this.model.maxDateTime) ? this._stringToObject(this.model.maxDateTime) : this.defaults.maxDateTime;
+            if (!value || !min || !max) return false;
+            if (min > max) this.model.minDateTime = this.model.maxDateTime;
+            if (value < min) {
+                if (!this.model.enableStrictMode) {
+                    this._setValue(min);
+                    this.isValidState = true;
+                }
+                else if (this.model.enableStrictMode) {
+                    this.datePicker.option('minDate', this._getFormat(min, this.datePicker.model.dateFormat));
+                    this.timePicker.option('minTime', this._getFormat(min, this.timePicker.model.timeFormat));
+                    this.isValidState = false;
+                }
+            }
+            if (value > max) {
+                if (!this.model.enableStrictMode) {
+                    this._setValue(max);
+                    this.isValidState = true;
+                }
+                else if (this.model.enableStrictMode) {
+                    this.datePicker.option('maxDate', this._getFormat(max, this.datePicker.model.dateFormat));
+                    this.timePicker.option('maxTime', this._getFormat(max, this.timePicker.model.timeFormat));
+
+                    this.isValidState = false;
+
+                }
+            }
+
+            if (!(value < min) && !(value > max)) this.isValidState = true;
+        },
+
+        _checkProperties: function () {
+            this.model.readOnly && this._readOnly(true);
+            this.model.showRoundedCorner && this._setRoundedCorner(true);
+            this.model.enableRTL && this._setRtl(true);
+            this.model.enabled && this._enabled(true);
+            if (!this.model.enabled) this._enabled(false);
+            else if (this.model.enabled && this.element.hasClass("e-disable")) this._enabled(true);
+            this.model.name = !this._options.name ? !this.element.attr("name") ? this.element[0].id : this.element.attr("name") : this.model.name;
+            this.element.attr("name", this.model.name);
+            this._checkStrictMode();
+            this._checkErrorClass();
+            this._setWaterMark();
+        },
+
+        _checkStrictMode: function () {
+            if (!this.model.enableStrictMode) {
+                if (!this.isValidState) {
+                    if (this.model.value < this.model.minDateTime) {
+                        this.element.val(this._objectToString(this.model.minDateTime));
+                        this.model.value = this.model.minDateTime;
+                        this.isValidState = true;
+                    }
+                    else if (this.model.value > this.model.maxDateTime) {
+                        this.element.val(this._objectToString(this.model.maxDateTime));
+                        this.model.value = this.model.maxDateTime;
+                        this.isValidState = true;
+                    }
+                    else {
+                        this.model.value = "";
+                        this.element.val("");
+                        this.isValidState = true;
+                    }
+                }
+            }
+            else if (this.model.enableStrictMode) {
+                if (!this.isValidState) {
+
+                    this.model.value = null;
+                    this.isValidState = false;
+                }
+            }
+        },
+
+        _targetFocus: function (e) {
+            e.preventDefault();
+            this.isFocused = true;
+            this.wrapper.addClass("e-focus");
+            this.wrapper.removeClass("e-error");
+            if (!this._isSupport) this._hiddenInput.css("display", "none");
+            this._prevDateTimeVal = this.element.val();
+            if (!this.model.showPopupButton && !this.model.readOnly) this._showResult();
+            if (!this.model.showPopupButton) this._on(this.element, "click", this._elementClick);
+            if (!this.model.showPopupButton && this.model.readOnly) this._off(this.element, "click", this._elementClick);
+            this._trigger("focusIn", { value: this.model.value });
+            this.wrapper.addClass('e-valid');
+        },
+        _targetBlur: function () {
+            this.isFocused = false;
+            this.wrapper.removeClass("e-focus");
+            if (!this.model.showPopupButton) this._hideResult();
+            var dateObj = BoldBIDashboard.parseDate(this.element.val(), this.model.dateTimeFormat, this.model.locale);
+            if (dateObj && !this.model.enableStrictMode) {
+                if (dateObj < this.model.minDateTime || dateObj > this.model.maxDateTime) {
+                    dateObj = dateObj < this.model.minDateTime ? this.model.minDateTime : this.model.maxDateTime;
+                    this.element.val(this._objectToString(dateObj));
+                }
+            }
+            var val = BoldBIDashboard.parseDate(this.element.val(), this.model.dateTimeFormat, this.model.locale);
+            if (val == null && !this.model.enableStrictMode) {
+                if (this._prevDateTimeVal == null || this.element.val() == "") {
+                    this.element.val("");
+                } else
+                    this.element.val(this._preVal);
+            }
+            this._valueChange();
+            if (!this.model.enableStrictMode) {
+                if (!this.isValidState) {
+                    this.element.val(this._prevDateTimeVal);
+                    this._preVal = this._prevDateTimeVal;
+                    this.model.value = this._stringToObject(this._prevDateTimeVal);
+                    this.isValidState = true;
+                }
+                else
+                    this._prevDateTimeVal = this.element.val();
+            } else if (this.element.val() != "")
+                this._validateValue(this.element.val());
+            if (!this._isSupport && this.element.val() == "")
+                this._hiddenInput.css("display", "block");
+            this._checkErrorClass();
+            if (!this.model.showPopupButton) this._off(this.element, "click", this._elementClick);
+            this._trigger("focusOut", { value: this.model.value });
+            (BoldBIDashboard.isNullOrUndefined(this.model.value)) ? this.wrapper.removeClass('e-valid') : this.wrapper.addClass('e-valid');
+            this._previousDateUpdate();
+        },
+        _previousDateUpdate: function () {
+            var previous = BoldBIDashboard.parseDate(this._prevDateTime, this.model.dateTimeFormat);
+            var current = BoldBIDashboard.parseDate(this.element.val(), this.model.dateTimeFormat);
+            if (!(+previous === +current)) {
+                this._preValString = this._prevDateTime;
+                this._prevDateTime = this.element.val();
+            }
+            return this._preValString;
+        },
+        _elementClick: function () {
+            if (!this.isPopupOpen) this._showResult();
+        },
+        _keyDownOnInput: function (e) {
+            switch (e.keyCode) {
+                case 40:
+                    if (e.altKey) this._showhidePopup();
+                    break;
+                case 37:
+                case 39:
+                    if (!this.model.timeDrillDown.enabled)
+                        if (e.altKey && this.isPopupOpen) {
+                            e.preventDefault();
+                            this._addPrevNextFocus(e.keyCode == 37);
+                        }
+                    break;
+                case 27:
+                    e.preventDefault();
+                case 9:
+                    this._hideResult();
+                    break;
+                case 13:    // Enter Key
+                    var val = BoldBIDashboard.parseDate(this.element.val(), this.model.dateTimeFormat);
+                    if (val == null && !this.model.enableStrictMode) {
+                        if (this._prevDateTimeVal == null || this.element.val() == "") {
+                            this.element.val("");
+                        } else
+                            this.element.val(this._preVal);
+                    }
+                    this._valueChange();
+                    if (!this.model.timeDrillDown.enabled) {
+                        this._valueChange();
+                        if (this.model.enableStrictMode)
+                            this._checkErrorClass();
+                        break;
+                    }
+            }
+        },
+        _addFocus: function (target) {
+            if (!target.hasClass("e-focus")) {
+                this._removeFocus();
+                target.addClass("e-focus");
+                if (target.hasClass("e-datepicker e-popup"))
+                    bbdesigner$(document).on("keydown", bbdesigner$.proxy(this.datePicker._keyboardNavigation, this.datePicker));
+                else if (target.hasClass("e-timecontainer"))
+                    bbdesigner$(document).on("keydown", bbdesigner$.proxy(this.timePicker._keyDownOnInput, this.timePicker));
+                else if (target.hasClass("e-time-hours"))
+                    bbdesigner$(document).on("keydown", bbdesigner$.proxy(this._keyDownOnHours, this));
+                else if (target.hasClass("e-time-minitues"))
+                    bbdesigner$(document).on("keydown", bbdesigner$.proxy(this._keyDownOnMinutes, this));
+                else if (target.hasClass("e-dt-button"))
+                    bbdesigner$(document).on("keydown", bbdesigner$.proxy(this._buttonClick, this));
+            }
+        },
+        _removeFocus: function () {
+            var target = this._getFocusedElement();
+            if (target.length > 0) {
+                target.removeClass("e-focus");
+                if (target.hasClass("e-datepicker e-popup"))
+                    bbdesigner$(document).off("keydown", bbdesigner$.proxy(this.datePicker._keyboardNavigation, this.datePicker));
+                else if (target.hasClass("e-timecontainer"))
+                    bbdesigner$(document).off("keydown", bbdesigner$.proxy(this.timePicker._keyDownOnInput, this.timePicker));
+                else if (target.hasClass("e-time-hours"))
+                    bbdesigner$(document).off("keydown", bbdesigner$.proxy(this._keyDownOnHours, this));
+                else if (target.hasClass("e-time-minitues"))
+                    bbdesigner$(document).off("keydown", bbdesigner$.proxy(this._keyDownOnMinutes, this));
+                else if (target.hasClass("e-dt-button"))
+                    bbdesigner$(document).off("keydown", bbdesigner$.proxy(this._buttonClick, this));
+            }
+        },
+        _addPrevNextFocus: function (flag) {
+            // flag true means previous focus, false means next focus
+            var target = this._getFocusedElement(), next;
+            if (target.length > 0) {
+                if (target.hasClass("e-datepicker e-popup"))
+                    next = flag ? this.popup.find(".e-dt-done") : this.popup.find(".e-timecontainer");
+                else if (target.hasClass("e-timecontainer"))
+                    next = flag ? this.popup.find(".e-datecontainer >.e-datepicker.e-popup") : this.popup.find(".e-dt-today");
+                else if (target.hasClass("e-dt-today"))
+                    next = flag ? this.popup.find(".e-timecontainer") : this.popup.find(".e-dt-now");
+                else if (target.hasClass("e-dt-now"))
+                    next = flag ? this.popup.find(".e-dt-today") : this.popup.find(".e-dt-done");
+                else if (target.hasClass("e-dt-done"))
+                    next = flag ? this.popup.find(".e-dt-now") : this.popup.find(".e-datecontainer >.e-datepicker.e-popup");
+            }
+            else next = flag ? this.popup.find(".e-dt-done") : this.popup.find(".e-datecontainer >.e-datepicker.e-popup");
+            this._addFocus(next);
+        },
+        _getFocusedElement: function () {
+            return this.popup.children("div").find("div.e-focus")
+        },
+        _keyDownOnHours: function (e) {
+            if ((e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 36 || e.keyCode == 35)) {
+                e.preventDefault && e.preventDefault();
+                var t = { row: null, col: null };
+
+                t.col = this._sfTimeHour.find('tbody tr td.e-state-hover').index();
+                t.row = this._sfTimeHour.find('tbody tr td.e-state-hover').parent().index();
+
+                if (t.col != -1)
+                    t.col = t.col + 1;
+                else
+                    t.col = this._sfTimeHour.find('tbody tr td.e-active').index() + 1;
+
+
+                if (t.row != -1) {
+                    t.row = t.row + 1;
+                    if (this.model.timeDrillDown.showMeridian && this._sfTimeHour.find('tbody tr td.e-state-hover').hasClass('e-hour-pm'))
+                        t.row = t.row + 2;
+                }
+                else {
+                    t.row = this._sfTimeHour.find('tbody tr td.e-active').parent().index() + 1;
+                    if (this.model.timeDrillDown.showMeridian && this._sfTimeHour.find('tbody tr td.e-active').hasClass('e-hour-pm'))
+                        t.row = t.row + 2;
+                }
+
+                var tableClass = this._sfTimeHour.find('table')[0].className, next;
+                rowLength = this._sfTimeHour.find('tbody.e-timepicker-hours tr').length, colLength = this.model.timeDrillDown.showMeridian ? 6 : 4;
+                next = this._changeRowCol(t, e.keyCode, rowLength, colLength, "hours", e.ctrlKey);
+                if (!e.ctrlKey) this._hoverHour = this._sfTimeHour.find('tbody.e-timepicker-hours tr td').index(next);
+
+                if (!e.ctrlKey) {
+                    this._sfTimeHour.find('table td').removeClass("e-state-hover");
+                    next.addClass("e-state-hover");
+                }
+            }
+        },
+
+        _changeRowCol: function (t, key, rows, cols, target, ctrlKey) {
+            var eleClass, table, cls = { parent: null, child: null };
+            switch (target) {
+                case "hours": eleClass = "tbody.e-timepicker-hours tr td.e-hour";
+                    cls.parent = ".e-timepicker-hours", cls.child = ".e-hour";
+                    hiddenClass = ".e-hide-hour";
+                    table = this._sfTimeHour;
+                    break;
+                case "mins": eleClass = "tbody.e-timepicker-mins tr td.e-mins";
+                    cls.parent = ".e-timepicker-mins", cls.child = ".e-mins";
+                    hiddenClass = ".e-hide-mins";
+                    table = this._sfTimeMins;
+                    cols = table.find('tbody' + cls.parent + ' tr:nth-child(' + t.row + ') td' + cls.child).length;
+                    break;
+
+            }
+            if (t.row <= 0 && t.col <= 0)
+                return table.find(eleClass + ':not(.e-disable):first');
+            var cell, proxy = this;
+            switch (key) {
+                case 36:
+                    return table.find(eleClass + ':not(.e-disable):first');
+                case 35:
+                    return table.find(eleClass + ':not(.e-disable):last');
+                case 38:
+                    if (ctrlKey) {
+                        this._forwardNavHandler(null, table);
+                    }
+                    else if (t.row > 1) {
+                        t.row -= 1;
+                    }
+                    else {
+                        this._processNextPrev(true, table);
+                        cell = table.find(eleClass + ':nth-child(' + t.col + '):last');
+                        return cell;
+                    }
+                    cell = this._getCell(t, cls, table).not(hiddenClass);
+                    if (cell.length <= 0) {
+                        cell = this._findVisible(t, cls, "up", table);
+                        if (cell !== null) return cell;
+                        this._processNextPrev(true, table);
+                        cell = table.find(eleClass + ':nth-child(' + t.col + '):last');
+                    }
+                    return cell;
+                case 37:
+                    if (ctrlKey) {
+                        this._processNextPrev(true, table);
+                        return table.find('tbody tr td.e-state-hover');
+                    }
+                    else if (t.col > 1)
+                        t.col -= 1;
+                    else if (t.row > 1) {
+                        t = { row: t.row - 1, col: cols }
+                        // different columns for the mins popup.
+                        if (target == "mins") t.col = cols = table.find('tbody' + cls.parent + ' tr:nth-child(' + t.row + ') td' + cls.child).length;
+                    }
+                    else {
+                        this._processNextPrev(true, table);
+                        cell = table.find(eleClass + ':not(.e-disable):last');
+                        return cell;
+                    }
+                    cell = this._getCell(t, cls, table).not(hiddenClass);
+                    if (cell.length <= 0) {
+                        cell = this._findVisible(t, cls, "left", table);
+                        if (cell !== null) return cell;
+                        this._processNextPrev(true, table);
+                        cell = table.find(eleClass + ':not(.e-disable):last');
+                    }
+                    return cell;
+                case 39:
+                    if (ctrlKey) {
+                        this._processNextPrev(false, table);
+                        return table.find('tbody tr td.e-state-hover');
+                    }
+                    else if (t.col < cols)
+                        t.col += 1;
+                    else if (t.row < rows) {
+                        t = { row: t.row + 1, col: 1 }
+                    }
+                    else {
+                        this._processNextPrev(false, table);
+                        cell = table.find(eleClass + ':not(.e-disable):first');
+                        return cell;
+                    }
+                    cell = this._getCell(t, cls, table).not(hiddenClass);
+                    if (cell.length <= 0) {
+                        cell = this._findVisible(t, cls, "right", table);
+                        if (cell !== null) return cell;
+                        this._processNextPrev(false, table);
+                        cell = table.find(eleClass + ':not(.e-disable):first');
+                    }
+                    return cell;
+                case 40:
+                    if (!ctrlKey) {
+                        if (t.row < rows) {
+                            t.row += 1;
+                        }
+                        else {
+                            this._processNextPrev(false, table);
+                            cell = table.find(eleClass + ':nth-child(' + t.col + '):first');
+                            return cell;
+                        }
+                        cell = this._getCell(t, cls, table).not(hiddenClass);
+                        if (cell.length <= 0) {
+                            cell = this._findVisible(t, cls, "down", table);
+                            if (cell !== null) return cell;
+                            this._processNextPrev(false, table);
+                            cell = table.find(eleClass + ':nth-child(' + t.col + '):first');
+                        }
+                        return cell;
+                    }
+                case 13:
+                    var ele, element;
+                    ele = this._getCell(t, cls, table); element = bbdesigner$(ele)[0];
+                    args = { type: null, target: ele };
+                    if (target == "hours") this._hourNavHandler(args);
+                    if (target == "mins") this._minsNavHandler(args);
+                    break;
+            }
+            return this._getCell(t, cls, table).not(hiddenClass);
+        },
+        _getCell: function (t, cls, table) {
+            var row = t.row;
+            if (this.model.timeDrillDown.showMeridian && t.row > 2 && table.hasClass('e-time-hours'))
+                row = row - 2;
+            var cell = table.find('tbody' + cls.parent + ' tr:nth-child(' + row + ') td' + cls.child + ':nth-child(' + t.col + ')');
+            if (this.model.timeDrillDown.showMeridian && cell.length > 0 && table.hasClass('e-time-hours'))
+                cell = t.row <= 2 ? bbdesigner$(cell[0]) : bbdesigner$(cell[1]);
+            return cell;
+        },
+        _findVisible: function (t, cls, key, table) {
+            var cols = t.col, rows = t.row, requiredClass = cls.child.slice(1, cls.child.length);
+            for (i = 0; i >= 0; i++) {
+                //nextElement = table.find('tbody' + cls.parent + ' tr:nth-child(' + rows + ') td:nth-child(' + cols + ')');
+                nextElement = this._getCell({ row: rows, col: cols }, cls, table)
+                if (nextElement.length <= 0) {
+                    return null;
+                }
+                if (nextElement.hasClass('e-disable') || !nextElement.is(":visible")) {
+                    key == "right" || key == "left" ? (key == "right" ? cols++ : cols--) : (key == "down" ? rows++ : rows--);
+                    if ((rows <= 0) || (rows > table.find('tbody' + cls.parent + ' tr').length)) {
+                        // No more rows there in popup.
+                        return null;
+                    }
+                    // Column exceeds the range. 
+                    if (cols > table.find('tbody' + cls.parent + ' tr:nth-child(' + rows + ') td').length) {
+                        //move to next row and select first column
+                        rows++;
+                        cols = 1;
+                    }
+                    if (cols <= 0) {
+                        //move to previous row and select last column
+                        rows--;
+                        cols = table.find('tbody' + cls.parent + ' tr:nth-child(' + rows + ') td').length;
+                    }
+                    // Row exceeds the range.
+                    if ((rows <= 0) || (rows > table.find('tbody' + cls.parent + ' tr').length)) {
+                        // No more rows there in popup.
+                        return null;
+                    }
+                } else if (nextElement.hasClass(requiredClass)) {
+                    t.col = cols; t.row = rows;
+                    nextElement = this._getCell(t, cls, table)
+                    return nextElement;
+                }
+            }
+        },
+        _keyDownOnMinutes: function (e) {
+            if ((e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 36 || e.keyCode == 35)) {
+                e.preventDefault && e.preventDefault();
+                var t = { row: null, col: null };
+
+                t.col = this._sfTimeMins.find('tbody tr td.e-state-hover').index();
+                t.row = this._sfTimeMins.find('tbody tr td.e-state-hover').parent().index();
+
+                t.col = (t.col != -1) ? t.col + 1 : this._sfTimeMins.find('tbody tr td.e-active').index() + 1;
+                t.row = (t.row != -1) ? t.row + 1 : this._sfTimeMins.find('tbody tr td.e-active').parent().index() + 1;
+
+                var tableClass = this._sfTimeMins.find('table')[0].className, next;
+                rowLength = this._sfTimeMins.find('tbody.e-timepicker-mins tr').length, colLength = 4;
+                next = this._changeRowCol(t, e.keyCode, rowLength, colLength, "mins", e.ctrlKey);
+                if (!e.ctrlKey) this._hoverHour = this._sfTimeMins.find('tbody.e-timepicker-mins tr td').index(next);
+
+                if (!e.ctrlKey) {
+                    this._sfTimeMins.find('table td').removeClass("e-state-hover");
+                    next.addClass("e-state-hover");
+                }
+            }
+        },
+        _valueChange: function (isCode) {
+            if (!this.model.enableStrictMode) {
+                if (this._preVal != this.element.val()) {
+                    this._preVal = this.element.val();
+                    this._updateModel();
+                    this._validateMinMax();
+                    this._raiseChangeEvent(isCode);
+                }
+                this._setWaterMark();
+            }
+            else if (this.model.enableStrictMode) {
+                if (this._preVal != this.element.val() || this.model.value < this.model.minDateTime || this.model.value > this.model.maxDateTime) {
+                    this._updateModel();
+                    this._raiseChangeEvent(isCode);
+                }
+            }
+        },
+        _updateModel: function (e, stopUpdateModel) {
+            if (this._stopRefresh) {
+                this._stopRefresh = false
+                return;
+            }
+            var value = this.element.val();
+            if (value == "") {
+                this.model.value = null;
+                this._change("value", this.model.value);
+                this.isValidState = true;
+            }
+            else {
+                var dateObj;
+                if (e != undefined && e.type == "select" || this._prevDateTimeVal == this.element.val()) dateObj = this.model.value;
+                else dateObj = BoldBIDashboard.parseDate(value, this.model.dateTimeFormat, this.model.locale);
+                if (dateObj) {
+                    this.model.value = dateObj;
+                    this.isValidState = true;
+                    if (!stopUpdateModel)
+                        this._refreshPopup();
+                    if (this._specificFormat() && this._prevDateTimeVal != this.element.val())
+                        this.element.val(this._objectToString(this.model.value));
+                }
+                else {
+                    this.model.value = null;
+                    this._change("value", this.model.value);
+                    this.isValidState = false;
+                    if (!this.model.enableStrictMode)
+                        this.element.val(this._objectToString(this.model.value));
+                }
+            }
+        },
+        _refreshPopup: function () {
+            if (this.isValidState && this.isPopupOpen) {
+                var date = this._setEmptyTime(this.model.value), time = this._setEmptyDate(this.model.value);
+                var getDate = this._getDate(), getTime = this._getTime();
+                if (!getDate || !this._compare(getDate, date)) this.datePicker.option("value", date);
+                if (!getTime || !this._compare(getTime, time)) this.timePicker.option("value", time);
+            }
+        },
+
+        _buttonClick: function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                var target = this._getFocusedElement();
+                if (target.hasClass("e-dt-today"))
+                    this._todayClick();
+                else if (target.hasClass("e-dt-now"))
+                    this._nowClick();
+                else if (target.hasClass("e-dt-done"))
+                    this._doneClick();
+            }
+        },
+        _todayClick: function () {
+            if (!this.model.enabled || this.model.readOnly) return false;
+            if (!this.datePicker.popup.find(".today").hasClass("e-active") ||
+                !this.datePicker.popup.children("table").hasClass("e-dp-viewdays") ||
+                this.element.val() == "" || !this.isValidState) {
+                this.datePicker._setCurrDate();
+                this._updateInput();
+            }
+        },
+        _nowClick: function () {
+            if (!this.model.enabled || this.model.readOnly) return false;
+            this.timePicker.setCurrentTime();
+            var mintime = this.model.minDateTime, maxtime = this.model.maxDateTime, date = this.datePicker.model.value, time = new Date();
+            date = BoldBIDashboard.isNullOrUndefined(date) ? new Date() : date;
+            var currTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes(), time.getSeconds());
+            if (currTime < mintime)
+                this.timePicker.option("value", this.timePicker._localizeTime(mintime));
+            else if (currTime > maxtime)
+                this.timePicker.option("value", this.timePicker._localizeTime(maxtime));
+            this._updateInput();
+        },
+        _doneClick: function () {
+            this._hideResult();
+        },
+
+        _iconClick: function (e) {
+            e.preventDefault();
+            if (!this.isFocused && (!BoldBIDashboard.isTouchDevice())) this.element.focus();
+            this._showhidePopup();
+            if (this._isIE9)
+                this.popup.find(".e-popup-container").css("display", "inline-block");
+        },
+        _setInitialSelection: function () {
+            var elements = this.timePicker.ul.find("li");
+            if (elements.hasClass('e-hover')) return;
+            var currentTime = this.timePicker._setEmptyDate(new Date()), selected;
+            selected = currentTime;
+            if (this.timePicker.minTime && !this._compareTime(this._createObject(currentTime), this.timePicker.minTime, true))
+                selected = this.timePicker.minTime;
+            if (this.timePicker.maxTime && !this._compareTime(this.timePicker.maxTime, this._createObject(currentTime), true))
+                selected = this.timePicker.maxTime;
+            var firstTime = elements.first().html(), index;
+            index = (this.timePicker._parse(selected) - this.timePicker._parse(firstTime)) / (this.timePicker.model.interval * 60000);
+            index = Math.round(index);
+            var activeItem = (index == elements.length) ? index : index + 1;
+            if (activeItem < 0 || activeItem > elements.length || isNaN(activeItem)) activeItem = 1;
+            var activeEle = bbdesigner$(this.timePicker.ul.find("li")[activeItem - 1]);
+            activeEle.addClass('e-hover');
+            this._calcScrollTop();
+        },
+        _calcScrollTop: function () {
+            var ulH = this.timePicker.ul.outerHeight(), liH = this.timePicker.ul.find("li").outerHeight(), index, top;
+            index = this.timePicker.ul.find("li.e-hover").index();
+            top = (liH * index) - ((this.timePicker.popupList.outerHeight() - liH) / 2);
+            this.timePicker.scrollerObj.setModel({ "scrollTop": top });
+        },
+        _showhidePopup: function () {
+            if (this.model.readOnly) return false;
+            if (!this.isPopupOpen)
+                this._showResult();
+            else
+                this._hideResult();
+        },
+        _showResult: function () {
+            if (!this.popup) this._renderDropdown();
+            if (this.isPopupOpen || !this.model.enabled) return false;
+            if (this._trigger("beforeOpen", { element: this.popup })) return false;
+            this.isPopupOpen = true;
+			this.element.attr({'aria-expanded':'true'})
+            this._setListPosition();
+            this._checkForResponsive();
+            var proxy = this;
+            this.popup.slideDown(this.model.enableAnimation ? 200 : 0, function () {
+                proxy._on(bbdesigner$(document), "mousedown", proxy._OnDocumentClick);
+                proxy.model.timeDrillDown.enabled && proxy._addFocus(proxy._dateContainer.find('.e-datepicker'));
+                if (!proxy.timePicker.model.value) proxy._setInitialSelection();
+            });
+            this._updateModel();
+            this._updateTimeHeight();
+            this._validateMinMax();
+            this._on(bbdesigner$(window), "resize", this._OnWindowResize);
+            this._on(BoldBIDashboard.getScrollableParents(this.wrapper), "scroll", this._hideResult);
+            this._on(BoldBIDashboard.getScrollableParents(this.wrapper), "touchmove", this._hideResult);
+            this._raiseEvent("open");
+            if (this._initial) {
+                this.timePicker._refreshScroller();
+                this.timePicker._changeActiveEle();
+                this._initial = false;
+            }
+            this.wrapper.addClass("e-active");
+        },
+        _hideResult: function (e) {
+			if ( e && (e.type == "touchmove" || e.type== "scroll")) {
+				if (bbdesigner$(e.target).parents("#"+this.popup[0].id).length > 0)
+				return;
+	        }
+            var proxy = this;
+            if (!this.isPopupOpen) return false;
+            if (this._trigger("beforeClose", { element: this.popup })) return false;
+            this.isPopupOpen = false;
+			this.element.attr({'aria-expanded':'false'})
+            this._removeFocus();
+            if (this._popClose && e && e.type != "click") {
+                this.isPopupOpen = true;
+                return;
+            }
+            this.popup.slideUp(this.model.enableAnimation ? 100 : 0, function () {
+                if (proxy.model) {
+                    if (proxy.model.timeDrillDown.enabled) {
+                        proxy._sfTimeHour.hide();
+                        proxy._sfTimeMins.hide();
+                        proxy._dateContainer.show();
+                    }
+                    if (!BoldBIDashboard.isNullOrUndefined(proxy.model.value))
+                        proxy._datetimeValue = new Date(proxy.model.value.toString());
+                }
+            });
+            this._raiseEvent("close");
+            this._off(bbdesigner$(document), "mousedown", this._OnDocumentClick);
+            this._off(bbdesigner$(window), "resize", this._OnWindowResize);
+            this._off(BoldBIDashboard.getScrollableParents(this.wrapper), "scroll", this._hideResult);
+            this._off(BoldBIDashboard.getScrollableParents(this.wrapper), "touchmove", this._hideResult);
+            this.wrapper.removeClass("e-active");
+        },
+
+        _setListPosition: function () {
+            var elementObj = this.wrapper, pos = this._getOffset(elementObj), winWidth,
+            winBottomHeight = bbdesigner$(document).scrollTop() + bbdesigner$(window).height() - (pos.top + bbdesigner$(elementObj).outerHeight()),
+            winTopHeight = pos.top - bbdesigner$(document).scrollTop(),
+            popupHeight = this.popup.outerHeight(),
+            popupWidth = this.popup.outerWidth(),
+            left = pos.left,
+            totalHeight = elementObj.outerHeight(),
+            border = (totalHeight - elementObj.height()) / 2,
+            maxZ = this._getZindexPartial(), popupmargin = 3,
+			popupPosition = this.model.popupPosition;
+            if (this.model.popupPosition == BoldBIDashboard.PopupPosition.Bottom)
+                var topPos = ((popupHeight < winBottomHeight || popupHeight > winTopHeight) ? pos.top + totalHeight + popupmargin : pos.top - popupHeight - popupmargin) - border;
+            else
+                var topPos = ((popupHeight > winTopHeight) ? pos.top + totalHeight + popupmargin : pos.top - popupHeight - popupmargin) - border;
+            winWidth = bbdesigner$(document).scrollLeft() + bbdesigner$(window).width() - left;
+            if (this.model.enableRTL || popupWidth > winWidth && (popupWidth < left + elementObj.outerWidth())) left -= this.popup.outerWidth() - elementObj.outerWidth();
+            this.popup.css({
+                "left": left + "px",
+                "top": topPos + "px",
+                "z-index": maxZ
+            });
+        },
+
+        _getOffset: function (ele) {
+            return BoldBIDashboard.util.getOffset(ele);
+        },
+
+        _OnDocumentClick: function (e) {
+            if (this.model) {
+                if (!bbdesigner$(e.target).is(this.popup) && !bbdesigner$(e.target).parents(".e-datetime-popup").is(this.popup) &&
+                    !bbdesigner$(e.target).is(this.wrapper) && !bbdesigner$(e.target).parents(".e-datetime-wrap").is(this.wrapper)) {
+                    this._hideResult();
+                }
+                else if (bbdesigner$(e.target).is(this.popup) || bbdesigner$(e.target).parents(".e-datetime-popup").is(this.popup)) {
+                    e.preventDefault();
+                    if (bbdesigner$(e.target).parents(".e-datepicker").length > 0) this._addFocus(bbdesigner$(e.target).parents(".e-datepicker"));
+                    else if (bbdesigner$(e.target).parents(".e-timecontainer").length > 0) this._addFocus(bbdesigner$(e.target).parents(".e-timecontainer"));
+                    else if (bbdesigner$(e.target).hasClass("e-dt-button")) this._addFocus(bbdesigner$(e.target));
+                    else if (bbdesigner$(e.target).parents(".e-time-hours").length > 0) this._addFocus(bbdesigner$(e.target).parents(".e-time-hours"));
+                    else if (bbdesigner$(e.target).parents(".e-time-minitues").length > 0) this._addFocus(bbdesigner$(e.target).parents(".e-time-minitues"));
+                    else this._removeFocus();
+                }
+            }
+        },
+        _OnWindowResize: function (e) {
+            this._setListPosition();
+            this._checkForResponsive();
+            this._updateTimeHeight();
+        },
+
+        _raiseChangeEvent: function (isCode) {
+            var previous = BoldBIDashboard.parseDate(this._prevDateTimeVal, this.model.dateTimeFormat);
+            var current = BoldBIDashboard.parseDate(this.element.val(), this.model.dateTimeFormat);
+            if (!(+previous === +current)) {
+                this._preVal = this.element.val();
+                var data = { prevDateTime: this._prevDateTimeVal, value: this.element.val(), isInteraction: !isCode, isValidState: this.isValidState };
+                this._trigger("_change", data);
+                data.value = bbdesigner$.trim(this.element.val()) == "" ? null : this.element.val();
+                this._trigger("change", data);
+                this._prevDateTimeVal = this.element.val();
+            }
+            else if ((this._prevDateTimeVal != this.element.val())) {
+                var data = { prevDateTime: this._prevDateTimeVal, value: this.element.val(), isValidState: this.isValidState };
+                this._prevDateTimeVal = this.element.val()
+                this._trigger("_change", data);
+            }
+        },
+        _raiseEvent: function (name) {
+            var dateStringVal = this._previousDateUpdate();
+            if (this.element != null && this.model[name])
+                return this._trigger(name, { prevDateTime: BoldBIDashboard.isNullOrUndefined(dateStringVal || this._preValString) ? '' : dateStringVal || this._preValString, value: this.element.val() });
+            return false;
+        },
+        _getDateTimeFormat: function () {
+            var pattern = BoldBIDashboard.preferredCulture(this.model.locale).calendar.patterns;
+
+            if (!this.model.dateTimeFormat) this.model.dateTimeFormat = pattern.d + " " + pattern.t;
+            if (!this.model.timeDisplayFormat) this.model.timeDisplayFormat = pattern.t;
+        },
+        _getZindexPartial: function () {
+            return BoldBIDashboard.util.getZindexPartial(this.element, this.popup);
+        },
+        _checkErrorClass: function () {
+            if (this.isValidState) this.wrapper.removeClass("e-error");
+            else this.wrapper.addClass("e-error");
+        },
+        _getDate: function () {
+            return this.datePicker.model.value;
+        },
+        _getTime: function () {
+            return this._getDateObj(this.timePicker.model.value, this.timePicker.model.timeFormat);
+        },
+        _setEmptyTime: function (date) {
+            var newDate = new Date(date);
+            newDate.setMilliseconds(0);
+            newDate.setSeconds(0);
+            newDate.setMinutes(0);
+            newDate.setHours(0);
+            return newDate;
+        },
+        _setEmptyDate: function (date) {
+            var newDate = new Date(date);
+            newDate.setDate(1);
+            newDate.setMonth(0);
+            newDate.setFullYear(2000);
+            return newDate;
+        },
+        _objectToString: function (obj) {
+            return this._getFormat(obj, this.model.dateTimeFormat);
+        },
+        _stringToObject: function (value) {
+            return this._getDateObj(value, this.model.dateTimeFormat);
+        },
+        _getFormat: function (value, format) {
+            if (value instanceof Date) {
+                var newFormat = this._checkFormat(format);
+                return BoldBIDashboard.format(value, newFormat, this.model.locale);
+            }
+            else return value;
+        },
+        _checkFormat: function (format) {
+            var proxy = this;
+            var dateFormatRegExp = this._regExp();
+            return format.replace(dateFormatRegExp, function (match) {
+                match = match === "/" ? BoldBIDashboard.preferredCulture(proxy.model.locale).calendars.standard['/'] !== "/" ? "'/'" : match : match;
+                return match;
+            });
+        },
+        _regExp: function () {
+            return /\/dddd|ddd|dd|d|MMMM|MMM|MM|M|yyyy|yy|HH|H|hh|h|mm|m|fff|ff|f|tt|ss|s|zzz|zz|z|gg|g|"[^"]*"|'[^']*'|[/]/g;
+        },
+        _getDateObj: function (value, format) {
+            if (typeof value === "string") {
+                var newFormat = this._checkFormat(format);
+                var temp = BoldBIDashboard.parseDate(value, newFormat, this.model.locale);
+                if (temp != null)
+                    return temp;
+                else {
+                    if (value != "" && value != null) {
+                        var dateregexp = /^\s*(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d).*Z\s*$/, month, datetimesplit = dateregexp.exec(value);
+                        var datevariable = new Date();
+                        if (datetimesplit) {
+                            datevariable = new Date();
+                            month = +datetimesplit[2];
+                            datevariable.setUTCFullYear(datetimesplit[1], month - 1, datetimesplit[3]);
+                            datevariable.setUTCHours(datetimesplit[4], datetimesplit[5], datetimesplit[6]);
+                            if (month != datevariable.getUTCMonth() + 1)
+                                datevariable.setTime();
+                        }
+                        if (this._isValidDate(datevariable))
+                            return datevariable;
+                    }
+                    else return null;
+                }
+            }
+            else return value;
+        },
+        _compare: function (obj1, obj2) {
+            return obj1 && obj2 && obj1.getTime() == obj2.getTime();
+        },
+        _isValidDate: function (dateObj) {
+            return dateObj && typeof dateObj.getTime === "function" && isFinite(dateObj.getTime());
+        },
+
+
+        _change: function (property, value) {
+            if (this.popup) {
+                this.datePicker.option(property, value);
+                this.timePicker.option(property, value);
+            }
+        },
+        _changeSkin: function (skin) {
+            this.wrapper.removeClass(this.model.cssClass).addClass(skin);
+            this.popup.removeClass(this.model.cssClass).addClass(skin);
+
+            this._change("cssClass", skin);
+        },
+        _localize: function (culture) {
+            this.model.locale = culture;
+            if (BoldBIDashboard.isNullOrUndefined(this._options.timeDisplayFormat))
+                this.model.timeDisplayFormat = "";
+            if (BoldBIDashboard.isNullOrUndefined(this._options.dateTimeFormat))
+                this.model.dateTimeFormat = "";
+            var meridianText = ["AM", "PM"];
+            this._getDateTimeFormat();
+            this.timePicker.option("timeFormat", this.model.timeDisplayFormat);
+            this._localizedLabels = this._getLocalizedLabels();
+            if (!BoldBIDashboard.isNullOrUndefined(this._options)) {
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.buttonText))
+                    bbdesigner$.extend(this._localizedLabels.buttonText, this._options.buttonText);
+                if (!BoldBIDashboard.isNullOrUndefined(this._options.watermarkText))
+                    this._localizedLabels.watermarkText = this._options.watermarkText;
+            }
+            this._localizedLabelToModel();
+            this._buttonText(this._localizedLabels.buttonText);
+            if (this.isValidState || (this.model.value instanceof Date && this._isValidDate(this.model.value)))
+                this.element.val(this._objectToString(this.model.value));
+            this._preVal = this.element.val();
+            this._change("locale", culture);
+            this.model.startDay = this.datePicker.model.startDay;
+            this._validateMeridian();
+            this._sfTimeHour.empty();
+            this._renderHourTable();
+
+            // Update the meridian support
+            if (this.model.timeDrillDown.showMeridian)
+                for (i = 0; i < 2; i++) {
+                    var txt = !BoldBIDashboard.isNullOrUndefined(BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard[meridianText[i]]) ? BoldBIDashboard.preferredCulture(this.model.locale).calendars.standard[meridianText[i]][0] : "";
+                    bbdesigner$("span.e-hours-meridiantxt-" + meridianText[i].toLowerCase(), this._sfTimeHour).text(txt);
+
+                }
+        },
+        _setWaterMark: function () {
+            if (this.element != null && this.element.hasClass("e-input")) {
+                if (this._localizedLabels.watermarkText && this.element.val() == "") {
+                    this.isValidState = true;
+                    this._checkErrorClass();
+                }
+                if ((!this._isSupport) && this.element.val() == "") {
+                    this._hiddenInput.css("display", "block").val(this._localizedLabels.watermarkText);
+                }
+                else {
+                    bbdesigner$(this.element).attr("placeholder", this._localizedLabels.watermarkText);
+                }
+                return true;
+            }
+        },
+        _localizedLabelToModel: function () {
+            this.model.watermarkText = this._localizedLabels.watermarkText;
+            this.model.buttonText = this._localizedLabels.buttonText;
+        },
+        _readOnly: function (boolean) {
+            this.model.readOnly = boolean;
+            if (boolean) this.element.attr("readonly", "readonly");
+            else this.element.prop("readonly", false);
+
+            this._change("readOnly", boolean);
+        },
+        _setRoundedCorner: function (boolean) {
+            if (boolean) {
+                this.container.addClass("e-corner");
+                if(this.popup)this.popup.addClass("e-corner");
+            }
+            else {
+                this.container.removeClass("e-corner");
+                if(this.popup) this.popup.removeClass("e-corner");
+            }
+            this.datePicker.option("showRoundedCorner", boolean);
+        },
+        _setRtl: function (boolean) {
+            if (boolean) {
+                this.wrapper.addClass("e-rtl");
+                if(this.popup) this.popup.addClass("e-rtl");
+            }
+            else {
+                this.wrapper.removeClass("e-rtl");
+                if(this.popup) this.popup.removeClass("e-rtl");
+            }
+
+            this._change("enableRTL", boolean);
+        },
+        _enabled: function (boolean) {
+            if (boolean) {
+                this.model.enabled = false;
+                this.enable();
+            }
+            else {
+                this.model.enabled = true;
+                this.disable();
+            }
+        },
+        _showButton: function (show) {
+            this.model.showPopupButton = show;
+            if (show) {
+                this.container.addClass("e-padding");
+                this._renderIcon();
+            }
+            else {
+                this.container.removeClass("e-padding");
+                this.datetimeIcon.remove();
+                this.datetimeIcon = null;
+            }
+        },
+        _buttonText: function (data) {
+            bbdesigner$.extend(this.model.buttonText, data);
+            this.popup.find(".e-dt-today").html(this.model.buttonText.today);
+            this.popup.find(".e-dt-now").html(this.model.buttonText.timeNow);
+            this.popup.find(".e-dt-done").html(this.model.buttonText.done);
+            this.popup.find(".e-timecontainer").find(".e-header").html(this.model.buttonText.timeTitle);
+        },
+        _checkForResponsive: function () {
+            if ((bbdesigner$(window).outerWidth() > 200) && (bbdesigner$(window).outerWidth() <= 500)) {
+                if (!this.popup.hasClass("e-dt-responsive")) {
+                    this.popup.addClass("e-dt-responsive");
+                    this.timePicker.option("popupWidth", this.datePicker.popup.outerWidth());
+                    this.timePicker.option("popupHeight", 98);
+                    this.timePicker._refreshScroller();
+                    this.timePicker._changeActiveEle();
+                }
+            }
+            else if (this.popup.hasClass("e-dt-responsive")) {
+                this.popup.removeClass("e-dt-responsive");
+                this.timePicker.option("popupWidth", this.model.timePopupWidth);
+                var height = this.datePicker.popup.height() - this.popup.find(".e-header").height();
+                this.timePicker.option("popupHeight", height);
+                this.timePicker._refreshScroller();
+                this.timePicker._changeActiveEle();
+            }
+        },
+
+        enable: function () {
+            if (!this.model.enabled) {
+                this.element[0].disabled = false;
+                this.model.enabled = true;
+                this.element.prop("disabled", false);
+                this.wrapper.removeClass("e-disable");
+                this.element.removeClass("e-disable").attr("aria-disabled", false);
+                if (!this._isSupport)
+                    this._hiddenInput.prop("disabled", false);
+                if (this.datetimeIcon) this.datetimeIcon.removeClass("e-disable").attr("aria-disabled", false);
+                if (this._isIE8 && this.datetimeIcon) this.datetimeIcon.children().removeClass("e-disable");
+                if (this.popup) {
+                    this.popup.children("div").removeClass("e-disable").attr("aria-disabled", false);
+                    this._change("enabled", true);
+                }
+            }
+        },
+
+
+        disable: function () {
+            if (this.model.enabled) {
+                this.element[0].disabled = true;
+                this.model.enabled = false;
+                this.wrapper.addClass("e-disable");
+                this.element.addClass("e-disable").attr("aria-disabled", true);
+                this.element.attr("disabled", "disabled");
+                if (!this._isSupport)
+                    this._hiddenInput.attr("disabled", "disabled");
+                if (this.datetimeIcon) this.datetimeIcon.addClass("e-disable").attr("aria-disabled", true);
+                if (this._isIE8 && this.datetimeIcon) this.datetimeIcon.children().addClass("e-disable");
+                this._hideResult();
+                this._change("enabled", false);
+                if (this.popup) {
+                    this.popup.children("div").addClass("e-disable").attr("aria-disabled", true);
+                    this.datePicker.popup.removeClass("e-disable").attr("aria-disabled", false);
+                    this.timePicker.popup.removeClass("e-disable").attr("aria-disabled", false);
+                }
+            }
+        },
+
+
+        getValue: function () {
+            return this._objectToString(this.model.value);
+        },
+
+
+        setCurrentDateTime: function () {
+            if (!this.model.readOnly)
+                this._setValue(new Date());
+        },
+
+
+        show: function () {
+            this._showResult();
+        },
+
+
+        hide: function () {
+            this._hideResult();
+        },
+
+
+        _wireEvents: function () {
+            if (this.model.allowEdit) {
+                this._on(this.element, "focus", this._targetFocus);
+                this._on(this.element, "blur", this._targetBlur);
+                this._on(this.element, "keydown", this._keyDownOnInput);
+            }
+            if (!this.model.allowEdit) {
+                this.element.attr("readonly", "readonly");
+                this.element.on("mousedown", bbdesigner$.proxy(this._showhidePopup, this));
+            }
+
+
+        },
+
+        _getLocalizedLabels: function () {
+            return BoldBIDashboard.getLocalizedConstants(this.sfType, this.model.locale);
+        }
+    });
+
+    BoldBIDashboard.DateTimePicker.Locale = BoldBIDashboard.DateTimePicker.Locale || {};
+
+    BoldBIDashboard.DateTimePicker.Locale['default'] = BoldBIDashboard.DateTimePicker.Locale['en-US'] = {
+        watermarkText: "Select datetime",
+        buttonText: {
+            today: "Today",
+            timeNow: "Time Now",
+            done: "Done",
+            timeTitle: "Time"
+        }
+    };
+
+    BoldBIDashboard.PopupPosition = {
+        Bottom: "bottom",
+        Top: "top"
+    };
 })(bbdesigner$, SyncfusionBoldBIDashboard);;
 ;
  // /<reference path="jquery-1.10.2.min.js" />
