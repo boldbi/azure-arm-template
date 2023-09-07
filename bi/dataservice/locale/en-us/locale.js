@@ -5643,7 +5643,9 @@
             },
             editConnection: {
                 fileAlertMsg: "*Previous tables will be dropped.",
-                reconnect: "Reconnect"
+                reconnect: "Reconnect",
+                update: "Update",
+                updateIconMsg: "The purpose of this button is solely to update the optional parameters like Description, MaxrowCount,CommandTimeOut and Additional connection Properties. It does not Reconnect the data source."
             },
             sharedDSMenu: {
                 ownerNameHeader: "Owner",

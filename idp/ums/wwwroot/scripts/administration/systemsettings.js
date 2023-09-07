@@ -476,6 +476,7 @@ $(document).ready(function () {
         if ($("#enablecopyrightinfo").is(":checked") == false) {
             $("#copyrightinfo").removeClass("show").hide();
             $("#site-copyright").attr('disabled', 'disabled');
+            $("#site-copyright-error").html("");
             $("#site-copyright-error").hide();
             $("#site-copyright").attr("style", "border-color:var(--input-box-border-normal-color) !important");
         }
@@ -483,6 +484,7 @@ $(document).ready(function () {
             $("#copyrightinfo").removeClass("hide").show();
             $("#site-copyright").removeAttr('disabled');
             $("#site-copyright-error").show();
+            $("#site-copyright-error").html(window.Server.App.LocalizationContent.CopyRightValidator);
             $("#site-copyright").attr("style", "border-color:var(--red)!important !important");
         }
         addFooterSeparator();

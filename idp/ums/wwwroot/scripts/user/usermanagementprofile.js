@@ -646,7 +646,7 @@ function onUserChangePasswordClick() {
             }
         }
     );
-
+    $(".popover").hide();
 }
 function editUser(fulldata) {
     var specficuserdetails = fulldata;

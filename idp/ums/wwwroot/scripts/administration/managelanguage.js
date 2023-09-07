@@ -351,6 +351,7 @@ function uploadDialogClose() {
     localizationGrid.refresh();
     dropDownList.refresh();
     dropDownList.value = null;
+    dropDownList.list.innerHTML = "";
 }
 
 $(document).on("change", ".localization-checkbox-row", function () {

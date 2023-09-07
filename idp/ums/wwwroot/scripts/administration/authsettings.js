@@ -5,6 +5,7 @@ var azureB2CLogoChanged = false;
 var dialog;
 
 $(document).ready(function () {
+    jwtSigningKeyShowHide();
     addPlacehoder("body");
 
     signingKeyConfirmationDlg();
@@ -1011,13 +1012,17 @@ function onRegenerateSigningKeyDialogOpen() {
 }
 
 $("#enable-jwt").change(function () {
+    jwtSigningKeyShowHide();
+})
+
+function jwtSigningKeyShowHide() {
     if ($("#enable-jwt").is(":checked")) {
         $("#jwt-signing-key,#show-signing-key").prop("disabled", false);
     }
     else {
         $("#jwt-signing-key,#show-signing-key").prop("disabled", true);
     }
-})
+}
 
 $(document).on("click", "#sendButton", function () {
     dialog.hide();
