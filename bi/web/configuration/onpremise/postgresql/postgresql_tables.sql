@@ -1363,6 +1363,8 @@ INSERT into SyncDS_Source (Name,IsActive) VALUES ( N'API',1)
 ;
 INSERT into SyncDS_Source (Name,IsActive) VALUES ( N'Schedule',1)
 ;
+INSERT into SyncDS_Source (Name,IsActive) VALUES ( N'Embed',1)
+;
 
 INSERT into SyncDS_LogStatus (Name,IsActive) VALUES ( N'Start',1)
 ;
