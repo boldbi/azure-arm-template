@@ -443,6 +443,7 @@
                     enableAnimation: "Enable Animation",
                     showLegend: "Show Legend",
                     showLegendAsDropDown: "Show Legend Items as Dropdown",
+                    interactivity: "Interactivity", 
                     showLegendTitle: "Show Title",
 		            showTooltip:"Show Tooltip",
                     legend: "Legend",

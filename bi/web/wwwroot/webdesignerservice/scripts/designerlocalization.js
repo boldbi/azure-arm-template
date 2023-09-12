@@ -423,6 +423,7 @@ var Designer = {
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
                     showLegend: "Show Legend",
+                    interactivity: "Interactivity",
 					showLegendTitle: "Show Title",
 		            showTooltip:"Show Tooltip",
                     legend: "Legend",
@@ -4452,7 +4453,8 @@ var Designer = {
                 resetButtonTooltip: "This action will reset the colors to default colors",
                 closeButtonText: "Close",
                 configureButtonText: "Configure",
-                updateButtonText: "Update"
+                updateButtonText: "Update",
+				selectColumnButtonText: "Select Column"
             },
             dateRangeFilterDialog: {
                 titleText: "Range Filter",
