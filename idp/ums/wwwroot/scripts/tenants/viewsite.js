@@ -479,6 +479,13 @@ function getAppUsers() {
 }
 
 function getAttributes() {
+
+    var tooltip = new ej.popups.Tooltip({
+        target: ".grid-content",
+        position: 'TopCenter',
+        beforeRender: beforeRender
+    }, "#grid-tooltip");
+
     var attributeGrid = new ejs.grids.Grid({
         dataSource: window.siteAttributes,
         gridLines: 'None',
@@ -492,10 +499,6 @@ function getAttributes() {
         enableAltRow: false,
         created: initialSiteGridCreate,
         dataBound: function (args) {
-            $('[data-toggle="tooltip"]').tooltip(
-                {
-                    container: 'body'
-                });
         },
         columns: [
             { field: 'Name', template: "#attribute-name-template", headerText: window.Server.App.LocalizationContent.Name, width: 40, allowSorting: true, allowFiltering: true },
@@ -519,6 +522,10 @@ function getAttributes() {
             hideWaitingPopup("SiteAttributesGrid");
         }
     });
+
+    function beforeRender(args) {
+        tooltip.content = args.target.closest("td").innerText;
+    }
 }
 
 function getUsersWithoutAccess() {
