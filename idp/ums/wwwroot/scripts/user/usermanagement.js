@@ -203,7 +203,7 @@ $(document).ready(function () {
                                                     SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAdded, 7000);
                                                 }
                                                 else if (result.result == "failure" && result.isAdmin == true && result.activation == 1) {
-                                                    WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, 7000);
+                                                    WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, null, 7000);
                                                 }
                                                 userGrid.refresh();
                                             }

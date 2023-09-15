@@ -60,18 +60,17 @@ function onMasterDialogOpen(tenanatName, tenantType) {
 }
 
 function updateMasterTenant() {
+    onCloseMasterDialog();
     $.ajax({
         type: "POST",
         url: updateMasterTenantUrl,
         data: { TenantInfoId: UpdateTenantId },
         success: function (result) {
             if (result.Success) {
-                onCloseMasterDialog();
                 SuccessAlert(window.Server.App.LocalizationContent.Master, result.Message, 7000);
                 siteGridRefresh();
             }
             else {
-                onCloseMasterDialog();
                 WarningAlert(window.Server.App.LocalizationContent.Master, window.Server.App.LocalizationContent.ErrorMessageDescription, result.Message, 7000);
                 siteGridRefresh();
             }

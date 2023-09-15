@@ -211,7 +211,7 @@ $(document).on("click", "#update-password-settings", function () {
             if (data.result) {
                 SuccessAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
             } else {
-                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, data.Message, 7000);
             }
             hideWaitingPopup('body');
         },
@@ -272,7 +272,7 @@ $(document).on("click", "#update-x-frame-options-settings", function () {
             if (result.status) {
                 SuccessAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
             } else {
-                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.message, 7000);
             }
         }
     });
@@ -1079,7 +1079,7 @@ $(document).on("click", "#update-csp-settings", function () {
             if (result.status) {
                 SuccessAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
             } else {
-                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.message, 7000);
             }
         }
     });
@@ -1129,7 +1129,7 @@ function confirmation() {
                 SuccessAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
                 window.location.href = loginUrl;
             } else {
-                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.message, 7000);
             }
         }
     });

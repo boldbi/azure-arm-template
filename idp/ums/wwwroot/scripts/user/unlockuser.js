@@ -49,7 +49,7 @@ function unLockUser() {
             window.location.reload();
         }
         else {
-            WarningAlert(window.Server.App.LocalizationContent.UnlockUser, window.Server.App.LocalizationContent.UserUnlockedError, 7000)
+            WarningAlert(window.Server.App.LocalizationContent.UnlockUser, window.Server.App.LocalizationContent.UserUnlockedError, null, 7000)
             userGrid.refresh();
             onUserUnlockDialogClose();
             hideWaitingPopup("unlock-user-confirmation");

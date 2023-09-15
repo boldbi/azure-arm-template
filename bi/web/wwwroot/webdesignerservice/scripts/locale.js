@@ -977,9 +977,11 @@
                 appendDsBrowseText: "Browse File",
                 appendDsSelectedTables: "Selected Tables",
                 appendDsdragAndDropText: "Drop files here or ",
-				appendDsWaitingPopupText: "Appending data from the uploaded file(s).",
-                appendDsSuccessPopupText: "The files have been appended successfully.",
-                appendDsFailurePopupText: "The files have failed to be appended successfully.",
+				appendDsWaitingPopupText: "Appending data from the uploaded file(s)",
+                appendDsSuccessPopupText: "The file(s) have been appended successfully",
+                appendDsFailurePopupText: "The process of appending the file(s) was unsuccessful",
+                appendDsReadyToAppend: "file(s) ready to append",
+                appendDsFilesNeedsAttention: "file(s) needs attention",
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
                 enableSSH: "Enable SSH",
@@ -2599,7 +2601,9 @@
 				exportingSuccessEndContent: " to download the file.",
                 connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.',
                 fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
-                filesNotValid: "The following file has schema mismatch when comparing with initial file uploaded. Do you want to remove and continue ?"
+                filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
+				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
+				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",

@@ -93,18 +93,18 @@ $(document).ready(function () {
     if (query.includes("?tab=general")) {
         $('a[href="#application-tab"]').tab("show");
     }
-    else if (query.includes("?tab=users")) {
+    else if (query.includes("?tab=users") && isActiveSite) {
         if (!isUserTabLoaded) {
             getAppUsers();
             isUserTabLoaded = true;
         }
         $('a[href="#users-tab"]').tab("show");
     }
-    else if (query.includes("?tab=isolation-code")) {
+    else if (query.includes("?tab=isolation-code") && isActiveSite) {
         $('a[href="#data-security-tab"]').tab("show");
         enableIsolationCode();
     }
-    else if (query.includes("?tab=attributes")) {
+    else if (query.includes("?tab=attributes") && isActiveSite) {
         if (!isAttributeTabLoaded) {
             getAttributes();
             isAttributeTabLoaded = true;
@@ -113,6 +113,7 @@ $(document).ready(function () {
     }
     else {
         isFreshLoad = false;
+        $('a[href="#application-tab"]').tab("show");
         history.replaceState(null, null, window.location.href);
     }
 
@@ -123,15 +124,15 @@ $(document).ready(function () {
             $("#application a").attr("href", "#application-tab");
             $('a[href="#application-tab"]').tab('show');
         }
-        else if (tab === "users") {
+        else if (tab === "users" && isActiveSite) {
             $("#users a").attr("href", "#users-tab");
             $('a[href="#users-tab"]').tab('show');
         }
-        else if (tab === "isolation-code") {
+        else if (tab === "isolation-code" && isActiveSite) {
             $("#data-security a").attr("href", "#data-security-tab");
             $('a[href="#data-security-tab"]').tab('show');
         }
-        else if (tab === "attributes") {
+        else if (tab === "attributes" && isActiveSite) {
             $("#custom-attribute a").attr("href", "#custom-attribute-tab");
             $('a[href="#custom-attribute-tab"]').tab('show');
         }
@@ -199,7 +200,7 @@ $(document).ready(function () {
                                                 SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAdded, 7000);
                                             }
                                             else if (result.result == "failure" && result.isAdmin == true && result.activation == 1) {
-                                                WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, 7000);
+                                                WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, null, 7000);
                                             }
                                             g.refresh();
                                         }
