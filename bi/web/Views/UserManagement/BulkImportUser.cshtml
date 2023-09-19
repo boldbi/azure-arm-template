@@ -7,6 +7,7 @@
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncDatabaseUsers);
     ViewBag.BackIconRedirectionUrl = Url.Action("User", "UserManagement");
+    var pageDescription = T["Shows a list of all bulk user import jobs."];
 }
 
 
@@ -186,7 +187,7 @@
 @section MainSection{
     @await Html.PartialAsync("../Administration/_AdminMenu")
     <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") top-nav-header-without-btn">
-        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Bulk Import Result"] }, { "PageDescription", @T["Shows a list of all bulk user import jobs."] } })
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Bulk Import Result"] }, { "PageDescription", @pageDescription } })
     </div>
     <div id="base-container" class="col-xs-12 bi-page-container bulk-import-result-list">
         <div class="col-xs-12 bi-page-content no-padding">

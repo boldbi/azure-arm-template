@@ -34,6 +34,7 @@
     var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-notifications") ? "active" : string.Empty;
     List<string> groupName = new List<string>();
     var isUserLanguagePreferenceDisabled = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference;
+    var pageDescription = T["Manage your profile settings and privacy controls"];
 }
 
 
@@ -87,12 +88,27 @@
                 }
             }
         });
+
+        $(document).on("keyup", "#homepage-list .btn-group .bs-searchbox input", function () {
+            if (@userHomepage.Count == 0) {
+                var inputText = $(this).val();
+                var noResultMessage = $("#homepage-list .no-result");
+                if (!isNullOrWhitespace(inputText) && noResultMessage.is(":visible") && $(".dropdown-menu .inner").find("li.no-results").is(":visible")) {
+                    noResultMessage.css("display", "none");
+                } else if (isNullOrWhitespace(inputText) && !noResultMessage.is(":visible")) {
+                    noResultMessage.css("display", "block");
+                }
+                else if (!noResultMessage.is(":visible") && !$(".dropdown-menu .inner").find("li.no-results").is(":visible")) {
+                    noResultMessage.css("display", "block");
+                }
+            }
+        });
     </script>
 }
 @section MainSection{
     @await Html.PartialAsync("_ProfileMenu")
     <div class="col-xs-12 no-padding no-margin width-alignment">
-        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["My Profile"] }, { "PageDescription", @T["Manage your profile settings and privacy controls"] } })
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["My Profile"] }, { "PageDescription", @pageDescription } })
         <div id="profile-details-heading-div" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
             <div class="col-xs-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">

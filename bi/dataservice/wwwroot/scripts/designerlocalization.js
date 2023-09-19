@@ -5077,7 +5077,8 @@ var Designer = {
                 includeFilterInfoTooltipForPdf: "When Include filter information is switched on, the dashboard exported PDF will contain the applied filter(s) information.",
                 includeFilterInfoText: "Include filter information",
                 reset: "Reset",
-                apiExportErrMsg: "Invalid export parameter (widgetName)"
+                apiExportErrMsg: "Invalid export parameter (widgetName)",
+				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured."
             },
             maximize: {
                 maximize: "Maximize",

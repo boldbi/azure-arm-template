@@ -4134,7 +4134,6 @@
                 fileLimitInfoText: "Max file size: 200 MB",
                 fileNoteForOnpremise: "Larger files will take more time to import",
                 fileSizeAlert:"The selected file size is very large at ",
-                fileSizeAlert:"The selected file size is very large at ",
                 fileUploadBrowseText: "Browse File",
                 fileUploaddragAndDropText: "Drop files here or ",
                 fileuploadEstimatedFileSize: "(up to 200MB)",
@@ -6051,7 +6050,8 @@
                 includeFilterInfoTooltipForPdf: "When Include filter information is switched on, the dashboard exported PDF will contain the applied filter(s) information.",
                 includeFilterInfoText: "Include filter information",
                 reset: "Reset",
-                apiExportErrMsg: "Invalid export parameter (widgetName)"
+                apiExportErrMsg: "Invalid export parameter (widgetName)",
+				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured."
             },
             maximize: {
                 maximize: "Maximize",
@@ -7464,6 +7464,14 @@
                 existingDashboardContent: "A dashboard with the same name already exists in the category",
 				uploadingProgressText: "Uploading in progress. Please wait for the upload to complete or you can remove the uploading item to continue.",
                 invalidColumnText: "Columns:",
+                differentCategoryText: "{0} different categories",
+                dashboardSelectedText: "selected",
+                dashboards: "Dashboards",
+                deleteDashboardText: "Delete dashboards",
+                removeSelectionText: "Remove selection",
+                deleteDashboardsContent: "Are you sure you want to delete the dashboards? You can upload the dashboards again by visiting the ",
+                deleteDashboardTitleContent: "Delete Dashboard",
+                deleteButtonContent: "Yes, Delete",
             }
         }
     }

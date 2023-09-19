@@ -39,11 +39,6 @@
     var homepagePageUrl = System.Net.WebUtility.UrlDecode(Url.Action("Homepages", "Boards"));
     var isMobile = new DeviceDetection(Context).IsMobile;
     var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
-    var isDataSourceConnection = string.Empty;
-    if((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true"))
-    {
-      isDataSourceConnection = ViewBag.isDataSourceConnection;
-    }  
     var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -53,6 +48,11 @@
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
+    var isDataSourceConnection = string.Empty;
+    if((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature)
+    { 
+        isDataSourceConnection = ViewBag.isDataSourceConnection;
+    }
     var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
     if (isEmbedTrue)
     {

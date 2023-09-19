@@ -6,6 +6,8 @@
     var isDownloadItemsTab = (Context.Request.Query["tab"].ToString().ToLower() == "offline-files") ? "active" : string.Empty;
     var isPublishedItemsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "online-publish") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isDownloadItemsTab)) ? "active" : string.Empty;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
+    var pageHeader = T["PUBLISHED RESOURCES"];
+    var pageDescription = T["You can manage the resources published to other sites online and request to download them for offline migration."];
 }
 @section MainSection{
     <environment include="Development,CloudDevelopment">
@@ -25,7 +27,7 @@
         var enablePublishModule = @Json.Serialize(enablePublishModule);
     </script>
 
-    @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["PUBLISHED RESOURCES"] }, { "PageDescription", @T["You can manage the resources published to other sites online and request to download them for offline migration."] } })
+    @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @pageHeader }, { "PageDescription", @pageDescription } })
     <div class="bi-page-header col-xs-12 top-nav-btn-secton top-nav-search-secton">
         <div id="publish-items-search-container" class="col-xs-12 no-padding no-margin">
             <div id="search-area" class="col-xs-4 pull-left">

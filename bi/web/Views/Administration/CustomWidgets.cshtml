@@ -1,4 +1,4 @@
-﻿@{ 
+﻿@{
     var globalAppSettings = _globalAppSettings;
     ViewBag.Title = T["Widget Configuration"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
@@ -12,6 +12,7 @@
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.WidgetSettings);
+    var pageDescription = T["Configure any number of widgets for your applications by choosing widgets from the following list."];
 }
 
 @section meta{
@@ -60,7 +61,7 @@
 
 @await Html.PartialAsync("_AdminMenu")
 <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
-    @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Widgets Configuration"] }, { "PageDescription", @T["Configure any number of widgets for your applications by choosing widgets from the following list."] } })
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Widgets Configuration"] }, { "PageDescription", @pageDescription } })
     <div id="widget-settings-header" class="col-xs-12 bi-page-header top-nav-btn-secton">
         <div class="col-xs-12 no-padding">
             <div class="col-xs-6 no-padding button-section">

@@ -25,6 +25,9 @@
     var usageAnalytics = Convert.ToBoolean(ViewBag.UsageAnalytics);
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var dashboardSettingsPageDescription = T["Configuration for the Dashboards."];
+    var deploymentDashboardPageDescription = T["Dashboards created in this site can be published to other site deployment."];
+    var attributesPageDescription = T["Configure site-level attributes."];
     var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
 }
 
@@ -49,7 +52,7 @@
     @await Html.PartialAsync("_AdminMenu")
     <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div id="dashboard-settings-header" class="col-xs-12 no-padding">
-            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Dashboard Settings"] }, { "PageDescription", @T["Configuration for the Dashboards."] } })
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Dashboard Settings"] }, { "PageDescription", @dashboardSettingsPageDescription } })
             <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
                 <div class="col-xs-12 no-padding">
                     <div class="col-xs-6 no-padding button-section">
@@ -60,7 +63,7 @@
             </div>
         </div>
         <div id="deployment-header" class="col-xs-12 no-padding">
-            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Deployment Dashboards"] }, { "PageDescription", @T["Dashboards created in this site can be published to other site deployment."] } })
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Deployment Dashboards"] }, { "PageDescription", @deploymentDashboardPageDescription } })
             <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
                 <div class="col-xs-12 no-padding">
                     <div id="deployment-button" class="col-xs-6 no-padding button-section">
@@ -72,7 +75,7 @@
             </div>
         </div>
         <div id="site-attribute-header" class="col-xs-12 no-padding" style="display: none">
-            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Attributes"] }, { "PageDescription", @T["Configure site-level attributes."] } })
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Attributes"] }, { "PageDescription", @attributesPageDescription } })
             <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
                 <div class="col-xs-12 no-padding">
                     <div id="add-attribute-button" class="col-xs-6 no-padding button-section">

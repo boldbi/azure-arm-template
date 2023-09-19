@@ -4,6 +4,7 @@
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.AccountSiteSettings);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var pageDescription = T["Configuration for managing user accounts."];
     var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
 }
@@ -38,7 +39,7 @@
 @section MainSection{
     @await Html.PartialAsync("_AdminMenu")
 <div id="user-settings-header" class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
-    @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Accounts Settings"] }, { "PageDescription", @T["Configuration for managing user accounts."] } })
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Accounts Settings"] }, { "PageDescription", @pageDescription } })
     <div class="col-xs-12 bi-page-header top-nav-btn-secton">
         <div class="col-xs-12 no-padding">
             <div class="col-xs-6 no-padding button-section">
