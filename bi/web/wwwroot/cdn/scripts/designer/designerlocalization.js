@@ -249,6 +249,7 @@ var Designer = {
                 descriptionText: "Description",
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
+                exportName: "Export Settings",
                 basicSettingsText: "Basic Settings",
                 tooltipSettingsText: "Tooltip Settings",
 				PaddingSettings:"Padding Settings",
@@ -398,16 +399,19 @@ var Designer = {
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
-                    csvExportText: "Allow CSV Export",
-                    excelExportText: "Allow Excel Export",
-                    imageExportText: "Allow Image Export",
-                    pdfExportText: "Allow PDF Export",
                     enableCommentText: "Enable Commenting",
                     showLinkIconText: "Show Link Icon",
                     viewDataText: "View Underlying Data",
                     pinWidgetText: "Pin Widget",
                     actionText: "Actions",
                     allowExportingText: "Allow Exporting"
+                },
+                exportSettings: {
+                    csvExportText: "Allow CSV Export",
+                    excelExportText: "Allow Excel Export",
+                    imageExportText: "Allow Image Export",
+                    pdfExportText: "Allow PDF Export",
+                    hiddenColumnExportText: "Include Hidden Columns"
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",

@@ -1007,6 +1007,11 @@ $(document).on("click", "#update-csp-settings", function () {
     var imgSrcList = [];
     var connectSrcList = [];
     var frameSrcList = [];
+
+     if ($(".style-src-validation").text() != "" || $(".script-src-validation").text() != "" || $(".font-src-validation").text() != "" || $(".img-src-validation").text() != "" || $(".connect-src-validation").text() != "" || $(".frame-src-validation").text() != "") {
+        return;
+    }
+
     var styleSrcInstance = document.getElementById("style-src-chip-content").ej2_instances;
     if (styleSrcInstance != undefined) {
         styleSrcList = styleSrcInstance[0].chips;

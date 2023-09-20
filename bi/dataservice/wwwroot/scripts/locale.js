@@ -250,6 +250,7 @@
                 descriptionText: "Description",
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
+                exportName: "Export Settings",
                 basicSettingsText: "Basic Settings",
                 tooltipSettingsText: "Tooltip Settings",
                 linkText: "Link",
@@ -412,10 +413,6 @@
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
-                    csvExportText: "Allow CSV Export",
-                    excelExportText: "Allow Excel Export",
-                    imageExportText: "Allow Image Export",
-                    pdfExportText: "Allow PDF Export",
                     enableCommentText: "Enable Commenting",
                     showLinkIconText: "Show Link Icon",
                     viewDataText: "View Underlying Data",
@@ -423,6 +420,13 @@
                     actionText: "Actions",
                     allowExportingText: "Allow Exporting",
 					showHeaderText: "Show Header"
+                },
+                exportSettings: {
+                    csvExportText: "Allow CSV Export",
+                    excelExportText: "Allow Excel Export",
+                    imageExportText: "Allow Image Export",
+                    pdfExportText: "Allow PDF Export",
+                    hiddenColumnExportText: "Include Hidden Columns"
                 },
 				viewDataActions: {
                     allowViewDataExporting: "Allow Exporting",
