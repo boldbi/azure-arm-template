@@ -114,7 +114,6 @@ $(document).ready(function () {
     else {
         isFreshLoad = false;
         $('a[href="#application-tab"]').tab("show");
-        history.replaceState("general", null, window.location.pathname + "?tab=general");
     }
 
     window.addEventListener("popstate", function (e) {
