@@ -5,8 +5,10 @@
         floatLabelType: 'Auto',
     });
     outlineEmail.appendTo('#key-input');
-    outlineEmail.focusIn();
-    document.getElementById("key-input").ej2_instances[0].value = localStorage.getItem(window.location.hostname + "_email");
+    if (document.getElementById("key-input") != null) {
+        outlineEmail.focusIn();
+        document.getElementById("key-input").ej2_instances[0].value = localStorage.getItem(window.location.hostname + "_email");
+    }
     localStorage.removeItem(window.location.hostname + "_email");
     $("#forgot-password-form").validate({
         errorElement: "span",

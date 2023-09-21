@@ -296,6 +296,7 @@ function returnStartupHome() {
     $("#tenant-status-container").addClass("display-none");
     $(".validation-error-message").addClass("display-none");
     $("#file-name").val('');
+    $("#confirm-license").prop('disabled', true);
     licenseKey = "";
     $("#tenant-type").val("");
     $("#system-settings-offline-license-container").hide();

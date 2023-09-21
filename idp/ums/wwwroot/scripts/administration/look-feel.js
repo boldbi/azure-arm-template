@@ -343,7 +343,7 @@ function uploadformValidation() {
 }
 
 $(document).on("keydown keyup", "#font-name", function () {
-    if ($("#font-name").val() == '') {
+    if ($("#font-name").val().trim() == '') {
         $("#upload-font").attr("disabled", true);
     }
     else {
@@ -352,7 +352,7 @@ $(document).on("keydown keyup", "#font-name", function () {
 });
 
 $(document).on("keydown keyup", "#applicationtheme-name", function () {
-    if ($("#applicationtheme-name").val() == '') {
+    if ($("#applicationtheme-name").val().trim() == '') {
         $("#upload-applicationtheme").attr("disabled", true);
     }
     else {
@@ -361,7 +361,7 @@ $(document).on("keydown keyup", "#applicationtheme-name", function () {
 });
 
 $(document).on("keydown keyup", "#dashboardtheme-name", function () {
-    if ($("#dashboardtheme-name").val() == '') {
+    if ($("#dashboardtheme-name").val().trim() == '') {
         $("#upload-dashboardtheme").attr("disabled", true);
     }
     else {

@@ -476,6 +476,7 @@ $(document).ready(function () {
         if ($("#enablecopyrightinfo").is(":checked") == false) {
             $("#copyrightinfo").removeClass("show").hide();
             $("#site-copyright").attr('disabled', 'disabled');
+            $("#site-copyright-error").html("");
             $("#site-copyright-error").hide();
             $("#site-copyright").attr("style", "border-color:var(--input-box-border-normal-color) !important");
         }
@@ -483,6 +484,7 @@ $(document).ready(function () {
             $("#copyrightinfo").removeClass("hide").show();
             $("#site-copyright").removeAttr('disabled');
             $("#site-copyright-error").show();
+            $("#site-copyright-error").html(window.Server.App.LocalizationContent.CopyRightValidator);
             $("#site-copyright").attr("style", "border-color:var(--red)!important !important");
         }
         addFooterSeparator();
@@ -733,7 +735,7 @@ $(document).on("click", "#update-active-dir-settings", function () {
                 SuccessAlert(window.Server.App.LocalizationContent.ADSettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
             }
             else {
-                WarningAlert(window.Server.App.LocalizationContent.ADSettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.ADSettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, null, 7000);
             }
             $(".error-message, .success-message").css("display", "none");
         },
@@ -803,7 +805,7 @@ $(document).on("click", "#UpdateAzureADSettings-bottom", function () {
                 SuccessAlert(window.Server.App.LocalizationContent.AzureADSettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
             }
             else {
-                WarningAlert(window.Server.App.LocalizationContent.AzureADSettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.AzureADSettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, null, 7000);
             }
             $(".azure-ad-button-area .error-message, .azure-ad-button-area .success-message").css("display", "none");
             hideWaitingPopup('server-app-container');

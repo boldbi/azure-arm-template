@@ -5,6 +5,7 @@ var azureB2CLogoChanged = false;
 var dialog;
 
 $(document).ready(function () {
+    jwtSigningKeyShowHide();
     addPlacehoder("body");
 
     signingKeyConfirmationDlg();
@@ -525,7 +526,7 @@ $(document).ready(function () {
                 }
             },
             error: function (data) {
-                WarningAlert(window.Server.App.LocalizationContent.SSOSettings, window.Server.App.LocalizationContent.SSOSettingsUpdateError, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.SSOSettings, window.Server.App.LocalizationContent.SSOSettingsUpdateError, data.Message, 7000);
             }
         });
     };
@@ -562,7 +563,7 @@ $(document).ready(function () {
                 }
             },
             error: function (data) {
-                WarningAlert(window.Server.App.LocalizationContent.AzureB2CSettings, window.Server.App.LocalizationContent.AzureB2CSettingsUpdateError, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.AzureB2CSettings, window.Server.App.LocalizationContent.AzureB2CSettingsUpdateError, data.Message, 7000);
             }
         });
     };
@@ -652,9 +653,9 @@ $(document).ready(function () {
                     WarningAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdatedError, result.Message, 7000);
                 }
             },
-            error: function () {
+            error: function (result) {
                 hideWaitingPopup('server-app-container');
-                WarningAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdatedError, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdatedError, result.Message, 7000);
             }
 
         });
@@ -995,11 +996,11 @@ function fnRegenerateSigningKey() {
                 SuccessAlert(window.Server.App.LocalizationContent.RegenerateKey, window.Server.App.LocalizationContent.RegenerateKeySuccess, 7000);
                 $("#jwt-signing-key").val(data);
             } else {
-                WarningAlert(window.Server.App.LocalizationContent.RegenerateKey, window.Server.App.LocalizationContent.RegenerateKeyError, 7000);
+                WarningAlert(window.Server.App.LocalizationContent.RegenerateKey, window.Server.App.LocalizationContent.RegenerateKeyError, null, 7000);
             }
         },
         error: function () {
-            WarningAlert(window.Server.App.LocalizationContent.RegenerateKey, window.Server.App.LocalizationContent.RegenerateKeyError, 7000);
+            WarningAlert(window.Server.App.LocalizationContent.RegenerateKey, window.Server.App.LocalizationContent.RegenerateKeyError, null, 7000);
         }
     });
 }
@@ -1011,13 +1012,17 @@ function onRegenerateSigningKeyDialogOpen() {
 }
 
 $("#enable-jwt").change(function () {
+    jwtSigningKeyShowHide();
+})
+
+function jwtSigningKeyShowHide() {
     if ($("#enable-jwt").is(":checked")) {
         $("#jwt-signing-key,#show-signing-key").prop("disabled", false);
     }
     else {
         $("#jwt-signing-key,#show-signing-key").prop("disabled", true);
     }
-})
+}
 
 $(document).on("click", "#sendButton", function () {
     dialog.hide();

@@ -203,7 +203,7 @@ $(document).ready(function () {
                                                     SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAdded, 7000);
                                                 }
                                                 else if (result.result == "failure" && result.isAdmin == true && result.activation == 1) {
-                                                    WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, 7000);
+                                                    WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, null, 7000);
                                                 }
                                                 userGrid.refresh();
                                             }
@@ -446,15 +446,7 @@ function MakeFlyDeleteUsers() {
                 var currentVal = parseInt(count) - deleteUserCount;
                 parent.$("#user-count").html(currentVal);
                 parent.$("#user-count-text").val(currentVal);
-                if (data.AdUserCount == 0) {
-                    $("#ad-indication").html("");
-                }
-                if (data.AzureADUserCount == 0) {
-                    $("#azure-ad-indication").html("");
-                }
-                if (data.DatabaseUserCount == 0) {
-                    $("#database-indication").html("");
-                }
+                hideExternalUserIndication(data.ExternalUser);
                 parent.onCloseMessageBox();
             });
             $("#user-delete-confirmation").ejDialog("close");
@@ -925,12 +917,7 @@ function deleteSingleUser() {
             var currentVal = parseInt(count) - 1;
             parent.$("#user-count").html(currentVal);
             parent.$("#user-count-text").val(currentVal);
-            if (data.AdUserCount == 0) {
-                $("#ad-indication").html("");
-            }
-            if (data.AzureADUserCount == 0) {
-                $("#azure-ad-indication").html("");
-            }
+            hideExternalUserIndication(data.ExternalUser);
             SuccessAlert(window.Server.App.LocalizationContent.DeleteUser, window.Server.App.LocalizationContent.UserHasDeleted, 7000);
             onConfirmDeleteUser("1");
             hideWaitingPopup('singleuser-delete-confirmation');
@@ -942,6 +929,29 @@ function deleteSingleUser() {
     });
 }
 
+function hideExternalUserIndication(externalUsers) {
+    if (!externalUsers.HasAdUsers) {
+        $("#ad-indication").html("");
+    }
+    if (!externalUsers.HasAzureAdUsers) {
+        $("#azure-ad-indication").html("");
+    }
+    if (!externalUsers.HasDatabaseUsers) {
+        $("#database-indication").html("");
+    }
+    if (!externalUsers.HasOAuthUsers) {
+        $("#oauth-indication").html("");
+    }
+    if (!externalUsers.HasOpenIdUsers) {
+        $("#openid-indication").html("");
+    }
+    if (!externalUsers.HasJwtSsoUsers) {
+        $("#jwt-indication").html("");
+    }
+    if (!externalUsers.HasAzureAdB2CUsers) {
+        $("#azureadb2c-indication").html("");
+    }
+}
 $(document).on("click", "#trigger-file,#filename", function () {
     $("#filename").trigger("focus");
     $("#grid-validation-messages span").css("display", "none");

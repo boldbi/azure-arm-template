@@ -1361,6 +1361,8 @@ INSERT into [BOLDBI_Source] (Name,IsActive) VALUES ( N'API',1)
 ;
 INSERT into [BOLDBI_Source] (Name,IsActive) VALUES ( N'Schedule',1)
 ;
+INSERT into [BOLDBI_Source] (Name,IsActive) VALUES ( N'Embed',1)
+;
 
 INSERT into [BOLDBI_LogStatus] (Name,IsActive) VALUES ( N'Start',1)
 ;

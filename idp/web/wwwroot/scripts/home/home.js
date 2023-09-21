@@ -26,11 +26,11 @@
                     $(".recent-users-list").html(users);
                     $("[data-toggle='tooltip']").tooltip();
                 } else {
-                    WarningAlert("Server Error", "Unable to retrieve the recently logged in users.", 7000);
+                    WarningAlert("Server Error", "Unable to retrieve the recently logged in users.", null, 7000);
                 }
             },
             error: function () {
-                WarningAlert("Server Error", "Unable to retrieve the recently logged in users.", 7000);
+                WarningAlert("Server Error", "Unable to retrieve the recently logged in users.", null, 7000);
             }
         });
     });

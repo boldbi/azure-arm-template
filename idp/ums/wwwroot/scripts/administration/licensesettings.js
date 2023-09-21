@@ -145,7 +145,7 @@ function handleApplyLicense(addButtonObj, evt) {
             });
 
         } else if (evt.originalEvent.data.isSuccess === false) {
-            WarningAlert(window.Server.App.LocalizationContent.ManageLicense, window.Server.App.LocalizationContent.LicenseUpdateFailed, 0);
+            WarningAlert(window.Server.App.LocalizationContent.ManageLicense, window.Server.App.LocalizationContent.LicenseUpdateFailed, null, 0);
         }
     }
 }

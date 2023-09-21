@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.treemap.all.js
-*  version : 6.12.12
+*  version : 6.13.11
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -391,7 +391,7 @@
             if (!isClear) {
                 this._drilldownItems = [];
             }
-            if (this.model.enableResize || this.model.isResponsive) {
+            if (this.model.enableResize || this.model.isResponsive || isHierarchicalDrilldown) {
                 if (this._drilldownItems.length == 0 && !isHierarchicalDrilldown) {
                     this._initPrivateProperties();
                 }

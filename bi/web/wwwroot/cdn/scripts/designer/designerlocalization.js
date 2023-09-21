@@ -249,6 +249,7 @@ var Designer = {
                 descriptionText: "Description",
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
+                exportName: "Export Settings",
                 basicSettingsText: "Basic Settings",
                 tooltipSettingsText: "Tooltip Settings",
 				PaddingSettings:"Padding Settings",
@@ -398,16 +399,19 @@ var Designer = {
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
-                    csvExportText: "Allow CSV Export",
-                    excelExportText: "Allow Excel Export",
-                    imageExportText: "Allow Image Export",
-                    pdfExportText: "Allow PDF Export",
                     enableCommentText: "Enable Commenting",
                     showLinkIconText: "Show Link Icon",
                     viewDataText: "View Underlying Data",
                     pinWidgetText: "Pin Widget",
                     actionText: "Actions",
                     allowExportingText: "Allow Exporting"
+                },
+                exportSettings: {
+                    csvExportText: "Allow CSV Export",
+                    excelExportText: "Allow Excel Export",
+                    imageExportText: "Allow Image Export",
+                    pdfExportText: "Allow PDF Export",
+                    hiddenColumnExportText: "Include Hidden Columns"
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
@@ -423,6 +427,7 @@ var Designer = {
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
                     showLegend: "Show Legend",
+                    interactivity: "Interactivity",
 					showLegendTitle: "Show Title",
 		            showTooltip:"Show Tooltip",
                     legend: "Legend",
@@ -877,9 +882,11 @@ var Designer = {
                 appendDsBrowseText: "Browse File",
                 appendDsSelectedTables: "Selected Tables",
                 appendDsdragAndDropText: "Drop files here or ",
-				appendDsWaitingPopupText: "Appending data from the uploaded file(s).",
-                appendDsSuccessPopupText: "The files have been appended successfully.",
-                appendDsFailurePopupText: "The files have failed to be appended successfully.",
+				appendDsWaitingPopupText: "Appending data from the uploaded file(s)",
+                appendDsSuccessPopupText: "The file(s) have been appended successfully",
+                appendDsFailurePopupText: "The process of appending the file(s) was unsuccessful",
+                appendDsReadyToAppend: "file(s) ready to append",
+                appendDsFilesNeedsAttention: "file(s) needs attention",
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
                 enableSSH: "Enable SSH",
@@ -2080,7 +2087,9 @@ var Designer = {
 				exportingSuccessEndContent: " to download the file.",
                 connectorFileSizeValidationMessage: 'The chosen file name length must be up to 100 characters.',
                 fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
-                filesNotValid: "The following file has schema mismatch when comparing with initial file uploaded. Do you want to remove and continue ?"
+                filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
+				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
+				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -4452,7 +4461,8 @@ var Designer = {
                 resetButtonTooltip: "This action will reset the colors to default colors",
                 closeButtonText: "Close",
                 configureButtonText: "Configure",
-                updateButtonText: "Update"
+                updateButtonText: "Update",
+				selectColumnButtonText: "Select Column"
             },
             dateRangeFilterDialog: {
                 titleText: "Range Filter",
@@ -4606,7 +4616,9 @@ var Designer = {
             },
             editConnection: {
                 fileAlertMsg: "*Previous tables will be dropped.",
-                reconnect: "Reconnect"
+                reconnect: "Reconnect",
+                update: "Update",
+                updateIconMsg: "The purpose of this button is solely to update the optional parameters like Description, MaxrowCount,CommandTimeOut and Additional connection Properties. It does not Reconnect the data source."
             },
             sharedDSMenu: {
                 ownerNameHeader: "Owner",
@@ -5069,7 +5081,8 @@ var Designer = {
                 includeFilterInfoTooltipForPdf: "When Include filter information is switched on, the dashboard exported PDF will contain the applied filter(s) information.",
                 includeFilterInfoText: "Include filter information",
                 reset: "Reset",
-                apiExportErrMsg: "Invalid export parameter (widgetName)"
+                apiExportErrMsg: "Invalid export parameter (widgetName)",
+				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured."
             },
             maximize: {
                 maximize: "Maximize",

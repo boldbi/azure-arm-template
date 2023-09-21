@@ -21,6 +21,7 @@
     var isAdmin = _identityResponse.IsAdmin;
     var loginDisclaimerObject = ServerAppConfig.IsSelfHosted ? string.Empty : ViewBag.SystemSettings.LoginDisclaimer;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var pageDescription = T["Configure external user directories."];
 }
 <script>
     var defaultAuthentication = "";
@@ -146,7 +147,7 @@
 @section MainSection{
     @await Html.PartialAsync("_AdminMenu")
     <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
-        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["User Directories"] }, { "PageDescription", @T["Configure external user directories."] } })
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["User Directories"] }, { "PageDescription", @pageDescription } })
         <div class="col-xs-12 bi-page-header top-nav-btn-secton @(((ServerAppConfig.IsSelfHosted && enableWindowsAD && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))) && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))) ? "tabs-header-padding" : string.Empty)">
             <div class="col-xs-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">
@@ -171,7 +172,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="@Url.Action("ScheduleDatabaseSynchronization", "Administration")" data-toggle="tooltip" data-placement="left" title="@T["Synchronize users and groups from database on a regular schedule"]">
+                                <a href="@Url.Action("ScheduleDatabaseSynchronization", "Administration")" data-toggle="tooltip" data-placement="left" title="@T["Synchronize users from database on a regular schedule"]">
                                     <span>@T["Database Schedule Synchronization"]</span>
                                 </a>
                             </li>

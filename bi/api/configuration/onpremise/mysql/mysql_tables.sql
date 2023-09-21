@@ -1452,6 +1452,8 @@ INSERT into {database_name}.BOLDBI_Source (Name,IsActive) VALUES ( 'API',1)
 ;
 INSERT into {database_name}.BOLDBI_Source (Name,IsActive) VALUES ( 'Schedule',1)
 ;
+INSERT into {database_name}.BOLDBI_Source (Name,IsActive) VALUES ( 'Embed',1)
+;
 
 INSERT into {database_name}.BOLDBI_LogStatus (Name,IsActive) VALUES ( 'Start',1)
 ;

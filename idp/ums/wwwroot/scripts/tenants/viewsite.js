@@ -93,18 +93,18 @@ $(document).ready(function () {
     if (query.includes("?tab=general")) {
         $('a[href="#application-tab"]').tab("show");
     }
-    else if (query.includes("?tab=users")) {
+    else if (query.includes("?tab=users") && isActiveSite) {
         if (!isUserTabLoaded) {
             getAppUsers();
             isUserTabLoaded = true;
         }
         $('a[href="#users-tab"]').tab("show");
     }
-    else if (query.includes("?tab=isolation-code")) {
+    else if (query.includes("?tab=isolation-code") && isActiveSite) {
         $('a[href="#data-security-tab"]').tab("show");
         enableIsolationCode();
     }
-    else if (query.includes("?tab=attributes")) {
+    else if (query.includes("?tab=attributes") && isActiveSite) {
         if (!isAttributeTabLoaded) {
             getAttributes();
             isAttributeTabLoaded = true;
@@ -113,7 +113,7 @@ $(document).ready(function () {
     }
     else {
         isFreshLoad = false;
-        history.replaceState(null, null, window.location.href);
+        $('a[href="#application-tab"]').tab("show");
     }
 
     window.addEventListener("popstate", function (e) {
@@ -123,15 +123,15 @@ $(document).ready(function () {
             $("#application a").attr("href", "#application-tab");
             $('a[href="#application-tab"]').tab('show');
         }
-        else if (tab === "users") {
+        else if (tab === "users" && isActiveSite) {
             $("#users a").attr("href", "#users-tab");
             $('a[href="#users-tab"]').tab('show');
         }
-        else if (tab === "isolation-code") {
+        else if (tab === "isolation-code" && isActiveSite) {
             $("#data-security a").attr("href", "#data-security-tab");
             $('a[href="#data-security-tab"]').tab('show');
         }
-        else if (tab === "attributes") {
+        else if (tab === "attributes" && isActiveSite) {
             $("#custom-attribute a").attr("href", "#custom-attribute-tab");
             $('a[href="#custom-attribute-tab"]').tab('show');
         }
@@ -199,7 +199,7 @@ $(document).ready(function () {
                                                 SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAdded, 7000);
                                             }
                                             else if (result.result == "failure" && result.isAdmin == true && result.activation == 1) {
-                                                WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, 7000);
+                                                WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, null, 7000);
                                             }
                                             g.refresh();
                                         }
@@ -479,6 +479,13 @@ function getAppUsers() {
 }
 
 function getAttributes() {
+
+    var tooltip = new ej.popups.Tooltip({
+        target: ".grid-content",
+        position: 'TopCenter',
+        beforeRender: beforeRender
+    }, "#grid-tooltip");
+
     var attributeGrid = new ejs.grids.Grid({
         dataSource: window.siteAttributes,
         gridLines: 'None',
@@ -492,10 +499,6 @@ function getAttributes() {
         enableAltRow: false,
         created: initialSiteGridCreate,
         dataBound: function (args) {
-            $('[data-toggle="tooltip"]').tooltip(
-                {
-                    container: 'body'
-                });
         },
         columns: [
             { field: 'Name', template: "#attribute-name-template", headerText: window.Server.App.LocalizationContent.Name, width: 40, allowSorting: true, allowFiltering: true },
@@ -519,6 +522,10 @@ function getAttributes() {
             hideWaitingPopup("SiteAttributesGrid");
         }
     });
+
+    function beforeRender(args) {
+        tooltip.content = args.target.closest("td").innerText;
+    }
 }
 
 function getUsersWithoutAccess() {
