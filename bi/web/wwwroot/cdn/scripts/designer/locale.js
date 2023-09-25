@@ -192,6 +192,7 @@
                 markerImage: "Marker Image",
                 markerAddress: "Address",
                 markerPostalCode: "Postal Code",
+                markerSize: "Marker Size",
                 locationTooltip: "Location Tooltip",
                 value: "Value",
                 shape: "Shape",
