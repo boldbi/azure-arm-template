@@ -431,7 +431,12 @@
                 },
 				viewDataActions: {
                     allowViewDataExporting: "Allow Exporting",
-                    allowViewDataColumnSelection: "Allow Column Selection"
+                    allowViewDataColumnSelection: "Allow Column Selection",
+					allowViewDataAction: "Enable",
+					allowAccessVia: "Access via",
+					accessViaWidgetTitle: "Widget Header",
+					accessViaWidgetSelection: "Widget Selection",
+					accessViaBoth: "Both Widget Header & Selection"
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
@@ -7363,6 +7368,9 @@
                 token: "Current User Token",
 				tenantURL: "Current Site URL",
 				siteIdentifier: "Current Site Identifier"
+            },
+			defaultParameter: {
+                browserCulture: 'Current Browser Culture',
             },
             tabWidget: {
                 deleteTab: "Delete Tab",
