@@ -59,90 +59,101 @@ $(document).on("click", "#mail-error-detail", function () {
 
 function testMailTrigger() {
     if ($("#email-setting-form").valid()) {
-        var createDialogId = document.createElement("div");
-        createDialogId.setAttribute("id", "test-mail-dialog");
-        var element = document.getElementById("content-area");
-        element.appendChild(createDialogId);
-        createWaitingPopup('test-mail-dialog');
+        if (document.getElementById("test-mail-dialog") == null) {
+            var createDialogId = document.createElement("div");
+            createDialogId.setAttribute("id", "test-mail-dialog");
+            var element = document.getElementById("content-area");
+            element.appendChild(createDialogId);
+            createWaitingPopup('test-mail-dialog');
 
-        var authenticationType = parseInt($("#authentication-type input[type='radio']:checked").val());
-
-        var mailSettingsData = {
-            MailSettingsAddress: $("#mail-user-name").val(),
-            MailSettingsAuthType: authenticationType,
-            MailSettingsUserName: authenticationType === 1 ? $("#sender-user-name").val() : "",
-            MailSettingsPassword: authenticationType === 1 ? $("#mail-password").val() : "",
-            MailSettingsHost: $("#smtp-address").val(),
-            MailSettingsSenderName: $("#mail-display-name").val(),
-            MailSettingsPort: parseInt($("#port-number").val()),
-            MailSettingsIsSecureAuthentication: $("#secure-mail-authentication").is(":checked")
-        };
-
-        var testMailDialogobj = new ejs.popups.Dialog({
-            header: window.Server.App.LocalizationContent.SendTestMail,
-            showCloseIcon: true,
-            content: document.getElementById("test-mail-box"),
-            buttons: [
-                {
-                    'click': function () {
-                        testMailDialogobj.hide();
-                        $("#test-mail").val("");
-                    },
-                    buttonModel: {
-                        content: window.Server.App.LocalizationContent.CancelButton
-                    }
-                },
-                {
-                    'click': function (e) {
-                        if ($("#test-mail-form").valid()) {
-                            showWaitingPopup('test-mail-dialog');
-                            $.ajax({
-                                type: "POST",
-                                url: sentTestMail,
-                                data: { email: $("#test-mail").val(), mailSettingsData: JSON.stringify(mailSettingsData) },
-                                beforeSend: showWaitingPopup('server-app-container'),
-                                success: function (result) {
-                                    hideWaitingPopup('server-app-container');
-                                    if (result.Status) {
-                                        $("#test-mail").val("");
-                                        $(".success-box").show();
-                                        $("#test-mail-dialog .e-footer-content").find("button").hide();
-                                        $("#test-mail-dialog .e-footer-content").find("button").last().show();
-                                        $(".e-footer-content").css("text-align", "center");
-                                        $(".test-mail-info, #test-mail-form").hide();
-                                    }
-                                    else {
-                                        $("#test-mail").closest('span').addClass("e-error");
-                                        $("#test-mail-validate").css("display", "block");
-                                        $("#test-mail-validate").html(window.Server.App.LocalizationContent.MailSendFailureMessage1.format("<a id='mail-error-detail'>", "</a>"));
-                                        $("#test-main-error-message").val(result.Data);
-                                    }
-                                    hideWaitingPopup('test-mail-dialog');
-                                }
-                            });
+            var testMailDialogobj = new ejs.popups.Dialog({
+                header: window.Server.App.LocalizationContent.SendTestMail,
+                showCloseIcon: true,
+                content: document.getElementById("test-mail-box"),
+                buttons: [
+                    {
+                        'click': function () {
+                            testMailDialogobj.hide();
+                            $("#test-mail").val("");
+                        },
+                        buttonModel: {
+                            content: window.Server.App.LocalizationContent.CancelButton
                         }
                     },
-                    buttonModel: {
-                        isPrimary: true,
-                        content: window.Server.App.LocalizationContent.SendButton
-                    }
-                },
-                {
-                    'click': function () {
-                        testMailDialogobj.hide();
-                        $("#test-mail").val("");
+                    {
+                        'click': function (e) {
+                            var authenticationType = parseInt($("#authentication-type input[type='radio']:checked").val());
+                            var mailSettingsData = {
+                                MailSettingsAddress: $("#mail-user-name").val(),
+                                MailSettingsAuthType: authenticationType,
+                                MailSettingsUserName: authenticationType === 1 ? $("#sender-user-name").val() : "",
+                                MailSettingsPassword: authenticationType === 1 ? $("#mail-password").val() : "",
+                                MailSettingsHost: $("#smtp-address").val(),
+                                MailSettingsSenderName: $("#mail-display-name").val(),
+                                MailSettingsPort: parseInt($("#port-number").val()),
+                                MailSettingsIsSecureAuthentication: $("#secure-mail-authentication").is(":checked")
+                            };
+
+                            if ($("#test-mail-form").valid()) {
+                                showWaitingPopup('test-mail-dialog');
+                                $.ajax({
+                                    type: "POST",
+                                    url: sentTestMail,
+                                    data: { email: $("#test-mail").val(), mailSettingsData: JSON.stringify(mailSettingsData) },
+                                    beforeSend: showWaitingPopup('server-app-container'),
+                                    success: function (result) {
+                                        hideWaitingPopup('server-app-container');
+                                        if (result.Status) {
+                                            $("#test-mail").val("");
+                                            $(".success-box").show();
+                                            $("#test-mail-dialog .e-footer-content").find("button").hide();
+                                            $("#test-mail-dialog .e-footer-content").find("button").last().show();
+                                            $(".e-footer-content").css("text-align", "center");
+                                            $(".test-mail-info, #test-mail-form").hide();
+                                        }
+                                        else {
+                                            $("#test-mail").closest('span').addClass("e-error");
+                                            $("#test-mail-validate").css("display", "block");
+                                            $("#test-mail-validate").html(window.Server.App.LocalizationContent.MailSendFailureMessage1.format("<a id='mail-error-detail'>", "</a>"));
+                                            $("#test-main-error-message").val(result.Data);
+                                        }
+                                        hideWaitingPopup('test-mail-dialog');
+                                    }
+                                });
+                            }
+                        },
+                        buttonModel: {
+                            isPrimary: true,
+                            content: window.Server.App.LocalizationContent.SendButton
+                        }
                     },
-                    buttonModel: {
-                        content: window.Server.App.LocalizationContent.DoneButton
+                    {
+                        'click': function () {
+                            testMailDialogobj.hide();
+                            $("#test-mail").val("");
+                        },
+                        buttonModel: {
+                            content: window.Server.App.LocalizationContent.DoneButton
+                        }
                     }
-                }
-            ],
-            animationSettings: { effect: 'Zoom' },
-            beforeOpen: showTestMailBox,
-            width: '400px',
-            isModal: true,
-        });
-        testMailDialogobj.appendTo(createDialogId);
+                ],
+                animationSettings: { effect: 'Zoom' },
+                beforeOpen: showTestMailBox,
+                width: '400px',
+                isModal: true,
+            });
+            testMailDialogobj.appendTo(createDialogId);
+        }
+        else {
+            $(".success-box").hide();
+            $(".test-mail-info, #test-mail-form").show();
+            $(".e-footer-content").css("text-align", "right");
+            $("#test-mail-dialog .e-footer-content").find("button").show();
+            $("#test-mail-dialog .e-footer-content").find("button").last().hide();
+            var sendMailTest = document.getElementById("test-mail-dialog").ej2_instances;
+            sendMailTest[0].refresh();
+            sendMailTest[0].show();
+        }
     }
 }
 

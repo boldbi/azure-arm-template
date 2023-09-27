@@ -178,7 +178,6 @@ function onDropDownChange() {
 function onLocalizationDialogOpen() {
     document.getElementById("localization-container").ej2_instances[0].show();
     $("#delete-language").hide();
-
     if (document.getElementById('Localization_grid').ej2_instances == null) {
         $("#search-languages").val("");
         var data = new ejs.data.DataManager({
@@ -328,6 +327,11 @@ function uploadLanguage() {
 
 function fnActionBeginLocalization(args) {
     var searchValue = $("#search-languages").val();
+    if (fileName.length > 0) {
+        fileName = [];
+    }
+    $("#delete-language").hide();
+    count = 0;
     if (this.properties.query.params.length > 0) {
         this.properties.query.params = [];
         this.properties.query.params.push({ key: "searchKey", value: searchValue });
