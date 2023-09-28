@@ -701,8 +701,10 @@ function removeError() {
 
 $(document).on("change", "#existing-db", function () {
     $(".data-store-hide").removeClass("show").addClass("hidden");
+    $(".data-store-existing-db-hide").removeClass("hidden").addClass("show");
 });
 
 $(document).on("change", "#new-db", function () {
     $(".data-store-hide").removeClass("hidden").addClass("show");
+    $(".data-store-existing-db-hide").removeClass("show").addClass("hidden");
 });

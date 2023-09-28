@@ -43,7 +43,8 @@ $(document).ready(function () {
                 isRequired: true
             },
             containername: {
-                required: true
+                isRequired: true,
+                hasWhiteSpace: false
             },
             bloburl: {
                 IsCustomEndpoint: true,
@@ -159,6 +160,9 @@ function onConnectionRadioChange(args) {
         $(".custom-endpoint-form-element").hide();
         var finalValue = "DefaultEndpointsProtocol=" + checkedVal + ";AccountName=" + accountName + ";AccountKey=" + accessKey;
         $("#connection-string").val(finalValue);
+        if ($("#txt-bloburl").parent().hasClass('e-error') && (checkedVal != 'customendpoint')) {
+            $("#txt-bloburl").parent().removeClass('e-error');
+        }
 
     } else {
         var blobUrl = $("#txt-bloburl").val();
