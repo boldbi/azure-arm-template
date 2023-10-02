@@ -299,6 +299,7 @@
 				persistenceNotificationsText: "Maintains the expanded and collapsed state of the nodes",
                 performanceDelayNotificationsText: "Enabling this property will disable virtualization in the Pivot grid, which can cause performance delays when working with large sets of records",
 				imagePaddingSettingsText: "Padding Settings",
+				widgetTitleLengthErrorText: "The name should not exceed 255 characters"
 				pageSettings: {
 					pageSettingsText: "Page Settings",
 					pageSizeText: "Page Size",
@@ -363,6 +364,7 @@
 				},
                 rteBasicSettings: {
                     autofitContent: "Autofit Content",
+                    contentPadding: "Content Padding",
                     content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
                 },
                 containerApperance: {
@@ -507,6 +509,7 @@
                     valueColor: "Value Color",
                     labelColor: "Label Color",
                     sliderColor: "Slider Color",
+                    sliderInterval: "Slider Interval",
                     color: "Color",
                     titleColor: "Title Color",
                     enableValueSorting: "Allow Value Sorting",
@@ -1073,6 +1076,9 @@
 				applicationClientId: "ApplicationClientId",
 				applicationKey: "ApplicationKey",
 				authority: "Authority",
+				workspaces: "WorkSpaces",
+				apiKey: "ApiKey",
+				regionEndpoint: "RegionEndPoint",
                 enableSSL: "Enable SSL",
                 mode: "Mode",
                 live: "Live",
@@ -1113,7 +1119,7 @@
                 exploreSamples: "explore samples",
                 alertboxHeaderEditConnectionText: "Edit Connection",
                 dialogTitletext: "Users in",
-                datasourceDescriptionWaterMarkTxt: "Write description about this datasource",
+                datasourceDescriptionWaterMarkTxt: "Write description about this data source",
                 datasourceDescriptionLabelTxt: "Description (Optional)",
                 datasourceNameLabelTxt: "Name",
                 connectTo: "Connect To ",
@@ -1155,6 +1161,7 @@
                     edi: "EDI",
                     json: "JSON",
                     xml: "XML",
+					parquet: "Parquet",
                     odbc: "ODBC",
                     msSql: "Microsoft SQL",
                     azuresynapseanalytics: "Azure Synapse Analytics",
@@ -1197,6 +1204,7 @@
                     clickHouse:"ClickHouse",
                     Clickhouse:"Clickhouse",
 					azureDataExplorer: "Azure Data Explorer",
+					rockSet: "Rockset",
                     redShift:"Redshift",
                     azureSQLDataWarehouse:"AzureSQLDataWarehouse",
                     jira: {
@@ -2613,7 +2621,8 @@
                 fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
                 filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
-				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN"
+				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
+				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -2909,7 +2918,10 @@
                 listMatchingProducts:"Matching Products",
 				applicationClientId: "ApplicationClientId",
 				applicationKey: "ApplicationKey",
-				authority: "Authority"
+				authority: "Authority",
+				workspaces: "WorkSpaces",
+				apiKey: "ApiKey",
+				regionEndpoint: "RegionEndPoint"
             },
             linkedInCustomUIDataSource: {
                 organizationAccessControl: "Organization Access Control",
@@ -5533,7 +5545,7 @@
                 invalidCharText: "Invalid characters in the",
                 invalidDatasourceName: "Invalid datasource name",
                 notSupportedCharDatasourceName: ".The following characters are not supported ",
-                datasourceNameWaterMarkTxt: "Enter datasource name",
+                datasourceNameWaterMarkTxt: "Enter data source name",
                 organizationIdWaterMarkText: "Organization ID",
 				invalidOrganizationId: "Organization ID can’t be empty"
             },
@@ -6537,7 +6549,8 @@
                 addGlobalWhereCondition: "+ Add Global Where Condition",
                 selectTargetText: "Select Target",
                 selectConditionText: "Select Condition",
-                selectFormatText: "Select Format"
+                selectFormatText: "Select Format",
+				conditionErrorText: "A condition should be added"
             },
             dataAlertExpression: {
                 dialogTitle: "Custom Expressions",
@@ -7490,7 +7503,19 @@
                 deleteDashboardsContent: "Are you sure you want to delete the dashboards? You can upload the dashboards again by visiting the ",
                 deleteDashboardTitleContent: "Delete Dashboard",
                 deleteButtonContent: "Yes, Delete",
-            }
+            },
+			qandawidget:{
+				dialogTitle: "Provide Additional Feedback",
+				dialogReasonForDislike: "Notify the BoldBI team about the issue, choose the reason for dislike?",
+				dialoglistItemFirst: "Irrelevant chart generated",
+				dialoglistItemSecond: "Innacurate data",
+				dialoglistItemThird: "Lack of Customization",
+				dialoglistItemFourth: "Throws Error",
+				dialoglistItemFifth: "Others",
+				dialogCommentsIfAnyText: "Comments (Optional) :",
+				dialogClickToSubmitDetails: "Clicking \'Submit\' shares your question, data source column names and error logs with the BoldBI support team to improve AI feature quality and provide support",
+				dialogSubmitBtn: "Submit"
+			}
         }
     }
 }
