@@ -299,7 +299,7 @@
 				persistenceNotificationsText: "Maintains the expanded and collapsed state of the nodes",
                 performanceDelayNotificationsText: "Enabling this property will disable virtualization in the Pivot grid, which can cause performance delays when working with large sets of records",
 				imagePaddingSettingsText: "Padding Settings",
-				widgetTitleLengthErrorText: "The name should not exceed 255 characters"
+				widgetTitleLengthErrorText: "The name should not exceed 255 characters",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
 					pageSizeText: "Page Size",

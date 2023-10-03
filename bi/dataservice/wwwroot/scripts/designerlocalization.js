@@ -292,7 +292,7 @@ var Designer = {
                 alignmentSettingsText:"Alignment Settings",
 				contentSettingsText: "Content Settings",
                 kpiValueText: "KPI Value",
-				widgetTitleLengthErrorText: "The name should not exceed 255 characters"
+				widgetTitleLengthErrorText: "The name should not exceed 255 characters",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
 					pageSizeText: "Page Size",
