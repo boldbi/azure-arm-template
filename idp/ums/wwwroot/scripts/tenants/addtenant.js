@@ -761,12 +761,12 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
             success: function (data) {
                 parent.hideWaitingPopup(waitingPopUpElement);
                 if (data.Result || data.ResultIdentifier) {
-                    if (data.Value != null && data.ResultIdentifier && tenantIdentifier.toLowerCase() != tenantIdentifierinDB) {
+                    if (data.Value != null && data.ResultIdentifier && tenantIdentifier != tenantIdentifierinDB) {
                         $("#tenant-identifier").closest("div").addClass("e-error");
                         $("#tenant-identifier-validation-error").css("display", "block");
                         $("#tenant-identifier-validation-error").html(data.Value);
                     }
-                    else if (data.Result && tenantName.toLowerCase() != tenantNameinDB) {
+                    else if (data.Result && tenantName != tenantNameinDB) {
                         $("#tenant-name").closest("div").addClass("e-error");
                         $("#tenant-name-validation-error").css("display", "block");
                         $("#tenant-name-validation-error").html(window.Server.App.LocalizationContent.SiteNameExists);
