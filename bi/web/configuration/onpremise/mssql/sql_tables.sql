@@ -974,6 +974,19 @@ CREATE TABLE [BoldBI_DSMetrics]  (
    RefreshException VARCHAR(255))
 ;
 
+CREATE TABLE [BoldBI_ai_qnawidgethistory] (
+   searchid VARCHAR(255) PRIMARY KEY,
+   question TEXT,
+   tableinfo TEXT,
+   schemasequence TEXT,
+   fieldinfo TEXT,
+   message TEXT,
+   haserror BIT,
+   sqlquery TEXT,
+   uservote TEXT,
+   isreported BIT)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT into [BOLDBI_ItemType] (Name,IsActive) VALUES (N'Category',1)
@@ -1909,9 +1922,6 @@ INSERT into [BOLDBI_PublishType] (Name,IsActive) VALUES ( N'Unlock',1)
 ;
 
 ---- PASTE ALTER Queries below this section --------
-
-ALTER TABLE [BOLDBI_PublishJobs]  ADD [Type] [int] NOT NULL DEFAULT 1
-;
 
 ALTER TABLE [BOLDBI_PublishJobs]  ADD FOREIGN KEY([Type]) REFERENCES [BOLDBI_PublishType] ([Id])
 ;

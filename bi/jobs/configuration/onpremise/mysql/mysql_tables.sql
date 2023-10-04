@@ -1055,6 +1055,19 @@ CREATE TABLE {database_name}.BOLDBI_DSMetrics (
    RefreshException VARCHAR(255))
 ;
 
+CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
+   searchid VARCHAR(255) PRIMARY KEY,
+   question TEXT,
+   tableinfo TEXT,
+   schemasequence TEXT,
+   fieldinfo TEXT,
+   message TEXT,
+   haserror BOOLEAN,
+   sqlquery TEXT,
+   uservote TEXT,
+   isreported BOOLEAN)
+;
+
 -- -- PASTE INSERT Queries below this section --------
 
 INSERT into {database_name}.BOLDBI_PublishType (Name, IsActive) Values ('Publish',1)
@@ -1990,9 +2003,6 @@ INSERT INTO {database_name}.BOLDBI_EventPayloadsMapping (EventType, PayloadType,
 ;
 
 -- -- PASTE ALTER Queries below this section --------
-
-ALTER TABLE {database_name}.BOLDBI_PublishJobs ADD Type int NOT NULL DEFAULT 1
-;
 
 ALTER TABLE  {database_name}.BOLDBI_PublishJobs  ADD FOREIGN KEY(Type) REFERENCES {database_name}.BOLDBI_PublishType (Id)
 ;
