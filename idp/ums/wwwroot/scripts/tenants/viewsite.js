@@ -459,6 +459,7 @@ function getAppUsers() {
             {
                 field: "UserStatus",
                 allowFiltering: false,
+                allowSorting: false,
                 template: "#user-status-template",
                 headerTemplate: "#status-header",
                 type: "string",
@@ -798,7 +799,12 @@ function removeUserAccess(users) {
                 if (result.status) {
                     var content = window.Server.App.LocalizationContent.RevokedAccessFor.format(result.count);
                     SuccessAlert(window.Server.App.LocalizationContent.RevokeSiteAccess, content, 7000);
-                } else {
+                }
+                else if (!result.status && result.errormessage !== '')
+                {
+                    WarningAlert(window.Server.App.LocalizationContent.RevokeSiteAccess, window.Server.App.LocalizationContent.RevokeSiteAccessForAdminError, null, 7000);
+                }
+                else {
                     WarningAlert(window.Server.App.LocalizationContent.RevokeSiteAccess, window.Server.App.LocalizationContent.RevokeSiteAccessError, result.Message, 7000);
                 }
                 singleUserRemove = false;

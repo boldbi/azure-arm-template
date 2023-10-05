@@ -190,6 +190,7 @@ var Designer = {
                 markerImage: "Marker Image",
                 markerAddress: "Address",
                 markerPostalCode: "Postal Code",
+                markerSize: "Marker Size",
                 locationTooltip: "Location Tooltip",
                 value: "Value",
                 shape: "Shape",
@@ -291,6 +292,7 @@ var Designer = {
                 alignmentSettingsText:"Alignment Settings",
 				contentSettingsText: "Content Settings",
                 kpiValueText: "KPI Value",
+				widgetTitleLengthErrorText: "The name should not exceed 255 characters",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
 					pageSizeText: "Page Size",
@@ -348,6 +350,7 @@ var Designer = {
                 },
                 rteBasicSettings: {
                     autofitContent: "Autofit Content",
+                    contentPadding: "Content Padding",
                     content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
                 },
                 containerApperance: {
@@ -412,6 +415,15 @@ var Designer = {
                     imageExportText: "Allow Image Export",
                     pdfExportText: "Allow PDF Export",
                     hiddenColumnExportText: "Include Hidden Columns"
+                },
+				viewDataActions: {
+                    allowViewDataExporting: "Allow Exporting",
+                    allowViewDataColumnSelection: "Allow Column Selection",
+					allowViewDataAction: "Enable",
+					allowAccessVia: "Access via",
+					accessViaWidgetTitle: "Widget Header",
+					accessViaWidgetSelection: "Widget Selection",
+					accessViaBoth: "Both Widget Header & Selection"
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
@@ -478,6 +490,7 @@ var Designer = {
                     valueColor: "Value Color",
                     labelColor: "Label Color",
                     sliderColor: "Slider Color",
+                    sliderInterval: "Slider Interval",
                     color: "Color",
                     titleColor: "Title Color",
                     enableValueSorting: "Allow Value Sorting",
@@ -1038,7 +1051,7 @@ var Designer = {
                 exploreSamples: "explore samples",
                 alertboxHeaderEditConnectionText: "Edit Connection",
                 dialogTitletext: "Users in",
-                datasourceDescriptionWaterMarkTxt: "Write description about this datasource",
+                datasourceDescriptionWaterMarkTxt: "Write description about this data source",
                 datasourceDescriptionLabelTxt: "Description (Optional)",
                 datasourceNameLabelTxt: "Name",
                 connectTo: "Connect To ",
@@ -1079,6 +1092,7 @@ var Designer = {
                     edi: "EDI",
                     json: "JSON",
                     xml: "XML",
+					parquet: "Parquet",
                     odbc: "ODBC",
                     msSql: "Microsoft SQL",
                     azureSqlDataWarehouse: "Azure SQL Data Warehouse",
@@ -1105,6 +1119,7 @@ var Designer = {
                     sparksql: "SparkSQL",
                     postgres: "PostgreSQL",
                     redshift: "Amazon Redshift",
+					rockSet: "Rockset",
                     influxdb: "InfluxDB",
                     amazonRDS: "Amazon RDS",
                     amazonRDSSqlServer: "AmazonRDSSqlServer",
@@ -2089,7 +2104,8 @@ var Designer = {
                 fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
                 filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
-				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN"
+                joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
+                joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -4494,7 +4510,7 @@ var Designer = {
                 invalidCharText: "Invalid characters in the",
                 invalidDatasourceName: "Invalid datasource name",
                 notSupportedCharDatasourceName: ".The following characters are not supported: \" + , ; [ ] % #",
-                datasourceNameWaterMarkTxt: "Enter datasource name"
+                datasourceNameWaterMarkTxt: "Enter data source name"
             },
             queryDesigner: {
                 columnType: {
@@ -5531,7 +5547,8 @@ var Designer = {
                 addGlobalWhereCondition: "+ Add Global Where Condition",
                 selectTargetText: "Select Target",
                 selectConditionText: "Select Condition",
-                selectFormatText: "Select Format"
+                selectFormatText: "Select Format",
+				conditionErrorText: "A condition should be added"
             },
             dataAlertExpression: {
                 dialogTitle: "Custom Expressions",
@@ -6801,6 +6818,9 @@ var Designer = {
 				tenantURL: 'Current Site URL',
                 siteIdentifier: 'Current Site Identifier'
 			},
+			defaultParameter: {
+                browserCulture: 'Current Browser Culture',
+            }
         }
     }
 }

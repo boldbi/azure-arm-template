@@ -132,7 +132,7 @@ $(document).ready(function () {
             success: function (result) {
                 if (result.status) {
                     SuccessAlert(window.Server.App.LocalizationContent.LookAndFeelSettings, window.Server.App.LocalizationContent.LookAndFeelSettingsSuccess, 7000);
-                    window.location.href = window.location.href;
+                    setTimeout(function () { window.location.href = window.location.href }, 3000);
                 } else {
                     WarningAlert(window.Server.App.LocalizationContent.LookAndFeelSettings, window.Server.App.LocalizationContent.LookAndFeelSettingsFailure, result.Message, 7000);
                 }

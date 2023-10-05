@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 6.13.11
+*  version : 6.14.12
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -7330,6 +7330,11 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
                     }
                 }
                 this._hScroll = this.isHScroll(), this._vScroll = this.isVScroll();
+		if ( Math.round(this.model.height) === this.content()[0].scrollHeight)
+                {
+                    this._tempVscrollbar = this._vScrollbar;
+                    this.element.children(".e-vscrollbar").remove();
+                }
 				jqVersion = bbdesigner$.fn.jquery ? (this._contentHeight = "height", this._contentWidth = "width") : (this._contentHeight = "outerHeight", this._contentWidth = "outerWidth");
                 if (this._hScroll || this._vScroll) {
                     this.content().addClass("e-content");

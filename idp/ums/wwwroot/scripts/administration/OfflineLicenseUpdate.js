@@ -2,6 +2,7 @@
 var getLicenseUrl;
 var licenseToken;
 var offlineLicenseToken;
+
 $(document).ready(function () {
     String.prototype.format = function () {
         a = this;

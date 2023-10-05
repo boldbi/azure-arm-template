@@ -644,7 +644,6 @@ $(document).ready(function () {
                     }
                     SuccessAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
                     SetCookie();
-
                 } else {
                     WarningAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.Message, 7000);
                     $(".error-message, .success-message").css("display", "none");
@@ -892,7 +891,7 @@ parseURL.options = {
 };
 
 function SetCookie() {
-    if ($("#lang_tag").val() !== $("#language").val()) {
+    if ($("#lang_tag").val() !== $("#language_hidden").val()) {
         $.ajax({
             type: "POST",
             url: window.setLanguageUrl,

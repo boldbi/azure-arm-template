@@ -1,2 +1,12 @@
-INSERT into {database_name}.BOLDBI_Source (Name,IsActive) VALUES ( 'Embed',1)
+CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
+   searchid VARCHAR(255) PRIMARY KEY,
+   question TEXT,
+   tableinfo TEXT,
+   schemasequence TEXT,
+   fieldinfo TEXT,
+   message TEXT,
+   haserror BOOLEAN,
+   sqlquery TEXT,
+   uservote TEXT,
+   isreported BOOLEAN)
 ;
