@@ -1014,3 +1014,8 @@ function validateCode() {
 $(document).on("click", "#data-security", function (e) {
     enableIsolationCode();
 });
+
+$(document).on("click", "#new-user-button", function () {
+    var usersgrid = document.getElementById('users_grid').ej2_instances[0];
+    usersgrid.clearSelection();
+});

@@ -523,7 +523,8 @@ var Designer = {
                     emptyCellsContent:"Empty Cell Content",
 					rawData: "Show Raw Data",
                     rawDataInfo:"This option will remove the aggregation in grid columns and show raw data.",
-                    apiType:"API Type"
+                    apiType:"API Type",
+                    listBoxShowAll:"Show All"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",

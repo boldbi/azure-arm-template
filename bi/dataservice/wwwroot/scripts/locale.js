@@ -555,7 +555,8 @@
 					headerColorText: "Header Color",
 					headerFontSizeText: "Header Font Size",
 					activeTabText: "Active  Tab",
-                    apiType:"API Type"
+                    apiType:"API Type",
+                    listBoxShowAll:"Show All"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -7514,7 +7515,10 @@
 				dialoglistItemFifth: "Others",
 				dialogCommentsIfAnyText: "Comments (Optional) :",
 				dialogClickToSubmitDetails: "Clicking \'Submit\' shares your question, data source column names and error logs with the BoldBI support team to improve AI feature quality and provide support",
-				dialogSubmitBtn: "Submit"
+				dialogSubmitBtn: "Submit",
+				queryWarning: "Provide valid question to start with QnA with your data.",
+                dataSourceWarning: "Attach a data source to the dashboard to start questioning.",
+				errorContent: "There might be issue due to the question entered or some other errors. Click here to ",
 			}
         }
     }

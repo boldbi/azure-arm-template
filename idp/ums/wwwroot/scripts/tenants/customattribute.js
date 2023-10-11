@@ -127,7 +127,7 @@ function openCustomAttributeDialog(attributeId, name) {
     if (isAttributeEdit) {
         setTimeout(function () {
             showSavedAttributes();
-        }, 500);
+        }, 200);
     }
     createWaitingPopup('custom-attribute-dialog');
 }
@@ -139,7 +139,7 @@ function saveAttribute() {
                 var siteAttributesGrid = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
                 var editAttributeName = $("#custom-attribute-name").val().trim();
                 for (var listItem = 0; listItem < siteAttributesGrid.dataSource.length; listItem++) {
-                    if (siteAttributesGrid.dataSource[listItem].Name == editAttributeName && siteAttributesGrid.dataSource[listItem].CustomAttributeId != editCustomAttributeId) {
+                    if (siteAttributesGrid.dataSource[listItem].Name.toLowerCase() == editAttributeName.toLowerCase() && siteAttributesGrid.dataSource[listItem].CustomAttributeId != editCustomAttributeId) {
                         $("#custom-attribute-name").closest("div").addClass("e-error");
                         $("#custom-attribute-name").closest(".e-outline").addClass("e-error");
                         $("#custom-attribute-name").closest(".e-outline").siblings(".custom-attr-validation-errors").html(window.Server.App.LocalizationContent.IsAttributeNameExist);
@@ -420,10 +420,8 @@ function addSiteLevelAttribute(customAttribute) {
 function nameCheckAtAddTenant() {
     var attributeName = $("#custom-attribute-name").val().trim();
     $.each(addSiteAttribute, function (index, value) {
-        if (value.Name == attributeName) {
+        if (value.Name.toLowerCase() == attributeName.toLowerCase()) {
             $("#custom-attribute-name").addClass("e-error");
-        } else {
-            $("#custom-attribute-name").removeClass("e-error");
         }
         $("[name='custom-attribute-name']").valid();
     });
