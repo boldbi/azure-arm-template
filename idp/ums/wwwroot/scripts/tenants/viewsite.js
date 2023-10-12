@@ -459,7 +459,6 @@ function getAppUsers() {
             {
                 field: "UserStatus",
                 allowFiltering: false,
-                allowSorting: false,
                 template: "#user-status-template",
                 headerTemplate: "#status-header",
                 type: "string",

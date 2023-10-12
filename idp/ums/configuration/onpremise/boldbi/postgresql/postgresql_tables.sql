@@ -967,19 +967,6 @@ CREATE TABLE SyncDS_DSMetrics (
    RefreshException VARCHAR(255))
 ;
 
-CREATE TABLE SyncDS_ai_qnawidgethistory (
-   searchid VARCHAR(255) PRIMARY KEY,
-   question TEXT,
-   tableinfo TEXT,
-   schemasequence TEXT,
-   fieldinfo TEXT,
-   message TEXT,
-   haserror BOOLEAN,
-   sqlquery TEXT,
-   uservote TEXT,
-   isreported BOOLEAN)
-;
-
 ---- PASTE INSERT Queries below this section --------
 
 INSERT INTO SyncDS_PublishType (Name, IsActive) Values (N'Publish',1)
@@ -1915,6 +1902,9 @@ INSERT INTO SyncDS_EventPayloadsMapping (EventType, PayloadType, IsActive) VALUE
 
 ---- PASTE ALTER Queries below this section --------
 ALTER TABLE SyncDS_ScheduleMissingLogs  ADD FOREIGN KEY(ScheduleId) REFERENCES SyncDS_ScheduleDetail (ScheduleId)
+;
+
+ALTER TABLE SyncDS_PublishJobs ADD COLUMN Type int not null DEFAULT 1
 ;
 
 ALTER TABLE SyncDS_PublishJobs  ADD FOREIGN KEY(Type) REFERENCES SyncDS_PublishType (Id)
