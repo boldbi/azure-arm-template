@@ -5297,7 +5297,12 @@ var Designer = {
                     measures: "measures",
                     rename: "Rename",
                     first: "First",
-                    last: "Last"
+                    last: "Last",
+                    showValueAs: "Show Value As",
+                    noCalculation: "No calculation",
+                    percentOfRowTotal: "Percent Of Row Total",
+                    percentOfColumnTotal: "Percent Of Column Total",
+                    percentOfGrandTotal: "Percent Of Grand Total"
                 },
                 numberFilterOption: {
                     equals: "Equals",

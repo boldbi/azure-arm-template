@@ -766,7 +766,7 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
                         $("#tenant-identifier-validation-error").css("display", "block");
                         $("#tenant-identifier-validation-error").html(data.Value);
                     }
-                    else if (data.Result && tenantName.toLowerCase() != tenantNameinDB.toLowerCase()) {
+                    else if (data.Result && tenantName.toLowerCase() != tenantNameinDB.toLowerCase().trim()) {
                         $("#tenant-name").closest("div").addClass("e-error");
                         $("#tenant-name-validation-error").css("display", "block");
                         $("#tenant-name-validation-error").html(window.Server.App.LocalizationContent.SiteNameExists);

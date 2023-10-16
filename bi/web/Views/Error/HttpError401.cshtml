@@ -10,6 +10,7 @@
     bool isEmbedSignature = Convert.ToBoolean(requestUrl.Query.ToLower().Contains("embed_signature"));
     bool isEmbedUserToken = Convert.ToBoolean(requestUrl.Query.ToLower().Contains("embed_user_token"));
     var isEmbedExpired = ViewBag.IsEmbedExpired == null ? false : ViewBag.IsEmbedExpired;
+    var isTimeStampRequired = ViewBag.IsTimeStampRequired == null ? false : ViewBag.IsTimeStampRequired;
     var nonce = ViewBag.Nonce == null ? false : ViewBag.Nonce;
     var isEmbedEnabled = ViewBag.IsEmbedEnabled == null ? false : ViewBag.IsEmbedEnabled;
     var publishedItemIsLocked = ViewBag.IsPublishedCanEdit == null ? false : ViewBag.IsPublishedCanEdit;
@@ -71,6 +72,12 @@
                 {
                     <div class="error-text">
                         @T["Embed authentication is disabled."]<br>@T["Please contact the site administrator for help."]
+                    </div>
+                }
+                else if (isTimeStampRequired)
+                {
+                    <div class="error-text">
+                        @T["The embed_timestamp value is missing the dashboard signature URL."]<br>@T["You must pass the current timestamp value while you setting embed_expirationtime value."]
                     </div>
                 }
                 else if (isEmbedExpired || nonce)

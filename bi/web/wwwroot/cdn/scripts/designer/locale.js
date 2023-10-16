@@ -6289,7 +6289,12 @@
                     measures: "measures",
                     rename: "Rename",
                     first: "First",
-                    last: "Last"
+                    last: "Last",
+                    showValueAs: "Show Value As",
+                    noCalculation: "No calculation",
+                    percentOfRowTotal: "Percent Of Row Total",
+                    percentOfColumnTotal: "Percent Of Column Total",
+                    percentOfGrandTotal: "Percent Of Grand Total"
                 },
                 numberFilterOption: {
                     equals: "Equals",
@@ -7509,16 +7514,20 @@
 				dialogTitle: "Provide Additional Feedback",
 				dialogReasonForDislike: "Notify the BoldBI team about the issue, choose the reason for dislike?",
 				dialoglistItemFirst: "Irrelevant chart generated",
-				dialoglistItemSecond: "Innacurate data",
-				dialoglistItemThird: "Lack of Customization",
-				dialoglistItemFourth: "Throws Error",
+				dialoglistItemSecond: "Inaccurate data",
+				dialoglistItemThird: "Lack of customization",
+				dialoglistItemFourth: "Throws error",
 				dialoglistItemFifth: "Others",
 				dialogCommentsIfAnyText: "Comments (Optional) :",
-				dialogClickToSubmitDetails: "Clicking \'Submit\' shares your question, data source column names and error logs with the BoldBI support team to improve AI feature quality and provide support",
+				dialogClickToSubmitDetails: "Clicking \'Submit\' shares your question, data source column names, and error logs with the BoldBI support team to improve AI feature quality and provide support",
 				dialogSubmitBtn: "Submit",
 				queryWarning: "Provide valid question to start with QnA with your data.",
                 dataSourceWarning: "Attach a data source to the dashboard to start questioning.",
-				errorContent: "There might be issue due to the question entered or some other errors. Click here to ",
+                errorContent1: "BoldBI AI service cannot provide a solution to your question. Kindly note the limitations in the AI widget from the ",
+                errorContent2: ", and retry by reframing the question. For detailed errors, ",
+				feedbackNote: "Note: ",
+				feedbackEmailSettings: "Email Settings",
+				feedbackNeedsToConfigure: " need to be configured for reporting."
 			}
         }
     }
