@@ -49,7 +49,6 @@ var excludedSearchKeys = [
 ];
 
 $(document).ready(function () {
-    setClientLocaleCookie("boldservice.client.locale", 365);
     createWaitingPopup('body');
     createWaitingPopup('server-app-container');
     createWaitingPopup('content-area');
@@ -1044,15 +1043,12 @@ function getUrlQueryVariable(url, variable) {
     return null;
 }
 
-function setClientLocaleCookie(name, exdays) {
-    var value = {
-        Locale: navigator.language,
-        TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-    };
-    var exdate = new Date();
-    exdate.setDate(exdate.getDate() + exdays++);
-    var cookie_value = escape(JSON.stringify(value)) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
-    document.cookie = name + "=" + cookie_value + ";path=/";
+function SetHttpOnlyCookie(cookieName, cookieValue, expires, isCookiePathRequired) {
+    $.ajax({
+        type: "POST",
+        url: setCookieHttpOnlyUrl,
+        data: { cookieName: cookieName, cookieValue: cookieValue, expires: expires, isCookiePathRequired: isCookiePathRequired }
+    });
 }
 
 function profileDisplayNameSelection() {

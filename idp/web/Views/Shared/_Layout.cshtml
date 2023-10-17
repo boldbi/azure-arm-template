@@ -2,6 +2,7 @@
 @using Syncfusion.Server.Base.Middlewares;
 @using Microsoft.AspNetCore.Http.Extensions;
 @using System.Security.Claims;
+@using Newtonsoft.Json
 @{
     var reqUrl = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = reqUrl.AbsolutePath.ToLower();
@@ -16,6 +17,7 @@
     var isWelcomePage = ViewBag.IsWelcomePage != null && ViewBag.IsWelcomePage;
     var headerTitle = ViewBag.HeaderTitle != null ? ViewBag.HeaderTitle : GlobalAppSettings.SystemSettings.OrganizationName;
     var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
+    var cookieValue = string.IsNullOrWhiteSpace(Context.Request.Cookies["boldservice.client.locale"]) ? string.Empty : Context.Request.Cookies["boldservice.client.locale"];
 }
 
 <!DOCTYPE html>
@@ -35,6 +37,18 @@
     <script type="text/javascript">
         var rootUrl = "";
         var baseurl = "";
+        var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
+        var cookieValue = @Html.Raw(JsonConvert.SerializeObject(@cookieValue));
+        var value = {
+            Locale: navigator.language,
+            TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        setTimeout(function () {
+            if (isEmptyOrWhitespace(cookieValue) || cookieValue != JSON.stringify(value)) {
+                SetHttpOnlyCookie("boldservice.client.locale", JSON.stringify(value), 365);
+            }
+        }, 5000);
     </script>
 
     @await Html.PartialAsync("../Shared/_FontReference")
