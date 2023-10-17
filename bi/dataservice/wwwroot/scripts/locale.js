@@ -7512,22 +7512,22 @@
             },
 			qandawidget:{
 				dialogTitle: "Provide Additional Feedback",
-				dialogReasonForDislike: "Notify the BoldBI team about the issue, choose the reason for dislike?",
-				dialoglistItemFirst: "Irrelevant chart generated",
-				dialoglistItemSecond: "Inaccurate data",
+                dialogReasonForDislike: "Notify the Bold BI team about the issue and choose the reason for the downvote:",
+				dialoglistItemFirst: "Irrelevant chart",
+                dialoglistItemSecond: "Inaccurate data",
 				dialoglistItemThird: "Lack of customization",
-				dialoglistItemFourth: "Throws error",
-				dialoglistItemFifth: "Others",
+				dialoglistItemFourth: "Error",
+				dialoglistItemFifth: "Other",
 				dialogCommentsIfAnyText: "Comments (Optional) :",
-				dialogClickToSubmitDetails: "Clicking \'Submit\' shares your question, data source column names, and error logs with the BoldBI support team to improve AI feature quality and provide support",
-				dialogSubmitBtn: "Submit",
-				queryWarning: "Provide valid question to start with QnA with your data.",
-                dataSourceWarning: "Attach a data source to the dashboard to start questioning.",
-                errorContent1: "BoldBI AI service cannot provide a solution to your question. Kindly note the limitations in the AI widget from the ",
-                errorContent2: ", and retry by reframing the question. For detailed errors, ",
+                dialogClickToSubmitDetails: "Clicking Submit shares your question, the column names of the data source involved, and the error logs with the Bold BI support team.",
+                dialogSubmitBtn: "Submit",
+                queryWarning: "Provide a question to start the Q&A with your data.",
+                dataSourceWarning: "Attach a data source to the dashboard to start asking questions.",
+                errorContent1: "The BoldBI AI service cannot provide a solution to your question. Note the limitations in the AI widget listed ",
+                errorContent2: ", and try again by reframing the question. To see the error details, ",
 				feedbackNote: "Note: ",
-				feedbackEmailSettings: "Email Settings",
-				feedbackNeedsToConfigure: " need to be configured for reporting."
+				feedbackEmailSettings: "Email settings",
+                feedbackNeedsToConfigure: " need to be configured for sending these details."
 			}
         }
     }
