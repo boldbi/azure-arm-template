@@ -691,7 +691,7 @@ function updateTenant(waitingPopUpElement, connectionString) {
     $.ajax({
         type: "POST",
         url: updateTenantDetailsUrl,
-        data: { tenantId: tenantId, tenantName: name, tenantIdentifier: tenantIdentifier, tenantUrl: tenantUrl, databaseDetails: connectionString, additionalParameters: additionalParameters, useSiteIdentifier: siteIdentifier },
+        data: { tenantId: tenantId, tenantName: name, tenantIdentifier: tenantIdentifier.toLowerCase(), tenantUrl: tenantUrl, databaseDetails: connectionString, additionalParameters: additionalParameters, useSiteIdentifier: siteIdentifier },
         success: function (data) {
             if (data.result == true) {
                 parent.hideWaitingPopup(waitingPopUpElement);
@@ -761,12 +761,12 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
             success: function (data) {
                 parent.hideWaitingPopup(waitingPopUpElement);
                 if (data.Result || data.ResultIdentifier) {
-                    if (data.Value != null && data.ResultIdentifier && tenantIdentifier != tenantIdentifierinDB) {
+                    if (data.Value != null && data.ResultIdentifier && tenantIdentifier.toLowerCase() != tenantIdentifierinDB.toLowerCase()) {
                         $("#tenant-identifier").closest("div").addClass("e-error");
                         $("#tenant-identifier-validation-error").css("display", "block");
                         $("#tenant-identifier-validation-error").html(data.Value);
                     }
-                    else if (data.Result && tenantName != tenantNameinDB) {
+                    else if (data.Result && tenantName.toLowerCase() != tenantNameinDB.toLowerCase().trim()) {
                         $("#tenant-name").closest("div").addClass("e-error");
                         $("#tenant-name-validation-error").css("display", "block");
                         $("#tenant-name-validation-error").html(window.Server.App.LocalizationContent.SiteNameExists);

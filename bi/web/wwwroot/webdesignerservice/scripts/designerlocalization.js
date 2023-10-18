@@ -523,7 +523,8 @@ var Designer = {
                     emptyCellsContent:"Empty Cell Content",
 					rawData: "Show Raw Data",
                     rawDataInfo:"This option will remove the aggregation in grid columns and show raw data.",
-                    apiType:"API Type"
+                    apiType:"API Type",
+                    listBoxShowAll:"Show All"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -5296,7 +5297,12 @@ var Designer = {
                     measures: "measures",
                     rename: "Rename",
                     first: "First",
-                    last: "Last"
+                    last: "Last",
+                    showValueAs: "Show Value As",
+                    noCalculation: "No calculation",
+                    percentOfRowTotal: "Percent Of Row Total",
+                    percentOfColumnTotal: "Percent Of Column Total",
+                    percentOfGrandTotal: "Percent Of Grand Total"
                 },
                 numberFilterOption: {
                     equals: "Equals",

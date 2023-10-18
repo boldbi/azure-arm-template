@@ -12,6 +12,8 @@ var isavailableLanguage = false;
 var isNewLanguageAdded = false;
 $(document).ready(function () {
     createWaitingPopup("localization-container");
+    createWaitingPopup("upload-container");
+    createWaitingPopup("language-delete-dialog");
     var localizationDialog = new ejs.popups.Dialog({
         width: "900px",
         height: "712px",
@@ -298,6 +300,7 @@ $(document).on("click", "#clear-search", function (args) {
 });
 
 function uploadLanguage() {
+    showWaitingPopup("upload-container");
     if (isValidationSuccess) {
         if (isavailableLanguage) {
             fileName.push(document.getElementById("model-language").ej2_instances[0].value);
@@ -319,6 +322,7 @@ function uploadLanguage() {
                     parent.onCloseMessageBox();
                 });
             }
+            hideWaitingPopup("upload-container");
         });
         localizationGrid.clearSelection();
         localizationGrid.refresh();
@@ -437,6 +441,7 @@ function languageDeleteDialogClose() {
 }
 
 function deleteLanguages() {
+    showWaitingPopup("language-delete-dialog");
     showWaitingPopup("localization-container");
     doAjaxPost("POST", removeLocalizationUrl, "languageName=" + fileName, function (data) {
         if (data.Status) {
@@ -450,11 +455,13 @@ function deleteLanguages() {
         }
         else {
             document.getElementById("language-delete-dialog").ej2_instances[0].hide();
-            messageBox("", window.Server.App.LocalizationContent.RemoveLanguageHeader, data.Message, "error", function () {
+            var errorMessage = data.Message != null ? data.Message : window.Server.App.LocalizationContent.LanguageRemoveFailedMessage;
+                messageBox("", window.Server.App.LocalizationContent.RemoveLanguageHeader, errorMessage, "error", function () {
                 parent.onCloseMessageBox();
             });
 
         }
+        hideWaitingPopup("language-delete-dialog");
     });
     localizationGrid.clearSelection();
     localizationGrid.refresh();

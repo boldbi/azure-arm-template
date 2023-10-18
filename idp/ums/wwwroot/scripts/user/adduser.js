@@ -164,6 +164,7 @@
 
 function onUserAddDialogClose() {
     document.getElementById("user-add-dialog").ej2_instances[0].hide();
+    $(".form input[type='text']").val('');
     $("#password_policy_rules").remove();
     $("#dialog-container").find("div").removeClass("e-error");
 }
