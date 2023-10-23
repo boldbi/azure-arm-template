@@ -858,7 +858,9 @@ var Designer = {
                 editTextEditor: "Edit",
                 widgetNotConfigured: "This widget has not been configured.",
                 noWidgetToPreview: "No Widgets to Preview",
-                noDataToBeDisplay: "There is no data to be displayed."
+                noDataToBeDisplay: "There is no data to be displayed.",
+				autoWidgetDropErrorMsg: "widgets are not placed because the cell bounds of these widgets are already occupied or the given name or ID is incorrect",
+				autoWidgetDropErrorMode: "This method can only invoke the Bold BI initialization page."
             },
             dataSource: {
                 headerText: "Data Source",
