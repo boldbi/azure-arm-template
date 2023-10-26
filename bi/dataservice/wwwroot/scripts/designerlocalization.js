@@ -5101,7 +5101,8 @@ var Designer = {
                 includeFilterInfoText: "Include filter information",
                 reset: "Reset",
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
-				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured."
+				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
+				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets."
             },
             maximize: {
                 maximize: "Maximize",
