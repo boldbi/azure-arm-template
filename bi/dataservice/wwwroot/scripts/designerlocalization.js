@@ -776,6 +776,7 @@ var Designer = {
 					showAxisTitle: "Show Axis Title",
 					axisTitle: "Axis Title",
 					labelRotation: "Label Rotation",
+                    axisRange: "Axis Range"
 				},
                 markerShapeSettings: {
                     markerShape: "Marker Shape",
