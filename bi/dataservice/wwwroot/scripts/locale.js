@@ -3942,7 +3942,8 @@
 				locationIdDisplayText: "Location Id",
                 relativeDateDisplayText: "Relative Date",
                 dateRangeDisplayText: "Date Range",
-                isSinceSeqFilterDisplayText:"SinceSeq Filter"
+                isSinceSeqFilterDisplayText:"SinceSeq Filter",
+                enableIncrementalRefreshDisplayText: "Incremental Refresh",
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
