@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var imageHelper = new ImageHelper();
+}
+@{
+    ViewBag.Title = T["Site not found"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+@section MainSection{
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta name="viewport" content="width=device-width" />
+            <link rel="stylesheet" href="~/bundles/css/error-page-layout.css" asp-append-version="true" />
+        </head>
+    <body >
+        <div class="error-layout">
+            <div class="error-display">
+                <div class="error-innerdisplay">
+                    <div class="error-headerlogo">
+                        <img src="@Url.Content("~/logos?type=login")" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';">
+                    </div>
+                    <div>
+                        <img src="@imageHelper.SiteNotFoundImage()" class="error-logo">
+                    </div>
+                    <div class="error-title">@T["Site not found"]</div>
+                    <div class="error-description">
+                        @T["Sorry! The site you are looking for is not available. The site may have been deleted."]
+                    </div>
+                    <div class="error-link">
+                        <span class="error-page-cursor"><a class="error-to-back-text-color" href="@Url.Action("Sites", "TenantsManagement")">@T["Take me back to Site page"]</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+          @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </body>
+</html>
+}
