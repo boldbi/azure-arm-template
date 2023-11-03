@@ -5,8 +5,12 @@ $(document).ready(function () {
     dropDownListInitialization('#model-language', window.Server.App.LocalizationContent.DataLanguage);
     document.getElementById("language").ej2_instances[0].value = selectedApplicationLanguageValue;
     document.getElementById("language").ej2_instances[0].text = selectedApplicationLanguageText;
-    document.getElementById("model-language").ej2_instances[0].value = selectedDataLanguageValue;
-    document.getElementById("model-language").ej2_instances[0].text = selectedDataLanguageText;
+
+    if (document.getElementById("model-language") != null) {
+        document.getElementById("model-language").ej2_instances[0].value = selectedDataLanguageValue;
+        document.getElementById("model-language").ej2_instances[0].text = selectedDataLanguageText;
+    }
+
     createWaitingPopup('content-area');
 });
 
@@ -17,14 +21,15 @@ $(document).on("click", "#language-cancel-button", function (e) {
 function SaveUserPreference() {
     $("#success-message").html("");
     var language = typeof (document.getElementById("language").ej2_instances[0].value) === "undefined" ? "en-us" : document.getElementById("language").ej2_instances[0].value;
-    if ($("#lang_tag").val() !== document.getElementById("language").ej2_instances[0].value || document.getElementById("model-language").ej2_instances[0].value !== $("#model-language").val()) {
+    var modelLanguage = document.getElementById("model-language") != null ? document.getElementById("model-language").ej2_instances[0].value : "en-us";
+    if ($("#lang_tag").val() !== document.getElementById("language").ej2_instances[0].value || modelLanguage !== $("#model-language").val()) {
         showWaitingPopup('content-area');
         doAjaxPost('POST',
             updateUserPreferenceUrl,
             {
                 returnurl: $("#hidden-return-url").val(),
                 languageSettings: language,
-                modelLanguageSettings: document.getElementById("model-language").ej2_instances[0].value
+                modelLanguageSettings: modelLanguage
             },
             function (result) {
                 if (result.Data.status) {

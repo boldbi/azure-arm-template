@@ -818,6 +818,7 @@
 					showAxisTitle: "Show Axis Title",
 					axisTitle: "Axis Title",
 					labelRotation: "Label Rotation",
+                    axisRange: "Axis Range"
 				},
                 markerShapeSettings: {
                     markerShape: "Marker Shape",
@@ -917,7 +918,9 @@
                 editTextEditor: "Edit",
                 widgetNotConfigured: "This widget has not been configured.",
                 noWidgetToPreview: "No Widgets to Preview",
-                noDataToBeDisplay: "There is no data to be displayed."
+                noDataToBeDisplay: "There is no data to be displayed.",
+				autoWidgetDropErrorMsg: "widgets are not placed because the cell bounds of these widgets are already occupied or the given name or ID is incorrect",
+				autoWidgetDropErrorMode: "This method can only invoke the Bold BI initialization page."
             },
             dataSource: {
                 headerText: "Data Source",
@@ -2584,7 +2587,7 @@
                 tableRemoveMessage: "Removing this table will affect the filter/parameters/expression columns referring to it. Do you still want to continue?",
                 createCategoryMessage: "*Please create a category to save the dashboard",
                 differentSchema: "The new schema differs from the existing one. If you click Yes means it will lose the previous widget and data and display the new connection table data. If you click No, means the data source will be reconnected with new credentials and the widget data will depend on the availability of the table and fields in the target connection.",
-                columnNotExist: "Some of the columns does not exist in new schema and it will affect the dashboard, if removed. Do you want to continue with the schema changes?",
+                columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
                 tableList: "The list of tables to be dropped ",
@@ -3939,7 +3942,8 @@
 				locationIdDisplayText: "Location Id",
                 relativeDateDisplayText: "Relative Date",
                 dateRangeDisplayText: "Date Range",
-                isSinceSeqFilterDisplayText:"SinceSeq Filter"
+                isSinceSeqFilterDisplayText:"SinceSeq Filter",
+                enableIncrementalRefreshDisplayText: "Incremental Refresh",
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
@@ -6074,7 +6078,8 @@
                 includeFilterInfoText: "Include filter information",
                 reset: "Reset",
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
-				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured."
+				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
+				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets."
             },
             maximize: {
                 maximize: "Maximize",

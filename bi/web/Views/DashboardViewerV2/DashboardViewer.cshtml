@@ -8,6 +8,7 @@
     var itemDetail = ViewBag.itemDetail as ItemDetail;
     var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
     var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
@@ -161,6 +162,7 @@
         var updateTemplateDashboardUrl = "@Url.Action("UpdateTemplateDashboardWithCustomerData", "Dashboards")";
         var getTemplateDashboardStatusUrl = "@Url.Action("GetTemplateDashboardStatus", "Dashboards")";
         var triggerDashboardRenderComplete = "@Url.Action("DashboardOptions", "FileRender")";
+        var IsDashboardSessionActive = "@Url.Action("IsSessionActive", "Accounts")";
         var pageurl = "@requestUrl.LocalPath";
         var canEdit = @Json.Serialize(canEdit);
         var dashboardItemDetail = @Html.Raw(Json.Serialize(itemDetail));
@@ -222,6 +224,8 @@
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var appVersion = "@ServerAppConfig.ProductVersion";
         var isBingMapRequired = @Json.Serialize(isBingMapRequired);
+        var canCheckSessionInActive = false;
+        var isAuthenticated = @Html.Raw(Json.Serialize(isAuthenticated));
 </script>
     <style>
         #warning-alert, #success-alert {
