@@ -65,15 +65,35 @@
 @section MainSection{
     @await Html.PartialAsync("_AdminMenu")
     @await Html.PartialAsync("_DiologBox")
-<div id="auth-settings-container" role="tabpanel" class="col-xs-12 admin-page-content-container" aria-labelledby="active-directory-settings-link" ng-controller="adSettingsController">
-    <div id="authentication-block" class="admin-page-content col-xs-12 no-padding">
-        <div class="col-md-12 admin-page-header auth-header">
-            <hgroup class="admin-page-header-description">
-                <h1 class="h2 page-title">@T["Authentication Settings"]</h1>
+
+    <div ng-controller="adSettingsController" class="col-xs-12 no-padding no-margin auth-page-height width-alignment">
+        <div class="col-md-12 admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">@T["Authentication Settings"]</h1>
                 <h5 class="page-description">@T["Configure authentication/authorization providers’ information."]</h5>
             </hgroup>
         </div>
-        <div class="col-xs-12 no-padding auth-page-nav-bar">
+                <div class="col-xs-4 top-nav-sec no-padding">
+                    @await Html.PartialAsync("../Shared/_TopMenu")
+                </div>
+            </div>
+        <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+                <button class="secondary-button pull-right" id="cancel-settings" title="">@T["Cancel"]</button>
+                <button type="submit" id="update-saml-settings" class="primary-button pull-right update-auth-settings" ng-disabled="ssoSettingsForm.$invalid">@T["Save"]</button>
+                <button type="submit" id="update-azure-b2c-settings" class="primary-button pull-right update-auth-settings" ng-disabled="ssoSettingsb2cForm.$invalid">@T["Save"]</button>
+                <button type="submit" id="update-jwt-settings" class="primary-button pull-right update-auth-settings" ng-disabled="jwtSettingsForm.$invalid">@T["Save"]</button>
+                <button type="submit" id="update-defaultauthlogin-settings" class="primary-button pull-right update-defaultauth-settings @(ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0 ? "display-none" : string.Empty)" ng-disabled>@T["Save"]</button>
+                <button type="submit" id="update-oauth-settings" class="primary-button pull-right update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">@T["Save"]</button>
+                <button type="submit" id="update-openid-settings" class="primary-button pull-right update-auth-settings" ng-disabled="openidSettingsForm.$invalid">@T["Save"]</button>
+                <button type="submit" id="update-windowsad-settings" class="primary-button pull-right update-auth-settings" ng-disabled="windowsadSettingsForm.$invalid">@T["Save"]</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 no-padding auth-page-border auth-page-nav-bar">
             <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
                 <li role="presentation">
                     <a href="#default-authentication-settings-tab" id="default-authentication-settings" aria-controls="default-authentication-settings" role="tab" data-toggle="tab">@T["General"]</a>
@@ -98,31 +118,22 @@
                 </li>
             </ul>
         </div>
-        <div class="tab-content col-xs-12 no-padding">
-            @await Html.PartialAsync("_DefaultAuthentication")
-            @await Html.PartialAsync("_WindowsADSettings")
-            @await Html.PartialAsync("_AzureADSettings")
-            @await Html.PartialAsync("_AzureADB2CSettings")
-            @await Html.PartialAsync("_OAuthSettings")
-            @await Html.PartialAsync("_OpenIdConnectSettings")
-            @await Html.PartialAsync("_JWTSettings")
-        </div>
-
-        <div class="admin-page-footer col-xs-12">
-            <div class="admin-page-actions col-lg-12 col-md-12">
-                <button class="secondary-button pull-right" id="cancel-settings" title="">@T["Cancel"]</button>
-                <button type="submit" id="update-saml-settings" class="primary-button pull-right update-auth-settings" ng-disabled="ssoSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-azure-b2c-settings" class="primary-button pull-right update-auth-settings" ng-disabled="ssoSettingsb2cForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-jwt-settings" class="primary-button pull-right update-auth-settings" ng-disabled="jwtSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-defaultauthlogin-settings" class="primary-button pull-right update-defaultauth-settings @(ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0 ? "display-none" : string.Empty)" ng-disabled>@T["Save"]</button>
-                <button type="submit" id="update-oauth-settings" class="primary-button pull-right update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-openid-settings" class="primary-button pull-right update-auth-settings" ng-disabled="openidSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-windowsad-settings" class="primary-button pull-right update-auth-settings" ng-disabled="windowsadSettingsForm.$invalid">@T["Save"]</button>
+        <div id="auth-settings-container" role="tabpanel" class="col-xs-12 admin-page-content-container auth-page-width" aria-labelledby="active-directory-settings-link">
+            <div id="authentication-block" class="admin-page-content col-xs-12 no-padding">
+                <div class="tab-content col-xs-12 no-padding">
+                    @await Html.PartialAsync("_DefaultAuthentication")
+                    @await Html.PartialAsync("_WindowsADSettings")
+                    @await Html.PartialAsync("_AzureADSettings")
+                    @await Html.PartialAsync("_AzureADB2CSettings")
+                    @await Html.PartialAsync("_OAuthSettings")
+                    @await Html.PartialAsync("_OpenIdConnectSettings")
+                    @await Html.PartialAsync("_JWTSettings")
+                </div>
             </div>
+            @await Html.PartialAsync("../Shared/_FooterOnPremise")
         </div>
     </div>
-    @await Html.PartialAsync("../Shared/_FooterOnPremise")
-</div>
+
     <div id="dialog" class="custom-template"></div>
     <div id="dlgContent" style="visibility: hidden" class="dialogContent">
         <span class="dialogText">

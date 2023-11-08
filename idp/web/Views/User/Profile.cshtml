@@ -65,6 +65,7 @@
                 $("#edit-language").trigger("click");
             }
             $("#avatar-button-click, #avatar-delete-click").css("display", "none");
+            $("#cancel-button, #save-button").css("display", "none");
              var fulldata = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.ProfileDetail)));
             window.dateFormat = "@dateFormat";
             editUser(fulldata, "@dateFormat");
@@ -90,22 +91,45 @@
 @section MainSection{
     @await Html.PartialAsync("_UserProfileMenu")
     @await Html.PartialAsync("_UserTokenForm")
+
+    <div id="site-settings-header" class="col-xs-12 header-section no-padding no-margin width-alignment">
+        <div class="col-md-12 import-area admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">
+                        @T["MY PROFILE"]
+                    </h1>
+                </hgroup>
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+        <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+                    <a href="@tenantHomePage" class="link-button pull-right" title="">@T["My Sites"]</a>
+                    @if (!string.IsNullOrEmpty(returnUrl))
+                    {
+                        <a href="@returnUrl" class="secondary-button pull-right" id="cancel-link-button">@T["Cancel"]</a>
+                        <input id="hidden-return-url" class="hidden" value="@returnUrl" />
+                    }
+                    else
+                    {
+                        <button type="button" class="secondary-button pull-right" id="cancel-button">@T["Cancel"]</button>
+                    }
+                    <button type="button" class="primary-button pull-right" id="save-button" onclick="SaveProfile()">@T["Save"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="edit-profile-base-div" class="col-lg-12 col-sm-12 col-md-12 col-xs-12 admin-page-content-container">
         <div class="admin-page-content col-xs-12 no-padding">
             <input type="hidden" class="page-name" data-content="USER PROFILE">
             <input type="hidden" id="user-id" value="@userId"/>
             <span id="is-aduser">@ViewBag.IsAdUser</span>
             <span id="logged-user">@ViewBag.LoggedUser</span>
-            <div id="edit-profile-heading-div" class=" col-md-12 col-lg-12 col-sm-12 admin-page-header">
-                <div class="col-xs-6 no-padding">
-                    <hgroup>
-                        <h2 class="page-title" id="display-name">@T["My Profile"]</h2>
-                    </hgroup>
-                </div>
-                <div class="col-xs-6 no-padding admin-header-btn">
-                    <a href="@tenantHomePage" class="link-button pull-right" title="">@T["My Sites"]</a>
-                </div>
-            </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-page-body">
                 <div class="col-xs-12 no-padding profile-img-name">
                     <div class="img-view-holder col-xs-4 no-padding" style="border: 0px; width: auto">
@@ -198,20 +222,6 @@
                 {
                     <div id="azure-user-info" class="col-xs-12 no-padding">@T["* Editing user profile details other than the picture is currently not supported for external directory accounts (Azure Active Directory, Office 365, database, etc.)."]</div>
                 }
-            </div>
-            <div class="admin-page-footer col-xs-12">
-                <div class="admin-page-actions col-lg-12 col-md-12">
-                    @if (!string.IsNullOrEmpty(returnUrl))
-                    {
-                        <a href="@returnUrl" class="secondary-button pull-right" id="cancel-link-button">@T["Cancel"]</a>
-                        <input id="hidden-return-url" class="hidden" value="@returnUrl"/>
-                    }
-                    else
-                    {
-                        <button type="button" class="secondary-button pull-right" id="cancel-button">@T["Cancel"]</button>
-                    }
-                    <button type="button" class="primary-button pull-right" id="save-button" onclick="SaveProfile()">@T["Save"]</button>
-                </div>
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_FooterOnPremise")

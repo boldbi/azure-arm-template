@@ -5,9 +5,11 @@ $(document).ready(function () {
         if ($("#security-setting-container").is(":visible")) {
             if (location.href.match(/2fa/)) {
                 $("#2fa").tab("show");
+                $("#user-management-options").hide();
             }
             else {
                 $("#change-password").tab("show");
+                $("#user-management-options").show();
                 var query = (window.location.search).toString();
                 if (query != "?view=change-password") {
                     history.pushState(null, '', '?view=change-password');
@@ -17,7 +19,8 @@ $(document).ready(function () {
     }
     else {
         if ($("#security-setting-container").is(":visible")) {
-                $("#2fa").tab("show");
+            $("#2fa").tab("show");
+            $("#user-management-options").hide();
                 var query = (window.location.search).toString();
                 if (query != "?view=2fa") {
                     history.pushState(null, '', '?view=2fa');
@@ -30,12 +33,14 @@ $(document).ready(function () {
 
     $("a[data-toggle='tab']").on('click', function (e) {
         if ($(this).attr("id") == "change-password") {
+            $("#user-management-options").show();
             var query = (window.location.search).toString();
             if (query != "?view=change-password") {
                 history.pushState(null, '', '?view=change-password');
             }
         }
         else if ($(this).attr("id") == "2fa") {
+            $("#user-management-options").hide();
             var query = (window.location.search).toString();
             if (query != "?view=2fa") {
                 history.pushState(null, '', '?view=2fa');

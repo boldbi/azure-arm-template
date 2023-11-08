@@ -37,13 +37,18 @@
                 else if (imageSize === "40") {
                     image.attr("width", imageSize);
                     image.attr("height", imageSize);
-                    image.css("left", "8px");
                 }
-                else {
+                else if (imageSize === "64") {
                     image.attr("width", imageSize);
                     image.attr("height", imageSize);
                     image.css("top", "0px");
                     image.css("left", "0px");
+                }
+                else {
+                    image.attr("width", imageSize);
+                    image.attr("height", imageSize);
+                    image.css("top", "5px");
+                    image.css("left", "5px");
                 }
                 image.appendTo($(this));
             }

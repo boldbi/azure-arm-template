@@ -95,6 +95,12 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+
+            $("#update-cookie-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-csp-settings").hide();
+            $("#update-password-settings").hide();
+
             var query = (window.location.search).toString();
             if (query != "?view=cookie-options") {
                 history.pushState(null, '', '?view=cookie-options');
@@ -105,6 +111,12 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#csp").hide();
             $("#password-policy").hide();
+
+            $("#update-x-frame-options-settings").show();
+            $("#update-csp-settings").hide();
+            $("#update-cookie-settings").hide();
+            $("#update-password-settings").hide();
+
             var query = (window.location.search).toString();
             if (query != "?view=x-frame-options") {
                 history.pushState(null, '', '?view=x-frame-options');
@@ -115,6 +127,10 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+            $("#update-csp-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-cookie-settings").hide();
+            $("#update-password-settings").hide();
             var query = (window.location.search).toString();
             if (query != "?view=csp-settings") {
                 history.pushState(null, '', '?view=csp-settings');
@@ -125,6 +141,12 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#csp").hide();
             $("#x-frame-options").hide();
+
+            $("#update-password-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-csp-settings").hide();
+            $("#update-cookie-settings").hide();
+
             var query = (window.location.search).toString();
             if (query != "?view=user-account") {
                 history.pushState(null, '', '?view=user-account');
@@ -139,6 +161,11 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#cookie-options").hide();
             $("#password-policy").hide();
+
+            $("#update-x-frame-options-settings").show();
+            $("#update-csp-settings").hide();
+            $("#update-cookie-settings").hide();
+            $("#update-password-settings").hide();
             var query = (window.location.search).toString();
             if (query != "?view=x-frame-options") {
                 history.pushState(null, '', '?view=x-frame-options');
@@ -149,6 +176,11 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+
+            $("#update-csp-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-cookie-settings").hide();
+            $("#update-password-settings").hide();
             var query = (window.location.search).toString();
             if (query != "?view=csp-settings") {
                 history.pushState(null, '', '?view=csp-settings');
@@ -159,6 +191,11 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+
+            $("#update-cookie-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-csp-settings").hide();
+            $("#update-password-settings").hide();
             var query = (window.location.search).toString();
             if (query != "?view=cookie-options") {
                 history.pushState(null, '', '?view=cookie-options');
@@ -169,6 +206,11 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#cookie-options").hide();
             $("#x-frame-options").hide();
+
+            $("#update-password-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-csp-settings").hide();
+            $("#update-cookie-settings").hide();
             var query = (window.location.search).toString();
             if (query != "?view=user-account") {
                 history.pushState(null, '', '?view=user-account');

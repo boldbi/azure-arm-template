@@ -82,6 +82,9 @@ $(document).ready(function () {
             },
             "user-lastname": {
                 isValidName: true
+            },
+            "user-phonenumber": {
+                isValidPhoneNumber: true
             }
         },
         highlight: function (element) {
