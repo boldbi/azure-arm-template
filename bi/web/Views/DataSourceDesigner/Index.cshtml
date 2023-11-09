@@ -7,6 +7,7 @@
     var isDebug = globalAppSettings.SystemSettings.IsDebug;
     var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
     var licenseSettings = globalAppSettings.GetLicenseSettings(_clientDateTimeInfo);
+    var siteUrl = globalAppSettings.SystemSettings.BaseUrl;
     var cdnLink = globalAppSettings.SystemSettings.CDNLink;
     var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
@@ -49,6 +50,7 @@
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isDataSourceConnection = string.Empty;
+    var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
     if((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature)
     { 
         isDataSourceConnection = ViewBag.isDataSourceConnection;
@@ -75,6 +77,7 @@
     }
     <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="site_identifier:url" content="@siteUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="data_service:url" content="@designerServiceUrl" />
@@ -167,7 +170,7 @@
         var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
         var isDataSourceConnection = "@isDataSourceConnection";
         var appVersion = "@ServerAppConfig.ProductVersion";
-        var canCheckSession = false;
+        var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
     </script>
     <script type="text/javascript">
         window.addEventListener("beforeunload", function (e) {

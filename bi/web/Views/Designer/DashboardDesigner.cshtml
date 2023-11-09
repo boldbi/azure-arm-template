@@ -76,6 +76,7 @@
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
     if (isEmbedTrue)
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -201,7 +202,7 @@
         var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
         var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
         var appVersion = "@ServerAppConfig.ProductVersion";
-        var canCheckSession = false;
+        var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
     </script>
     <script type="text/javascript">
         window.addEventListener("beforeunload", function (e) {
@@ -264,7 +265,7 @@
     </environment>
 
     <section id="menu-area" style="display:none" class="custom-bootstrap-styles">
-        @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", ViewBag.HelpSiteUrl }, { "GlobalAppSettings", globalAppSettings } })
+        @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
     </section>
     @*<div id="designer-header" class="custom-bootstrap-styles">
             <div class="dashboard-name">
