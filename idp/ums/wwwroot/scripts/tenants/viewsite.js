@@ -480,7 +480,6 @@ function getAppUsers() {
 }
 
 function getAttributes() {
-
     var tooltip = new ej.popups.Tooltip({
         target: ".grid-content",
         position: 'TopCenter',

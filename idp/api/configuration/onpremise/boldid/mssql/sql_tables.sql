@@ -1097,6 +1097,20 @@ CREATE TABLE [BOLDTC_QueryMetrics] (
 )
 ;
 
+CREATE TABLE [BOLDTC_UserAttributes](
+	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	[Name] [nvarchar](255) NOT NULL,
+	[Value] [nvarchar](4000) NOT NULL,
+	[Description] [nvarchar](1024) NULL,
+	[Encrypt] [bit] NOT NULL,
+	[UserId] [uniqueidentifier] NOT NULL,
+	[CreatedById] [uniqueidentifier] NULL,
+	[ModifiedById] [uniqueidentifier] NULL,
+    [CreatedDate] [datetime] NOT NULL,
+    [ModifiedDate] [datetime] NOT NULL,
+	[IsActive] [bit] NOT NULL)
+;
+
 INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'Registration', 1)
 INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'StatusUpdated', 1)
 INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'PaymentUpdated', 1)
@@ -1580,4 +1594,7 @@ ALTER TABLE [BOLDTC_UserLog] CHECK CONSTRAINT [BOLDTC_UserLog_fk3]
 ;
 
 ALTER TABLE [BOLDTC_EmailActivityLog] WITH CHECK ADD CONSTRAINT [BOLDTC_EmailActivityLog_fk0] FOREIGN KEY ([UserId]) REFERENCES [BOLDTC_User]([Id])
+;
+
+ALTER TABLE [BOLDTC_UserAttributes] ADD FOREIGN KEY([UserId]) REFERENCES [BOLDTC_User] ([Id])
 ;

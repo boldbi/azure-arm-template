@@ -817,7 +817,9 @@ $(document).on("click", ".remove-admin-class", function () {
 
 function onSingleDeleteDialogOpen() {
     $("#singleuser-delete-confirmation").find("button.e-primary").addClass("critical-action-button");
-    document.getElementById("singleuser-delete-confirmation").ej2_instances[0].show();
+    if (document.getElementById("singleuser-delete-confirmation") != null) {
+        document.getElementById("singleuser-delete-confirmation").ej2_instances[0].show();
+    }
 }
 
 function onMakeAdminDialogOpen() {
