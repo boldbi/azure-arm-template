@@ -1,2 +1,3 @@
-INSERT into SyncDS_ItemLogType (Name,IsActive) VALUES ( N'Downloaded',1)
+INSERT INTO SyncDS_ItemLogType (Name, IsActive) SELECT N'Downloaded', 1
+WHERE NOT EXISTS (SELECT Name FROM SyncDS_ItemLogType WHERE Name = N'Downloaded')
 ;
