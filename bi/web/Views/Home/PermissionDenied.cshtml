@@ -1,0 +1,111 @@
+﻿@using Microsoft.AspNetCore.Http.Extensions;
+@{
+    var isDashboardListEmpty = ViewBag.isDashboardListEmpty == null ? false : ViewBag.isDashboardListEmpty;
+    var globalAppSettings = _globalAppSettings;
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    ViewBag.Title = T["Permission Denied"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var contactAdmin = T["Please contact your administrator."];
+    ViewBag.MessageBox = false;
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var canDownloadTemplate = ViewBag.CanDownloadTemplate == null ? true : ViewBag.CanDownloadTemplate;
+    var isEmbed = (ViewBag.isEmbed != null && ViewBag.isEmbed == "true") ? true : false;
+    var isDesignerEmbedding = ViewBag.isDesignerEmbedding == null ? false : ViewBag.isDesignerEmbedding;
+    var isDatasourceEmbedding = ViewBag.isDatasourceEmbedding == null ? false : ViewBag.isDatasourceEmbedding;
+    var isConnectionEmbedding = ViewBag.isConnectionEmbedding == null ? false : ViewBag.isConnectionEmbedding;
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+@await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+@if (Layout == null)
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section MainSection{
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.min.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.min.css" />
+    </environment>
+    <script>
+        $(document).ready(function (e) {
+            generateProfileAvatar();
+        });
+    </script>
+    @if (!isEmbed)
+    {
+        <div class="col-xs-12 no-padding no-margin top-header-sec-access-denied">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Access Denied"] } })
+        </div>
+    }
+    <div class="error-page-outer dashbord-denied">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-2">
+                    <img src="@themeBasedImageHelper.AccessDeniedImage()" class="error-image-2">
+                </div>
+                <div class="error-type">@T["Access Denied"]</div>
+                <div class="error-text">
+                    @if (!canDownloadTemplate)
+                    {
+                        @T["You do not have permission to download this dashboard template."]<br>@contactAdmin
+                    }
+                    else if (_identityResponse.IsAdmin && !globalAppSettings.SystemSettings.UsageAnalytics && url.ToString().ToLower().Contains("/usage-analytics/"))
+                    {
+                        @Html.Raw(string.Format(T["Usage analytics dashboards are disabled in {0}dashboard settings{1}."].Value, "<a href='" + Url.Action("DashboardSettings", "Administration") + "'>", "</a>"))
+                    }
+                    else if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) != -1)
+                    {
+                        @if (isDashboardListEmpty)
+                        {
+                            @T["This dashboard has been configured to show tabs based on individual dashboard permissions. You do not have the permission to view any of the tabs in this dashboard."]
+                        }
+                        else
+                        {
+                            @T["You do not have permission to view this dashboard."]
+                        }
+                        
+                        <br>
+                        @contactAdmin
+                    }
+                    else if (isEmbed)
+                    {
+                        if (isDesignerEmbedding)
+                        {
+                            @T["You do not have permission to edit or create the dashboard."]
+                        }
+                        else if (isConnectionEmbedding)
+                        {
+                            @T["You do not have permission to create the datasource."]
+                        }
+                        else if (isDatasourceEmbedding)
+                        {
+                            @T["You do not have permission to edit the datasource."]
+                        }
+
+                        <br>
+                        @contactAdmin
+                    }
+                    else
+                    {
+                        @T["You do not have permission to view this page."]<br>@contactAdmin
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) != -1)
+    {
+        <div class="dashboard-permission-denied">
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+        </div>
+    }
+
+}
+

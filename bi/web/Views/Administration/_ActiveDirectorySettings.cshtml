@@ -1,0 +1,596 @@
+﻿@using System.Runtime.InteropServices;
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["User Directory Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var ldapRegEx = @"/(?:ldap|http)s?:\/\/(?:(?!.*\d[\/?:])[a-z0-9\-._~%]+|(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\[[a-z0-9\-._~%!$&'()*+,;=:]+\])(?::\d+)?(?:[\/?][\-A-Z0-9+&@#\/%?=~_|$!:,.;]*)?$/i";
+    var oauthRegEx = @"/(?:^|[ \t])((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/";
+    List<TenantAuthControl> authControl = null;
+    TenantAuthControl cloudAuthControl = null;
+    var loginOptions = globalAppSettings.SystemSettings.LoginOptions;
+#if DashboardServerOnPremise
+    authControl = ViewBag.AuthControl as List<TenantAuthControl>;
+    authControl = authControl != null && authControl.Count > 0 ? authControl : null;
+#else
+    cloudAuthControl = ViewBag.AuthControl as TenantAuthControl;
+#endif
+    var isAzureApplication = ServerAppConfig.IsAzureApplication;
+    var enableWindowsAD = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !isAzureApplication;
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isAdmin = _identityResponse.IsAdmin;
+    var loginDisclaimerObject = ServerAppConfig.IsSelfHosted ? string.Empty : ViewBag.SystemSettings.LoginDisclaimer;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var pageDescription = T["Configure external user directories."];
+}
+<script>
+    var defaultAuthentication = "";
+</script>
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-database-import.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-database-import.min.css" />
+    </environment>
+}
+@section scripts{
+    <script>
+        serverApp.controller("adSettingsController", ["$scope", function ($scope) {
+            $scope.regex = '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
+            $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_\s]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_\s]+)*$/;
+        }]);
+
+    </script>
+    <script>
+        var itemInfoCtrl = angular.element('[ng-controller=adSettingsController]').scope();
+        var defaultAuthentication = "";
+        var updateAdSettingsUrl = "@Url.Action("UpdateActiveDirectorySettings", "Administration")";
+        var adTestconnectionUrl = "@Url.Action("activedirectorytestconnection", "Administration")";
+        var azureadTestconnectionUrl = "@Url.Action("AzureADTestConnection", "Administration")";
+        var updateAzureADSettingsUrl = "@Url.Action("UpdateAzureADSettings", "Administration")";
+        var saveDbSettingsUrl = "@Url.Action("SaveDatabaseSettings", "Administration")";
+        var testConnectionUrl = "@Url.Action("TestDatabaseConnection", "UserManagement")";
+        var connectDatabaseUrl = "@Url.Action("ConnectDatabaseToImport", "UserManagement")";
+        var getDatabaseUrl = "@Url.Action("GetDatabaseList", "UserManagement")";
+        var getTableRelationUrl = "@Url.Action("GetTableRelation", "UserManagement")";
+        var addUserDirectoryLogUrl = "@Url.Action("AddSystemLogForUserDirectory", "Administration")";
+        var userDirectoryAzure = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.AzureAdSettings)";
+        var userDirectoryDatabase = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DatabaseSettings)";
+        var userDirectoryWindows = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ADSettings)";
+        var SystemSettingsProperties = @Html.Raw(Json.Serialize(ViewBag.SystemSettings));
+        var isAzureApplication = @Json.Serialize(isAzureApplication);
+        var enableWindowsAD = @Json.Serialize(enableWindowsAD);
+        var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
+    </script>
+    <script type="text/javascript">
+
+        $(document)
+            .ready(function () {
+                var section = window.location.href;
+                $(".system-settings-sidebar li").hide();
+
+                if (section.toLowerCase().indexOf("groups") > 0 ||
+                    section.toLowerCase().indexOf("users") > 0 ||
+                    section.toLowerCase().indexOf("user-management") > 0) {
+                    $("li[data-current-content='groups'],li[data-current-content='users']").show();
+                } else {
+                    $("li[data-current-content='emailsettings'],li[data-current-content='usersettings'],li[data-current-content='general'],li[data-current-content='activedirectorysettings'],li[data-current-content='notificationsettings'],li[data-current-content='usersettings'],li[data-current-content='databasesettings'],li[data-current-content='licensesettings']").show();
+                }
+                if (section.toLowerCase().indexOf("groups") > 0) {
+                    $("li[data-current-content='groups'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("users") > 0 ||
+                    section.toLowerCase().indexOf("user-management") > 0) {
+                    $("li[data-current-content='users'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("e-mail-settings") > 0) {
+                    $("li[data-current-content='emailsettings'] a").addClass('active');
+                    $("#look-and-feel-container, #active-directory-container, #database-settings-container, #user-settings-container").hide();
+                    $("#mail-settings-container").show();
+                } else if (section.toLowerCase().indexOf("user-settings") > 0) {
+                    $("li[data-current-content='usersettings'] a").addClass('active');
+                    $("#look-and-feel-container, #active-directory-container, #database-settings-container, #mail-settings-container").hide();
+                    $("#user-settings-container").show();
+                } else if (section.toLowerCase().indexOf("user-directory-settings") > 0) {
+                    $("li[data-current-content='activedirectorysettings'] a").addClass('active');
+                    $("#look-and-feel-container, #mail-settings-container,#database-settings-container, #user-settings-container").hide();
+                    $("#active-directory-container").show();
+                } else if (section.toLowerCase().indexOf("notification-settings") > 0) {
+                    $("li[data-current-content='notificationsettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("database-settings") > 0) {
+                    $("li[data-current-content='databasesettings'] a").addClass('active');
+                } else if (section.toLowerCase().indexOf("license-settings") > 0) {
+                    $("li[data-current-content='licensesettings'] a").addClass('active');
+                    $("#mail-settings-container, #active-directory-container, #user-settings-container").hide();
+                } else {
+                    $("li[data-current-content='general'] a").addClass('active');
+                    $("#look-and-feel-container").show();
+                    $("#mail-settings-container, #active-directory-container, #database-settings-container, #user-settings-container").hide();
+                    addUserDirectoryLog("site");
+                }
+            });
+
+        function addUserDirectoryLog(tabName) {
+            var resultName = "";
+            switch (tabName) {
+                case "site":
+                    resultName = "SiteSettings";
+                    break;
+                case "windows":
+                    resultName = "UserDirectory.Windows";
+                    break;
+                case "azure":
+                    resultName = "UserDirectory.Azure";
+                    break;
+                case "database":
+                    resultName = "UserDirectory.Database";
+                    break;
+                default:
+                    resultName = "";
+            }
+            $.ajax({
+                type: "POST",
+                url: addUserDirectoryLogUrl,
+                data: { tabName: resultName }
+            });
+        }
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["User Directories"] }, { "PageDescription", @pageDescription } })
+        <div class="col-xs-12 bi-page-header top-nav-btn-secton @(((ServerAppConfig.IsSelfHosted && enableWindowsAD && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))) && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))) ? "tabs-header-padding" : string.Empty)">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))
+                    {
+                        <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" id="schedule-synchronization" title="@T["Synchronize schedules"]">
+                            <span class="sync-btn-text">@T["Synchronization"] </span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu multi-level pull-right" role="menu" id="synchronization-options">
+                            @if (ServerAppConfig.IsSelfHosted && enableWindowsAD)
+                            {
+                                <li>
+                                    <a href="@Url.Action("ScheduleSynchronization", "Administration")" data-toggle="tooltip" data-placement="left" data-container="body" title="@string.Format(T["Synchronize {0} users and groups on a regular schedule"].Value, "Active Directory")">
+                                        <span>@string.Format(T["{0} Schedule Synchronization"].Value,"AD")</span>
+                                    </a>
+                                </li>
+                            }
+                            <li>
+                                <a href="@Url.Action("ScheduleAzureSynchronization", "Administration")" data-toggle="tooltip" data-placement="left" data-container="body" title="@string.Format(T["Synchronize {0} users and groups on a regular schedule"].Value,"Azure AD")">
+                                    <span>@string.Format(T["{0} Schedule Synchronization"].Value,"Azure AD")</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="@Url.Action("ScheduleDatabaseSynchronization", "Administration")" data-toggle="tooltip" data-placement="left" data-container="body" title="@T["Synchronize users from database on a regular schedule"]">
+                                    <span>@T["Database Schedule Synchronization"]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul id="ad-tab-nav" class="nav nav-tabs" role="tablist">
+                @if (ServerAppConfig.IsSelfHosted && enableWindowsAD && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings]))))
+                {
+                    <li role="presentation" class="active">
+                        <a href="#windows-ad" id="windows-ad-tab" aria-controls="windows-ad-tab" role="tab" data-toggle="tab">Windows Active Directory</a>
+                    </li>
+                }
+                @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))
+                {
+                    <li role="presentation" class="@(!ServerAppConfig.IsSelfHosted ? "active" : ServerAppConfig.IsSelfHosted && isAzureApplication ? "active" : !enableWindowsAD ? "active" : string.Empty )">
+                        <a href="#azure-ad" id="azure-ad-tab" aria-controls="azure-ad-tab" role="tab" data-toggle="tab">Azure Active Directory</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#database-settings" id="database-settings-tab" aria-controls="database-settings-tab" role="tab" data-toggle="tab">@T["Database"]</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+<div id="active-directory-container" role="tabpanel" class="bi-page-container  @(((ServerAppConfig.IsSelfHosted && enableWindowsAD && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))) && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))) ? "bi-page-container-with-tab" : string.Empty) @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")" aria-labelledby="active-directory-settings-link" ng-controller="adSettingsController">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="tab-content">
+            @if (ServerAppConfig.IsSelfHosted && enableWindowsAD && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings]))))
+            {
+                <div role="tabpanel" class="tab-pane active" id="windows-ad">
+                    <form autocomplete="off" class="active-directory-form user-directories-tab col-xs-12 bi-page-body" name="windowsAdSettingsForm" enctype="multipart/form-data" id="active-directory-setting" method="post">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label">@T["Username"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(windowsAdSettingsForm.userName.$dirty && windowsAdSettingsForm.userName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control txt-holder validation-padding" name="userName" placeholder="@T["Username"]" title="" id="username" ng-model="windowsAduserName" ng-init="windowsAduserName='@ViewBag.SystemSettings.ActiveDirectoryUserName'" required />
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.userName.$dirty && windowsAdSettingsForm.userName.$invalid">@T["Please enter the username"]</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding form-fields-top-margin">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label">@T["Password"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(windowsAdSettingsForm.passWord.$dirty && windowsAdSettingsForm.passWord.$invalid) ? 'has-error' : ''">
+                                <input type="text" style="display: none;">
+                                <input style="visibility: hidden; position: absolute; left: -99999px" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
+                                <input type="password" class="form-control txt-holder validation-padding eye-icon-align" value="" name="passWord" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" title="" id="password" ng-model="passWord" required />
+                                <div class="show-hide-password su su-eye"></div>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.passWord.$dirty && windowsAdSettingsForm.passWord.$invalid">@T["Please enter the password"]</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding form-fields-top-margin">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label" for="ldapurl">LDAP URL(LDAP://)</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(windowsAdSettingsForm.ldapUrl.$dirty && windowsAdSettingsForm.ldapUrl.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control txt-holder validation-padding" name="ldapUrl" placeholder="LDAP URL" title="" id="ldapurl" ng-model="windowsLdapUrl" ng-init="windowsLdapUrl='@ViewBag.SystemSettings.LdapUrl'" ng-pattern="@ldapRegEx" required />
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.ldapUrl.$error.required && windowsAdSettingsForm.ldapUrl.$dirty ">@string.Format(T["Please enter the {0}"].Value,"LDAP URL")</span>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.ldapUrl.$error.pattern ">@string.Format(T["Invalid {0}"].Value,"LDAP URL")</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding form-fields-top-margin">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label" for="distinguished-name">@T["Distinguished Name"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(windowsAdSettingsForm.distinguishedName.$dirty && windowsAdSettingsForm.distinguishedName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control txt-holder validation-padding" name="distinguishedName" placeholder="DC=example,DC=com" title="" id="distinguished-name" ng-model="windowsDistinguishedName" ng-init="windowsDistinguishedName='@ViewBag.SystemSettings.DistinguishedName'" ng-pattern="distinguishedNameRegex" required />
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.distinguishedName.$error.required && windowsAdSettingsForm.distinguishedName.$dirty ">@T["Please enter the Distinguished Name"]</span>
+                                <span class="validation-message" ng-show="windowsAdSettingsForm.distinguishedName.$error.pattern ">@T["Invalid Distinguished Name"]</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding enablesslcontainer">
+                            @Html.CheckBox("enable-ldap-ssl", (bool)ViewBag.SystemSettings.EnableSsl, new { @class = "material-checkbox" })
+                            @Html.Hidden("enable-ldap-ssl")
+                            @Html.Label("enable-ldap-ssl", string.Format(T["Enable {0}"].Value,"SSL"), new { @class = "app-textbox-label col-xs-4 no-margin" })
+                        </div>
+                        <div class="col-xs-12 no-padding form-fields-top-margin">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label" for="ldap-port-number">@T["Port Number"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(windowsAdSettingsForm.portNo.$dirty && windowsAdSettingsForm.portNo.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control txt-holder validation-padding" name="portNo" placeholder="@T["Port Number"]" title="" id="ldap-port-number" ng-model="windowsPortNo" ng-init="windowsPortNo='@ViewBag.SystemSettings.PortNo'" required />
+                                <span class="validation-message port-no-validation-display" ng-show="windowsAdSettingsForm.portNo.$dirty && windowsAdSettingsForm.portNo.$invalid">@T["Please enter the Port Number"]</span>
+                                <span class="port-number-info col-xs-6 no-padding">(@T["Default"]: SSL: 636, Non-SSL: 389)</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding import-group-checkbox">
+                            @Html.CheckBox("import-ad-group-user", (bool)ViewBag.SystemSettings.EnableGroupUserImport, new { @class = "material-checkbox" })
+                            @Html.Hidden("import-ad-group-user")
+                            <label for="import-ad-group-user">
+                                <span>@T["Import users from groups"]</span>
+                            </label>
+                            <div class="info-message">
+                                @string.Format(T["Enabling this setting will import and synchronize users when importing and synchronizing groups with {0}. Enable this setting if you need to import users from your {0} groups."].Value,"Windows AD")
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-12 no-padding">
+                                <input type="button" onclick="ActiveDirectoryFormValidate()" class="primary-button app-btn-primary test-connection" data-container="body" title="@string.Format(T["Test {0} Connection"].Value, "Active Directory")" value="@T["Test Connection"]" ng-disabled="windowsAdSettingsForm.$invalid" />
+                            </div>
+                            <div class="col-xs-12 no-padding validation-bottom error-message" style="display: none"></div>
+                            <div class="col-xs-12 no-padding validation-bottom success-message" style="display: none"></div>
+                        </div>
+                    </form>
+                </div>
+            }
+            @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))
+            {
+                <div role="tabpanel" class="tab-pane col-xs-12 no-padding @(!ServerAppConfig.IsSelfHosted ? "active" : ServerAppConfig.IsSelfHosted && isAzureApplication ? "active" : !enableWindowsAD ? "active" : string.Empty)" id="azure-ad">
+                    <form id="azure-ad-setting" name="azureAdSettingsForm" class="bi-page-body user-directories-tab col-xs-12" method="post" enctype="multipart/form-data" autocomplete="off">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label">@T["Tenant Name"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(azureAdSettingsForm.tenantName.$dirty && azureAdSettingsForm.tenantName.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control txt-holder validation-padding" ng-model="azureTenantName" ng-init="azureTenantName='@ViewBag.AzureADSetting.TenantName'" name="tenantName" placeholder="example.onmicrosoft.com" title="" id="tenantName" ng-pattern="regex" required />
+                                <span class="validation-message" ng-show="azureAdSettingsForm.tenantName.$error.required && azureAdSettingsForm.tenantName.$dirty ">@T["Please enter the tenant name"]</span>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.tenantName.$error.pattern ">@string.Format(T["Please enter the valid {0}"].Value, "URL")</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding form-fields-top-margin">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label">@T["Client Id"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(azureAdSettingsForm.clientId.$dirty && azureAdSettingsForm.clientId.$invalid) ? 'has-error' : ''">
+                                <input type="text" class="form-control txt-holder validation-padding" ng-model="azureClientId" name="clientId" ng-init="azureClientId='@ViewBag.AzureADSetting.ClientId'" placeholder="@T["Client Id"]" title="" id="clientId" required />
+                                <span class="validation-message" ng-show="azureAdSettingsForm.clientId.$dirty && azureAdSettingsForm.clientId.$invalid">@T["Please enter the client id"]</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding form-fields-top-margin">
+                            <div class="col-xs-12 no-padding">
+                                <label class="app-textbox-label">@T["Client Secret Code"]</label>
+                            </div>
+                            <div class="col-xs-12 no-padding form-input-field" ng-class="(azureAdSettingsForm.clientKey.$dirty && azureAdSettingsForm.clientKey.$invalid) ? 'has-error' : ''">
+                                <input type="text" style="display: none;">
+                                <input style="visibility: hidden; position: absolute; left: -99999px" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
+                                <input type="password" class="form-control txt-holder validation-padding eye-icon-align" value="" ng-model="azureClientKey" name="clientKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" id="clientKey" title="" required />
+                                <div class="show-hide-password su su-eye"></div>
+                                <span class="validation-message" ng-show="azureAdSettingsForm.clientKey.$dirty && azureAdSettingsForm.clientKey.$invalid">@T["Please enter the client key"]</span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 no-padding import-group-checkbox">
+                            @Html.CheckBox("import-azure-ad-group-user", (bool)ViewBag.AzureADSetting.EnableGroupUserImport, new { @class = "material-checkbox" })
+                            @Html.Hidden("import-azure-ad-group-user")
+                            <label for="import-azure-ad-group-user">
+                                <span>@T["Import users from groups"]</span>
+                            </label>
+                            <div class="info-message">
+                                @string.Format(T["Enabling this setting will import and synchronize users when importing and synchronizing groups with {0}. Enable this setting if you need to import users from your {0} groups."].Value,"Azure AD")
+                            </div>
+                        </div>
+                        @if (ViewBag.ThirdPartyLogins)
+                        {
+                            <div class="col-xs-12 no-padding">
+                                <div class="col-xs-12 no-padding">
+                                    <input type="button" id="testAzureConnection" ng-disabled="azureAdSettingsForm.$invalid" onclick="AzureADFormValidate()" class="primary-button app-btn-primary test-connection" title="@string.Format(T["Test {0} Connection"].Value, "Azure Active Directory")" value="@T["Test Connection"]" />
+                                </div>
+                                <div class="col-xs-12 no-padding validation-bottom error-message" style="display: none"></div>
+                                <div class="col-xs-12 no-padding validation-bottom success-message" style="display: none"></div>
+                            </div>
+                        }
+                    </form>
+                </div>
+            }
+            @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))
+            {
+                <div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="database-settings">
+                    <div id="import-database-container" class="col-xs-12 user-directories-tab no-padding">
+                        <div class="col-xs-12 connection-properties-form bi-page-body">
+                            <div id="connect-properties" class="col-xs-12 no-padding">
+                                <form class="no-padding col-xs-12 form-horizontal" method="post">
+                                    <div class="col-xs-12 no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Database type"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding">
+                                            <div class="txt-holder validation-padding">
+                                                <select id="database-type" class="selectpicker">
+                                                        <option value="MSSQL" selected="@(ViewBag.DbSettings.ServerType != null &&  ViewBag.DbSettings.ServerType.ToString() == "MSSQL")">SQL Server</option>
+                                                        <option value="PostgreSQL" selected="@(ViewBag.DbSettings.ServerType != null &&ViewBag.DbSettings.ServerType.ToString() == "PostgreSQL")">PostgreSQL</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <form id="sql-content-holder" class="no-padding col-xs-12 content-display show-sql-content form-horizontal" method="post">
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Server name"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="txt-servername" name="servername" class="form-control txt-holder validation-padding" placeholder="@T["Server name"]" title="" value="@ViewBag.DbSettings.ServerName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label"> @T["Authentication"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <div class="txt-holder validation-padding">
+                                                <select id="check-windows" class="selectpicker">
+                                                    <option value="sql" selected="@(ViewBag.DbSettings.AuthenticationType == AuthenticationType.SqlServer)">@string.Format(T["{0} authentication"].Value, "SQL")</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Username"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="txt-login" name="username" class="form-control txt-holder validation-padding" placeholder="@T["Username"]" title="" value="@ViewBag.DbSettings.UserName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Password"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="txt-password-db" name="password" class="form-control txt-holder validation-padding eye-icon-align" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" title="" autocomplete="off" />
+                                            <span id="password-field" class="validation-txt-errors"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Database name"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="txt-dbname" name="dbname" class="form-control txt-holder validation-padding system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.databaseName" placeholder="@T["Existing Database name"]" title="" autocomplete="off">
+                                            <div class="loader-blue loader-icon database-select-loader-icon display-none " id="sql-loader-icon">
+                                                <svg class="circular">
+                                                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                                                </svg>
+                                            </div>
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Table names"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="mssql-tablenames" name="mssqltablename" class="form-control txt-holder validation-padding" placeholder="@T["Existing table names separated by commas"]" title="" autocomplete="off">
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 no-padding import-group-checkbox">
+                                        @Html.CheckBox("secure-sql-connection", (bool)ViewBag.DbSettings.SslEnabled, new { @class = "material-checkbox" })
+                                        @Html.Hidden("secure-sql-connection")
+                                        <label for="secure-sql-connection">
+                                            @string.Format(T["Enable {0}"].Value, "SSL")
+                                        </label>
+                                        <div class="info-message checkbox-info">
+                                            @string.Format(T["Enable this if the database server is {0} configured. It uses {0} encryption for all data transmitted between the client and the server."].Value, "SSL")
+                                        </div>
+                                    </div>
+                                </form>
+                                <form id="postgresql-content-holder" class="no-padding content-display show-postgresql-content form-horizontal" method="post">
+                                    <div class="col-xs-12 form-fields-top-margin no-padding data-base-fields">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Server name"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding">
+                                            <input type="text" id="postgresql-servername" name="servername" class="form-control txt-holder validation-padding" placeholder="@T["Server name"]" title="" value="@ViewBag.DbSettings.ServerName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding data-base-fields">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Port"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding">
+                                            <input type="text" id="postgresql-port" name="port" class="form-control txt-holder validation-padding" placeholder="@T["Port"]" title="" value="@ViewBag.DbSettings.Port" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Username"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="postgresql-login" name="username" class="form-control txt-holder validation-padding" placeholder="@T["Username"]" title="" value="@ViewBag.DbSettings.UserName" />
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Password"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" style="display: none;">
+                                            <input type="password" id="postgresql-password-db" name="password" class="form-control txt-holder validation-padding eye-icon-align" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" title="" autocomplete="off" />
+                                            <span id="password-field" class="validation-txt-errors"></span>
+                                            <div class="su su-eye show-hide-password"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Database name"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="postgresql-dbname" name="dbname" class="form-control txt-holder validation-padding system-settings-startup-page-fields dbname-fields db-fields" value="@ViewBag.databaseName" placeholder="@T["Existing Database name"]" title="" autocomplete="off">
+                                            <div class="loader-blue loader-icon database-select-loader-icon display-none " id="postgresql-loader-icon">
+                                                <svg class="circular">
+                                                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                                                </svg>
+                                            </div>
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 form-fields-top-margin no-padding">
+                                        <div class="col-xs-12 no-padding">
+                                            <label class="app-textbox-label">@T["Table names"]</label>
+                                        </div>
+                                        <div class="col-xs-12 no-padding connect-database-padding data-base-fields">
+                                            <input type="text" id="postgresql-tablenames" name="tablename" class="form-control txt-holder validation-padding" placeholder="@T["Existing table names separated by commas"]" title="" autocomplete="off">
+                                            <span class="validation-txt-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 no-padding import-group-checkbox">
+                                        @Html.CheckBox("secure-postgresql-connection", (bool)ViewBag.DbSettings.SslEnabled, new { @class = "material-checkbox" })
+                                        @Html.Hidden("secure-postgresql-connection")
+                                        <label for="secure-postgresql-connection">
+                                            @string.Format(T["Enable {0}"].Value, "SSL")
+                                        </label>
+                                        <div class="info-message checkbox-info">
+                                            @string.Format(T["Enable this if the database server is {0} configured. It uses {0} encryption for all data transmitted between the client and the server."].Value, "SSL")
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            @if (ViewBag.ThirdPartyLogins)
+                            {
+                                <div class="col-xs-12 no-padding connection-properties-form">
+                                    <div class="col-xs-12 no-padding">
+                                        <button type="button" id="test-connection" class="primary-button app-btn-primary test-connection" disabled="disabled">@T["Test Connection"]</button>
+                                    </div>
+                                    <div class="col-xs-12 no-padding validation-bottom" id="test-connection-validation" style="display: none"></div>
+                                    <div class="col-xs-12 no-padding validation-bottom success-message" style="display: none"></div>
+                                </div>
+                            }
+                        </div>
+                        <div id="selected-schema-container" class="col-xs-12 selected-schema-container bi-page-body" style="display: none">
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+            <div id="select-existing-join" style="display:none">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-12 no-padding table-content">
+                        <table class="relation-list"></table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="get-join-details" style="display:none">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-12 no-padding relation-select-content">
+                        <div class="col-xs-5 no-padding">
+                            <h5>@T["Left table"]</h5>
+                            <div class="col-xs-12 no-padding">
+                                <select id="left-table-selection" class="selectpicker"></select>
+                            </div>
+                            <div id="left-table-columnlist" class="col-xs-12 no-padding column-list">
+                                <ul></ul>
+                            </div>
+                        </div>
+                        <div class="col-xs-2 no-padding">
+                            <div id="join-type-holder">
+                                <select id="join-type" class="selectpicker">
+                                    <option value="inner join">@T["Inner Join"]</option>
+                                    <option value="left join">@T["Left Join"]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-5 no-padding">
+                            <h5>@T["Right table"]</h5>
+                            <div class="col-xs-12 no-padding">
+                                <select id="right-table-selection" class="selectpicker" disabled="disabled"></select>
+                            </div>
+                            <div id="right-table-columnlist" class="col-xs-12 no-padding column-list">
+                                <ul></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (ViewBag.ThirdPartyLogins)
+        {
+            <div class="bi-page-footer col-xs-12">
+                <div class="bi-page-actions col-xs-12 col-xs-12">
+                    <a href="@Url.Action("Index","Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-active-dir-settings" title="">@T["Cancel"]</a>
+                    @if (enableWindowsAD)
+                    {
+                        <button type="button" title="" id="update-active-dir-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right update-system-settings  @(!ServerAppConfig.IsSelfHosted ? " hidden" : string.Empty )" ng-disabled="windowsAdSettingsForm.$invalid" ng-click="">@T["Save"]</button>
+                    }
+                    <button type="button" title="" id="UpdateAzureADSettings-bottom" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right @(ServerAppConfig.IsSelfHosted ? " hidden" : string.Empty)" ng-disabled="azureAdSettingsForm.$invalid" ng-click="">@T["Save"]</button>
+                    <button type="button" title="" id="save-db-settings" disabled="disabled" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">@T["Save"]</button>
+                    <button type="button" id="connect-database" class="primary-button app-btn-primary pull-right connect-database-button" disabled="disabled">@T["Next"]</button>
+                    <button type="button" id="change-connection" class="secondary-button app-btn-secondary pull-right">@T["Back"]</button>
+                </div>
+            </div>
+        }
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+}

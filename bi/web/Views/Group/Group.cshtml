@@ -1,0 +1,466 @@
+﻿@using System.Runtime.InteropServices;
+
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Groups"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageGroups);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isAzureApplication = ServerAppConfig.IsAzureApplication;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var groupPermissionHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.WhenToUseGroups);
+    var enableWindowsAD = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isAdmin = _identityResponse.IsAdmin;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var customUI = _globalAppSettings.SystemSettings.CustomUI;
+    var pageDescription = T["Add and manage groups."];
+    var groupImport = new GroupImport();
+    if (customUI?.Profiles != null)
+    {
+        groupImport = customUI?.Profiles[0]?.GroupImport != null ? customUI?.Profiles[0]?.GroupImport[0] : new GroupImport();
+    }
+}
+
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/groups.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/groups.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/groups.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/groups.min.js"></script>
+    </environment>
+    <script>
+        var checkGroupnameUrl = "@Url.Action("CheckGroupname", "group")";
+        var addGroupUrl = "@Url.Action("AddGroup", "group")";
+        var deleteGroupViewUrl = "@Url.Action("DeleteGroupView", "group")";
+        var addGroupViewUrl = "@Url.Action("AddGroupView","group")";
+        var deleteGroupUrl = "@Url.Action("DeleteGroup", "group")";
+        var groupPageUrl = "@Url.Action("group", "group")";
+        var deleteFromGroupListUrl = "@Url.Action("DeleteFromGroupList", "group")";
+    </script>
+    <script type="text/x-jsrender" id="checkbox-row-template">
+        <input type="checkbox" class="checkbox-row material-checkbox" name="checkbox-row" data-checked-id="{{:GroupId}}" id="row-check{{:GroupId}}" />
+        <input name="row-check{{:GroupId}}" type="hidden" value="false">
+        <label for="row-check{{:GroupId}}"> </label>
+    </script>
+
+    <script type="text/x-jsrender" id="checkbox-header-template">
+        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
+        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+    </script>
+    <script type="text/x-jsrender" id="group-profile-template">
+        <a class="item-name grid-content" title="{{:~renderDoubleQuotes(GroupName)}}" data-toggle="tooltip" href="@Url.Action("viewgroup", "group")/{{:GroupId}}">{{:GroupName}}</a>
+        {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
+        <span title="Azure AD Group" class="su su-azure-ad grid-directory-icon"> </span>
+        {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
+        <span title="Windows AD Group" class="su su-windows-ad grid-directory-icon"> </span>
+        {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
+        <span class="su su-oauth grid-directory-icon"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span>
+        {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
+        <span class="su su-openid grid-directory-icon"> </span>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="group-description-template">
+        <span class="grid-content" title="{{:~renderDoubleQuotes(GroupDescription)}}" data-toggle="tooltip">
+            {{:~encodeString(GroupDescription)}}
+        </span>
+    </script>
+    <script type="text/x-jsrender" id="group-description-template">
+        {{if GroupDescription != ""}}
+        <span class="grid-content" title="{{:GroupDescription}}" data-toggle="tooltip">{{:GroupDescription}}</span>
+        {{else}}
+        --
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="actions-template">
+        <div class="dropdown context-menu" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+            <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                @if (isAdmin || granularPermissions[PermissionEntity.AllPermissions] || granularPermissions[PermissionEntity.SpecificPermissions])
+                {
+                    <li class="menu-group">
+                        <a href="@Url.Action("grouppermission","permission")?groupId={{:GroupId}}" title="@T["Manage Permissions"]" data-toggle="tooltip" data-groupid="{{:GroupId}}">
+                            <i class="su su-manage-permission"></i>
+                            <span class="menu-text">@T["Manage Permissions"]</span>
+                        </a>
+                    </li>
+                }
+                {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
+                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                {
+                    <li class="menu-group">
+                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "Azure AD")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                            <i class="su su-user-add disabled-icon-color"></i>
+                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
+                        </a>
+                    </li>
+                }
+                {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
+                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                {
+                    <li class="menu-group">
+                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "Windows AD")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                            <i class="su su-user-add disabled-icon-color"></i>
+                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
+                        </a>
+                    </li>
+                }
+                {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
+                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                {
+                    <li class="menu-group">
+                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "OAuth")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                            <i class="su su-user-add disabled-icon-color"></i>
+                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
+                        </a>
+                    </li>
+                }
+                {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
+                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                {
+                    <li class="menu-group">
+                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "OpenID")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                            <i class="su su-user-add disabled-icon-color"></i>
+                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
+                        </a>
+                    </li>
+                }
+                {{else}}
+                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                {
+                    <li class="menu-group">
+                        <a href="@Url.Action("viewgroup", "group")/{{:GroupId}}?isAddUser=True" class="user-add-class" title="@T["Add Users"]" data-toggle="tooltip" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                            <i class="su su-user-add"></i>
+                            <span class="menu-text">@T["Add Users"]</span>
+                        </a>
+                    </li>
+                }
+                {{/if}}
+                <li class="menu-group">
+                    <a href="@Url.Action("viewgroup","group")/{{:GroupId}}" title="@T["View"]" data-toggle="tooltip" data-groupid="{{:GroupId}}">
+                        <i class="su su-eye"></i>
+                        <span class="menu-text">@T["View"]</span>
+                    </a>
+                </li>
+                {{if CanDelete}}
+                <li class="menu-group">
+                    <a href="javascript:void(0);" class="delete user-delete-class" data-groupid="{{:GroupId}}" title="@T["Delete"]" data-toggle="tooltip" data-groupname="{{:GroupName}}">
+                        <i class="su su-delete"></i>
+                        <span class="menu-text">@T["Delete"]</span>
+                    </a>
+                </li>
+                {{else}}
+                <li class="menu-group">
+                    <a href="javascript:void(0);" class="user-delete-class" data-groupid="{{:GroupId}}" title="@T["You cannot delete the administrator group."]" data-toggle="tooltip" data-placement="top" data-groupname="{{:GroupName}}">
+                        <i class="su su-delete disabled-icon-color"></i>
+                        <span class="menu-text disabled-icon-color">@T["Delete"]</span>
+                    </a>
+                </li>
+                {{/if}}
+            </ul>
+        </div>
+    </script>
+    <script type="text/javascript">
+        var groups = @Html.Raw(@ViewBag.groups)
+            GridLocalization(window.Server.App.Localization.GroupResourceEmpty);
+        $(document).ready(function () {
+            $("#search-groups").val("");
+            addPlacehoder("#search-area");
+            $("#Grid").ejGrid({
+                dataSource: ej.DataManager({ url: "@Url.Action("RefreshGroup", "Group")", adaptor: "UrlAdaptor" }),
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                enableAltRow: false,
+                locale: "en-US",
+                allowSorting: true,
+                allowSearching: true,
+                allowSelection: true,
+                allowFiltering: true,
+                selectionType: ej.Grid.SelectionType.Multiple,
+                selectionSettings: { selectionMode: ["row"] },
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    $("#checkbox-header").change(headCheckboxOnChange);
+                    this.model.indexes = {}; /* Additional property*/
+                },
+                rowDataBound: function () {
+                    var height = $(".e-gridcontent").height();
+                    if (height != null) {
+                        rowBound();
+                    }
+
+                },
+                recordClick: "fnGroupRecordClick",
+                load: "fnOnGroupfLoad",
+                pageSettings: { pageSize: 20 },
+                filterSettings: { filterType: "menu" },
+                actionBegin: "fnOnGroupGridActionBegin",
+                actionComplete: "fnOnGroupGridActionComplete",
+                create: "fnCreate",
+                columns: [
+                    {
+                        headerTemplateID: "#checkbox-header-template",
+                        template: true,
+                        templateID: "#checkbox-row-template",
+                        textAlign: ej.TextAlign.Center,
+                        allowFiltering: false,
+                        width: 20
+                    },
+                    {
+                        template: true,
+                        allowSorting: true,
+                        allowFiltering: true,
+                        headerText: "@T["Name"]",
+                        width: 105,
+                        headerTemplateID: "#name-header",
+                        templateID: "#group-profile-template",
+                        field: "GroupName",
+                        type: "string"
+                    },
+                    {
+                        field: "GroupDescription",
+                        headerText: "@T["Description"]",
+                        allowSorting: true,
+                        allowFiltering: true,
+                        type: "string",
+                        width: 210,
+                        templateID: "#group-description-template",
+                        headerTemplateID: "#description-header"
+                    },
+                    {
+                        allowSorting: false,
+                        allowFiltering: false,
+                        field: "UsersCount",
+                        headerText: "@T["Users"]",
+                        type: "string",
+                        width: 25
+                    },
+                    {
+                        template: true,
+                        allowSorting: false,
+                        allowFiltering: false,
+                        templateID: "#actions-template",
+                        width: (window.innerWidth > 1200) ? 15 : 25
+                    }
+
+                ]
+
+            });
+
+            $.views.helpers({
+                renderDoubleQuotes: function (inputString) {
+                    return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                }
+            });
+
+            $.views.helpers({
+                encodeString: function (inputString) {
+                    return inputString.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                }
+            });
+
+            $("#groups-delete-confirmation").ejDialog({
+                width: "378px",
+                showOnInit: false,
+                allowDraggable: false,
+                enableResize: false,
+                height: "auto",
+                showHeader: false,
+                title: "@T["Delete Groups"]",
+                enableModal: true,
+                close: "onDeleteDialogClose",
+                closeOnEscape: true,
+                open: "onDeleteDialogOpen"
+            });
+            var groupDeleteWaitingPopupTemplateId = createLoader("groups-delete-confirmation_wrapper");
+			$("#groups-delete-confirmation_wrapper").ejWaitingPopup({ template:$("#" + groupDeleteWaitingPopupTemplateId) });
+            var grupBodyWaitingPopupTemplateId = createLoader("body");
+			$("#body").ejWaitingPopup({ template:$("#" + grupBodyWaitingPopupTemplateId) });
+
+        });
+    </script>
+
+    <script type="text/x-jsrender" id="name-header">
+        <div class="item-name">@T["Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="description-header">
+        <div class="item-header">@T["Description"]</div>
+    </script>
+}
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") group-page-header">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Groups"] }, { "PageDescription", @pageDescription } })
+        <div class="col-md-12 bi-page-header top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="pull-left col-xs-4">
+                    <input type="text" id="search-groups" class="pull-left no-margin" placeholder="@T["Search groups"]" />
+                    <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-group pull-left no-margin" title="@T["Search"]"></span>
+                </div>
+                <ul id="group-header" class="pull-right col-xs-6 no-padding groups-menu button-section">
+                    @if (!(groupImport.HideCreateGroup && groupImport.HideAzureAD && groupImport.HideOAuth && groupImport.HideOpenID && groupImport.HideWindowsAD))
+                    {
+                        <li class="dropdown no-padding">
+                            @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || ViewBag.IsUserHasCreateGroupPermission)
+                            {
+                                <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" id="new-user-dropdown" title="@T["Add new group"]">
+                                    <span>@T["New Group"] </span>
+                                    <span class="caret"></span>
+                                </button>
+                            }
+                            <ul class="dropdown-menu pull-right" role="menu" id="dropdown-options">
+                                @if (!groupImport.HideCreateGroup)
+                                {
+                                    <li id="new-group-button" title="@T["Add new group"]">
+                                        <a href="javascript:void(0)" title="@T["Add new group"]" data-toggle="tooltip" data-placement="top">
+                                            <i class="su su-group-1"></i>
+                                            <span>@T["Create Group"]</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (ServerAppConfig.IsSelfHosted && !isAzureApplication && enableWindowsAD && !groupImport.HideWindowsAD && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("ActiveDirectoryGroupImport", "group")" data-toggle="tooltip" data-placement="top" title="@String.Format(T["Import groups from {0}"].Value, "Active Directory")">
+                                            <i class="su su-windows-ad"></i>
+                                            <span>@String.Format(T["Import from {0}"].Value, "Active Directory")</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && !groupImport.HideAzureAD)
+                                {
+                                    <li>
+                                        <a href="@Url.Action("AzureADGroupImport", "group")" data-toggle="tooltip" data-placement="top" title="@String.Format(T["Import groups from {0}"].Value, "Azure AD")">
+                                            <i class="su su-azure-ad"></i>
+                                            <span>@String.Format(T["Import from {0}"].Value, "Azure AD")</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (ServerAppConfig.IsSelfHosted && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
+                                {
+                                    @if (!groupImport.HideOAuth)
+                                    {
+                                        <li>
+                                            <a href="@(Url.Action("AuthGroupImport", "group") + "?authType=" + (int)AuthType.OAuth)" data-toggle="tooltip" data-placement="top" title="@String.Format(T["Import groups from {0}"].Value, "OAuth2")">
+                                                <i class="su su-oauth"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></i>
+                                                <span>@String.Format(T["Import from {0}"].Value, "OAuth")</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (!groupImport.HideOpenID)
+                                    {
+                                        <li>
+                                            <a href="@(Url.Action("AuthGroupImport", "group") + "?authType=" + (int)AuthType.OIDC)" data-toggle="tooltip" data-placement="top" title="@String.Format(T["Import groups from {0}"].Value, "OpenID Connect")">
+                                                <i class="su su-openid"></i>
+                                                <span>@String.Format(T["Import from {0}"].Value, "OpenID")</span>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </li>
+                    }
+
+                    @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted) && ViewBag.AzureAD != null && !groupImport.HideAzureAD && !groupImport.HideWindowsAD && ViewBag.AdgroupCount > 0 && ViewBag.AzureADGroupCount > 0)
+                    {
+                        <li class="dropdown">
+                            <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" id="synchronize-dropdown" title="@T["Synchronize Groups"]">
+                                <span>@T["Synchronize"] </span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" id="synchronize-dropdown-menu">
+                                @if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication && ViewBag.AdgroupCount > 0)
+                                {
+                                    <li>
+                                        <a class="dropdown-toggle" href="@Url.Action("ActiveDirectoryGroup", "Group")" data-toggle="tooltip" data-placement="left" title="@String.Format(T["Synchronize groups with {0}"].Value, "Active Directory")">
+                                            <i class="su su-windows-ad"> </i>
+                                            <span>@String.Format(T["{0} Synchronization"].Value, "Active Directory")</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (ViewBag.AzureAD != null && ViewBag.AzureADGroupCount > 0)
+                                {
+                                    <li>
+                                        <a class="dropdown-toggle" href="@Url.Action("AzureADGroup", "Group")" data-toggle="tooltip" data-placement="left" title="@String.Format(T["Synchronize groups with {0}"].Value, "Azure AD")">
+                                            <i class="su su-azure-ad"> </i>
+                                            <span>@String.Format(T["{0} Synchronization"].Value, "Azure AD")</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && !groupImport.HideWindowsAD && ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && ViewBag.AdgroupCount > 0)
+                        {
+                            <li>
+                                <a href="@Url.Action("ActiveDirectoryGroup","group")" class="link-button app-btn-link pull-right synchronize-groups" title="@String.Format(T["Synchronize groups with {0}"].Value, "Active Directory")">
+                                    @String.Format(T["{0} Synchronization"].Value, "Active Directory")
+                                </a>
+                            </li>
+
+                        }
+                        if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && !groupImport.HideAzureAD && ViewBag.AzureAD != null && ViewBag.AzureADGroupCount > 0)
+                        {
+                            <li>
+                                <a href="@Url.Action("AzureADGroup", "group")" class="link-button app-btn-link pull-right synchronize-groups" title="@String.Format(T["Synchronize groups with {0}"].Value, "Azure AD")">
+                                    @String.Format(T["{0} Synchronization"].Value, "Azure AD")
+                                </a>
+                            </li>
+
+                        }
+                    }
+                    @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup])
+                    {
+                        <li class="flying-add hide" id="add-user-in-groups">
+                            <button class="critical-action-button app-btn-danger group-delete-button" title="@T["Delete selected Groups"]" data-directory-type="@((int)DirectoryType.AzureAD)" data-groupid="1">@T["Delete Groups"]</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="group-directory-container" class="bi-page-container col-xs-12 @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")" aria-labelledby="active-directory-settings-link">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div id="grid-container" class="col-xs-12 bi-page-body">
+                <div id="Grid" data-gridName="Group" class="pull-left">
+                </div>
+                <div class="directory-info col-lg-8">
+                    @if (ViewBag.AzureADGroupCount > 0)
+                    {
+                        <div id="azure-ad-indication" class="ad-azure-indication"><span class="su su-azure-ad"> </span> - <span class="margin">@String.Format(T["{0} group"].Value, "Azure AD")</span></div>
+                    }
+                    @if (ServerAppConfig.IsSelfHosted && ViewBag.AdgroupCount > 0)
+                    {
+                        <div id="windows-ad-indication" class="ad-azure-indication"><span class="su su-windows-ad"> </span> - <span class="margin">@String.Format(T["{0} group"].Value, "Windows AD")</span></div>
+                    }
+                    @if (ServerAppConfig.IsSelfHosted && ViewBag.OAuthgroupCount > 0)
+                    {
+                        <div id="oauth-indication" class="ad-azure-indication"><span class="su su-oauth"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span> - <span class="margin">@String.Format(T["{0} group"].Value, "OAuth")</span></div>
+                    }
+                    @if (ServerAppConfig.IsSelfHosted && ViewBag.OpenIDGroupCount > 0)
+                    {
+                        <div id="openid-indication" class="ad-azure-indication"><span class="su su-openid"> </span> - <span class="margin">@String.Format(T["{0} group"].Value, "OpenID Connect")</span></div>
+                    }
+                </div>
+            </div>
+            <div id="new-group-area" class="no-padding"></div>
+            <div id="delete-group-area" class="no-padding"></div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    @await Html.PartialAsync("../Group/_MultipleGroupDeleteDialog")
+}

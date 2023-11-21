@@ -1,0 +1,157 @@
+﻿@{
+    Layout = null;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var globalAppSettings = _globalAppSettings;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var currentUrl = Context.Request.GetDisplayUrl();
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var siteUrl = globalAppSettings.SystemSettings.BaseUrl;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isEmbed = ViewBag.IsEmbed == null ? "false" : ViewBag.IsEmbed;
+    var hasSettingsPagePermissionFlag = (isAdmin || granularPermissions[SettingsScopes.All]);
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        hasSettingsPagePermissionFlag = hasSettingsPagePermissionFlag || granularPermissions[SettingsScopes.Connectors];
+    }
+    var hasSettingsPagePermission = hasSettingsPagePermissionFlag.ToString();
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var dashboardCutomTheme = string.Empty;
+    var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
+    var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    if (isEmbedTrue)
+    {
+        dashboardCutomTheme = Context.Request.Query["embed_theme"];
+    }
+    else
+    {
+        dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
+    }
+}
+<!DOCTYPE html>
+
+<html style="height:100%;width:100% ; overflow:hidden;">
+<head>
+    <title>@T["Connection"] - @globalAppSettings.SystemSettings.OrganizationName</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="site_identifier:url" content="@siteUrl" />
+    <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
+    <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+    <meta name="data_service:url" content="@designerServiceUrl" />
+    <meta name="datasource_schedule:url" content="@Url.Action("GetRecurrenceTypeView", "DataSources")" />
+
+    @*<meta name="datasource:version" content="@ViewBag.Version" />
+        <meta name="datasource:id" content="@ViewBag.DataSourceId" />
+        <meta name="isdraft" content="@ViewBag.IsDraft" />*@
+    <meta name="datasource:connectionlist" content="@ViewBag.Datasources" />
+    <meta name="intermediatedbstatus" content="@ViewBag.IntermediateDbStatus" />
+
+    <meta name="user:is_admin" content="@hasSettingsPagePermission.ToString()" />
+    <meta name="user:culture" content="@ViewBag.Culture" />
+
+    <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
+    <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+    {
+        <style>
+            :root {
+                --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+            }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+                --designer-font: var(--font-family) !important;
+            }
+        </style>
+    }
+    @if (isEmbedTrue)
+    {
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    }
+    else
+    {
+        @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+        @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    }
+    <script>
+        var rootUrlAction = "@rootUrl";
+        var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
+        var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var currentUrl = "@currentUrl";
+        var isSelfHosted = @Json.Serialize(isSelfHosted);
+        var dataStoreSettingUrl = "@Url.Action("DataStoreSettings", "Administration")";
+        var modelLanguage = "@ViewBag.ModelLanguage";
+        var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+        var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+        var custombrandName = "@ServerAppConfig.CustomBrandName";
+        var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+        var isEmbed = "@isEmbed";
+        var dashboardCustomThemename = "@dashboardCutomTheme";
+        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
+        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var appVersion = "@ServerAppConfig.ProductVersion";
+    </script>
+    @if (isEmbed == "true")
+    {
+        <style>
+            .bbi-dbrd-designer-mode-connection .bbi-dbrd-close-icon {
+                display: none;
+            }
+        </style>
+    }
+</head>
+
+<body ng-app="serverApp" id="body" onload="openDatasource()" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/connection-designer.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/connection-designer.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+    </environment>
+
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-connection.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-connection.min.js"></script>
+    </environment>
+
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    <div id="connectionDesigner"></div>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/connection-designer.js"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/connection-designer.min.js"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>

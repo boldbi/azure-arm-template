@@ -1,0 +1,1006 @@
+﻿@using Newtonsoft.Json
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    var permission = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    ViewBag.Title = globalAppSettings.SystemSettings.OrganizationName + " - " +T["Dashboards"].Value;
+    var categories = String.Empty;
+    var isMarkItemsPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic;
+    var currentUserId = ViewBag.currentUserId;
+    var isViewRequest = ViewBag.IsViewRequest;
+    var itemName = ViewBag.itemName;
+    var dashboardUrl = Url.Action("Dashboards", "Dashboards");
+    var index = dashboardUrl.LastIndexOf("/dashboards");
+    var dashboardCultureUrl = dashboardUrl;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var donotShowJourney = Context.Request.Cookies["syncfusion.dashboards.server.journey"] != null;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    if (index != -1)
+    {
+        dashboardCultureUrl = dashboardUrl.Substring(0, index + 1) + ViewBag.Culture + "/dashboards";
+    }
+
+    if (ViewBag.Categories != null)
+    {
+        categories = JsonConvert.SerializeObject(ViewBag.Categories);
+    }
+
+    var requestType = ViewBag.HasFavoriteItem == true ? DisplayCategory.FavouriteItems : DisplayCategory.AllDashboards;
+
+    var activeClass = "active";
+    var backButton = "none";
+
+    var sectionName = Context.Request.RouteValues["categoryName"];
+
+    var currentUrl = new Uri(ViewBag.Url ?? Context.Request.GetDisplayUrl());
+
+    var url = currentUrl.ToString();
+
+    if (sectionName == null)
+    {
+        sectionName = ViewBag.HasFavoriteItem == true ? T["Favorites"].Value : T["All Dashboards"].Value;
+    }
+
+    if (ViewBag.CategoryName != null)
+    {
+        requestType = DisplayCategory.SpecificCategory;
+        sectionName = ViewBag.CategoryName;
+        activeClass = String.Empty;
+        backButton = "block";
+    }
+    else if (url.IndexOf("view=public") > -1)
+    {
+        requestType = DisplayCategory.PublicItems;
+        sectionName = T["Public Dashboards"].Value;
+        activeClass = String.Empty;
+    }
+    else if (url.IndexOf("view=recent") > -1)
+    {
+        requestType = DisplayCategory.RecentItems;
+        sectionName = T["Recent Dashboards"].Value;
+        activeClass = String.Empty;
+    }
+    else if (url.IndexOf("view=favorites") > -1)
+    {
+        requestType = DisplayCategory.FavouriteItems;
+        sectionName = T["Favorite Dashboards"].Value;
+        activeClass = String.Empty;
+    }
+    else if (url.IndexOf("view=categories") > -1)
+    {
+        requestType = DisplayCategory.AllCategory;
+        sectionName = T["All Categories"].Value;
+        activeClass = String.Empty;
+    }
+    else if (url.IndexOf("view=all") > -1)
+    {
+        requestType = DisplayCategory.AllDashboards;
+        sectionName = T["All Dashboards"].Value;
+        activeClass = String.Empty;
+    }
+    else if (url.IndexOf("view=drafts") > -1)
+    {
+        requestType = DisplayCategory.DraftItems;
+        sectionName = T["Draft Dashboards"].Value;
+        activeClass = String.Empty;
+    }
+
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var absolutePath = requestUrl.AbsolutePath;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageDashboards);
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboards-page.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboards-page.min.css" />
+    </environment>
+
+    <style>
+        #items_WaitingPopup {
+            display: none !important;
+        }
+    </style>
+}
+
+@section scripts{
+    <script>
+        var i_am_ie9 = false;
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var deleteConfirmUrl = "@Url.Action("deleteconfirmation", "items")";
+        var getdashboarddetailsUrl = "@Url.Action("getdashboarddetails", "dashboards")";
+        var getDataSourceDetailsUrl = "@Url.Action("getdatasources", "dashboards")";
+        var viewDashboardUrlAction = "@Url.Action("Dashboards", "Dashboards")";
+        var getCategories = "@Url.Action("RefreshCategoryList", "Dashboards")";
+        var licenseSettingsPage = "@Url.Action("LicenseSettings", "Administration")";
+        var getLinkDialogViewUrl= "@Url.Action("GetLinkView", "items")";
+        var recentVisitedDashboardsUrl = "@Url.Action("GetRecentlyVisitedDashboardLogs", "items")";
+        var getItemDetailsUrl = "@Url.Action("GetItemDetail", "items")";
+        var designerInstallationHelpUrl = "@ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerInstallation))";      var categories;
+        if ('@ViewBag.Categories' != '')
+            categories =@Html.Raw(categories);
+        else
+            categories = "";
+
+        $(document).ready(function (e) {
+            var itemGridDashboardWaitingPopupTemplateId = createLoader("item-grid-container");
+            $("#item-grid-container").ejWaitingPopup({ template:$("#" + itemGridDashboardWaitingPopupTemplateId) });
+            $("[data-toggle='tooltip']").tooltip();
+            displayRecentVisitedDashboard();
+        });
+
+        $(window).resize(function (e) {
+            $("[data-toggle='tooltip']").tooltip();
+            refreshScrollerForCategory();
+        });
+
+        serverApp.controller("categoryController", ["$scope", "ajaxService", function ($scope, ajaxService) {
+
+            if (categories != "") {
+                $scope.categories = categories;
+
+            }
+            else {
+                ajaxService.getData(getCategories, "")
+                    .then(function (data) {
+                        $scope.categories = data;
+                        refreshScrollerForCategory();
+                    });
+            }
+            $scope.showCategories = false;
+            $scope.showDashbaords = false;
+            $scope.enableItemRequest = false;
+            $scope.showCategoryDropdown = false;
+            $scope.showDashboardDropdown = false;
+            $scope.itemRequestType = "@((int)requestType)";
+
+            if (($scope.itemRequestType == "@((int)DisplayCategory.PublicItems)") || ($scope.itemRequestType == "@((int)DisplayCategory.AllDashboards)") || ($scope.itemRequestType == "@((int)DisplayCategory.FavouriteItems)") || ($scope.itemRequestType == "@((int)DisplayCategory.RecentItems)") || ($scope.itemRequestType == "@((int)DisplayCategory.AllCategory)")) {
+                $(".tool-tip").hide();
+
+            }
+
+
+            $scope.category = "";
+            $scope.search = {
+                "Name": ""
+            };
+
+            $scope.refreshCategorySection = function (categoryId) {
+                $.xhrPool.abortAll();
+                ajaxService.getData(getCategoryItem, "")
+                   .then(function (data) {
+                       $scope.categories = data;
+                       refreshScrollerForCategory();
+                       setTimeout(function () {
+                           if (categoryId != null) {
+                               if (!$(".all-items").hasClass("active")) {
+                                   $(".all-items").trigger("click");
+                               }
+                               $(".category-link[data-id='" + categoryId + "']").trigger("click");
+                           }
+                       }, 0);
+                   });
+            }
+
+            $scope.onClickDisplayCategory = function ($event, section) {
+                $(".tool-tip").hide();
+                var gridObj = $("#items").data("ejGrid");
+                $("[data-toggle='tooltip']").tooltip();
+                $scope.itemRequestType = $event != "" ? $event.currentTarget.getAttribute("data-display-category") : $(".item-navigation li[data-value='" + section + "']").attr("data-display-category");
+                $scope.showOrHidePanels();
+
+                gridObj.model.filterSettings.filteredColumns = [];
+
+                if ($scope.itemRequestType !== "1") {
+                    if ($(".search-area").hasClass("add-background")) {
+                        $(".search-home-section:visible").addClass("show");
+                        if ($(".search-home-section").val() != "") {
+                            var dashboardScope = angular.element(document.getElementById("server-items-container")).scope();
+                            if (!$("#category-list").is(":visible") || $("#category-list").length <= 0) {
+                                if ($(".all-items").hasClass("active")) {
+                                    gridObj.model.filterSettings.filteredColumns = [{ field: "CategoryName", operator: "equal", value: $("#category-section-name").html() }];
+                                }
+                            }
+                        }
+                    }
+
+                    gridObj.model.query._params.push({
+
+                        key: "displayCategory",
+                        value: $scope.itemRequestType
+
+                    });
+                    $.xhrPool.abortAll();
+                    ajaxService.cancelRequest();
+                    $("#items").find(".e-gridcontent").css("visibility", "hidden");
+                    setTimeout(function () {
+                        gridObj.refreshContent();
+                    }, 0);
+                }
+                else {
+                    $.xhrPool.abortAll();
+                    ajaxService.cancelRequest();
+                    $scope.refreshCategorySection();
+                }
+                $("#back-icon").css("display", "none");
+
+                $("#category-listing").removeClass("specific-dashboards category");
+
+                if ($scope.itemRequestType != "100") {
+
+                    if ($event != "") {
+                        $("#category-section-name").html($event.currentTarget.getAttribute("data-section")).attr({ "data-original-title": $event.currentTarget.getAttribute("data-section") });
+                    } else {
+                        $("#category-section-name").html($(".item-navigation li[data-value='" + section + "']").attr("data-section")).attr({ "data-original-title": $(".item-navigation li[data-value='" + section + "']").attr("data-section") });
+                    }
+
+                    if (($scope.itemRequestType == "@((int)DisplayCategory.AllDashboards)") || ($scope.itemRequestType == "@((int)DisplayCategory.AllCategory)") || ($scope.itemRequestType == "@((int)DisplayCategory.RecentItems)") || ($scope.itemRequestType == "@((int)DisplayCategory.FavouriteItems)")) {
+                        $(".tool-tip").hide();
+                    }
+                }
+
+                refreshScrollerForCategory();
+
+
+            };
+
+            $scope.clearSearch = function () {
+                $("[data-toggle='tooltip']").tooltip();
+
+                if ($scope.search.Name != "")
+                    clearSearch = true;
+                else
+                    clearSearch = false;
+
+                $scope.search.Name = "";
+
+                refreshScrollerForCategory();
+            }
+
+            $scope.getItemsInCategory = function ($event, category) {
+
+                $("[data-toggle='tooltip']").tooltip();
+
+                $scope.itemRequestType = $event != "" ? $event.currentTarget.getAttribute("data-display-category") : $(".category-link[data-category='" + category.toLowerCase() + "']").attr("data-display-category");
+                $scope.category = $event != "" ? $event.currentTarget.getAttribute("data-category") : category.toLowerCase();
+
+                $scope.showOrHidePanels();
+                var itemGrid = $("#items").data("ejGrid");
+
+                if ($scope.itemRequestType !== "1") {
+
+                    itemGrid.model.filterSettings.filteredColumns = [{ field: "CategoryName", operator: "equal", value: $scope.category }];
+                    $.xhrPool.abortAll();
+                    ajaxService.cancelRequest();
+                    $("#items").find(".e-gridcontent").css("visibility", "hidden");
+                    setTimeout(function () {
+                        itemGrid.refreshContent();
+                    }, 0);
+                }
+                else {
+                    $.xhrPool.abortAll();
+                    ajaxService.cancelRequest();
+                    $scope.refreshCategorySection();
+                }
+
+                if ($scope.itemRequestType == "100") {
+                    var categoryNameWithCasing = typeof (category) === "undefined" ? $event.currentTarget.getAttribute("data-category-original") : $(".category-link[data-category='" + category.toLowerCase() + "']").attr("data-category-original");
+                    $("#category-section-name").html(categoryNameWithCasing).attr({ "data-original-title": categoryNameWithCasing });
+                }
+                $("#back-icon").css("display", "block");
+                $("#category-listing").addClass("specific-dashboards category");
+
+                var url = $event != "" ? $event.currentTarget.getAttribute("data-value") : $(".category-link[data-category='" + category.toLowerCase() + "']").attr("data-value");
+                var currentUrl = window.location.pathname + window.location.search;
+                if (currentUrl != url && window.innerWidth >= 1041) {
+                    if (history.pushState != undefined && $event != "") {
+                        history.pushState({}, "", url);
+                    }
+                }
+            };
+
+            $scope.onBackButtonClick = function () {
+                refreshScrollerForCategory();
+                $("#item-list-panel").ejWaitingPopup("show");
+                $("[data-toggle='tooltip']").tooltip();
+                $scope.showCategories = true;
+                $scope.showDashbaords = false;
+
+                $scope.refreshCategorySection();
+
+                $("#back-icon").css("display", "none");
+                $("#category-listing").removeClass("specific-dashboards category");
+                $("#category-section-name").html("@T["All Categories"]").attr({ "data-original-title": "@T["All Categories"]" });
+                $("#item-list-panel").ejWaitingPopup("hide");
+
+                $scope.showCategoryDropdown = true;
+                $scope.showDashboardDropdown = false;
+                var url = $(".all-items").attr("href");
+                var currentUrl = window.location.pathname + window.location.search;
+                if (currentUrl != url && window.innerWidth >= 1041) {
+                    if (history.pushState != undefined) {
+                        history.pushState({}, "", url);
+                    }
+                }
+
+            }
+
+            $scope.showOrHidePanels = function () {
+                switch ($scope.itemRequestType) {
+                    case "1":
+                        $scope.showCategories = true;
+                        $scope.showDashbaords = false;
+
+                        $scope.showCategoryDropdown = true;
+                        $scope.showDashboardDropdown = false;
+                        break;
+
+                    case "2":
+                        $scope.showCategories = false;
+                        $scope.showDashbaords = true;
+
+                        $scope.showCategoryDropdown = false;
+                        $scope.showDashboardDropdown = true;
+                        break;
+
+                    case "3":
+                        $scope.showCategories = false;
+                        $scope.showDashbaords = true;
+
+                        $scope.showCategoryDropdown = false;
+                        $scope.showDashboardDropdown = true;
+                        break;
+
+                    case "4":
+                        $scope.showCategories = false;
+                        $scope.showDashbaords = true;
+
+                        $scope.showCategoryDropdown = false;
+                        $scope.showDashboardDropdown = true;
+                        break;
+
+                    case "5":
+                        $scope.showCategories = false;
+                        $scope.showDashbaords = true;
+
+                        $scope.showCategoryDropdown = false;
+                        $scope.showDashboardDropdown = true;
+                        break;
+
+                    case "9":
+                        $scope.showCategories = false;
+                        $scope.showDashbaords = true;
+
+                        $scope.showCategoryDropdown = false;
+                        $scope.showDashboardDropdown = true;
+                        break;
+
+                    case "100":
+                        $scope.showCategories = false;
+                        $scope.showDashbaords = true;
+
+                        $scope.showCategoryDropdown = false;
+                        $scope.showDashboardDropdown = true;
+                        break;
+                }
+
+            }
+
+            $scope.showOrHidePanels();
+
+        }]);
+
+        function displayRecentVisitedDashboard(){
+            $.ajax({
+                type: "POST",
+                url: recentVisitedDashboardsUrl,
+                success: function (data) {
+                    if (data.Status) {
+                        var items = data.Result;
+                        var tag = "";
+
+                        if(items !== null && items !== undefined && items.length > 0){
+                            for(var i = 0; i < items.length; i++) {
+                                tag += "<div class='link-div'> <a href='" + viewDashboardUrlAction + "/" + items[i].Id + "?showmydashboards=1' class='link-text'> <i class='su su-nav-dashboard'></i><span data-html='true' data-toggle='tooltip' data-placement='right' data-original-title='<strong>Description:</strong> " + items[i].Description + "<br/><strong>Category:</strong> " + items[i].CategoryName + "'>"+items[i].Name+"</span> </a> </div>";
+                            }
+                        }
+                    }
+
+                    tag = (tag === "" ? "<div class='link-div'><a class='link-text'><span>No recent dashboards</span></a></div>" : tag);
+
+                    $(".recent-dashboards-link").html(tag);
+                    $("[data-toggle='tooltip']").tooltip();
+                }
+            });
+        }
+    </script>
+    <!--[if LT IE  10]>
+        <script>
+            i_am_ie9 = true;
+        </script>
+    <![endif]-->
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboards-pagee.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboards-page.min.js"></script>
+    </environment>
+}
+
+@section MainSection
+{
+    <div id="server-items-container" class="server-items-container" ng-controller="categoryController">
+        <span class="su su-sidebar-expand category-collapse pull-left" title="@T["Expand"]" data-toggle="tooltip" data-placement="top"></span>
+        <div id="item-list-panel" class="item-list-panel pull-left">
+            <ul class="item-navigation" role="tablist">
+                <li class="favorite-items @(ViewBag.Url.IndexOf("/dashboards?view=favorites") > -1 ? "active" : (@ViewBag.HasFavoriteItem == true ? @activeClass: string.Empty))" data-value="favorites" href="@dashboardCultureUrl?view=favorites" title="@T["Favorite Dashboards"]" data-toggle="tooltip" data-placement="top" ng-click="onClickDisplayCategory($event)" data-display-category="@((int)DisplayCategory.FavouriteItems)" data-section="Favorite Dashboards">
+                    <a class="tab-header" href="@dashboardUrl?view=favorites" role="tab">
+                        <i class="su su-favorite"></i>
+                    </a>
+                </li>
+                <li class="recent-items @(ViewBag.Url.IndexOf("/dashboards?view=recent") > -1 ? "active" : String.Empty)" href="@dashboardCultureUrl?view=recent" title="@T["Recent Dashboards"]" data-value="recent" data-toggle="tooltip" data-placement="top" ng-click="onClickDisplayCategory($event)" data-display-category="@((int)DisplayCategory.RecentItems)" data-section="Recent Dashboards">
+                    <a class="tab-header" href="@dashboardUrl?view=recent" role="tab">
+                        <i class="su su-recent-dashboards"></i>
+                    </a>
+                </li>
+                <li class="all-items @(ViewBag.Url.IndexOf("/dashboards?view=categories") > -1 ? "active" : String.Empty) @(ViewBag.CategoryName != null ? "active" : String.Empty)" data-value="categories" href="@dashboardCultureUrl?view=categories" title="@T["All Categories"]" data-toggle="tooltip" data-placement="top" ng-click="onClickDisplayCategory($event)" data-display-category="@((int)DisplayCategory.AllCategory)" data-section="All Categories">
+                    <a class="tab-header" href="@dashboardUrl?view=categories" role="tab">
+                        <i class="su su-categoried-dashboard"></i>
+                    </a>
+                </li>
+                <li class="public-items @(ViewBag.Url.IndexOf("/dashboards?view=public") > -1 ? "active" : String.Empty)" href="@dashboardCultureUrl?view=public" title="@T["Public Dashboards"]" data-value="public" data-toggle="tooltip" data-placement="top" ng-click="onClickDisplayCategory($event)" data-display-category="@((int)DisplayCategory.PublicItems)" data-section="Public Dashboards">
+                    <a class="tab-header" href="@dashboardUrl?view=public" role="tab">
+                        <i class="su su-public-dashboards"></i>
+                    </a>
+                </li>
+                <li class="all-dashboard @(ViewBag.Url.IndexOf("/dashboards?view=all") > -1 ? "active" : (@ViewBag.HasFavoriteItem == false ? @activeClass: string.Empty))" data-value="all" href="@dashboardCultureUrl?view=all" title="@T["All Dashboards"]" data-toggle="tooltip" data-placement="top" ng-click="onClickDisplayCategory($event)" data-display-category="@((int)DisplayCategory.AllDashboards)" data-section="All Dashboards">
+                    <a class="tab-header" href="@dashboardUrl?view=all" role="tab">
+                        <i class="su su-all-dashboards"></i>
+                    </a>
+                </li>
+                <li class="draft-items @(ViewBag.Url.IndexOf("/dashboards?view=drafts") > -1 ? "active" : string.Empty)" data-value="drafts" href="@dashboardCultureUrl?view=drafts" title="@T["Draft Dashboards"]" data-toggle="tooltip" data-placement="top" ng-click="onClickDisplayCategory($event)" data-display-category="@((int)DisplayCategory.DraftItems)" data-section="Draft Dashboards">
+                    <a class="tab-header" href="@dashboardUrl?view=drafts" role="tab">
+                        <i class="su su-draft"></i>
+                    </a>
+                </li>
+                <li class="category-collapse pull-right" title="@T["Collapse"]" data-toggle="tooltip" data-placement="top">
+                    <a class="tab-header" href="">
+                        <i class="su su-sidebar-collapse"></i>
+                    </a>
+                </li>
+            </ul>
+
+            <div id="category-listing" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 @(ViewBag.CategoryName != null ? "category" : string.Empty)">
+                <span class="su su-arrow-back col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" id="back-icon" title="@T["Back"]" ng-click="onBackButtonClick()" style="display: @backButton"></span>
+                @if (sectionName != null)
+                {
+                    if (isMarkItemsPublic == false && isAdmin == true || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings])
+                    {
+                        <div class="tool-tip col-lg-1 col-md-1 col-sm-1 col-xs-1" style="display:none; padding-left: 7px; cursor:pointer">
+                            <span class="dropdown-toggle" style="display:block; padding-top:8px; " data-toggle="dropdown" id="help-text-default"><span id="error_icon" class="su su-warning-alt" title="" style="color:yellow;"></span></span>
+                            <div class="dropdown-menu" role="menu" id="help-text-message" style="left:18px; width: 300px; padding-left : 5px;margin-left:-11px">
+                                @Html.Raw(String.Format(T["Public Dashboards are disabled in {0}dashboard settings{1}."].Value, "<a href='" + Url.Action("DashboardSettings", "Administration") + "'>", "</a>"))
+                            </div>
+
+                        </div>
+                    }
+                    else if (isMarkItemsPublic == false && isAdmin == false)
+                    {
+                        <div class="tool-tip col-lg-1 col-md-1 col-sm-1 col-xs-1" style="display:none; padding-left: 7px; cursor:pointer">
+                            <span class="dropdown-toggle" style="display:block; padding-top:8px; " data-toggle="dropdown" id="help-text-default"><span id="error_icon" class="su su-warning-alt" title="" style="color:yellow;"></span></span>
+                            <div class="dropdown-menu" role="menu" id="help-text-message" style="left:18px; width: 300px; padding-left : 5px;margin-left:-11px">
+                                @T["Public Dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]
+
+                            </div>
+
+                        </div>
+                    }
+                    <span id="category-section-name" class="col-lg-5 col-md-5 col-sm-5 col-xs-5" title="@sectionName" data-toggle="tooltip" data-placement="top">
+                        @sectionName
+                    </span>
+                }
+                else
+                {
+                    <span id="category-section-name" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" title="@T["Favorites"]" data-toggle="tooltip" data-placement="top">@T["Favorites"]</span>
+                }
+
+                <div style="width:50%; float:right;" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding text-right sorting" ng-show="showDashboardDropdown" ng-cloak>
+                    <span class="dropdown text-right" id="field">
+                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
+                            <span class="selected selected-field" data-value="ModifiedDate">@T["Modified Date"]</span>
+                            <span class="caret"></span>
+                        </button>
+
+                        <ul class="dropdown-menu dashboard-sort">
+                            <li>
+                                <a class="dashboard-sort-options" data-value="Name" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Dashboard Name"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dashboard-sort-options" data-value="CreatedByDisplayName" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Owner Name"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dashboard-sort-options" data-value="CreatedDate" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Added Date"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dashboard-sort-options selected" data-value="ModifiedDate" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Modified Date"]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </span>
+
+                    <span class="su su-sort-down-up text-right" id="order" data-value="descending">
+                        <span class="path1 sorting-icon" style="margin-right: -5px"></span>
+                        <span class="path2 sorting-icon opacity"></span>
+                    </span>
+
+                    <div class="search-area" role="search">
+                        <span class="su su-search search-item pull-left" title="@T["Search"]" data-toggle="tooltip" data-placement="left"></span>
+                        <div id="input-div">
+                            <input type="text" class="search-home-section" id="search-home-page" ng-model="search.Name" placeholder="@T["Search"]" autocomplete="off" />
+                        </div>
+                        <span class="su su-inner-close close-icon category" ng-click="clearSearch()" id="clear-search" title="@T["Close search"]" data-container='body' data-toggle="tooltip" data-placement="top"></span>
+                    </div>
+                </div>
+
+                <div style="width:50%; float:right;" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding text-right sorting" ng-show="showCategoryDropdown" ng-cloak>
+                    <span class="dropdown text-right" id="field">
+                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
+                            <span class="selected selected-field" data-value="ModifiedDate">@T["Modified Date"]</span>
+                            <span class="caret"></span>
+                        </button>
+
+                        <ul class="dropdown-menu dashboard-sort">
+                            <li>
+                                <a class="dashboard-sort-options" data-value="Name" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Category Name"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dashboard-sort-options" data-value="CreatedByDisplayName" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Owner Name"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dashboard-sort-options" data-value="CreatedDate" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Added Date"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dashboard-sort-options selected" data-value="ModifiedDate" href="javascript:void(0);">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Modified Date"]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </span>
+
+                    <span class="su su-sort-down-up text-right" id="order" data-value="descending">
+                        <span class="path1 sorting-icon" style="margin-right: -5px"></span>
+                        <span class="path2 sorting-icon opacity"></span>
+                    </span>
+
+                    <div class="search-area" role="search">
+                        <span class="su su-search search-item pull-left" title="@T["Search"]" data-toggle="tooltip" data-placement="left"></span>
+                        <div id="input-div"><input type="text" class="search-home-section" id="search-home-page" ng-model="search.Name" placeholder="@T["Search"]" autocomplete="off" /></div>
+                        <span class="su su-inner-close close-icon category" ng-click="clearSearch()" id="clear-search" title="@T["Close search"]" data-toggle="tooltip" data-placement="left"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="parent-scroll-element">
+                <div id="scroll-element">
+                    <div id="category-list" ng-show="showCategories">
+                        <div id="scroll-content">
+                            <ul id="listing" class="hide-display">
+                                <li ng-repeat="category in categories | filter:search | filter:customSearchFilter | orderBy:sortBy" class="category-section">
+                                    <a class="category-link" ng-click="getItemsInCategory($event)" data-value="@Html.Encode(dashboardUrl + "?category={{category.Name}}")" data-display-category="@((int)DisplayCategory.SpecificCategory)" data-id="{{category.Id}}" data-category="{{category.Name |  lowercase}}" data-category-original="{{category.Name}}" href="@Html.Encode(dashboardUrl + "?category={{category.Name}}")"><span class="category-name" title="{{category.Name}}" data-toggle="tooltip" data-placement="top" data-name="{{category.Name}}" ng-bind="category.Name"></span></a>
+                                    <span class="pull-right badge item-count" ng-bind="category.ReportsCount"></span>
+                                    <ul class="CategorySettings pull-right">
+                                        <li class="dropdown" ng-if="category.CreatedById==@(currentUserId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || category.CanWrite || category.CanDelete">
+                                            <span class="dropdown-toggle su su-settings-1" title="@T["Actions"]" data-placement="top" data-toggle="dropdown">
+                                            </span>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li ng-if="category.CreatedById==@(currentUserId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true">
+                                                    <a href="javascript:void(0);" class="item-permissions" title="" data-itemname="{{category.Name}}" data-item-id="{{category.Id}}">
+                                                        <i class="su su-manage-permission"></i>
+                                                        <span>@T["Sharing Permissions"]</span>
+                                                    </a>
+                                                    <hr />
+                                                </li>
+                                                <li ng-if="category.CanWrite">
+                                                    <a class="EditCategory" href="javascript:void(0)" title="" data-item-id="{{category.Id}}">
+                                                        <i class="su su-edit"></i>
+                                                        <span>@T["Update"]</span>
+                                                    </a>
+                                                </li>
+                                                <li ng-if="category.CanDelete">
+                                                    <a class="DeleteCategory" data-item-id="{{category.Id}}" title="" data-itemtype="{{category.ItemType}}" data-name="{{category.Name}}" href="javascript:void(0)">
+                                                        <i class="su su-delete"></i>
+                                                        <span>@T["Delete"]</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                    </ul>
+                                </li>
+                                <li ng-show="!(categories| filter:search).length" id="category-no-records">@T["No categories available to display"]</li>
+                            </ul>
+                        </div>
+                        @if (permission[ItemType.Category])
+                        {
+                            <div id="create-new-category" class="col-lg-12 hide-display">
+                                <div id="create-section" onclick="openNewCategoryPopup()"><span class="su su-add-category add-icon"></span>@T["NEW CATEGORY"]</div>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="category-info">
+
+            </div>
+            <input type="hidden" id="culture-info" value="@ViewBag.Culture" />
+            <input type="hidden" value="@isMarkItemsPublic.ToString()" id="isMarkItemspublic" />
+            <div id="item-grid-container" data-request-type="{{itemRequestType}}" data data-grid-name="dashboards" ng-show="showDashbaords">
+                @await Html.PartialAsync("../Items/_ItemsList", new ViewDataDictionary(ViewData) { { "gridName", "dashboards" }, { "itemId", ViewBag.ItemId as string }, { "categoryName", ViewBag.CategoryName as string }, { "itemName", isViewRequest == true ? ViewBag.itemName as string : string.Empty }, { "Url", currentUrl.AbsolutePath }, { "category", ViewBag.category }, { "tabName", ViewBag.tabName as string }, { "sectionName", ViewBag.sectionName as string }, { "cultureinfo", ViewBag.Culture as string } })
+            </div>
+        </div>
+        <div id="item-viewer" class="pull-left">
+            <input id="current-url" type="hidden" data-url="">
+            <iframe id="dashboard_render_iframe" class="dashboard_render" name="targetframe" allowTransparency="true" scrolling="no" frameborder="0" onload=""></iframe>
+
+            <div id="initial-item-message">
+
+                <div id="multiple-links">
+                    @if (isAdmin && !donotShowJourney)
+                    {
+                        <div class="link-box-div col-xs-4 col-lg-4">
+                            <div class="link-box">
+                                @{ await Html.RenderPartialAsync("~/Views/Shared/_OnBoardExperience.cshtml"); }
+                            </div>
+                        </div>
+                    }
+
+                    @if (permission[ItemType.Dashboard])
+                    {
+                        <div class="link-box-div col-xs-4 col-lg-3">
+                            <div class="link-box blank-dashboard-link-box">
+                                <div class="blank-dashboard-section">
+                                    <div class="blank-dashboard-icon">
+                                        <i class="su su-add" style=""></i>
+                                    </div>
+                                    <div class="blank-dashboard-title">@T["New Dashboard"]</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="link-box-div col-xs-4 @(isAdmin && !donotShowJourney ? "col-lg-5":"col-lg-6")">
+                        <div class="link-box">
+                            <div class="link-header">
+                                <a class="header-text no-link-header">
+                                    <i class="su su-recent-dashboards"></i>
+                                    <span>@T["Recent Dashboards"]</span>
+                                </a>
+                            </div>
+                            <div class="link-body-div">
+                                <div class="link-body">
+                                    <div class="link-div recent-dashboards-link">
+                                        <a class="link-text no-link-header">
+                                            <span class="no-link-header">@T["Loading..."]</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="link-box-div col-xs-4 col-lg-3">
+                        <div class="link-box">
+                            <div class="link-header">
+                                <a class="header-text no-link-header">
+                                    <i class="su su-nav-dashboard"></i>
+                                    <span>@T["Dashboards"]</span>
+                                </a>
+                            </div>
+                            <div class="link-body-div">
+                                <div class="link-body">
+                                    @if (permission[ItemType.Dashboard])
+                                    {
+                                        <div class="link-div">
+                                            <a href="@Url.Action("DashboardDesigner", "Designer")" class="link-text">
+                                                @*<i class="su su-add"></i>*@
+                                                <span>@T["Add Blank Dashboard"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="javascript:void(0)" id="start-from-templates" class="link-text">
+                                                @*<i class="su su-"></i>*@
+                                                <span>@T["Start from Templates"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="javascript:void(0)" class="add-sample-button link-text">
+                                                @*<i class="su su-download"></i>*@
+                                                <span>@T["Import Sample Dashboards"]</span>
+                                            </a>
+                                        </div>
+                                    }
+
+                                    <div class="link-div">
+                                        <a href="javascript:void(0)" class="link-text" onclick="$('.favorite-items').click()">
+                                            @*<i class="su su-favorite"></i>*@
+                                            <span>@T["Favorite Dashboards"]</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="learn-more-div">
+                                <a target="_blank" href="@(helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThrough))">@T["Learn more"]</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="link-box-div col-xs-4 col-lg-3">
+                        <div class="link-box">
+                            <div class="link-header no-link-header">
+                                <a class="header-text">
+                                    <i class="su su-nav-schedule"></i>
+                                    <span>@T["Schedules"]</span>
+                                </a>
+                            </div>
+                            <div class="link-body-div">
+                                <div class="link-body">
+                                    @if (permission[ItemType.Dashboard])
+                                    {
+                                        <div class="link-div">
+                                            <a href="javascript:void(0)" class="link-text" id="create_schedule">
+                                                @*<i class="su su-add"></i>*@
+                                                <span>@T["Create Schedule"]</span>
+                                            </a>
+                                        </div>
+                                    }
+                                    <div class="link-div">
+                                        <a href="@Url.Action("Schedules", "Scheduler")" class="link-text">
+                                            @*<i class="su su-nav-schedule"></i>*@
+                                            <span>@T["Manage Schedules"]</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="learn-more-div">
+                                <a target="_blank" href="@(helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageSchedules))">@T["Learn more"]</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isAdmin)
+                    {
+                        <div class="link-box-div col-xs-4 col-lg-3">
+                            <div class="link-box">
+                                <div class="link-header">
+                                    <a class="header-text no-link-header">
+                                        <i class="su su-group-1"></i>
+                                        <span>@T["Users & Groups"]</span>
+                                    </a>
+                                </div>
+                                <div class="link-body-div">
+                                    <div class="link-body">
+                                        <div class="link-div">
+                                            <a href="@Url.Action("Index", "UserManagement")" class="link-text">
+                                                @*<i class="su su-active-directory"></i>*@
+                                                <span>@T["Manage Users"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="@(Url.Action("Index", "UserManagement").TrimEnd('/') + "?action=adduser")" class="link-text">
+                                                @*<i class="su su-download"></i>*@
+                                                <span>@T["Add User"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="@(Url.Action("group", "group").TrimEnd('/') + "?action=addgroup")" class="link-text">
+                                                @*<i class="su su-azure-ad"></i>*@
+                                                <span>@T["Add Group"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="@(Url.Action("Index", "UserManagement").TrimEnd('/') + "/users/import-csv")" class="link-text">
+                                                @*<i class="su su-download"></i>*@
+                                                <span>@T["Import Users from CSV"]</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="learn-more-div">
+                                    <a target="_blank" href="@(helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageUsers))">@T["Learn more"]</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="link-box-div col-xs-4 col-lg-3">
+                            <div class="link-box">
+                                <div class="link-header">
+                                    <a class="header-text no-link-header">
+                                        <i class="su su-nav-settings"></i>
+                                        <span>@T["Site & Subscription"]</span>
+                                    </a>
+                                </div>
+                                <div class="link-body-div">
+                                    <div class="link-body">
+                                        <div class="link-div">
+                                            <a href="@Url.Action("Administration", "Administration")" class="link-text">
+                                                @*<i class="su su-url"></i>*@
+                                                <span>@T["Site Settings"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="@(Url.Action("Administration", "Administration").TrimEnd('/') + "/dashboard-settings")" class="link-text">
+                                                @*<i class="su su-nav-dashboard"></i>*@
+                                                <span>@T["Dashboard Settings"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="@(Url.Action("Administration", "Administration").TrimEnd('/') + "/subscription")" class="link-text">
+                                                @*<i class="su su-license-settings"></i>*@
+                                                <span>@T["Manage Subscription"]</span>
+                                            </a>
+                                        </div>
+                                        <div class="link-div">
+                                            <a href="@(Url.Action("Administration", "Administration").TrimEnd('/') + "/payments")" class="link-text">
+                                                @*<i class="su su-dollar"></i>*@
+                                                <span>@T["Manage Payments"]</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="learn-more-div">
+                                    <a target="_blank" href="@(helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomRebranding))">@T["Learn more"]</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="link-box-div col-xs-4 col-lg-3">
+                        <div class="link-box">
+                            <div class="link-header">
+                                <a class="header-text no-link-header">
+                                    <i class="su su-user-1"></i>
+                                    <span>@T["My Profile"]</span>
+                                </a>
+                            </div>
+                            <div class="link-body-div">
+                                <div class="link-body">
+                                    <div class="link-div">
+                                        <a href="@Url.Action("Profile", "User")" class="link-text">
+                                            @*<i class="su su-view-permission"></i>*@
+                                            <span>@T["View My Profile"]</span>
+                                        </a>
+                                    </div>
+                                    <div class="link-div">
+                                        <a href="@Url.Action("UserPermission", "User")" class="link-text">
+                                            @*<i class="su su-view-permission"></i>*@
+                                            <span>@T["View My Permissions"]</span>
+                                        </a>
+                                    </div>
+                                    <div class="link-div">
+                                        <a href="@(Url.Action("Profilepage", "User").TrimEnd('/') + "#notification-settings")" class="link-text">
+                                            @*<i class="su su-notification-settings"></i>*@
+                                            <span>@T["Notification Settings"]</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="learn-more-div">
+                                <a target="_blank" href="@(helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UserProfile))">@T["Learn more"]</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="link-box-div col-xs-4 col-lg-3">
+                        <div class="link-box">
+                            <div class="link-header">
+                                <a class="header-text no-link-header">
+                                    <i class="su su-concierge-support"></i>
+                                    <span>@T["Support"]</span>
+                                </a>
+                            </div>
+                            <div class="link-body-div">
+                                <div class="link-body">
+                                    <div class="link-div">
+                                        <a href="javascript:void(0)" class="link-text" onclick="$('#concierge-support-request').click()">
+                                            @*<i class="su su-"></i>*@
+                                            <span>@T["New Support Request"]</span>
+                                        </a>
+                                    </div>
+                                    <div class="link-div">
+                                        <a href="javascript:void(0)" class="link-text" onclick="$('#feedback-icon').click()">
+                                            @*<i class="su su-"></i>*@
+                                            <span>@T["Provide Feedback"]</span>
+                                        </a>
+                                    </div>
+                                    <div class="link-div">
+                                        <a target="_blank" href="@(helpSiteBaseUrl)" class="link-text">
+                                            @*<i class="su su-"></i>*@
+                                            <span>@T["Online Help"]</span>
+                                        </a>
+                                    </div>
+                                    <div class="link-div">
+                                        <a target="_blank" href="https://www.@(GlobalAppSettings.BrandingDomain)/contact" class="link-text">
+                                            @*<i class="su su-"></i>*@
+                                            <span>@T["Contact Us"]</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+
+        </div>
+    </div>
+
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+    <div id="edit-file-popup" style="display:none">
+        <iframe id="edit-file-popup-iframe" class="editDashboardDialog"></iframe>
+    </div>
+    <div id="update-data-source-popup" style="display:none">
+        <iframe id="update-data-source-popup-iframe" class="updateDataSourceDialog"></iframe>
+    </div>
+    <div id="make_item_public" class="no-padding pull-left" style="display:none"></div>
+
+    <div id="remove_item_public" class="no-padding" style="display:none"></div>
+
+    <div id="make_item_unlist" class="no-padding pull-left" style="display:none"></div>
+    @await Html.PartialAsync("../Items/_AddItems")
+    @await Html.PartialAsync("../Items/_ItemVersion")
+    @if (new DeviceDetection(Context).IsMobile)
+    {
+        <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12">
+           @if (Context.Request.Cookies["cookie-consent"] == null)
+           {
+                <div class="cookie-notification-dashboards">
+                    <div class="container">
+                        <div class="row cookie-notification-row-mobile">
+                            <div class="col-lg-10 col-md-9 col-sm-10 col-xs-12 content-small vcenter cookie-notification-div-mobile">
+                                @Html.Raw(String.Format(T["We use cookies to give you the best experience on our website. If you continue to browse, then you agree to our {0}privacy policy{1} and {2}cookie policy{3}."].Value, "<a href='https://www." + (GlobalAppSettings.BrandingDomain) + "/privacy' target='_blank' style='text-decoration:underline;' class='privacy-link'>", "</a>", "<a href = 'https://www.'" + (GlobalAppSettings.BrandingDomain) + "'/cookie-policy' target = '_blank' style = 'text-decoration:underline;' class='privacy-link'>", "</a>"))
+                            </div>
+                            <div class="col-lg-1 col-md-2 col-sm-1 col-xs-12 vcenter agreebutton agreebutton-mobile">
+                                <button id="cookiesubs-dashboards" type="button" class="btn  btn--stack  btn--primary cookiesubs-button">
+                                    <span class="btn--text cookiesubs-button-span">@T["OK"]</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+           }
+        </div>
+    }
+ }

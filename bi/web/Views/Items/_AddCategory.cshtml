@@ -1,0 +1,43 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<div id="AddCategoryPopup" class="no-padding" style="display:none">
+    <div class="dialog">
+        <form id="addCategoryForm" name="addCategoryForm">
+            <div id="create_category_content" class="col-md-12 dialog-body">
+                <table>
+                    <tbody>
+                        <tr class="bottomPadding5">
+                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                            <td>
+                                <span>
+                                    <input type="text" id="add_category_name" autofocus class="popup form-control bottom-margin30 text" name="categoryName" data-maxlength="255" tabindex="1">
+                                    <span id="validate-name" class="validation-message text"></span>
+                                    <div id="plugin_validation" class="validation-message text"></div>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Description"]</div></td>
+                            <td>
+                                <textarea name="description" class="form-control bottom-margin30 text" maxlength="1024" id="add-category_description" tabindex="2"></textarea>
+                                <span class="notification help-text">
+                                    <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="submit" class="hide-content" style="display: none" />
+            </div>
+            <div class="col-xs-12" id="upload-dashboard-info" style="display: none;">@T["You don't have any categories to upload dashboards. Please create a category."]</div>
+        </form>
+    </div>
+</div>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/add-category.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/add-category.min.js"></script>
+</environment>

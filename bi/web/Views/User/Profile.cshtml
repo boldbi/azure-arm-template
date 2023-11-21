@@ -1,0 +1,337 @@
+﻿@using System.IO
+@using System.Globalization
+@using Microsoft.AspNetCore.Builder;
+@using Microsoft.AspNetCore.Localization;
+@inject RequestLocalizationOptions _localizationOptions
+@model UserNotificationSettings
+@{
+    var globalAppSettings = _globalAppSettings;
+    var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
+    var userDetail = (User)ViewBag.UserDetail;
+    var groupList = ViewBag.GroupList;
+    ViewBag.Title = T["My Profile"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var userHomepage = ViewBag.UserHomepage as List<HomepageDetail>;
+    var idpProfileUrl = ViewBag.IdpProfileUrl;
+    var idpUserPreferenceUrl = ViewBag.IdpUserPreferenceUrl;
+    var idpChangePasswordUrl = ViewBag.IdpChangePasswordUrl;
+    var isProfileUpdateSuccess = ViewBag.IsProfileUpdateSuccess;
+    var isProfileUpdateFailure = ViewBag.IsProfileUpdateFailure;
+    var isPasswordUpdateSuccess = ViewBag.IsPasswordUpdateSuccess;
+    var isPasswordUpdateFailure = ViewBag.IsPasswordUpdateFailure;
+    var isUserPreferenceSuccess = ViewBag.IsUserPreferenceUpdateSuccess;
+    var isUserPreferenceFailure = ViewBag.IsUserPreferenceUpdateFailure;
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId").ToString() : string.Empty;
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UserProfile);
+    var dashboardSettings = ViewBag.DashboardSettings;
+    var userPreference = !string.IsNullOrWhiteSpace(Context.Request.Cookies[ServerAppConfig.UserLanguageCookieName]) ? CookieRequestCultureProvider.ParseCookieValue(Context.Request.Cookies[ServerAppConfig.UserLanguageCookieName]).Cultures.FirstOrDefault().Value : identityResponse.UserPreference.LanguageSettings.Language;
+    var languagePreference = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference && !string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.Language) ? globalAppSettings.SystemSettings.Language : userPreference;
+    var cultureLanguageObj = new CultureInfo(!string.IsNullOrWhiteSpace(languagePreference) ? languagePreference : "en-us");
+    var nativeNameTitleCase = cultureLanguageObj.TextInfo.ToTitleCase(cultureLanguageObj.NativeName);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isProfileDetailsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "profile-details") ? "active" : string.Empty;
+    var isProfileSettingsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-settings") ? "active" : string.Empty;
+    var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-notifications") ? "active" : string.Empty;
+    List<string> groupName = new List<string>();
+    var isUserLanguagePreferenceDisabled = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference;
+    var pageDescription = T["Manage your profile settings and privacy controls"];
+}
+
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.min.js"></script>
+    </environment>
+    <script type="text/javascript">
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var updateprofilepictureUrl = "@Url.Action("updateprofilepicture", "User")";
+        var isAdmin = @Html.Raw(Json.Serialize(ViewBag.IsAdminAccount));
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        var avatarUrl = "@(idPUrl + Url.Action("Avatar", "User"))";
+        var updatepasswordUrl = "@Url.Action("updatepassword", "User")";
+        var deleteavatarUrl = "@Url.Action("deleteavatar", "UserManagement")";
+        var getdefaultavatarUrl = "@Url.Action("getdefaultavatar", "User")";
+        var saveUserNotificationSettingsUrl = "@Url.Action("savenotificationsettings", "User")";
+
+        var successMessage = "@isProfileUpdateSuccess";
+        var failureMessage = "@isProfileUpdateFailure";
+        var passwordSuccessMessage = "@isPasswordUpdateSuccess";
+        var defaultViewSettings = "@ViewBag.DefaultView";
+        var dashboardSettingsUrl = '@Url.Action("DashboardSettings", "Administration")';
+        var passwordFailureMessage = "@isPasswordUpdateFailure";
+        var userPreferencesuccessMessage = "@isUserPreferenceSuccess";
+        var userPreferenceFailureMessage = "@isUserPreferenceFailure";
+        var profileSettingsUrl = "@Url.Action("UpdateProfileSettings", "User")";
+        $(document).ready(function () {
+
+            if ("@ViewBag.IsDefaultHomepage" == "True") {
+                $("#default-homepage").attr("data-original-value", "@ViewBag.DefaultHomePageId");
+            }
+
+            if("@ViewBag.DefaultHomePageName" == ""){
+                $("#no-default-homepage").removeClass("hide");
+                $("#homepage-name").addClass("hide");
+            }
+        });
+        $(document).on('show.bs.dropdown', '#homepage-list', function () {
+            if (@userHomepage.Count == 0) {
+                $('#default-homepage > option:first').hide();
+                $('.default-homepage-dropdown ul li:first').hide();
+                $("#default-homepage").find(".remove-default-homepage").remove();
+                if (!$("#homepage-list").find(".dropdown-menu span").hasClass("no-result")) {
+                    $("#homepage-list .btn-group .bs-searchbox").after("<span class='no-result'>@T["No Results Found"]</span>");
+                }
+            }
+        });
+
+        $(document).on("keyup", "#homepage-list .btn-group .bs-searchbox input", function () {
+            if (@userHomepage.Count == 0) {
+                var inputText = $(this).val();
+                var noResultMessage = $("#homepage-list .no-result");
+                if (!isNullOrWhitespace(inputText) && noResultMessage.is(":visible") && $(".dropdown-menu .inner").find("li.no-results").is(":visible")) {
+                    noResultMessage.css("display", "none");
+                } else if (isNullOrWhitespace(inputText) && !noResultMessage.is(":visible")) {
+                    noResultMessage.css("display", "block");
+                }
+                else if (!noResultMessage.is(":visible") && !$(".dropdown-menu .inner").find("li.no-results").is(":visible")) {
+                    noResultMessage.css("display", "block");
+                }
+            }
+        });
+    </script>
+}
+@section MainSection{
+    @await Html.PartialAsync("_ProfileMenu")
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["My Profile"] }, { "PageDescription", @pageDescription } })
+        <div id="profile-details-heading-div" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    @if (!ViewBag.IsAdUser && userDetail.DirectoryType != DirectoryType.Syncfusion)
+                    {
+                        <a rel="alternate" hreflang="en" href="@idpChangePasswordUrl" target="@(ViewBag.HasOAuthOpenIDProviderUrl ? "_blank": "_self")" class="link-button app-btn-link pull-right edit-password" title="">@T["Change Password"]</a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isProfileDetailsTab">
+                    <a href="#profile-details" id="profile-details-tab" aria-controls="profile-details-tab-control" role="tab" data-toggle="tab">@T["PROFILE DETAILS"]</a>
+                </li>
+                <li role="presentation" class="@isProfileSettingsTab">
+                    <a href="#profile-settings" id="profile-settings-tab" aria-controls="profile-settings-tab-control" role="tab" data-toggle="tab">@T["SETTINGS"]</a>
+                </li>
+                <li role="presentation" class="@isProfileNotificationsTab">
+                    <a href="#profile-notifications" id="profile-notifications-tab" aria-controls="profile-notifications-tab-control" role="tab" data-toggle="tab">@T["NOTIFICATIONS"]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="profile-base-div" role="tabpanel" class="col-xs-12 bi-page-container bi-page-container-with-tab">
+        <input type="hidden" class="page-name" data-content="@T["USER PROFILE"]">
+        <input type="hidden" id="user-id" value="@identityResponse.User.Email;" />
+        <span id="is-aduser">@ViewBag.IsAdUser</span>
+        <span id="logged-user">@ViewBag.LoggedUser</span>
+        <div class="col-xs-12 no-padding bi-page-content" id="user-profile-master">
+            <div class="col-xs-12 no-padding tab-content">
+                <div role="tabpanel" id="profile-details" class=" profile-section profile-section-first-div col-xs-12 tab-pane bi-page-body @isProfileDetailsTab">
+                    <div class="col-xs-12 no-padding profile-img-name">
+                        <div class="img-view-holder col-xs-4 no-padding" style="border: 0px">
+                            <div class="profile-pic-tag" data-id="@idpreferenceId" data-type="user" data-display-name="@userDetail.DisplayName" data-image-size="64" data-toggle="tooltip" title="@userDetail.DisplayName" data-placement="top"></div>
+                        </div>
+                        <div class="col-xs-8 no-padding account-edit">
+                            <label class="display-name">@userDetail.DisplayName</label>
+                            <label id="edit-button">
+                                <span class="bg-info" id="id-account-link">
+                                    <a hreflang="en" href="@idpProfileUrl" target="@(ViewBag.HasOAuthOpenIDProviderUrl ? "_blank": "_self")" id="edit-link">@T["Edit Account"]</a>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    @if (userDetail.DirectoryType != DirectoryType.Local)
+                    {
+                        <div id="azure-user-info" class="col-xs-12 no-padding profile-note-sec">
+                            <label>@string.Format(T["Editing your user profile, except the picture, is not currently supported for {0} and database accounts."].Value, "Azure Active Directory, Windows Active Directory, Office 365, OAuth, OpenID Connect") </label>
+                        </div>
+                    }
+                    <div id="profile-details-form-div" class="col-xs-12 no-padding">
+                        <form class="form-horizontal profile-details-form" autocomplete="off">
+                            @if (ServerAppConfig.IsSelfHosted)
+                            {
+                                <div class="form-element-label">
+                                    <label>@T["Username"]:</label>
+                                    <span value="@userDetail.Username">@userDetail.Username</span>
+                                </div>
+                            }
+                            <div class="form-element-label">
+                                <label>@T["First Name"]:</label>
+                                <span value="@userDetail.FirstName">@userDetail.FirstName</span>
+                            </div>
+                            <div class="form-element-label">
+                                <label>@T["Last name"]:</label>
+                                <span type="text" value="@(!string.IsNullOrWhiteSpace(userDetail.LastName) ? userDetail.LastName: "--")">@(!string.IsNullOrWhiteSpace(userDetail.LastName) ? userDetail.LastName : "--")</span>
+                            </div>
+                            <div class="form-element-label">
+                                <label>@T["Email"]:</label>
+                                <span value="@(userDetail.CanShowEmail ? userDetail.Email :"--")">@(userDetail.CanShowEmail ? userDetail.Email : "--")</span>
+                            </div>
+                            <div class="form-element-label">
+                                <label class="">@T["Phone"]:</label>
+                                <span id="user-phonenumber" name="user-phonenumber" type="text" value="@(!string.IsNullOrWhiteSpace(userDetail.ContactNumber) ? userDetail.ContactNumber : "--")">@(!string.IsNullOrWhiteSpace(userDetail.ContactNumber) ?  userDetail.ContactNumber : "--")</span>
+                            </div>
+                            <div class="form-element-label" style="display:none">
+                                <label class="app-textbox-label col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding">
+                                    @T["Isolation Code"]:
+                                </label>
+                            </div>
+                            <div class="form-element-span">
+                                <span id="isolation-code" name="isolation-code" type="text" value="@ViewBag.IsolationCode" autocomplete="off">@ViewBag.IsolationCode</span>
+                                <span id="contact-validation" class="alert-messages validation-message"></span>
+                            </div>
+                            @if (ViewBag.GroupList.Count != 0)
+                            {
+                                <div class="form-element-label">
+                                    <label class="">@T["Groups"]:</label>
+                                    <span id="groups-name">
+                                        @{ for (var group = 0; group < ViewBag.GroupList.Count; group++)
+                                            {
+                                                groupName.Add(@ViewBag.GroupList[group].Name);
+                                            }
+                                        }
+                                        @(String.Join(", ", groupName))
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-element-label">
+                                    <label class="">@T["Groups"]:</label>
+                                    <span>--</span>
+                                </div>
+                            }
+                        </form>
+                    </div>
+                </div>
+                <div role="tabpanel" id="profile-settings" class="col-xs-12 no-margin no-padding tab-pane @isProfileSettingsTab">
+                    <div class="profile-section col-xs-12 no-margin  bi-page-body">
+                        @if (isUserLanguagePreferenceDisabled)
+                        {
+                            <div id="profile-settings-info" class="col-xs-12 no-padding profile-note-sec">
+                                <label>@T["Your preferred application and data language will not be applied here as the user preference for these settings is disabled."]</label>
+                            </div>
+                        }
+                        <div id="profile-settings-form-div" class="col-xs-12 no-padding">
+                            <form class="col-md-12 no-padding content-display text-wrap" autocomplete="off">
+                                <input type="hidden" class="page-title" data-page="ACCOUNT PREFERENCE">
+                                @if (ServerAppConfig.IsSelfHosted)
+                                {
+                                    <div class="account-preference-table col-xs-12 no-padding form-fields">
+                                        <label class="profile-textbox-label app-language-label">@T["Application language"]</label>
+                                        <h6 class="no-margin">@T["The language used in the application user interface (such as menu items, dialog boxes, toolboxes, and more)."]</h6>
+                                        <div class="txt-holder dropdown language-group">
+                                            <div id="language" class="margin-top-12">
+                                                <button class="btn btn-default dropdown-toggle pull-left disabled" type="button" id="dropdown-lang" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="@nativeNameTitleCase">
+                                                    <span class="lang-overflow">@nativeNameTitleCase</span>
+                                                    <i class="su-dropdown-arrow arrow-margin"></i>
+                                                </button>
+                                                @{
+                                                    int i;
+                                                    var supportedCultures = GlobalAppSettings.GetSupportedLanguages();
+                                                    var supportedLanguages = supportedCultures.OrderBy(x => x.Name).ToList();
+                                                    int cellcnt = supportedLanguages.Count() + 1;
+                                                    int maxcols = supportedLanguages.Count() + 1;
+                                                    for (i = 1; i < cellcnt;)
+                                                    {
+                                                        bool lastRow = i + maxcols >= cellcnt;
+                                                        <ul class="@(Html.Raw((i % 2) == 0 ? "even" : "odd")) @(Html.Raw(lastRow ? "last" : "")) dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                            @for (int j = 0; j < maxcols && i < cellcnt; ++i, ++j)
+                                                            {
+                                                                string langtag;
+                                                                string title;
+                                                                string nativelangname;
+                                                                if (i == 0)
+                                                                {
+                                                                    langtag = "";
+                                                                    title = "Browser default language setting";
+                                                                    nativelangname = "Auto ";
+                                                                }
+                                                                else
+                                                                {
+                                                                    var supportedLanguageObj = supportedLanguages[i - 1];
+                                                                    title = langtag = supportedLanguageObj.Name.ToString();
+                                                                    nativelangname = supportedLanguageObj.TextInfo.ToTitleCase(supportedLanguageObj.NativeName);
+                                                                }
+                                                            }
+                                                            @if (lastRow)
+                                                            {
+                                                                for (; i % maxcols != 0; ++i)
+                                                                {
+                                                                    <li></li>
+                                                                }
+                                                            }
+                                                        </ul>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                        <div id="id-account-link">
+                                            <a hreflang="en" href="@idpUserPreferenceUrl" id="edit-link">@T["Update application language details through your account"]</a>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col-xs-12 no-padding form-fields" id="data-language-container">
+                                    <label class="profile-textbox-label user-model-language">@T["Data language"]</label>
+                                    <h6 class="no-margin">@T["The language used in date, number, and currency formats."]</h6>
+                                    @if (ServerAppConfig.IsSelfHosted)
+                                    {
+                                        <div class="txt-holder dropdown margin-top-12" id="user-model-dropdown-container">
+                                            @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { @class = "selectpicker user-model-language-dropdown pull-left", disabled = "disabled", data_live_search = "true", data_size = 10 })
+                                        </div>
+                                        <div id="id-account-link">
+                                            <a hreflang="en" href="@idpUserPreferenceUrl" id="edit-link">@T["Update data language details through your account"]</a>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="txt-holder dropdown margin-top-12" id="user-model-dropdown-container">
+                                            @Html.DropDownList("model-language", ViewBag.UserModelLanguages as IEnumerable<SelectListItem>, new { @class = "selectpicker user-model-language-dropdown pull-left", data_live_search = "true", data_size = 10 })
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-xs-12 no-padding form-fields">
+                                    <label class="profile-textbox-label ">@T["Default pinboard"]</label>
+                                    @if (!@ServerAppConfig.IsHideHelpLink)
+                                    {
+                                        <h6 class="no-margin">@Html.Raw(string.Format(T["Click {0}here{1} to learn how to set a default pinboard."].Value, "<a href='" + (ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SetDefaultPinboards)) + "' target='_blank'>", "</a>"))</h6>
+                                    }
+
+                                    <div class="txt-holder margin-top-12" id="homepage-list">
+                                        @Html.DropDownList("default-homepage", ViewBag.UserHomePages as IEnumerable<SelectListItem>, new { @class = "selectpicker default-homepage-dropdown pull-left", data_live_search = "true", data_size = 10 })
+                                    </div>
+                                </div>
+                                @await Html.PartialAsync("_UserDashboardSettings")
+                            </form>
+                        </div>
+                    </div>
+                    <div class="bi-page-footer col-xs-12">
+                        <div class="bi-page-actions col-xs-12 col-md-12">
+                            <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-button" title="">@T["Cancel"]</a>
+                            <input type="button" class="primary-button app-btn-primary pull-right" id="save-button" title="" onclick="SaveProfileSettings()" value="@T["Save"]">
+                        </div>
+                    </div>
+                </div>
+                @await Html.PartialAsync("_UserNotificationPreference")
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    <input type="hidden" id="image" value="" />
+    <span id="baseurl" data-url="@Url.Action("Index", "Home")"></span>
+    @await Html.PartialAsync("_ProfilePictureUploadBox", globalAppSettings.SystemSettings.CDNLink)
+}

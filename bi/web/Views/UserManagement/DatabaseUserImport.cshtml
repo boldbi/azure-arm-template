@@ -1,0 +1,305 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    ViewBag.Title = T["Database User Import"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportDatabaseUsers);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var usersettings = Url.Action("administration", "administration") + "/user-settings";
+    ViewBag.PageHeader = T["Import Users — From Database"];
+    ViewBag.PageDescription = T["Import users from Database."];
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+}
+<script>
+    var importDatabaseQuerySchema = {};
+</script>
+
+@section scripts{
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-database-import.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-database-import.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-database-import.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-database-import.min.js"></script>
+    </environment>
+    <script>
+        var getSearchedResultUrl = "@Url.Action("GetDataWithSearchForImport", "UserManagement")";
+        var saveSelectedUsersUrl = "@Url.Action("ImportSelectedUsersFromDatabase", "UserManagement")";
+        var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+        var userImportSuccessUrl = "@Url.Action("BulkImportResult", "UserManagement")";
+        var viewCurrentImportUrl = "@Url.Action("BulkUserImportResult", "UserManagement")";
+        var isDatabaseUserImport = true;
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "UserManagement")";
+        var bulkImportFileName = @ViewBag.FileName;
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    @if (globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation || disableEmailActivation)
+    {
+        <script type="text/x-jsrender" id="user-detail-validation">
+            {{if IsDuplicated}}
+            <span class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+            {{/if}}
+        </script>
+        <script type="text/x-jsrender" id="user-name-template">
+            <span title="{{:~renderDoubleQuotes(Username)}}" class="grid-content" data-toggle="tooltip">
+                {{:Username}}
+            </span>
+        </script>
+        <script type="text/x-jsrender" id="first-name-template">
+            {{if FirstName != ""}}
+            <span title="{{:~renderDoubleQuotes(FirstName)}}" class="grid-content" data-toggle="tooltip">
+                {{:FirstName}}
+            </span>
+            {{else}}
+            <span style="padding-left:32px">
+                --
+            </span>
+            {{/if}}
+        </script>
+
+        <script type="text/x-jsrender" id="last-name-template">
+            {{if LastName != ""}}
+            <span title="{{:~renderDoubleQuotes(LastName)}}" class="grid-content" data-toggle="tooltip">
+                {{:LastName}}
+            </span>
+            {{else}}
+            <span style="padding-left:32px">
+                --
+            </span>
+            {{/if}}
+        </script>
+
+        <script type="text/x-jsrender" id="email-id-template">
+            <span title="{{:EmailId}}" class="grid-content" data-toggle="tooltip">
+                {{:EmailId}}
+            </span>
+        </script>
+
+        <script type="text/x-jsrender" id="checkbox-row-template">
+            {{if IsDuplicated}}
+            <input disabled type="checkbox" class="checkbox-row-disabled material-checkbox" data-checked-id="{{:Index}}" id="row-check{{:Index}}" />
+            <input name="row-check{{:Index}}" type="hidden" value="false">
+            <label for="row-check{{:Index}}"> </label>
+            {{else}}
+            <input type="checkbox" class="checkbox-row material-checkbox" data-checked-id="{{:Index}}" id="row-check{{:Index}}" />
+            <input name="row-check{{:Index}}" type="hidden" value="false">
+            <label for="row-check{{:Index}}"> </label>
+            {{/if}}
+        </script>
+
+        <script type="text/x-jsrender" id="full-name-header">
+            <span class="item-header">@T["Name"]</span>
+        </script>
+        <script type="text/x-jsrender" id="last-name-header">
+            <div class="item-header">@T["Last Name"]</div>
+        </script>
+        <script type="text/x-jsrender" id="first-name-header">
+            <div class="item-header">@T["First Name"]</div>
+        </script>
+        <script type="text/x-jsrender" id="email-id-header">
+            <span class="item-header">@T["Email Address"]</span>
+        </script>
+        <script type="text/x-jsrender" id="user-name-header">
+            <div class="item-header">@T["Username"]</div>
+        </script>
+        <script type="text/javascript">
+            var gridData = @Html.Raw(Json.Serialize(ViewBag.ExternalDatabaseUsers));
+        </script>
+
+        <script type="text/javascript">
+
+            $(function () {
+                $("#search-database-users").val("");
+                addPlacehoder(".search-user-holder");
+                gridData = ej.parseJSON(gridData);
+                gridData.Success
+                    ? $("#error-value").find("span").html("")
+                    : $("#error-value").find("span").html(gridData.Message);
+                $("#import-selected").attr("disabled", "disabled");
+                ej.support.stableSort = false;
+                GridLocalization();
+                searchedResult = $.grep(gridData.Value, function (item) { return item.IsDuplicated != true; });
+                $("#Grid")
+                    .ejGrid({
+                        dataSource: gridData.Value,
+                        gridLines: ej.Grid.GridLines.None,
+                        allowPaging: true,
+                        allowSorting: true,
+                        allowSelection: true,
+                        allowScrolling: false,
+                        allowFiltering: false,
+                        allowSearching: true,
+                        locale: "en-us",
+                        filterSettings: { filterType: "menu" },
+                        pageSettings: { pageSize: 20 },
+                        selectionType: ej.Grid.SelectionType.Multiple,
+                        selectionSettings: { selectionMode: ["row"] },
+                        templateRefresh: "refreshTemplate",
+                        actionComplete: "fnActionComplete",
+                        create: "fnCreate",
+                        recordClick: "recordClick",
+                        actionBegin: "fnOnUserGridActionBegin",
+                        enableAltRow: false,
+                        rowDataBound: function () {
+                            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                            $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
+                        },
+                        columns: [
+                            {
+                                headerTemplateID: "#checkbox-header-template",
+                                template: true,
+                                templateID: "#checkbox-row-template",
+                                textAlign: ej.TextAlign.Center,
+                                width: 10,
+                                allowFiltering: false
+                            },
+                            {
+                                field: "Username",
+                                cssClass: "user-name",
+                                headerText: "@T["Username"]",
+                                templateID: "#user-name-template",
+                                headerTemplateID: "#user-name-header",
+                                width: 70,
+                                type: "string",
+                                visible: isSelfHosted
+                            },
+                            {
+                                field: "FirstName",
+                                cssClass: "first-name",
+                                headerText: "@T["First Name"]",
+                                templateID: "#first-name-template",
+                                headerTemplateID: "#first-name-header",
+                                width: 60,
+                                type: "string"
+                            },
+                            {
+                                field: "LastName",
+                                cssClass: "last-name",
+                                headerText: "@T["Last Name"]",
+                                templateID: "#last-name-template",
+                                headerTemplateID: "#last-name-header",
+                                width: 60,
+                                type: "string"
+                            },
+                            {
+                                field: "EmailId",
+                                cssClass: "email-id",
+                                headerText: "@T["Email Address"]",
+                                templateID: "#email-id-template",
+                                headerTemplateID: "#email-id-header",
+                                width: 80,
+                                type: "string"
+                            },
+                            {
+                                field: "",
+                                width: 10,
+                                templateID: "#user-detail-validation",
+                                allowFiltering: false,
+                                textAlign: ej.TextAlign.Center
+                            }
+                        ]
+                    });
+                $.views.helpers({
+                    renderDoubleQuotes: function (inputString) {
+                        return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                    }
+                });
+                $("#Grid").data("ejGrid").refreshContent();
+                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                $("#content-area").ejWaitingPopup("hide");
+            });
+        </script>
+
+        <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+            <div class="col-xs-12 no-padding">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection")
+            </div>
+            <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-6 no-padding button-section">
+                        <input type="button" value="@T["Import Selected Users"]" disabled="" title="@T["Import the selected users and activate their accounts"]" onclick="SaveSelectedUsers()" id="import-selected" class="primary-button app-btn-primary pull-right import-button bi-header-btn" />
+                        <input type="button" value="@T["Import All Users"]" title="@T["Import all users and activate their accounts"]" id="import-all" class="primary-button app-btn-primary pull-right import-button bi-header-btn" style="margin-right : 23px" />
+                    </div>
+                    <div id="search-area" class="pull-left col-xs-4">
+                        <input type="text" id="search-database-users" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />
+                        <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                        <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="import-database-users" class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+            <div class="col-xs-12 bi-page-content no-padding">
+                <div class="content-section bi-page-body col-xs-12">
+                    <div class="col-md-12 col-xs-12 no-margin no-padding import-user-search">
+                        <div class="col-md-9 col-xs-9 no-padding connection-string-area">
+                            <div class="connection-path no-padding">
+                                <span id="txt-connection">@T["Connection String"] : </span>
+                                <input type="text" id="txt-connection-string" class="form-control" disabled="disabled" value="@ViewBag.ConnectionString" />
+                            </div>
+                            <span class="no-padding database-settings-url">
+                                <a href="@Url.Action("Administration", "Administration")/user-directory-settings?tab=database-settings" title="@T["Update Database Configuration settings"]" class="link-button app-btn-link">@T["Modify"]</a>
+                            </span>
+                            <div class="no-padding error-msg"></div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding no-margin user-data-grid">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-12 col-md-12 no-padding">
+                                <span class="import-message">
+                                    @T["Select the users from the following list to import"]
+                                </span>
+                                <div id="error-value" class="col-xs-12">
+                                    <span class="error-message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="grid-container" class="col-md-12 no-top-margin no-padding">
+                            <div class="col-md-12 container-fluid page-inner-padding no-padding ">
+                                <div id="Grid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 no-padding"></div>
+                        <div class="col-xs-8 no-padding"></div>
+                    </div>
+                </div>
+
+                @await Html.PartialAsync("../UserManagement/_LimitUserCreation")
+            </div>
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+        </div>
+    }
+
+    else
+    {
+        <div class="col-xs-12 no-padding no-margin width-alignment top-nav-header-without-btn @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+            <div class="col-xs-12 no-padding">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection")
+            </div>
+        </div>
+        <div id="import-database-container" class="col-xs-12 container-fluid bi-page-container bg-grid import-database-container-with-warning @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+            <div class="col-xs-12 bi-page-content no-padding">
+                <div class="col-xs-12 bi-page-body">
+                    @if (!disableEmailActivation && globalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation)
+                    {
+                        <h5 class="user-import-from-db-automatic-type">@T["Importing users from existing database is not available in automatic account activation type."]</h5>
+                        <a href="@usersettings" class="admin-page-link">@T["Click here to change the account activation type"]</a>
+                    }
+                </div>
+            </div>
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+        </div>
+    }
+    @if (!ViewBag.ThirdPartyLogins)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+    }

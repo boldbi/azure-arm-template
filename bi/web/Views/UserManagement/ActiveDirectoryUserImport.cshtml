@@ -1,0 +1,272 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+
+    ViewBag.Title = String.Format(T["{0} Users Import"].Value, ViewBag.AdImport ? "Active Directory" : "Azure AD") + " - " + globalAppSettings.SystemSettings.OrganizationName;
+
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportAzureAdUsers);
+    @if (ViewBag.AdImport)
+    {
+        ViewBag.PageHeader = @String.Format(T["Import Users — {0}"].Value, "Active Directory");
+        ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, "Active Directory");
+    }
+    else
+    {
+        ViewBag.PageHeader = @String.Format(T["Import Users — {0}"].Value, "Azure AD");
+        ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, "Azure AD");
+    }
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+}
+
+
+@section scripts
+    {
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-active-directory.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-active-directory.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-active-directory.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-active-directory.min.js"></script>
+    </environment>
+    @if (ViewBag.AdImport)
+    {
+        <script>
+            var saveSelectedActiveDirectoryUserUrl = "@Url.Action("SaveSelectedActiveDirectoryUser", "UserManagement")";
+            var SearchActiveDirectoryUsersUrl = "@Url.Action("SearchActiveDirectoryUsers", "UserManagement")";
+        </script>
+    }
+    else
+    {
+        <script>
+            var saveSelectedActiveDirectoryUserUrl = "@Url.Action("SaveSelectedAzureADUser", "UserManagement")";
+            var SearchActiveDirectoryUsersUrl = "@Url.Action("SearchAzureADUsers", "UserManagement")";
+        </script>
+    }
+
+    <script>
+        var userImportSuccessUrl = "@Url.Action("BulkImportResult", "UserManagement")";
+        var viewCurrentImportUrl = "@Url.Action("BulkUserImportResult", "UserManagement")";
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "UserManagement")";
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+
+    <script type="text/x-jsrender" id="user-detail-validation">
+        {{if IsDuplicated}}
+        <span class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+        {{/if}}
+    </script>
+
+    <script type="text/x-jsrender" id="checkbox-row-template">
+        {{if IsDuplicated}}
+        <input disabled type="checkbox" class="checkbox-row-disabled material-checkbox" data-checked-id="{{:UserId}}" id="row-check{{:UserId}}" />
+        <input name="row-check{{:UserId}}" type="hidden" value="false">
+        <label for="row-check{{:UserId}}"> </label>
+        {{else}}
+        <input type="checkbox" class="checkbox-row material-checkbox" data-checked-id="{{:UserId}}" id="row-check{{:UserId}}" />
+        <input name="row-check{{:UserId}}" type="hidden" value="false">
+        <label for="row-check{{:UserId}}"> </label>
+        {{/if}}
+    </script>
+
+    <script type="text/x-jsrender" id="full-name-template">
+        <span title="{{:~renderDoubleQuotes(FullName)}}" class="grid-content" data-toggle="tooltip">
+            {{:FullName}}
+        </span>
+    </script>
+
+    <script type="text/x-jsrender" id="username-template">
+        <span title="{{:Username}}" class="grid-content" data-toggle="tooltip">
+            {{:Username}}
+        </span>
+    </script>
+
+    <script type="text/x-jsrender" id="email-id-template">
+        <span title="{{:EmailId}}" class="grid-content" data-toggle="tooltip">
+            {{:EmailId}}
+        </span>
+    </script>
+
+    <script type="text/x-jsrender" id="full-name-header">
+        <span class="item-header">@T["Name"]</span>
+    </script>
+    <script type="text/x-jsrender" id="user-name-header">
+        <span class="item-header">@T["Username"]</span>
+    </script>
+    <script type="text/x-jsrender" id="last-name-header">
+        <div class="item-header">@T["Last Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="first-name-header">
+        <div class="item-name">@T["First Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="email-id-header">
+        <span class="item-header">@T["Email Address"]</span>
+    </script>
+    <script type="text/x-jsrender" id="contact-header">
+        <div class="item-header">@T["Mobile No"]</div>
+    </script>
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("#ad-user-import").val("");
+                addPlacehoder("#search-area");
+                @if(ViewBag.AdImport)
+                {
+                <text>
+                var data = ej.DataManager({
+                    url: "@Url.Action("SearchActiveDirectoryUsers", "UserManagement")",
+                    adaptor: new ej.UrlAdaptor()
+                });
+                </text>
+                }
+                else
+                {
+                <text>
+                var data = ej.DataManager({
+                    url: "@Url.Action("SearchAzureADUsers", "UserManagement")",
+                    adaptor: new ej.UrlAdaptor()
+                });
+                </text>
+                }
+                ej.support.stableSort = false;
+            GridLocalization(window.Server.App.Localization.UsersResourceEmpty);
+                $("#Grid").ejGrid({
+                    dataSource: data,
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    allowSorting: true,
+                    allowSelection: true,
+                    allowScrolling: false,
+                    allowFiltering: false,
+                    allowSearching: true,
+                    locale: "en-US",
+                    filterSettings: { filterType: "menu" },
+                    pageSettings: { pageSize: 20 },
+                    selectionType: ej.Grid.SelectionType.Multiple,
+                    selectionSettings: { selectionMode: ["row"] },
+                    templateRefresh: "refreshTemplate",
+                    actionComplete: "fnActionComplete",
+                    create: "fnCreate",
+                    recordClick: "recordClick",
+                    actionBegin: "fnOnADUserGridActionBegin",
+                    enableAltRow: false,
+                    rowDataBound: function () {
+                        $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
+                    },
+                    columns: [
+                        { headerTemplateID: "#checkbox-header-template", template: true, templateID: "#checkbox-row-template", textAlign: ej.TextAlign.Center, width: 10, allowFiltering: false },
+                        { field: "FullName", cssClass: "full-name", headerText: "@T["Name"]",  templateID: "#full-name-template", headerTemplateID: "#full-name-header", width: 40, type: "string" },
+                        { field: "LastName", cssClass: "last-name", headerText: "@T["Last Name"]", headerTemplateID: "#last-name-header", width: 10, visible: false },
+                        { field: "FirstName", cssClass: "first-name", headerText: "@T["First Name"]", headerTemplateID: "#first-name-header", width: 10, visible: false },
+                        { field: "Username", cssClass: "username", headerText: "@T["Username"]", templateID: "#username-template", headerTemplateID: "#user-name-header", width: 80, type: "string", visible: isSelfHosted  },
+                        { field: "EmailId", cssClass: "email-id", headerText: "@T["Email Address"]",  templateID: "#email-id-template", headerTemplateID: "#email-id-header", width: 80, type: "string" },
+                        { field: "ContactNumber", cssClass: "mobile-no", headerText: "@T["Mobile No"]", headerTemplateID: "#contact-header", width: 10, visible: false },
+                        { field: "UserId", cssClass: "item-id", headerText: "@T["User Id"]", headerTemplateID: "#UserIdHeader", width: 10, visible: false },
+                        { field: "", width: 10, templateID: "#user-detail-validation", allowFiltering: false, textAlign: ej.TextAlign.Center }
+                    ]
+                });
+                $.views.helpers({
+                    renderDoubleQuotes: function (inputString) {
+                        return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                    }
+                });
+        });
+    </script>
+
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection")
+        </div>
+        <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <input type="button" value="@T["Import Selected Users"]" disabled="" title="@T["Import the selected users"]" onclick="SaveActiveDirectoryUsers()" id="import-button" class="primary-button app-btn-primary pull-right import-button" />
+                    <input type="button" value="@T["Import All Users"]" title="@T["Import all users and activate their accounts"]" id="import-all" class="primary-button app-btn-primary pull-right import-button bi-header-btn" style="margin :0px 23px 0px 0px" />
+                </div>
+                <div id="search-area" class="pull-left col-xs-4">
+                    <input type="text" id="ad-user-import" class="pull-left" placeholder="@T["Search users"]" autocomplete="off" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="import-active-directory-users" class="col-lg-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div class="content-section bi-page-body col-xs-12">
+                <div class="col-md-12 col-xs-12 no-margin no-padding directory-user-search">
+                    <div class="col-md-8 col-xs-8 directorypath-area">
+                        @if (ViewBag.AdImport)
+                        {
+                            <span class="directory-path no-padding">@T["Directory Path"] :<input type="hidden" name="url" value="@ViewBag.ActiveDirectory.LdapUrl"></span>
+                            <span class="no-padding ad-url">
+                                @ViewBag.ActiveDirectory.LdapUrl&nbsp;&nbsp;
+                                <a href="@Url.Action("Administration", "Administration")/user-directory-settings" title="@String.Format(T["Update {0} Configuration settings"].Value, "Active Directory")" class="link-button app-btn-link">@T["Modify"]</a>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="directory-path no-padding">@T["Tenant Name"] :<input type="hidden" name="url" value="@ViewBag.ActiveDirectory.TenantName"></span>
+                            <span class="no-padding ad-url">
+                                @ViewBag.ActiveDirectory.TenantName&nbsp;&nbsp;
+                                <a href="@Url.Action("Administration", "Administration")/user-directory-settings?tab=azure-ad" title="@String.Format(T["Update {0} Configuration settings"].Value, "Azure AD")" class="link-button app-btn-link azure-section">@T["Modify"]</a>
+                            </span>
+                        }
+                        <div class="no-padding error-msg">@TempData["ErrorMessage"]</div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-12 no-padding">
+                    <span class="import-message @(ViewBag.AdImport ? "windows-ad-msg" : "")">
+                        @T["Search and select the users from the following list to import"]
+                    </span>
+                </div>
+                <div class="col-xs-12 no-padding no-margin user-data-grid">
+                    <div class="col-xs-12 no-padding">
+                        @if (ViewBag.AdImport)
+                        {
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 bg-warning windows-ad-user-import-warning">
+                                <div class="warning-icon-container no-padding">
+                                    <span class="su su-info"></span>
+                                </div>
+                                <span class="no-padding text-warning">@String.Format(T["A user without an email address will be assigned a {0} or system-generated email address."].Value, "User Principal Name (UPN)")</span>
+                            </div>
+                        }
+                        <div class="col-xs-12  col-md-12 no-padding no-margin">
+                            <div id="grid-validation-messages" class="list grid-error-validation">
+                                <div class="col-xs-12">
+                                    <span id="grid-validation" class="grid-validation no-padding"><span id="user-count" class="user-count">@ViewBag.UserCount</span> @T["User(s) has been imported and activated successfully."]</span>
+                                    <span id="grid-error-validation" class="grid-error-validation no-padding">@T["Duplicate or Invalid data is found. Please change the data accordingly and re-import."]</span>
+                                    <span id="empty-validation" class="validation-message empty-validation no-padding">@T["Please select user(s) to import"]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="grid-container" class="col-md-12 no-top-margin no-padding">
+                        <div class="col-md-12 container-fluid page-inner-padding no-padding ">
+                            <div id="Grid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 no-padding"></div>
+                    <div class="col-xs-8 no-padding"></div>
+                </div>
+            </div>
+            <input type="hidden" name="AllUserList" id="AllUserList" value="@ViewBag.Pathname" />
+            <input type="hidden" id="UserCount" data-value="@ViewBag.UserExists" />
+            <input type="hidden" id="csvFileError" data-value="@ViewBag.result" />
+            @await Html.PartialAsync("../UserManagement/_LimitUserCreation")
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    @if (!ViewBag.ThirdPartyLogins)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

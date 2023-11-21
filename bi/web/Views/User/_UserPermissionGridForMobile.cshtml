@@ -1,0 +1,97 @@
+﻿@using Newtonsoft.Json;
+
+@model List<Permission>
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = globalAppSettings.SystemSettings.OrganizationName + " - " + @T["View My Permissions"];
+    ViewBag.MessageBox = false;
+    var jsondata = JsonConvert.SerializeObject(Model);
+    var gridName = ViewBag.gridName;
+}
+
+<script type="text/x-jsrender" id="permission-grid-template">
+    <div class="item-name" data-placement="top">
+        {{if (PermissionEntity=="@((int)PermissionEntity.SpecificDashboard)" || PermissionEntity=="@((int)PermissionEntity.SpecificCategory)" || PermissionEntity=="@((int)PermissionEntity.SpecificDataSource)" || PermissionEntity=="@((int)PermissionEntity.SpecificDataset)" || PermissionEntity=="@((int)PermissionEntity.SpecificFile)" || PermissionEntity=="@((int)PermissionEntity.SpecificItemView)"||PermissionEntity=="@((int)PermissionEntity.SpecificReports)" || PermissionEntity=="@((int)PermissionEntity.SpecificSchedule)" || PermissionEntity=="@((int)PermissionEntity.SpecificWidget)")}}
+        <span>{{:PermissionAccessDescription}} @T["access for the"] </span>
+        {{if ItemType=="@((int)ItemType.Dashboard)" && ItemName!="-"}}
+        <span>{{:ItemTypeDescription}} - <a href="{{:~urlEncode(ItemId, CategoryName, ItemName, IsDraft)}}" target="_blank">{{:ItemName}}</a>.</span>
+        {{else ItemType=="@((int)ItemType.Widget)" && ItemName!="-"}}
+        <span>{{:ItemTypeDescription}} - <a href="{{:~widgetUrlEncode(ItemId, ItemName)}}" target="_blank">{{:ItemName}}</a>.</span>
+        {{else ItemType=="@((int)ItemType.Category)" && ItemName!="-"}}
+        <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+        {{else ItemType=="@((int)ItemType.Schedule)"}}
+        <span>{{:ItemTypeDescription}} - {{:ItemName}}.</span>
+        @*{{else ItemType=="@((int)ItemType.File)"}}
+            <span>{{:ItemTypeDescription}} - <a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeDescription}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a>.</span>*@
+        {{else}}
+        <span>{{:ItemName}}</span>
+        {{/if}}
+        {{else}}
+        <span>{{:PermissionAccessDescription}} @T["access for"] {{:PermissionEntityDescription}}.</span>
+        {{/if}}
+    </div>
+</script>
+
+<script>
+    $.views.helpers({
+        urlEncode: function (id, category, item, isDraft) {
+            if (isDraft) {
+                return encodeURI("@Url.Action("DashboardDesigner", "Designer")/" + id + "/draft/" + item);
+            } else {
+
+                return encodeURI("@Url.Action("Dashboards", "Dashboards")/" + id + "/" + category + "/" + item);
+            }
+        },
+        widgetUrlEncode: function(id, item) {
+            return encodeURI("@Url.Action("widgets", "FileRender")/" + id + "/" + item);
+        }
+    });
+    function onDataBound(args) {
+        $(".e-gdiagonalnext").click();
+        $("[data-toggle=tooltip]").tooltip();
+    }
+
+    $(document)
+        .ready(function() {
+            GridLocalization();
+            $("#PermissionGrid")
+                .ejGrid({
+                    dataSource: @Html.Raw(jsondata),
+                    allowSearching: true,
+                    allowSelection: false,
+                    enableAltRow: false,
+                    allowGrouping: true,
+                    groupSettings: {
+                        showDropArea:false,
+                        showUngroupButton:false,
+                        showGroupedColumn: false,
+                        groupedColumns: ["ItemTypeDescription"]
+                    },
+                    columns:[
+                         {
+                             field:"ItemName",
+                             headerText:"@T["Permissions"]",
+                             template: true,
+                             templateID:"#permission-grid-template",
+                             type: "string"
+                         },
+                        {
+                            field:"GroupName",
+                            headerText:"@T["Inherited from Group"]",
+                            width: 140,
+                            visible: window.innerWidth > 768
+                        },
+                        {
+                            field:"ItemTypeDescription",
+                            headerText:"@T["Resources"]",
+                            allowSorting:false,
+                            allowFiltering:false
+                        }
+                    ],
+                    dataBound: "onDataBound"
+                });
+        });
+</script>
+
+<input type="hidden" class="page-name" data-content="@T["MY PERMISSIONS"]">
+<div id="PermissionGrid" class="permission-grid-mobile"></div>

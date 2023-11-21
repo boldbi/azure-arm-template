@@ -1,0 +1,423 @@
+﻿@inject ServerPrincipal _identityResponse
+@using Newtonsoft.Json
+@{
+    Layout = null;
+    var dashboardType = (int)ItemType.Dashboard;
+    var itemViewType = (int)ItemType.ItemView;
+    var slideShowType = (int)ItemType.Slideshow;
+    var categoryType = (int)ItemType.Category;
+    var widgetType = (int)ItemType.Widget;
+    var datasourceType = (int)ItemType.Datasource;
+    var userManagement = (int)ItemType.UserManagement;
+    var globalAppSettings = _globalAppSettings;
+    var currentUserId = _identityResponse.User.UserId;
+    var data = new List<ItemUsers>();
+    var accessModeDetail = new List<Syncfusion.Server.Dashboards.Models.SearchObject>();
+    var idPUrl = globalAppSettings.SystemSettings.IDPUrl;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var specificGroupEntity = (int)PermissionEntity.SpecificGroup;
+    var currentuserId = _identityResponse.User.UserId;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
+}
+
+<script>
+    var makeItemPublicUrl = "@Url.Action("MakePublicItem", "items")";
+    var removeItemPublicUrl = "@Url.Action("RemoveItemPublic", "items")";
+    var makeItemUnlistedUrl = "@Url.Action("MakeUnlistItem", "items")";
+    var removeItemUnlistedUrl = "@Url.Action("RemoveItemUnlist", "items")";
+    var getShareItemPermissionUrl = "@Url.Action("ShareItemPermission", "items")";
+    var sharepermissionUrl = "@Url.Action("AddItemPermission", "Permission")";
+    var updateBulkItemPermissionUrl = "@Url.Action("AddBulkItemPermission", "Permission")";
+    var editUserPermissionUrl = "@Url.Action("userpermission", "permission")";
+    var editGroupPermissionUrl = "@Url.Action("grouppermission", "permission")";
+    var slideShowUrl = "@Url.Action("SlideshowPreview", "Slideshow")";
+    var getGroupOwnersUrl = "@Url.Action("GetGroupOwners", "Group")";
+    var addGroupOwnerPermissionUrl = "@Url.Action("AddGroupOwnerPermission","Permission")";
+    var idpUrl = "@idPUrl";
+    var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
+    var getDashboardEmbedCode = @Json.Serialize(getDashboardEmbedCode);
+    window.currentUserId = "@currentUserId";
+    window.sharedUserGroupList = @Html.Raw(Json.Serialize(@data));
+    window.accessModeList = @Html.Raw(Json.Serialize(@data));
+    var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+    var isSelfHosted =  @Json.Serialize(isSelfHosted);
+</script>
+
+<div id="share-permission-popup" class="fluent-popup custom-bootstrap-styles" style="display:none;">
+    <div class="fluent-popup-header">
+        <h4 class="popup-title">
+            <span id="share-permission-dialog-header">@T["Share with others"]</span>
+            <button id="share-close-popup" type="button" title="@T["Close"]" class="close popup-close" aria-label="Close">
+                <span class="su su-close"></span>
+            </button>
+        </h4>
+        <div class="item-name-container"><span id="item-name-header"></span></div>
+    </div>
+    <div id="share-permission-content-section" class="fluent-popup-body share-permission-popup-body" ng-controller="shareItemController">
+        <div id="share-permission-container">
+            <div class="share-permission-public-section" ng-class="{'itemview-share-permission-public': currentItemType == @itemViewType }">
+                <div class="col-xs-2 public-private-icon-section">
+                    <div class="public-private-icon">
+                        <i class="su su-public"></i>
+                    </div>
+                </div>
+                <div class="col-xs-8 public-private-content-section">
+                    <div class="public-private-content">
+                        <div class="private-public-label">@T["Public"]</div>
+                        <div class="private-public-description" ng-if="currentItemType == @dashboardType">@T["Dashboards are accessible to anyone with a link to them. No sign-in is required. If a user is signed in, public dashboards will be included in their dashboards list."]</div>
+                        <div class="private-public-description" ng-if="currentItemType == @itemViewType">@T["Dashboard views are accessible to anyone who have access to the dashboard."]</div>
+                    </div>
+                </div>
+                <div class="col-xs-2 public-private-change-section">
+                    <div class="public-private-change-action">
+                        <a href="javascript:void(0)" onclick="changeAccessMode()" id="access-mode-change-link" class="app-hyperlink">@T["Change"]</a>
+                    </div>
+                </div>
+            </div>
+            <div class="share-permission-private-section" style="display:none;">
+                <div class="col-xs-2 public-private-icon-section">
+                    <div class="public-private-icon">
+                        <i class="su su-lock"></i>
+                    </div>
+                </div>
+                <div class="col-xs-8 public-private-content-section">
+                    <div class="public-private-content">
+                        <div class="private-public-label">@T["Private"]</div>
+                        <div class="private-public-description" ng-if="currentItemType == @dashboardType">@T["Dashboards will only be visible to users with the appropriate permissions."]</div>
+                        <div class="private-public-description" ng-if="currentItemType == @itemViewType">@T["Dashboard views will only be visible to users with the appropriate permissions."]</div>
+                    </div>
+                </div>
+                <div class="col-xs-2 public-private-change-section">
+                    <div class="public-private-change-action">
+                        <a href="javascript:void(0)" onclick="changeAccessMode()" id="access-mode-change-link" class="app-hyperlink">@T["Change"]</a>
+                    </div>
+                </div>
+            </div>
+            <div class="get-item-link-section" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType !=@userManagement">
+                <input onClick="this.setSelectionRange(0, this.value.length)" id="item-url" class="form-control" readonly />
+                <div class="form-control text focus" id="item-url-copy" readonly="" data-original-title="@T["Click to copy"]">@T["Copy link"]</div>
+            </div>
+            <div class="get-item-embed-link-section col-xs-12 no-padding" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType != @slideShowType && currentItemType !=@userManagement && getDashboardEmbedCode">
+                <a class="get-embed-link app-hyperlink pull-left" href="javascript:void(0)" onclick="getEmbedCode()">&lt;/&gt; @T["Get Embed code"]</a>
+            </div>
+            <div class="share-with-label slideshow-note" ng-if="currentItemType == @slideShowType">@Html.Raw("<b>" + T["Note: "].Value + "</b>" + T["Anyone can navigate to this link, but only users with appropriate permissions to access dashboards used in the slideshow will be able to view the items in the slideshow."].Value)</div>
+            <hr class="divider-cls col-xs-12 no-padding" ng-if="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType !=@userManagement">
+            <div id="assign-user-group-container">
+                <div class="share-user-group-permission-section">
+                    <div class="share-with-label" ng-if="currentItemType == @dashboardType">@T["Select one or more users and groups you would like to share this dashboard with."]</div>
+                    <div class="share-with-label" ng-if="currentItemType == @itemViewType">@T["Select the users and groups with whom you would like to share this dashboard view."]</div>
+                    <div class="share-with-label" ng-if="currentItemType == @slideShowType">@T["Select the users and groups with whom you would like to share this slideshow."]</div>
+                    <div class="share-with-label" ng-if="currentItemType == @datasourceType">@T["Select the users and groups with whom you would like to share this datasource."]</div>
+                    <div class="share-with-label" ng-if="currentItemType == @categoryType">@T["Select the users and groups with whom you would like to share this category."]</div>
+                    <div class="share-with-label" ng-if="currentItemType == @userManagement">@T["Select the users and groups you would like to make owners for this group."]</div>
+                    <div class="col-xs-12 share-user-group-segment no-padding">
+                        <input type="text" id="share-hidden-input" hidden />
+                        <div id="user-group-search-container" class="col-xs-8 no-padding" ng-class="{ 'itemview-user-group-container' : currentItemType == @itemViewType || currentItemType == @userManagement  }">
+                            @await Html.PartialAsync("../AutoComplete/_AccessibleUserGroupSuggestion")
+                        </div>
+                        <div id="access-mode-selection-container" class="col-xs-4 no-padding" ng-show="currentItemType != @itemViewType && currentItemType != @userManagement ">
+                            <select id="access-mode-selection" class="selectpicker" data-size="5"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="show-shared-user-group-container" style="display:none;">
+                <a href="javascript:void(0)" onclick="showManageAccessContainer()" id="show-shared-user-group-link">
+                    <div class="show-shared-user-group-section">
+                        <div class="show-shared-user-group-label">@T["Shared with "]:</div>
+                        <div class="shared-user-group-name-section"></div>
+                        <div class="shared-user-group-count-section">+<span class="shared-user-group-count"></span>@T[" others"]</div>
+                    </div>
+                </a>
+            </div>
+            <div id="manage-user-group-container" style="display: none";>
+                <div class="manage-user-group-section">
+                    <div class="manage-user-group-header-section">
+                        <span class="col-xs-9">@T["People"]</span>
+                        <span class="col-xs-3">@T["Access"]</span>
+                    </div>
+                    <div class="manage-user-group-body-section" ng-form="shareUserGroupForm">
+                        <div class="scroll-content-section col-xs-12 no-padding">
+                            <div class="user-group-scroll-content col-xs-12 no-padding">
+                                <div class="col-xs-12 shared-user-group-list-section no-padding " ng-repeat="people in sharedUserGroups">
+                                    <div class="col-xs-7 shared-user-group-list-display-section no-padding">
+                                        <div class="col-xs-1 no-padding change-indicator-container">
+                                            <div class="change-indicator-section">
+                                                <div class="change-indicator" style="display:none"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-2 no-padding shared-user-group-img-container">
+                                            <div class="profile-pic-tag" data-id="{{people.IdPReferenceId}}" data-type="user" data-display-name={{people.DisplayName}} data-image-size="32" data-placement="top" ng-if="people.TargetUserId > 0"></div>
+                                            <div class="group-logo" ng-style="GetGroupColor(people.TargetGroupColor, '{{$index}}')" ng-if="people.TargetGroupId > 0"><i class="su su-group"></i></div>
+                                        </div>
+                                        <div class="col-xs-9 no-padding shared-user-group-display-name-container">
+                                            <div class="shared-user-group-display-name"><span data-toggle="tooltip" data-placement="top" data-container="body" title="{{people.DisplayName != null ? people.DisplayName : people.TargetGroupName}}">{{people.DisplayName != null ? people.DisplayName : people.TargetGroupName}}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-5 shared-user-group-list-action-section no-padding">
+                                        <div class="col-xs-12 no-padding current-user-container" ng-show="{{people.TargetUserId == currentUserId}}">
+                                            <div class="col-xs-12 no-padding current-user-info-text">
+                                                <span>@T["It's You"]</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 no-padding action-for-delete-container" ng-show="{{(people.TargetUserId != currentUserId) && (people.CanRemove)}}">
+                                            <div class="col-xs-10 no-padding change-access-mode-select">
+                                                <select class="change-access-mode-selection selectpicker-sharedialog" title="" data-original-title="" id="select_{{$index}}" name="accessMode" ng-change="updateValue(people.PermissionAccess, '{{$index}}')" ng-model="people.PermissionAccess" ng-options="parseInt(p.Key) as p.Value for p in accessModes" ng-show="currentItemType != @itemViewType"></select>
+                                            </div>
+                                            <div class="col-xs-2 no-padding shared-user-group-delete-access-container">
+                                                <i class="su su-close mark-for-deletion-icon" ng-show="{{(people.IsUserPermission && people.CanRemove) || (people.CanRemove && people.TargetGroupId > 0)}}" ng-click="MarkForDeletion($event, people.PermissionAccess, $index)"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 no-padding action-hide-info-container" ng-show="{{(people.TargetUserId != currentUserId) && (!people.CanRemove)}}">
+                                            <div class="col-xs-10 no-padding action-hide-info-text">
+                                                <span>{{people.PermissionAccessDescription}}</span>
+                                            </div>
+                                            <div class="col-xs-2 no-padding shared-user-group-access-info-container">
+                                                <i class="su su-info access-info-icon" ng-hide="{{people.CanRemove}}" data-container="#share-permission-popup_wrapper" data-html="true" data-toggle="popover" data-placement="left" data-content="{{GetManagePermisisionContent($index)}}"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 no-padding marked-for-delete-container" style="display:none">
+                                            <div class="col-xs-10 no-padding marked-for-delete-text"><span>@T["Marked for Delete"]</span></div>
+                                            <div class="col-xs-2 no-padding marked-for-delete-icon-container">
+                                                <i class="su su-minus-circle remove-mark-for-deletion-icon" ng-click="RemoveMarkForDeletion($event, people.PermissionAccess,$index)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="access-mode-container" style="display:none;">
+            <div class="access-mode-change-section">
+                <form id="accessModeForm">
+                    <div class="share-permission-dashboard-setting-section" style="display:none" ng-show="!isMarkItemsPublic && currentItemType != @itemViewType">
+                        <div class="col-xs-12 public-private-content-section">
+                            <div class="public-private-content" ng-show="hasDashboardSettingsPermission">
+                                <div class="private-public-description"><span>@Html.Raw(String.Format(T["Public Dashboards are disabled in {0}dashboard settings{1}."].Value, "<a class='app-hyperlink' target='_blank' href=" + Url.Action("DashboardSettings", "Administration") + ">", "</a>"))</span></div>
+                            </div>
+                            <div class="public-private-content" ng-show="!hasDashboardSettingsPermission">
+                                <div class="private-public-description"><span>@T["Public dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="access-mode-change-private-section">
+                        <div class="col-xs-1 radio-btn">
+                            @Html.RadioButton("access-mode", "private", new { @class = "css-radio", @id = "private-access-mode", @checked = "checked" })
+                            @Html.Label("private-access-mode", " ", new { @class = "pointer normal-font pull-left notransition" })
+                        </div>
+                        <div class="col-xs-1 private-icon-section">
+                            <div class="private-icon">
+                                <i class="su su-lock"></i>
+                            </div>
+                        </div>
+                        <div class="col-xs-10 private-content-section">
+                            <div class="private-content">
+                                <div class="private-label label-segment">@T["Private"]</div>
+                                <div class="private-description description-segment" ng-if="currentItemType == @dashboardType">
+                                    @T["Dashboards will only be visible to users with the appropriate permissions."]
+                                </div>
+                                <div class="private-description description-segment" ng-if="currentItemType == @itemViewType">
+                                    @T["Dashboard views will only be visible to users with the appropriate permissions."]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="access-mode-change-public-section" ng-class="{'enable-element-opacity': !isMarkItemsPublic }">
+                        <div class="col-xs-1 radio-btn">
+                            @Html.RadioButton("access-mode", "public", new { @class = "css-radio", @id = "public-access-mode", ng_disabled= "!isMarkItemsPublic" })
+                            @Html.Label("public-access-mode", " ", new { @class = "pointer normal-font pull-left notransition" })
+                        </div>
+                        <div class="col-xs-1 public-icon-section">
+                            <div class="public-icon">
+                                <i class="su su-public"></i>
+                            </div>
+                        </div>
+                        <div class="col-xs-10 public-content-section">
+                            <div class="public-content">
+                                <div class="public-label label-segment">@T["Public"]</div>
+                                <div class="public-description description-segment" ng-if="currentItemType == @dashboardType">@T["Dashboards are accessible to anyone with a link to them. No sign-in is required. If a user is signed in, public dashboards will be included in their dashboards list."]</div>
+                                <div class="public-description description-segment" ng-if="currentItemType == @itemViewType">@T["Dashboard views are accessible to anyone who have access to the dashboard."]</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="access-mode-change-unlisted-section" ng-if="currentItemType == @dashboardType">
+                        <div class="col-xs-12 no-padding no-margin unlisted-section">
+                            @Html.CheckBox("make-unlisted", false, new { @class = "material-checkbox" })
+                            @Html.Hidden("make-unlisted")
+                            <label for="make-unlisted">
+                                <span>
+                                    @T["Unlist dashboard from listing"]
+                                </span>
+                            </label>
+                            <div class="unlisted-description">
+                                @T["If this option is checked, the dashboard will not be listed for any other users, but users with the dashboard link can access the dashboard directly."]
+                                @if (!@ServerAppConfig.IsHideHelpLink)
+                                {
+                                    @Html.Raw(String.Format(T["Learn more about unlisting dashboards {0}here{1}."].Value, "<a href='" + helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UnlistedDashboards) + "' target='_blank'>", "</a>"))
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            @if (!@ServerAppConfig.IsHideHelpLink)
+            {
+                <div class="learn-more-link">
+                    <span><a target="_blank" href="@(helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.PublicDashboards))" class="app-hyperlink">@T["Learn more about Access modes"]</a></span>
+                </div>
+            }
+        </div>
+
+        <div id="get-embed-code-container" style="display:none;">
+            <div class="embed-code-description" ng-if="currentItemType == @dashboardType">@string.Format(T["Copy this {0} code to embed the dashboard into any web application."].Value, "HTML")</div>
+            <div class="embed-code-description" ng-if="currentItemType == @itemViewType">@string.Format(T["Copy this {0} code to embed the dashboard view into a web application."].Value, "HTML")</div>
+            <div class="embed-code-description" ng-if="currentItemType == @widgetType">@string.Format(T["Copy this {0} code to embed the widget into a web application."].Value, "HTML")</div>
+            <div class="embed-code-description" ng-if="currentItemType == @datasourceType">@string.Format(T["Copy this {0} code to embed the datasource into any web application."].Value, "HTML")</div>
+
+            <div class="embed-text-area-section">
+                <span id="copy-embed-code" class="pull-right app-hyperlink"><span class="su su-copy"></span>@T["Copy"]</span>
+                <textarea id="embed-code" class="form-control" readonly></textarea>
+            </div>
+            <div class="embed-configuration col-xs-12">
+                <div class="embed-config-row col-xs-12 no-padding datasource-hide" style="margin-bottom: 10px;" ng-show="currentItemType == @dashboardType">
+                    <div class="col-xs-5 no-padding">
+                        <label>@T["Mode"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Users can able to change the Mode as Edit or View."]</div>
+                        </div>
+                    </div>
+                    <div class="col-xs-5 no-padding" style="width:120px">
+                        <select id="mode-selection" class="selectpicker no-padding mode-selection" title="@string.Format(T["Select {0} provider"].Value, "SSO")">
+                            <option class="no-margin-dropdown-ul" value="edit" selected="">@T["Edit"]</option>
+                            <option class="no-margin-dropdown-ul" value="view" selected="">@T["View"]</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="embed-config-row col-xs-12 no-padding datasource-hide" ng-show="currentItemType == @dashboardType">
+                    <div class="col-xs-5 no-padding">
+                        <label>@T["Dashboard Comments"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Show or hide the comment option for the dashboard."]<br>@T["The comment option will be hidden by default if the dashboard is marked as public."]</div>
+                        </div>
+                    </div>
+                    <span class="material-switch text-left">
+                        <input type="checkbox" class="mode-change" id="embed-dashboard-comments" />
+                        <label for="embed-dashboard-comments" class="label-primary"></label>
+                    </span>
+                </div>
+                <div class="embed-config-row col-xs-12 no-padding datasource-hide" ng-show="currentItemType == @dashboardType">
+                    <div class="col-xs-5 no-padding">
+                        <label>@T["Widget Comments"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Show or hide the comment option for widgets in the dashboard."]<br>@T["The comment option will be hidden by default if the dashboard is marked as public."]</div>
+                        </div>
+                    </div>
+                    <span class="material-switch text-left">
+                        <input type="checkbox" class="mode-change" id="embed-widget-comments" />
+                        <label for="embed-widget-comments" class="label-primary"></label>
+                    </span>
+                </div>
+                <div class="embed-config-row col-xs-12 no-padding datasource-hide" ng-show="currentItemType == @dashboardType">
+                    <div class="col-xs-5 no-padding">
+                        <label>@T["Views"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Show or hide the view option for the dashboard."]<br>@T["If the dashboard is marked as public, the views marked as public will be listed."]</div>
+                        </div>
+                    </div>
+                    <span class="material-switch text-left">
+                        <input type="checkbox" class="mode-change" id="embed-views" />
+                        <label for="embed-views" class="label-primary"></label>
+                    </span>
+                </div>
+                <div class="embed-config-row col-xs-12 no-padding datasource-hide" ng-show="currentItemType == @dashboardType">
+                    <div class="col-xs-5 no-padding">
+                        <label>@T["Export"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Show or hide the export option for the dashboard."]<br>@T["If this is enabled, users can download a copy of the dashboard as an image, PDF, or Excel file."]</div>
+                        </div>
+                    </div>
+                    <span class="material-switch text-left">
+                        <input type="checkbox" class="mode-change" id="embed-export" />
+                        <label for="embed-export" class="label-primary"></label>
+                    </span>
+                </div>
+                @if (isSelfHosted)
+                {
+                    <div class="embed-config-row col-xs-12 no-padding">
+                        <div class="col-xs-5 no-padding">
+                            <label>@string.Format(T["Use {0}"].Value, "SSO")</label>
+                            <div class="info-popup">
+                                <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                <div class="dropdown-menu" role="menu">@string.Format(T["Enable the {0} authentication for the dashboard."].Value, "SSO")<br>@string.Format(T["If your application shares the same authentication as that of the {0}, use {1} and select corresponding authentication provider."].Value, "Bold BI", "SSO")</div>
+                            </div>
+                        </div>
+                        <span class="material-switch text-left">
+                            <input type="checkbox" id="embed-sso" />
+                            <label for="embed-sso" class="label-primary"></label>
+                        </span>
+                    </div>
+                    <div class="embed-config-row col-xs-12 no-padding auth-provider-row hide">
+                        <div class="col-xs-5 no-padding">
+                            <label>@T["Authentication Provider"]</label>
+                        </div>
+                        <div class="col-xs-5 no-padding">
+                            <select id="sso-providers" class="selectpicker no-padding sso-providers" title="@string.Format(T["Select {0} provider"].Value , "SSO")" style="display:none">
+                                <option class="no-margin-dropdown-ul" value="WindowsAD" selected="">Windows Active Directory</option>
+                                <option class="no-margin-dropdown-ul" value="AzureAD" selected="">Azure Active Directory</option>
+                                <option class="no-margin-dropdown-ul" value="OAuth" selected="">OAuth 2.0</option>
+                                <option class="no-margin-dropdown-ul" value="OpenID" selected="">OpenID Connect</option>
+                            </select>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="embed-code-note">
+                <span class="note-label">@T["Note:"]</span>
+                <span class="private-embed-code-note" ng-if="currentItemType == @dashboardType">@T["You can use this code to embed and render this dashboard in your web application. Users need to be logged in and have the appropriate permission to view the dashboard."]</span>
+                <span class="public-embed-code-note" ng-if="currentItemType == @dashboardType">@T["You can use this code to embed and render this dashboard in your web application. Since the dashboard has been marked as public, anyone will be able to view it."]</span>
+                <span class="private-embed-code-note" ng-if="currentItemType == @itemViewType && isDashboardPublic">@T["You can use this code to embed and render this dashboard view in your web application. Users need to be logged in and have permission to view the dashboard view."]</span>
+                <span class="public-embed-code-note" ng-if="currentItemType == @itemViewType && isDashboardPublic">@T["You can use this code to embed and render this dashboard view in your web application. Since the dashboard and dashboard view have been marked as public, anyone will be able to view it."]</span>
+                <span class="private-embed-code-note" ng-if="currentItemType == @itemViewType && !isDashboardPublic">@T["You can use this code to embed and render this dashboard view in your web application. Users need to be logged in and have permission to view the dashboard and dashboard view."]</span>
+                <span class="public-embed-code-note" ng-if="currentItemType == @itemViewType && !isDashboardPublic">@T["You can use this code to embed and render this dashboard view in your web application. Users need to be logged in and have permission to view the dashboard."]</span>
+                <span class="private-embed-code-note" ng-if="currentItemType == @widgetType && !isDashboardPublic">@T["You can use this code to embed and render this widget in your web application. Users need to be logged in and have the appropriate permission to view the widget."]</span>
+                <span class="public-embed-code-note" ng-if="currentItemType == @widgetType && isDashboardPublic">@T["You can use this code to embed and render this widget in your web application. Since the dashboard has have been marked as public, anyone will be able to view it."]</span>
+                <span class="private-embed-code-note" ng-if="currentItemType == @datasourceType">@T["You can use this code to embed and render this datasource in your web application. Users need to be logged in and have the appropriate permission to view the datasource."]</span>
+            </div>
+            <div class="copy-message-container col-xs-12 no-padding"><span class="embed-copy-success alert-success col-xs-12 no-padding" style="display:none">@T["Embed code copied successfully!"]</span></div>
+        </div>
+
+        <div id="dummy-container" style="display: none;">
+        </div>
+        <div id="info-container">
+            <div class="col-xs-12 changes-indicator-banner no-padding" style="visibility: hidden">@T["Changes have been made. Please save your changes before navigating to another section."]</div>
+        </div>
+    </div>
+
+    <div class="fluent-popup-footer">
+        <div id="button-container" class="col-lg-12 col-md-12">
+            <span>
+                <button type="button" id="manage-access-button" class="app-button app-secondary-button app-btn-secondary pull-left">@T["Manage Access"]</button>
+            </span>
+            <button type="button" id="manage-access-back-button" class="app-button app-secondary-button app-btn-secondary pull-left" style="display: none;">@T["Back"]</button>
+            <button type="button" id="share-done-popup-button" class="app-button app-secondary-button app-btn-secondary pull-right">@T["Done"]</button>
+            <button type="button" id="manage-access-cancel-button" class="app-button app-secondary-button app-btn-secondary pull-right" style="display: none;">@T["Cancel"]</button>
+            <button type="button" id="share-permission-button" class="app-button app-primary-button app-btn-primary pull-right" onclick="saveItemPermission()" style="display: none;">@T["Share"]</button>
+            <button type="button" id="add-owner-permission-button" class="app-button app-primary-button app-btn-primary pull-right" onclick="addGroupOwnerPermission()" style="display: none;">@T["Add Owner"]</button>
+            <button type="button" id="manage-access-save-button" class="app-button app-primary-button app-btn-primary pull-right" style="display: none;">@T["Save"]</button>
+            <button type="button" id="access-mode-cancel-button" class="app-button app-secondary-button app-btn-secondary pull-right" style="display: none;">@T["Cancel"]</button>
+            <button type="button" id="access-mode-change-button" class="app-button app-primary-button app-btn-primary pull-right" style="display: none;" disabled="disabled">@T["Change"]</button>
+            <button type="button" id="copy-embed-code-done-button" class="app-button app-secondary-button app-btn-secondary pull-right" style="display: none;">@T["Done"]</button>
+            <button type="button" id="copy-embed-code-back-button" class="app-button app-secondary-button app-btn-secondary pull-left" style="display: none;">@T["Back"]</button>
+        </div>
+    </div>
+</div>

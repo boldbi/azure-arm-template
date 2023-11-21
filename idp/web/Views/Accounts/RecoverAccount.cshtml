@@ -1,0 +1,96 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    ViewBag.Title = $"{T["Account Recovery"].Value} - {GlobalAppSettings.SystemSettings.OrganizationName}";
+    var returnUrl = TempData["returnUrl"] != null ? TempData["returnUrl"].ToString() : string.Empty;
+    var appBranding = GlobalAppSettings.Branding;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/accounts-forget-password.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script src="~/bundles/js/accounts-forget-password.js" asp-append-version="true"></script>
+}
+
+@section MainSection{
+    <form name="forgotPasswordForm" class="forgot-password-container" action="@Url.Action("RecoverAccount","Accounts")" onsubmit="return ForgotValidate();" id="forgot-password-form" method="post" autocomplete="off">
+        @if (!ViewBag.IsEmailSettingsConfigured)
+        {
+            <div class="icon-container"><span class="su su-warning-alt"></span></div>
+            <div class="heading text-h4">@T["Reset password"]</div>
+            @if (!CloudAppConfig.IsHideHelpLink)
+            {
+                @if (appBranding == AppBranding.Bold.Identifier)
+                {
+                    <div class="user-validation text-body">
+                        @Html.Raw(string.Format(T["As the email settings are not configured, we will not be able to send an email to reset your password. If you are the administrator, please follow the {0} steps {1} to reset your password."].Value, $"<a href='{await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ResetPassword, TenantType.BoldBIOnPremise)}'>", "</a>"))
+                    </div>
+                }
+                else
+                {
+                    <div class="user-validation text-body">
+                        @Html.Raw(string.Format(T["As the email settings are not configured, we will not be able to send an email to reset your password. If you are the administrator, please follow the {0} steps {1} to reset your password."].Value, $"<a href='{await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ResetPassword, TenantType.BoldReportsOnPremise)}'>", "</a>"))
+
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="user-validation text-body">@T["As the email settings are not configured, we will not be able to send an email to reset your password. Please contact your administrator."]</div>
+            }
+        }
+        else
+        {
+            if (!string.IsNullOrWhiteSpace((string)TempData["uservalidationMessage"]))
+            {
+                <div class="icon-container"><span class="su su-warning-alt"></span></div>
+                <div class="heading text-h4">@T["Reset password"]</div>
+                <div class="user-validation text-body">@TempData["userValidationMessage"]</div>
+            }
+            else if (ViewBag.IsEmailPresent)
+            {
+                <div class="form-name text-h1">@T["Cannot access your account?"]</div>
+                if (ViewBag.IsAccountActivationRequest)
+                {
+                    <div class="forgot-password-content text-body">@T["Enter your username or email address and we will send you a link to activate your account."]</div>
+                }
+                else
+                {
+                    <div class="forgot-password-content text-body">@T["Enter your username or email address and we will send you a link to recover your account."]</div>
+                }
+
+                <div class="forgot-form-input-field">
+                    <input type="hidden" name="form-submit" id="form-submit" value="true" />
+                    <input type="hidden" name="callBackUri" value="@TempData["returnUrl"]" />
+                    <input type="text" required ng-minlength="1" md-no-asterisk name="userName" id="key-input" placeholder="@T["Username / Email Address"]" maxlength="100" autofocus="true">
+                    <span class="special-char-msg validation-holder"></span>
+                    <div id="username-validation" style="width: 290px;">
+                        @if (TempData["errorMessage"] as string != string.Empty)
+                        {
+                            <p class="validation-holder">@TempData["errorMessage"]</p>
+                        }
+                    </div>
+                </div>
+                if (ViewBag.IsAccountActivationRequest)
+                {
+                    <button id="submit-button" class="submit-button proceed-button" type="submit">
+                        @T["Send activation link"]
+                    </button>
+                }
+                else
+                {
+                    <button id="submit-button" class="submit-button proceed-button" type="submit">
+                        @T["Send recovery link"]
+                    </button>
+                }
+
+            }
+        }
+
+        <div class="back-button text-body"> <a href="@(Url.Action("login","accounts") + (string.IsNullOrWhiteSpace(returnUrl) ? string.Empty : "?returnUrl=" + returnUrl))"><span>@T["Return to login"]</span></a></div>
+    </form>  
+}

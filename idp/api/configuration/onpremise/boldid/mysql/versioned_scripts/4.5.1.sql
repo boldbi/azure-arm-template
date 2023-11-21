@@ -1,0 +1,1 @@
+ALTER TABLE {database_name}.BOLDTC_UserLogin MODIFY COLUMN IpAddress nvarchar(255) Not NULL;

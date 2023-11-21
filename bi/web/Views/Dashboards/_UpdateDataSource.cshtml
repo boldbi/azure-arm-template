@@ -1,0 +1,137 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var datasourceList = ViewData["ItemsList"] as List<ItemDetail>;
+    var dataSourceNames = ViewData["DataSourceName"] as List<string>;
+    var isDataSourceUpdated = ViewData["IsDatasourceUpdated"] != null ? Convert.ToBoolean(ViewData["IsDatasourceUpdated"]) : false;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+@if (dataSourceNames.Count != 0)
+{
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+        <title>
+            Update Data Source(s)
+        </title>
+
+        @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+        <script>
+            var updatedatasource = "@Url.Action("updatedatasource", "dashboards")";
+        </script>
+        @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.css" />
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.min.css" />
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.min.js"></script>
+        </environment>
+
+        <script type="text/javascript">
+        $(function () {
+            $("#new-datasource-tab-content").css("height", window.innerHeight - 132 + "px");
+            if((@Json.Serialize(isDataSourceUpdated))){
+                var updatedDataSource = @Html.Raw(Json.Serialize(ViewBag.UpdatedDataSourceDetails));
+                var selectContents = parent.$("#update-data-source-popup-iframe").contents().find("select");
+                $(selectContents).each(function (index, value) {
+                    for (var i = 0; i < updatedDataSource.length; i++) {
+                        if(this.name == updatedDataSource[i].DataSourceName){
+                            $(this).attr("data-original-value",updatedDataSource[i].DataSourceId);
+                            $(this).val(updatedDataSource[i].DataSourceId);
+                            $(this).selectpicker("refresh");
+                        }
+                    }
+                });
+            }
+            window.parent.ShowWaitingProgress("#update-data-source-popup_wrapper", "hide");
+        });
+        </script>
+
+    </head>
+    <body style="background-color:white" id="datasource-update">
+        <div class="col-md-12 header-menu dialog-header">
+            <span class="su su-nav-datasource Head-icon"></span>
+            <span class="PopupTitle modal-title">@T["Update Data Source(s)"]</span>
+            <div class="dashboard-name report-name">@Html.Raw("<div class='float-left'>" + string.Format(T["Update data sources connected to the Dashboard - {0}"].Value,"</div><span class='item-name' data-toggle='tooltip' data-placement='bottom' data-original-title=" + ViewBag.FullItemName + ">" + ViewBag.FullItemName + "</span>"))</div>
+            <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="closeUpdateDataSourcePopup()"><span class="su su-close"></span></a>
+        </div>
+        <div id="datasource-popup-module">
+            <div class="datasource-btns dialog-footer">
+                <div class="pull-right">
+                    <input type='button' title='' id="share-datasource" value="@T["Update"]" class='primary-button app-btn-primary' data-item-id=@ViewData["ItemId"] data-mapid="name" tabindex="17">
+                    <input type='button' title='' value="@T["Cancel"]" class='secondary-button  app-btn-secondary' onclick="closeUpdateDataSourcePopup()" tabindex="18">
+                </div>
+            </div>
+            <form id='new-datasource-tab-content' class='col-md-12 update-datasource-tab-contents' autocomplete="off">
+                <div class='col-md-12 no-top-margin new-datasource-content-holder' id='new-datasource-content-holder'>
+                    <table width="100%" cellspacing="10px" cellpadding="0" border="0">
+                        <tr>
+                            <th>@T["Data Source Name"]</th>
+                            <th colspan="2">@T["Select Data Source"]</th>
+                        </tr>
+                        @for (var i = 0; i < dataSourceNames.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @dataSourceNames[i]
+                                </td>
+                                <td>
+                                    <div id="data-source-container">
+                                        <select data-live-search="true" class="selectpicker bottom-margin30 update-datasource form-control" data-size="5" data-container="body" name="@dataSourceNames[i]" data-original-value="null">
+                                            <option class="select-data-source" value="null">@T["Embedded Data Source"]</option>
+                                            <option data-divider="true"></option>
+                                            @for (var item = 0; item < datasourceList.Count; item++)
+                                            {
+                                                <option value="@datasourceList[item].Id">@datasourceList[item].Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </td>
+                                @*<td>
+                                        <span id="add-new-datasource" class="su-add" data-toggle="tooltip" data-placement="left" title="@T["Add new Data Source"]"></span>
+                                    </td>*@
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </form>
+        </div>
+    </body>
+}
+
+else
+{
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+        @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.css" />
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.min.css" />
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.min.js"></script>
+        </environment>
+        <script>
+            $(document).ready(function () {
+                closeUpdateDataSourcePopup();
+                parent.messageBox("su-update-data-source", "@T["Update Data Source(s)"]", "@T["Internal server error. Please try again."]", "success", function () {
+                    parent.onCloseMessageBox();
+                });
+            });
+        </script>
+    </head>
+}
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+</environment>
+</html>

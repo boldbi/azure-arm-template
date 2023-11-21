@@ -1,0 +1,160 @@
+﻿@{
+    Layout = null;
+
+    var globalAppSettings = _globalAppSettings;
+    var userHomepage = ViewBag.UserHomepage as List<HomepageDetail>;
+    var isHomepageExists = Convert.ToBoolean(ViewBag.IsHomepageExists);
+    var dashboardServiceResourceUrl = globalAppSettings.SystemSettings.DashboardServiceResourceUrl;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var isCurrentVersion = ViewBag.IsCurrentVersion;
+    var versionLink = "v=" + ViewBag.VersionNumber;
+    var dashboardUrl = ViewBag.DashboardUrl;
+    var symbol = dashboardUrl.Contains("?") ? "&" : "?";
+    var canShowFilter = ViewBag.IsNewVersion ? "display:none" : "";
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-viewer-page.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-viewer-page.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.min.js"></script>
+    </environment>
+    @*@if (isDebug)
+        {
+            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.ejcommon.all.min.js")"></script>
+            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.viewer.all.min.js")"></script>
+        }*@
+
+    <script type="text/javascript">
+        var pinWidgetUrl = "@Url.Action("pinitemtohomepage", "boards")";
+        var addHomepageUrl = "@Url.Action("addhomepage", "boards")";
+        var checkHomepageNameExistUrl = "@Url.Action("checkhomepagenameexist", "boards")";
+        var cdnLink = "@cdnLink";
+        $(document).ready(function () {
+            var widgetName = parent.$("#pin-widget-popup").attr("data-widget-name");
+            parent.$("#pin-widget-popup-iframe").contents().find("#widget-name").val(widgetName);
+            $("#filter-info").popover();
+            parent.$('#success-alert, #warning-alert').fadeOut();
+            parent.$("#pin-widget-popup_wrapper").BoldBIDashboardWaitingPopup("hide");
+            if (parent.dashboardItemDetail.Extension != ".sydj") {
+                parent.$(".e-dashboardviewer").ejDashboardViewer("instance").isWidget ? $("#filter-container").remove() : null;
+            }
+             $("#pin-widget-form .popup-title").text(parent.window.IsDashboard ? window.Server.App.Localization.PinDashboard : window.Server.App.Localization.AddPinWidget);
+            if(@userHomepage.Count == 0){
+                $("#select-homepage").selectpicker("refresh");
+                $("#select-content").find(".dropdown-menu > .bs-searchbox").after("<span class='no-result-found'>@T["No Results Found"]</span>");
+            }
+            if(!(@Json.Serialize(isHomepageExists))){
+                $("#select-homepage").append("<option value='' data-item='Widget' data-virtual-homepage='true'>@T["Pinboard1"]</option>");
+                $("#select-homepage").next().find(".dropdown-menu > .no-result-found").remove();
+                $("#select-homepage").selectpicker("refresh");
+            }
+        });
+    </script>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+</head>
+<body>
+    <form id="pin-widget-form" autocomplete="off">
+        <div class="col-md-12 header-menu">
+            <span class="su su-pin head-icon"></span>
+              <span class="popup-title"></span>
+            <a href="javascript:void(0);" title="@T["Close"]" class="popup-close" onclick="closePinWidgetPopup()"><span class="su su-close"></span></a>
+            @if (isCurrentVersion)
+            {
+                <div id="homepage-name"><div id="sub-title" data-toggle="tooltip" data-placement="bottom" data-original-title="">@T["Select an existing pinboard or add a new one."]</div></div>
+                <div id="widget-name-container" class="col-xs-12">
+                    @Html.Label("widget-label", T["Widget name"].Value, new { @class = "app-textbox-label widget-name-label col-xs-3" })
+                    <div id="widget-input" class="col-xs-4">
+                        <input type="text" id="widget-name" name="widgetname" class="form-control" data-maxlength="255" autofocus />
+                        <span class="validation-errors"></span>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!isCurrentVersion)
+        {
+            <div class=" col-md-12 alert alert-danger alert-older-version">
+                @T["You are viewing an older version of the dashboard. Only widgets in the latest version of a dashboard can be added to the pinboard."]
+                <div id="new-version-link">@Html.Raw(string.Format(T["Click {0}here{1} to open the latest version."].Value,"<a href='"+dashboardUrl+symbol+versionLink+"' target='_blank' style='text-decoration:underline;'>","</a>"))</div>
+            </div>
+            <div class="col-xs-12 dialog-footer rightAlign no-right-padding no-left-padding">
+                <div class="pull-right"></div>
+                <div class="no-padding centerAlign validationArea" id="close">
+                    <input title="" type="button" id="version-Alert-button" class="btn secondary-button app-btn-secondary PopupClose" value="@T["OK"]" onclick="onAlertDialogClose()" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <div id="pin-widget-container">
+                <div class="col-xs-3">
+                    @Html.Label("homepage-label", T["Pinboard"].Value, new { @class = "app-textbox-label homepage-name-label col-xs-3" })
+                </div>
+                <div class="col-xs-4">
+                    <input type="radio" class="css-radio" id="existing-homepage" name="pin-widget-option" value="pin-exist" @(isHomepageExists ? "checked" : string.Empty) />
+                    <label for="existing-homepage">@T["Existing"]</label>
+                </div>
+                <div class="col-xs-4">
+                    <input type="radio" class="css-radio" id="new-homepage" name="pin-widget-option" value="pin-new" @(!isHomepageExists ? "checked" : string.Empty) />
+                    <label for="new-homepage">@T["New"]</label>
+                </div>
+                <div id="select-content" class="@(!isHomepageExists ? "hidden" : string.Empty)">
+                    <select data-live-search="true" class="selectpicker dropup form-control" id="select-homepage" data-none-results-text="@T["No results match"]" data-size="4" title="@T["Select a pinboard to add"]" data-original-value="null" data-container="#pin-widget-form" data-dropup-auto="false" @(!isHomepageExists ? "disabled" : string.Empty)>
+                        <option data-hidden="true" value="">@T["Select a pinboard to add"]</option>
+                        @if (userHomepage != null && userHomepage.Count > 0)
+                        {
+                            for (var item = 0; item < userHomepage.Count; item++)
+                            {
+                                <option value="@userHomepage[item].Id" data-item="@userHomepage[item].ItemType" selected="@(item == 0)">@userHomepage[item].Name</option>
+                            }
+                        }
+                    </select>
+                    <span id="select-validation" class="validation-errors"></span>
+                </div>
+                <div class="@(isHomepageExists ? "hidden" : string.Empty)" id="input-content">
+                    <input type="text" id="new-homepage-name" name="newhomepagename" class="form-control" data-maxlength="255" placeholder="@T["New pinboard name"]" autofocus />
+                    <span class="validation-errors"></span>
+                </div>
+                <div class="col-xs-12" id="filter-container" style="@canShowFilter">
+                    @Html.Label("keepfilter", T["Keep filters"].Value, new { @class = "app-textbox-label col-xs-4", @id = "keep-filter-label" })
+                    <div class="col-xs-4 keepfilter switch-align">
+                        <span class="material-switch text-left">
+                            <input type="checkbox" id="keepfilter" name="keep-filter" />
+                            <label for="keepfilter" class="label-primary"></label>
+                        </span>
+                    </div>
+                    <div id="info-tag">
+                        <span id="filter-info" class="su su-info info-popup" data-toggle="popover" data-placement="top" data-content='@T["When “Keep filters” is switched on, the widget will be added to the pinboard along with the applied filters."]'></span>
+                    </div>
+                </div>
+                <div id="pin-widget-button">
+                    <div id="button-container">
+                        <input type="button" id="save-button" class="btn primary-button app-btn-primary" value="@T["Pin"]">
+                        <input type="button" id="cancel-button" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" onclick="closePinWidgetPopup()">
+                    </div>
+                </div>
+            </div>
+        }
+    </form>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>

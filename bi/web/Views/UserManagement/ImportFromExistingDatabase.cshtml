@@ -1,0 +1,255 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.Title = "[[[Users - Import from database]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts
+{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-database-import.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-database-import.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-database-import.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-database-import.min.js"></script>
+    </environment>
+    <script>
+        var testConnectionUrl = "@Url.Action("TestDatabaseConnection", "UserManagement")";
+        var connectDatabaseUrl = "@Url.Action("ConnectDatabaseToImport", "UserManagement")";
+        var getDatabaseUrl = "@Url.Action("GetDatabaseList", "UserManagement")";
+        var getTableRelationUrl = "@Url.Action("GetTableRelation", "UserManagement")";
+        var getResultDataUrl = "@Url.Action("GetDataForImportFromDatabase", "UserManagement")";
+        var getSearchedResultUrl = "@Url.Action("GetDataWithSearchForImport", "UserManagement")";
+        var saveSelectedUsersUrl = "@Url.Action("ImportSelectedUsersFromDatabase", "UserManagement")";
+        var isDatabaseUserImport = false;
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_UserMenu")
+    @if (globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation)
+    {
+        <div id="import-database-container" class="container-fluid admin-page-container">
+            <div class="col-md-12 import-area admin-page-header">
+                <div class="col-xs-6 no-padding">
+                    <a href="@Url.Action("index", "UserManagement")" data-toggle="tooltip" data-placement="top" title="[[[Users]]]" class="back-button pull-left">
+                        <i class="su su-arrow-back"> </i>
+                    </a>
+                    <h1 class="page-title">
+                        [[[Import Users From Database]]]
+                    </h1>
+                </div>
+                <div class="col-xs-6 page-btn-holder no-padding">
+                    <div class="connection-properties-form">
+                        <button type="button" id="connect-database" class="primary-button app-btn-primary pull-right">[[[Connect]]]</button>
+                    </div>
+                    <button type="button" id="apply-connections" class="primary-button app-btn-primary pull-right display-none" disabled="disabled">[[[Next]]]</button>
+                    <button type="button" id="import-selected" class="primary-button app-btn-primary pull-right display-none" onclick="SaveSelectedUsers()">[[[Import users]]]</button>
+                </div>
+            </div>
+            <div class="col-lg-12 connection-properties-form admin-page-body">
+                <div id="connect-properties" class="col-md-5 col-sm-6 col-xs-12">
+                    <form class="col-xs-12 no-padding form-horizontal">
+                        <div class="form-group">
+                            <div id="databasetype-holder" class="col-xs-12 no-padding">
+                                <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                    [[[Database type]]]
+                                </label>
+                                <div class="col-xs-8 connect-database-padding txt-holder">
+                                    <select id="database-type" class="selectpicker">
+                                        <option value="MSSQL">[[[SQL Server]]]</option>
+                                        <option value="PostgreSQL">[[[PostgreSQL]]]</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <form id="sql-content-holder" class="col-xs-12 no-padding content-display show-sql-content form-horizontal">
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Server name]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" id="txt-servername" name="servername" class="form-control" placeholder="[[[Server name]]]" />
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Authentication]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <select id="check-windows" class="selectpicker">
+                                    <option value="sql">[[[SQL Authentication]]]</option>
+                                    <option value="windows">[[[Windows Authentication]]]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Username]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" id="txt-login" name="username" class="form-control" placeholder="[[[Username]]]" />
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Password]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" style="display: none;">
+                                <input type="password" id="txt-password-db" name="password" class="form-control" placeholder="[[[Password]]]" autocomplete="off" />
+                                <span id="password-field" class="validation-txt-errors"></span>
+                                <div class="su su-eye show-hide-password"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Database name]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <select id="txt-dbname" class="selectpicker database-name-select" title="[[[Database name]]]" data-size="5"></select>
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                    </form>
+                    <form id="postgresql-content-holder" class="col-xs-12 no-padding content-display show-postgresql-content display-none form-horizontal">
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Server name]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" id="postgresql-servername" name="servername" class="form-control" placeholder="[[[Server name]]]" />
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Port]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" id="postgresql-port" name="port" class="form-control" placeholder="[[[Port]]]" />
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Username]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" id="postgresql-login" name="username" class="form-control" placeholder="[[[Username]]]" />
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Password]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <input type="text" style="display: none;">
+                                <input type="password" id="postgresql-password-db" name="password" class="form-control" placeholder="[[[Password]]]" autocomplete="off" />
+                                <span id="password-field" class="validation-txt-errors"></span>
+                                <div class="su su-eye show-hide-password"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-4 connect-database-padding txt-holder app-textbox-label">
+                                [[[Database name]]]
+                            </label>
+                            <div class="col-xs-8 connect-database-padding txt-holder">
+                                <select id="postgresql-dbname" class="selectpicker database-name-select" title="[[[Database name]]]" data-size="5"></select>
+                                <span class="validation-txt-errors"></span>
+                            </div>
+                        </div>
+                    </form>
+                    <button type="button" id="test-connection" class="primary-button app-btn-primary  pull-right">[[[Test Connection]]]</button>
+                </div>
+                <div class="col-xs-12 connection-properties-form">
+                    <div class="col-md-5 col-sm-6 col-xs-12 text-center">
+                        <span id="test-connection-validation"></span>
+                    </div>
+                </div>
+            </div>
+            <div id="selected-schema-container" class="col-xs-12 selected-schema-container display-none admin-page-body">
+            </div>
+        </div>
+        <div id="select-existing-join">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-12 no-padding">
+                    <h3>[[[Select Relation]]]</h3>
+                </div>
+                <div class="col-xs-12 no-padding table-content">
+                    <table class="relation-list"></table>
+                </div>
+            </div>
+            <div class="col-xs-12 btn-relation-holder">
+                <button type="button" id="select-relation" class="primary-button app-btn-primary pull-right">[[[Apply]]]</button>
+            </div>
+        </div>
+
+        <div id="get-join-details">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-12 no-padding">
+                    <span class="join-dialog-title">[[[Form Relation]]]</span>
+                </div>
+                <div class="col-xs-12 no-padding relation-select-content">
+                    <div class="col-xs-5 no-padding">
+                        <h5>[[[Left table]]]</h5>
+                        <div class="col-xs-12 no-padding">
+                            <select id="left-table-selection" class="selectpicker"></select>
+                        </div>
+                        <div id="left-table-columnlist" class="col-xs-12 no-padding column-list">
+                            <ul></ul>
+                        </div>
+                    </div>
+                    <div class="col-xs-2 no-padding">
+                        <div id="join-type-holder">
+                            <select id="join-type" class="selectpicker">
+                                <option value="inner join">[[[Inner Join]]]</option>
+                                <option value="left join">[[[Left Join]]]</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-5 no-padding">
+                        <h5>[[[Right table]]]</h5>
+                        <div class="col-xs-12 no-padding">
+                            <select id="right-table-selection" class="selectpicker" disabled="disabled"></select>
+                        </div>
+                        <div id="right-table-columnlist" class="col-xs-12 no-padding column-list">
+                            <ul></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 btn-relation-holder">
+                <button type="button" id="apply-relation" class="primary-button app-btn-primary pull-right" disabled="disabled">[[[Apply]]]</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div id="import-database-container" class="container-fluid admin-page-container">
+            <div class="col-md-12 import-area admin-page-header">
+                <div class="col-xs-6 no-padding">
+                    <a href="@Url.Action("index", "UserManagement")" title="[[[Import Users]]]" class="back-button pull-left">
+                        <i class="su su-arrow-back back-navigaion"> </i>
+                    </a>
+                    <h1 class="page-title">
+                        [[[Import Users From Database]]]
+                    </h1>
+                </div>
+            </div>
+            <div class="col-md-12 admin-page-body">
+                @if (globalAppSettings.SystemSettings.ActivationType != ActivationType.EmailActivation)
+                {
+                    <h5>[[[Importing users from existing database is not available in automatic account activation type.]]]</h5>
+                    <a href="@Url.Action("user-settings", "administration")" class="admin-page-link">[[[Please click here to change the account activation type]]]</a>
+                }
+            </div>
+        </div>
+    }
+}

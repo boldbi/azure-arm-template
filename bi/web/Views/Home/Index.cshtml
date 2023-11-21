@@ -1,0 +1,372 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Home"] + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
+    var donotShowJourney = Context.Request.Cookies["syncfusion.dashboards.server.journey"] != null;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var itemList = ViewBag.RecentItems != null ? ViewBag.RecentItems as List<ItemDetail> : new List<ItemDetail>();
+    var permission = ViewBag.ItemPermissions != null ? ViewBag.ItemPermissions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>();
+    var viewDashboardUrl = Url.Action("Dashboards", "Dashboards");
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var quickActions = ViewBag.QuickActions != null ? ViewBag.QuickActions as List<QuickAction> : new List<QuickAction>();
+    var donotShowConcierge = Context.Request.Cookies["syncfusion.dashboards.server.concierge"] != null;
+    var onBoardExperience = ViewBag.OnBoardExperience;
+    var currentUserId = ViewBag.currentUserId;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<environment include="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/home.css" />
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/home.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/home.min.css" />
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/home.min.js"></script>
+</environment>
+
+@section scripts{
+
+    <script type="text/javascript">
+        var getItemDetailsUrl = "@Url.Action("GetItemDetail", "items")";
+        var schedulerIframeUrl = "@Url.Action("GetSchedulerDialog", "scheduler")";
+        var quickActions = @Html.Raw(Json.Serialize(quickActions.ToArray()));
+        var addSampleItemsUrl = "@Url.Action("AddSampleItems", "Items")";
+        var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
+        var viewDashboardUrlAction = "@Url.Action("Dashboards", "Dashboards")";
+        var recentDashboard = @Html.Raw(Json.Serialize(onBoardExperience.RecentDashboard));
+        var recentSlideShowId = "@(onBoardExperience.RecentSlideShowId != Guid.Empty ? onBoardExperience.RecentSlideShowId.ToString() : string.Empty)";
+        var donotShowJourney = @Json.Serialize(donotShowJourney);
+        var isAdmin = @Json.Serialize(isAdmin);
+        var isCreateDashboardPermissionAvailable = @Json.Serialize(permission[ItemType.Dashboard]);
+        var isSlideshowPermissionAvailable = @Json.Serialize(!permission[ItemType.Dashboard] && permission[ItemType.Slideshow]);
+        var currentUserId = @currentUserId;
+    </script>
+}
+
+@section MainSection {
+
+    <div id="home-container">
+
+        @if (!donotShowConcierge)
+        {
+            <div class="col-md-12 col-lg-12 concierge-support-div">
+                <div class="col-md-2 col-lg-2 concierge-img">
+                    <img src="~/content/Styles/LESS/images/concierge_support.svg" />
+                </div>
+                <div class="col-md-9 col-lg-9 concierge-content">
+                    <h4 class="concierge-title">
+                        @Html.Raw(string.Format(T["{0}Questions?{1} Contact our support team."].Value, "<strong>", "</strong>"))
+                    </h4>
+                    <span>
+                        @T["We can answer all your questions about dashboard creation, sharing, and maintenance."]
+                    </span>
+                    <div class="concierge-buttons">
+                        <button class="btn primary-button app-btn-primary request-concierge-support">@T["New Support Request"]</button>
+                    </div>
+                </div>
+                <div class="col-md-1 col-lg-1 no-padding">
+                    <span class="su su-close donot-show-concierge" data-toggle="tooltip" title="@T["Close"]"></span>
+                </div>
+            </div>
+        }
+
+
+        <div class="col-md-12 col-lg-8 content-left no-padding">
+            <h4>@string.Format(T["Welcome back, {0}"].Value, displayName)</h4>
+
+            <div class="col-md-12 col-lg-12 no-padding">
+                @if (permission[ItemType.Dashboard] && !donotShowJourney)
+                {
+                    <div class="setup-journey col-xs-10 no-padding">
+                        <div class="link-box">
+                            @{ await Html.RenderPartialAsync("~/Views/Shared/_OnBoardExperience.cshtml", new ViewDataDictionary(ViewData) { { "onBoardExperience", onBoardExperience }, { "createItemPermission", permission }, { "IsAdmin", isAdmin } }); }
+                        </div>
+                    </div>
+                }
+                @if (permission[ItemType.Dashboard])
+                {
+                    <div class="link-box-div create-blank-dashboard">
+                        <a class="link-box-content" href="@Url.Action("DashboardDesigner", "Designer")" title="">
+                            <div class="blank-dashboard-section">
+                                <div class="blank-dashboard-icon">
+                                    <img id="new-dashboard-img" class="smiley" src=@Url.Content("~/content/images/new-dashboard.svg") />
+                                </div>
+                                <div class="blank-dashboard-title">@T["New Dashboard"]</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="link-box-div create-template-dashboard-div">
+                        <div class="link-box-content deploy-template-dashboard">
+                            <div class="blank-dashboard-section">
+                                <div class="blank-dashboard-icon">
+                                    <img id="templates-img" class="smiley" src=@Url.Content("~/content/images/templates.svg") />
+                                </div>
+                                <div class="blank-dashboard-title">@T["Dashboard Templates"]</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="quick-actions-div col-md-12 col-lg-12 no-padding">
+                <div class="quick-actions-content">
+                    <span class="header">@T["Quick Actions"]</span>
+                    <div class="dropdown pull-right col-md-8 col-lg-8 no-padding quick-search-area">
+                        @if (quickActions.Count > 0)
+                        {
+                            <input class="secondary-button app-btn-secondary dropdown-toggle quick-actions" type="text" data-toggle="dropdown" placeholder="@T["Look for more quick options.."]">
+                            <span class="su su-vertical-expand"></span>
+                            <ul class="dropdown-menu" id="quick-action-ul">
+                                @for (int i = 0; i < quickActions.Count; i++)
+                                {
+                                    <li class="action-link">
+                                        @{
+                                            var description = quickActions[i].Description.IndexOf("branding:company_name") == -1 ? quickActions[i].Description : quickActions[i].Description.Replace("branding:company_name", GlobalAppSettings.BrandingCompanyName);
+                                        }
+
+                                        @if (string.IsNullOrEmpty(quickActions[i].Url))
+                                        {
+                                            <a class="@quickActions[i].ElementClass col-sm-12 col-md-12 col-lg-12">
+                                                <span class="action-title">@quickActions[i].Title</span>
+                                                <span class="col-sm-12 col-md-12 col-lg-12 action-description no-padding">@description</span>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            var url = quickActions[i].Url.StartsWith("Help:") ? helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl((HelpSiteUrlNames)Enum.Parse(typeof(HelpSiteUrlNames), quickActions[i].Url.Remove(0, 5))) : (quickActions[i].Url.Contains("branding:url") ? (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier ? quickActions[i].SyncfusionUrl : quickActions[i].BoldBiUrl) : quickActions[i].Url);
+
+                                            <a href="@url" target="@(quickActions[i].Url.StartsWith("/") ? "" : "blank")" class="col-sm-12 col-md-12 col-lg-12">
+                                                <span class="action-title">@quickActions[i].Title</span>
+                                                <span class="col-sm-12 col-md-12 col-lg-12 action-description no-padding">@description</span>
+                                            </a>
+                                        }
+
+                                        @if (i != quickActions.Count - 1)
+                                        {
+                                            <a class="col-md-12 col-lg-12 separator"></a>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+                <div class="separator">
+                    <hr />
+                </div>
+            </div>
+
+            <div class="col-md-12 col-lg-12 no-padding quick-actions-list">
+
+                <div class="col-md-6 col-lg-6 no-padding pull-left">
+                    @if (permission[ItemType.Schedule])
+                    {
+                        <div class="col-md-12 col-lg-12 no-padding options notification-from-dashboard">
+                            <h5>
+                                @T["Add email notifications from the dashboards"]
+                            </h5>
+                            <ul>
+                                <li><a class="create-schedule">@T["Create schedules"]</a></li>
+                                <li><a href="@Url.Action("Schedules", "Scheduler")">@T["View all schedules"]</a></li>
+                            </ul>
+                        </div>
+                    }
+
+                    @if (permission[ItemType.Slideshow])
+                    {
+                        <div class="col-md-12 col-lg-12 no-padding options tv-mode">
+                            <h5>
+                                @T["Rotate dashboards in TV mode"]
+                            </h5>
+                            <ul>
+                                <li><a class="create-presentation">@T["Create slideshows"]</a></li>
+                                <li><a href="@Url.Action("Slideshows", "Slideshow")">@T["View all slideshows"]</a></li>
+                            </ul>
+                        </div>
+                    }
+
+                    @if (!permission[ItemType.Schedule] || !permission[ItemType.Slideshow])
+                    {
+                        <div class="col-md-12 col-lg-12 no-padding options my-actions">
+                            <h5>
+                                @T["My quick actions"]
+                            </h5>
+                            <ul>
+                                <li><a href="@Url.Action("Dashboards", "Dashboards")?view=shared">@T["View dashboards shared with me"]</a></li>
+                                <li><a href="@Url.Action("Homepages", "Boards")">@T["Add pinboards"]</a></li>
+                            </ul>
+                        </div>
+                    }
+
+                    @if (!permission[ItemType.Schedule] && !permission[ItemType.Slideshow])
+                    {
+                        <div class="col-md-12 col-lg-12 no-padding options my-account">
+                            <h5>
+                                @T["My account"]
+                            </h5>
+                            <ul>
+                                <li><a href="@Url.Action("Profilepage", "User")">@T["View my profile"]</a></li>
+                                <li><a href="@Url.Action("Profilepage", "User")">@T["My notification settings"]</a></li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-6 col-lg-6 no-padding pull-right">
+                    <div class="col-md-12 col-lg-12 no-padding options dashboard-help">
+                        <h5>@T["Need help with building a Dashboard?"]</h5>
+
+                        <ul>
+                            <li><a class="concierge-support-request-button request-concierge-support">@T["New Support Request"]</a></li>
+                            <li><a href="@Url.Action("TicketList", "Support")">@T["View all requests"]</a></li>
+                        </ul>
+                    </div>
+
+                    @if (!isAdmin && (permission[ItemType.Schedule] || permission[ItemType.Slideshow]))
+                    {
+                        <div class="col-md-12 col-lg-12 no-padding options my-account">
+                            <h5>
+                                @T["My account"]
+                            </h5>
+                            <ul>
+                                <li><a href="@Url.Action("Profilepage", "User")">@T["View my profile"]</a></li>
+                                <li><a href="@Url.Action("Profilepage", "User")">@T["My notification settings"]</a></li>
+                            </ul>
+                        </div>
+                    }
+
+                    @if (isAdmin)
+                    {
+                        <div class="col-md-6 col-lg-6 no-padding options administer-site">
+                            <h5>
+                                @T["Administer your site"]
+                            </h5>
+                            <ul>
+                                <li><a href="@Url.Action("Index", "UserManagement")?action=adduser">@T["Invite users"]</a></li>
+                                <li><a href="@Url.Action("Administration", "Administration")">@T["Custom Branding"]</a></li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (permission[ItemType.Datasource])
+            {
+                <div class="datasource-list-div col-md-12 col-lg-12 no-padding">
+                    <div class="datasource-content">
+                        <span class="header">@T["Add your Data"]</span>
+                    </div>
+
+                    <div class="separator">
+                        <hr />
+                    </div>
+
+                    <h5>@T["Bring your data from 50+ available datasources"]</h5>
+
+                    <div class="col-md-12 col-lg-12 no-padding datasource-div">
+
+                        <ul class="no-padding datasource-list-ul">
+                            <li class="datasource-item separator-right">
+                                <span class="datasource no-margin">
+                                    <img class="datasource-excel" id="datasource-excel" src="~/content/Styles/LESS/images/excel.png" title="Excel" data-toggle="tooltip" data-container="body" data-placement="top" />
+                                </span>
+                            </li>
+                            <li class="datasource-item separator"></li>
+                            <li class="datasource-item separator-left">
+                                <span class="datasource no-margin">
+                                    <img class="datasource-mssql" id="datasource-mssql" src="~/content/Styles/LESS/images/sql.png" title="Microsoft SQL" data-toggle="tooltip" data-container="body" data-placement="top" />
+                                </span>
+                            </li>
+                            <li class="datasource-item">
+                                <span class="datasource">
+                                    <img class="datasource-postgre" id="datasource-postgre" src="~/content/Styles/LESS/images/postgresql.png" title="PostgreSQL" data-toggle="tooltip" data-container="body" data-placement="top" />
+                                </span>
+                            </li>
+                            <li class="datasource-item" title="Amazon Redshift" data-toggle="tooltip" data-container="body" data-placement="top">
+                                <span class="datasource">
+                                    <img class="datasource-redshift" id="datasource-redshift" src="~/content/Styles/LESS/images/amazonredshift.png" title="Amazon Redshift" data-toggle="tooltip" data-container="body" data-placement="top" />
+                                </span>
+                            </li>
+                            <li class="datasource-item">
+                                <span class="datasource">
+                                    <img class="datasource-google-analytics" id="datasource-google-analytics" src="~/content/Styles/LESS/images/google_analytics.png" title="Google Analytics" data-toggle="tooltip" data-container="body" data-placement="top" />
+                                </span>
+                            </li>
+                            <li class="datasource-item">
+                                <span class="datasource">
+                                    <img class="datasource-jira" id="datasource-jira" src="~/content/Styles/LESS/images/jira.png" title="Jira" data-toggle="tooltip" data-container="body" data-placement="top" />
+                                </span>
+                            </li>
+                            <li class="datasource-item">
+                                <span class="datasource more-services">@T["View all 50+ Services"]</span>
+                            </li>
+                        </ul>
+
+                        <span class="displayNone create-datasource-connection"></span>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <div class="col-md-12 col-lg-4 content-right no-padding">
+            @if (itemList.Count > 0)
+            {
+                <div class="recent-dashboards-div">
+                    <h4>@T["Recently Visited Dashboards"]</h4>
+                    <hr class="no-margin" />
+                    <div class="recent-dashboards">
+                        <ul class="no-padding">
+                            @foreach (var item in itemList)
+                            {
+                                <li class="dashboard-item-link">
+                                    <a href="@viewDashboardUrl/@item.Id?showmydashboards=1" class="item-name col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        @item.Name
+                                        <span class="owner-name col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">@item.CreatedByDisplayName</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            <div class="quick-help-div">
+                <h4>@T["Quick Help"]</h4>
+                <hr class="no-margin" />
+
+                <ul>
+                    <li><a href="@helpSiteBaseUrl/dashboard-designer-walk-through" target="_blank">@T["How to Create Dashboards"]</a></li>
+                    <li><a href="@helpSiteBaseUrl/creating-a-new-data-source" target="_blank">@T["How to Connect Data"]</a></li>
+                    <li><a href="@helpSiteBaseUrl/share-dashboards/public-dashboards#make-public" target="_blank">@T["How to make my Dashboard Public"]</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+
+    <div id="permission-popup" class="no-padding" style="display:none">
+        <iframe id="permission-iframe" class="PermissionIframe"></iframe>
+    </div>
+
+    <div id="sample-item-popup" class="no-padding" style="display:none">
+        <iframe id="sample-item-iframe" class="sampleItemIframe"></iframe>
+    </div>
+
+    <div id="create-presentation-popup" class="no-padding" style="display:none">
+        <div id="create-presentation-div" class="partial-views" data-partial-url="@GlobalAppSettings.HttpPathBase/en-us/home/getpartial?partialView=_CreateSlideshow&controller=Slideshow">
+
+        </div>
+    </div>
+
+    @if (!ServerAppConfig.IsSelfHosted)
+    {
+        @await Html.PartialAsync("../Items/_CreateDashboards", permission)
+    }
+    @await Html.PartialAsync("../Items/_SharePermission")
+}
+

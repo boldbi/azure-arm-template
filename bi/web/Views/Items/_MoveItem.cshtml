@@ -1,0 +1,60 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
+    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<script>
+    var moveItemUrl = "@Url.Action("moveitem", "items")";
+    var canCreateCategory = "@canCreateCategory";
+
+    function load() {
+        if (($(parent.window).width()) > 1400) {
+            $(".dialog").addClass("iframe");
+        }
+
+        if (($(parent.window).width()) < 1400) {
+            $(".dialog").removeClass("iframe");
+        }
+    }
+</script>
+
+<div id="ItemAction" style="display:none" class="no-padding">
+    <div id="PopupContainer" class="dialog">
+        <form class="dialog-body no-padding move-category" id="move_report_form" style="display: none">
+            <input type="hidden" id="move-dashboard-status" value="true" />
+            <div class="col-xs-12" id="item-name-division">
+                <div class="col-xs-12 no-padding text-label" style="font-weight:bold">@T["Name"]<span class="mandatory">*</span></div>
+                <div class="col-lg-12 no-padding">
+                    <input type="text" id="move_item_name" name="itemName" data-maxlength="255" value="" class="form-control site-orgname-fields text" />
+                    <span class="validation-error text"></span>
+                </div>
+            </div>
+            <div class="col-xs-12" id="action-category-division">
+                <div class="col-xs-12 no-padding text-label" style="font-weight:bold">@T["Move to Category"]</div>
+                @if (canCreateCategory)
+                {
+                    <div class="col-xs-12 no-padding dropup">
+                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
+                        <span class="category-validation-error text"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-xs-12 no-padding dropup">
+                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
+                    </div>
+                }
+
+            </div>
+            <input type="hidden" id="MoveItemIdHidden" value="" />
+            <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />
+        </form>
+
+        <div class="col-xs-12 no-padding">
+            <div class="permission-denied" id="move-item-denied" style="display: none"></div>
+        </div>
+    </div>
+</div>

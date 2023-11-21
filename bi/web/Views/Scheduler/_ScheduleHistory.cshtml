@@ -1,0 +1,126 @@
+﻿
+<!DOCTYPE html>
+<head>
+    <script>
+        var scheduleHistoryUrl = "@Url.Action("ScheduleHistory", "items")";
+    </script>
+
+</head>
+<body>
+    <div id="run-history-container" class="col-xs-12 no-padding dialog" style="display:none">
+        <div class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog col-lg-12 popup-header no-padding" role="document">
+                <div class="modal-content col-lg-12" data-spy="scroll">
+                    <div class="col-lg-12 modal-header">
+                        <div class="col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding">
+                            <span class="su su-run-history head-icon col-lg-1 col-xs-1 col-sm-1 col-md-1 header-icon"></span>
+                            <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-10 col-xs-10 col-sm-10 col-md-10 no-padding" data-toggle="tooltip" data-placement="bottom" data-container="body" style="font-size:16px;"></span>
+                        </div>
+                        <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1 no-padding">
+                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" data-container="body" title="@T["Close"]" class="popup-close pull-right"><span class="su su-close"></span></a>
+                        </div>
+                    </div>
+                    <div class="modal-body col-lg-12">
+                        <div class="total-move-container col-xs-12 version-container-padding">
+                            <div id="item-history-container" class="show col-xs-12 no-padding version-area" data-previous-parent-id="none" data-parent-id="home" data-type="self">
+                                <div class="col-xs-12 no-padding" style="display:block; padding-top:20px; float:left;">
+                                    <div id="historygrid" class="grid">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 modal-footer">
+                        <div class="col-xs-12 no-padding">
+                            <input type="button" id="close-button" title="@T["Close"]" class="app-button app-secondary-button app-btn-secondary pull-right popup-close" value="@T["Close"]" tabindex="-1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ScheduleFailureStatus" class="fluent-popup custom-bootstrap-styles custom-server-style no-padding" style="display: none">
+        <div class="fluent-popup-header col-xs-12 no-padding">
+            <h4 class="popup-title">
+                <span class="su su-info"></span>
+                <span id="info-dialog-header">@T["Failure Info"]</span>
+                <button id="close-info-dialog" type="button" title="@T["Close"]" data-toggle="tool-tip" data-container="body" class="close popup-close" onclick="closeFailureInfo()" aria-label="Close">
+                    <span class="su su-close"></span>
+                </button>
+            </h4>
+        </div>
+        <div class="fluent-item-popup-body col-xs-12">
+            <span id="ScheduleFailureStatusMessage"></span>
+        </div>
+        <div class="fluent-popup-footer col-xs-12">
+            <div class="col-xs-12 no-padding">
+                <button class="app-button app-secondary-button app-btn-secondary" onclick="closeFailureInfo()" title=@T["Close"]>@T["Close"]</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/x-jsrender" id="execution_type">
+    <div class="grid-content" title="{{:ExecutionType}}" data-toggle="tooltip">{{:ExecutionType}}</div>
+</script>
+<script type="text/x-jsrender" id="schedule_status">
+    {{if ScheduleStatus =="@((int)ScheduleStatus.Fail)"}}
+    <span><a class="grid-content" href="javascript:void(0);" onclick="onFailureStatusClick()">{{:Status}}</a></span>
+    {{else}}
+<div class="grid-content" title="{{:Status}}" data-toggle="tooltip">{{:Status}}</div>
+    {{/if}}
+</script>
+<script type="text/x-jsrender" id="schedule_message">
+    <div class="grid-content" title="{{:Message}}" data-toggle="tooltip">{{:Message}}</div>
+</script>
+<script type="text/x-jsrender" id="executed_date">
+    <div class="grid-content" title="{{:ExecutedDateString}}" data-toggle="tooltip">{{:ExecutedDateString}}</div>
+</script>
+<script type="text/x-jsrender" id="log_details">
+    <div class="grid-content" title="{{:Details}}" data-toggle="tooltip">{{:Details}}</div>
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        GridLocalization(window.Server.App.Localization.ScheduleHistoryEmpty);
+        $("#historygrid").ejGrid({
+            gridLines: ej.Grid.GridLines.None,
+            allowPaging: true,
+            pageSettings: { pageSize: 10 },
+            allowSorting: true,
+            allowSearching: true,
+            allowFiltering: false,
+            enableAltRow: false,
+            allowSelection: true,
+            enableRowHover: true,
+            locale: "en-US",
+            rowDataBound: function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
+            dataBound: function (args) {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
+            columns: [
+                {
+                    template: true,
+                    templateID: "#execution_type",
+                    headerText: "@T["Execution Type"]",
+                    width: 40,
+                    field: "ExecutionType"
+                },
+                {
+                    template: true,
+                    templateID: "#schedule_status",
+                    headerText: "@T["Status"]",
+                    width: 25,
+                    field: "Status"
+                },
+                {
+                    template: true,
+                    templateID: "#executed_date",
+                    headerText: "@T["Execution Date"]",
+                    width: 40,
+                    field: "ExecutedDateString"
+                },
+            ]
+        });
+    });
+</script>

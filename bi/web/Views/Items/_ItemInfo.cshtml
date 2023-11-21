@@ -1,0 +1,49 @@
+﻿<div id="item-info-popup" class="fluent-popup custom-bootstrap-styles custom-server-style" style="display: none" ng-controller="ItemInfoCtrl">
+    <div class="fluent-popup-header">
+        <h4 class="popup-title">
+            <span class="su su-info"></span>
+            <span id="info-dialog-header">@T["Info"]</span>
+            <button id="close-info-dialog" type="button" title='@T["Close"]' data-toggle="tool-tip" data-container="body" class="close popup-close" ng-click="closeItemInfo()" aria-label="Close">
+                <span class="su su-close"></span>
+            </button>
+        </h4>
+    </div>
+    <div class="fluent-item-popup-body">
+        <p class="item-info-name">
+            {{ItemDetail.Name}}
+        </p>
+        <p class="item-info-description" ng-show="ItemDetail.Description != ''" style="white-space:pre-line"> {{ItemDetail.Description}}</p>
+        <span class="item-info-id" ng-show="!isUsageAnalytics">
+            <label class="info-label">@T["Item Id"]:</label> {{ItemDetail.Id}}
+        </span>
+        <span class="item-info-DashboardId" ng-show="ItemDetail.ItemId !=null">
+            <label class="info-label">@T["Dashboard Id"]:</label> {{ItemDetail.ItemId}}
+        </span>
+        <span class="item-info-created" ng-show="!isUsageAnalytics">
+            <label class="info-label">@T["Created by"]:</label> {{ItemDetail.CreatedByDisplayName}}
+        </span>
+        <span class="item-info-created" ng-show="!isUsageAnalytics">
+            <label class="info-label">@T["Created on"]:</label> {{ItemDetail.CreatedDate}}
+        </span>
+        <span class="item-info-modified" ng-show="!isUsageAnalytics">
+            <label class="info-label">@T["Last modified by"]:</label> {{ItemDetail.ModifiedByFullName}}
+        </span>
+        <span class="item-info-modified" ng-show="!isUsageAnalytics">
+            <label class="info-label">@T["Last modified on"]:</label> {{ItemDetail.ModifiedDate}}
+        </span>
+        <span class="item-info-modified" ng-if="!isUsageAnalytics" ng-show="ItemDetail.CategoryName !=null">
+            <label class="info-label">@T["Category"]:</label> {{ItemDetail.CategoryName}}
+        </span>
+    </div>
+    <div class="fluent-popup-footer">
+        <div class="col-xs-12" ng-if="showDashboardLinkButton && !ItemDetail.IsUploadDraft">
+            <a href="{{viewDashboardUrl(ItemDetail.Id, ItemDetail.CategoryName, ItemDetail.Name, ItemDetail.IsDraft)}}" class="link-button app-btn-link" target="_blank" title="">{{GetInfoButtonText(ItemDetail.IsDraft)}}</a>
+        </div>
+        <div class="col-xs-12" ng-if="showDashboardLinkButton && ItemDetail.IsUploadDraft">
+            <span class="link-button app-btn-link" ng-click="openUploadDashboardDialog(ItemDetail.Id)">@T["Complete Upload"]</span>
+        </div>
+        <div class="col-xs-12 " ng-if="!showDashboardLinkButton">
+            <button class="secondary-button app-btn-secondary" ng-click="closeItemInfo()" title="">@T["Close"]</button>
+        </div>
+    </div>
+</div>

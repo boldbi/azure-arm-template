@@ -1,0 +1,50 @@
+﻿
+
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/deleteconfirm.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/deleteconfirm.min.css" />
+    </environment>
+
+    <script>
+        var deleteGroupUrl = "@Url.Action("DeleteGroup", "group")";
+        var groupPageUrl = "@Url.Action("group", "group")";
+        var cdnLink = "@dashboardServerResourceUrl";
+    </script>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+<div id="delete-resolution-fix">
+    <div id="group-delete-confirmation" class="no-padding">
+        <input type="hidden" id="hidden-id" value="@ViewBag.id" />
+        <div class="col-md-12 error-message pull-left no-padding">@TempData["ErrorMessage"]</div>
+        <div class="col-md-12 success-message pull-left no-padding"></div>
+        <div class="col-xs-12 no-padding" id="container">
+            <div class="modal-body col-xs-12 no-padding">
+                <div class="col-xs-12 no-padding">
+                    <div class="delete-msg">@Html.Raw(String.Format(T["Are you sure you want to delete the group {0}?"].Value, " &mdash; <span class='highlight-name'>" + Context.Request.Query["name"] + "</span>"))</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</div>

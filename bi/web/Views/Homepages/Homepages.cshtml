@@ -1,0 +1,396 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    ViewBag.Title = T["Pinboards"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = true;
+    var baseUrl = globalAppSettings.SystemSettings.BaseUrl;
+    var dashboardServiceUrl = globalAppSettings.SystemSettings.InternalAppDataServiceUrl;
+    var dashboardServiceResourceUrl = globalAppSettings.SystemSettings.DashboardServiceResourceUrl;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var isHomepageExists = Convert.ToBoolean(ViewBag.IsHomepageExists);
+    var isDefaultHomepage = Convert.ToBoolean(ViewBag.IsDefaultHomepage);
+    var isHomePageInfoByName = Convert.ToBoolean(ViewBag.IsHomepageInfoByName);
+    var defaultHomepageDetail = (HomepageDetail)ViewBag.DefaultHomepageDetail;
+    var homepageInfo = (HomepageDetail)ViewBag.HomepageInfo;
+    var allHomepagesCount = ViewBag.UserHomepageCount;
+    var isUseCdn = globalAppSettings.SystemSettings.UseCDN;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePinboards);
+    var dataServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings).TrimEnd('/');
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var isSyncfusionIdentifier = GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier ? true : false;
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var ipAddress = Context.Connection.RemoteIpAddress;
+
+}
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepages-page.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepages-page.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.min.css" />
+    </environment>
+}
+@section scripts{
+    <script src="@dataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepages-page-v1-dependency.js"></script>
+        @*<script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-common-all.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.js"></script>*@
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepages-page-v1-utilities.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepages-page-v1-dependency.min.js"></script>
+        @if (!isSelfHosted)
+        {
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/ej.dashboard.ejcommon.all.min.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.min.js"></script>
+        }
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepages-page-v1-utilities.min.js"></script>
+    </environment>
+
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.common.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.common.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard.min.js"></script>
+    </environment>
+
+    @if (!isSelfHosted)
+    {
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+
+    }
+    else
+    {
+        @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    }
+
+    @* Need to check for cloud
+        @if (isDebug)
+        {
+            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.ejcommon.all.min.js")"></script>
+            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.viewer.all.min.js")"></script>
+        }*@
+
+
+    <script type="text/javascript">
+        var allHomepages = @Html.Raw(@ViewBag.UserHomepages);
+        var allHomepagesCount = allHomepagesCount;
+        var baseUrl = "@(baseUrl.TrimEnd('/'))";
+        var homepageBaseUrl = "@(baseUrl.TrimEnd('/') + "/pinboards")";
+        var dashboardServiceUrl = "@dashboardServiceUrl";
+        var accessToken = "@ViewBag.AccessToken";
+        var designerRootUrl = "@dataServiceUrl";
+        var dashboardServerApiUrl = "@dashboardServerApiUrl";
+        var dashboardServerUrl = "@globalAppSettings.SystemSettings.BaseUrl";
+        var deleteHomepageUrl = "@Url.Action("deletehomepage", "boards")";
+        var changeLayoutUrl = "@Url.Action("onlayoutchange", "boards")";
+        var dragAndDropUrl = "@Url.Action("ondraganddrop","boards")";
+        var unPinUrl = "@Url.Action("onunpin","boards")";
+        var homepageActionUrl = "@Url.Action("homepageaction","boards")";
+        var setRemoveDefaultHomepageUrl="@Url.Action("setremovedefaulthomepage","boards")";
+        var homepageAddItemUrl = "@Url.Action("homepageadditem","boards")";
+        var addHomepageUrl = "@Url.Action("addhomepage", "boards")";
+        var getHomepageDetails = "@Url.Action("gethomepagedetails", "boards")";
+        var checkHomepageNameExistsUrl = "@Url.Action("checkhomepagenameexist", "boards")";
+        var renameHomepageUrl = "@Url.Action("edithomepage", "boards")";
+        var duplicateHomepageUrl = "@Url.Action("duplicatehomepage", "boards")";
+        var addHomepageUrl = "@Url.Action("addhomepage", "boards")";
+        var pinWidgetUrl = "@Url.Action("pinitemtohomepage", "boards")";
+        var dashboardsRenderUrl = "@Url.Action("Dashboards","Dashboards")";
+        var widgetsRenderUrl = "@Url.Action("widgets","widgets")";
+        var homepages = "@Url.Action("homepages","boards")";
+        var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var checkDashboardCreationLimit = "@Url.Action("CheckDashboardCreationLimit", "Designer")";
+        var dashboardViewerObject = null;
+        var isUseCdn = "@isUseCdn.ToString().ToLower()" == "true" ? true : false;
+        var cdnLink = "@cdnLink";
+        var cdnPath = "@dashboardDesignerResourceUrl/cdn/scripts/designer/";
+        var isSyncfusionIdentifier = @Json.Serialize(isSyncfusionIdentifier);
+        var ipAddress = "@ipAddress";
+        var appVersion = "@ServerAppConfig.ProductVersion";
+
+        serverApp.controller("homepagesController", ["$scope", function ($scope) {
+            $scope.allHomepages=allHomepages;
+        }]);
+        window.IsHomepagesPage = true;
+
+        window.onload = function () {
+            //Add placeholder for search box in 'Select a default pinboard' selectpicker in homepage
+            $("#widget-container #no-default-homepage-container .bootstrap-select .bs-searchbox .input-block-level").attr("placeholder", window.Server.App.Localization.SearchPinboards);
+        }
+    </script>
+}
+@section MainSection{
+    <div class="col-xs-12 no-padding">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Pinboards"] }, { "IsDefaultPage", "true" } })
+        <div id="homepage-header" class="col-xs-12 no-padding" ng-app="serverApp" ng-controller="homepagesController">
+            <div id="element-container">
+                @if (allHomepagesCount != 0)
+                {
+                    <div id="homepage-menu">
+                        <span id="homepage-list-container">
+                            <select data-live-search="true" class="selectpicker" id="homepage-list" data-size="11" title="" data-original-value="null">
+                                <option ng-repeat="homepage in allHomepages|orderBy:'Name'" data-homepage-id="{{homepage.Id}}" value="{{homepage.Name}}">{{homepage.Name}}</option>
+                            </select>
+                        </span>
+                    </div>
+                }
+                <div id="options-container">
+                    <span id="homepage-options" class="dropdown-toggle su su-nav-settings" data-toggle="dropdown"></span>
+                    <ul class="dropdown-menu" id="options" role="menu">
+                        @if (!isMobile)
+                        {
+                            <li id="rename">@T["Rename"]</li>
+                            <li id="duplicate">@T["Duplicate"]</li>
+                            <li id="delete">@T["Delete"]</li>
+                        }
+                        @if ((!isDefaultHomepage && defaultHomepageDetail != null) || (isHomePageInfoByName && !homepageInfo.IsDefaultHomepage) || (!isDefaultHomepage && !isHomePageInfoByName))
+                        {
+                            <li id="make-default" class="make-default">
+                                @T["Set as default pinboard"]
+                            </li>
+                        }
+                        else
+                        {
+                            <li id="remove-default" class="make-default">
+                                @T["Remove default pinboard"]
+                            </li>
+                        }
+                    </ul>
+                    @if (!isMobile)
+                    {
+                        <div id="divider"></div>
+                    }
+                    @if (!isMobile)
+                    {
+                        <div id="layout-container">
+                            <div id="layout" class="dropdown-toggle" data-toggle="dropdown">@T["Edit Layout"]</div>
+                            <div class="dropdown-menu" id="layout-items" role="menu">
+                                <span class="su su-single-column" id="1"></span>
+                                <span class="su su-two-column" id="11"></span>
+                                <span class="su su-small-big-column" id="12"></span>
+                                <span class="su su-big-small-column" id="21"></span>
+                                <span class="su su-three-column" id="111"></span>
+                            </div>
+                        </div>
+                        if (isSyncfusionIdentifier)
+                        {
+                            <div id="divider"></div>
+                            <div id="add-button-container">
+                                <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="add-button" title="@T["Add Pinboard"]">
+                                    <span>@T["Add Pinboard"] </span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="add-homepage-options" role="menu">
+                                    <li id="add-homepage">@T["Empty Pinboard"]</li>
+                                    <li id="add-dashboard-homepage">@T["Pin Dashboard"]</li>
+                                </ul>
+                            </div>
+                        }
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="homepage-page-container" ng-app="serverApp" ng-controller="homepagesController" class="col-xs-12 no-padding">
+        <div class="col-xs-12 no-padding" id="widget-elemnt-container">
+            @if (!isMobile)
+            {
+                <div id="initial-message" class="hidden"><span id="message"><span class="su su-info"></span><span>@T["You have not added any widget to the pinboard yet. Start tracking data from multiple dashboards. Click pin icon on dashboard widgets to add widgets to the pinboard."]</span><span id="close-icon"><span class="su su-close" title="@T["Close"]"></span></span></span></div>
+            }
+            <div id="widget-container" data-homepage-id="" data-current-layout="" data-virtual-homepage="">
+                @if (allHomepagesCount != 0 && (!isDefaultHomepage && !isHomePageInfoByName) && isHomepageExists)
+                {
+                    <div id="default-homepage-detail">
+                        @if (isSyncfusionIdentifier)
+                        {
+                            <div>@T["The pinboard is the initial screen. It can either contain individual widgets from other dashboards or have entire dashboards added to it."]</div>
+                        }
+                        else
+                        {
+                            <div>@T["The pinboard is the initial screen. It can contain individual widgets from other dashboards."]</div>
+                        }
+                        <div id="select-default-content">@T["Select a pinboard to set as default."]</div>
+                    </div>
+                    <div id="no-default-homepage-container">
+                        <select class="selectpicker" id="select-default-homepage" data-live-search="true" data-size="5" title="" data-original-value="" data-none-results-text="@T["No results match"]">
+                            <option data-hidden="true" value="">@T["Select a default pinboard"]</option>
+                            <option ng-repeat="homepage in allHomepages|orderBy:'Name'" value="{{homepage.Id}}">{{homepage.Name}}</option>
+                        </select>
+                        <input type="button" id="set-default-button" class="btn primary-button app-btn-primary" value="@T["Apply"]">
+                    </div>
+                }
+                @if (allHomepagesCount <= 0 && isHomepageExists)
+                {
+                    <div id="homepage-detail">
+                        <div id="default-content-detail">
+                            @if (isSyncfusionIdentifier)
+                            {
+                                <div>
+                                    @T["The pinboard is the initial screen. It can either contain individual widgets from other dashboards or have entire dashboards added to it. It is possible to create multiple pinboards, but only one can be active at a time."]
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    @T["The pinboard is the initial screen. It can contain individual widgets from other dashboards. It is possible to create multiple pinboards, but only one can be active at a time."]
+                                </div>
+                            }
+
+                            @if (isMobile)
+                            {
+                                <div id="login-message">@T["You need to log in with a desktop client to be able to create and configure pinboards."]</div>
+                            }
+                        </div>
+                    </div>
+                    if (!isMobile)
+                    {
+                        <div id="add-button-wrapper">
+                            <div id="add-button-container">
+                                <button class="dropdown-toggle primary-button app-btn-primary" data-toggle="dropdown" id="add-button" title="@T["Add Pinboard"]">
+                                    <span>@T["Add Pinboard"]</span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="add-homepage-options" role="menu">
+                                    <li id="add-homepage">@T["Empty Pinboard"]</li>
+                                    @if (isSyncfusionIdentifier)
+                                    {
+                                        <li id="add-dashboard-homepage">@T["From Dashboard"]</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    <div id="homepage-action-popup" class="no-padding display-none">
+        <input type="hidden" id="homepage-name" data-original-title="" />
+        <input type="hidden" title="" data-value="" id="save-button" value="@T["Save"]" />
+        <div id="homepage-option-container" class="dialog">
+            <form class="dialog-body col-xs-12 no-padding" id="homepage-option-form" data-homepage-id="">
+                <div>
+                    <div class="col-xs-12 no-bottom-padding" id="item-name-division">
+                        <div class="col-xs-4 no-padding text-right text-label">@T["Name"]<span class="mandatory">*</span></div>
+                        <div class="col-xs-1 no-padding"></div>
+                        <div class="col-xs-7 no-padding">
+                            <input type="text" id="homepage-new-name" name="homepagenewname" data-maxlength="255" value="" class="form-control site-orgname-fields text" autofocus />
+                            <span class="validation-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12" id="default-homepage-section">
+                        @Html.Label("makedefault", T["Make default"].Value, new { @class = "col-xs-4 no-padding text-right text-label", @id = "make-default-label" })
+                        <div class="col-xs-4 makedefault switch-align">
+                            <span class="material-switch text-left">
+                                <input type="checkbox" id="makedefault" name="make-default" />
+                                <label for="makedefault" class="label-primary"></label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 display-none" id="filter-container">
+                        @Html.Label("keepfilter", T["Keep filters"].Value, new { @class = "col-xs-4 no-padding text-right text-label", @id = "keep-filter-label" })
+                        <div class="col-xs-4 keepfilter switch-align">
+                            <span class="material-switch text-left">
+                                <input type="checkbox" id="keepfilter" name="keep-filter" checked />
+                                <label for="keepfilter" class="label-primary"></label>
+                            </span>
+                        </div>
+                        <div id="info-tag">
+                            <span id="filter-info" class="su su-info info-popup" data-toggle="popover" data-placement="top" data-content="@T["When “keep filter” is switched on, the widget will be added to the pinboard in its current filtered state."]"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="add-item-popup" class="no-padding">
+        <iframe id="add-item-popup-iframe" class="" style="width: 100%;height: 100%;border: none"></iframe>
+    </div>
+    <div id="maximize" class="display-none">
+        <div id="wrapper-div"></div>
+        <div id="maximize_container"></div>
+    </div>
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+    <div>
+        <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.DateFormat" id="dateFormat" />
+        <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.TimeFormat" id="timeFormat" />
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            window.IsMobile = @Json.Serialize(isMobile);
+            if((@Json.Serialize(isMobile))){
+                window.screen.availWidth < 360 ? $("#set-default-button").addClass("align-button") : "";
+                $("#server-app-container").removeClass("avoid-overflow");
+            }
+            if((@Json.Serialize(isDefaultHomepage))){
+                var defaultHomepageDetail = @Html.Raw(Json.Serialize(defaultHomepageDetail));
+                $("#homepage-list").val(defaultHomepageDetail.Name);
+                $("#homepage-list").selectpicker("refresh");
+                createHomepageDom(defaultHomepageDetail);
+                renderItem(defaultHomepageDetail);
+                $("#server-app-container").removeClass("avoid-overflow");
+            }
+            else if((@Json.Serialize(homepageInfo != null))) {
+                var homepageInfo = @Html.Raw(Json.Serialize(homepageInfo));
+                $("#homepage-list").val(homepageInfo.Name);
+                $("#homepage-list").selectpicker("refresh");
+                createHomepageDom(homepageInfo);
+                renderItem(homepageInfo);
+                $("#server-app-container").removeClass("avoid-overflow");
+            }
+            else if((@Json.Serialize(isHomepageExists))){
+                $("#homepage-options, #layout-container, #add-item, #divider").hide();
+                $("#server-app-container").removeClass("avoid-overflow");
+            }
+            else{
+                $("#options li#duplicate,#options li#delete").hide();
+                createVirtualHomepage();
+                $("#server-app-container").addClass("avoid-overflow");
+            }
+            addToolTip();
+
+            var itemType = $("#widget-container").attr("data-item-type");
+            if (itemType != undefined && itemType.toLowerCase() != "dashboard") {
+                changeListOnWindowResize();
+            }
+        });
+    </script>
+    @await Html.PartialAsync("../Items/_AddItems")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepages-page-viewer-files.css" />
+        @*<link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.css" />*@
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepages-page-viewer-files.min.css" />
+    </environment>
+
+    @if (!isSelfHosted)
+    {
+        <environment exclude="CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.min.css" />
+        </environment>
+    }
+
+    @*@if (isDebug)
+        {
+            <link rel="stylesheet" type="text/css" href="@(dashboardServiceResourceUrl + "/themes/default-theme/ej.dashboardviewer.all.min.css")" />
+        }*@
+}

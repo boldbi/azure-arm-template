@@ -1,0 +1,176 @@
+﻿@using Microsoft.AspNetCore.Mvc.Routing
+@inject Microsoft.AspNetCore.Mvc.Infrastructure.IActionContextAccessor actionContextAccessor
+
+@{
+    var gridName = ViewBag.gridName;
+    var host = Context.Request.Host.ToString();
+    var fragement = new Uri(Context.Request.GetDisplayUrl()).Fragment;
+    var url = new URLHelper(actionContextAccessor.ActionContext).GenerateUrl("http", host, null, fragement);
+    var isMobile = new DeviceDetection(Context).IsMobile;
+}
+<div class="items-mobile-grid">
+    <div id="items" class="item-grid">
+    </div>
+</div>
+
+<script type="text/x-jsrender" id="options">
+    @if (gridName == "files")
+    {
+        <div class="dropdown">
+            <span class="dropdown-toggle option-icon" data-toggle="dropdown">
+                <span class="su su-options-horizontal"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <a href="@url/{{:ItemTypeString}}/{{:Name}}" title="">
+                        <i class="su su-download"></i>
+                        <span>
+                            @T["Download"]
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    }
+
+    <tr class="panel-collapse collapse" aria-expanded="false" id="{{:Id}}">
+        <td colspan="3">
+            <table class="card-table" cellpadding="3" cellspacing="2">
+                <colgroup>
+                    <col width="30%">
+                    <col width="70%">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td class="card-header">@T["Name"]:</td>
+                        <td class="card-field"> {{:Name}}</td>
+                    </tr>
+                    <tr>
+                        <td class="card-header">@T["Description"]:</td>
+                        <td class="card-field"> {{:Description}}</td>
+                    </tr>
+                    <tr>
+                        <td class="card-header">@T["Owner"]:</td>
+                        <td class="card-field"> {{:CreatedByDisplayName}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+
+</script>
+
+
+<script type="text/x-jsrender" id="item-name-template">
+    {{if ItemType=="@((int)ItemType.File)"}}
+    <a class="item-name" title="{{:Name}}" href="@url/{{:ItemTypeString}}/{{:Name}}" target="_blank">
+        <span class="name">{{:Name}}</span>
+    </a>
+    {{else}}
+    <span class="item-name" title="{{:Name}}">
+        <span class="name">{{:Name}}</span>
+    </span>
+    {{/if}}
+</script>
+
+<script id="expand-template" type="text/x-jsrender">
+    <span class="collapsed su su-angle-right" href="#{{:Id}}" data-toggle="collapse" aria-expanded="false"></span>
+</script>
+
+<script id="expand-temp" type="text/x-jsrender">
+    <a class="expand-collapse" data-value="expand-all" title="@T["Expand All"]">@T["Expand All"]</a>
+</script>
+
+<script id="search-temp" type="text/x-jsrender">
+    <div id="search-area" title="@T["Search"]" class="pull-right no-margin">
+        <input id="search-items" class="pull-left no-margin" placeholder="@T["Search data sources"]" style="display: none;" autocomplete="off" type="text">
+        <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" title="@T["Clear search"]"></span>
+        <span class="su su-search search-item pull-left no-margin remove-background" title="@T["Search data sources"]"></span>
+    </div>
+</script>
+
+<script>
+    var gridNamejs = $('#item-grid-container').attr("data-grid-name");
+    $(".grid-container").css("margin-top", "0");
+    var dataManger = ej.DataManager({ url: "@Url.Action("GetItems", (string)gridName)", adaptor: "UrlAdaptor" });
+    var gridHeight = $(window).height() - ($("#header-area").outerHeight() + 62);
+    var pageSize = gridHeight > 700 ? Math.round(gridHeight / 35) + 5 : 20;
+    $(document)
+        .ready(function () {
+            $(function () {
+                $("#search-items").val("");
+                $('#items')
+                    .ejGrid({
+                        dataSource: dataManger,
+                        gridLines: ej.Grid.GridLines.Horizontal,
+                        toolbarSettings: {
+                            showToolbar: true,
+                            customToolbarItems: [{
+                                templateID: "#expand-temp"
+                            },
+                            {
+                                templateID: "#search-temp"
+                            }],
+                            toolbarClick: "onToolBarClick"
+                        },
+                        toolbarClick: "onToolBarClick",
+                        enableRowHover: true,
+                        enableAltRow: false,
+                        allowSelection: false,
+                        allowSearching: true,
+                        allowScrolling: true,
+                        pageSettings: { pageSize: pageSize },
+                        scrollSettings: { width: $(".items-mobile-grid").innerWidth() - 20, height: gridHeight, allowVirtualScrolling: true, virtualScrollMode: ej.Grid.VirtualScrollMode.Normal, buttonSize: 0, autoHide: true },
+                        dataBound: function () {
+                            $(".e-gridcontent").css("height", $(".e-gridcontent .e-table").height());
+                        },
+                        rowDataBound: function () {
+                            setTimeout(function () {
+                                $(".e-gridcontent").css("height", $(".e-gridcontent .e-table").height());
+                                refreshMobileGrid();
+                            });
+                            var serverAppWaitingPopupTemplateId = createLoader("server-app-container");
+							$("#server-app-container").ejWaitingPopup({ template:$("#" + serverAppWaitingPopupTemplateId) });
+                            $("#server-app-container").ejWaitingPopup("show");
+                            setTimeout(function () { $("#server-app-container").ejWaitingPopup("hide"); }, 500);
+                        },
+                        actionBegin: "fnActionBegin",
+                        actionComplete: "fnActionEnd",
+                        rowSelecting: function (args) {
+                            if (args.target.hasClass("favoriteItem")) {
+                                args.cancel = true;
+                            }
+                        },
+                        columns: [
+                            {
+                                width: 15,
+                                template: true,
+                                templateID: "#expand-template",
+                                allowSearching: false
+                            },
+                            {
+                                template: true,
+                                templateID: "#item-name-template",
+                                field: "Name",
+                                allowSearching: true
+                            },
+                            {
+                                template: true,
+                                templateID: "#options",
+                                width: 20,
+                                allowSearching: false
+                            }
+                        ]
+                    });
+            });
+
+            $.views.helpers({
+                checkMobile: function () {
+                    return ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1040));
+                },
+                checkTablet: function () {
+                    return window.innerWidth > 900;
+                }
+            });
+        });
+</script>

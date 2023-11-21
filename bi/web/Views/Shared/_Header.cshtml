@@ -1,0 +1,142 @@
+﻿@{
+    var globalAppSettings = (GlobalAppSettings)ViewBag.appsettings;
+    var isWelcomePage = (bool)ViewBag.isWelcomePage;
+    var isAdmin = (bool)ViewBag.isAdmin;
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+    var idpreferenceId = Context.Session.GetString("idpreferenceId") != null ? Context.Session.GetString("idpreferenceId").ToString() : string.Empty;
+    var donotShowJourney = Context.Request.Cookies["syncfusion.dashboards.server.journey"] != null;
+    var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var absolutePath = requestUrl.AbsolutePath;
+    var idPUrl = globalAppSettings.SystemSettings.IDPUrl;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var navigationUrl = Url.Action("Index", "Home");
+}
+    <div class="header-bar col-lg-12 col-md-12 col-sm-12">
+        <div class="main-screen-logo mobile-hidden">
+
+        </div>
+        @if (!isWelcomePage)
+        {
+            <div class="mobile-menu-icon text-center mobile-visible collapsed" data-toggle="collapse" aria-expanded="false" data-target="#menu-area">
+                <span>
+                    <i class="su su-mobile-menu-icon"></i>
+                </span>
+            </div>
+        }
+        <div class="org-name-wrapper">
+            <h5 class="header-org-name">@globalAppSettings.SystemSettings.OrganizationName</h5>
+        </div>
+
+        <div class="suspension-warning" style="display:none">
+            <div class="warning-content"></div>
+        </div>
+
+        <div class="user-account mobile-hidden">
+            <div id="account-profile" class="dropdown no-padding">
+                <span class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="profile-picture">
+                        <div class="lazyload img-loader" data-src="@(idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64"))" data-alt="" data-default="" data-id="" style="margin:4px;"></div>
+                    </span>
+                </span>
+                <div class="dropdown-menu" id="profile-info-section" role="menu">
+                    <div class="profile-info col-lg-12">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="profile-picture-area">
+                                        <div class="lazyload img-loader" data-src="@(idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64"))" data-alt="Profile Picture" data-default="" data-id=""></div>
+                                    </td>
+                                    <td class="profile-info-area">
+                                        <ul class="no-margin no-padding">
+                                            <li id="profile-name">@displayName</li>
+                                            <li id="profile-email">@emailAddress</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="profile-buttons">
+                        <a class="profile-menu-action col-xs-12 separator top"></a>
+                        <a href="@Url.Action("Dashboards", "Dashboards")?view=owned" class="profile-menu-action col-xs-12">
+                            @T["My Dashboards"]
+                        </a>
+                        <a class="profile-menu-action col-xs-12 separator middle"></a>
+                        <a class="profile-menu-action request-concierge-support col-xs-12" href="javascript:void(0)">
+                            @T["New Support Request"]
+                        </a>
+                        <a href="@Url.Action("TicketList", "Support")" class="profile-menu-action col-xs-12">
+                            @T["Support Incidents"]
+                        </a>
+                        <a class="profile-menu-action col-xs-12 separator middle"></a>
+                        <a href="@Url.Action("ProfilePage", "User")" class="profile-menu-action col-xs-12">
+                            @T["Edit Profile"]
+                        </a>
+                        <a href="@Url.Action("logout", "accounts")" class="profile-menu-action col-xs-12">
+                        @T["Sign out"]
+                        </a>
+                        <a class="profile-menu-action col-xs-12 separator bottom"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (!isMobile)
+        {
+            <div class="pull-right" id="notification-section">
+                <div id="notification-link" class="dropdown no-padding">
+                    <span id="notification-icon" class="su su-notification-alert dropdown-toggle" data-toggle="dropdown">
+
+                    </span>
+                    <div id="notification-content-area" class="dropdown-menu notification-content-area" role="menu">
+                        <div id="notification-header">
+                            <span> @T["Notifications"]</span>
+                            <a id="view-all-notification" href="@Url.Action("getusernotifications", "notification")">@T["View all"]</a>
+                        </div>
+                        @await Html.PartialAsync("../Notification/_UserNotification")
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="pull-right" id="notification-section">
+                <a id="notification-link" class="notification-mobile-link no-padding" href="@Url.Action("getusernotifications", "notification")">
+                    <span id="notification-icon" class="su su-notification-alert">
+
+                    </span>
+                </a>
+            </div>
+        }
+        @if ((absolutePath == "/" ||
+                                          absolutePath == Url.Content("~/") ||
+                                          requestUrl.ToString().IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                                          requestUrl.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                                          requestUrl.ToString().IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                                          requestUrl.ToString().IndexOf("/files", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                                          requestUrl.ToString().IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                                          requestUrl.ToString().IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                                          requestUrl.ToString().IndexOf("/widgets", StringComparison.CurrentCultureIgnoreCase) > 0) &&
+                                          (ViewBag.ItemAddOptions != null && !isMobile)
+                                      )
+        {
+            await Html.RenderPartialAsync("~/Views/Items/_ItemAddOptions.cshtml", ViewBag.ItemAddOptions as Dictionary<ItemType, bool>, new ViewDataDictionary(ViewData) { { "IsDashboardsPage", requestUrl.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 } });
+        }
+        @if (!isMobile)
+        {
+            <div class="pull-right" id="feedback-section" data-toggle="tooltip" data-placement="bottom" title="@T["Give us feedback"]">
+                <div id="feedback-link" class="dropdown no-padding">
+                    <span id="feedback-icon">
+                        <span id="bullhorn_img" class="su su-feedback" />
+                    </span>
+                </div>
+            </div>
+
+            <div class="pull-right" id="concierge-support-request" data-toggle="tooltip" data-placement="bottom">
+                <button class="primary-button app-btn-primary pull-right request-concierge-support" data-toggle="tooltip" title="@T["We answer all your questions."]" data-placement="bottom">@T["New Support Request"]</button>
+            </div>
+        }
+
+    </div> 

@@ -1,0 +1,93 @@
+﻿@inject ServerPrincipal _identityResponse
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var userId = _identityResponse.User.UserId;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<!DOCTYPE html>
+<head>
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datachanges.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datachanges.min.css" />
+    </environment>
+
+
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+    <script>
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var getCustomExpressionListUrl = "@Url.Action("getCustomExpressionList", "Scheduler")";
+        var getItemNamesUrl = "@Url.Action("GetColumnNames", "scheduler")";
+        var getColumnValuesUrl = "@Url.Action("GetColumnValues", "scheduler")";
+        var addConditionUrl = "@Url.Action("AddCondition", "scheduler")";
+        var customExpressionEditor = "@Url.Action("CustomExpressionEditor", "scheduler")";
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datachanges.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datachanges.min.js"></script>
+    </environment>
+</head>
+<body>
+    <input type="hidden" value="@userId" id="userid" />
+    <input type="button" id="back-button" style="display: none" />
+    <div id="data-changes-container">
+        <div id="data-changes-div-container">
+            <input id="itemid" hidden />
+            <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12 no-padding no-margin" id="choose-itemName">
+                <div class="col-sm-6 col-xs-6 no-padding choose-item no-margin">
+                    <div class="col-sm-3 col-xs-3 no-padding">
+                        <label class="choose-option">[[[Choose Widget]]]</label><span class="mandatory">*</span>
+                    </div>
+                    <div class="items-dropdown col-sm-6 col-xs-6 condition-category">
+                        <select id="selected-items" data-live-search="true" class="selectpicker col-sm-4 col-xs-4 no-padding" data-size="5" data-toggle="tooltip">
+                        </select>
+                        <input type="hidden" id="category_change_validation" name="isCategoryChanged" value="false" />
+                    </div>
+                </div>
+                <span id="widget-message" class="error-message-widget validate-error no-padding col-sm-4 col-xs-4">[[[Please select a widget]]]</span>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding">
+                <div class="col-sm-6 col-xs-6 no-padding" id="condition-category">
+                    <div class="col-sm-3 col-xs-3 no-padding">
+                        <label class="margin-top">[[[Condition]]] <span class="mandatory">*</span></label>
+                    </div>
+                    <div class="control col-sm-6 col-xs-6 condition-category condition-category-changes">
+                        <select id="selected-option" data-live-search="true" class="selectpicker col-sm-4 col-xs-4 no-padding" data-size="5">
+                            <option value="@((int) ConditionCategory.ValueChanges)" data-title="[[[Checks whether the filtered value changes.]]]" name="ValueChanges" selected="selected">@ViewBag.valueChangesDescription</option>
+                            <option value="@((int) ConditionCategory.Increases)" data-title="[[[Checks whether the filtered value increases once.]]]" name="Increases">@ViewBag.increasesDescription</option>
+                            <option value="@((int) ConditionCategory.ContinuousIncreases)" data-title="[[[Checks whether the filtered value increases continuously.]]]" name="ContinuousIncreases">@ViewBag.continuousIncreasesDescription</option>
+                            <option value="@((int) ConditionCategory.Decreases)" data-title="[[[Checks whether the filtered value decreases once.]]]" name="Decreases">@ViewBag.decreasesDescription</option>
+                            <option value="@((int) ConditionCategory.ContinuousDecreases)" data-title="[[[Checks whether the filtered value decreases continuously.]]]" name="ContinuousDecreases">@ViewBag.continuousDecreasesDescription</option>
+                        </select>
+                    </div>
+                </div>
+                <span id="widget-message" class="error-message-condition-category validate-error no-padding col-sm-4 col-xs-4">[[[Please select a condition]]]</span>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding" id="condition-div">
+                <div id="measure-div" class="col-sm-12 col-xs-12 col-lg-12 no-padding">
+                </div>
+                <button class="col-sm-12 col-xs-12 col-lg-12 col-md-12 add-first-condition text-center" id="add-condition">
+                    <span class="su su-add"></span>
+                    <span class="label-add">[[[Add Condition]]]</span>
+                    <input type="number" value="0" id="count" hidden />
+                </button>
+                <span class="col-sm-12 col-xs-12 col-lg-12 col-md-12 validate-error add-error-msg text-right no-padding"></span>
+                <div id="dimension-div" class="col-sm-12 col-xs-12 col-lg-12 no-padding no-margin">
+                </div>
+                <button class="col-md-12  col-sm-12 col-lg-12 col-xs-12 where-global no-padding" id="add-dimension-condition">
+                    <span class="su su-add"></span>
+                    <span class="margin-alignment">[[[Add global Where condition]]]</span>
+                </button>
+            </div>
+        </div>
+        <div id="custom-expression-editor-container">
+            <iframe id="custom-expression-editor-container-iframe" class="custom-expression-editor-container-frame"></iframe>
+        </div>
+    </div>
+</body>
