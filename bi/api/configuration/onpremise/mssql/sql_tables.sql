@@ -1076,6 +1076,8 @@ INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Rollbacked',1)
 ;
 INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Visited',1)
 ;
+INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Downloaded',1)
+;
 
 INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'Excel', 1)
 ;

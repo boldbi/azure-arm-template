@@ -25,6 +25,7 @@
     var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var tourCookie = Context.Request.Cookies["syncfusion.dashboards.server.tour"];
+    var isEmbed = (ViewBag.isEmbed != null && ViewBag.isEmbed == "true") ? true : false;
     var isItemPageRequested = (url.AbsolutePath == "/" || url.AbsolutePath == Url.Content("~/") || url.ToString().IndexOf("/homepages", StringComparison.CurrentCultureIgnoreCase) > 0
    || url.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 || url.ToString().IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0
    || url.ToString().IndexOf("/files", StringComparison.CurrentCultureIgnoreCase) > 0 || url.ToString().IndexOf("/widgets", StringComparison.CurrentCultureIgnoreCase) > 0) &&
@@ -377,7 +378,7 @@
                     @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "GlobalAppSettings", globalAppSettings }, { "ItemPermission", ViewBag.ItemAddOptions != null ? ViewBag.ItemAddOptions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>() } })
                 </section>
             }
-            else if (!isSlideshow)
+            else if (!isSlideshow && !isEmbed)
             {
                 <section id="menu-area">
                     @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "GlobalAppSettings", globalAppSettings }, { "ItemPermission", ViewBag.ItemAddOptions != null ? ViewBag.ItemAddOptions as Dictionary<ItemType, bool> : new Dictionary<ItemType, bool>() } })

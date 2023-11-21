@@ -534,8 +534,8 @@ function IsEmail(email) {
 }
 
 function IsValidContactNumber(contactNumber) {
-    var regex = /^(?:|[0-9\-\+]{9,15})$/;
-    if (regex.test(contactNumber)) {
+    var regex = /^(\+\d{1,3}\s?)?\d{9,15}$/;
+    if (regex.test(contactNumber) || contactNumber === "") {
         return true;
     }
     else {

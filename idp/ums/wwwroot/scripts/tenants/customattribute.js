@@ -133,6 +133,7 @@ function openCustomAttributeDialog(attributeId, name) {
 }
 
 function saveAttribute() {
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
     if ($("#custom-attribute-form").valid() && !$("#custom-attribute-name").hasClass("e-error")) {
         if (isAttributeEdit) {
             if (addSiteAttribute.length != 0) {
@@ -156,12 +157,18 @@ function saveAttribute() {
             saveCustomAttribute();
         }
     }
+
     var attributeObj;
-    if (siteCreation) {
-        attributeObj = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    if (isUserAttributeRequest) {
+        attributeObj = document.getElementById('UsersAttributesGrid').ej2_instances[0];
     }
     else {
-        attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        if (siteCreation) {
+            attributeObj = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+        }
+        else {
+            attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        }
     }
     attributeObj.clearSelection();
 }
@@ -171,18 +178,31 @@ function onCloseCustomAttribute() {
     $("#custom-attribute-form").find("div").removeClass("e-error");
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     dialog[0].hide();
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
     var attributeObj;
-    if (siteCreation) {
-        attributeObj = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+    if (isUserAttributeRequest) {
+        attributeObj = document.getElementById('UsersAttributesGrid').ej2_instances[0];
     }
     else {
-        attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        if (siteCreation) {
+            attributeObj = document.getElementById('AddSiteAttributesGrid').ej2_instances[0];
+        }
+        else {
+            attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        }
     }
     attributeObj.clearSelection();
 }
 
 function showSavedAttributes() {
-    var attributeGridObj = siteCreation ? document.getElementById('AddSiteAttributesGrid').ej2_instances[0] : document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
+    var attributeGridObj;
+    if (isUserAttributeRequest) {
+        attributeGridObj = document.getElementById('UsersAttributesGrid').ej2_instances[0];
+    }
+    else {
+        attributeGridObj = siteCreation ? document.getElementById('AddSiteAttributesGrid').ej2_instances[0] : document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    }
     customAttributeInfo = attributeGridObj.getCurrentViewRecords()[attributeGridObj.getSelectedRowIndexes()];
     document.getElementById("custom-attribute-name").ej2_instances[0].value = customAttributeInfo.Name;
     document.getElementById("custom-attribute-descrition").ej2_instances[0].value = customAttributeInfo.Description;
@@ -209,15 +229,39 @@ function saveCustomAttribute() {
         ModifiedDate: new Date(),
         CustomAttributeId: customAttributeId
     }
+
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
+    if (isUserAttributeRequest) {
+        customAttribute = {
+            Name: $("#custom-attribute-name").val().trim(),
+            Value: document.getElementById("custom-attribute-value").ej2_instances[0].value,
+            Description: document.getElementById("custom-attribute-descrition").ej2_instances[0].value,
+            CanEncrypt: $("#encrypt-custom-attribute").is(":checked"),
+            CreatedDate: new Date(),
+            ModifiedDate: new Date(),
+            CustomAttributeId: customAttributeId,
+            UserId = userId
+        }
+    }
+
     customAttributeId++;
 
     showWaitingPopup('custom-attribute-dialog');
-    if (siteCreation) {
+    if (!isUserAttributeRequest && siteCreation) {
         addSiteLevelAttribute(customAttribute);
         return;
     }
 
-    var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
+    var requestData = { customAttribute: JSON.stringify(customAttribute)};
+
+    if (isUserAttributeRequest) {
+        requestData = { customAttribute: JSON.stringify(customAttribute) };
+        saveCustomAttributeUrl = addUserCustomAttributeUrl;
+    }
+    else {
+        requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId };
+    }
+
     showWaitingPopup('custom-attribute-dialog');
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     $.ajax({
@@ -226,7 +270,7 @@ function saveCustomAttribute() {
         data: requestData,
         success: function (result) {
             if (result.Status) {
-                getSiteAttributes();
+                getSiteOrUseAttributes();
                 SuccessAlert(window.Server.App.LocalizationContent.AddCustomAttribute, window.Server.App.LocalizationContent.CustomAttributeSuccess, 7000);
                 hideWaitingPopup('custom-attribute-dialog');
                 dialog[0].hide();
@@ -265,10 +309,21 @@ $(document).on("keyup focusout", "#custom-attribute-name", function (e) {
 
 function attributeNameCheck() {
     var attributeName = $("#custom-attribute-name").val().trim();
+    var requestData = { attributeName: attributeName };
+
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
+    if (isUserAttributeRequest) {
+        requestData = { attributeName: attributeName, userId: userId };
+        isAttributeNameExistsUrl = isUserCustomAttributeNameExistUrl;
+    }
+    else {
+        requestData = { attributeName: attributeName, tenantInfoId: tenantInfoId };
+    }
+
     $.ajax({
         type: "POST",
         url: isAttributeNameExistsUrl,
-        data: { attributeName: attributeName, tenantInfoId: tenantInfoId },
+        data: requestData ,
         success: function (result) {
             if (result.Status) {
                 $("#custom-attribute-name").addClass("e-error");
@@ -281,6 +336,7 @@ function attributeNameCheck() {
 }
 
 function updateCustomAttribute(attributeId) {
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
     var customAttribute = {
         Id: attributeId,
         Name: $("#custom-attribute-name").val().trim(),
@@ -291,13 +347,33 @@ function updateCustomAttribute(attributeId) {
         ModifiedDate: new Date(),
         CustomAttributeId: editCustomAttributeId
     }
+    if (isUserAttributeRequest) {
+        customAttribute = {
+            Id: attributeId,
+            Name: $("#custom-attribute-name").val().trim(),
+            Value: document.getElementById("custom-attribute-value").ej2_instances[0].value,
+            Description: document.getElementById("custom-attribute-descrition").ej2_instances[0].value,
+            CanEncrypt: $("#encrypt-custom-attribute").is(":checked"),
+            CreatedDate: new Date(),
+            ModifiedDate: new Date(),
+            UserId = userId
+        }
+        updateCustomAttributeUrl = editUserCustomAttributeUrl;
+    }
 
     showWaitingPopup('custom-attribute-dialog');
     if (siteCreation) {
         updateSiteLevelAttribute(customAttribute);
         return;
     }
-    var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
+    var requestData = { customAttribute: JSON.stringify(customAttribute)}
+    if (isUserAttributeRequest) {
+        requestData = { customAttribute: JSON.stringify(customAttribute) }
+    }
+    else {
+        requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
+    }
+
     var dialog = document.getElementById("custom-attribute-dialog").ej2_instances;
     $.ajax({
         type: "POST",
@@ -305,7 +381,7 @@ function updateCustomAttribute(attributeId) {
         data: requestData,
         success: function (result) {
             if (result.Status) {
-                getSiteAttributes();
+                getSiteOrUseAttributes();
                 SuccessAlert(window.Server.App.LocalizationContent.EditCustomAttribute, window.Server.App.LocalizationContent.UpdateCustomAttributeSuccess, 7000);
                 hideWaitingPopup('custom-attribute-dialog');
                 dialog[0].hide();
@@ -324,20 +400,29 @@ function updateCustomAttribute(attributeId) {
 }
 
 function removeCustomAttribute(item) {
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
     var customAttribute = {
         Id: $(item).attr("data-id"),
         CreatedDate: new Date(),
         ModifiedDate: new Date()
     }
+    var requestData = { customAttribute: JSON.stringify(customAttribute) }
+    if (isUserAttributeRequest) {
+        deleteCustomAttributeUrl = deleteUserCustomAttributeUrl;
+        requestData = { customAttribute: JSON.stringify(customAttribute) }
+    }
+    else {
+        requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
+    }
+
     showWaitingPopup('messageBox');
-    var requestData = { customAttribute: JSON.stringify(customAttribute), tenantInfoId: tenantInfoId }
     $.ajax({
         type: "POST",
         url: deleteCustomAttributeUrl,
         data: requestData,
         success: function (result) {
             if (result.Status) {
-                getSiteAttributes();
+                getSiteOrUseAttributes();
                 hideWaitingPopup('messageBox');
                 SuccessAlert(window.Server.App.LocalizationContent.DeleteCustomAttribute, window.Server.App.LocalizationContent.DeleteCustomAttributeSuccess, 7000);
             } else {
@@ -357,20 +442,37 @@ function editCustomAttribute(item) {
     openCustomAttributeDialog(id, name);
 }
 
-function getSiteAttributes() {
-    showWaitingPopup('SiteAttributesGrid');
-    $.ajax({
-        type: "GET",
-        url: siteAttributesUrl,
-        data: { tenantInfoId: tenantInfoId },
-        success: function (result) {
-            if (result.Status) {
-                var siteAttributesGrid = document.getElementById('SiteAttributesGrid').ej2_instances[0];
-                siteAttributesGrid.dataSource = result.Attributes;
+function getSiteOrUseAttributes() {
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
+    if (isUserAttributeRequest) {
+        showWaitingPopup('UsersAttributesGrid');
+        $.ajax({
+            type: "GET",
+            url: userAttributesUrl,
+            data: { userId: userId },
+            success: function (result) {
+                if (result.Status) {
+                    var userAttributesGrid = document.getElementById('UsersAttributesGrid').ej2_instances[0];
+                    userAttributesGrid.dataSource = result.Attributes;
+                }
+                hideWaitingPopup('UsersAttributesGrid');
             }
-            hideWaitingPopup('SiteAttributesGrid');
-        }
-    });
+        });
+    } else {
+        showWaitingPopup('SiteAttributesGrid');
+        $.ajax({
+            type: "GET",
+            url: siteAttributesUrl,
+            data: { tenantInfoId: tenantInfoId },
+            success: function (result) {
+                if (result.Status) {
+                    var siteAttributesGrid = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+                    siteAttributesGrid.dataSource = result.Attributes;
+                }
+                hideWaitingPopup('SiteAttributesGrid');
+            }
+        });
+    }
 }
 
 function updateValidationMessages() {
@@ -385,7 +487,14 @@ function updateValidationMessages() {
 
 function deleteConfirmation(item) {
     setTimeout(function () {
-        var attributeGridObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
+        var attributeGridObj;
+        if (isUserAttributeRequest) {
+            attributeGridObj = document.getElementById('UsersAttributesGrid').ej2_instances[0];
+        }
+        else {
+            attributeGridObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+        }
         var attribute = attributeGridObj.getCurrentViewRecords()[attributeGridObj.getSelectedRowIndexes()];
         messageBox("su-delete", window.Server.App.LocalizationContent.DeleteCustomAttribute, window.Server.App.LocalizationContent.DeleteAttributeConfirm.format(" - <span class ='highlight-name'>", attribute.Name, "</span>"), "error", function () {
             removeCustomAttribute(item)
@@ -396,8 +505,15 @@ function deleteConfirmation(item) {
 }
 
 function clearAttributeSelection() {
-    var attributeObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
-    attributeObj.clearSelection();
+    var isUserAttributeRequest = typeof (userAttributesPageUrl) != "undefined" && window.location.pathname + window.location.search == userAttributesPageUrl;
+    var attributeGridObj;
+    if (isUserAttributeRequest) {
+        attributeGridObj = document.getElementById('UsersAttributesGrid').ej2_instances[0];
+    }
+    else {
+        attributeGridObj = document.getElementById('SiteAttributesGrid').ej2_instances[0];
+    }
+    attributeGridObj.clearSelection();
     onCloseMessageBox();
 }
 

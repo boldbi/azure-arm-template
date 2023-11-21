@@ -55,6 +55,7 @@
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
+    var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -224,7 +225,7 @@
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var appVersion = "@ServerAppConfig.ProductVersion";
         var isBingMapRequired = @Json.Serialize(isBingMapRequired);
-        var canCheckSessionInActive = false;
+        var canCheckSessionInActive = @Html.Raw(Json.Serialize(canShowSession));
         var isAuthenticated = @Html.Raw(Json.Serialize(isAuthenticated));
 </script>
     <style>

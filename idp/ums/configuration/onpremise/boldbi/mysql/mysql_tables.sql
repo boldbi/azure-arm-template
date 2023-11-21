@@ -1167,6 +1167,8 @@ INSERT into {database_name}.BOLDBI_ItemLogType (Name,IsActive) VALUES ( 'Rollbac
 ;
 INSERT into {database_name}.BOLDBI_ItemLogType (Name,IsActive) VALUES ( 'Visited',1)
 ;
+INSERT into {database_name}.BOLDBI_ItemLogType (Name,IsActive) VALUES ( 'Downloaded',1)
+;
 
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('Excel', 1)
 ;

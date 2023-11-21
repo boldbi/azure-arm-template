@@ -326,6 +326,7 @@ $(document).ready(function () {
                     $(this).removeAttr("disabled");
                 }
             }
+            enableIsolationCode();
             Resize();
             ResizeHeightForDOM();
         }
@@ -335,6 +336,7 @@ $(document).ready(function () {
     });
 
     $(document).on("click", "#details-back", function () {
+        $("#details-next").removeAttr("disabled");
         if ($("#details-next").hasClass("storage-config") || $("#details-next").hasClass("update")) {
             $(".tenant-user-form").removeClass("show").addClass("hide");
             $(".tenant-database-form").removeClass("show").addClass("hide");
@@ -1005,7 +1007,12 @@ function enableIsolationCode() {
     if (isEnabled) {
         document.getElementById("site-isolation-code").ej2_instances[0].enabled = true;
         $("#isolation-code").focus();
-        $("#details-next").attr("disabled", true);
+        if ($(".data-security-form").hasClass("show")) {
+            $("#details-next").attr("disabled", true);
+        }
+        if ($("#site-isolation-code").closest('div').hasClass("e-valid-input")) {
+            $("#details-next").removeAttr("disabled");
+        }
     } else {
         document.getElementById("site-isolation-code").ej2_instances[0].enabled = false;
         $("#isolation-code-validation").html("");

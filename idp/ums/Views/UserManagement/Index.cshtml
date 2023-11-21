@@ -281,17 +281,30 @@
 }
 
 @section MainSection{
-    <div id="base-container" class="admin-page-content-container full-page-container">
-        <div class="admin-page-content col-md-12 no-padding">
-            <div class="col-xs-12 admin-page-header">
-                <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment admin-header-width">
+        <div class="col-xs-12 admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
                     <h1 class="h2 page-title">
                         <input type="hidden" id="user-count-text" value="@ViewBag.UserCount">
                         @T["USERS"] (<span id="user-count" value="@ViewBag.UserCount">@ViewBag.UserCount</span>)
                     </h1>
+                    <h5 class="page-description">@T["Add and manage your users."]</h5>
+                </hgroup>                
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
 
+        <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="pull-left">
+                    <input type="text" class="pull-left" id="search-users" placeholder="@T["Search users"]" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
                 </div>
-                <div class="col-xs-6 no-padding admin-header-btn">
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
                     @if (DeviceDetection.IsMobile)
                     {
                         <button class="primary-button pull-right" id="new-user-dropdown" title="@T["Add new user"]" data-toggle="tooltip" onclick="onUserAddDialogOpen()">
@@ -325,16 +338,13 @@
                     <button class="secondary-button pull-right" id="grant-user-button" onclick="onAddTenantsDialogOpen()" disabled>
                         @T["Grant Site Access"]
                     </button>
-
                 </div>
             </div>
-
+        </div>
+    </div>
+    <div id="base-container" class="admin-page-content-container full-page-container">
+        <div class="admin-page-content col-md-12 no-padding">
             <div id="user-list-container" class="list col-xs-12 admin-page-body">
-                <div id="search-area" class="pull-right">
-                    <input type="text" class="pull-left" id="search-users" placeholder="@T["Search users"]" />
-                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
-                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
-                </div>
                 <div class="col-xs-12 no-padding ">
                     <div id="user_grid">
                     </div>

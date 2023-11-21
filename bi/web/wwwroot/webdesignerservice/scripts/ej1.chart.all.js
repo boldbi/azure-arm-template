@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.16.12
+*  version : 6.17.13
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -21858,7 +21858,7 @@ var Gradient = function (colors) {
         this.model.stackedValue = {};
 		this._setCulture(this.model.locale);
 		 var seriesLength = this.model.series.length;
-		 var series, seriesType;
+		 var series, seriesType, len, trendlines, visibility;
         if (BoldBIDashboard.util.isNullOrUndefined(this.model.sideBySideSeriesPlacement))  // for setting sideBySideSeriesPlacement property values
             this.model._sideBySideSeriesPlacement = (this.model.enable3D) ? false : true;
         else
@@ -21868,6 +21868,12 @@ var Gradient = function (colors) {
             series = this.model.series[i];
             seriesType = series.type.toLowerCase();
             series._isTransposed = (seriesType.indexOf("bar") == -1) ? series.isTransposed : !series.isTransposed;
+            trendlines = series.trendlines;
+			len = trendlines.length;
+			for(var j = 0; j< len ;j++){
+				visibility = trendlines[j].visibility.toLowerCase();
+				this.model._drawTrendline = visibility == "visible"? true: false;
+			}
         }
         if (seriesLength > 0)
             this.addedXYValues(excludeDataUpdate);

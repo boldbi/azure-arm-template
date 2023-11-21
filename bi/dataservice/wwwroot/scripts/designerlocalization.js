@@ -4540,6 +4540,7 @@ var Designer = {
                     dec: "Dec"
                 },
                 rename: "Rename",
+				replaceValues: "Replace Values",
                 changeColumnType: "Change Column Type",
                 fiscalYearStart: "Fiscal Year Start",
                 sharedTable: {
@@ -6831,7 +6832,28 @@ var Designer = {
 			},
 			defaultParameter: {
                 browserCulture: 'Current Browser Culture',
-            }
+            },
+			replaceValues: { 
+				applyBtnText: "Apply",
+				cancelBtnText: "Cancel",
+				updateBtnText: "Update",
+				newRuleBtnText: "New Rule",
+				addRuleBtnText: "Add Rule",
+				title: "Replace Values",
+				addRuleTitle: "Add New Rule",
+				editRuleTitle: "Edit Rule",
+				replaceRuleTitle: "Replace Rule",
+				valueToFindText: "Value To Find",
+				replaceText: "Replace",
+				valueToReplaceText: "Value To Replace",
+				matchCaseText: "Match Case",
+		        matchEntireStringText: "Match Entire String",
+				nullText: "Null",
+				nullValueText: "(Null)",
+				blanksValueText: "(Blanks)",
+				blanksText: "Blanks",
+				customRuleText: "Custom Rule",
+			}
         }
     }
 }

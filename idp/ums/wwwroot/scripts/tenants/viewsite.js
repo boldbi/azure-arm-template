@@ -40,8 +40,8 @@ $(document).ready(function () {
         content: document.getElementById("grant-users-access-dialog-content"),
         showCloseIcon: true,
         buttons: [
-            { click: provideAccesstoUsers, buttonModel: { content: window.Server.App.LocalizationContent.GrantSiteAccessButton, isPrimary: true, cssClass: 'provide-access-button' } },
-            { click: onAddUsersDialogClose, buttonModel: { content: window.Server.App.LocalizationContent.CancelButton, cssClass: 'cancel-button' } }
+            { click: onAddUsersDialogClose, buttonModel: { content: window.Server.App.LocalizationContent.CancelButton, cssClass: 'cancel-button' } },
+            { click: provideAccesstoUsers, buttonModel: { content: window.Server.App.LocalizationContent.GrantSiteAccessButton, isPrimary: true, cssClass: 'provide-access-button' } }
         ],
         width: "900px",
         height: "539px",
@@ -480,7 +480,6 @@ function getAppUsers() {
 }
 
 function getAttributes() {
-
     var tooltip = new ej.popups.Tooltip({
         target: ".grid-content",
         position: 'TopCenter',

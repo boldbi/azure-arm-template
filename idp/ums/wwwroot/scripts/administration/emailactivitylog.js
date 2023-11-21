@@ -45,6 +45,7 @@ $(document).ready(function () {
         if (location.href.match(/logs/)) {
             $("#email-logs-tab").tab("show");
             $("#email-settings").hide();
+            $(".email-settings-option").hide();
             var query = (window.location.search).toString();
             if (query != "?view=logs") {
                 history.pushState(null, '', '?view=logs');
@@ -54,28 +55,29 @@ $(document).ready(function () {
         else {
             $("#email-settings-tab").tab("show");
             $("#logs").hide();
+            $(".email-settings-option").show();
             var query = (window.location.search).toString();
             if (query != "?view=email-settings") {
                 history.pushState(null, '', '?view=email-settings');
             }
         }
-        
     }
-
 
     $("a[data-toggle='tab']").on('click', function (e) {
         if ($(this).attr("id") == "email-logs-tab") {
             $("#logs").show();
             $("#email-settings").hide();
+            $(".email-settings-option").hide();
             var query = (window.location.search).toString();
             if (query != "?view=logs") {
                 history.pushState(null, '', '?view=logs');
             }
             emailActivityLogGrid();
         }
-        else if ($(this).attr("id") == "email-settings-tab"){
+        else if ($(this).attr("id") == "email-settings-tab") {
             $("#email-settings").show();
             $("#logs").hide();
+            $(".email-settings-option").show();
                 var query = (window.location.search).toString();
             if (query != "?view=email-settings") {
                 history.pushState(null, '', '?view=email-settings');

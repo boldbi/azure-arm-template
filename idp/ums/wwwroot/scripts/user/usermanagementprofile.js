@@ -26,6 +26,7 @@ $(document).ready(function () {
     if ($(".security-setting-container").is(":visible")) {
         if (location.href.match(/2fa/) || isShow2fa) {
             $("#2fa").tab("show");
+            $("#user-management-options").hide();
             var query = (window.location.search).toString();
             if (!query.includes("&view=2fa")) {
                 history.pushState(null, '', query + '&view=2fa');
@@ -33,6 +34,7 @@ $(document).ready(function () {
         }
         else {
             $("#change-password").tab("show");
+            $("#user-management-options").show();
             var query = (window.location.search).toString();
             if (!query.includes("&view=change-password")) {
                 history.pushState(null, '', query + '&view=change-password');
@@ -42,6 +44,7 @@ $(document).ready(function () {
 
     $("a[data-toggle='tab']").on('click', function (e) {
         if ($(this).attr("id") == "change-password") {
+            $("#user-management-options").show();
             var query = (window.location.search).toString();
             if (query.includes("&view=2fa")) {
                 query = query.replace("&view=2fa", "&view=change-password");
@@ -52,6 +55,7 @@ $(document).ready(function () {
             }
         }
         else if ($(this).attr("id") == "2fa") {
+            $("#user-management-options").hide();
             var query = (window.location.search).toString();
             if (query.includes("&view=change-password")) {
                 query = query.replace("&view=change-password", "&view=2fa");
@@ -813,7 +817,9 @@ $(document).on("click", ".remove-admin-class", function () {
 
 function onSingleDeleteDialogOpen() {
     $("#singleuser-delete-confirmation").find("button.e-primary").addClass("critical-action-button");
-    document.getElementById("singleuser-delete-confirmation").ej2_instances[0].show();
+    if (document.getElementById("singleuser-delete-confirmation") != null) {
+        document.getElementById("singleuser-delete-confirmation").ej2_instances[0].show();
+    }
 }
 
 function onMakeAdminDialogOpen() {
