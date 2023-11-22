@@ -2069,7 +2069,7 @@ var Designer = {
                 fiscalYearChangeValidationMsg: "Changing the Fiscal Year will invalidate filters and sorting applied on this column.",
                 tableRemoveMessage: "Removing this table will affect the filter/parameters/expression columns referring to it. Do you still want to continue?",
                 createCategoryMessage: "*Please create a category to save the dashboard",
-                differentSchema: "The new schema differs from the existing one. If you click Yes means it will lose the previous widget and data and display the new connection table data. If you click No, means the data source will be reconnected with new credentials and the widget data will depend on the availability of the table and fields in the target connection.",
+                differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Otherwise, click on the 'x' icon to close the popup without taking any action.",
                 columnNotExist: "Some of the columns does not exist in new schema and it will affect the dashboard, if removed. Do you want to continue with the schema changes?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
