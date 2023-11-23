@@ -1,0 +1,179 @@
+﻿@inject ServerPrincipal _identityResponse
+@{
+    ViewBag.Title = "_SaveView";
+    var isDefaultView = ViewBag.IsDefaultView;
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.isAdmin = _identityResponse.IsAdmin;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var defaultViewHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DefaultViews);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+    var settingsPagePermission = ViewBag.GranularPermissions as Dictionary<object, bool>;
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/save-view.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/save-view.min.css" />
+    </environment>
+    @if (ViewBag.ViewerType == "v2")
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view-v2.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view-v2.min.js"></script>
+        </environment>
+
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view.min.js"></script>
+        </environment>
+
+    }
+    <script type="text/javascript">
+        var rootUrlAction = "@rootUrl";
+        var addViewUrl = { "web": "@Url.Action("onfiltersave", "DashboardViews")", "api": "/items/views/add" };
+        var getSavedViewUrl = { "web": "@Url.Action("GetViews", "DashboardViews")", "api": "/items/views/get-by-item-id" };
+        var viewUrl = "@ViewBag.ViewUrl";
+        var cdnLink = "@dashboardServerResourceUrl";
+        var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+        var sameOrigin;
+        try {
+            sameOrigin = window.parent.location.host == window.location.host;
+        }
+        catch (e) {
+            sameOrigin = false;
+        }
+    </script>
+</head>
+<body id="save-view-dialog" class="no-margin">
+    <div id="save-view-container" class="dialog">
+        <div class="col-md-12 dialog-header">
+            <span class="su su-view Head-icon"></span>
+            <span class="PopupTitle">@T["Save View"]</span>
+            <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="closeSaveViewPopup()"><span class="su su-close"></span></a>
+        </div>
+        <span id="user-name" type="hidden" value="@ViewBag.userName"></span>
+        <span id="user-id" type="hidden" value="@ViewBag.userId"></span>
+        <form name="save-view-form" id="save-view-form" class="dialog-body col-xs-12 no-padding" onsubmit="$('#save-button').trigger('click'); return false;">
+            <div>
+                <div class="col-xs-12 padding20 no-bottom-padding" id="item-name-division">
+                    <div class="col-xs-3 no-padding text-right text-label">@T["Name"]<span class="mandatory">*</span></div>
+                    <div class="col-xs-1 no-padding"></div>
+                    <div class="col-xs-8 no-padding">
+                        <input type="text" id="view-name" name="viewnewname" data-maxlength="255" class="form-control site-orgname-fields text" />
+                        <span class="validation-errors"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12 padding20 no-bottom-padding" id="default-view-division">
+                    <div class="col-xs-3 no-padding text-right text-label">@T["Mark as Default"]</div>
+                    <div class="col-xs-1 no-padding"></div>
+                    <div class="col-xs-8 no-padding switch-padding">
+
+                        <div class="col-md-2 no-padding switch-align">
+                            <span class="material-switch text-left">
+                                @if (isDefaultView)
+                                {
+                                    <input type="checkbox" id="default-view" checked onchange="notifyAlert()" />
+                                    <label for="default-view" class="label-primary"></label>
+                                }
+                                else
+                                {
+                                    <input type="checkbox" id="default-view" disabled />
+                                    <label for="default-view" class="label-primary"></label>
+                                }
+                            </span>
+                            @if (ViewBag.IsAdmin == true || settingsPagePermission[SettingsScopes.All] || settingsPagePermission[SettingsScopes.DashboardSettings])
+                            {
+                                if (!isDefaultView)
+                                {
+                                    <div class="tool-tip col-xs-1">
+                                        <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                        <div class="dropdown-menu" role="menu">
+                                            @T["Based on your Dashboard Settings, these filters will be applied by default when next time render the Dashboard"].
+                                        @if (!@ServerAppConfig.IsHideHelpLink)
+                                        {
+                                            <span>@Html.Raw(string.Format(T["Learn more about {0}default views{1}."].Value, "<a target = '_blank' href = '" + (helpSiteBaseUrl + defaultViewHelpSiteUrl) + "' >", "</a>"))</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="tool-tip col-xs-1">
+                                    <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="dropdown-menu default-msg" role="menu">
+                                        @T["If enabled, the current view will be set as your default view for this dashboard."]
+                                        @if (!@ServerAppConfig.IsHideHelpLink)
+                                        {
+                                            <span>@Html.Raw(string.Format(T["Learn more about {0}default views{1}."].Value, "<a target = '_blank' href = '" + (helpSiteBaseUrl + defaultViewHelpSiteUrl) + "' >", "</a>"))</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            if (isDefaultView)
+                            {
+                                <div class="tool-tip col-xs-1">
+                                    <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="dropdown-menu default-msg" role="menu">
+                                        @T["If enabled, the current view will be set as your default view for this dashboard."]
+                                        @if (!@ServerAppConfig.IsHideHelpLink)
+                                        {
+                                            <span>@Html.Raw(string.Format(T["Learn more about {0}default views{1}."].Value, "<a target = '_blank' href = '" + (helpSiteBaseUrl + defaultViewHelpSiteUrl) + "' >", "</a>"))</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="tool-tip col-xs-1">
+                                    <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="dropdown-menu" role="menu">@T["Default views are disabled by the system administrator. Please contact your system administrator to enable them."]</div>
+                                </div>
+                            }
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="col-xs-12 dialog-footer no-right-padding no-left-padding" id="action-button-division">
+            <div class="rightAlign">
+                <input type="button" title="" id="save-button" class="btn primary-button app-btn-primary" value=@T["Save"] />
+                <input type="button" id="cancel-button" title="" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" onclick="closeSaveViewPopup()" />
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var dashboardViewWaitingPopupTemplateId = createLoader("dashboard-view-toogle");
+            parent.$("#dashboard-view-toogle").BoldBIDashboardWaitingPopup({ template: $("#" + dashboardViewWaitingPopupTemplateId) });
+            parent.$("#save-view-popup_wrapper").BoldBIDashboardWaitingPopup("hide");
+        });
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>

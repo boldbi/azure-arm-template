@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = T["Configuration"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    bool? updateConfigValues = ViewBag.Result;
+    List<SelectListItem> values = ViewBag.EditableFiles;
+    var content = ViewBag.FileData;
+    bool? isValidFile = ViewBag.ValidFile;
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/additional-settings.css" asp-append-version="true" />
+}
+@section scripts{
+
+    <script src="~/bundles/js/additional-settings.js" asp-append-version="true"></script>
+    <script>
+        var getFilesUrl = "@Url.Action("GetFiles", "Administration")";
+        var loadFileUrl = "@Url.Action("LoadFile", "Administration")";
+        var selectedFileName = "@ViewBag.FileName";
+        var methodType = "@Context.Request.Method";
+    </script>
+
+    <script>
+
+    </script>
+    @if (Context.Request.Method == "POST" && updateConfigValues.HasValue)
+    {
+        <script>
+            var isRequestSuccess = "@updateConfigValues.Value";
+            var isValidFile = "@isValidFile";
+            var selectedPath = "@ViewBag.FilePath";
+            $(document).ready(function () {
+
+                if (isRequestSuccess.toLowerCase() === "true" && isValidFile.toLowerCase() === "true") {
+                    SuccessAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.ConfigurationUpdated, 7000);
+                }
+                else if (isValidFile.toLowerCase() === "false")
+                {
+                    WarningAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.InvalidConfiguration, null, 7000);
+                }
+                else
+                {
+                    WarningAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.ConfigurationUpdateError, null, 7000);
+                }
+        });
+        </script>
+    }
+
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment">
+    <div class="col-md-12 admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">@T["Configuration"]</h1>
+                <h5 class="page-description">@T["Update the configuration of the application."]</h5>
+            </hgroup>
+        </div>
+                <div class="col-xs-4 top-nav-sec no-padding">
+                    @await Html.PartialAsync("../Shared/_TopMenu")
+                </div>
+            </div>
+            <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+                    <a href="@Url.Content("~/administration/config-editor")" class="secondary-button pull-right">@T["Cancel"]</a>
+                    <button type="submit" class="primary-button pull-right update-system-setting" form="look-and-feel-form" id="save-files">@T["Save"]</button>
+                </div>
+            </div>
+        </div>
+</div>
+<div id="look-and-feel-container" class="admin-page-content-container">
+    <div class="admin-page-content col-xs-12 no-padding">  
+        <div class="admin-page-body col-xs-12">
+            <form id="look-and-feel-form" class="form-horizontal" method="post" action="config-editor" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <input type="hidden" class="file-name" value="@ViewBag.FileName" name="fileName" />
+                <div class="col-xs-12 no-padding">
+                    <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12 no-padding edit-files">
+                        @Html.Label("search-files", T["Search your files"].Value, new { @class = "app-textbox-label col-lg-12" })
+                        @Html.DropDownList("editfiles", values, new
+                        {
+                            id = "edit-files",
+                            @class = "selectpicker form-control",
+                            data_none_results_text = T["No results match"].Value,
+                            data_size = "10",
+                            title = T["Select files"].Value,
+                            data_live_search = "true",
+                            data_live_search_placeholder = T["Search"].Value,
+                        })
+                    </div>
+                </div>
+                <div class="form-groups">
+                    @Html.Label("configuration", T["Configuration"].Value, new { @class = "app-textbox-label col-lg-12" })
+                    <textarea id="text-area-content" class="textarea-label" name="configFileValues" placeholder=@T["Configuration"]>@content</textarea><br><br>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</div>
+}

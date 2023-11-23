@@ -1,0 +1,52 @@
+﻿@{ 
+    var protocolTypes = new List<SelectListItem>
+    {  new SelectListItem
+        {
+            Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+        },
+        new SelectListItem
+        {
+             Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+        }
+    };
+    var siteUrl = Url.Action("Sites", "TenantsManagement");
+    var existingDomainUrl = GlobalAppSettings.SystemSettings.BaseUrl + siteUrl + "?searchKey=" + GlobalAppSettings.SystemSettings.BaseUrl;
+}
+
+<div class="sub-section no-padding">
+    <h3 class="title sub-section-heading">@T["General"]</h3>
+    <div class="form-group section-content-first">
+        @Html.Label("site-orgname", T["Organization name"].Value, new { @class = "col-xs-12 app-textbox-label" })
+        <div class="no-padding">
+            <input type="text" id="site-orgname" name="site_name" class="form-control site-orgname-fields" placeholder="@T["Enter your organization name"]" value="@ViewBag.SystemSettings.OrganizationName" data-original-value="@ViewBag.SystemSettings.OrganizationName" />
+            <span class="validation-errors" id="site-name-validation"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.Label("enable-ssl", T["Site URL"].Value, new { @class = "col-xs-12 app-textbox-label" })
+
+        <div id="ssl-selectpicker" class="input-group no-padding">
+            <div class="input-group-addon">
+                @Html.DropDownList("enableSsl", protocolTypes, new { id = "enable-ssl", @class = "enable-ssl", data_live_search = "false" })
+            </div>
+            <div class="no-padding">
+                <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="@T["Enter your URL"]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+            </div>
+        </div>
+        <div id="site-url-validation" class="col-xs-12 no-padding validation-errors site-url-validation"></div>
+        <div class=" exist-domain-info hide">
+            @Html.CheckBox("domain-change", true, new { @class = "material-checkbox", id = "domain-change" })
+            @Html.Hidden("domain-change")
+            <label for="domain-change" class="app-textbox-label no-margin">
+                @Html.Raw(string.Format(T["Update the URL of the {0}sites{1} that are deployed to the same URL."].Value, "<a target='_blank' href='" + existingDomainUrl + "'>", "</a>"))
+            </label>
+        </div>
+        <div id="enable-checkbox">
+            @Html.CheckBox("ssl-certificate", new { @class = "material-checkbox", @id = "ssl-certificate" })
+            @Html.Hidden("ssl-certificate")
+            @Html.Label("ssl-certificate", T["Ignore the SSL certificate validation errors."].Value, new { @class = "app-textbox-label col-xs-4 section-label ssl-certification" })
+        </div>
+
+        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
+    </div>
+</div>

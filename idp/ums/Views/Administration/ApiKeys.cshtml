@@ -1,0 +1,61 @@
+﻿@{
+    ViewBag.Title = T["API Keys"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/api-keys.css" asp-append-version="true" />
+}
+@section scripts{
+    <script src="~/bundles/js/api-keys.js" asp-append-version="true"></script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment">
+        <div id="api-keys-header" class="col-xs-12 col-md-12 col-sm-12 admin-page-header header-without-button">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">
+                        @T["API Keys"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Client id and secret for REST API authentication."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+
+        </div>
+    </div>
+    <div id="api-keys-container" class="col-xs-12 col-md-12 col-sm-12 admin-page-content-container">
+        <div class="admin-page-content col-xs-12 no-padding"> 
+            <div id="api-keys-body" class="col-xs-12 admin-page-body">
+                <form class="admin-page-form col-xs-12 col-md-12 col-sm-12 no-padding" autocomplete="off">
+                    <div class="col-md-12 no-padding">
+                        <div class="col-md-12 no-padding">
+                            @Html.Label("api-client-id", T["Client Id"].Value, new { @class = "app-textbox-label" })
+                        </div>
+                        <div class="id">
+                            <input type="text" class="client-values form-control no-margin" tabindex="-1" id="myApiId"  readonly="readonly" value="@ViewBag.ApiClientId.ToString()" />
+                            <div class="su su-copy form-control" id="api-copy-client-id" onclick="copyToClipboard('#myApiId','#api-copy-client-id')" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 no-padding input-field-margin">
+                        <div class="col-md-12 no-padding">
+                            @Html.Label("api-client-secret", T["Client Secret"].Value, new { @class = "app-textbox-label" })
+                        </div>
+                        <div class="secret">
+                            <input type="password" id="my-api-secret" readonly="readonly"  class="form-control client-values my-secret" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@ViewBag.ApiClientSecret.ToString()" />
+                            <div class="su su-show show-client-secret" id="show-api-client-secret" data-toggle="tooltip" data-original-title="@T["Click to view"]"></div>
+                            <div class="su su-copy form-control" id="api-copy-client-secret" onclick="copyToClipboard('#my-api-secret','#api-copy-client-secret')" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

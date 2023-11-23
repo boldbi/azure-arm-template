@@ -1,0 +1,63 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var downloadedResourcesUrl = Url.Action("GetPublishedItems", "publish") + "?tab=offline-files";
+    var offlineFilesLink = ViewBag.OfflineFilesLink;
+}
+
+<script>
+    var downloadItemUrl = "@Url.Action("DownloadDashboard", "items")";
+    var downloadedResourcesUrl = "@Url.Action("GetPublishedItems", "publish")" + "?tab=offline-files";
+        function load() {
+            if (($(parent.window).width()) > 1400) {
+                $(".dialog").addClass("iframe");
+            }
+
+            if (($(parent.window).width()) < 1400) {
+                $(".dialog").removeClass("iframe");
+            }
+        }
+</script>
+
+<body onload="load()">
+    <div id="PopupContainer" class="dialog">
+
+        @if (TempData["ErrorMessage"] == null)
+        {
+            <form class="dialog-body no-padding" id="download-item-form">
+                <input type="hidden" id="download-dashboard-status" value="true" />
+            <div class="col-xs-12 no-padding">
+                    <label>@Html.Raw(String.Format(T["The dashboard will be prepared for download with its data sources. It will take some time, depending on the data sources. You can track the file preparation status in the {0} tab on the Publish page and you can download the file once it is ready."].Value, "<a href = " + Url.Action("GetPublishedItems", "publish") + "?tab=offline-files target=_blank" + ">" + @ViewBag.OfflineFilesLink + "</a>"))</label>
+            </div>
+            <div class="col-xs-12 include-sensitiveinfo">
+                <div class="info-label">
+                    @Html.CheckBox("include-sensitiveinfo", new { @class = "material-checkbox", @checked = "checked" })
+                    @Html.Hidden("include-sensitiveinfo")
+                    <label for="include-sensitiveinfo">
+                            @T["Include sensitive information"]
+                    </label>
+                </div>
+                <div class="info-message">
+                        @T["Include all sensitive information in an encrypted format. This will be helpful if you want to upload the dashboard into another site without any data source credential changes."]
+                </div>
+            </div>
+                <input type="hidden" id="download_item_id" value="@Context.Request.Form["itemId"]" />
+        </form>
+
+        }
+        else
+        {
+            <div class="col-xs-12 no-padding">
+                <div class="permission-denied">@TempData["ErrorMessage"]</div>
+            </div>
+        }
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+        </environment>
+    </div>
+</body>

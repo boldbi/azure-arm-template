@@ -1,0 +1,160 @@
+﻿@{
+    var groupIdValue = ViewBag.groupId;
+    var isAdmin = _identityResponse.IsAdmin;
+}
+<div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog col-lg-12 no-padding" id="popup-container" role="document">
+        <div class="modal-content col-lg-12" id="add-permission-controller" ng-controller="AddPermissionController">
+            <div class="col-lg-12 modal-header">
+                <div class="col-xs-6 no-padding">
+                    <span class="popup-title modal-title">@T["Add Permission"]</span>
+                </div>
+                <div class="col-xs-6 no-padding">
+                    <a href="javascript:void(0);" class="popup-close pull-right"><span class="su su-close"></span></a>
+                </div>
+            </div>
+            <div class="modal-body col-xs-12">
+                <div class="col-xs-12 no-padding header-content">@(groupIdValue != null ? T["Select the permission to add to the group"] : T["Select the permission to add to the user"])</div>
+                <div class="col-xs-12 radio-btn-div">
+                    <div class="all-permission select-permission all-permission-resource">
+                        <input type="radio" id="all-permission" class="css-radio" value="all-permission" name="permissionType" checked="checked" ng-click="onClickAllResource(true)">
+                        <label for="all-permission" class="app-textbox-label radio-label"><span class="text">@T["All Resources"]</span></label>
+                    </div>
+                    <div class="specific-permission select-permission specific-permission-resource">
+                        <input type="radio" id="specific-permission" class="css-radio" value="specific-permission" name="permissionType" ng-click="onClickSpecificResource(true)">
+                        <label for="specific-permission" class="app-textbox-label radio-label"><span class="text">@T["Specific Resources"]</span></label>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="all-permission select-permission all-permission-settings">
+                            <input type="radio" id="all-permission-settings" class="css-radio" value="all-permission-settings" name="permissionType" ng-click="onClickAllSettings(true)">
+                            <label for="all-permission-settings" class="app-textbox-label radio-label"><span class="text">@T["All Settings"]</span></label>
+                        </div>
+                        <div class="specific-permission select-permission specific-permission-settings">
+                            <input type="radio" id="specific-permission-settings" class="css-radio" value="specific-permission-settings" name="permissionType" ng-click="onClickSpecificSettings(true)">
+                            <label for="specific-permission-settings" class="app-textbox-label radio-label"><span class="text">@T["Specific Settings"]</span></label>
+                        </div>
+                    }
+                </div>
+                <div class="col-xs-12 no-padding all-permission-div permission-modes">
+                    <div class="col-xs-4 no-padding entity-div">
+                        <div class="app-textbox-label no-padding modes-head">
+                            <label class="app-textbox-label">@T["Entity"]</label>
+                            <div class="entity-search-area pull-right">
+                                <input type="text" class="entity-search-box pull-left no-margin" ng-model="entitySearchQuery" ng-init="entitySearchQuery = ''" ng-focus="isEntitySearchFocus = true" ng-blur="isEntitySearchFocus = false" placeholder="@T["Search Entity"]" />
+                                <span class="su su-inner-close pull-left no-margin ng-hide" ng-show="entitySearchQuery != ''" ng-click="onEntitySearchClear()" ng-class="{focus : isEntitySearchFocus}" title="@T["Clear search"]"></span>
+                                <span class="su su-search pull-left no-margin" ng-show="entitySearchQuery == ''" ng-class="{focus : isEntitySearchFocus}" title="@T["Search"]"></span>
+                            </div>
+                        </div>
+                        <div class="no-padding modes-body entity-selection-div">
+                            <ul ng-show="isAllResource" class="no-margin modes-body-ul">
+                                <li ng-repeat="entity in entities | filter: filterAllResourceEntity as filteredEntityResourceType" data-entity-type="{{entity.Type}}" data-entity-mode="{{entity.Id}}" id="{{entity.Name}}" ng-class="{'selected': entity.IsSelected}" ng-click="onClickEntity(entity)" data-container="body" data-toggle="permission-tooltip" data-original-title="{{entity.Name}}" data-placement="top" data-html="true">
+                                    {{entity.Name}}
+                                </li>
+                                <div class="entity-empty-message-div col-xs-12" ng-show="filteredEntityResourceType.length == 0">
+                                    <span class="entity-empty-message">@T["No entites available to display"]</span>
+                                </div>
+                            </ul>
+                            <ul ng-show="isAllSettings" class="no-margin modes-body-ul">
+                                <li ng-repeat="entity in entities | filter: filterAllAdminEntity as filteredEntityAdminType" data-entity-type="{{entity.Type}}" data-entity-mode="{{entity.Id}}" id="{{entity.Name}}" ng-class="{'selected': entity.IsSelected}" ng-click="onClickEntity(entity)" data-container="body" data-toggle="permission-tooltip" data-original-title="{{entity.Name}}" data-placement="top" data-html="true">
+                                    {{entity.Name}}
+                                </li>
+                                <div class="entity-empty-message-div col-xs-12" ng-show="filteredEntityAdminType.length == 0">
+                                    <span class="entity-empty-message">@T["No entites available to display"]</span>
+                                </div>
+                            </ul>
+                            <ul ng-show="isSpecificResource" class="no-margin modes-body-ul no-padding">
+                                <li ng-repeat="entity in entities | filter: filterSpecificResourceEntity as filteredEntityTypeSpecificResource" ng-if="entity.Type != 1" data-entity-type="{{entity.Type}}" data-entity-mode="{{entity.Id}}" id="{{entity.Name}}" ng-class="{'selected': selectedItem === entity}" ng-click="onClickEntity(entity)" data-container="body" data-toggle="permission-tooltip" data-original-title="{{entity.Name}}" data-placement="top" data-html="true">
+                                    {{entity.Name}}
+                                </li>
+                                <div class="entity-empty-message-div col-xs-12" ng-show="filteredEntityTypeSpecificResource.length == 0">
+                                    <span class="entity-empty-message">@T["No entites available to display"]</span>
+                                </div>
+                            </ul>
+                            <ul ng-show="isSpecificSettings" class="no-margin modes-body-ul no-padding">
+                                <li ng-repeat="entity in entities | filter: filterSpecificSettingsEntity as filteredEntityTypeSpecificSettings" ng-if="entity.Type != 1" data-entity-type="{{entity.Type}}" data-entity-mode="{{entity.Id}}" id="{{entity.Name}}" ng-class="{'selected': selectedItem === entity}" ng-click="onClickEntity(entity)" data-container="body" data-toggle="permission-tooltip" data-original-title="{{entity.Name}}" data-placement="top" data-html="true">
+                                    {{entity.Name}}
+                                </li>
+                                <div class="entity-empty-message-div col-xs-12" ng-show="filteredEntityTypeSpecificSettings.length == 0">
+                                    <span class="entity-empty-message">@T["No entites available to display"]</span>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 no-padding scope-div" ng-show="isSpecificResource || isSpecificSettings">
+                        <div class="app-textbox-label no-padding modes-head">
+                            <label class="app-textbox-label">@T["Scope"]</label>
+                            <div class="scope-search-area pull-right">
+                                <input type="text" class="scope-search-box pull-left no-margin" ng-model="scopeSearchQuery" ng-init="scopeSearchQuery = ''" ng-focus="isScopeSearchFocus = true" ng-blur="isScopeSearchFocus = false" placeholder="@T["Search Scope"]" />
+                                <span class="su su-inner-close pull-left no-margin ng-hide" ng-show="scopeSearchQuery != ''" ng-click="onScopeSearchClear()" ng-class="{focus : isScopeSearchFocus}" title="@T["Clear search"]"></span>
+                                <span class="su su-search pull-left no-margin" ng-show="scopeSearchQuery == ''" ng-class="{focus : isScopeSearchFocus}" title="@T["Search"]"></span>
+                            </div>
+                        </div>
+                        <div class="modes-body scope-selection-div" id="scope">
+                            <ul class="scope-selection-ul modes-body-ul">
+                                <li ng-show="scopes.length!=0" class="scope-selection-li">
+                                    <ul ng-repeat="(key, value) in scopes | groupBy: 'CategoryName'" ng-show="entityTypeId != 25 && (scopes | filter: filteredScopesAll).length != 0">
+                                        <span ng-if="key!='null' && key!= 'undefined' && filteredScopeAll.length != 0 && noLoader" class="group-head">{{ key }}</span>
+                                        <li ng-show="noLoader" ng-repeat="scope in value | filter: {Name: scopeSearchQuery} as filteredScopeAll" class="scope-selection" id="{{scope.Name}}" data-scope-id="{{scope.Id}}" data-container="body" data-toggle="permission-tooltip" data-original-title="{{scope.Name}}" data-placement="top" data-html="true" ng-class="{'selected': scope.IsSelected}" ng-click="onClickScope(scope)">
+                                            {{ scope.Name }}
+                                        </li>
+                                    </ul>
+                                    <div class="entity-empty-message-div col-xs-12" ng-show="(scopes | filter: filteredScopesAll).length == 0 && entityTypeId != 25">
+                                        <span class="entity-empty-message">@T["No scopes available to display"]</span>
+                                    </div>
+                                    <ul ng-show="entityTypeId == 25" class="group-div">
+                                        <li ng-show="noLoader" ng-repeat="scope in scopes | filter: {GroupName: scopeSearchQuery} as filteredScopeGroup" class="scope-selection" id="{{scope.GroupName}}" data-scope-id="{{scope.GroupId}}" data-container="body" data-toggle="permission-tooltip" data-original-title="{{scope.GroupName}}" data-placement="top" data-html="true" ng-class="{'selected': scope.IsSelected}" ng-click="onClickScope(scope)">
+                                            {{scope.GroupName}}
+                                        </li>
+                                        <div class="entity-empty-message-div col-xs-12" ng-show="filteredScopeGroup.length == 0">
+                                            <span class="entity-empty-message">@T["No scopes available to display"]</span>
+                                        </div>
+                                    </ul>
+                                </li>
+                                <div ng-show="scopes.length==0  && noLoader && !noScope" class="select-any-msg-div">
+                                    @T["Select an entity to see the available scopes"]
+                                </div>
+                                <div ng-show="noScope" class="select-any-msg-div">
+                                    @T["No scopes available to display"]
+                                </div>
+                                <div class="permission-loader-div">
+                                    <span class="loader-align"></span>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 no-padding access-div">
+                        <div class="app-textbox-label no-padding modes-head access-mode-head">
+                            <label class="app-textbox-label">@T["Access Mode"]</label>
+                        </div>
+                        <div class="modes-body access-selection-div">
+                            <ul class="modes-body-ul">
+                                <li ng-show="noLoader" ng-repeat="access in accesses" class="access-selection" id="{{access.Name}}" data-access-id="{{access.Id}}" data-container="body" data-toggle="permission-tooltip" data-original-title="{{access.Name}}" data-placement="top" data-html="true" ng-class="{'selected': selectedAccess === access}" ng-click="onClickAccess(access)">
+                                    {{access.Name}}
+                                </li>
+                                <div ng-show="accesses.length==0  && noLoader" class="select-any-msg-div">
+                                    @T["Select an entity to see the access modes"]
+                                </div>
+                                <div class="permission-loader-div">
+                                    <span class="loader-align"></span>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                    <div ng-show="showErrorIsSpecific" class="col-xs-12 warning-div">
+                        @T["Please select at least one entity, scope and access mode."]
+                    </div>
+                    <div ng-show="showError" class="col-xs-12 warning-div">
+                        @T["Please select at least one entity and access mode."]
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 modal-footer">
+                <div class="col-xs-7 buttons-area pull-right no-padding">
+                    <input type="button" name="Save" value="@T["Add"]" class="primary-button app-btn-primary" id="save-permission" />
+                    <input type="button" id="cancel-group" class="secondary-button app-btn-secondary popup-close" value="@T["Cancel"]" />
+                </div>
+            </div>
+        </div>
+    </div>

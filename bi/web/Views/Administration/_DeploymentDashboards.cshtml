@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "DeploymentDashboards";
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.min.js"></script>
+    </environment>
+}
+
+<script type="text/javascript">
+    var deploymentDashboardsUrl = "@Url.Action("AddDeploymentDashboard", "Publish")";
+    var isDashboardNameExistUrl = "@Url.Action("IsDeploymentDashboardNameExists", "Publish")";
+    var getDeploymentDashboardsUrl = "@Url.Action("GetDeploymentDashboards", "Publish")";
+    var deploymentItemDetails = @Html.Raw(Json.Serialize(ViewBag.DeploymentDashboard));
+    var getSelectPickerValuesUrl = "@Url.Action("GetDeploymentDashboardDetail", "Administration")";
+    var removeDashboardUrl = "@Url.Action("RemoveDeploymentDashboard", "Publish")";
+</script>
+
+<script type="text/x-jsrender" id="dashboard-template">
+    <div class="grid-content" title="{{:Name}}" data-toggle="tooltip" data-placement="top">
+        <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:Name}}" target="_blank">{{:Name}}</a></span>
+    </div>
+</script>
+<script type="text/x-jsrender" id="dashboard-name-template">
+    <div class="grid-content" title="{{:DeploymentDashboardName}}" data-toggle="tooltip" data-placement="top">
+        <span>{{:DeploymentDashboardName}}</span>
+    </div>
+</script>
+<script type="text/x-jsrender" id="category-template">
+    <div class="grid-content" title="{{:CategoryName}}" data-toggle="tooltip" data-placement="top">
+        <span>{{:CategoryName}}</span>
+    </div>
+</script>
+<script type="text/x-jsrender" id="actionstemplate">
+    <div class="grid-content">
+        <span><a href="javascript:void(0);" class="remove-dashboard grid-content" title="" data-username="{{:DisplayName}}" data-itemId="{{:ItemId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+    </div>
+</script>
+<script type="text/x-jsrender" id="locked-template-dashboard">
+    {{if IsDashboardLocked == false}}
+    @T["Enabled"]
+    {{else IsDashboardLocked == true}}
+   @T["Disabled"]
+    {{/if}}
+</script>
+<script type="text/x-jsrender" id="locked-template-datasource">
+    {{if IsDatasourceLocked == false}}
+     @T["Enabled"]
+    {{else IsDatasourceLocked == true}}
+     @T["Disabled"]
+    {{/if}}
+</script>
+
+<div id="dashboardGrid" class="col-xs-12 no-padding dialog-override">
+</div>
+

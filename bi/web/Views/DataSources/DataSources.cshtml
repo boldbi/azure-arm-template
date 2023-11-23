@@ -1,0 +1,180 @@
+﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
+    var globalAppSettings = _globalAppSettings;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    ViewBag.Title = T["Data Sources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageDatasources);
+    var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
+    var pageDescription = T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."];
+}
+
+@model List<ItemDetail>
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasources.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasources.min.css" />
+    </environment>
+    @if (isEmbed)
+    {
+        <style>
+            #server-app-container #menu-area {
+                display: none;
+            }
+
+            #server-app-container #content-area {
+                padding: 0px !important;
+            }
+        </style>
+    }
+}
+
+@section scripts{
+
+    <script>
+        var refreshHistory = "@ViewBag.RefreshHistory";
+        var refreshHistoryItemName = "@ViewBag.ItemName";
+        var refreshHistoryItemId = "@ViewBag.ItemId";
+        var refreshHistoryItemType = "@Convert.ToInt32(ItemType.Datasource)";
+    </script>
+    @if (!isMobile)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page.min.js"></script>
+        </environment>
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page-mobile.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page-mobile.min.js"></script>
+        </environment>
+    }
+
+    @*<script>
+            var getDataSourceDetailsUrl = "@Url.Action("GetDataSourceDetails", "DataSources")";
+        </script>*@
+    <script>
+        var createDatasourceIframeUrl = "@Url.Action("Connection", "DataSourceDesigner")";
+        var dataPreviewIframeUrl = "@Url.Action("DataPreview", "DataSourceDesigner")";
+        var edittableorcolumnUrl = "@Url.Action("EditTableOrColumn", "DataSourceDesigner")";
+        var datasourceId = "@ViewBag.DataSourceId";
+        var datasourceName = "@ViewBag.DataSourceName";
+        var designerInstallationHelpUrl = "@(ServerAppConfig.AppSettings.Documentation.Uri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerInstallation))";
+        var refreshDataScheduleIframeUrl = "@Url.Action("GetRecurrenceTypeView", "DataSources")";
+        var mergeDatasourceIframeUrl = "@Url.Action("MergeDataSource", "DataSourceDesigner")";
+        var refreshData = "@Url.Action("RefreshData", "DataSources")";
+        var isUpdateDataSource = @Json.Serialize(ViewBag.IsUpdateDataSource);
+
+        $(document).ready(function () {
+            $("#search-items").val("");
+            if ("@ViewBag.searchKey" != "") {
+                var query = "dashboard:" + "@ViewBag.searchKey";
+                $("#search-items").val(query);
+                var searchEvent = $.Event('keydown');
+                $("#search-items").trigger(searchEvent);
+            }
+            if (datasourceId != "" && datasourceId != undefined && datasourceName != "" && datasourceName != undefined) {
+                var newUrl = window.location.origin + rootUrlAction + "/data-sources";
+                history.pushState({}, "", newUrl);
+                if (isUpdateDataSource) {
+                    successToast(window.Server.App.Localization.EditDataSourceSuccess, 7000);
+                } else {
+                    successToast(window.Server.App.Localization.AddDataSourceSuccess, 7000);
+                }
+            }
+        });
+    </script>
+}
+@section MainSection{
+    @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Datasource) && itemsCount[ItemType.Datasource] > 0)
+    {
+        @if (!isMobile)
+        {
+            <div class="col-xs-12 no-padding no-margin">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["DATA SOURCES"] }, { "PageDescription", @pageDescription } })
+                <div class="import-area col-xs-12 bi-page-header top-nav-btn-secton">
+                    <div class="col-xs-12 no-padding">
+                        <div id="search-area" class="pull-left col-xs-4">
+                            <input type="text" id="search-items" class="pull-left no-margin" placeholder="@T["Search data sources"]" />
+                            <span class="su close-icon su-inner-close pull-left no-margin clear-search" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-item pull-left no-margin" title="@T["Search data sources"]"></span>
+                        </div>
+                        <div class="col-xs-6 no-padding button-section">
+                            @if (itemPermissions[ItemType.Datasource])
+                            {
+                                <button type="button" id="create-datasource-connection" class="pull-right primary-button app-btn-primary">@T["Create Data Source"]</button>
+                            }
+                            <a href="@Url.Action("ConnectedAccounts", "User")" id="my-connection" class="link-button app-btn-link pull-right connected-accounts-button" title="">@T["My Connections"]</a>
+                            @if (itemPermissions[ItemType.Datasource])
+                            {
+                                <button type="button" id="merge-datasource" class="pull-right link-button app-btn-link">@T["Combine Data Source"]</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div id="item-grid-container" data-grid-name="datasources" class="bi-page-container grid-page-container">
+            <div class="bi-page-content col-md-12 no-padding">
+                <input type="hidden" class="page-name" data-content="@T["DATA SOURCES"]">
+                @if (!isMobile)
+                {
+                    <div class="col-xs-12 bi-page-body">
+                        <div class="grid-container grid">
+                            @await Html.PartialAsync("../Items/_ItemsGrid", new ViewDataDictionary(ViewData) { { "gridName", "datasources" }, { "Permissions", @itemPermissions }, { "SearchQuery", ViewBag.FilterKey } })
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="grid-container grid">
+                        @await Html.PartialAsync("../Items/_ItemsGridForMobile", new ViewDataDictionary(ViewData) { { "gridName", "datasources" } })
+                    </div>
+                }
+            </div>
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("../DefaultPages/DefaultPages", new ViewDataDictionary(ViewData) { { "Permissions", itemPermissions }, { "ItemType", ItemType.Datasource } })
+    }
+    <div id="datasource-edit-popup" style="display:none;">
+        <iframe id="datasource-edit-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+    <div id="datasource-refresh-schedule-container" style="display:none;" class="no-padding">
+        <iframe id="datasource-refresh-scheduler-edit-popup-iframe" class="datasource-refresh-popup-frame">
+        </iframe>
+    </div>
+    <div id="create-data-preview-popup" class="fluent-popup display-none">
+        <iframe id="create-data-preview-iframe" class="datasource-create-frame"></iframe>
+    </div>
+    <div id="create-merge-datasource-popup" class="fluent-popup display-none">
+        <iframe id="create-merge-datasource-iframe" class="datasource-create-frame"></iframe>
+    </div>
+    <div id="datasource-edit-table-column-popup" class=" display-none">
+        <iframe id="datasource-edit-table-column-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+
+    @if (!isMobile)
+    {
+        @await Html.PartialAsync("../Items/_AddItems")
+        @await Html.PartialAsync("../Items/_ItemVersion")
+        @await Html.PartialAsync("../Items/_SharePermission")
+        @await Html.PartialAsync("../Scheduler/_DataSourceScheduleHistory")
+    }
+}

@@ -1,0 +1,22 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+}
+
+<div id="x-frame-options-settings-body" class="col-xs-12 no-padding">
+    <div class="col-xs-12 no-padding field-container-dashboard">
+        <div class="info-label">
+            @Html.CheckBox("x-frame", (bool)globalAppSettings.SystemSettings.IsXFrameOptionsEnabled, new { @class = "material-checkbox" })
+            <label for="x-frame">
+                @string.Format(T["Enable {0}"].Value, "X-Frame-Options")
+            </label>
+        </div>
+        <div class="info-message" id="x-frame-checkbox-label">
+            @string.Format(T["If you enable this option, the application will add an {0} header, {1}, meaning that the page will only be displayed if all frame ancestors and the page origin are the same. By default, this option is disabled."].Value, "X-Frame-Options", "SAMEORIGIN")
+        </div>
+        <div class="bg-warning x-frame-notification">
+            @string.Format(T["Please make sure that you are not using {0} embedding, as it will not work when this setting is saved."].Value, "iframe")
+        </div>
+    </div>
+</div>

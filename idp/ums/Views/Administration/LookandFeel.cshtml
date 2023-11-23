@@ -1,0 +1,98 @@
+﻿@using Syncfusion.Server.Base.LicenseManagement.Core
+@{
+    ViewBag.Title = T["Look and Feel"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var fonts = ViewBag.FontList as List<SelectListItem>;
+    var selectedFont = fonts.FirstOrDefault(x => x.Selected);
+    var applicationThemes = ViewBag.ApplicationTheme as List<SelectListItem>;
+    var selectedapplicationTheme = new SelectListItem()
+    {
+        Text = "Default",
+        Value = "Default",
+        Selected = true
+    };
+    if (applicationThemes.FirstOrDefault(x => x.Selected) != null && applicationThemes.FirstOrDefault(x => x.Selected).Selected)
+    {
+        selectedapplicationTheme = applicationThemes.FirstOrDefault(x => x.Selected);
+    }
+
+    var dashboardThemes = ViewBag.DashboardTheme as List<SelectListItem>;
+    var selecteddashboardTheme = new SelectListItem()
+    {
+        Text = "Default",
+        Value = "Default",
+        Selected = true
+    };
+    if (dashboardThemes.FirstOrDefault(x => x.Selected) != null && dashboardThemes.FirstOrDefault(x => x.Selected).Selected)
+    {
+        selecteddashboardTheme = dashboardThemes.FirstOrDefault(x => x.Selected);
+    }
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/look-and-feel.css" asp-append-version="true" />
+}
+@section scripts{
+
+    <script src="~/bundles/js/look-and-feel.js" asp-append-version="true"></script>
+    <script>
+        var fontReferenceUrl = "@Url.Action("GetFontCss", "LookFeel")";
+        var applicationThemeReferenceUrl = "@Url.Action("GetApplicationTheme", "LookFeel")";
+        var updateFontThemeSettingsUrl = "@Url.Action("UpdateLookAndFeelSettings", "Administration")";
+        var selectedFontText = "@selectedFont.Text";
+        var selectedFontValue = "@selectedFont.Value";
+        var selectedApplicationThemeText = "@selectedapplicationTheme.Text";
+        var selectedApplicationThemeValue = "@selectedapplicationTheme.Value";
+        var selectedDashboardThemeText = "@selecteddashboardTheme.Text";
+        var selectedDashboardThemeValue = "@selecteddashboardTheme.Value";
+        var applicationThemes = "@applicationThemes";
+        var dashboardThemes = "@dashboardThemes";
+         var baseRootUrl = "@Url.Content("~/")";
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+    @await Html.PartialAsync("_uploadfont")
+    @await Html.PartialAsync("_UploadApplicationTheme")
+    @await Html.PartialAsync("_UploadDashboardTheme")
+
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment">
+        <div id="look-and-feel-header" class="col-xs-12 admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">
+                        @T["Look and Feel"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Customize the look and feel of the application."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+        <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+                    <button class="secondary-button pull-right" id="cancel-settings">@T["Cancel"]</button>
+                    <button type="button" id="update-lookandfeel-settings" name="update-lookandfeel-settings" class="primary-button pull-right">
+                        <span>@T["Save"]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+</div>
+
+    <div id="look-and-feel-container" class="col-xs-12 admin-page-content-container">
+        <div class="admin-page-content col-xs-12 no-padding"> 
+            <div class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+                @await Html.PartialAsync("_FontSection")
+                @await Html.PartialAsync("_ThemeSection", "", new ViewDataDictionary(ViewData) { { "hasBoldBIOnPremise", GlobalAppSettings.IsBoldBIOnPremise }, { "hasBoldReportsOnPremise", GlobalAppSettings.IsBoldReportsOnPremise }, { "isCommonDeployment", GlobalAppSettings.IsCommonDeployment } })
+            </div>
+            
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

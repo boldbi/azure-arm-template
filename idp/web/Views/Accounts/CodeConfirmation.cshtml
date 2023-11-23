@@ -1,0 +1,62 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    ViewBag.Title = $"{T["Account Recovery"].Value} - {GlobalAppSettings.SystemSettings.OrganizationName}";
+    var email = ViewBag.Email;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/accounts-code-confirmation.css" asp-append-version="true"/>
+}
+
+@section scripts{
+    <script>
+        var email = "@email";
+        $(document).ready(function () {
+            $(document).on("click", ".forgot-pwd-link", function (event) {
+                showWaitingPopup('body');
+            });
+        });
+
+        $(document).on("click", "#mail-resend", function (event) {
+            event.preventDefault();
+            if (email != "" && email != undefined) {
+                localStorage.setItem(window.location.hostname + "_email", email);
+            }
+
+            window.location.href = $(this).attr("href");
+        });
+    </script>
+}
+
+@section MainSection{
+    <div class="code-confirmation-body">
+        <div class="icon-container">
+            <div class="su su-tick"></div>
+        </div>
+        @if (ViewBag.IsAccountActivation)
+        {
+            <div class="status-message text-body">
+                @Html.Raw(string.Format(T["An email with instructions on how to verify your account has been sent to {0}."].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>"))
+            </div>
+            <div class="text-body resend-verification">@T["If you have not received it, please click the following link."]</div>
+            <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=true" value="@T["Resend activation link"]">
+            <div class="divider-light"></div>
+            <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">@T["The verification link expires in 2 days!"]</span></div>
+        }
+        else
+        {
+            <div class="status-message text-body">
+                @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}."].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>"))
+            </div>
+            <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
+            <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">
+            <div class="divider-light"></div>
+            <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">@T["The recovery link expires in two hours!"]</span></div>
+        }
+
+        <div class="back-button text-body"> <a href="@Url.Action("login","accounts")"><span>@T["Return to Sign in"]</span></a></div>
+    </div>
+}

@@ -1,0 +1,209 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.Title = T["Synchronize Users"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncDatabaseUsers);
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var pageHeader = T["Database User Synchronization"];
+    var pageDescription = T["Select Users to synchronize with Existing Database."];
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/import-database-users-sync.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/import-database-users-sync.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.min.js"></script>
+    </environment>
+    <script>
+        var synchronizeSelectedDbUsersUrl = "@Url.Action("SynchronizeSelectedImportedUsers", "UserManagement")";
+    </script>
+    <script type="text/x-jsrender" id="user-profile-template">
+        <a class="user-name" title="{{:FullName}}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}">{{:FullName}}</a>
+    </script>
+
+    <script type="text/x-jsrender" id="username-template">
+        <span title="{{:Username}}" class="grid-content" data-toggle="tooltip">
+            {{:Username}}
+        </span>
+    </script>
+    <script type="text/x-jsrender" id="email-template">
+        <span title="{{:EmailId}}" class="grid-content" data-toggle="tooltip">
+            {{:EmailId}}
+        </span>
+    </script>
+
+    <script type="text/x-jsrender" id="checkbox-row-template">
+        <input type="checkbox" class="checkbox-row material-checkbox" name="checkbox-row" data-checked-id="{{:UserId}}" id="row-check{{:UserId}}" />
+        <input name="row-check{{:UserId}}" type="hidden" value="false">
+        <label for="row-check{{:UserId}}"> </label>
+    </script>
+
+    <script type="text/x-jsrender" id="checkbox-header-template">
+        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
+        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+    </script>
+
+    <script type="text/x-jsrender" id="name-header">
+        <div class="item-header">@T["Name"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="username-header">
+        <div class="item-header">@T["Username"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="email-header">
+        <div class="item-header">@T["Email Address"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="userid-header">
+        <div class="item-header">@T["User id"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="user-detail-validation">
+        {{if IsDuplicated}}
+        <span class="su su-login-error user-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+        {{/if}}
+    </script>
+
+    <script type="text/javascript" language="javascript">
+        ej.support.stableSort = false;
+        $("#search-ad-users").val("");
+        var data = @Html.Raw(Json.Serialize(ViewBag.DatabaseUsers));
+        $(function () {
+            data = ej.parseJSON(data);
+            GridLocalization(window.Server.App.Localization.SynchronizationUsersEmpty);
+            $("#user_grid").ejGrid({
+                dataSource: data,
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                enableAltRow: false,
+                enableRowHover: true,
+                allowSorting: true,
+                allowSelection: true,
+                allowScrolling: false,
+                allowFiltering: true,
+                allowSearching: true,
+                actionBegin: "fnActionBegin",
+                locale: "en-US",
+                selectionType: ej.Grid.SelectionType.Multiple,
+                pageSettings: { pageSize: 20 },
+                templateRefresh: "refreshTemplate",
+                filterSettings: { filterType: "menu" },
+                selectionSettings: { selectionMode: ["row"] },
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    $("#checkbox-header").change(headCheckboxOnChange);
+                    this.model.indexes = {}; /* Additional property*/
+                    var selecteduserIdValues = [];
+                },
+
+                recordClick: "fnRecordClick",
+                create: "fnOnUserGridCreate",
+                actionComplete: "fnOnUserGridActionComplete",
+                columns: [
+                        {
+                            headerTemplateID: "#checkbox-header-template",
+                            template: true,
+                            templateID: "#checkbox-row-template",
+                            textAlign: ej.TextAlign.Center,
+                            allowFiltering: false,
+                            width: 20
+                        },
+                        {
+                            template: true,
+                            allowSorting: true,
+                            templateID: "#user-profile-template",
+                            headerText: "@T["Name"]",
+                            headerTemplateID: "#name-header",
+                            width: 115,
+                            field: "FullName",
+                            allowFiltering: true,
+                            type: "string"
+                        },
+                        {
+                            template: true,
+                            allowSorting: true,
+                            templateID: "#username-template",
+                            headerText: "@T["Username"]",
+                            headerTemplateID: "#username-header",
+                            width: 115,
+                            field: "Username",
+                            allowFiltering: true,
+                            type: "string",
+                            visible: isSelfHosted
+                        },
+                        {
+                            field: "EmailId",
+                            headerText: "@T["Email Address"]",
+                            templateID: "#email-template",
+                            headerTemplateID: "#email-header",
+                            type: "string",
+                            allowFiltering: true,
+                            width: 150
+                        },
+                        {
+                            field: "UserId",
+                            headerText: "@T["User id"]",
+                            headerTemplateID: "#userid-header",
+                            type: "string",
+                            cssClass: "user-id",
+                            allowFiltering: true,
+                            width: 100,
+                            visible: false
+                        },
+
+                        {
+                            field: "",
+                            width: 15,
+                            templateID: "#user-detail-validation",
+                            allowFiltering: false,
+                            visible: true
+                        }
+                ]
+
+            });
+        });
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+<div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+    <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @pageHeader }, { "PageDescription", @pageDescription }, { "IsUserSyncPage", "true" } })
+    </div>
+    <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton" id="user-title">
+        <div class="col-xs-12 no-padding">
+            <div class="col-xs-6 no-padding button-section hide" id="synchronize-users">
+                <span class="primary-button app-btn-primary pull-right" title="@T["Synchronize Users with Existing Database"]" onclick="SynchronizeDatabaseUsers()">@T["Synchronize"]</span>
+            </div>
+            <div id="search-area" class="pull-left col-xs-4">
+                <input type="text" id="search-ad-users" class="pull-left no-margin" placeholder="@T["Search database users"]" autocomplete="off" />
+                <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                <span class="su su-search search-icon pull-left no-margin search-user" title="@T["Search"]"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-xs-12 bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+    <div class="col-xs-12 bi-page-content no-padding">
+        <div class="col-xs-12 bi-page-body col-lg-12">
+            <div class="col-xs-7 no-padding">
+                <span class="db-userlist-info pull-left">@T["Only users imported from the database configured in this organization are listed here."]</span>
+            </div>
+            <div id="user_grid" class="col-xs-12 no-padding"></div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+    @if (!ViewBag.ThirdPartyLogins)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

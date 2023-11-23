@@ -1,0 +1,76 @@
+﻿@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"].ToString().ToLower() == "attributes") ? "active" : string.Empty;
+}
+
+<!DOCTYPE html>
+<head>
+    <script type="text/javascript">
+        var siteAttributesUrl = "@Url.Action("GetSiteAttributes", "CustomAttribute")";
+        $(document).ready(function () {
+            $("#SiteAttributesGrid").ejGrid({
+                dataSource: null,
+                gridLines: ej.Grid.GridLines.None,
+                allowSorting: true,
+                allowSearching: true,
+                allowPaging: true,
+                allowSelection: true,
+                allowFiltering: true,
+                filterSettings: { filterType: "menu" },
+                pageSettings: { pageSize: 8 },
+                enableRowHover: true,
+                enableAltRow: false,
+                create: "initialSiteGridCreate",
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                columns: [
+                    { field: 'Name', templateID: "#attribute-name-template", headerText: "@T["Name"]", width: 40, allowSorting: true, allowFiltering: true },
+                    { field: 'Value', templateID: "#attribute-value-template", headerText: "@T["Value"]", width: 60, allowSorting: true, allowFiltering: true },
+                    { field: 'Description', templateID: "#attribute-description-template", headerText: "@T["Description"]", width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'ModifiedDateString', headerText: "@T["Last Modified"]", width: 40, allowSorting: true, allowFiltering: false },
+                    { field: 'Options', headerText: '', templateID: "#options", width: 20, allowSorting: false, allowFiltering: false }
+                ]
+            });
+
+            $.ajax({
+                type: "GET",
+                url: siteAttributesUrl,
+                success: function (result) {
+                    if (result.Status) {
+                        var siteAttributesGrid = $("#SiteAttributesGrid").data("ejGrid");
+                        siteAttributesGrid.dataSource(result.Attributes);
+                    }
+                    $("#SiteAttributesGrid").ejWaitingPopup("hide");
+                }
+            });
+        });
+    </script>
+    <script type="text/x-jsrender" id="attribute-name-template">
+        <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+    </script>
+    <script type="text/x-jsrender" id="attribute-value-template">
+        <span class="grid-content" title="{{:Value}}" data-toggle="tooltip">{{:Value}}</span>
+    </script>
+    <script type="text/x-jsrender" id="attribute-description-template">
+        <span class="grid-content" title="{{:Description}}" data-toggle="tooltip">{{:Description}}</span>
+    </script>
+</head>
+<body>
+    <div role="tabpanel" class="tab-pane @activeTab" id="custom-attributes">
+        <div id="site-attribute-body" class="bi-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+                <div id="SiteAttributesGrid"></div>
+            </div>
+            <script type="text/x-jsrender" id="options">
+                <div class="user-hover-options">
+                    <a href="javascript:void(0);" id="edit-site-attribute" title="@T["Edit"]" data-toggle="tooltip" data-id="{{:Id}}" data-name="site" onclick="editCustomAttribute(this)">
+                        <i class="su su-edit"></i>
+                    </a>
+                    <a class="delete-class" href="javascript:void(0);" id="remove-site-attribute" title="@T["Remove"]" data-toggle="tooltip" data-id="{{:Id}}" data-name="site" onclick="deleteConfirmation(this)">
+                        <i class="su su-delete"></i>
+                    </a>
+                </div>
+            </script>
+        </div>
+    </div>
+</body>

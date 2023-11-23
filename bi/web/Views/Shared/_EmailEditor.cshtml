@@ -1,0 +1,56 @@
+﻿
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<environment include="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/emaileditor.css" />
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emaileditor.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/emaileditor.min.css" />
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emaileditor.min.js"></script>
+</environment>
+
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body>
+    <div class="no-padding email-custom-editor" id="email-editor-area">
+        <div class="col-sm-12 col-xs-12 no-padding" id="email-subject-panel">
+            <div class="col-sm-2 col-xs-2 no-padding align-center email-label"><span>@T["Subject"]</span></div>
+            <div class="col-sm-12 col-xs-12 no-padding email-subject-text"><input type="text" class="form-control cls-schname" value="" id="subject-area" data-maxlength="100"></div>
+            <div class="col-sm-4 col-xs-4 no-padding pull-right" id="select-variables">
+                <select id="email-subject-variables" class="selectpicker" data-size="5" title="@T["Select variables"]" data-hide-disabled="true" multiple>
+                    <option value="Organization Name">Organization Name</option>
+                    <option value="Schedule Name">Schedule Name</option>
+                    <option value="Dashboard Name">Dashboard Name</option>
+                    <option value="Date">Date</option>
+                    <option value="Time">Time</option>
+                </select>
+            </div>
+            <div class="validate-error" id="email-subject-validation">@T["Please enter the email subject"]</div>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding email-editor custom-bootstrap-styles" id="email-editor-panel">
+            <div class="col-sm-2 col-xs-2 no-padding align-center email-label"><span>@T["Body"]</span></div>
+            <div id="data-alert-header" class="col-sm-12 col-xs-12 bottom-margin no-padding">
+                <div class="col-sm-1 col-xs-3 no-padding field-width" style="margin-top: 11px;">@T["Select Fields"] : </div>
+                <div id="email-alert-widget-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
+                    <select id="widget-items" data-live-search="true" class="selectpicker col-sm-4 col-xs-4 no-padding" data-size="5" data-toggle="tooltip"></select>
+                </div>
+                <div class="col-sm-3 col-xs-3"><input type="button" class="primary-button app-btn-primary" id="add-alert-column" value="Insert" />  </div>
+            </div>
+
+            <div class="col-sm-12 col-xs-12 no-padding" id="selected-users-container"></div>
+            <div id="email-content-validation" style="visibility: visible;"></div>
+        </div>
+    </div>
+</body>
+</html>

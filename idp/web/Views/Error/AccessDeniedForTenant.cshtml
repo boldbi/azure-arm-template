@@ -1,0 +1,45 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@{
+    Layout = null;
+    var returnUrl = ViewBag.ReturnUrl;
+    var email = ViewBag.Email;
+    var dns = ViewBag.DNS;
+    var imageHelper = new ImageHelper();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Access Denied"] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" onerror="if (this.src != '@GlobalAppSettings.SystemSettings.CDNLink/images/application/@CloudAppConfig.AppBranding/@IconFileNames.LoginLogo') this.src = '@GlobalAppSettings.SystemSettings.CDNLink/images/application/@CloudAppConfig.AppBranding/@IconFileNames.LoginLogo';" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@imageHelper.AccessDeniedImage()" class="error-image-2">
+                </div>
+                <div class="error-type">@T["Access Denied"]</div>
+                <div class="error-text">
+                    @Html.Raw(string.Format(T["You are logged in as {0}, but you do not have access to the site {1}.{2} If you should have access to this site, contact your system administrator."].Value, $"<strong>{email}</strong>", $"<strong>{dns}</strong>", "<br>"))                  
+                </div>
+                <div class="take-me-back-to-home-page">
+                    <span class="error-page-cursor">
+                        <a class="error-to-back-text-color" href="@Url.Action("Logout", "Accounts")">
+                            @T["Try a different account"]
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</body>
+</html>

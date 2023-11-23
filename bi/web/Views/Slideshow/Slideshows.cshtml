@@ -1,0 +1,252 @@
+﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@inject ServerPrincipal _identityResponse
+@using Newtonsoft.Json
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Slideshow"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var culture = ViewBag.Culture;
+    var userId = _identityResponse.User.UserId;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageSlideshows);
+    var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var schemes = customUI?.Profiles != null && customUI.Profiles[0].Slideshows != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].Slideshows.Scheme).FirstOrDefault() : null;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var pageHeader = T["SLIDESHOWS"];
+    var pageDescription = T["Create and manage slideshows to present a collection of dashboards that switch at regular intervals."];
+}
+
+@section scripts{
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/slideshow-listing.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow-listing.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/slideshow-listing.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow-listing.min.js"></script>
+    </environment>
+
+    <script type="text/javascript">
+        var deleteConfirmationUrl = "@Url.Action("deleteconfirmation", "items")";
+        var deleteItemUrl = "@Url.Action("DeleteItem", "Slideshow")";
+        var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
+        var editSlideShowUrl = "@Url.Action("EditSlideshow", "Slideshow")";
+    </script>
+    <script type="text/javascript">
+        $(document)
+            .ready(function () {
+                $("#search-slideshows").val("");
+                var data = ej.DataManager({
+                    url: "@Url.Action("GetAllSlideshows", "Slideshow")",
+                    adaptor: new ej.UrlAdaptor()
+                });
+                GridLocalization();
+                $("#slideshowGrid")
+                    .ejGrid({
+                        dataSource: data,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 20 },
+                        allowSorting: true,
+                        allowSearching: true,
+                        allowFiltering: true,
+                        filterSettings: { filterType: "menu" },
+                        enableAltRow: false,
+                        gridLines: ej.Grid.GridLines.None,
+                        load: "fnOnGridLoad",
+                        actionBegin: "fnActionBegin",
+                        actionComplete: function (args) {
+                            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                            showOrHideGridPager("#slideshowGrid");
+                            if (args.model.currentViewData.length === 0) {
+                                this.getContentTable().find("tbody .emptyrecord").html(window.Server.App.Localization.NoSlideShow);
+                                rowBound();
+                            }
+                        },
+                        rowDataBound: function () {
+                            var height = $(".e-gridcontent").height();
+                            if (height != null) {
+                                rowBound();
+                            }
+                        },
+                        dataBound: function (args) {
+                            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                        },
+                        columns: [
+                            {
+                                field: "Name",
+                                headerText: "@T["Name"]",
+                                templateID: "#slideshow-template",
+                                headerTemplateID: "#item-name-header",
+                                type: "string",
+                                allowSorting: true,
+                                allowFiltering: true,
+                                width: 100
+                            },
+                            {
+                                field: "CreatedByDisplayName",
+                                headerText: "@T["Owner"]",
+                                width: 100,
+                                headerTemplateID: "#owner-column",
+                                allowSorting: true,
+                                allowFiltering: true
+                            },
+                            {
+                                field: "CreatedDate",
+                                headerText: "@T["Created Date"]",
+                                width: 70,
+                                allowSorting: false,
+                                allowFiltering: false
+                            },
+                            {
+                                template: true,
+                                templateID: "#options",
+                                width: (window.innerWidth > 1200) ? 15 : 25,
+                                allowSorting: false,
+                                allowFiltering: false
+                            }
+                        ]
+                    });
+
+                $.views.helpers({
+                    slideshowUrl: function (id, name) {
+                        return encodeURI("@Url.Action("SlideshowPreview", "Slideshow")" + "/" + id + "/" + name);
+                    }
+                });
+            });
+    </script>
+}
+
+@section MainSection{
+
+    @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Slideshow) && itemsCount[ItemType.Slideshow] > 0)
+    {
+        <script type="text/x-jsrender" id="slideshow-template">
+            <a class="item-name grid-content" title="{{:Name}}" data-toggle="tooltip" href="{{:~slideshowUrl(Id, Name)}}" target="_blank">{{:Name}}</a>
+        </script>
+        <script type="text/x-jsrender" id="item-name-header">
+            <div class="item-name">@T["Name"]</div>
+        </script>
+        <script type="text/x-jsrender" id="owner-column">
+            <div title="@T["Owner"]">@T["Owner"]</div>
+        </script>
+        <script type="text/x-jsrender" id="options">
+            <div class="dropdown context-menu @(schemes != null && !schemes.ContextMenu ? "hide" : string.Empty)">
+                <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                    <span class="su su-options"> </span>
+                </span>
+                <ul class="dropdown-menu" role="menu">
+                    <li class="menu-group @(schemes != null && !schemes.Open ? "hide" : string.Empty)">
+                        <a href="{{:~slideshowUrl(Id, Name)}}" title="@T["Open"]" target="_blank">
+                            <i class="su su-open"><i class="su su-open path1"></i></i>
+                            <span class="menu-text">@T["Open"]</span>
+                        </a>
+                    </li>
+                    <li class="menu-group @(schemes != null && !schemes.Info ? "hide" : string.Empty)">
+                        <a href="javascript:void(0);" class="item-info" title="@T["Info"]">
+                            <i class="su su-info"></i>
+                            <span class="menu-text">@T["Info"]</span>
+                        </a>
+                    </li>
+                    <li class="menu-group @(schemes != null && !schemes.GetLink ? "hide" : string.Empty)">
+                        <a href="javascript:void(0);" class="get-slideshow-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~slideshowUrl(Id, Name)}}" title="@T["Get Link"]">
+                            <i class="su su-link"></i>
+                            <span class="menu-text">@T["Get Link"]</span>
+                        </a>
+                    </li>
+                    {{if CanWrite}}
+                    <li title="@T["Edit"]" class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
+                        <a href="javascript:void(0);" class="edit-slideshow" data-item-id="{{:Id}}" title="@T["Edit"]">
+                            <i class="su su-edit"></i>
+                            <span class="menu-text">@T["Edit"]</span>
+                        </a>
+                    </li>
+                    {{/if}}
+                    {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Slideshow].ToString().ToLower()) == true}}
+                    <li class="menu-group @(schemes != null && !schemes.Share ? "hide" : string.Empty)">
+                        <a href="javascript:void(0);" class="item-permissions" data-item-id="{{:Id}}" title="@T["Sharing Permissions"]">
+                            <i class="su su-manage-permission"></i>
+                            <span class="menu-text">@T["Sharing Permissions"]</span>
+                        </a>
+                    </li>
+                    {{/if}}
+                    {{if CanDelete}}
+                    <li title="@T["Delete"]" class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
+                        <a href="javascript:void(0);" class="slideshow-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" title="@T["Delete"]">
+                            <i class="su su-delete"></i>
+                            <span class="menu-text">@T["Delete"]</span>
+                        </a>
+                    </li>
+                    {{/if}}
+                </ul>
+            </div>
+        </script>
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @pageHeader }, { "PageDescription", @pageDescription } })
+        <div class="bi-page-header col-xs-12 top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="col-xs-4">
+                    <input type="text" id="search-slideshows" class="pull-left no-margin" placeholder="@T["Search Slideshow"]" />
+                    <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-slideshows pull-left no-margin" title="@T["Search Slideshow"]"></span>
+                </div>
+                <div class="col-xs-6 no-padding button-section">
+                    @if (itemPermissions[ItemType.Slideshow])
+                    {
+                        <button type="button" class="create-presentation pull-right primary-button app-btn-primary">@T["Create Slideshow"]</button>
+                    }
+                </div>
+            </div>
+        </div>
+        <div id="item-grid-container" data-grid-name="slideshows" class="bi-page-container slideshows-listing grid-page-container">
+            <div class="bi-page-content col-md-12 no-padding">
+@*                @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["SLIDESHOWS"] }, { "PageDescription", @T["Create and manage slideshows to present a collection of dashboards that switch at regular intervals."] } })*@
+@*                <div class="bi-page-header col-xs-12 top-nav-btn-secton">
+                    <div class="col-xs-12 no-padding">
+                        <div id="search-area" class="col-xs-4">
+                            <input type="text" id="search-slideshows" class="pull-left no-margin" placeholder="@T["Search Slideshow"]" />
+                            <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-slideshows pull-left no-margin" title="@T["Search Slideshow"]"></span>
+                        </div>
+                        <div class="col-xs-6 no-padding button-section">
+                            @if (itemPermissions[ItemType.Slideshow])
+                            {
+                                <button type="button" class="create-presentation pull-right primary-button app-btn-primary">@T["Create Slideshow"]</button>
+                            }
+                        </div>
+                    </div>
+                </div>*@
+                <div id="slideshows-grid-container" class="col-xs-12 bi-page-body">
+                    <div id="slideshowGrid" class="slide-show-grid">
+                    </div>
+                </div>
+            </div>
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("../DefaultPages/DefaultPages", new ViewDataDictionary(ViewData) { { "Permissions", itemPermissions }, { "ItemType", ItemType.Slideshow } })
+    }
+
+    @if (!isMobile)
+    {
+        @await Html.PartialAsync("../Items/_AddItems")
+        @await Html.PartialAsync("../Items/_ItemVersion")
+        @await Html.PartialAsync("../Items/_SharePermission")
+        @await Html.PartialAsync("../Items/_ItemInfo")
+    }
+
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

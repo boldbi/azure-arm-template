@@ -1,0 +1,207 @@
+﻿@model List<ScheduleViewModel>
+@{
+    var isMobile = new DeviceDetection(Context).IsMobile;
+}
+
+<div class="items-mobile-grid">
+    <div id="scheduleGrid" class="schedule-grid">
+    </div>
+</div>
+
+<script type="text/x-jsrender" id="options">
+
+    {{if !IsScheduledItemDeleted}}
+    <div class="dropdown">
+        <span class="dropdown-toggle option-icon" data-toggle="dropdown">
+            <span class="su su-options-horizontal"> </span>
+        </span>
+        <ul class="dropdown-menu" role="menu">
+            <li class="menu-group">
+                <a href="javascript:void(0);" title="@T["Run now"]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}","{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                    <i class="su su-play" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                    <span class="menu-text">@T["Run Now"]</span>
+                </a>
+            </li>
+
+            {{if CanWrite}}
+            {{if Status=="Active"}}
+            <li class="divider"></li>
+            <li class="menu-group">
+                <a href="javascript:void(0);" title="@T["Disable"]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}","{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                    <i class="su su-disable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                    <span class="menu-text">@T["Disable"]</span>
+                </a>
+            </li>
+
+            {{else Status=="Inactive"}}
+            <li class="divider"></li>
+            <li class="menu-group">
+                <a href="javascript:void(0);" title="@T["Enable"]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}","{{:ItemCategoryName}}","{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                    <i class="su su-enable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                    <span class="menu-text">@T["Enable"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+        </ul>
+    </div>
+    {{/if}}
+    <tr class="panel-collapse collapse" aria-expanded="false" id="{{:Id}}">
+        <td colspan="3">
+            <table class="card-table" cellpadding="3" cellspacing="2">
+                <colgroup>
+                    <col width="30%">
+                    <col width="70%">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td class="card-header">@T["Dashboard"]:</td>
+                        {{if IsScheduledItemDeleted}}
+                        <td class="card-field">
+                            {{:ItemName}}
+                        </td>
+                        {{else MultiDashboardName}}
+                        <td class="card-field"><a href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank"> {{:ItemName}}</a></td>
+                        {{else}}
+                        <td class="card-field"><a href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank"> {{:ItemName}}</a></td>
+                        {{/if}}
+                    </tr>
+                    <tr>
+                        <td class="card-header">@T["Last Run"]:</td>
+                        <td class="card-field"> {{:LastRunString}}</td>
+                    </tr>
+                    <tr>
+                        <td class="card-header">@T["Next Run"]:</td>
+                        <td class="card-field"> {{:NextScheduleString}}</td>
+                    </tr>
+                    <tr>
+                        <td class="card-header">@T["Owner"]:</td>
+                        <td class="card-field"> {{:CreatedByDisplayName}}</td>
+                    </tr>
+                    <tr>
+                        <td class="card-header">@T["Status"]:</td>
+                        <td class="card-field"> {{:Status}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+</script>
+
+
+<script type="text/x-jsrender" id="item-name-template">
+    <span class="item-name" title="{{:Name}}">
+        <span class="name">{{:Name}}</span>
+    </span>
+</script>
+
+<script id="status-template" type="text/x-jsrender">
+    <div class="{{toLowerCase:Status}} status">
+    </div>
+</script>
+
+<script id="expand-template" type="text/x-jsrender">
+    <span class="collapsed su su-angle-right" href="#{{:Id}}" data-toggle="collapse" aria-expanded="false"></span>
+</script>
+
+<script id="expand-temp" type="text/x-jsrender">
+    <a class="expand-collapse" data-value="expand-all" title="@T["Expand All"]">@T["Expand All"]</a>
+</script>
+
+<script id="search-temp" type="text/x-jsrender">
+    <div id="search-area" title="@T["Search"]" class="pull-right no-margin">
+        <span class="su su-search search-item pull-right no-margin remove-background" title="@T["Search schedules"]"></span>
+        <span class="su close-icon su-inner-close pull-right no-margin clear-search mobile-search-close-icon" id="clear-search" title="@T["Clear search"]"></span>
+        <input id="search-schedules" class="pull-right no-margin" placeholder="@T["Search schedules"]" autocomplete="off" type="text">
+    </div>
+</script>
+
+<script>
+    var gridNamejs = "schedules";
+    $(".grid-container").css("margin-top", "0");
+    var gridHeight = $(window).height() - ($("#header-area").outerHeight() + 62);
+    var pageSize = gridHeight > 700 ? Math.round(gridHeight / 35) : 20;
+
+    $(document)
+        .ready(function() {
+            ej.support.enableLocalizedSort = true;
+            $(function () {
+                $("#search-schedules").val("");
+                $('#scheduleGrid')
+                    .ejGrid({
+                        dataSource: ej.DataManager({ url: "@Url.Action("getschedules", "scheduler")", adaptor: "UrlAdaptor" }),
+                        gridLines: ej.Grid.GridLines.Horizontal,
+                        toolbarSettings: {
+                            showToolbar: true,
+                            customToolbarItems: [{
+                                templateID: "#expand-temp"
+                            },
+                            {
+                                templateID: "#search-temp"
+                            }],
+                            toolbarClick: "onToolBarClick"
+                        },
+                        toolbarClick: "onToolBarClick",
+                        enableRowHover: true,
+                        enableAltRow: false,
+                        allowSelection: false,
+                        allowSearching: true,
+                        allowScrolling: true,
+                        pageSettings: { pageSize: pageSize },
+                        scrollSettings: { width: $(".items-mobile-grid").innerWidth() - 20, height: gridHeight, allowVirtualScrolling: true, virtualScrollMode: ej.Grid.VirtualScrollMode.Normal, buttonSize: 0, autoHide: true },
+                        dataBound: function () {
+                            $(".e-gridcontent").css("height", $(".e-gridcontent .e-table").height());
+                        },
+                        rowDataBound: function() {
+                            setTimeout(function() {
+                                $(".e-gridcontent").css("height", $(".e-gridcontent .e-table").height());
+                                refreshMobileGrid();
+                            });
+                            var serverAppWaitingPopupTemplateId = createLoader("server-app-container");
+							$("#server-app-container").ejWaitingPopup({ template:$("#" + serverAppWaitingPopupTemplateId) });
+                            $("#server-app-container").ejWaitingPopup("show");
+                            setTimeout(function () { $("#server-app-container").ejWaitingPopup("hide"); }, 500);
+                        },
+                        actionComplete: "fnActionEnd",
+                        actionBegin: "fnActionBegin",
+                        columns: [
+                        {
+                            width: 5,
+                            template: true,
+                            templateID: "#status-template",
+                            allowSearching: false
+                        },
+                        {
+                            width: 20,
+                            template: true,
+                            templateID: "#expand-template",
+                            allowSearching: false
+                        },
+                        {
+                            template: true,
+                            templateID: "#item-name-template",
+                            field: "Name",
+                            allowSearching: true
+                        },
+                        {
+                            template: true,
+                            templateID: "#options",
+                            width: 15,
+                            allowSearching: false
+                        }
+                        ]
+                    });
+            });
+
+            $.views.helpers({
+                checkMobile: function () {
+                    return ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1040));
+                },
+                checkTablet: function () {
+                    return window.innerWidth > 900;
+                }
+            });
+        });
+
+
+</script>

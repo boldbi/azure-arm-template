@@ -1,0 +1,255 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardExportScheduleFailure);
+    var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+    <script>
+        var getActiveandInactiveUserUrl = "@Url.Action("getallactivegroupsandusers", "accounts")";
+        var updateScheduleUrl = "@Url.Action("UpdateSchedule", "scheduler")";
+        var getWebhooksUrl = "@Url.Action("GetWebhooks", "scheduler")";
+        var getWebhookDetailsByIdUrl = "@Url.Action("GetWebhookDetailsById", "scheduler")";
+        var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
+        var canExport = @Html.Raw(Json.Serialize(ViewBag.CanExport));
+        var webhookevent = @Html.Raw(Json.Serialize(ViewBag.webhookEvent));
+        var validateFTPCredentials = "@Url.Action("ValidateFTPCredentials", "scheduler")";
+        var enableWidgetScheduleExport = @Json.Serialize(enableWidgetScheduleExport);
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecipients.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecipients.min.js"></script>
+    </environment>
+</head>
+<body>
+    <div class="col-sm-12 col-xs-12 no-padding subscribe-popup-body" id="subscribers-panel">
+        <div class="col-sm-12 col-xs-12 bottom-margin no-padding">
+            <div id="user-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
+                <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Users"]" data-hide-disabled="true" multiple="" data-actions-box="true"></select>
+            </div>
+            <div id="group-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
+                <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Groups"]" data-hide-disabled="true" multiple="" data-actions-box="true"></select>
+            </div>
+            <form id="email-form" class="col-sm-4 col-xs-4 no-margin">
+                <div class="inner-addon right-addon has-feedback">
+                    <input id="external-email" type="text" class="form-control" placeholder="@T["External Recipients (Email address)"]">
+                    <span id="external-submit" class="su-add form-control-feedback" title="@T["Add external recipients"]"></span>
+                </div>
+                <span id="external-email-validation" class="alertMessages"></span>
+            </form>
+        </div>
+        <div class="col-xs-12 col-sm-12 no-padding" id="selected-users-container">
+            <div class="col-xs-8 col-sm-8 selected-recipients" id="selected-users"></div>
+            <div id="selected-users-info" class="col-xs-4 col-sm-4 no-margin i-search-fields"></div>
+            <div id="failure-notification" class="col-xs-4 col-sm-4 no-margin">
+                <div id="enable-checkbox">
+                    @Html.CheckBox("enable-notification-to-owner", new { @class = "material-checkbox", @id = "enable-notification-to-owner" })
+                    @Html.Label("enable-notification-to-owner", T["Send failure notification to schedule owner"].Value)
+                </div>
+                <div id="enable-checkbox">
+                    @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox", @id = "enable-notification-to-recipient" })
+                    @Html.Label("enable-notification-to-recipient", T["Send failure notification to recipient"].Value)
+                </div>
+            </div>
+            <div id="note-message" class="col-xs-4 col-sm-4">
+                <b>@T["Note: "]</b>
+                @(String.Format(T["The application deactivates your schedule after {0} consecutive failures."].Value, ServerAppConfig.FailureOccurrence))
+                @if (!@ServerAppConfig.IsHideHelpLink)
+                {
+                    <span>@Html.Raw(string.Format(T["To learn more, click {0}here{1}."].Value, "<a href='"+(ServerAppConfig.AppSettings.Documentation.BaseUri + helpSiteUrl)+"' title='help' target='_blank'>", "</a>"))</span>
+                }
+            </div>
+        </div>
+        <div id="selected-users-validation">@T["Select a user, group, or type an email address in the external recipient to schedule"]</div>
+        <div class="col-sm-12 col-xs-12 no-padding" id="export-container">
+            <div class="col-xs-4 col-sm-4" id="export-format-container">
+                <label class="export-header-text">@T["Export Format"]</label>
+                <div id="export-header">
+                    @if (!ViewBag.CanExport.Pdf || !ViewBag.CanExport.Excel || !ViewBag.CanExport.Image)
+                    {
+                        <span class="dropdown-toggle cursor-type export-format-info-margin" data-toggle="dropdown">
+                            <span class="su su-info" title=""></span>
+                        </span>
+                        <div class="col-xs-2 dropdown-menu" id="export-format-message" role="menu">
+                            @T["Please contact your administrator to enable these export formats."]
+                        </div>
+                    }
+                </div>
+                <div class="col-xs-12 col-sm-12" id="export-options-container">
+                    <select id="export-format-dropdown" class="selectpicker" onchange="fileTypeOnChangeExport()">
+                        <option value="Image" selected="selected">Image</option>
+                        <option value="PDF">PDF</option>
+                        <option value="Excel">Excel</option>
+                        <option value="CSV">CSV</option>
+                    </select>
+                </div>
+                <div id="show-export-formats" class="col-sm-12 col-xs-12 no-padding">
+                    <div id="show-image-format" class="col-xs-12 col-sm-12 no-padding no-margin" style="display:none;">
+                        <label class="export-format-info">
+                            @T["Format"]
+                        </label>
+                        <select id="image-format" class="selectpicker" style="display: none;">
+                            <option value="jpg" selected="selected">JPEG (*.jpg)</option>
+                            <option value="png">PNG (*.png)</option>
+                            @*<option value="bmp">BMP (*.bmp)</option>*@
+                        </select>
+                        <div class="export-format-info">
+                            @string.Format(T["Resolution {0}"].Value,"(dpi)")
+                        </div>
+                        <input type="number" id="image-dpi" value="96" onkeyup="validateImagedpi()" class="btn-default" />
+                        <span id="image-dpi-error" class="col-sm-12 col-xs-12 image-validation-error" style="display:none;">@T["The resolution must be between 96 and 300 dpi."]</span>
+                        <span id="image-no-value-error" class="col-sm-12 col-xs-12 image-validation-error" style="display:none;">@T["Please specify a resolution."]</span>
+                    </div>
+                    <div id="show-excel-format" class="col-xs-12 col-sm-12 no-padding no-margin" style="display:none;">
+                        <label class="export-format-info">
+                            @T["File Type"]
+                        </label>
+                        <select id="excel-format" class="selectpicker" style="display: none;">
+                            <option value="xlsx" selected="selected">Excel Workbook (*.xlsx)</option>
+                            <option value="xls">Excel 97-2003 Workbook (*.xls)</option>
+                        </select>
+                    </div>
+                    <div id="show-pdf-format" class="col-xs-12 col-sm-12 no-padding no-margin" style="display:none;">
+                        <label class="export-format-info">
+                            @T["Page Size"]
+                        </label>
+                        <select id="pdf-format" class="selectpicker" title="" style="display: none;">
+                            <option value="A3">A3</option>
+                            <option value="A4" selected="selected">A4</option>
+                            <option value="A5">A5</option>
+                            <option value="Letter">Letter</option>
+                        </select>
+                        <label class="export-format-info">
+                            @T["Orientation"]
+                        </label>
+                        <div id="pdf-orientation" onclick="pdfActiveOrientation()">
+                            <div class="col-sm-6 col-xs-6 pdfOrientation-for-landscape selected-pdf-orientation pdf-orientation-format" id="pdf-landscape" data-toggle="tooltip" data-placement="bottom" title="Landscape">
+                                <span class="su su-pdf-landscape">
+                                </span>
+                            </div>
+                            <div class="col-sm-6 col-xs-6 pdfOrientation-for-portrait  pdf-orientation-format" id="pdf-portrait" data-toggle="tooltip" data-placement="bottom" title="Portrait">
+                                <span class="su su-pdf-portrait">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="show-csv-format" class="col-xs-12 col-sm-12 no-padding no-margin" style="display:none;">
+                        <label class="export-format-info">
+                            @T["File Type"]
+                        </label>
+                        <select id="csv-format" class="selectpicker" style="display: none;">
+                            <option value="csv" selected="selected">CSV (Comma delimited)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="export-separator"></div>
+            <div id="location-export-options" class="col-sm-8 col-xs-8 no-margin">
+                <div id="enable-checkbox" class="export-dest">
+                    @Html.CheckBox("export-destination", new { @class = "material-checkbox", @id = "export-destination" })
+                    @Html.Label("export-destination", T["Other Destinations"].Value)
+                </div>
+                @*Now using only ftp so, no need for the below items*@
+                <!--<div>-->
+                @*<div class="radio-inline" id="localSystem">
+                        <input type="radio" id="local-system" class="css-radio" value="@T["Local System"]" name="locationExport" />
+                        <label for="local-system" class="pointer normal-font notransition">@T["Local System"]</label>
+                    </div>
+                    <div class="radio-inline" id="sharedLocation">
+                       <input type="radio" id="shared-location" class="css-radio" value="@T["Shared Location"]" name="locationExport" />
+                        <label for="shared-location" class="pointer normal-font notransition">@T["Shared Location"]</label>
+                    </div>*@
+                @*<div class="radio-inline" id="ftpLocation" style="display:none">
+                       <input type="radio" id="ftp-location" class="css-radio" value="@T["FTP Location"]" name="locationExport" />
+                       <label for="ftp-location" class="pointer normal-font notransition">@T["FTP Location"]</label>
+                    </div>*@
+                @*<div class="radio-inline" id="httpLocation">
+                        <input type="radio" id="http-location" class="css-radio" value="HTTP" name="locationExport" />
+                        <label for="http-location" class="pointer normal-font notransition">HTTP</label>
+                    </div>
+                    <div class="radio-inline" id="webHook">
+                        <input type="radio" id="webHook-location" class="css-radio" value="WebHook"" name="locationExport" />
+                        <label for="webHook-location" class="pointer normal-font notransition">WebHook</label>
+                    </div>*@
+                <!--</div>-->
+            <form class="col-sm-12 col-xs-12 no-padding" id="ftp-form">
+                <div class="col-xs-12 no-padding auth-radio-btn">
+                    <div class="ftp-destination select-destination">
+                        <input type="radio" id="ftp-destination" class="css-radio" name="destinationType" value="0" checked="checked" disabled="disabled">
+                        <label for="ftp-destination" class="radio-btn-label app-textbox-label"><span class="text">@string.Format(T["{0} Location"].Value, "FTP")</span></label>
+                    </div>
+                    <div class="webhook-destination select-destination">
+                        <input type="radio" id="webhook-destination" class="css-radio" name="destinationType" value="1" disabled="disabled">
+                        <label for="webhook-destination" class="radio-btn-label app-textbox-label"><span class="text">@T["Webhook"]</span></label>
+                    </div>
+                </div>
+                <div class="ftp-location-div">
+                    @*<label class="location-export-header-text no-margin">@T["FTP Location"]</label>*@
+                    <div class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px;">
+                        @string.Format(T["Supported protocols are {0} and {1}"].Value, "FTP, FTPS,", "sFTP")
+                    </div>
+                    <div class="col-sm-12 col-xs-12 no-padding ftp-form-container">
+                        <div class="col-sm-4 col-xs-4">
+                            <label class="path-label">@T["Host"]</label>
+                            <input type="text" class="form-control" id="host-name" placeholder="Host" name="host-name" autocomplete="off" disabled="disabled" />
+                            <span id="invalid-hostname"></span>
+                        </div>
+                        <div class="col-sm-4 col-xs-4">
+                            <label class="path-label">@T["Username"]</label>
+                            <input type="text" class="form-control" id="user-name" placeholder="@T["Username"]" name="user-name" autocomplete="off" disabled="disabled" />
+                            <span id="invalid-username"></span>
+                        </div>
+                        <div class="col-sm-4 col-xs-4">
+                            <label class="path-label">@T["Password"]</label>
+                            <input type="password" class="form-control password-field" id="password" name="password" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off" disabled="disabled">
+                            <div class="su su-eye show-hide-password ftp-password-icon"></div>
+                            <span id="invalid-password"></span>
+                        </div>
+                        <div id="ftp-validation-message"></div>
+                    </div>
+                </div>
+                <div class="webhook-location-div hide">
+                    <div class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px;">
+                        @T["Please select an existing webhook or create new a webhook and refresh the dropdown."]
+                    </div>
+                    <div class="col-sm-12 col-xs-12 no-padding webhook-form-container">
+                        <div class="col-sm-6 col-xs-6 select-webhook-div">
+                            <select class="selectpicker form-control" id="webhook-option" title="@T["Select webhook"]" disabled="disabled">
+                                <option value="" id="select-webhook-option" data-hidden="true" selected="selected" disabled="disabled">@T["Select webhook"]</option>
+                            </select>
+                            <span id="webhook-select-validations" style="display:none" class="display validation-errors">@T["Please select a webhook"]</span>
+                        </div>
+                        <div class="create-webhook-btn">
+                            <a href="@Url.Action("AddWebhookPage", "User")" id="create-webhook" target ="_blank" class="secondary-button app-btn-secondary pull-left disabled">@T["Create"]</a>
+                        </div>
+                        <div class="refresh-btn">
+                            <button type="button" title="" id="refresh-webhook" name="RefreshWebhook" disabled class="secondary-button app-btn-secondary pull-left" onclick="refreshDropdown()">
+                                @T["Refresh"]
+                            </button>
+                        </div>
+                    </div>
+                    <div id="webhook-info" class="col-xs-12" style="display:none">
+                        <span></span>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>

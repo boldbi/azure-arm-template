@@ -1,0 +1,102 @@
+﻿<div class="col-xs-12 auth-sub-title no-padding">
+    <div class="section-title">
+        <span>@T["Group Import Settings"]</span>
+    </div>
+    <div class="col-xs-12 info-message no-padding">
+        @T["This settings will be used for importing groups from the above configured authentication provider. We have 4 known authentication providers where we know how to import groups from them. Select any of the applicable provider from the dropdown."]
+    </div>
+</div>
+<div class="col-xs-12 auth-fields-margin no-padding">
+    <label class="app-textbox-label col-xs-12 no-padding">@T["Provider"]</label>
+    <div class="col-xs-12 no-padding">
+        <div class="txt-holder">
+            <select class="selectpicker group-import-provider-type auth-group  @(ViewBag.AuthType == AuthType.OAuth ? "oauth-group-import" : "openid-group-import")">
+                <option class="no-margin-dropdown-ul" value="None">@T["Select a provider"]</option>
+                @if (ViewBag.AuthType == AuthType.OAuth)
+                {
+                    <option class="no-margin-dropdown-ul" value="CognitoAWS" selected="@(Model !=null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS)">Cognito AWS</option>
+                }
+                <option class="no-margin-dropdown-ul" value="Auth0" selected="@(Model !=null && Model.KnownProviderType == KnownAuthProviders.Auth0)">Auth0</option>
+                <option class="no-margin-dropdown-ul" value="Okta" selected="@(Model !=null && Model.KnownProviderType == KnownAuthProviders.Okta)">Okta</option>
+                <option class="no-margin-dropdown-ul" value="OneLogin" selected="@(Model !=null && Model.KnownProviderType == KnownAuthProviders.OneLogin)">OneLogin</option>
+            </select>
+        </div>
+    </div>
+</div>
+@if (ViewBag.AuthType == AuthType.OAuth)
+{
+    @*Cognito AWS*@
+    <div class="col-xs-12 auth-fields-margin no-padding cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <label class="app-textbox-label col-xs-12 no-padding">@T["User Pool Id"]</label>
+        <div class="col-xs-12 no-padding">
+            <input type="text" class="form-control txt-holder validation-padding" id ="userPoolId" name="userPoolId" placeholder="@T["User Pool Id"]" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.UserPoolId) ? Model.Cognito.UserPoolId : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+            <span class="validation-message display-none">@T["Please enter the user pool ID"]</span>
+        </div>
+    </div>
+    <div class="col-xs-12 auth-fields-margin no-padding cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["{0} Access key Id"].Value, "AWS")</label>
+        <div class="col-xs-12 no-padding">
+            <input type="text" class="form-control txt-holder validation-padding" id="awsAccesskeyId" name="awsAccesskeyId" placeholder="@string.Format(T["{0} Access key Id"].Value, "AWS")" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.AwsAccesskeyId) ? Model.Cognito.AwsAccesskeyId : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+            <span class="validation-message display-none">@T["Please enter the access key ID"]</span>
+        </div>
+    </div>
+    <div class="col-xs-12 auth-fields-margin no-padding cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["{0} Access key Secret"].Value, "AWS")</label>
+        <div class="col-xs-12 no-padding">
+            <input type="text" class="form-control txt-holder validation-padding" id="awsAccesskeySecret" name="awsAccesskeySecret" placeholder="@string.Format(T["{0} Access key Secret"].Value, "AWS")" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.AwsAccesskeySecret) ? Model.Cognito.AwsAccesskeySecret : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+            <span class="validation-message display-none">@T["Please enter the access key secret"]</span>
+        </div>
+    </div>
+    <div class="col-xs-12 auth-fields-margin no-padding cognito-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.CognitoAWS ? string.Empty : "display-none")">
+        <label class="app-textbox-label col-xs-12 no-padding">@T["Region"]</label>
+        <div class="col-xs-12 no-padding">
+            <input type="text" class="form-control txt-holder validation-padding" id="cognitoRegion" name="cognitoRegion" placeholder="@T["Region"]" value="@(Model != null && Model.Cognito != null && !string.IsNullOrWhiteSpace(Model.Cognito.Region) ? Model.Cognito.Region : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+            <span class="validation-message display-none">@T["Please enter the region"]</span>
+        </div>
+    </div>
+}
+@*Auth0*@
+<div class="col-xs-12 auth-fields-margin auth0-fields no-padding  @(Model != null && Model.KnownProviderType == KnownAuthProviders.Auth0 ? string.Empty : "display-none")">
+    <label class="app-textbox-label col-xs-12 no-padding">@T["Audience"]</label>
+    <div class="col-xs-12 no-padding">
+        <input type="text" class="form-control txt-holder validation-padding" id ="audience" name="audience" placeholder="@T["Audience"]" value="@(Model != null && Model.Auth0 != null && !string.IsNullOrWhiteSpace(Model.Auth0.Audience) ? Model.Auth0.Audience : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        <span class="validation-message display-none">@T["Please enter the audience"]</span>
+    </div>
+</div>
+<div class="col-xs-12 auth-fields-margin auth0-fields no-padding @(Model != null && Model.KnownProviderType == KnownAuthProviders.Auth0 ? string.Empty : "display-none")">
+    <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["Extension {0}"].Value, "URL")</label>
+    <div class="col-xs-12 no-padding">
+        <input type="text" class="form-control txt-holder validation-padding" id ="extensionUrl" name="extensionUrl" placeholder="@string.Format(T["Extension {0}"].Value, "URL")" value="@(Model != null && Model.Auth0 != null && !string.IsNullOrWhiteSpace(Model.Auth0.ExtensionURL) ? Model.Auth0.ExtensionURL : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        <span class="validation-message display-none">@string.Format(T["Please enter the {0} extension"].Value, "URL")</span>
+    </div>
+</div>
+@*Okta*@
+<div class="col-xs-12 auth-fields-margin no-padding okta-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.Okta ? string.Empty : "display-none")">
+    <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["{0} Token"].Value, "API")</label>
+    <div class="col-xs-12 no-padding">
+        <input type="text" class="form-control txt-holder validation-padding" id ="apiToken" name="apiToken" placeholder="@string.Format(T["{0} Token"].Value ,"API")" value="@(Model != null && Model.Okta != null && !string.IsNullOrWhiteSpace(Model.Okta.ApiToken) ? Model.Okta.ApiToken : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        <span class="validation-message display-none">@string.Format(T["Please enter the {0} token"].Value, "API")</span>
+    </div>
+</div>
+@*OneLogin*@
+<div class="col-xs-12 auth-fields-margin no-padding onelogin-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin ? string.Empty : "display-none")">
+    <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["{0} Client ID"].Value, "API")</label>
+    <div class="col-xs-12 no-padding">
+        <input type="text" class="form-control txt-holder validation-padding" id ="apiClientId" name="apiClientId" placeholder="@string.Format(T["{0} Client ID"].Value, "API")" value="@(Model != null && Model.OneLogin != null && !string.IsNullOrWhiteSpace(Model.OneLogin.ApiClientId) ? Model.OneLogin.ApiClientId : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        <span class="validation-message display-none">@string.Format(T["Please enter the {0} client ID"].Value, "API")</span>
+    </div>
+</div>
+<div class="col-xs-12 auth-fields-margin no-padding onelogin-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin ? string.Empty : "display-none")">
+    <label class="app-textbox-label col-xs-12 no-padding">@string.Format(T["{0} Client Secret"].Value, "API")</label>
+    <div class="col-xs-12 no-padding">
+        <input type="text" class="form-control txt-holder validation-padding" id ="apiClientSecret" name="apiClientSecret" placeholder="@string.Format(T["{0} Client Secret"].Value, "API")" value="@(Model != null && Model.OneLogin != null && !string.IsNullOrWhiteSpace(Model.OneLogin.ApiClientSecret) ? Model.OneLogin.ApiClientSecret : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        <span class="validation-message display-none">@string.Format(T["Please enter the {0} client secret"].Value, "API")</span>
+    </div>
+</div>
+<div class="col-xs-12 auth-fields-margin no-padding onelogin-fields @(Model != null && Model.KnownProviderType == KnownAuthProviders.OneLogin ? string.Empty : "display-none")">
+    <label class="app-textbox-label col-xs-12 no-padding">@T["Region"]</label>
+    <div class="col-xs-12 no-padding">
+        <input type="text" class="form-control txt-holder validation-padding" id ="oneloginRegion" name="oneloginRegion" placeholder="@T["Region"]" value="@(Model != null && Model.OneLogin != null && !string.IsNullOrWhiteSpace(Model.OneLogin.Region) ? Model.OneLogin.Region : string.Empty)" @(ViewBag.AuthType == AuthType.OAuth ? "data-ng-disabled=!oauthIsEnabled" : "data-ng-disabled=!openidIsEnabled") />
+        <span class="validation-message display-none">@T["Please enter the region"]</span>
+    </div>
+</div>

@@ -1,0 +1,94 @@
+﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var groupPermissionHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.WhenToUseGroups);
+}
+
+<div class="col-xs-12 top-nav-header-section @(ViewBag.IsDefaultPage != null ? "default-pages-alignment" : string.Empty)">
+    <div class="col-xs-8 top-nav-title-description-section  @(ViewBag.BackIconRedirectionUrl != null ? "adjust-description-padding" : string.Empty)">
+        <hgroup class="col-xs-12 header-group @(ViewBag.PageDescription == null ? "header-group-without-description" : string.Empty)">
+            @if (ViewBag.IsUserSyncPage != null && ViewBag.IsUserSyncPage == "true")
+            {
+                <h1 class="col-xs-12 no-padding section-heading page-title header" id="user-title-with-count">
+                    @if (ViewBag.BackIconRedirectionUrl != null)
+                    {
+                        <a class="back-button pull-left" href="@ViewBag.BackIconRedirectionUrl" data-toggle="tooltip" data-placement="bottom" data-container="body" title="@(ViewBag.BackIconTitle != null ? ViewBag.BackIconTitle : "")">
+                            <i class="su su-arrow-back back-navigaion img-size"> </i>
+                        </a>
+                    }
+                    @ViewBag.PageHeader - @Html.Raw(String.Format(T["Users {0}"].Value, "<span id='total-record-count'></span>"))
+                </h1>
+            }
+            else
+            {
+                <h1 class="col-xs-12 no-padding section-heading page-title header" id="@(ViewBag.IsViewUserProfile != null && ViewBag.IsViewUserProfile == "true" ? "display-name" : string.Empty)">
+                    @if (ViewBag.BackIconRedirectionUrl != null)
+                    {
+                        <a class="back-button pull-left" href="@ViewBag.BackIconRedirectionUrl" data-toggle="tooltip" data-placement="bottom" data-container="body" title="@(ViewBag.BackIconTitle != null ? ViewBag.BackIconTitle : "")">
+                            <i class="su su-arrow-back back-navigaion img-size"> </i>
+                        </a>
+                    }
+                    @if (ViewBag.UserCount != null && ViewBag.IsUsersPage != null && ViewBag.IsUsersPage == "true")
+                    {
+                        <input type="hidden" id="user-count-text" value="@ViewBag.UserCount">
+                        @ViewBag.PageHeader @(Html.Raw("<span id=\"user-count\" value=\"" + ViewBag.UserCount + "\"> (" + ViewBag.UserCount + ")</span>"))
+                    }
+                    else if (ViewBag.groupCount != null)
+                    {
+                        @if (ViewBag.IsGroupSyncPage != null && ViewBag.IsGroupSyncPage == "true")
+                        {
+                            <span>@ViewBag.PageHeader - @Html.Raw(String.Format(T["Groups {0}"].Value, "(<span id='group-count'>" + ViewBag.groupCount + "</span>)"))</span>
+                        }
+                        else
+                        {
+                            @ViewBag.PageHeader @(Html.Raw("<span id=\"group-count\" value=\"" + ViewBag.groupCount + "\"> (" + ViewBag.groupCount + ")</span>"))
+                            <span class="tool-tip-description">
+                                <span class="dropdown-toggle" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                <span class="dropdown-menu" role="menu">
+                                    @T["You can use groups to create and assign a set of permissions and custom attributes to multiple users without re-creating them for each user."]
+                                    @if (!@ServerAppConfig.IsHideHelpLink)
+                                    {
+                                        <span>@Html.Raw(String.Format(T["Click {0}here{1} to learn how to use groups."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + groupPermissionHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
+                                    }
+                                </span>
+                            </span>
+                            <input type="hidden" id="azureadgroup-count-text" value="@ViewBag.AzureADGroupCount">
+                        }
+                        <input type="hidden" name="GroupCount" id="group-count-text" value="@ViewBag.groupCount" />
+                    }
+                    else if (ViewBag.IsViewGroupProfile != null && ViewBag.IsViewGroupProfile == "true")
+                    {
+                        <span ng-bind="allGroupDetails.GroupName" title="{{allGroupDetails.GroupName}}"></span>
+                    }
+                    else
+                    {
+                        @if (ViewBag.DisplayNameInHeader != null)
+                        {
+                            <span>
+                                @ViewBag.PageHeader <span title="@ViewBag.DisplayNameInHeader"> - @ViewBag.DisplayNameInHeader</span>
+                            </span>
+                        }
+                        else
+                        {
+                            @ViewBag.PageHeader
+                        }
+                        @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Datasource) && itemsCount[ItemType.Datasource] > 0)
+                        {
+                            <feature name=@FeatureManagement.Yokogawa>
+                                <span style="display: none" id="data-source-text">(<span id="data-source-count"></span>) </span>
+                            </feature>
+                        }
+                    }
+                </h1>
+            }
+            @if (ViewBag.PageDescription != null)
+            {
+                <h5 class="page-description">@ViewBag.PageDescription</h5>
+            }
+        </hgroup>
+    </div>
+    <div class="col-xs-4 top-nav-sec no-padding">
+        @await Html.PartialAsync("../Shared/_TopMenu")
+    </div>
+</div>

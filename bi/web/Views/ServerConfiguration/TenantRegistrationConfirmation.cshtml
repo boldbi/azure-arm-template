@@ -1,0 +1,239 @@
+﻿@{
+    Layout = null;
+    var token = ViewBag.Token;
+    var cdnLink = GlobalAppSettings.CdnDomain;
+    var dashboardServerResourceUrl = ViewBag.appsettings.SystemSettings.CDNLink.TrimEnd('/');
+    var favLogo = string.Empty;
+    var orgName = string.Empty;
+    var headerLogo = string.Empty;
+    var footerlogo = string.Empty;
+    if (!string.IsNullOrWhiteSpace(ViewBag.appsettings.SystemSettings.LoginLogo))
+    {
+        headerLogo = new Uri(ViewBag.appsettings.SystemSettings.LoginLogo).PathAndQuery;
+        favLogo = new Uri(ViewBag.appsettings.SystemSettings.FavIcon).PathAndQuery + "&ramd=" + Syncfusion.Server.Base.Helpers.DateTimeHelper.DateTimeToUnixTimeStamp(DateTime.Now);
+        footerlogo = new Uri(ViewBag.appsettings.SystemSettings.FooterLogo).PathAndQuery;
+        orgName = ViewBag.appsettings.SystemSettings.OrganizationName;
+    }
+    else
+    {
+        headerLogo = dashboardServerResourceUrl + "/cdn/images/application/boldbi/" + ServerAppConfig.Theme.Appearance + "/deployment_header_logo.svg";
+        favLogo = dashboardServerResourceUrl + "/cdn/images/application/boldbi/favicon.ico";
+        footerlogo = dashboardServerResourceUrl + "/cdn/images/application/boldbi/" + ServerAppConfig.Theme.Appearance + "/footer_logo.svg";
+        orgName = @GlobalAppSettings.BrandingDisplayName + " Enterprise";
+    }
+    var pathbase = GlobalAppSettings.HttpPathBase;
+    var tenantId = ViewBag.TenantInfoId;
+    var baseUrl = ViewBag.BaseUrl;
+    var isFirstTenant = ViewBag.IsFirstTenant;
+    var globalAppSettings = _globalAppSettings;
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Registration - @orgName Dashboards</title>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <link rel="icon" href="@favLogo" />
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tenant-registration-page.css" />
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.min.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tenant-registration-page.min.css" />
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <script>
+        var statusTracker;
+        var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
+        var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
+        var idpUrl = "@ServerAppConfig.InternalAppIdpUrl";
+        var isFirstTenant = @Json.Serialize(isFirstTenant);
+        var siteRegistrationCompleted = false;
+        $(function() {
+            setTimeout(function () {
+                $('#circle').circleProgress('value', 0.18);
+                IsSentRequest();
+            }, 2000);
+
+            $('#circle').circleProgress('value', 0.05);
+            setInterval(function () {
+                if (!siteRegistrationCompleted) {
+                    $.ajax({
+                        type: "POST",
+                        url: progressStatusUrl,
+                    data: {
+                        tenantId: "@tenantId"
+                    },
+                    success: function (result) {
+                        var circleValue = $('#circle').circleProgress('value');
+                        if ((result.Percentage / 100) > circleValue) {
+                            $('#circle').circleProgress('value', result.Percentage / 100);
+                        }
+
+                        if (result.Message != undefined && result.Message != null && result.Status) {
+                            $("#deployment-status").text(result.Message + "...");
+                        }
+
+                        if (typeof (result.AdditionalData) != "undefined" && result.AdditionalData != null && result.Percentage == 100) {
+                            siteRegistrationCompleted = true;
+                            if (typeof (result.AdditionalData.RedirectUrl) != "undefined" && !isNullOrWhitespace(result.AdditionalData.RedirectUrl) && isFirstTenant) {
+                                $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
+                                $("body").addClass("welcome-page-footer-alignment");
+                                $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");
+                                $(".user-name span").text(result.AdditionalData.DisplayName);
+                                $(".profile-pic-tag").attr({
+                                    "data-id": result.AdditionalData.UserId,
+                                    "data-display-name": result.AdditionalData.DisplayName
+                                });
+
+                                generateProfileAvatar();
+                            } else {
+                                window.location = "@baseUrl";
+                            }
+                        }
+                    }
+                });
+              }
+            }, 3000);
+        });
+
+        $(window).on("load", function () {
+            $('.lazyload').each(function () {
+                if ($(this).attr("data-id") == "footerlogo") {
+                    $(this).parent().find("p#poweredbysyncfusion").append($("<img>").attr({
+                        "src": $(this).attr("data-src"),
+                        "alt": $(this).attr("data-alt"),
+                        "id": $(this).attr("data-id"),
+                        "onerror": $(this).attr("data-default")
+                    }));
+
+                }
+
+                $(this).remove();
+            });
+        });
+
+        function IsSentRequest() {
+            $.ajax({
+                type: "POST",
+                url: setSystemSettingsUrl,
+                data: {
+                    token: "@token"
+                },
+                success: function (result) {
+                    if (result.deploymentFailed) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        if (result.isDefaultTenant) {
+                            $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
+                            $("body").addClass("welcome-page-footer-alignment");
+                            $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");
+                            $(".dashboard-parent-container > a, #close-welcome-page").attr("href", result.redirectUrl);
+                        }
+                        else {
+                            window.location = result.redirectUrl
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="deploy-tenant-parent">
+        <div class="deploy-tenant-child">
+            <div class="deployment-page-image">
+                <img class="boldbi-logo" src="@headerLogo" />
+            </div>
+            <div class="deploy-tenant-bg">
+                <div class="text-h1 deployment-content">@T["Registering your site..."]</div>
+                <div class="text-body deployment-content-small">@T["Sit back and relax. We’ll let you know when your setup is ready to go!"]</div>
+                <div class="deployment-container">
+                    <div class="circle-progress">
+                        <div class="wrapper">
+                            <img src="@dashboardServerResourceUrl/cdn/images/application/boldbi/deploymentimage.gif" />
+                            <div id="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="deployment-status" class="text-body deployment-content-small">@T["Fetching site information..."]</div>
+            </div>
+        </div>
+    </div>
+    @if (ViewBag.appsettings.SystemSettings.IsEnablePoweredBySyncfusion) 
+    {
+        <footer class="deployment-footer">
+            <span class="footer-content">@T["Powered by"]</span><img class="footer-logo" src="@footerlogo"/>
+        </footer>
+    }
+
+    <header class="deployment-header hide">
+        <div class="deployment-header-container">
+            <img class="boldbi-logo" src="@headerLogo" />
+            <a id="close-welcome-page" class="su-close"></a>
+        </div>
+    </header>
+    <div class="welcome-tenant-parent hide">
+        <div class="welcome-tenant-child">
+            <div class="welcome-tenant-bg">
+                <div id="user-profile-picture" style="background-image: url('@themeBasedImageHelper.ProfilePictureBackgroundImage()');">
+                    <div class="profile-pic-tag" data-type="user" data-image-size="100" data-toggle="tooltip" data-placement="top"></div>
+                </div>
+                <div class="user-name">@Html.Raw(string.Format(T["Hello, {0}Welcome to {1} Enterprise Dashboards"].Value, "<span></span></div><div class='welcome-content'>","Bold BI"))</div>
+                <div class="tenant-parent-container">
+                    <a class="admin-link-container" rel="alternate" hreflang="en" href="@ServerAppConfig.InternalAppIdpUrl/@ServerAppConfig.TenantManagementHostName/sites">
+                        <table class="admin-options">
+                            <tr>
+                                <td class="action-logo" rowspan="2">
+                                    <img src="@dashboardServerResourceUrl/cdn/images/application/boldbi/manage_tenant.svg" />
+                                </td>
+                                <td class="action-title">
+                                    <div>@T["Manage your Sites"]</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="action-description">
+                                    @T["Manage permissions for the sites you created."]
+                                    <a class="su-arrow-right"></a>
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                </div>
+                <div class="dashboard-parent-container">
+                    <a class="admin-link-container">
+                        <table class="admin-options">
+                            <tr>
+                                <td class="action-logo" rowspan="2">
+                                    <img src="@dashboardServerResourceUrl/cdn/images/application/boldbi/goto_dashboard.svg" />
+                                </td>
+                                <td class="action-title">
+                                    <div>@T["Go to Dashboards"]</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="action-description">
+                                    @T["Get started creating dashboards."]
+                                    <a class="su-arrow-right"></a>
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="base-footer-wrapper hide">
+        @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml")
+    </div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.Title = T["Data Connectors"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DataConnectors);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    ViewBag.MessageBox = false;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var pageDescription = T["Configure any number of connections for your applications by choosing connectors from the list below."];
+    var pageHeader = T["Data connectors Configuration"];
+}
+
+@section meta{
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="user:is_admin" content="@isAdmin.ToString()" />
+    <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+    <meta name="intermediatedbstatus" content="@ViewBag.IntermediateDbStatus" />
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/connection-configuration.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connector-page.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/connection-configuration.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connector-page.min.css" />
+    </environment>
+}
+
+@section scripts{
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/datasource-connection-configuration-dependency.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/datasource-connection-configuration-dependency.min.js"></script>
+    </environment>
+
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+   
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/datasource-connection-configuration.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connector-page.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/datasource-connection-configuration.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connector-page.min.js"></script>
+    </environment>
+
+    <script>
+    var subAppPath = "@ServerAppConfig.WebRootPath";
+    var isSelfHosted = @Json.Serialize(isSelfHosted);
+    var dataStoreSettingUrl = "@Url.Action("DataStoreSettings", "Administration")";
+    var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+    var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+    var custombrandName = "@ServerAppConfig.CustomBrandName";
+    var connectorsPagePermissionUrl = "@Url.Action("CheckAdminPagePermission", "Administration")";
+    var appVersion = "@ServerAppConfig.ProductVersion";
+    </script>
+}
+@section MainSection{
+
+@await Html.PartialAsync("_AdminMenu")
+<div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @pageHeader }, { "PageDescription", @pageDescription } })
+    <div id="dataconnector-settings-header" class="col-xs-12 bi-page-header top-nav-btn-secton">
+        <div class="col-xs-12 no-padding">
+            <div class="col-xs-6 no-padding button-section">
+                    <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-connector-settings" title="">@T["Cancel"]</a>
+                    <button type="button" title="" id="update-datasource-settings" name="update-datasources-settings" class="primary-button app-btn-primary pull-right update-system-settings">
+                        @T["Save"]
+                    </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="look-and-feel-container" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div id="look-and-feel-form" class="col-lg-12 col-md-12 bi-page-body">
+            @*<a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-connector-settings" title="">[[[Cancel]]]</a>
+            <button type="button" title="" id="update-datasource-settings" name="update-datasources-settings" class="primary-button app-btn-primary pull-right update-system-settings">
+                [[[Save]]]
+            </button>*@
+            <div id="connectionDesigner" style="height:100%;min-height:350px"></div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+}

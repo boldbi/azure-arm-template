@@ -1,0 +1,224 @@
+﻿@using Newtonsoft.Json
+
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Connected Accounts"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ConnectedAccounts);
+    ViewBag.MessageBox = true;
+    var jsondata = JsonConvert.SerializeObject(Model);
+    var serverApiUrl = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var pageDescription = T["Manage the external accounts that you have granted access for data analytics"];
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-accounts.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-accounts.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-accounts.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-accounts.min.js"></script>
+    </environment>
+    <script>
+        var editConnectedAccountUrl = "@Url.Action("UpdateConnectedAccount", "User")";
+        var deleteConnectedAccountUrl = "@Url.Action("DeleteConnectedAccount", "User")";
+        var getConnectedAccountsUrl = "@Url.Action("GetConnectedAccounts", "User")";
+    </script>
+
+    <script type="text/x-jsrender" id="name-template">
+        <div class="grid-content">
+            <span class="item-name"><span title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span></span><br>
+            <span class="provider-mail"><span title="{{:Email}}" data-toggle="tooltip">{{:Email}}</span></span>
+        </div>
+    </script>
+    <script type="text/x-jsrender" id="provider-template">
+        @if (!ServerAppConfig.IsSelfHosted)
+        {
+            <div class="grid-content">
+                <span class="item-name"><span title="{{:Provider}}" data-toggle="tooltip">{{:Provider}}</span></span>
+                {{for ServiceList}}
+                <img class="service-image" title="{{:Name}}" data-toggle="tooltip" src="@dashboardDesignerResourceUrl/cdn/css/designer/images/datasource/{{:Icon}}" alt="{{:Name}}" onerror="this.onerror = null; this.src = '@dashboardServerResourceUrl/cdn/images/datasource.svg';" />
+                {{/for}}
+            </div>
+        }
+        else
+        {
+
+            <div class="grid-content">
+                <span class="item-name"><span title="{{:Provider}}" data-toggle="tooltip">{{:Provider}}</span></span>
+                {{for ServiceList}}
+                <img class="service-image" title="{{:Name}}" data-toggle="tooltip" src="@dashboardDesignerResourceUrl/cdn/css/designer/images/datasource/{{:Icon}}" alt="{{:Name}}" onerror="this.onerror = null; this.src = '@dashboardServerResourceUrl/cdn/images/datasource.svg';" />
+                {{/for}}
+            </div>
+        }
+    </script>
+    <script type="text/x-jsrender" id="created-date-template">
+        <span class="grid-content item-name"><span title="{{:CreatedDate}}" data-toggle="tooltip">{{:CreatedDate}}</span></span>
+    </script>
+    <script type="text/x-jsrender" id="last-authorized-template">
+        <span class="grid-content item-name"><span title="{{:AuthorizedDate}}" data-toggle="tooltip">{{:AuthorizedDate}}</span></span>
+    </script>
+    <script type="text/x-jsrender" id="itemname-header">
+        <div class="item-name">@T["Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="provider-header">
+        <div class="item-header">@T["Provider"]</div>
+    </script>
+    <script type="text/x-jsrender" id="created-date-header">
+        <div class="item-header">@T["Created Date"]</div>
+    </script>
+    <script type="text/x-jsrender" id="last-authorized-header">
+        <div class="item-header">@T["Last Authorized"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="options">
+        <div class="dropdown">
+            <span class="dropdown-toggle option-icon" data-toggle="dropdown" data-content="{{:Id}}">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <a href="javascript:void(0);" class="re-authorize-account" data-content="{{:Id}}" data-reauthorize-url="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/v1.0/oauth/re-authorize?token=@ViewBag.AccessToken&id={{:Id}}&server=@serverApiUrl{{:OrganizationUrl ? '&resourceurl=' + OrganizationUrl : ''}}">
+                        <i class="su su-re-authorize"></i>
+                        <span>@T["Reauthorize"]</span>
+                    </a>
+                </li>
+                <li class="divider" role="separator"></li>
+                <li>
+                    <a href="javascript:void(0);" class="edit-connected-account" data-content="{{:Id}}" data-account-name="{{:Name}}">
+                        <i class="su su-edit"></i>
+                        <span>@T["Edit"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="delete-class delete-connected-account" data-content="{{:Id}}" data-account-name="{{:Name}}" href="javascript:void(0);">
+                        <i class="su su-delete"></i>
+                        <span>@T["Delete"]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            GridLocalization(window.Server.App.Localization.ConnectedAccountsEmpty);
+            $("#search-linked-accounts").val("");
+            $("#ConnectedAccountGrid").ejGrid({
+                dataSource: @Html.Raw(jsondata),
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                allowSorting: true,
+                allowSearching: true,
+                allowSelection: false,
+                allowFiltering: false,
+                pageSettings: { pageSize: 20 },
+                filterSettings: { filterType: "excel" },
+                selectionType: ej.Grid.SelectionType.Single,
+                selectionSettings: { selectionMode: ["row"] },
+                actionBegin: "fnOnLinkedAccountGridActionBegin",
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function(args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                rowSelecting: function(e) {
+                    this.multiSelectCtrlRequest = true;
+                },
+                columns: [
+                    {
+                        template: true,
+                        allowSorting: true,
+                        templateID: "#name-template",
+                        headerText: "@T["Name"]",
+                        width: 115,
+                        headerTemplateID: "#itemname-header",
+                        field: "Name",
+                        type: "string"
+                    },
+                    {
+                        field: "Services",
+                        templateID: "#provider-template",
+                        headerText: "@T["Provider"]",
+                        headerTemplateID: "#provider-header",
+                        type: "string",
+                        width: 115
+                    },
+                    {
+                        field: "CreatedOn",
+                        headerText: "@T["Created On"]",
+                        headerTemplateID: "#create-date-header",
+                        templateID: "#created-date-template",
+                        width: 80
+                    },
+                    {
+                        field: "AuthorizedDate",
+                        headerText: "@T["Last Authorized"]",
+                        headerTemplateID: "#last-authorized-header",
+                        templateID: "#last-authorized-template",
+                        width: 80
+                    },
+                    {
+                        template: true,
+                        allowSorting: false,
+                        templateID: "#options",
+                        width: 75
+                    }
+                ]
+
+            });
+        });
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_ProfileMenu")
+<div class="col-xs-12 no-padding no-margin width-alignment">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Connected Accounts"] }, { "PageDescription", @pageDescription } })
+        <div class="bi-page-header col-xs-12 top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="col-xs-4 pull-left">
+                    <input type="text" class="pull-left" id="search-linked-accounts" placeholder="@T["Search"]" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-accounts pull-left" title="@T["Search"]"></span>
+                </div>
+            </div>
+        </div>
+</div>
+<div id="linked-accounts-container" class="bi-page-container col-xs-12 bg-grid">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="bi-page-body col-md-12">
+            <div class="col-xs-12 no-padding ">
+                <div id="ConnectedAccountGrid"></div>
+            </div>
+        </div>
+        <div id="edit-connected-account-popup" class="fluent-popup display-none">
+            <div class="fluent-popup-header">
+                <h4 class="popup-title">
+                    <span>@T["Edit Connected Account"]</span>
+                    <button id="close-edit-connected-account" type="button" title="@T["Close"]" class="close popup-close" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </h4>
+            </div>
+            <div class="fluent-popup-body">
+                <div class="edit-name">
+                    <label class="popup-label">@T["Name"]</label>
+                    <input class="form-control textarea" maxlength="255" id="edit-connected-account-name" />
+                </div>
+            </div>
+            <div id="edit-connected-account-button" class="fluent-popup-footer">
+                <div id="button-container" class="col-lg-12 col-md-12">
+                    <button type="button" id="cancel-edit-account" class="app-button app-secondary-button app-btn-secondary pull-right">@T["Cancel"]</button>
+                    <button type="button" id="submit-edit-account" data-conected-account-id="" class="app-button app-primary-button app-btn-primary pull-right" disabled="disabled">@T["Submit"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+}

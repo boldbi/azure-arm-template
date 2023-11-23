@@ -1,0 +1,353 @@
+﻿@using Newtonsoft.Json
+@{
+    Layout = null;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var globalAppSettings = _globalAppSettings;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
+    var licenseSettings = globalAppSettings.GetLicenseSettings(_clientDateTimeInfo);
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
+    // var notificationCount = new NotificationManagement(globalAppSettings).GetUnreadNotificationCount();
+    var notificationCount = 0;
+    var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.MainLogo;
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var currentUrl = Context.Request.GetEncodedUrl();
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var tourCookie = Context.Request.Cookies["syncfusion.dashboards.designer.tour"];
+    var tourObj = new TourCookie();
+    if (tourCookie != null)
+    {
+        tourObj = JsonConvert.DeserializeObject<TourCookie>(JsonConvert.DeserializeObject(tourCookie).ToString());
+    }
+    var showDatasourceTour = !string.IsNullOrWhiteSpace(ViewBag.showDatasourceTour) && ViewBag.showDatasourceTour.ToString().ToLower() == "true";
+    var showTour = !new DeviceDetection(Context).IsMobile && ((tourCookie == null || (tourObj.TourCompleted == "false" && tourObj.TourSkipped == "false")) || showDatasourceTour);
+    var feedbackCookie = Context.Request.Cookies["feedback.visible"];
+    var showFeedbackKey = ServerAppConfig.EnableCloudFeedback;
+    var showFeedback = (feedbackCookie == null && !new DeviceDetection(Context).IsMobile && showFeedbackKey);
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var donotShowJourney = Context.Request.Cookies["syncfusion.dashboards.server.journey"] != null;
+    var issampledata = !string.IsNullOrEmpty(ViewBag.IsSampleData) ? bool.Parse(ViewBag.IsSampleData) : false;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
+
+    var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
+
+    var dashboardPageUrl = Url.Action("Dashboards", "Dashboards");
+    var widgetsPageUrl = Url.Action("Widgets", "Widgets");
+    var dataSourcesPageUrl = Url.Action("DataSources", "DataSources");
+    var schedulePageUrl = Url.Action("Schedules", "Scheduler");
+    var profilePageUrl = Url.Action("Profilepage", "User");
+    var homepagePageUrl = System.Net.WebUtility.UrlDecode(Url.Action("Homepages", "Boards"));
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
+    var navigationUrl = Url.Action("Index", "Home");
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var canCreateDatasource = permissions[ItemType.Datasource];
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+
+    Context.Response.Cookies.Append(ServerAppConfig.DesignerLanguageCookieName, ViewBag.Culture, new CookieOptions()
+    {
+        HttpOnly = true,
+        Expires = DateTime.UtcNow.AddYears(1),
+        SameSite = SameSiteMode.Lax
+    });
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var hasDashboardSettingsPermissionFlag = (_identityResponse.IsAdmin || granularPermissions[SettingsScopes.All] || granularPermissions[SettingsScopes.DashboardSettings]);
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        hasDashboardSettingsPermissionFlag = hasDashboardSettingsPermissionFlag || granularPermissions[SettingsScopes.Connectors];
+    }
+    var hasDashboardSettingsPermission = hasDashboardSettingsPermissionFlag.ToString();
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var dashboardCutomTheme = string.Empty;
+    var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
+    var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
+    if (isEmbedTrue)
+    {
+        dashboardCutomTheme = Context.Request.Query["embed_theme"];
+    }
+    else
+    {
+        dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
+    }
+}
+<!DOCTYPE html>
+
+<html style="height:100%;width:100% ; overflow:hidden;">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    @if (!isSelfHosted && !globalAppSettings.SystemSettings.IsDebug)
+    {
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    }
+
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
+    <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+    <meta name="data_service:url" content="@designerServiceUrl" />
+    <meta name="datasource_schedule:url" content="@Url.Action("GetRecurrenceTypeView", "DataSources")" />
+    <meta name="dashboard:version" content="@ViewBag.Version" />
+    <meta name="dashboard:id" content="@ViewBag.DashboardId" />
+    <meta name="dashboard:name" content="@ViewBag.DashboardName" />
+    <meta name="category:name" content="@ViewBag.CategoryName" />
+    <meta name="dashboard:description" content="@ViewBag.Description" />
+
+    <meta name="datasource:version" content="@ViewBag.DatasourceVersion" />
+    <meta name="datasource:id" content="@ViewBag.DatasourceId" />
+
+    <meta name="datasource:connectionlist" content="@ViewBag.Datasources" />
+    <meta name="intermediatedbstatus" content="@ViewBag.IntermediateDbStatus" />
+    <meta name="isurlchange" content="@ViewBag.IsUrlChange" />
+    <meta name="isdraft" content="@ViewBag.IsDraft" />
+    <meta name="ispublic" content="@ViewBag.IsPublic" />
+    <meta name="dashboards:allow_public_dashboards" content="@ViewBag.CanMarkDashboardAsPublic" />
+
+    <meta name="user:is_admin" content="@hasDashboardSettingsPermission" />
+    <meta name="user:culture" content="@ViewBag.Culture" />
+
+    <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
+    <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
+
+    <title>@(ViewBag.dashboardName != null ? ViewBag.dashboardName : "Untitled") - @T["Design Dashboard"] - @globalAppSettings.SystemSettings.OrganizationName</title>
+    @if (isEmbedTrue)
+    {
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    }
+    else
+    {
+        @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+        @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    }
+    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@IconFileNames.Favicon';" />
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+    @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+    {
+        <style>
+            :root {
+                --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+            }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+                --designer-font: var(--font-family) !important;
+            }
+        </style>
+    }
+
+    <style>
+        #create-item, #user-system-notification {
+            display: none !important;
+        }
+    </style>
+
+    <script>
+        var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
+        var licenseSettings =@Html.Raw(JsonConvert.SerializeObject(licenseSettings));
+		var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var currentUrl = "@currentUrl";
+        var organizationName = "@globalAppSettings.SystemSettings.OrganizationName";
+        var isDebug = "@isDebug";
+        var idpreferenceId = "@idpreferenceId";
+        var idpUrl = "@idPUrl";
+        var displayName = "@displayName";
+        var showDatasourceTour = "@showDatasourceTour";
+        var feedbackSendUrl = "@Url.Action("AddUserFeedback", "Feedback")";
+        var feedbackCookieUrl = "@Url.Action("SetUserFeedbackCookies", "FeedBack")";
+        var showFeedbackDialog = "@showFeedback";
+        var issampledata = "@issampledata";
+        var helpSiteBaseUrl = "@helpSiteBaseUrl";
+        var appBranding = "@GlobalAppSettings.Branding";
+        var rootUrlAction = "@rootUrl";
+        var isSelfHosted = @Json.Serialize(isSelfHosted);
+        var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
+        var exportFormat = @Html.Raw(Json.Serialize(ViewBag.ExportFormat));
+        var dataStoreSettingUrl = "@Url.Action("DataStoreSettings", "Administration")";
+        var canCreateDatasource = @Json.Serialize(canCreateDatasource);
+        var modelLanguage = "@ViewBag.ModelLanguage";
+        var isSessionActiveUrl = "@Url.Action("IsSessionActive", "Accounts")";
+        var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+        var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+        var custombrandName = "@ServerAppConfig.CustomBrandName";
+        var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+        var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+        var confirmationMessage = "@T["Are you sure you want to close? The current progress will be lost if you continue."]";
+        var dashboardCustomThemename = "@dashboardCutomTheme";
+        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
+        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+        var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
+        var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
+        var appVersion = "@ServerAppConfig.ProductVersion";
+        var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
+    </script>
+    <script type="text/javascript">
+        window.addEventListener("beforeunload", function (e) {
+
+            if ($('#dashboardDesigner').data('BoldBIDashboardDesigner').hasReportChanges()) {
+                (e || window.event).returnValue = confirmationMessage;
+                return 'false';
+            }
+            else {
+                return;
+            }
+        });
+    </script>
+</head>
+<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+    <input type="hidden" id="embed-iframe" value="@ViewBag.isEmbed" />
+    <div class="preloader-wrap" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: #fff; z-index : 2; ">
+        <div id="loader_image" align="center" style="position:relative;top:39%;">
+            <div class="loader-blue loader-icon" id="loader-icon">
+                <svg class="circular">
+                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                </svg>
+            </div>
+        </div>
+        <div id="loader_text" align="center" style="font-family:@globalAppSettings.SystemSettings.FontPreference,Segoe UI,SegoeUI,Helvetica Neue,Helvetica,Arial,sans-serif;position:relative;top: 42%;font-size:21px;font-weight:400;">@T["Initializing Dashboard Designer"]</div>
+    </div>
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+    </environment>
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.min.js"></script>
+    </environment>
+
+     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.min.js"></script>
+    </environment>
+
+    <section id="menu-area" style="display:none" class="custom-bootstrap-styles">
+        @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
+    </section>
+    @*<div id="designer-header" class="custom-bootstrap-styles">
+            <div class="dashboard-name">
+                <span class="edit-dashboard">@ViewBag.dashboardName</span>
+                <span class="dashboard-status">@T["(Edited)"]</span>
+                <span class="dashboard-unsave" style="display:none">Unsaved Changes</span>
+            </div>
+        </div>*@
+    <div id="dashboardDesigner"></div>
+
+    <div id="messageBox">
+        <div class="message-header"></div>
+        <div class="message-box-close"></div>
+        <div class="message-content text-center"></div>
+        <div class="message-box-btn-holder"></div>
+    </div>
+    @if (showTour && ViewBag.isEmbed != "true")
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-designer-tour.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-designer-tour.min.css" />
+        </environment>
+        await Html.RenderPartialAsync("~/Views/Shared/_DesignerTour.cshtml");
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-designer-tour.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-designer-tour.min.js"></script>
+        </environment>
+    }
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css" />
+    </environment>
+
+    @if (!ServerAppConfig.IsSelfHosted && (ViewBag.isEmbed != null && ViewBag.isEmbed.ToString().ToLower() != "true"))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
+        </environment>
+
+    }
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <div class="custom-bootstrap-styles custom-server-style">
+        <div id="success-alert">
+            <div id="image-container">
+                <div class="image-holder">
+                    <span class="su su-tick" alt="Success Icon"></span>
+                </div>
+            </div>
+            <div id="message">
+                <h1 id="message-header"></h1>
+                <span id="message-content"></span>
+            </div>
+        </div>
+        <div id="warning-alert">
+            <div id="image-container">
+                <span class="su su-warning-alt" alt="Warning Icon"></span>
+            </div>
+            <div id="message" class="div-close">
+                <h1 id="message-header"></h1>
+                <span id="message-content"></span>
+            </div>
+            <div class="close-div">
+                <span id="close-content">@T["Close"]</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+</html>

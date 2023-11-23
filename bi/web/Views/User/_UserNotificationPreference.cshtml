@@ -1,0 +1,153 @@
+﻿@model UserNotificationSettings
+
+@{
+    var notificationList = new List<SelectListItem>
+{
+new SelectListItem { Text = T["Enable"].Value, Value = ((int)NotificationPreferenceOption.Enable).ToString() },
+new SelectListItem { Text = T["Disable"].Value, Value = ((int)NotificationPreferenceOption.Disable).ToString()},
+new SelectListItem { Text = T["Inherit from global settings"].Value, Value = ((int)NotificationPreferenceOption.Inherit).ToString()}
+};
+    var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-notifications") ? "active" : string.Empty;
+}
+<script>
+    var notificationSettings = @Html.Raw(Json.Serialize(ViewBag.userNotificationSettings));
+    var globalNotificationSettings =  @Html.Raw(Json.Serialize(_globalAppSettings.SystemSettings.NotificationAdministration));
+</script>
+<div role="tabpanel" id="profile-notifications" class="col-xs-12 no-padding no-margin tab-pane @isProfileNotificationsTab">
+    <div class="col-xs-12 bi-page-body no-margin ">
+        <input type="hidden" class="page-title" data-page="NOTIFICATION PREFERENCE">
+        <div class="col-xs-12 no-padding" id="notification-preference-form-div">
+            <div class="notification-preference-table">
+                <div class="col-xs-8 field-container-notification no-padding">
+                    <div ng-controller="UserMailNotificationSettingsController">
+                        <div class="hidden disabled-user-preference-container notifications-info">
+                            <div class="notifications-listCollection">
+                                <div class="disabled-user-preference-note notifications-list notifications-head">
+                                    <h5 class="notification-header-description">
+                                        @T["User preferences are disabled by the system administrator in global notification settings."]
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notifications-info user-mail-notification-settings-container">
+                            <div class="notifications-head">
+                                <h3 class="notification-header">@T["Email Notifications"]</h3>
+                                <h5 class="notification-header-description">
+                                    @T["Users will be notified of activities through email"]
+                                </h5>
+                            </div>
+                            <div class="inherit-from-global-settings notifications-info">
+                                <div class="notifications-list">
+                                    @Html.CheckBox("InheritMailNotificationSettingsFromGlobalSettings", new { @class = "material-checkbox", ng_model = "NotificationSettings.InheritMailNotificationSettingsFromGlobalSettings", ng_change = "onInheritFromGlobalMailSettingsChanged()", ng_disabled = "InheritMailNotificationSettingsFromGlobalSettingsDisable" })
+                                    <label for="InheritMailNotificationSettingsFromGlobalSettings">
+                                        <span>@T["Inherit from global settings"]</span>
+                                    </label>
+                                    <div class="inherit-settings-info">@T["Inherit from global settings will use the global notification settings configured by the administrator."]</div>
+                                </div>
+                            </div>
+                            <ul id="mail-notification-settings" class="notifications-listCollection">
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationOnDashboardCreatedByUser", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableNotificationForDashboardOwner", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableNotificationForDashboardOwner" })
+                                    <label for="EnableMailNotificationOnDashboardCreatedByUser">
+                                        <span>@T["Notify me when someone comments on my dashboard"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationOnDashboardSharedWithUser", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableNotificationForAccessibleUser", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableNotificationForAccessibleUser" })
+                                    <label for="EnableMailNotificationOnDashboardSharedWithUser">
+                                        <span>@T["Notify me when someone comments on a dashboard I have access to"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationWhenMentionedInComment", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableNotificationOnUserMention", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableNotificationOnUserMention" })
+                                    <label for="EnableMailNotificationWhenMentionedInComment">
+                                        <span>@T["Notify me when someone mentions me in a comment"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationWhenWatchEnabled", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableNotificationWhenWatchEnabled", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableNotificationWhenWatchEnabled" })
+                                    <label for="EnableMailNotificationWhenWatchEnabled">
+                                        <span>@T["Notify me about comments when I have watch enabled for a dashboard"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationForScheduleExportAndDataAlert", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableUserScheduleNotification", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableUserScheduleNotification" })
+                                    <label for="EnableMailNotificationForScheduleExportAndDataAlert">
+                                        <span>@T["Enable data alert and scheduled export email notifications"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationForUserProfileEdit", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableUserProfileNotification", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableUserProfileNotification" })
+                                    <label for="EnableMailNotificationForUserProfileEdit">
+                                        <span>@T["Notify me when my profile is edited"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableMailNotificationForSharedResource", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableResourceShareNotification", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableResourceShareNotification" })
+                                    <label for="EnableMailNotificationForSharedResource">
+                                        <span>@T["Notify me when a resource is shared with me"]</span>
+                                    </label>
+                                </li>
+                                <li class="notifications-list">
+                                    @Html.CheckBox("EnableUserSynchronizationNotification", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserMailNotificationSettings.EnableUserSynchronizationNotification", ng_change = "updateCheckAllMailNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.MailNotificationSettings.EnableUserSynchronizationNotification" })
+                                    <label for="EnableUserSynchronizationNotification">
+                                        <span>@T["User synchronization notification"]</span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="notifications-info user-system-notification-settings-container" ng-controller="UserSystemNotificationSettingsController">
+                        <div class="notifications-head">
+                            <h3 class="notification-header">@T["System Notifications"]</h3>
+                            <h5 class="notification-header-description">
+                                @T["System notifications will appear in the bottom left once the user logs into the application"]
+                            </h5>
+                        </div>
+                        <div class="inherit-from-global-settings notifications-info">
+                            <div class="notifications-list">
+                                @Html.CheckBox("InheritSystemNotificationSettingsFromGlobalSettings", new { @class = "material-checkbox", ng_model = "NotificationSettings.InheritSystemNotificationSettingsFromGlobalSettings", ng_change = "onInheritFromGlobalSystemSettingsChanged()", ng_disabled = "InheritSystemNotificationSettingsFromGlobalSettingsDisable" })
+                                <label for="InheritSystemNotificationSettingsFromGlobalSettings">
+                                    <span>@T["Inherit from global settings"]</span>
+                                </label>
+                                <div class="inherit-settings-info">@T["Inherit from global settings will use the global notification settings configured by the administrator."]</div>
+                            </div>
+                        </div>
+                        <ul id="system-notification-settings" class="notifications-listCollection">
+                            <li class="notifications-list">
+                                @Html.CheckBox("EnableSystemNotificationOnDashboardCreatedByUser", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserSystemNotificationSettings.EnableNotificationForDashboardOwner", ng_change = "updateCheckAllSystemNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.SystemNotificationSettings.EnableNotificationForDashboardOwner" })
+                                <label for="EnableSystemNotificationOnDashboardCreatedByUser">
+                                    <span>@T["Notify me when someone comments on my dashboard"]</span>
+                                </label>
+                            </li>
+                            <li class="notifications-list">
+                                @Html.CheckBox("EnableSystemNotificationOnDashboardSharedWithUser", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserSystemNotificationSettings.EnableNotificationForAccessibleUser", ng_change = "updateCheckAllSystemNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.SystemNotificationSettings.EnableNotificationForAccessibleUser" })
+                                <label for="EnableSystemNotificationOnDashboardSharedWithUser">
+                                    <span>@T["Notify me when someone comments on a dashboard I have access to"]</span>
+                                </label>
+                            </li>
+                            <li class="notifications-list">
+                                @Html.CheckBox("EnableSystemNotificationWhenMentionedInComment", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserSystemNotificationSettings.EnableNotificationOnUserMention", ng_change = "updateCheckAllSystemNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.SystemNotificationSettings.EnableNotificationOnUserMention" })
+                                <label for="EnableSystemNotificationWhenMentionedInComment">
+                                    <span>@T["Notify me when someone mentions me in a comment"]</span>
+                                </label>
+                            </li>
+                            <li class="notifications-list">
+                                @Html.CheckBox("EnableSystemNotificationWhenWatchEnabled", new { @class = "material-checkbox", ng_model = "NotificationSettings.UserSystemNotificationSettings.EnableNotificationWhenWatchEnabled", ng_change = "updateCheckAllSystemNotificatiionSettingsOnChange()", ng_disabled = "!DisableNotificationsettings.SystemNotificationSettings.EnableNotificationWhenWatchEnabled" })
+                                <label for="EnableSystemNotificationWhenWatchEnabled">
+                                    <span>@T["Notify me about comments when I have watch enabled for a dashboard"]</span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bi-page-footer col-xs-12 update-user-notification-settings">
+        <div class="bi-page-actions col-xs-12 col-md-12">
+            <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-settings" title="">@T["Cancel"]</a>
+            <input type="button" class="primary-button app-btn-primary pull-right inactive-content" id="update-notification-settings" title="" value="@T["Save"]">
+        </div>
+    </div>
+</div>

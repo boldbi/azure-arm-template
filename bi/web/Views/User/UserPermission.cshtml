@@ -1,0 +1,32 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["My Permissions"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MyPermissions);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var pageDescription = T["View the permissions for the resources you can access"];
+}
+
+
+@section MainSection{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-permissions.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-permissions.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-permissions.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-permissions.min.js"></script>
+    </environment>
+    @await Html.PartialAsync("_ProfileMenu")
+<div class="col-xs-12 no-padding no-margin width-alignment top-nav-header-without-btn">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["My Permissions"] }, { "PageDescription", @pageDescription } })
+</div>
+<div id="user-permissions-container" class="bi-page-container col-xs-12 bg-grid">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="bi-page-body col-md-12">
+            @(!new DeviceDetection(Context).IsMobile ? await Html.PartialAsync("../User/_UserPermissionGrid") : await Html.PartialAsync("../User/_UserPermissionGridForMobile"))
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+}

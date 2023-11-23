@@ -1,0 +1,123 @@
+﻿@using Newtonsoft.Json
+
+@model List<Permission>
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = globalAppSettings.SystemSettings.OrganizationName + " - " + T["View My Permissions"].Value;
+    ViewBag.MessageBox = false;
+    var jsondata = JsonConvert.SerializeObject(Model);
+    var gridName = ViewBag.gridName;
+    var userId = _identityResponse.User.UserId;
+}
+
+<script type="text/x-jsrender" id="itemNameHeader">
+    <div class="item-name">@T["Scope"]</div>
+</script>
+
+<script type="text/x-jsrender" id="itemName">
+    <div class="item-name" data-placement="top">
+        {{if ItemType=="@((int)ItemType.Dashboard)" && ItemName!="-"}}
+        {{if IsDraft}}
+        <span><a href="@Url.Action("DashboardDesigner", "Designer")/{{:ItemId}}/draft/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+        {{else}}
+        <span><a href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+        {{/if}}
+        {{else ItemType=="@((int)ItemType.Widget)" && ItemName!="-"}}
+        <span><a href="@Url.Action("Widgets", "FileRender")/{{:ItemId}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+        {{else ItemType=="@((int)ItemType.Category)" && ItemName!="-"}}
+        <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+        {{else ItemType=="@((int)ItemType.Slideshow)" && ItemName!="-"}}
+        <span><a href="@Url.Action("SlideshowPreview", "Slideshow")/{{:ItemId}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+        {{else ItemType=="@((int)ItemType.Schedule)"}}
+        <span>{{:ItemName}}</span>
+        @*{{else ItemType=="@((int)ItemType.File)"}}
+        <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeDescription}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>*@
+        {{else}}
+        <span>{{:ItemName}}</span>
+        {{/if}}
+    </div>
+</script>
+
+<script type="text/javascript">
+    function onQueryCellInfo(args) {
+        if(args.data[args.column.field] !=="-"){
+            $(args.cell).attr({
+                "data-toggle": "tooltip",
+                "data-container": "body",
+                "title": args.data[args.column.field]
+            });
+        }
+    }
+
+    function refreshTooltipAndPositionForGrid(args) {
+        $("[data-toggle=tooltip]").tooltip();
+
+    }
+
+    $.views.helpers({
+        urlEncode: function (category, item) {
+            return encodeURI("@Url.Action("Dashboards", "Dashboards")/" + category + "/" + item);
+        },
+        widgetUrlEncode: function (item) {
+            return encodeURI("@Url.Action("widgets", "FileRender")/" + item);
+        }
+    });
+    $(document).ready(function () {
+        GridLocalization(window.Server.App.Localization.PermissionRecordsEmpty);
+        UserGridLocalization();
+        ExcelFilterLocalization();
+        $("#PermissionGrid").ejGrid({
+            dataSource:@Html.Raw(jsondata),
+            allowPaging: true,
+            pageSettings: { pageSize: 20 },
+            allowFiltering: true,
+            allowSorting: true,
+            allowSearching: true,
+            allowSelection: false,
+            enableAltRow: false,
+            filterSettings: {
+                filterType: "excel"
+            },
+            allowGrouping: true,
+            groupSettings: {
+                showDropArea:false,
+                showUngroupButton:false,
+                showGroupedColumn: false,
+                groupedColumns: ["ItemTypeDescription"]
+            },
+            columns:[
+                {field:"PermissionAccessDescription", headerText:"@T["Access Mode"]", width: 130 },
+                {field:"PermissionEntityDescription", headerText:"@T["Entity"]", width: 80 },
+                {field:"ItemName",
+                    headerText:"@T["Scope"]",
+                    template: true,
+                    headerTemplateID: "#itemNameHeader",
+                    templateID:"#itemName",
+                    type: "string",
+                    width: 240
+                },
+                {field:"GroupName", headerText:"@T["Inherited from Group"]", width: 120 },
+                {field:"ItemTypeDescription", headerText:"@T["Resources"]", allowSorting:false, allowFiltering:false }
+            ],
+            queryCellInfo: "onQueryCellInfo",
+            dataBound: "refreshTooltipAndPositionForGrid",
+            actionComplete: "refreshTooltipAndPositionForGrid"
+        });
+    });
+
+    function UserGridLocalization() {
+        var userGridLocalization = {
+            GroupCaptionFormat: "{{:headerText}}: {{:key}} - {{:count}} {{if count == 1 }}" +  window.Server.App.Localization.Item + " {{else}}" +  window.Server.App.Localization.Items + "{{/if}}",
+            OKButton: window.Server.App.Localization.OKButton
+        };
+
+        if (typeof (BoldBIDashboard) != "undefined") {
+            BoldBIDashboard.Grid.Locale["en-US"] = userGridLocalization;
+        } else {
+            ej.Grid.Locale["en-US"] = userGridLocalization;
+        }
+    }
+
+</script>
+
+<div id="PermissionGrid"></div>

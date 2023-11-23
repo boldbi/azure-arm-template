@@ -1,0 +1,224 @@
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Dashboard Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = true;
+    var makepublic = Convert.ToBoolean(ViewBag.DashboardSettings);
+    var defaultView = Convert.ToBoolean(ViewBag.DefaultViewSettings);
+    var autosavedFilter = Convert.ToBoolean(ViewBag.AutosaveFilterSettings);
+    var theming = Convert.ToBoolean(ViewBag.Theming);
+    var getDashboardEmbedcode = Convert.ToBoolean(ViewBag.GetDashboardEmbedCode);
+    var getWidgetEmbedCode = Convert.ToBoolean(ViewBag.GetWidgetEmbedCode);
+    var lockSynchronization = Convert.ToBoolean(ViewBag.LockSynchronization);
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var defaultViewHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DefaultViews);
+    var autoSaveHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.AutoSaveFilter);
+    var publicDashboardsHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardSiteSettings);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var enableIsolation = globalAppSettings.SystemSettings.IsIsolationCodeEnabled;
+    var isAttributeTab = (Context.Request.Query["tab"].ToString().ToLower() == "attributes") ? "active" : string.Empty;
+    var isDeploymentTab = (Context.Request.Query["tab"].ToString().ToLower() == "deployment-dashboards") ? "active" : string.Empty;
+    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "dashboard-settings") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isAttributeTab) && string.IsNullOrWhiteSpace(isDeploymentTab)) ? "active" : string.Empty;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var deploymentDashboard = ViewBag.DeploymentDashboard;
+    var isMaster = globalAppSettings.SystemSettings.IsMaster;
+    var usageAnalytics = Convert.ToBoolean(ViewBag.UsageAnalytics);
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var dashboardSettingsPageDescription = T["Configuration for the Dashboards."];
+    var deploymentDashboardPageDescription = T["Dashboards created in this site can be published to other site deployment."];
+    var attributesPageDescription = T["Configure site-level attributes."];
+    var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-settings.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-settings.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.min.js"></script>
+    </environment>
+    <script>
+        var isSelfHosted =  @Json.Serialize(isSelfHosted);
+        var dashboardSettingsUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardSiteSettings)";
+        var deploymentDashboardUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DeploymentDashboard)";
+        var customAttributeUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomAttribute)";
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div id="dashboard-settings-header" class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Dashboard Settings"] }, { "PageDescription", @dashboardSettingsPageDescription } })
+            <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div class="col-xs-6 no-padding button-section">
+                        <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary pull-right" id="cancel-dashboard-settings" title="">@T["Cancel"]</a>
+                        <input type="button" title="" data-url="@Url.Action("updatedashboardsettings", "administration")" id="update-dashboard-settings" class="primary-button app-btn-primary pull-right" value="@T["Save"]" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="deployment-header" class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Deployment Dashboards"] }, { "PageDescription", @deploymentDashboardPageDescription } })
+            <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div id="deployment-button" class="col-xs-6 no-padding button-section">
+                        <button class="primary-button app-btn-primary pull-right" id="add-dashboard" title="@T["Add Dashboard"]">
+                            <span>@T["Add Dashboard"] </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="site-attribute-header" class="col-xs-12 no-padding" style="display: none">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Attributes"] }, { "PageDescription", @attributesPageDescription } })
+            <div class="col-xs-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div id="add-attribute-button" class="col-xs-6 no-padding button-section">
+                        <button class="primary-button app-btn-primary pull-right" id="add-custom-attribute" title="@T["Add Attribute"]" onclick="addCustomAttribute('site')">
+                            <span>@T["Add Attribute"] </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul id="dashboards-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isSettingsTab">
+                    <a href="#dashboard-settings" id="dashboard-settings-tab" aria-controls="dashboard-settings-tab" role="tab" data-toggle="tab">@T["Dashboard Settings"]</a>
+                </li>
+                @if (!isSelfHosted)
+                {
+                    <li role="presentation" class="@isAttributeTab">
+                        <a href="#custom-attributes" id="custom-attributes-tab" aria-controls="custom-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
+                    </li>
+                }
+                else if (isMaster)
+                {
+                    <li role="presentation" class="@isDeploymentTab">
+                        <a href="#deployment-dashboards" id="deployment-dashboards-tab" aria-controls="deployment-ad-tab" role="tab" data-toggle="tab">@T["Deployment Dashboards"]</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div id="dashboard-settings-container" role="tabpanel" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width") bi-page-container-with-tab">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="tab-content col-xs-12 no-padding">
+            <div role="tabpanel" class="tab-pane bi-page-body @isSettingsTab" id="dashboard-settings">
+                <ul id="dashboard-settings-ul" class="no-padding dashboard-listCollection">
+                    <li class="dashboard-settings-list">
+                        @Html.CheckBox("restrict-makepublic-dashboard", makepublic, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="restrict-makepublic-dashboard">
+                            <span>
+                                @T["Mark dashboards as public"]
+                            </span>
+                        </label>
+                        <div class="info-message">
+                            @Html.Raw(string.Format(T["This setting will allow the dashboard creators to create public dashboards and these dashboards can be opened by an anonymous user. Click on public {0}dashboards{1} to view them."].Value, "<a class='app-hyperlink' href='" + Url.Action("dashboards", "dashboards", new { view = "public" }) + "' target='_blank'>", "</a>"))
+                            @if (!@ServerAppConfig.IsHideHelpLink)
+                            {
+                                <span>@Html.Raw(string.Format(T["Learn more about {0}public dashboards{1}."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + publicDashboardsHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
+                            }
+                        </div>
+                    </li>
+                    <li class="dashboard-settings-list">
+                        @Html.CheckBox("restrict-default-view-dashboard", defaultView, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="restrict-default-view-dashboard">
+                            <span>@T["Default views"]</span>
+                        </label>
+                        <div class="info-message">
+                            @T["This setting will allow users to set the default view for the dashboards."]
+                            @if (!@ServerAppConfig.IsHideHelpLink)
+                            {
+                                <span>@Html.Raw(string.Format(T["Learn more about {0}default views{1}."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + defaultViewHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
+                            }
+                        </div>
+                    </li>
+                    <li class="dashboard-settings-list">
+                        @Html.CheckBox("restrict-auto-save-filter", autosavedFilter, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="restrict-auto-save-filter">
+                            <span>@T["Autosave filter"]</span>
+                        </label>
+                        <div class="info-message">
+                            @T["The dashboards will be rendered with the last applied filters by the users."]
+                            @if (!@ServerAppConfig.IsHideHelpLink)
+                            {
+                                <span>@Html.Raw(string.Format(T["Learn more about {0}autosaving filters{1}."].Value, "<a class='app-hyperlink' href='" + (helpSiteBaseUrl + autoSaveHelpSiteUrl) + "' target='_blank'>", "</a>"))</span>
+                            }
+                        </div>
+                    </li>
+                    @*Hide the theme option in the dashboard settings for designer team request*@
+                    @if (ServerAppConfig.IsSelfHosted && themeInViewer)
+                    {
+                        <li class="dashboard-settings-list">
+                            @Html.CheckBox("dashboard-theming-setting", theming, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="dashboard-theming-setting">
+                                <span>@T["Theming"]</span>
+                            </label>
+                            <div class="info-message">
+                                @T["This setting will allow the user to hide or show theme options in the dashboard."]
+                            </div>
+                        </li>
+                    }
+
+                    <li class="dashboard-settings-list usage-analytics-list">
+                            @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="usage-analytics-setting">
+                                <span>@T["Usage analytics"]</span>
+                            </label>
+                            <div class="info-message">
+                                @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
+                            </div>
+                        </li>
+                    <li class="dashboard-settings-list">
+                        @Html.CheckBox("get-emebed-code-dashboard", getDashboardEmbedcode, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="get-emebed-code-dashboard">
+                            <span>@T["Show get Embed code for Dashboards"]</span>
+                        </label>
+                        <div class="info-message">
+                            @T["This setting will allow the user to hide or show the Get Embed Code option in the context menu of the dashboard in the listing page and also in the share dialog of the dashboard."]
+                        </div>
+                    </li>
+                    <li class="dashboard-settings-list">
+                        @Html.CheckBox("get-emebed-code-widget", getWidgetEmbedCode, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="get-emebed-code-widget">
+                            <span>@T["Show get Embed code for Widgets"]</span>
+                        </label>
+                        <div class="info-message">
+                            @T["This setting will allow the user to hide or show the Get Embed Code option in the context menu of the widget in the dashboard view page."]
+                        </div>
+                    </li>
+                        <li class="dashboard-settings-list">
+                            @Html.CheckBox("lock-unlock-synchronization", lockSynchronization, new { @class = "material-checkbox", @autocomplete = "off" })
+                            <label for="lock-unlock-synchronization">
+                                <span>@T["Lock Resource Synchronization"]</span>
+                            </label>
+                            <div class="info-message">
+                                @T["This setting will disable synchronization of dashboards and data sources from other sites."]
+                            </div>
+                        </li>
+                    </ul>
+            </div>
+            <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isDeploymentTab " id="deployment-dashboards">
+                @await Html.PartialAsync("_DeploymentDashboards")
+            </div>
+            @await Html.PartialAsync("_SiteAttribute")
+        </div>
+        @await Html.PartialAsync("_AddDeploymentDashboard")
+        @await Html.PartialAsync("../CustomAttribute/_CustomAttribute")
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

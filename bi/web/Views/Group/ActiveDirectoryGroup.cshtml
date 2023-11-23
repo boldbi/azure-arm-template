@@ -1,0 +1,240 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = String.Format(T["Synchronize {0} Groups"].Value, "Active Directory") + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SyncAzureAdGroups);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.PageHeader = @String.Format(T["{0} Synchronization"].Value, ViewBag.AdSync > 0 ? "Active Directory" : "Azure AD");
+    ViewBag.PageDescription = @String.Format(T["Select groups to synchronize with {0}."].Value, ViewBag.AdSync > 0 ? "Active Directory" : "Azure AD");
+    ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
+    ViewBag.BackIconTitle = T["Groups"];
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/users-groups-sync.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-groups.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/users-groups-sync.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-groups.min.js"></script>
+    </environment>
+
+    @if (ViewBag.AdSync > 0)
+    {
+        <script>
+            var synchronizeActiveDirectoryGroupUrl = "@Url.Action("SynchronizeActiveDirectoryGroup", "group")";
+        </script>
+    }
+    @if (ViewBag.AzureAdSync > 0)
+    {
+        <script>
+            var synchronizeActiveDirectoryGroupUrl = "@Url.Action("SynchronizeAzureADGroup", "group")";
+        </script>
+    }
+    <script type="text/x-jsrender" id="group-profile-template">
+        <a class="item-name" title="{{:~renderDoubleQuotes(GroupName)}}" data-toggle="tooltip" href="@Url.Action("viewgroup", "group")/{{:GroupId}}" data-groupid="{{:GroupId}}">{{:GroupName}}</a>
+    </script>
+    <script type="text/x-jsrender" id="item-name-header">
+        <div class="item-name">@T["Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="checkbox-row-template">
+        <input type="checkbox" class="checkbox-row material-checkbox" name="checkbox-row" data-checked-id="{{:GroupId}}" id="row-check{{:GroupId}}" />
+        <input name="row-check{{:GroupId}}" type="hidden" value="false">
+        <label for="row-check{{:GroupId}}"> </label>
+    </script>
+    <script type="text/x-jsrender" id="group-description-template">
+        <div class="grid-content" title="{{:~renderDoubleQuotes(GroupDescription)}}" data-toggle="tooltip">
+            {{:GroupDescription}}
+        </div>
+    </script>
+    <script type="text/x-jsrender" id="checkbox-header-template">
+        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
+        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+    </script>
+    <script type="text/x-jsrender" id="group-detail-validation">
+        {{if IsDuplicated}}
+        <div class="su su-login-error group-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></div>
+        {{/if}}
+    </script>
+    <script type="text/javascript">
+        ej.support.stableSort = false;
+        $(function () {
+            $.views.helpers({
+                renderDoubleQuotes: function (inputString) {
+                    return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                }
+            });
+        });
+        $(document).ready(function() {
+            $("#search-ad-groups").val("");
+            addPlacehoder("#search-area");
+            var data = @Html.Raw(Json.Serialize(ViewBag.ActiveDirectoryGroups));
+            data = ej.parseJSON(data);
+            GridLocalization(window.Server.App.Localization.SynchronizationGroupsEmpty);
+            $("#Grid").ejGrid({
+                dataSource: data,
+                gridLines: ej.Grid.GridLines.None,
+                allowPaging: true,
+                enableAltRow: false,
+                enableRowHover: true,
+                allowSorting: true,
+                allowSelection: true,
+                allowScrolling: false,
+                allowFiltering: true,
+                allowSearching: true,
+                locale: "en-US",
+                selectionType: ej.Grid.SelectionType.Multiple,
+                dataBound: function () {
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    $("#checkbox-header").change(headCheckboxOnChange);
+                    this.model.indexes = {}; /* Additional property*/
+                },
+                rowDataBound: function () {
+                    $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
+                },
+                create: fnCreateGrid,
+                pageSettings: { pageSize: 20 },
+                recordClick: "recordClick",
+                selectionSettings: { selectionMode: ["row"] },
+                filterSettings: { filterType: "menu" },
+                actionBegin: "fnOnGroupGridActionBegin",
+                templateRefresh: "refreshTemplate",
+                actionComplete: "fnActionComplete",
+                columns: [
+                        { headerTemplateID: "#checkbox-header-template", template: true, templateID: "#checkbox-row-template", textAlign: ej.TextAlign.Center, width: 25, allowFiltering: false },
+                        {
+                            allowSorting: true,
+                            headerText: "@T["Name"]",
+                            width: 110,
+                            headerTemplateID: "#item-name-header",
+                            templateID: "#group-profile-template",
+                            field: "GroupName",
+                            type: "string"
+                        },
+                        {
+                            allowSorting: false,
+                            allowFiltering: false,
+                            headerText: "@String.Format(T["{0} Group Id"].Value, "AD")",
+                            width: 10,
+                            cssClass: "activedirectory-group-id",
+                            field: "ActiveDirectoryGroupId",
+                            type: "string",
+                            visible: false
+                        },
+                        {
+                            allowSorting: false,
+                            allowFiltering: false,
+                            headerText: "@T["Group Id"]",
+                            width: 10,
+                            cssClass: "group-id",
+                            field: "GroupId",
+                            type: "string",
+                            visible: false
+                        },
+                        {
+                            field: "GroupDescription",
+                            headerText: "@T["Description"]",
+                            allowSorting: true,
+                            templateID: "#group-description-template",
+                            allowFiltering: true,
+                            type: "string",
+                            width: 300
+                        },
+                        {
+                            allowSorting: false,
+                            allowFiltering: false,
+                            field: "UsersCount",
+                            headerText: "@T["Users"]",
+                            type: "string",
+                            width: 60
+                        },
+                        {
+                            field: "",
+                            width: 20,
+                            templateID: "#group-detail-validation",
+                            allowFiltering: false,
+                            visible: true
+                        }
+                ]
+
+            });
+
+            $("#new-group-area").ejDialog({
+                width: "500px",
+                showOnInit: false,
+                allowDraggable: true,
+                enableResize: false,
+                showHeader: false,
+                height: "290px",
+                title: "@T["Add New Group"]",
+                enableModal: true,
+                closeOnEscape: true,
+                close: ''
+            });
+            $("#delete-group-area").ejDialog({
+                width: "499px",
+                showOnInit: false,
+                allowDraggable: true,
+                enableResize: false,
+                showHeader: false,
+                height: "201px",
+                title: "@T["Add New Group"]",
+                enableModal: true,
+                closeOnEscape: true,
+                close: ''
+            });
+            var deleteGroupWaitingPopupTemplateId = createLoader("delete-group-area_wrapper");
+			$("#delete-group-area_wrapper").ejWaitingPopup({ template:$("#" + deleteGroupWaitingPopupTemplateId) });
+			var newGroupWaitingPopupTemplateId = createLoader("new-group-area_wrapper");
+            $("#new-group-area_wrapper").ejWaitingPopup({ template:$("#" + newGroupWaitingPopupTemplateId) });
+        });
+    </script>
+
+}
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+<div class="col-xs-12 no-padding no-margin width-alignment">
+    <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "IsGroupSyncPage", "true" } })
+    </div>
+    <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+        <div class="col-xs-12 no-padding">
+            <div id="sync-button" class="col-xs-6 no-padding button-section">
+                <input type="button" name="SyncGroups" value="@T["Synchronize"]" title="@String.Format(T["Synchronize groups with {0}"].Value, "Active Directory")" data-toggle="tooltip" data-placement="left" id="syncronize-group" class="primary-button app-btn-primary pull-right" />
+            </div>
+            <div id="search-area" class="pull-left col-xs-4">
+                @if (ViewBag.AdSync > 0 || ViewBag.AzureAdSync > 0)
+                {
+                    <input type="text" id="search-ad-groups" class="pull-left no-margin" placeholder="@String.Format(T["Search {0} groups"].Value, ViewBag.AdSync > 0 ? "AD" : "Azure AD")" autocomplete="off" />
+                }
+                <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                <span class="su su-search search-icon pull-left no-margin search-group" title="@T["Search"]"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-xs-12 sync-container bi-page-container @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div id="grid-container" class="bi-page-body col-xs-12">
+            <div id="Grid" class="col-xs-12 no-padding" data-gridName="Group">
+            </div>
+        </div>
+        <div id="new-group-area" class="no-padding">
+            <iframe id="new-group-iframe" class="pull-left"></iframe>
+        </div>
+        <div id="delete-group-area" class="no-padding">
+            <iframe id="delete-group-iframe" class="pull-left"></iframe>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+    @if ((ViewBag.AdSync != null && ViewBag.AdSync > 0) || (ViewBag.AzureAdSync != null && ViewBag.AzureAdSync > 0))
+    {
+        @await Html.PartialAsync("../UserManagement/_LimitUserCreation")
+    }
+
+    @if (!ViewBag.ThirdPartyLogins)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

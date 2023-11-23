@@ -1,0 +1,34 @@
+﻿@{
+    var isUserHasCreateGroupPermission = ViewBag.IsUserHasCreateGroupPermission;
+}
+<script>
+    var isUserHasCreateGroupPermission = @Json.Serialize(isUserHasCreateGroupPermission);
+</script>
+<div id="popup-container" data-dialog="add-users-in-group">
+    <div class="subhead-menu col-xs-12">
+        @T["Add the selected users to a Group"] - @Html.Raw(String.Format(T["{0} user(s) selected"].Value, "<span id='usersCount'></span>"))
+    </div>
+    <div class="modal-body col-xs-12 content group-section">
+        <form id="new-group" class="col-xs-12 no-padding new-group-form" style="display: none" autocomplete="off">
+            <div class="col-xs-12 content no-padding">
+                <div class="col-xs-3 form-label text-right no-padding">
+                    @T["Name"]
+                    <span class="mandatory">*</span>
+                </div>
+                <div class="col-xs-9 group-name-div">
+                    <input id="group-name" class="form-control" placeholder="@T["Group name"]" type="text" name="group-name" data-maxlength="60">
+                    <span id="group-name-validation" class="group-validation" title="@T["Please enter the group name"]" data-content="">
+                    </span>
+                </div>
+            </div>
+            <div class="col-xs-12 description-content no-padding"><div class="col-xs-3 form-label text-right no-padding">@T["Description"]</div><div class="col-xs-9"><textarea id="group-description" class="form-control text-area" name="group-description" data-maxlength="1024"></textarea><span id="group-name-validation" class="group-validation"></span><span class="notification">*@T["1024 characters maximum"]</span></div></div>
+        </form>
+        <div id="existing-group" class="col-xs-12 no-padding">
+            <div class="col-xs-12 no-padding"><div class="col-xs-3 form-label text-right no-padding">@T["Group Name"]&nbsp;&nbsp;</div><div class="col-xs-9"><select id="groupname-dropdown" class="form-control selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]"></select><span id="group-name-validation-message" style="display:none" class="group-validation"></span></div></div>
+        </div>
+    </div>
+    <div id="modal-footer" class="modal-footer content" style="display:none;">
+        <h4>@T["Selected user(s)"]</h4>
+        <div id="UserListToGroup"></div>
+    </div>
+</div>

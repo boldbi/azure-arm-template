@@ -1,0 +1,75 @@
+@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@using Microsoft.AspNetCore.Http;
+@using Microsoft.AspNetCore.Http.Extensions;
+@using System.Linq;
+@using System.Security.Claims;
+@{
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname").ToString() : string.Empty;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+
+    var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
+
+    var currentUrl = requestUrl.ToString().TrimEnd('/');
+
+    var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
+                         currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
+
+    var idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    var profilePageUrl = $"{idPUrl}/user/profile";
+
+    var tenantSitesUrl = CloudAppConfig.TenantManagementUrl + "/sites";
+    var tenantUsersUrl = CloudAppConfig.TenantManagementUrl + "/administration/user-management/users";
+    var tenantSettingsUrl = CloudAppConfig.TenantManagementUrl + "/administration";
+    AdminType adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
+    var username = Context.Session.GetString("username") != null ? Context.Session.GetString("username").ToString() : string.Empty;
+    var userId = Context.User.GetUserId();
+    var isAdmin = await new UserManagement().IsAdmin(userId);
+    var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+}
+
+<aside class="menu-bar" id="app-navigation">
+    <nav id="main-nav">
+        <ul id="items-menu">
+            <li>
+                <a href="@imageUrl" class="home-link" style="background-color:transparent;" title=@GlobalAppSettings.SystemSettings.OrganizationName>
+                    <img alt="@T["Application Logo"]" id="application-logo" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=header")" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/images/boldid/application/@IconFileNames.MainLogo';" />
+                </a>
+            </li>
+            @if (isAdmin)
+            {
+                <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                <li>
+                    <a href="@tenantSitesUrl">
+                        <span class="menu-icon-container">
+                            <i class="su su-applications"></i>
+                        </span>
+                        <span class="menu-label">@T["Sites"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="@tenantUsersUrl">
+                        <span class="menu-icon-container">
+                            <i class="su su-user"></i>
+                        </span>
+                        <span class="menu-label">@T["Users"]</span>
+                    </a>
+                </li>
+                <li class="sf-nav-separator logo-separator mobile-hidden"></li>
+                <li class="mobile-hidden">
+                    <a href="@tenantSettingsUrl">
+                        <span class="menu-icon-container">
+                            <i class="su su-nav-settings"></i>
+                        </span>
+                        <span class="menu-label">@T["Settings"]</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+</aside>
+
+

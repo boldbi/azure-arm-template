@@ -1,0 +1,144 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
+    var isDashboardFileUploaded = ViewBag.IsDashboardFileUploaded;
+    var itemDetail = ViewBag.ItemDetail;
+    var uploadedFileName = ViewBag.UploadedFileName;
+    var categoryId = itemDetail != null ? itemDetail.CategoryId : string.Empty;
+    var itemId = itemDetail != null ? itemDetail.Id : string.Empty;
+    var isInValidFile = ViewBag.IsInValidFile != null ? ViewBag.IsInValidFile : false;
+}
+
+<script>
+    var canCreateCategory = "@canCreateCategory";
+    var isitemexistinsamecategoryUrl = "@Url.Action("isitemexistinsamecategory", "Dashboards")";
+    var uploadDashboardUrl = "@Url.Action("UploadDashboard", "Dashboards")";
+    var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+    var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+    var uploadItemId = "@itemId";
+    var categoryId = "@categoryId";
+    var uploadedFileName = "@uploadedFileName";
+    var isDashboardFileUploaded = @Json.Serialize(isDashboardFileUploaded);
+    var isInValidFile = @Json.Serialize(isInValidFile);
+        function load() {
+            if (($(parent.window).width()) > 1400) {
+                $(".dialog").addClass("iframe");
+            }
+
+            if (($(parent.window).width()) < 1400) {
+                $(".dialog").removeClass("iframe");
+            }
+        }
+</script>
+
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
+</environment>
+
+<body onload="load()">
+    <div id="PopupContainer" class="dialog">
+        <form id="uploadDashboardForm" name="uploadDashboardForm" method="post" enctype="multipart/form-data" action="@Url.Action("UploadDashboard", "Dashboards")">
+            <input type="hidden" id="itemId" name="itemId" value="@(itemDetail != null ? @itemDetail.Id : string.Empty)" />
+            <input type="hidden" id="isFileChanged" name="isFileChanged" value="@isInValidFile.ToString()" />
+            <div id="upload_dashboard_content" class="col-md-12 dialog-body copy-move-category">
+                <table>
+                    <tbody>
+                        <tr class="bottomPadding5">
+                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Category"]<span class="mandatory">*</span></div></td>
+                            <td>
+                                @if (canCreateCategory)
+                                {
+                                    <div class="dropdown no-padding">
+                                        <select id="CategoryList" name="catergoryId" class="selectpicker" data-live-search="true" data-size="7" style="width:230px;"></select>
+                                        <span class="category-validation-error text"></span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="dropdown no-padding" style="margin-bottom: 18px">
+                                        <select id="CategoryList" name="catergoryId" class="selectpicker" data-live-search="true" data-size="7" style="width:230px;"></select>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                        <tr class="bottomPadding5">
+                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Name"]<span class="mandatory">*</span></div></td>
+                            <td>
+                                <span>
+                                    <input type="text" id="dashboard-name" autofocus class="popup form-control bottom-margin30 text" name="itemName" maxlength="255" tabindex="1" value="@(itemDetail != null ? itemDetail.Name : string.Empty)">
+                                    <span id="validate-dashboard-name" class="validation-message text"></span>
+                                    <span id="upload-dashboard-name-validation" class="validation-message text"></span>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr class="bottomPadding5 description-field">
+                            <td class="text-right padding-right-15"><div class="bottom-margin50">@T["Description"]</div></td>
+                            <td>
+                                <textarea name="description" class="form-control bottom-margin30 text" maxlength="1024" id="upload-dashboard-description" tabindex="2">@(itemDetail != null ? itemDetail.Description : string.Empty)</textarea>
+                                <span class="notification help-text">
+                                    <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
+                                </span>
+                            </td>
+                        </tr>
+                        <tr class="bottomPadding5 fileUpload-field">
+                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["File"]<span class="mandatory">*</span></div></td>
+                            <td>
+                                <button type="button" title="@T["Select File"]" id="upload-file" name="upload-file" class="primary-button app-btn-primary">
+                                    @T["Select File"]
+                                </button>
+                                <input type="file" id="browse_file" class="browse-button upload-btn" name="file" accept='.zip' tabindex="-1">
+                            </td>
+                        </tr>
+                        <tr class="no-margin">
+                            <td class="text-right padding-right-15"></td>
+                            <td>
+                                <div class="fileUpload btn btn-default" style="display: none">
+                                    <i id="fileUpload-popup" class="su su-delete pull-right"></i>
+                                    <div id="uploaded-fileName"></div>
+                                    <span id="validate-file"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="submit" class="hide-content" style="display: none" />
+            </div>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var categories = @Html.Raw(Json.Serialize(ViewBag.CategoryDetails));
+            var options = "";
+            for (var t = 0; t < categories.length; t++) {
+                if(categories[t].Id == categoryId){
+                    options += '<option value=' + categories[t].Id + ' selected>' + categories[t].Name + '</option>';
+                }
+                else{
+                    options += '<option value=' + categories[t].Id + '>' + categories[t].Name + '</option>';
+                }        
+            }
+            $("#CategoryList").html(options);
+            $("#CategoryList").selectpicker("refresh");
+            if (uploadItemId != null && uploadItemId != "" && !isInValidFile) {
+                $("#upload-file").attr('disabled', 'disabled');
+                $("#uploaded-fileName").text(uploadedFileName);
+                $("#validate-file").html(window.Server.App.Localization.UploadDashboardFileSuccess).removeClass("failure").addClass("success");
+                $('#fileUpload-popup').prop("disabled", true);
+                $(".fileUpload").css("display", "block");
+            }
+            else if (isInValidFile) {
+                $("#upload-file").attr('disabled', 'disabled');
+                $("#uploaded-fileName").text(uploadedFileName);
+                $("#validate-file").html(window.Server.App.Localization.IsValidFile).addClass("failure").removeClass("success");
+                $('#fileUpload-popup').prop("disabled", false);
+                $(".fileUpload").css("display", "block");
+            }
+        });
+    </script>
+</body>

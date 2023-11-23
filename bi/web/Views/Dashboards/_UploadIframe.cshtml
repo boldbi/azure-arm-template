@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerResourceUrl = _globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var uploadDashboardId = ViewBag.ItemId;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var canCreateCategory = ViewData["CanCreateCategory"] != null ? Convert.ToBoolean(ViewData["CanCreateCategory"]) : false;
+    var enableManualOverWrite = ViewData["EnableManualOverWrite"] != null ? Convert.ToBoolean(ViewData["EnableManualOverWrite"]) : false;
+}
+<head>
+    <meta name="designer_service:url" content="@ServerAppConfig.InternalAppDataRefreshServiceUrl" />
+    <meta name="dashboard_service:url" content="@dashboardServerApiUrl" />
+    <meta name="access:token" content="@ViewBag.AccessToken" />
+    @if (ViewBag.DashboardIds != null)
+    {
+        <meta name="dashboard:ids" content='@Html.Raw(Json.Serialize(ViewBag.DashboardIds))' />
+    }
+    else
+    {
+        <meta name="dashboard:ids" content="" />
+    }
+</head>
+<html class="upload-iframe-server">
+<head>
+    <script>
+        var loadUploadDialogUrl = "@Url.Action("DataSourceMapping", "Dashboards")";
+        var isSelfHosted = @Json.Serialize(isSelfHosted);
+        var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+        var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+        var custombrandName = "@ServerAppConfig.CustomBrandName";
+        var appVersion = "@ServerAppConfig.ProductVersion";
+        var canCreateCategory = @Json.Serialize(canCreateCategory);
+        var enableManualOverWrite = @Json.Serialize(enableManualOverWrite);
+    </script>
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+</head>
+<body class="upload-iframe-body">
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/upload-iframe.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/upload-iframe.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+    </environment>
+
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <script asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-upload.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-upload.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.min.js"></script>
+    </environment>
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <div id="Upload_Item"></div>
+    @if (isSelfHosted)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+        </environment>
+    }
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.js"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.min.js"></script>
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>
