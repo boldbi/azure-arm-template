@@ -1,2 +1,0 @@
-ALTER TABLE BOLDTC_SAMLSettings ADD IsSloEnabled bit NOT NULL DEFAULT 0
-;
