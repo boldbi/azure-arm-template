@@ -473,12 +473,15 @@
             Html.RenderPartial("~/Views/Shared/_ServerTour.cshtml", ViewBag.ItemAddOptions as Dictionary<ItemType, bool>);
             @Scripts.Render("~/bundles/scripts/dashboard-server-tour")
         }*@
-    <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css" />
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css" />
-    </environment>
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css" />
+        </environment>
+    }
     @if (!ServerAppConfig.IsSelfHosted)
     {
         @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")

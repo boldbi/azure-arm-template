@@ -24,3 +24,9 @@
         }
     }
 });
+
+$('body').on('click', 'a', function () {
+    if (enableSameTabLinkTarget && $(this).attr('href') !== undefined && !($(this).attr("href").includes("redirect.boldbi.com"))) {
+        $(this).attr("target", "_self");
+    }
+});

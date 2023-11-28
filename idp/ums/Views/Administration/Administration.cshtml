@@ -4,6 +4,14 @@
     var defaultLanguageText = ViewBag.SelectedLanguage != null && ViewBag.SelectedLanguage.Text != null ? ViewBag.SelectedLanguage.Text : string.Empty;
     var defaultLanguageValue = ViewBag.SelectedLanguage != null && ViewBag.SelectedLanguage.Value != null ? ViewBag.SelectedLanguage.Value : string.Empty;
     var isSecureConnection = GlobalAppSettings.SystemSettings.IsSecureConnection;
+    var mailAccount = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = T["Custom SMTP"].Value, Selected = GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAccount == MailAccount.CustomSMTP },
+        new SelectListItem { Value = "1", Text = T["Microsoft Office 365"].Value, Selected = GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAccount == MailAccount.MicrosoftOffice365 }
+    };
+
+    var emailAccountText = GlobalAppSettings.SystemSettings.MailSettings != null ? GlobalAppSettings.GetDescription(GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAccount) : GlobalAppSettings.GetDescription(MailAccount.CustomSMTP);
+    var emailAccountValue = GlobalAppSettings.SystemSettings.MailSettings != null ? ((int)GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAccount).ToString() : ((int)MailAccount.CustomSMTP).ToString();
     var protocolTypes = new List<SelectListItem>
 {  new SelectListItem
     {
@@ -65,6 +73,8 @@
         if (baseRootUrl.toLowerCase() === "/")
             baseRootUrl = "";
         var isSiteCreation = false;
+        var emailAccountText = "@emailAccountText";
+        var emailAccountValue = "@emailAccountValue";
         var isSecureConnection = "@isSecureConnection.ToString()" == "True";
 
         $(function() {

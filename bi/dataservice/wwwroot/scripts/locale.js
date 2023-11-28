@@ -6367,6 +6367,7 @@
                 addRows: "Add more rows",
                 deleteRowsAlertMsg: "Please remove the widgets from the rows to be deleted and try again.",
                 performanceAlertMsg: "Adding more rows might affect the performance of the dashboard.",
+				addRowsLimitAlertMsg: "A maximum of 1,000 rows can be added.",
 				done: "Done"
             },
             initialFilter: {

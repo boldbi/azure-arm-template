@@ -21,6 +21,8 @@ function onDropDownListChange(args) {
         onFontChange();
     if (args.element.id == 'application-theme')
         onApplicationThemeChange();
+    if (args.element.id == 'mail-account')
+        emailConfiguration();
 }
 
 function groupImportDropDownListInitialization(id, placeHolder) {
