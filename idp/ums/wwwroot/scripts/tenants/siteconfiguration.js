@@ -321,7 +321,7 @@ function changeTenantType(args) {
                 document.getElementById("branding-type").ej2_instances[0].list.querySelectorAll('li')[0].style.display = "none";
             }
 
-            document.getElementById("branding-type").ej2_instances[0].value = "Enterprise Reporting";
+            document.getElementById("branding-type").ej2_instances[0].value = reportsProductname;
             $(".isolation-part").addClass("hide");
             if (isBoldReportsTenantType()) {
                 $(".attribute-part-bi").addClass("hide");
@@ -351,7 +351,7 @@ function changeTenantType(args) {
                 document.getElementById("branding-type").ej2_instances[0].list.querySelectorAll('li')[0].style.display = "block";
                 document.getElementById("branding-type").ej2_instances[0].list.querySelectorAll('li')[1].style.display = "none";
             }
-            document.getElementById("branding-type").ej2_instances[0].value = "Embedded BI";
+            document.getElementById("branding-type").ej2_instances[0].value = biProductname;
             $(".isolation-part").removeClass("hide");
             if (isBoldReportsTenantType()) {
                 $(".attribute-part-bi").removeClass("hide");

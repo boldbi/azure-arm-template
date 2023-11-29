@@ -1,5 +1,5 @@
 ﻿@{
-    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? "Embedded BI" : "Enterprise Reporting";
+    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
     var serverUserHelp = string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2} to connect and use the database."].Value, "<a target='_blank' href='" + (await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration, ViewBag.TenantType)) + "'>", "</a>", helpLinkData);
     var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
 }
@@ -43,13 +43,15 @@
 
                 <div class="first-radio-align col-xs-6 radio-padding">
                     <input type="radio" id="check-sql" class="radio-button" name="checkWindows" />
-                    <div class="info-content radio-info">@Html.Raw(string.Format(T["Use SQL username and password to set up {0}{1}{2}."].Value, "<span class='tenant-sql-db-content'>", helpLinkData, "</span>"))
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Use SQL username and password to set up {0}{1}{2}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>"))
                     </div>
 
                 </div>
                 <div class="second-radio-align radio-padding col-xs-6">
                     <input type="radio" id="check-windows" class="radio-button" name="checkWindows" />
-                    <div class="info-content radio-info">@Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to configure {2} with Windows Authentication."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.WindowsAuthentication) + "'>", "</a>", helpLinkData))
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to configure {2}{3}{4} with Windows Authentication."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.WindowsAuthentication) + "'>", "</a>", "<span class='tenant-product-name'>", helpLinkData, "</span>"))
                     </div>
 
                 </div>
@@ -71,7 +73,8 @@
                 <input type="text" id="txt-login" name="username" class="" placeholder="@T["Username"]" />
                 <span class="startup-validation validation-txt-errors"></span>
 
-                <div class="info-content txt-box-info"> @Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2} to connect and use the database."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DatabasePermissions, ViewBag.TenantType) + "'>", "</a>", helpLinkData))
+                <div class="info-content txt-box-info">
+                    @Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2}{3}{4} to connect and use the database."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DatabasePermissions, ViewBag.TenantType) + "'>", "</a>", "<span class='tenant-product-name'>", helpLinkData, "</span>"))
                </div>
             </div>
             <div class="txt-holder center-align windows-disabled">
@@ -84,12 +87,14 @@
             <div class="txt-holder center-align db-selection-radio col-xs-12 radio-padding">
                 <div class="new-db col-xs-6 radio-padding">
                     <input type="radio" id="new-db" class="radio-button" name="databaseType" />
-                    <div class="info-content radio-info">@Html.Raw(string.Format(T["Create a new database(s) for {0}{1}{2}."].Value, "<span class='tenant-sql-db-content'>", helpLinkData, "</span>"))
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Create a new database(s) for {0}{1}{2}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>"))
                     </div>
                 </div>
                 <div class="existing-db col-xs-6 radio-padding">
                     <input type="radio" id="existing-db" class="radio-button" name="databaseType" />
-                    <div class="info-content radio-info">@Html.Raw(string.Format(T["Use the existing database to deploy the site and make sure it was created using the {0} {1}supported collation{2}."].Value,helpLinkData, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DefaultCollation, ViewBag.TenantType) + "'>", "</a>"))
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Use the existing database to deploy the site and make sure it was created using the {0}{1}{2} {3}supported collation{4}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>", "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DefaultCollation, ViewBag.TenantType) + "'>", "</a>"))
                     </div>
                 </div>
             </div>
