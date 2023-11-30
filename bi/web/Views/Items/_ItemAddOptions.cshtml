@@ -11,6 +11,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
     var absoluteUrl = requestUrl.AbsolutePath.ToString().ToLower();
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
 }
 
 <!DOCTYPE html>
@@ -41,7 +42,7 @@
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
     </environment>
 
-    @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0))
     {
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.css" />
