@@ -2110,6 +2110,7 @@ var Designer = {
                 filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
                 joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
+				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
                 joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
@@ -5106,7 +5107,9 @@ var Designer = {
                 reset: "Reset",
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
 				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
-				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets."
+				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets.",
+				pagewiseOption: "Only export current view",
+				pagewiseExportInfo: "If this option is disabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export."
             },
             maximize: {
                 maximize: "Maximize",
