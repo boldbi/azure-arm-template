@@ -139,8 +139,8 @@ function emailActivityLogGrid() {
 
 $(document).on("click", "#apply-button", function () {
     setTimpickerValue();
-    var startDateRange = document.getElementById("datePicker").ej2_instances[0].startValue.toLocaleDateString('en-US');
-    var endDateRange = document.getElementById("datePicker").ej2_instances[0].endValue.toLocaleDateString('en-US');
+    var startDateRange = document.getElementById("datePicker").ej2_instances[0].startValue != null ? document.getElementById("datePicker").ej2_instances[0].startValue.toLocaleDateString('en-US') : "";
+    var endDateRange = document.getElementById("datePicker").ej2_instances[0].endValue != null ? document.getElementById("datePicker").ej2_instances[0].endValue.toLocaleDateString('en-US') : "";
     var startDate = startDateRange != "" ? startDateRange + " " + emailLogStartDateTime : "";
     var endDate = endDateRange != "" ? endDateRange + " " + emailLogEndDateTime : "";
     var eventType = document.getElementById("email-event").ej2_instances[0].value;
