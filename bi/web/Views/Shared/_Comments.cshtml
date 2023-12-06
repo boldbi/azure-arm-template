@@ -4,7 +4,6 @@
     Layout = null;
     var globalAppSettings = _globalAppSettings;
     var idPUrl = globalAppSettings.SystemSettings.IDPUrl;
-    var isItemWatched = ViewBag.IsWatched != null ? ViewBag.IsWatched : false;
     var userId = ViewBag.UserId;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
@@ -44,9 +43,10 @@
     var getdefaultavatarUrl="@Url.Action("getdefaultavatar", "User")";
     var itemId = "@ViewBag.itemId";
     var isSydjViewer = "@ViewBag.ViewerVersion" == "v2";
-    var getItemWatchUrl = "@Url.Action("GetItemWatch", "Comments")";
+    var getItemWatchUrl = { "web": "@Url.Action("GetItemWatch", "Comments")", "api": "/comments/item-watch" };
     var cdnLink = "@dashboardServerResourceUrl";
     var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+    var userId = "@userId";
 </script>
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.js"></script>
@@ -65,8 +65,6 @@
         <textarea id="temp" class="hidden"></textarea>
         <div id="toRemoveCulture"></div>
     </div>
-    <div id="isadmin" class="displayNone">@ViewBag.isAdmin</div>
-    <div id="isWatch" class="displayNone">@isItemWatched</div>
     @if (ViewBag.ItemType == "dashboard")
     {
         <div id="itemType" class="displayNone" data-item-type="dashboard"></div>
@@ -106,14 +104,7 @@
         <div class="col-xs-12 count-sort">
             <div class="comments-count col-xs-6 no-padding">
                 <div class="watch-txt-container">
-                    @if (isItemWatched)
-                    {
-                        <span id="watchItem" class="su su-notification-settings watch-action unwatch" title="@T["Unwatch"]" data-html='false' data-toggle='tooltip'></span>
-                    }
-                    else
-                    {
-                        <span id="watchItem" class="su su-notification-settings watch-action watch" title="@T["Watch"]" data-html='false' data-toggle='tooltip'></span>
-                    }
+                    <span id="watchItem" class="su su-notification-settings watch-action watch" title="@T["Watch"]" data-html='false' data-toggle='tooltip'></span>
                 </div>
                 <span id="comment_count">0</span>
                 <span class="">@T["Comment(s)"]</span>

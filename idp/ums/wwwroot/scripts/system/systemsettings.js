@@ -85,9 +85,9 @@ $(document).ready(function () {
                 $("#label_txt-dbname").html(window.Server.App.LocalizationContent.DatabaseName);
                 $("#label_database-name").html(window.Server.App.LocalizationContent.DatabaseName);
             }
-            $(".db-name-info").html(isBoldBI ? window.Server.App.LocalizationContent.DatabaseInfoBI.format("Embedded BI") : window.Server.App.LocalizationContent.DatabaseInfoReports.format("Enterprise Reporting"));
+            $(".db-name-info").html(isBoldBI ? window.Server.App.LocalizationContent.DatabaseInfoBI.format(biProductname) : window.Server.App.LocalizationContent.DatabaseInfoReports.format(reportsProductname));
             if (!isSiteCreation) {
-                $(".db-name-info").html(isBoldBI ? window.Server.App.LocalizationContent.DatabaseInfoBI3 : window.Server.App.LocalizationContent.DatabaseInfoReports2.format("Enterprise Reporting", "report"));
+                $(".db-name-info").html(isBoldBI ? window.Server.App.LocalizationContent.DatabaseInfoBI3 : window.Server.App.LocalizationContent.DatabaseInfoReports2.format(reportsProductname, "report"));
                 prefillDbNames();
             }
             $("#advanced_tab_db_name").hide();

@@ -2,6 +2,9 @@
     Layout = null;
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
 }
 <!DOCTYPE html>
 <head>
@@ -13,12 +16,19 @@
     var validatePublishItemUrl = { "dashboard": "@Url.Action("ValidatePublishItem", "Publish")", "datasource": "@Url.Action("ValidateDatasourcePublishItem", "Publish")" };
     var getExternalSitesUrl = "@Url.Action("GetExternalSites", "Publish")";
     </script>
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/publish-dashboard.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/publish-dashboard.min.css" />
+        </environment>
+    }
     <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/publish-dashboard.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/publish-dashboard.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/publish-dashboard.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/publish-dashboard.min.js"></script>
     </environment>
 </head>

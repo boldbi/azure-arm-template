@@ -860,6 +860,7 @@ var Designer = {
                 widgetNotConfigured: "This widget has not been configured.",
                 noWidgetToPreview: "No Widgets to Preview",
                 noDataToBeDisplay: "There is no data to be displayed.",
+				customWidgetNotAvailable: "CustomWidget is not available to render with GUID",
 				autoWidgetDropErrorMsg: "widgets are not placed because the cell bounds of these widgets are already occupied or the given name or ID is incorrect",
 				autoWidgetDropErrorMode: "This method can only invoke the Bold BI initialization page."
             },
@@ -2069,7 +2070,7 @@ var Designer = {
                 fiscalYearChangeValidationMsg: "Changing the Fiscal Year will invalidate filters and sorting applied on this column.",
                 tableRemoveMessage: "Removing this table will affect the filter/parameters/expression columns referring to it. Do you still want to continue?",
                 createCategoryMessage: "*Please create a category to save the dashboard",
-                differentSchema: "The new schema differs from the existing one. If you click Yes means it will lose the previous widget and data and display the new connection table data. If you click No, means the data source will be reconnected with new credentials and the widget data will depend on the availability of the table and fields in the target connection.",
+                differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Otherwise, click on the 'x' icon to close the popup without taking any action.",
                 columnNotExist: "Some of the columns does not exist in new schema and it will affect the dashboard, if removed. Do you want to continue with the schema changes?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
@@ -2109,6 +2110,7 @@ var Designer = {
                 filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
                 joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
+				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
                 joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
@@ -5105,7 +5107,9 @@ var Designer = {
                 reset: "Reset",
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
 				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
-				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets."
+				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets.",
+				pagewiseOption: "Only export current view",
+				pagewiseExportInfo: "If this option is disabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export."
             },
             maximize: {
                 maximize: "Maximize",
@@ -5368,6 +5372,7 @@ var Designer = {
                 addRows: "Add more rows",
                 deleteRowsAlertMsg: "Please remove the widgets from the rows to be deleted and try again.",
                 performanceAlertMsg: "Adding more rows might affect the performance of the dashboard.",
+				addRowsLimitAlertMsg: "A maximum of 1,000 rows can be added.",
 				done: "Done"
             },
             initialFilter: {

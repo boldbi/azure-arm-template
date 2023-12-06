@@ -42,11 +42,11 @@ $(document).ready(function () {
     }
 
     if (isBoldReportsTenantType()) {
-        document.getElementById("branding-type").ej2_instances[0].value = "Enterprise Reporting";
+        document.getElementById("branding-type").ej2_instances[0].value = reportsProductname;
         $(".selector").addClass("selector-alignment");
     }
     else {
-        document.getElementById("branding-type").ej2_instances[0].value = "Embedded BI";
+        document.getElementById("branding-type").ej2_instances[0].value = biProductname;
         $(".selector").addClass("selector-alignment");
     }
 
@@ -510,10 +510,10 @@ function addTenant() {
     };
 
     var brandingType = getDropDownValue("branding-type");
-    if (brandingType == "Embedded BI") {
+    if (brandingType == biProductname) {
         brandingType = "boldbi";
     }
-    else if (brandingType == "Enterprise Reporting") {
+    else if (brandingType == reportsProductname) {
         brandingType = "boldreports"
     }
     postSystemSettingsData(systemSettingsDetails, azuredetails, selectedAdmins, tenantInfo, brandingType, true, userId);
@@ -811,16 +811,16 @@ function nextToDatabasePage() {
     $("#used-tenant-name").html($("#tenant-name").val());
 
     if (isBoldReportsTenantType()) {
-        var helpData = "Enterprise Reporting";
+        var helpData = reportsProductname;
         $("#used-tenant-identifier").html($(".url-part").text().replace(/\s/g, '').replace("i.e", ''));
-        $(".db-name-info").html(window.Server.App.LocalizationContent.DatabaseInfoReports.format("Enterprise Reporting"));
-        $(".tenant-sql-db-content").html(helpData);
+        $(".db-name-info").html(window.Server.App.LocalizationContent.DatabaseInfoReports.format(helpData));
+        $(".tenant-product-name").html(helpData);
     }
     else {
-        var helpData = "Embedded BI";
+        var helpData = biProductname;
         $("#used-tenant-identifier").html($(".url-part").text().replace(/\s/g, '').replace("i.e", ''));
-        $(".db-name-info").html(window.Server.App.LocalizationContent.DatabaseInfoBI.format("Embedded BI"));
-        $(".tenant-sql-db-content").html(helpData);
+        $(".db-name-info").html(window.Server.App.LocalizationContent.DatabaseInfoBI.format(helpData));
+        $(".tenant-product-name").html(helpData);
     }
 
     moveStepper("front", 2);

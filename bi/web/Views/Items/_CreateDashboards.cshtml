@@ -7,6 +7,9 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var themeAppearanceName = globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.ThemeAppearance : "light";
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
 }
 
 <!DOCTYPE html>
@@ -39,14 +42,22 @@
         var serverAppPathBase = "@GlobalAppSettings.HttpPathBase";
     </script>
 
-    <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.css" />      
+    <environment include="Development,CloudDevelopment">  
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
     </environment>
+
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css" />
+        </environment>
+    }
 </head>
 <body>
     <div id="create-dashboard-popup" class="fluent-popup display-none custom-bootstrap-styles custom-server-style">

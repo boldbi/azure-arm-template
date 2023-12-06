@@ -43,6 +43,34 @@
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tile-dashboards-page.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.min.js"></script>
     </environment>
+
+    <environment include="Development,CloudDevelopment">
+        <script>
+            var createItemMenuStyle = "@dashboardServerResourceUrl/cdn/css/create-item-menu.css?v=@ServerAppConfig.ProductVersion";
+            var addSampleItemStyle = "@dashboardServerResourceUrl/cdn/css/addsampleitem.css?v=@ServerAppConfig.ProductVersion";
+            var addCategoryStyle = "@dashboardServerResourceUrl/cdn/css/add-category.css?v=@ServerAppConfig.ProductVersion";
+            var publishDashboardStyle = "@dashboardServerResourceUrl/cdn/css/publish-dashboard.css?v=@ServerAppConfig.ProductVersion";
+            var dashboardSecurityStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-security.css?v=@ServerAppConfig.ProductVersion";
+            var itemVersionStyle = "@dashboardServerResourceUrl/cdn/css/itemversion.css?v=@ServerAppConfig.ProductVersion";
+            var createSlideshowStyle = "@dashboardServerResourceUrl/cdn/css/create-slideshow.css?v=@ServerAppConfig.ProductVersion";
+            var createDashboardStyle = "@dashboardServerResourceUrl/cdn/css/create-dashboard.css?v=@ServerAppConfig.ProductVersion";
+            var dashboardFeedbackStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css?v=@ServerAppConfig.ProductVersion";
+        </script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script>
+            var createItemMenuStyle = "@dashboardServerResourceUrl/cdn/css/create-item-menu.min.css?v=@ServerAppConfig.ProductVersion" ;
+            var addSampleItemStyle = "@dashboardServerResourceUrl/cdn/css/addsampleitem.min.css?v=@ServerAppConfig.ProductVersion";
+            var addCategoryStyle = "@dashboardServerResourceUrl/cdn/css/add-category.min.css?v=@ServerAppConfig.ProductVersion";
+            var publishDashboardStyle = "@dashboardServerResourceUrl/cdn/css/publish-dashboard.min.css?v=@ServerAppConfig.ProductVersion";
+            var dashboardSecurityStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-security.min.css?v=@ServerAppConfig.ProductVersion";
+            var itemVersionStyle = "@dashboardServerResourceUrl/cdn/css/itemversion.min.css?v=@ServerAppConfig.ProductVersion";
+            var createSlideshowStyle = "@dashboardServerResourceUrl/cdn/css/create-slideshow.min.css?v=@ServerAppConfig.ProductVersion";
+            var createDashboardStyle = "@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css?v=@ServerAppConfig.ProductVersion";
+            var dashboardFeedbackStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css?v=@ServerAppConfig.ProductVersion";
+        </script>
+    </environment>
+
     <script>
         var searchKey = '@Html.Raw(ViewBag.searchKey)';
         var getItemUrl = "@Url.Action("GetItems", "Dashboards")";
@@ -88,6 +116,7 @@
         var usageAnalytics = @Json.Serialize(usageAnalytics);
         var getDashboardEmbedCode = @Json.Serialize(getDashboardEmbedCode);
         var designerInstallationHelpUrl = "@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerInstallation))";
+        var usageAnalyticsHelpUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UsageAnalyticsDashboard)";
         var categoryList;
         if ('@categories' != '') {
             categoryList = @Html.Raw(categories);
@@ -941,7 +970,7 @@
 
                         <div class="dashboard-empty-message-div col-xs-12 ng-hide" ng-show="totalDashboardCount == 0">
                             <div class="empty-dashboard-image-div">
-                                <img class="empty-dashboard-image" src="@dashboardServerResourceUrl/cdn/css/images/dashboard-empty-state.svg" style="margin: 0 auto;/*! width: 100%; */">
+                                <img class="empty-dashboard-image" src="@dashboardServerResourceUrl/cdn/css/images/dashboard-empty-state.svg" style="margin: 0 auto;/*! width: 100%; */" loading="lazy">
                             </div>
                             <div ng-show="categoryList.length === 0 && activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UploadDrafts)">
                                 <span class="dashboard-empty-message" ng-show="!canCreateDashboard">@T["No dashboards have been shared with you."]</span>

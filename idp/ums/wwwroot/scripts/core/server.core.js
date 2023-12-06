@@ -1211,3 +1211,9 @@ $(document).on("click", "#copy-error-area", function (e) {
     $("#copy-error-area").tooltip("hide").attr("data-original-title", window.Server.App.LocalizationContent.Copied).tooltip("fixTitle").tooltip("show");
     setTimeout(function () { $("#copy-error-area").attr("data-original-title", window.Server.App.LocalizationContent.LinkCopy); $("#copy-error-area").tooltip(); }, 3000);
 });
+
+$('body').on('click', 'a', function () {
+    if (enableSameTabLinkTarget && $(this).attr('href') !== undefined && !($(this).attr("href").includes("redirect.boldbi.com"))) {
+        $(this).attr("target", "_self");
+    }
+});

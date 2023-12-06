@@ -1,5 +1,6 @@
 ﻿const additionalSpecialChar = /^[a-zA-Z_0-9`~!\$\^()=\-\.\{\} ]+$/;
-
+const specialChar = /^[a-zA-Z0-9-_]*$/;
+const specialCharWithHyphen = /^[a-zA-Z0-9-]*$/;
 $(document).ready(function () {
     addPlacehoder("#font-upload-dialog");
     var fontUploadDialog = new ejs.popups.Dialog({
@@ -54,7 +55,7 @@ $(document).ready(function () {
     dashboardThemeUploadDialog.appendTo("#dashboard-theme-upload-dialog");
 
     $.validator.addMethod("additionalSpecialCharValidation", function (value) {
-        if (additionalSpecialChar.test(value) || value === "") {
+        if (specialChar.test(value) || value === "") {
             return true;
         }
     }, window.Server.App.LocalizationContent.AvoidSpecailCharacters);
@@ -78,7 +79,6 @@ $(document).ready(function () {
         rules: {
             "filename": {
                 isRequired: true,
-                additionalSpecialCharValidation: true
             },
         },
         highlight: function (element) {
@@ -164,19 +164,25 @@ $(document).on("change", "#font-file", function (e) {
     var fontName = fileName.substring(0, fileName.indexOf('.'));
     $("#font-file-name").val(fileName);
     $("#font-name").val(fontName);
-    $(".validation").closest("div").removeClass("has-error");
-    $(".validation-message").css("display", "none");
-    $("#upload-font").attr("disabled", false);
+    $('#font-file-name').closest('div').removeClass("has-error");
+    $(".validation-message").html("");
+    $('#upload-font,  #font-name').attr("disabled", false);
     var fontFamily = document.getElementById("fontfamily").ej2_instances[0];
     var fontFamilyList = fontFamily.getItems();
-    for (var item = 0; item < fontFamilyList.length; item++) {
-        if (fontName === fontFamilyList[item].dataset.value.toLowerCase()) {
-            $('.validation').closest('div').addClass("has-error");
-            $(".validation-message").css("display", "block").text(window.Server.App.LocalizationContent.CssFileExist);
-            $('#upload-font').attr("disabled", true);
+    if (!specialChar.test(fontName)) {
+        $('#font-file-name').closest('div').addClass("has-error");
+        $("#invalid-file-name").html(window.Server.App.LocalizationContent.FileNameInvalid);
+        $('#upload-font, #font-name').attr("disabled", "disabled");
+    }
+    else {
+        for (var item = 0; item < fontFamilyList.length; item++) {
+            if (fontName === fontFamilyList[item].dataset.value.toLowerCase()) {
+                $('.validation').closest('div').addClass("has-error");
+                $(".validation-message").css("display", "block").text(window.Server.App.LocalizationContent.CssFileExist);
+                $('#upload-font').attr("disabled", true);
+            }
         }
     }
-
 });
 
 function onChangeTheme(defaultTheme) {
@@ -246,13 +252,19 @@ $(document).on("change", "#applicationtheme-file", function (e) {
     var themeName = fileName.substring(0, fileName.indexOf('.'));
     $("#application-theme-file-name").val(fileName);
     $('#upload-applicationtheme').attr("disabled", "disabled");
-
+    $(".validation-message").html("");
     var fileInput = document.getElementById('applicationtheme-file');
     var filePath = fileInput.value;
     var allowedExtensions = /(\.css)$/i;
+
     if (!allowedExtensions.exec(filePath)) {
         $('#applicationtheme-file').closest('div').addClass("has-error");
         $("#invalid-applicationthemefile-name").html(window.Server.App.LocalizationContent.CssFile);
+        $('#upload-applicationtheme,#applicationtheme-name').attr("disabled", "disabled");
+    }
+    else if (!specialChar.test(themeName)) {
+        $('#applicationtheme-file').closest('div').addClass("has-error");
+        $("#invalid-applicationthemefile-name").html(window.Server.App.LocalizationContent.FileNameInvalid);
         $('#upload-applicationtheme,#applicationtheme-name').attr("disabled", "disabled");
     }
     else {
@@ -264,7 +276,7 @@ $(document).on("change", "#applicationtheme-file", function (e) {
         $('#applicationtheme-name').closest('div').removeClass("has-error");
         $("#applicationtheme-name").val(themeName);
         for (var item = 0; item < applicationThemeList.length; item++) {
-            if (themeName === applicationThemeList[item].dataset.value) {
+            if (themeName.toLowerCase() === applicationThemeList[item].dataset.value) {
                 $('#applicationtheme-name').closest('div').addClass("has-error");
                 $("#invalid-applicationtheme-name").html(window.Server.App.LocalizationContent.CssFileExist);
                 $('#upload-applicationtheme').attr("disabled", "disabled");
@@ -288,6 +300,11 @@ $(document).on("change", "#dashboardtheme-file", function (e) {
         $('.upload-theme').attr("disabled", "disabled");
         $(".validation-message").html("");
     }
+    else if (!specialChar.test(themeName)) {
+        $('#dashboardtheme-file').closest('div').addClass("has-error");
+        $("#invalid-dashboardthemefile-name").html(window.Server.App.LocalizationContent.FileNameInvalid);
+        $('#upload-dashboardtheme, #dashboardtheme-name').attr("disabled", "disabled");
+    }
     else {
         var dashboardTheme = document.getElementById("dashboard-theme").ej2_instances[0];
         var dashboardThemeList = dashboardTheme.getItems();
@@ -298,7 +315,7 @@ $(document).on("change", "#dashboardtheme-file", function (e) {
         $(".validation-message").html("");
         $("#dashboardtheme-name").val(themeName);
         for (var item = 0; item < dashboardThemeList.length; item++) {
-            if (themeName === dashboardThemeList[item].dataset.value) {
+            if (themeName.toLowerCase() === dashboardThemeList[item].dataset.value) {
                 $('#dashboardtheme-name').closest('div').addClass("has-error");
                 $("#invalid-dashboardtheme-name").html(window.Server.App.LocalizationContent.CssFileExist);
                 $('#upload-dashboardtheme').attr("disabled", "disabled");
@@ -313,28 +330,44 @@ function keyvalidation(id) {
     var themename = id === "#applicationtheme-name" ? "application-theme" : "dashboard-theme";
     var theme = document.getElementById(themename).ej2_instances[0];
     var themeList = theme.getItems();
+    $(".validation-message").html("");
+    $('.upload-theme').attr("disabled", "disabled");
+
     if (name != "") {
-        for (var item = 0; item < themeList.length; item++) {
-            if (name.toLowerCase().trim() === themeList[item].dataset.value.toLowerCase() || name.toLowerCase().trim() == "light" || name.toLowerCase().trim() == "dark") {
-                $(id).closest('div').addClass("has-error");
-                $(invalid).html(window.Server.App.LocalizationContent.CssFileExist);
-                $('.upload-theme').attr("disabled", "disabled");
-                break;
-            }
-            else {
-                $(id).closest('div').removeClass("has-error");
-                $(".validation-message").html("");
-                $('.upload-theme').removeAttr("disabled");
+        if (!specialChar.test(name)) {
+            $(id).closest('div').addClass("has-error");
+            $(invalid).html(window.Server.App.LocalizationContent.FileNameInvalid);
+            $('.upload-theme').attr("disabled", "disabled");
+        }
+        else {
+            for (var item = 0; item < themeList.length; item++) {
+                if (name.toLowerCase().trim() === themeList[item].dataset.value.toLowerCase() || name.toLowerCase().trim() == "light" || name.toLowerCase().trim() == "dark") {
+                    $(id).closest('div').addClass("has-error");
+                    $(invalid).html(window.Server.App.LocalizationContent.CssFileExist);
+                    $('.upload-theme').attr("disabled", "disabled");
+                    break;
+                }
+                else if (name.trim() == '') {
+                    $(".upload-theme").attr("disabled", true);
+                }
+                else {
+                    $(id).closest('div').removeClass("has-error");
+                    $(".validation-message").html("");
+                    $('.upload-theme').removeAttr("disabled");
+                }
             }
         }
     }
+    else {
+        $('.upload-theme').attr("disabled", "disabled");
+    }
 }
 
-$(document).on("keyup", "#applicationtheme-name", function () {
+$(document).on("keydown keyup", "#applicationtheme-name", function () {
     keyvalidation("#applicationtheme-name");
 });
 
-$(document).on("keyup", "#dashboardtheme-name", function () {
+$(document).on("keydown keyup", "#dashboardtheme-name", function () {
     keyvalidation("#dashboardtheme-name");
 });
 
@@ -344,27 +377,14 @@ function uploadformValidation() {
 
 $(document).on("keydown keyup", "#font-name", function () {
     if ($("#font-name").val().trim() == '') {
-        $("#upload-font").attr("disabled", true);
+        $('#upload-font').attr("disabled", "disabled");
+    }
+    else if (!specialChar.test($("#font-name").val())) {
+        $('#font-name').closest('div').addClass("has-error");
+        $("#invalid-font-name").html(window.Server.App.LocalizationContent.FileNameInvalid);
+        $('#upload-font').attr("disabled", "disabled");
     }
     else {
         $("#upload-font").removeAttr("disabled");
-    }
-});
-
-$(document).on("keydown keyup", "#applicationtheme-name", function () {
-    if ($("#applicationtheme-name").val().trim() == '') {
-        $("#upload-applicationtheme").attr("disabled", true);
-    }
-    else {
-        $("#upload-applicationtheme").removeAttr("disabled");
-    }
-});
-
-$(document).on("keydown keyup", "#dashboardtheme-name", function () {
-    if ($("#dashboardtheme-name").val().trim() == '') {
-        $("#upload-dashboardtheme").attr("disabled", true);
-    }
-    else {
-        $("#upload-dashboardtheme").removeAttr("disabled");
     }
 });

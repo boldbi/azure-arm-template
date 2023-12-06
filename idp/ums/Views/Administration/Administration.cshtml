@@ -4,6 +4,14 @@
     var defaultLanguageText = ViewBag.SelectedLanguage != null && ViewBag.SelectedLanguage.Text != null ? ViewBag.SelectedLanguage.Text : string.Empty;
     var defaultLanguageValue = ViewBag.SelectedLanguage != null && ViewBag.SelectedLanguage.Value != null ? ViewBag.SelectedLanguage.Value : string.Empty;
     var isSecureConnection = GlobalAppSettings.SystemSettings.IsSecureConnection;
+    var mailAccount = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = T["SMTP"].Value, Selected = GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAccount == MailAccount.SMTP },
+        new SelectListItem { Value = "1", Text = T["Microsoft 365"].Value, Selected = GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAccount == MailAccount.Microsoft365 }
+    };
+
+    var emailAccountText = GlobalAppSettings.SystemSettings.MailSettings != null ? GlobalAppSettings.GetDescription(GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAccount) : GlobalAppSettings.GetDescription(MailAccount.SMTP);
+    var emailAccountValue = GlobalAppSettings.SystemSettings.MailSettings != null ? ((int)GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAccount).ToString() : ((int)MailAccount.SMTP).ToString();
     var protocolTypes = new List<SelectListItem>
 {  new SelectListItem
     {
@@ -65,7 +73,11 @@
         if (baseRootUrl.toLowerCase() === "/")
             baseRootUrl = "";
         var isSiteCreation = false;
+        var emailAccountText = "@emailAccountText";
+        var emailAccountValue = "@emailAccountValue";
         var isSecureConnection = "@isSecureConnection.ToString()" == "True";
+        var biProductname = "@AppBranding.Bold.ProductName";
+        var reportsProductname = "@AppBranding.BoldReports.ProductName";
 
         $(function() {
             if ("@ViewBag.scheme.ToLower()" != "null") {

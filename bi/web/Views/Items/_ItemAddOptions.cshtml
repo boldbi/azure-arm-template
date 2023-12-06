@@ -9,6 +9,9 @@
     var showImport = model[ItemType.Dashboard] && requestUrl.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards") && isNotHomepage;
     var isDashboardsPage = ViewBag.IsDashboardsPage != null && ViewBag.IsDashboardsPage;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var absoluteUrl = requestUrl.AbsolutePath.ToString().ToLower();
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
 }
 
 <!DOCTYPE html>
@@ -33,13 +36,21 @@
 	        var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
     </script>
     <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
     </environment>
+
+    @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0))
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.min.css" />
+        </environment>
+    }
 	</head>
 	<body>
     @if (model[ItemType.Category])

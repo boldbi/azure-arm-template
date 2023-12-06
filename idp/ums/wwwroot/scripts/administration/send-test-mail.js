@@ -83,7 +83,7 @@ function testMailTrigger() {
                     {
                         'click': function (e) {
                             var authenticationType = parseInt($("#authentication-type input[type='radio']:checked").val());
-                            var mailSettingsData = {
+                            var mailSettings = {
                                 MailSettingsAddress: $("#mail-user-name").val(),
                                 MailSettingsAuthType: authenticationType,
                                 MailSettingsUserName: authenticationType === 1 ? $("#sender-user-name").val() : "",
@@ -91,7 +91,17 @@ function testMailTrigger() {
                                 MailSettingsHost: $("#smtp-address").val(),
                                 MailSettingsSenderName: $("#mail-display-name").val(),
                                 MailSettingsPort: parseInt($("#port-number").val()),
-                                MailSettingsIsSecureAuthentication: $("#secure-mail-authentication").is(":checked")
+                                MailSettingsIsSecureAuthentication: $("#secure-mail-authentication").is(":checked"),
+                                MachineName: $("#machineName").val(),
+                                HostDomain: $("#hostDomain").val(),
+                                MailSettingsAccount: document.getElementById("mail-account").ej2_instances[0].value != undefined && !isNullOrWhitespace(document.getElementById("mail-account").ej2_instances[0].value) ? parseInt(document.getElementById("mail-account").ej2_instances[0].value) : 0,
+                                MailSettingsTenantId: $("#tenant-id").val(),
+                                MailSettingsClientId: $("#client-id").val(),
+                                MailSettingsClientSecret: $("#client-secret").val(),
+                            };
+
+                            var mailSettingsData = {
+                                MailSettings: mailSettings
                             };
 
                             if ($("#test-mail-form").valid()) {

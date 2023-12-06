@@ -55,8 +55,30 @@ else
     <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
 }
 
+@if (isMultiTab)
+{
+    <environment include="Development,CloudDevelopment">
+        <script>
+            var multiTabDashboardOptionStyle = "@dashboardServerResourceUrl/cdn/css/designer/dashboard-options.css?v=@ServerAppConfig.ProductVersion";
+        </script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script>
+            var multiTabDashboardOptionStyle = "@dashboardServerResourceUrl/cdn/css/designer/dashboard-options.min.css?v=@ServerAppConfig.ProductVersion";
+        </script>
+    </environment>
+}
+
 <script>
     var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
+    var isMultiTab = @Json.Serialize(isMultiTab);
+
+    if (isMultiTab) {
+        var preloadLink = document.createElement("link");
+        preloadLink.rel = "stylesheet";
+        preloadLink.href = multiTabDashboardOptionStyle;
+        document.head.appendChild(preloadLink);
+    }
 </script>
 @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
 <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.common.all.min.js"></script>

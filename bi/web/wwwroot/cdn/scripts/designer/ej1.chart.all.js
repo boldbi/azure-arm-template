@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 6.17.13
+*  version : 6.18.11
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -16062,11 +16062,12 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
         chart._trigger("displayTextRendering", commonEventArgs);
         var dataLabelOffset = (marker.dataLabel.offset.y==undefined) ? marker.dataLabel.offset : marker.dataLabel.offset.y;
         var xval = marker.dataLabel.offset.x;
+        var offset = textPosition == "top" && series.type.toLowerCase().indexOf("100") != -1 ? -10 : dataLabelOffset;
 		var textOffset = BoldBIDashboard.EjSvgRender.utils._measureText(commonEventArgs.data.text, null, labelfont);
         if (textPosition == 'bottom')
               commonEventArgs.data.location.y = commonEventArgs.data.location.y + dataLabelOffset;
         else
-              commonEventArgs.data.location.y = commonEventArgs.data.location.y - dataLabelOffset;
+              commonEventArgs.data.location.y = commonEventArgs.data.location.y - offset;
         if (xval)                           
               commonEventArgs.data.location.x = commonEventArgs.data.location.x + xval;
                           

@@ -6,6 +6,9 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var absoluteUrl = new Uri(Context.Request.GetDisplayUrl()).AbsolutePath.ToString().ToLower();
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
 }
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -24,14 +27,22 @@
 @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
 <environment include="Development,CloudDevelopment">
     <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/addsampleitem.css" />
     <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/addsampleitem.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
     <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/addsampleitem.min.css" />
     <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/addsampleitem.min.js"></script>
 </environment>
+
+@if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0))
+{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/addsampleitem.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/addsampleitem.min.css" />
+    </environment>
+}
 
 @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
@@ -94,7 +105,7 @@
                                     </div>
                                     <div class="dashboard-empty-message-div col-xs-12 ng-hide" ng-show="countFilterObjects(result, query) == 0">
                                         <div class="empty-dashboard-image-div">
-                                            <img class="empty-dashboard-image" src="@dashboardServerResourceUrl/cdn/css/images/dashboard-empty-state-60x60.svg" style="margin: 0 auto;/*! width: 100%; */">
+                                            <img class="empty-dashboard-image" src="@dashboardServerResourceUrl/cdn/css/images/dashboard-empty-state-60x60.svg" style="margin: 0 auto;/*! width: 100%; */" loading="lazy">
                                         </div>
                                         <div>
                                             <span class="dashboard-empty-message">@T["No dashboards were found that match your search."]<br />@T["Try modifying your search or filters."]</span>

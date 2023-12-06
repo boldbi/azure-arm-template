@@ -7,8 +7,7 @@
     var blobServiceEndpoint = GlobalAppSettings.Configuration["IdP:AzureBlobServiceEndpoint"];
     var containerName = GlobalAppSettings.Configuration["IdP:AzureBlobContainerName"];
     var hasDRMConfiguration = ViewBag.HasDRMConfiguration ? "true" : "false";
-    var productName = ViewBag.TenantType == TenantType.BoldBIOnPremise ? "Embedded" : "On-Premise";
-    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? "Embedded BI" : "Enterprise Reporting";
+    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
     var pathbase = Context.Request.PathBase;
     var serverUserHelp = string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2} to connect and use the database."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration, ViewBag.TenantType) + "'>", "</a>", helpLinkData);
     var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
@@ -81,6 +80,8 @@
         var isSiteCreation = false;
         var isSimpleModeValue = "true";
         var actionType = "";
+        var biProductname = "@AppBranding.Bold.ProductName";
+        var reportsProductname = "@AppBranding.BoldReports.ProductName";
 
         $(document).ready(function () {
             $(document).click(function (e) {
@@ -122,7 +123,7 @@
                     </div>
                     <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5" id="system-settings-welcome-container">
                         <div class="welcome-content">
-                            <span class="first-content">@Html.Raw(string.Format(T["Welcome to {0} {1} Server"].Value, "<span>" + displayName + "</span>", productName))
+                            <span class="first-content">@Html.Raw(string.Format(T["Welcome to {0} Enterprise Server"].Value, "<span>" + displayName + "</span>"))
                             </span>
                             <span class="second-content">
                                 @T["To proceed with the installation, please activate your account."]
