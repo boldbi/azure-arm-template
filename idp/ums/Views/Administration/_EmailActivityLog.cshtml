@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "EmailActivityLogs";
+    var isLogsTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "logs") ? "active" : string.Empty;
+
+}
+<script>
+     var filterEmailLogsUrl = "@Url.Action("GetEmailLogs", "Administration")";
+    var emailActivityLogDateFormat = "@GlobalAppSettings.SystemSettings.DateFormat";
+    var emailActivityLogTimeFormat = "@GlobalAppSettings.SystemSettings.TimeFormat";
+</script>
+<div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 email-page-body @isLogsTab" id="logs">
+    <div class="filter-section">
+        <div class="pull-right filter-alignment">
+            <div class="col-sm-3 col-xs-3 date-picker no-padding">
+                <input type="text" name="email-log-filter-date-range" class="form-control full-width" id="datePicker">
+            </div>
+            <div class="dropdown email-settings-drop-down pull-left col-xs-12">
+                @Html.DropDownList("emailEvent", new SelectList(ViewBag.EmailEvent, "Value", "Text"), new { id = "email-event", @class = "selectpicker form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["Event"].Value, data_live_search = "true", data_live_search_placeholder = T["Search"].Value })
+            </div>
+            <span>
+                <button type="button" id="apply-button" class="link-button btn pull-left">@T["Apply"]</button>
+            </span>
+            <span id="reset">@T["Clear"]</span>
+            <span class="separator pull-left"></span>
+            <span class="su su-sync pull-left" id="refresh"></span>
+        </div>
+        <div class="pull-left">
+            <div id="search-area" class="pull-right no-margin">
+                <input type="text" class="pull-left" id="search-event" placeholder="@T["Search"]" />
+                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+            </div>
+        </div>
+    </div>
+    <div id="emailActivityLogGrid" class="col-lg-12 no-padding dialog-override">
+    </div>
+    <script type="text/x-jsrender" id="emaillogoptions">
+        <span title="View" data-toggle="dropdown">
+            <a href="javascript:void(0);" class="email-log-info" data-email>
+                <span>@T["View"]</span>
+            </a>
+        </span>
+    </script>
+ </div>

@@ -1,0 +1,128 @@
+﻿@{
+    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
+    var serverUserHelp = string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2} to connect and use the database."].Value, "<a target='_blank' href='" + (await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration, ViewBag.TenantType)) + "'>", "</a>", helpLinkData);
+    var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
+}
+<div class="system-settings-page-container col-lg-5 col-md-5 col-sm-5 col-xs-5 display-none" id="system-settings-db-selection-container">
+
+    <div class="system-settings-db-selection-field">
+        @await Html.PartialAsync("~/Views/ServerConfiguration/_StartupTab.cshtml")
+        <input type="hidden" name="Ums_table_prefix" id="tenant-table-prefix" value="@DbTablePrefixes.TenantManagement" />
+        @if (ViewBag.AppConfigure == "true")
+        {
+            <div class="text-info bg-info client-config-info">@Html.Raw(string.Format(T["To configure {0}{1}{2} you need to configure TenantServer first."].Value, "<b>", ViewBag.AppName, "</b>"))
+            </div>
+        }
+        <div class="database-types">
+            <div class="center-align">
+                <div id="database-type-dropdown" class="system-settings-startup-page-fields txt-holder database-dropdown-margin">
+                    <select id="database-type" class="system-settings-startup-page-fields db-fields" data-width="100%">
+                        <option class="no-margin-dropdown-ul" value="MSSQL">@T["Microsoft SQL Server / Azure SQL"]</option>
+                        @if (ViewBag.IsNpgsqlExist)
+                        {
+                            <option class="no-margin-dropdown-ul" value="PostgreSQL">@T["PostgreSQL"]</option>
+                        }
+                        else
+                        {
+                            <option class="no-margin-dropdown-ul" title="@T["Please install Npgsql client library to connect with PostgreSQL database."]" value="PostgreSQL" disabled>@T["PostgreSQL"]</option>
+                        }
+
+                        <option class="no-margin-dropdown-ul" value="MySQL">@T["MySQL"]</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+       
+        <form id="db-content-holder" class="col-md-12 no-padding display-none content-display text-wrap show-sql-content" autocomplete="off">
+            <div class="txt-holder center-align">
+                <input type="text" id="txt-servername" name="servername" placeholder="@T["Server name"]">
+                <span class="startup-validation validation-txt-errors"></span>
+            </div>
+            <label class="field-label auth-type radio-label">@T["Authentication Type"]</label>
+            <div class="txt-holder center-align auth-type col-xs-12 radio-padding">
+
+                <div class="first-radio-align col-xs-6 radio-padding">
+                    <input type="radio" id="check-sql" class="radio-button" name="checkWindows" />
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Use SQL username and password to set up {0}{1}{2}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>"))
+                    </div>
+
+                </div>
+                <div class="second-radio-align radio-padding col-xs-6">
+                    <input type="radio" id="check-windows" class="radio-button" name="checkWindows" />
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to configure {2}{3}{4} with Windows Authentication."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.WindowsAuthentication) + "'>", "</a>", "<span class='tenant-product-name'>", helpLinkData, "</span>"))
+                    </div>
+
+                </div>
+            </div>
+            <div class="txt-holder center-align port-num hidden">
+                <input type="text" id="txt-portnumber" name="portnumber" class="" placeholder="@T["Port number"]" />
+
+                <span class="startup-validation validation-txt-errors"></span>
+
+                <div id="txt-portnumber-info" class="info-content txt-box-info"></div>
+            </div>
+            <div class="txt-holder center-align maintenancedb hidden">
+                <input type="text" id="maintenance-db" name="maintenancedatabase" class="" placeholder="@T["Maintenance Database"]" />
+
+                <div class="info-content txt-box-info">@T["The maintenance DB is a default database for users and applications to connect to. On PostgreSQL 8.1 and above, the maintenance DB is normally called ‘postgres’, and on earlier versions, ‘template1’."]</div>
+                <span class="startup-validation validation-txt-errors"></span>
+            </div>
+            <div class="txt-holder center-align windows-disabled">
+                <input type="text" id="txt-login" name="username" class="" placeholder="@T["Username"]" />
+                <span class="startup-validation validation-txt-errors"></span>
+
+                <div class="info-content txt-box-info">
+                    @Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2}{3}{4} to connect and use the database."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DatabasePermissions, ViewBag.TenantType) + "'>", "</a>", "<span class='tenant-product-name'>", helpLinkData, "</span>"))
+               </div>
+            </div>
+            <div class="txt-holder center-align windows-disabled">
+                <input type="text" class="display-none">
+                <input type="password" class="fake-password" name="fake_passwordfield_to_turnoff_autocomplete">
+                <input type="password" id="txt-password-db" name="password" class="" placeholder="@T["Password"]" autocomplete="off" />
+                <div class="su su-show show-hide-password show-hide-password-ej2" data-toggle="tooltip" data-original-title="@T["Click to view"]"></div>
+                <div class="startup-validation validation-txt-errors" id="confirm-password"></div>
+            </div>
+            <div class="txt-holder center-align db-selection-radio col-xs-12 radio-padding">
+                <div class="new-db col-xs-6 radio-padding">
+                    <input type="radio" id="new-db" class="radio-button" name="databaseType" />
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Create a new database(s) for {0}{1}{2}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>"))
+                    </div>
+                </div>
+                <div class="existing-db col-xs-6 radio-padding">
+                    <input type="radio" id="existing-db" class="radio-button" name="databaseType" />
+                    <div class="info-content radio-info">
+                        @Html.Raw(string.Format(T["Use the existing database to deploy the site and make sure it was created using the {0}{1}{2} {3}supported collation{4}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>", "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DefaultCollation, ViewBag.TenantType) + "'>", "</a>"))
+                    </div>
+                </div>
+            </div>
+            @await Html.PartialAsync("~/Views/ServerConfiguration/_DatabaseName.cshtml")
+            <div class="txt-holder center-align additonal-parameters">
+                <input type="text" id="additional-parameter" name="additionalparameter" class="" placeholder="@T["Additional Parameters"]" />
+                <span class="startup-validation validation-txt-errors"></span>
+                <span class="database-error validation-txt-errors"></span>
+                <div class="info-content txt-box-info note-additional-parameter">
+                    @Html.Raw(string.Format(T["Additional parameters override input values in the above form. Please refer to {0}this{1} documentation for connection string parameters."].Value, "<a target='_blank' href='" + sqlParameter + "'>", "</a>"))
+                </div>
+            </div>
+            <div class="secure-sql selfhosted center-align txt-holder">
+                @Html.CheckBox("secure-sql-connection", false, new { @class = "material-checkbox" })
+                @Html.Hidden("secure-sql-connection")
+                <label for="secure-sql-connection" class="">@T["Enable SSL"]</label>
+                <div class="info-content check-box-info"> @T["Enable this if the database server is SSL configured. It uses SSL encryption for all data transmitted between the client and the server."]</div>
+            </div>
+        </form>
+
+        <div class="btn-holder center-align">
+            @await Html.PartialAsync("~/Views/ServerConfiguration/_SubmitData.cshtml")
+            <button type="button" id="db-config-submit" class="proceed-button display-none content-display">@T["Next"]</button>
+            <button type="button" id="sql-existing-db-submit" class="proceed-button display-none content-display">@T["Next"]</button>
+        </div>
+    </div>
+</div>
+<div id="messageBox">
+    <div class="message-box-close"></div>
+    <div class="message-content text-center"></div>
+</div>

@@ -1,0 +1,198 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["User Permissions"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePermissions);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.BackIconRedirectionUrl = Url.Action("Index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+}
+
+@model List<ItemDetail>
+
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/permissionpage.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/permissionpage.min.css" />
+    </environment>
+    <script>
+        var addUserPermissionViewIframeUrl = "@Url.Action("AddUserPermissionView", "permission")";
+        var getPermissionEntityUrl = "@Url.Action("GetPermissionEntity", "permission")";
+        var getItemScopeUrl = "@Url.Action("GetItemScope", "permission")";
+        var addnewuserpermissionUrl = "@Url.Action("addnewpermission", "permission")";
+        var deleteuserPermissionUrl = "@Url.Action("DeleteUserPermission", "permission")";
+        var resourceManagePermissionUrl = "@Url.Action("IsUserHasResourceManagePermission", "permission")";
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/permissionpage.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/permissionpage.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Manage Permissions"] }, { "DisplayNameInHeader", @ViewBag.DisplayName } })
+        </div>
+        <div id="user-header" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <input type="button" title="@T["Add Permission to the user"]" id="add-permission-button-top" value="@T["Add Permission"]" class="primary-button app-btn-primary pull-right" />
+                    @if (!ViewBag.IsAdUser)
+                    {
+                        <a type="button" class="link-button app-btn-link pull-right margin-right" href="@Url.Action("ViewProfile", "UserManagement")?id=@ViewBag.UserId">@T["View Profile"]</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="base-container" class="bi-page-container user-permission col-xs-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div class="active-directory-form col-xs-12 bi-page-body">
+                <div class="col-md-12 col-xs-12 col-sm-12 permission-grid">@await Html.PartialAsync("_PermissionGrid", Model)</div>
+                <div class="col-md-3">
+                    <div id="add-permission" class="no-padding" style="display:none">
+                        @await Html.PartialAsync("_AddUserPermission")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="user-id-hidden" value="@Context.Request.Query["userid"]" />
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+
+
+    <script type="text/x-jsrender" id="commandstemplate">
+        <div>
+            {{if IsUserPermission && CanDelete}}
+            <span><a href="javascript:void(0);" class="delete-permission" data-permission-id="{{:PermissionId}}">@T["Remove"]</a></span>
+            {{else}}
+            <span title="{{:GroupName}}" data-toggle="tooltip"><a href="@Url.Action("grouppermission","permission")?groupId={{:TargetId}}">{{:GroupName}}</a></span>
+            {{/if}}
+        </div>
+    </script>
+    <script type="text/x-jsrender" id="accessmodetemplate">
+        <div class="item-name" title="{{:PermissionAccessDescription}}" data-toggle="tooltip">{{:PermissionAccessDescription}}</div>
+    </script>
+    <script type="text/x-jsrender" id="scopetemplate">
+        <div class="grid-content" title="{{:ItemName}}" data-toggle="tooltip">{{:ItemName}}</div>
+    </script>
+    <script type="text/x-jsrender" id="entitytemplate">
+        <div class="grid-content" title="{{:PermissionEntityDescription}}" data-toggle="tooltip">{{:PermissionEntityDescription}}</div>
+    </script>
+    <script type="text/x-jsrender" id="accessmodeheader">
+        <div class="item-name">@T["Access Mode"]</div>
+    </script>
+    <script type="text/x-jsrender" id="entityheader">
+        <div class="item-header">@T["Entity"]</div>
+    </script>
+    <script type="text/x-jsrender" id="scopeheader">
+        <div class="item-header">@T["Scope"]</div>
+    </script>
+    <script type="text/x-jsrender" id="actionsheader">
+        <div class="item-header">@T["Actions"]</div>
+    </script>
+    <script>
+        var userId = @Context.Request.Query["userid"]
+
+            $(document).ready(function () {
+                $("#add-permission").ejDialog({
+                    width: "800px",
+                    showOnInit: false,
+                    allowDraggable: true,
+                    enableResize: false,
+                    showHeader: false,
+                    height: "537px",
+                    title: "@T["Add New Permission"]",
+                    enableModal: true,
+                    closeOnEscape: true,
+                    close: ''
+                });
+                var addPermissionWaitingPopupTemplateId = createLoader("add-permission_wrapper");
+                $("#add-permission_wrapper").ejWaitingPopup({ template: $("#" + addPermissionWaitingPopupTemplateId) });
+                GridLocalization(window.Server.App.Localization.PermissionRecordsEmpty);
+                $("#Grid").ejGrid({
+                    dataSource: ej.DataManager({ url: "@Url.Action("GetAllUserPermission", "permission")?userId=" + userId + "&&requiresCounts=true", adaptor: "UrlAdaptor" }),
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    allowSorting: true,
+                    enableAltRow: false,
+                    allowSearching: true,
+                    allowSelection: true,
+                    rowHover: "HoverEf",
+                    pageSettings: { pageSize: 10 },
+                    actionBegin: "fnOnUserPermissionActionBegin",
+                    actionComplete: function (args) {
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                        if (args.model.currentViewData.length == 0) {
+                            rowBound();
+                        }
+
+                        showOrHideGridPager("#Grid");
+                    },
+                    rowDataBound: function () {
+                        var height = $(".e-gridcontent").height();
+                        if (height != null) {
+                            rowBound();
+                        }
+                    },
+                    dataBound: function (args) {
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    },
+                    enableRowHover: true,
+                    columns: [
+                        {
+                            allowSorting: true,
+                            headerText: "@T["Access Mode"]",
+                            width: 80,
+                            field: "PermissionAccessDescription",
+                            templateID: "#accessmodetemplate",
+                            headerTemplateID: "#accessmodeheader"
+                        },
+                        {
+                            field: "PermissionEntityDescription",
+                            allowSorting: true,
+                            headerText: "@T["Entity"]",
+                            templateID: "#entitytemplate",
+                            headerTemplateID: "#entityheader",
+                            width: 80
+                        },
+
+                        {
+                            field: "ItemName",
+                            allowSorting: true,
+                            headerText: "@T["Scope"]",
+                            templateID: "#scopetemplate",
+                            headerTemplateID: "#scopeheader",
+                            width: 80
+                        },
+                        {
+
+                            template: true,
+                            allowSorting: false,
+                            headerText: "@T["Actions"]",
+                            templateID: "#commandstemplate",
+                            headerTemplateID: "#actionsheader",
+                            width: (window.innerWidth > 1024) ? 40 : 80
+                        }
+                    ]
+
+                });
+            });
+    </script>
+    @await Html.PartialAsync("../Permission/_DeletePermission")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

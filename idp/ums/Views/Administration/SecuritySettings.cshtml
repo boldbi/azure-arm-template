@@ -1,0 +1,101 @@
+@using Syncfusion.Server.Base.DataClasses.Core;
+@{
+    ViewBag.Title = T["Security"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var isPasswordPolicyTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "user-account") ? "active" : string.Empty;
+    var isCSPTab = (Context.Request.Query["view"] == "csp-settings") ? "active" : string.Empty;
+    var isXFrameTab = (Context.Request.Query["view"].ToString() == "x-frame-options") ? "active" : string.Empty;
+    var isCookiesTab = (Context.Request.Query["view"].ToString() == "cookie-options") ? "active" : string.Empty;
+    var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
+    var styleSources = contentSecurityPolicySettings.StyleSource != null ? contentSecurityPolicySettings.StyleSource.Split(',') : contentSecurityPolicySettings.StyleSource;
+    var scriptSources = contentSecurityPolicySettings.ScriptSource != null ? contentSecurityPolicySettings.ScriptSource.Split(',') : contentSecurityPolicySettings.ScriptSource;
+    var fontSources = contentSecurityPolicySettings.FontSource != null ? contentSecurityPolicySettings.FontSource.Split(',') : contentSecurityPolicySettings.FontSource;
+    var imgSources = contentSecurityPolicySettings.ImageSource != null ? contentSecurityPolicySettings.ImageSource.Split(',') : contentSecurityPolicySettings.ImageSource;
+    var connectSources = contentSecurityPolicySettings.ConnectSource != null ? contentSecurityPolicySettings.ConnectSource.Split(',') : contentSecurityPolicySettings.ConnectSource;
+    var frameSources = contentSecurityPolicySettings.FrameSource != null ? contentSecurityPolicySettings.FrameSource.Split(',') : contentSecurityPolicySettings.FrameSource;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/security-settings.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script src="~/bundles/js/security-settings.js" asp-append-version="true"></script>
+    <script>
+        var updateSecuritySettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
+        var updateXFrameHeaderSettingsUrl = "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
+        var updateCSPSettingsUrl = "@Url.Action("UpdateCSPSettings", "Administration")";
+        var updateCookieSettingsUrl = "@Url.Action("UpdateCookieSettings", "Administration")";
+        var passwordLength = "@GlobalAppSettings.SystemSettings.PasswordSettings.MinimumLength";
+         var styleSourcesList = @Html.Raw(Json.Serialize(styleSources));
+        var scriptSourcesList = @Html.Raw(Json.Serialize(scriptSources));
+        var fontSourcesList = @Html.Raw(Json.Serialize(fontSources));
+        var imgSourcesList = @Html.Raw(Json.Serialize(imgSources));
+        var connectSourcesList = @Html.Raw(Json.Serialize(connectSources));
+        var frameSourcesList = @Html.Raw(Json.Serialize(frameSources));
+        var loginUrl = "@GlobalAppSettings.SystemSettings.InternalAppUrls.Idp" + "/accounts/logout" + "?returnUrl=" +"@Url.Action("SecuritySettings", "Administration")";
+    </script>
+}
+
+@section MainSection{
+    
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment">
+        <div class="col-md-12 admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">@T["Security"]</h1>
+                    <h5 class="page-description">@T["Configure application and user account security policies."]</h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+        <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+                    <button class="secondary-button pull-right" id="cancel-settings">@T["Cancel"]</button>
+                    <button type="button" title="" id="update-password-settings" class="primary-button pull-right">@T["Save"]</button>
+                    <button type="button" title="" id="update-cookie-settings" class="primary-button pull-right">@T["Save"]</button>
+                    <button type="button" title="" id="update-csp-settings" class="primary-button pull-right">@T["Save"]</button>
+                    <button type="button" title="" id="update-x-frame-options-settings" class="primary-button pull-right">@T["Save"]</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 no-padding security-page-nav-bar">
+            <ul id="security-settings-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isPasswordPolicyTab">
+                    <a href="#password-policy" id="password-policy-tab" aria-controls="password-policy-tab" role="tab" data-toggle="tab">@T["User Account"]</a>
+                </li>
+                <li role="presentation" class="@isCookiesTab">
+                    <a href="#cookie-options" id="cookie-options-tab" aria-controls="cookie-options-tab" role="tab" data-toggle="tab">@T["Authentication Cookie Options"]</a>
+                </li>
+                <li role="presentation" class="@isCSPTab">
+                    <a href="#csp" id="csp-tab" aria-controls="csp-tab" role="tab" data-toggle="tab">@T["Content Security Policy"]</a>
+                </li>
+                <li role="presentation" class="@isXFrameTab">
+                    <a href="#x-frame-options" id="x-frame-options-tab" aria-controls="x-frame-options-tab" role="tab" data-toggle="tab">@T["X-Frame-Options"]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="security-settings-container" role="tabpanel" class="col-xs-12 admin-page-content-container admin-page-container-with-tab">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div class="tab-content col-xs-12 no-padding">
+                <div role="tabpanel" class="tab-pane security-page-body @isPasswordPolicyTab" id="password-policy">
+                    <div class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+                        @await Html.PartialAsync("_PasswordPolicy")
+                        @await Html.PartialAsync("_LockAccount")
+                    </div>
+
+                    
+                </div>
+                @await Html.PartialAsync("_CookieSettings")
+                @await Html.PartialAsync("_CspSettings")
+                @await Html.PartialAsync("_XFrameOptionsSettings")
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

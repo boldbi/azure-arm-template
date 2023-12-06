@@ -1,0 +1,188 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var baseUrl = ViewBag.BaseUrl;
+    var dashboardServiceUrl = globalAppSettings.SystemSettings.InternalAppDataServiceUrl;
+    var dashboardServiceResourceUrl = globalAppSettings.SystemSettings.DashboardServiceResourceUrl;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var isUseCdn = globalAppSettings.SystemSettings.UseCDN;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+}
+<head>
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-add-item.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.css" />
+    </environment>
+    <environment exclude="">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-add-item.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewer/themes/default-theme/ej.dashboardviewer.all.min.css" />
+    </environment>
+
+    @*@if (isDebug)
+        {
+            <link rel="stylesheet" type="text/css" href="@(dashboardServiceResourceUrl + "/themes/default-theme/ej.dashboardviewer.all.min.css")" />
+        }*@
+    <environment include="">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepage-add-item-v1-dependency.js"></script>
+        @*<script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-common-all.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.js"></script>*@
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepage-add-item-v1-utilities.js"></script>
+    </environment>
+    <environment exclude="">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepage-add-item-v1-dependency.min.js"></script>
+        @*<script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-common-all.min.js"></script>
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/dashboard-viewer-v1-all.min.js"></script>*@
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewer/homepage-add-item-v1-utilities.min.js"></script>
+    </environment>
+
+    @*@if (isDebug)
+        {
+            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.ejcommon.all.min.js")"></script>
+            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.viewer.all.min.js")"></script>
+        }*@
+    <script type="text/javascript">
+        var baseUrl = "@baseUrl";
+        var dashboardServiceUrl = "@dashboardServiceUrl";
+        var dashboardServerUrl = "@globalAppSettings.SystemSettings.BaseUrl";
+        var accessToken = "@ViewBag.AccessToken";
+        var getPreviewItemUrl = "@Url.Action("previewitem", "boards")";
+        var widgetsUrl = "@Url.Action("getitems","widgets")";
+        var dashboardsUrl = "@Url.Action("getitemsforpinboard","boards")";
+        var pinWidgetUrl = "@Url.Action("pinitemtohomepage", "boards")";
+        var getHomepageDetails = "@Url.Action("gethomepagedetails", "boards")";
+        var dragAndDropUrl = "@Url.Action("ondraganddrop","boards")";
+        var unPinUrl = "@Url.Action("onunpin","boards")";
+        var addHomepageUrl = "@Url.Action("addhomepage", "boards")";
+        var checkHomepageNameExistUrl = "@Url.Action("checkhomepagenameexist", "boards")";
+        var homepageActionUrl = "@Url.Action("homepageaction","boards")";
+        var getChildDashboardsUrl = "@Url.Action("GetChildDashboards", "boards")";
+        var isUseCdn = "@isUseCdn.ToString().ToLower()" == "true" ? true : false;
+        var cdnLink = "@cdnLink";
+    </script>
+</head>
+<div id="items-container" class="col-xs-4">
+    <div id="item-list">
+        <div id="search" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <span class="su su-arrow-back col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding display-none" id="back-button" title="@T["Back"]"></span>
+            <div id="item-type" class="col-lg-5 col-md-5 col-sm-5 col-xs-5"></div>
+            <div id="sort-options" class="no-padding col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                <div id="sort-container">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button" id="sort-value">
+                        <span class="selected selected-field" data-value="ModifiedDate">@T["Modified Date"]</span>
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul class="dropdown-menu dashboard-sort">
+                        <li>
+                            <a class="dashboard-sort-options" data-value="Name" href="javascript:void(0);">
+                                <i class="su su-tick"></i>
+                                <span class="search-option">@T["Dashboard Name"]</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dashboard-sort-options" data-value="CreatedByDisplayName" href="javascript:void(0);">
+                                <i class="su su-tick"></i>
+                                <span class="search-option">@T["Owner Name"]</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dashboard-sort-options" data-value="CreatedDate" href="javascript:void(0);">
+                                <i class="su su-tick"></i>
+                                <span class="search-option">@T["Added Date"]</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dashboard-sort-options selected" data-value="ModifiedDate" href="javascript:void(0);">
+                                <i class="su su-tick"></i>
+                                <span class="search-option">@T["Modified Date"]</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <span class="su su-sort-down-up text-right" id="order" data-value="descending">
+                    <span class="path1 sorting-icon" style="margin-right: -5px"></span>
+                    <span class="path2 sorting-icon opacity"></span>
+                </span>
+
+                <div class="search-area" role="search">
+                    <span class="su su-search pull-left" id="item-search" title="@T["Search"]"></span>
+                    <div id="input-div">
+                        <input type="text" class="search-home-section" id="search-home-page" placeholder="@T["Search"]" autocomplete="off" />
+                    </div>
+                    <span class="su su-inner-close close-icon category" id="search-clear" title="@T["Clear search"]"></span>
+                </div>
+            </div>
+        </div>
+        <div id="items" data-grid-type="">
+        </div>
+    </div>
+</div>
+
+<div id="preview-container" class="col-xs-8">
+    <div id="header-menu">
+        <div id="item-container" data-homepage-id="" data-dashboard-id="" data-widget-id="" data-item-type="" data-parent-id="" data-parent-name="">
+            <span id="preview-item-name"></span>
+            <a href="javascript:void(0);" title="@T["Close"]" class="popup-close pull-right" onclick="parent.closeHomepageAddItemPopup();"><span class="su su-close"></span></a>
+        </div>
+        <div id="owner-container">
+            <span id="preview-owner-name"></span>
+            <time id="preview-modified-date" class="pull-right"></time>
+        </div>
+    </div>
+    <div id="select-item">@T["Select an item to preview."]</div>
+    <div id="disabled-preview">
+        <input type="button" id="load-preview" class="btn primary-button app-btn-primary" value="@T["Load preview"]">
+    </div>
+    <span id="view-denied">@T["Public Dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span>
+    <div id="preview"></div>
+    <div id="buttons" class="pull-right">
+        <input type="button" id="add-button" class="btn primary-button app-btn-primary" value="@T["Add"]">
+        <input type="button" id="cancel-button" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" onclick="parent.closeHomepageAddItemPopup()">
+    </div>
+</div>
+
+<script type="text/x-jsrender" id="itemname">
+    <a class="item-link col-lg-12 col-md-12 col-sm-12 col-xs-12 disabled" data-multi-dashboard="{{:IsMultiDashboard}}" data-item-name="{{:Name}}" data-item-id="{{:Id}}">
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 name-and-options">
+            <span class="item-name col-lg-10 col-md-10 col-sm-10 col-xs-10 no-padding" data-container="body">{{:Name}}</span>
+            {{if IsMultiDashboard}}
+            <span class="multitab-icon su su-multi-tabbed" data-toggle="tooltip" data-container="body" data-placement="bottom" title="@T["Contains multiple dashboards"]"></span>
+            {{/if}}
+        </span>
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 item-info no-padding">
+            <span class="owner-name col-lg-5 col-md-5 col-sm-5 col-xs-5 no-padding">{{:CreatedByDisplayName}}</span>
+            <time class="modified-time pull-right col-lg-6 col-md-6 col-sm-6 col-xs-6 no-padding">{{:ModifiedDate}}</time>
+        </span>
+    </a>
+</script>
+
+<script type="text/x-jsrender" id="child">
+    <a class="item-link col-lg-12 col-md-12 col-sm-12 col-xs-12 disabled" data-multi-dashboard="false" data-item-name="{{:DisplayName}}" data-item-id="{{:DesignerId}}" data-parent-id="{{:ParentId}}" data-parent-name="{{:ParentName}}">
+        <span class="col-lg-12 col-md-12 col-sm-12 col-xs-12 name-and-options">
+            <span class="item-name col-lg-10 col-md-10 col-sm-10 col-xs-10 no-padding" data-container="body">{{:DisplayName}}</span>
+        </span>
+    </a>
+</script>
+
+<script type="text/javascript" language="javascript">
+    $(document).ready(function () {
+        parent.$("#add-item-popup_wrapper").ejWaitingPopup("hide");
+        $("#item-container").attr("data-homepage-id", parent.$("#widget-container").attr("data-homepage-id"));
+        $("#disabled-preview,#preview-container #buttons,#view-denied").hide();
+        ShowWaitingProgress("#items", "show");
+        if (parent.window.IsPinWidget) {
+            $("#item-type").text("All Widgets");
+            $(".dashboard-sort a[data-value=Name] span").text("Widget Name");
+            $("#item-container").attr("data-item-type", "Widget");
+            getItems(widgetsUrl);
+        }
+        else if (parent.window.IsPinDashboard) {
+            $("#item-type").text("All Dashboards");
+            $("#item-container").attr("data-item-type", "Dashboard");
+            getItems(dashboardsUrl);
+        }
+    });
+</script>

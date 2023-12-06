@@ -1,0 +1,84 @@
+﻿@using Newtonsoft.Json
+@{
+    var globalAppSettings = _globalAppSettings;
+    var forReportsWidgetsConfiguration = ViewBag.forReportsWidgetsConfiguration;
+    ViewBag.Title = T["Connected Sites"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<script type="text/javascript">
+    var forReportsWidgetsConfiguration = "@forReportsWidgetsConfiguration";
+    var getExternalReportsSitesUrl = "@Url.Action("GetReportsWidgetSites", "Administration")";
+    var removeExternalReportsSiteUrl = "@Url.Action("RemoveReportsWidgetSite", "Administration")";
+    var editExternalSiteUrl = "@Url.Action("EditExternalSite", "Administration")";
+        $(document).ready(function () {
+            GridLocalization();
+            $("#ReportsConnectedSitesGrid").ejGrid({
+                dataSource: ej.DataManager({ url: "@Url.Action("GetReportsWidgetSites", "Administration")", adaptor: "UrlAdaptor" }),
+                gridLines: ej.Grid.GridLines.None,
+                allowSorting: true,
+                allowSearching: true,
+                allowPaging: true,
+                allowSelection: true,
+                allowFiltering: true,
+                filterSettings: { filterType: "menu" },
+                pageSettings: { pageSize: 10 },
+                enableRowHover: true,
+                enableAltRow: false,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                columns: [
+                    { field: 'Name', templateID: "#reports-site-name-template", headerText: '@T["Name"]', width: 40, allowSorting: true, allowFiltering: true },
+                    { field: 'ClientId', templateID: "#reports-site-clientid-template", headerText: '@T["Client Id"]', width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'SiteURL', templateID: "#reports-site-url-template", headerText: '@string.Format(T["Site {0}"].Value,"URL")', width: 50, allowSorting: true, allowFiltering: true },
+                    { field: 'Options', headerText: '', templateID: "#options", width: 10, allowSorting: false, allowFiltering: false }
+                ]
+            });
+        });
+</script>
+<script type="text/x-jsrender" id="reports-site-name-template">
+    <span class="grid-content" title="{{:Name}}" data-toggle="tooltip">{{:Name}}</span>
+</script>
+<script type="text/x-jsrender" id="reports-site-clientid-template">
+    <span class="grid-content" title="{{:ClientId}}" data-toggle="tooltip">{{:ClientId}}</span>
+</script>
+<script type="text/x-jsrender" id="reports-site-url-template">
+    <span class="grid-content" title="{{:SiteURL}}" data-toggle="tooltip">{{:SiteURL}}</span>
+</script>
+<div class="col-xs-12 no-padding info-section">
+    <div id="reports-site-info" class="col-xs-10 no-padding">
+        <label>@string.Format(T["Please add required {0} site here which will be shown when you configure the {1} widget."].Value, "reports", "report")</label>
+    </div>
+    <div class="col-xs-2 no-padding pull-right">
+        <button class="primary-button app-btn-primary pull-right" id="add-new-site" title="@T["Add new site"]" onclick="getExternalSitesDetailDialog(1)"><span>@T["Add new site"] </span></button>
+    </div>
+</div>
+
+<div class="col-xs-12 no-padding ">
+    <div id="ReportsConnectedSitesGrid"></div>
+</div>
+
+<script type="text/x-jsrender" id="options">
+    <div class="dropdown context-menu">
+        <span class="dropdown-toggle option-icon" title="Actions" data-toggle="dropdown">
+            <span class="su su-options">
+            </span>
+        </span>
+        <ul class="dropdown-menu" role="menu">
+            <li class="menu-group">
+                <a class="edit-class" href="javascript:void(0);" id="edit-reports-external-sites" title="@T["Edit"]" data-toggle="tooltip" data-id="{{:Id}}" data-name="{{:Name}}" data-clientid="{{:ClientId}}" data-site-url="{{:SiteURL}}" onclick="getExternalSitesDetailDialog(1,1,this)">
+                    <i class="su su-edit"></i>
+                    <span class="menu-text">@T["Edit"]</span>
+                </a>
+            </li>
+            <li class="menu-group">
+                <a class="delete-class" href="javascript:void(0);" id="remove-reports-external-sites" title="@T["Remove"]" data-toggle="tooltip" data-id="{{:Id}}" data-site-type="{{:SiteType}}" data-name="group" onclick="deleteReportsSiteConfirmation(this)">
+                    <i class="su su-delete"></i>
+                    <span class="menu-text">@T["Remove"]</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</script>
+

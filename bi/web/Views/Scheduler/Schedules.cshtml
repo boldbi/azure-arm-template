@@ -1,0 +1,388 @@
+﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = T["Schedules"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageSchedules);
+    var itemPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var schemes = customUI?.Profiles != null && customUI.Profiles[0].Schedules != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].Schedules.Scheme).FirstOrDefault() : null;
+    var userId = _identityResponse.User.UserId;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+    var pageDescription = T["Create and manage dashboard schedules to send out dashboard reports either at a specific date and time interval or when data changes."];
+}
+@model List<ScheduleViewModel>
+
+@section styles{
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedules.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedules.min.css" />
+    </environment>
+}
+
+@section scripts{
+
+    <script>
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var enableScheduleUrl = "@Url.Action("EnableSchedule", "scheduler")";
+        var disableScheduleUrl = "@Url.Action("DisableSchedule", "scheduler")";
+        var ondemandScheduleUrl = "@Url.Action("OnDemandSchedule", "scheduler")";
+        var deleteScheduleUrl = "@Url.Action("deleteschedule", "scheduler")";
+        var removeScheduleUrl = "@Url.Action("RemoveSchedule", "scheduler")";
+        var getSchedulesUrl = "@Url.Action("getschedules", "scheduler")";
+        var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
+        var scheduleHistory = "@ViewBag.SchedleHistory";
+        var scheduleHistoryScheduleId = "@ViewBag.ScheduleId";
+        var scheduleHistoryScheduleName = "@ViewBag.ScheduleName";
+        var scheduleHistoryItemType = "@Convert.ToInt32(ItemType.Schedule)";
+        var cdnLink = "@cdnLink";
+        var appVersion = "@ServerAppConfig.ProductVersion";
+        var scheduleExist = "@ViewBag.ScheduleExist";
+    </script>
+
+    @if (!isMobile)
+    {
+        @await Html.PartialAsync("../Scheduler/_ScheduleHistory")
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting.min.js"></script>
+        </environment>
+        <script type="text/javascript">
+            $(document)
+                .ready(function () {
+                    $("#search-schedules").val("");
+                    $.views.helpers({
+                        checkMobile: function() {
+                            return ("@isMobile.ToString().ToLower()" == "false" &&
+                            (window.innerWidth > 1040));
+                        }
+                    });
+                    if (window.location.search.length > 0) {
+                        var query = decodeURIComponent(window.location.search.split('?')[1]);
+                        query = query.replace('=', ':');
+                        searchValue = query.split('&');
+                        $("#search-schedules").val(searchValue[0]);
+                    }
+                    addPlacehoder("#search-area");
+                    ej.support.enableLocalizedSort = true;
+                    GridLocalization(window.Server.App.Localization.ScheduleResourceEmpty);
+                    $("#scheduleGrid")
+                        .ejGrid({
+                            dataSource: ej.DataManager({ url: "@Url.Action("getschedules", "scheduler")", adaptor: "UrlAdaptor" }),
+                            allowPaging: true,
+                            pageSettings: { pageSize: 20 },
+                            allowSorting: true,
+                            allowSearching: true,
+                            allowFiltering: true,
+                            filterSettings: { filterType: "menu" },
+                            enableAltRow: false,
+                            locale: "en-US",
+                            gridLines: ej.Grid.GridLines.None,
+                            recordClick: manageSchedule,
+                            toolbarSettings: { showToolbar: false, toolbarItems: [ej.Grid.ToolBarItems.Search] },
+                            searchSettings: { fields: ["Name", "ItemName", "CreatedByDisplayName", "LastRunString", "NextScheduleString", "Status"], key: "", ignoreCase: false },
+                            actionBegin: "fnActionBegin",
+                            actionComplete: function(args) {
+                                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                                if (args.model.currentViewData.length === 0) {
+                                    rowBound();
+                                }
+
+                                showOrHideGridPager("#scheduleGrid");
+                                $("#scheduleGrid").ejWaitingPopup("hide");
+                            },
+                            rowDataBound: function() {
+                                var height = $(".e-gridcontent").height();
+                                if (height != null) {
+                                    rowBound();
+                                }
+                            },
+                            dataBound: function(args) {
+                                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                            },
+                            columns: [
+                                {
+                                    field: "Name",
+                                    headerText: "@T["Name"]",
+                                    templateID: "#schedule-template",
+                                    headerTemplateID: "#item-name-header",
+                                    type: "string",
+                                    width: ("@isMobile.ToString().ToLower()" == "false" &&
+                                    (window.innerWidth > 1040))
+                                    ? 100
+                                    : 80
+                                },
+                                {
+                                    field: "ItemName",
+                                    headerText: "@T["Dashboard"]",
+                                    templateID: "#dashboard-template",
+                                    type: "string",
+                                    width: 100,
+                                    visible: ("@isMobile.ToString().ToLower()" == "false" &&
+                                    (window.innerWidth > 1040))
+                                },
+                                {
+                                    field: "LastRunString",
+                                    headerText: "@T["Last Run"]",
+                                    visible: !(window.innerWidth < 1200),
+                                    width: 70,
+                                    allowSorting: false,
+                                    allowFiltering: false
+                                },
+                                {
+                                    field: "NextScheduleString",
+                                    headerText: "@T["Next Scheduled Run"]",
+                                    width: 100,
+                                    headerTemplateID: "#next-schedule-header",
+                                    allowSorting: false,
+                                    allowFiltering: false
+                                },
+                                {
+                                    field: "CreatedByDisplayName",
+                                    headerText: "@T["Owner"]",
+                                    width: 100,
+                                    headerTemplateID: "#owner-column",
+                                    allowSorting: true,
+                                    allowFiltering: true
+                                },
+                                {
+                                    field: "Status",
+                                    headerText: "@T["Status"]",
+                                    width: 60,
+                                    allowSorting: false,
+                                    templateID: "#status-template",
+                                    allowFiltering: false,
+                                    visible: ("@isMobile.ToString().ToLower()" == "false" &&
+                                    (window.innerWidth > 1040))
+                                },
+                                {
+                                    template: true,
+                                    templateID: "#options",
+                                    width: (window.innerWidth > 1200) ? 15 : 25,
+                                    allowSorting: false,
+                                    allowFiltering: false
+                                }
+                            ]
+                        });
+                });
+        </script>
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting-mobile.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting-mobile.min.js"></script>
+        </environment>
+    }
+
+}
+
+@section MainSection{
+    @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Schedule) && itemsCount[ItemType.Schedule] > 0)
+    {
+        if (!isMobile)
+        {
+            <script id="template-data" type="text/x-jsrender">
+                <div class="details">
+                    <a href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">
+                        <div class="item-name">{{:Name}}<span class="{{toLowerCase:Status}} su su-schedule-status"></span></div><br />
+                        @T["Dashboard"]: <span class="values">{{:ItemName}}</span> <br />
+                        @T["Last Run"] <span class="values">{{:LastRunString}}</span><br />
+                        @T["Next Run"] <span class="values">{{:NextScheduleString}}</span>
+                    </a>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="dashboard-template">
+                <div class="item-dashboard grid-content" title="{{:ItemName}}" data-toggle="tooltip" data-placement="top">
+                    {{if IsScheduledItemDeleted || (IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                    <span class="schedule-deleted-name">{{:DeletedItemName}}</span><span class="badge badge-secondary1 badge-secondary2">@T["Deleted"]</span>
+                    {{else MultiDashboardName}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{else DashboardWidgetId != "@Guid.Empty"}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}" target="_blank">{{:ItemName}}</a></span>
+                    {{else}}
+                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{/if}}
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="status-template">
+                {{if Status=="Active"}}
+                <span class="active su su-schedule-status"></span>
+                @T["Active"]
+                {{else Status=="Inactive"}}
+                <span class="inactive su su-schedule-status"></span>
+                @T["Inactive"]
+                {{else}}
+                <span class="done su su-schedule-status"></span>
+                @T["Completed"]
+                {{/if}}
+            </script>
+            <script type="text/x-jsrender" id="schedule-template">
+                <div class="item-name grid-content">
+                    <span title="{{:Name}}" data-toggle="tooltip" data-placement="top">{{:Name}}</span>
+                </div>
+            </script>
+            <script type="text/x-jsrender" id="item-name-header">
+                <div class="item-name">@T["Name"]</div>
+            </script>
+            <script type="text/x-jsrender" id="next-schedule-header">
+                <div title="@T["Next Scheduled Run"]">@T["Next Scheduled Run"]</div>
+            </script>
+            <script type="text/x-jsrender" id="owner-column">
+                <div title="@T["Owner"]">@T["Owner"]</div>
+            </script>
+            <script type="text/x-jsrender" id="options">
+                <div class="dropdown context-menu @(schemes != null && !schemes.ContextMenu ? "hide" : string.Empty)">
+                    <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                        <span class="su su-options"> </span>
+                    </span>
+                    <ul class="dropdown-menu" role="menu">
+                        {{if !IsScheduledItemDeleted  && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                        <li class="menu-group @(schemes != null && !schemes.RunNow ? "hide" : string.Empty)">
+                            <a href="javascript:void(0);" title="@T["Run now"]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-play" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">@T["Run Now"]</span>
+                            </a>
+                        </li>
+                        <li class="divider @(schemes != null && !schemes.RunNow ? "hide" : string.Empty)"></li>
+                        {{/if}}
+                        <li class="menu-group">
+                            <a href="javascript:void(0);" title="@T["Schedule-History"]" class="schedule-history" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}")'>
+                                <i class="su su-run-history" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">@T["Run History"]</span>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="menu-group @(schemes != null && !schemes.Info ? "hide" : string.Empty)">
+                            <a href="javascript:void(0);" title="@T["Info"]" class="item-info">
+                                <i class="su su-info"></i>
+                                <span class="menu-text">@T["Info"]</span>
+                            </a>
+                        </li>
+                        {{if CanWrite}}
+                        <li class="divider @(schemes != null && !schemes.Info ? "hide" : string.Empty)"></li>
+                        {{if Status=="Active"}}
+                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                        <li class="menu-group @(schemes != null && !schemes.Disable ? "hide" : string.Empty)">
+                            <a href="javascript:void(0);" title="@T["Disable"]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-disable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">@T["Disable"]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+
+                        {{else Status=="Inactive"}}
+                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                        <li class="menu-group @(schemes != null && !schemes.Enable ? "hide" : string.Empty)">
+                            <a href="javascript:void(0);" title="@T["Enable"]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-enable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">@T["Enable"]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+                        {{/if}}
+                        {{/if}}
+
+                        {{if ~checkMobile()}}
+                        {{if CanWrite}}
+                        <li title="@T["Edit"]" class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
+
+                            <a href="javascript:void(0);" title="@T["Edit"]" class="edit-schedule" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}", "{{:IsScheduledItemDeleted}}")'>
+                                <i class="su su-edit" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">@T["Edit"]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+                        {{/if}}
+
+                        {{if ~checkMobile()}}
+                        {{if CanDelete}}
+                        <li title="@T["Delete"]" class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
+                            <a href="javascript:void(0);" title="@T["Delete"]" class="remove-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Name}}", "{{:Id}}", "{{:ItemName}}", "{{:ItemCategoryName}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                                <i class="su su-delete" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
+                                <span class="menu-text">@T["Delete"]</span>
+                            </a>
+                        </li>
+                        {{/if}}
+                        {{/if}}
+                    </ul>
+                </div>
+            </script>
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["SCHEDULES"] }, { "PageDescription", @pageDescription } })
+            <div class="bi-page-header col-xs-12 top-nav-btn-secton">
+                <div class="col-xs-12 no-padding">
+                    <div id="search-area" class="pull-left col-xs-4">
+                        <input type="text" id="search-schedules" class="pull-left no-margin" placeholder="@T["Search schedules"]" />
+                        <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                        <span class="su su-search search-schedule pull-left no-margin" title="@T["Search schedules"]"></span>
+                    </div>
+                    <div class="col-xs-6 no-padding button-section">
+                        @if (itemPermissions[ItemType.Schedule])
+                        {
+                            <button type="button" class="create-schedule pull-right primary-button app-btn-primary">@T["Create Schedule"]</button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div id="item-grid-container" data-grid-name="schedules" class="bi-page-container col-xs-12 schedule-listing grid-page-container">
+                <div class="bi-page-content col-md-12 no-padding">
+                    <div id="schedules-grid-container" class="col-xs-12 bi-page-body  @(isMobile ? "mobile" : "desktop")">
+                        <div id="scheduleGrid" class="schedule-grid">
+                        </div>
+                    </div>
+                </div>
+                @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+            </div>
+        }
+        else
+        {
+            @await Html.PartialAsync("../Scheduler/_ScheduleGridForMobile", Model)
+        }
+    }
+    else
+    {
+        @await Html.PartialAsync("../DefaultPages/DefaultPages", new ViewDataDictionary(ViewData) { { "Permissions", itemPermissions }, { "ItemType", ItemType.Schedule } })
+    }
+
+    @if (!isMobile)
+    {
+        @await Html.PartialAsync("../Items/_AddItems")
+        @await Html.PartialAsync("../Items/_ItemVersion")
+        @await Html.PartialAsync("../Items/_ItemInfo")
+    }
+
+    <div id="popup-container" style="display:none;">
+        <iframe id="scheduler-popup-iframe"></iframe>
+    </div>
+
+    <div id="editpopup-container" style="display:none;">
+        <iframe id="editscheduler-popup-iframe"></iframe>
+    </div>
+
+    <div id="schedule-delete-confirmation" class="no-padding"></div>
+
+    <div id="permission-popup" class="no-padding" style="display:none;">
+        <iframe id="permission-iframe"></iframe>
+    </div>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

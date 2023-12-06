@@ -1,0 +1,212 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isFailedUserTab = (Context.Request.Query["tab"].ToString().ToLower() == "failed-users") ? "active" : string.Empty;
+    var isImportedUserTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "imported-users") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isFailedUserTab)) ? "active" : string.Empty;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var scopeList = ServerAppConfig.SettingsScopesList;
+    var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
+    ViewBag.Title = T["Bulk user import Result"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.PageHeader = T["Bulk Import Result"];
+    ViewBag.PageDescription = T["Shows details about bulk user import jobs."];
+    ViewBag.BackIconRedirectionUrl = Url.Action("BulkImportResult", "UserManagement");
+};
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bulk-import-result.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bulk-import-result.min.js"></script>
+    </environment>
+    <script type="text/javascript">
+        var importedUsersListUrl = "@Url.Action("GetAllImportedUsers", "UserManagement")";
+        var failedUsersListUrl = "@Url.Action("GetAllFailedUsers", "UserManagement")";
+    </script>
+
+    <script type="text/x-jsrender" id="display-name-template">
+        <span class="grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
+    </script>
+    <script type="text/x-jsrender" id="user-name-template">
+        <span class="grid-content" title="{{:Username}}" data-toggle="tooltip">{{:Username}}</span>
+    </script>
+    <script type="text/x-jsrender" id="email-template">
+        <span class="grid-content" title="{{:Email}}" data-toggle="tooltip">{{:Email}}</span>
+    </script>
+    <script type="text/x-jsrender" id="status-template">
+        {{if IsActive}}
+        <span class="grid-content inprogress-or-completed-job" title="@T["Active"]" data-toggle="tooltip">@T["Active"]</span>
+        {{else}}
+        <span class="grid-content suspended-job" title="@T["Inactive"]" data-toggle="tooltip">@T["Inactive"]</span>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="failed-user-name-template">
+        <span class="grid-content" title="{{:Username}}" data-toggle="tooltip">{{:Username}}</span>
+    </script>
+    <script type="text/x-jsrender" id="user-email-template">
+        <span class="grid-content" title="{{:Email}}" data-toggle="tooltip">{{:Email}}</span>
+    </script>
+    <script type="text/x-jsrender" id="failed-display-name-template">
+        <span class="grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
+    </script>
+    <script type="text/x-jsrender" id="message-template">
+        <span class="grid-content error-readmore" data-ng-message="{{:Message}}" title="{{:Message}}" data-toggle="tooltip">{{:Message}}</span>
+        <span class="grid-content readmore" style="display:none" title="ReadMore" data-toggle="tooltip">ReadMore</span>
+    </script>
+}
+@section MainSection {
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <div id="view-bulk-import" class="bi-page-container col-xs-12 bulk-import-job-details">
+        <div id="bulk-import-details" role="tabpanel" class="bi-page-content col-xs-12 no-padding">
+            <div class="col-xs-12 no-padding no-margin top-nav-header-without-btn">
+                @await Html.PartialAsync("../Shared/_TopHeaderSection")
+            </div>
+            <div class="@(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport) ? "import-user-message" : string.Empty)" style="display:none">
+                @if (ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart")
+                {
+                    @T["The importing process will begin either within 3 minutes of the job creation time or after the completion of other import tasks already in the queue."]
+                }
+                else if (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)
+                {
+                    @T["The bulk user import status will be marked as completed within 3 minutes after all the users have been imported successfully."]
+                }
+            </div>
+            <div id="bulk-import-body" class="col-xs-12 bi-page-body job-details-container @(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && (ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)) ? "job-info-container" : string.Empty)">
+                <div id="job-info-container" class="col-xs-12 no-padding job-info-margin">
+                    <div class="col-xs-6 pull-left">
+                        <div class="form-element-label">
+                            <div class="show input-field user-name-input-field">
+                                <label>@T["Job Id"]:</label>
+                                <span value="@ViewBag.jobDetails.JobId">@ViewBag.jobDetails.JobId</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Total User Count"]:</label>
+                                <span value="@ViewBag.jobDetails.BulkImportDetails.TotalUser)">@ViewBag.jobDetails.BulkImportDetails.TotalUser</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Imported Users"]:</label>
+                                <span value="@ViewBag.jobDetails.BulkImportDetails.ImportedUser)">@ViewBag.jobDetails.BulkImportDetails.ImportedUser</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Yet To Import"]:</label>
+                                <span value="@ViewBag.jobDetails.BulkImportDetails.YetToImport)">@ViewBag.jobDetails.BulkImportDetails.YetToImport</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Failed User"]:</label>
+                                <span value="@ViewBag.jobDetails.BulkImportDetails.FailedImport)">@ViewBag.jobDetails.BulkImportDetails.FailedImport</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Created By"]:</label>
+                                <a href="@Url.Action("ViewProfile", "UserManagement")?id=@ViewBag.jobDetails.UserId">@ViewBag.jobDetails.CreatedBy</a>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Date Created"]:</label>
+                                <span value="@ViewBag.jobDetails.CreatedDateString)">@ViewBag.jobDetails.CreatedDateString</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Last Updated"]:</label>
+                                <span value="@ViewBag.jobDetails.ModifiedDateString)">@ViewBag.jobDetails.ModifiedDateString</span>
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Status"]:</label>
+                                @if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended" && ViewBag.jobDetails.BulkImportDetails.ErrorType == 3)
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@ViewBag.jobDetails.ImportJobStatus</span>
+                                    <span class="su su-help" title="@T["The import job has been suspended by system due to some unexpected error."]" data-toggle="tooltip"></span>
+                                }
+                                else if (ViewBag.jobDetails.BulkImportDetails.CreatedBy == 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Suspended"]</span>
+                                    <span class="su su-help" title="@T["The import has been suspended by system due to 5 consecutive Failure."]" data-toggle="tooltip"></span>
+                                }
+                                else if (ViewBag.jobDetails.BulkImportDetails.CreatedBy != 0 && ViewBag.jobDetails.ImportJobStatus == "Suspended")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Suspended"]</span>
+                                    <span class="su su-help" title="@T[$"The import has been suspended by {ViewBag.jobDetails.CreatedBy}."]" data-toggle="tooltip"></span>
+                                }
+                                else if (ViewBag.jobDetails.ImportJobStatus == "Completed")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Completed"]</span>
+                                }
+                                else if (ViewBag.jobDetails.ImportJobStatus == "In progress")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["In progress"]</span>
+                                }
+                                else if (ViewBag.jobDetails.ImportJobStatus == "Yet to start")
+                                {
+                                    <span value="@ViewBag.jobDetails.ImportJobStatus)">@T["Yet to start"]</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-element-label">
+                            <div class="show input-field">
+                                <label>@T["Type Of Import"]:</label>
+                                <span value="@ViewBag.jobDetails.ImportSource)">@ViewBag.jobDetails.ImportSource</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 no-padding bi-page-nav-bar">
+                    <ul id="bulk-import-tab-nav" class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="import-tab @isImportedUserTab">
+                            <a href="#imported-users" id="imported-users-tab" aria-controls="imported-users-tab" role="tab" data-toggle="tab">@T["Imported Users"]</a>
+                        </li>
+                        <li role="presentation" class="import-tab @isFailedUserTab">
+                            <a href="#failed-users" id="failed-users-tab" aria-controls="failed-users-tab" role="tab" data-toggle="tab">@T["Failed Import"]</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content col-xs-12 no-padding">
+                    <div role="tabpanel" class="tab-pane bi-page-body @isImportedUserTab" id="imported-users">
+                        <div id="imported-users-div" class="col-xs-12 no-padding">
+                            <div id="search-area" class="pull-right imported-users-search">
+                                <input type="text" class="pull-left" id="search-imported-users-grid" placeholder="@T["Search"]" />
+                                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                                <span class="su su-search search-accounts pull-left" title="@T["Search"]"></span>
+                            </div>
+                            <div class="col-xs-12 no-padding ">
+                                <div id="ImportedUsersGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isFailedUserTab" id="failed-users">
+                        <div id="failed-users-div" class="col-xs-12 no-padding">
+                            <div id="search-area" class="pull-right failed-users-search">
+                                <input type="text" class="pull-left" id="search-failed-users-grid" placeholder="@T["Search"]" />
+                                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                                <span class="su su-search search-accounts pull-left" title="@T["Search"]"></span>
+                            </div>
+                            <div class="col-xs-12 no-padding ">
+                                <div id="FailedUsersGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+            </div>
+        </div>        
+    </div>
+}

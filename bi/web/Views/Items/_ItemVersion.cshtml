@@ -1,0 +1,292 @@
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+}
+
+<!DOCTYPE html>
+<head>
+    <script>
+        var rollBackUrl = "@Url.Action("rollbackItem", "items")";
+        var itemVersionUrl = "@Url.Action("VersionItems", "items")";
+        var itemLogsUrl = "@Url.Action("ItemLogs", "items")";
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemversion.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemversion.min.js"></script>
+    </environment>
+
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/itemversion.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/itemversion.min.css" />
+        </environment>
+    }
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body>
+    <div id="version-window-container" class="col-xs-12 no-padding dialog" style="display:none">
+        <div class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog col-lg-12 popup-header no-padding" role="document">
+                <div class="modal-content col-lg-12" data-spy="scroll">
+                    <div class="col-lg-12 modal-header">
+                        <div class="col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding">
+                            <span class="version-modal-title popup-title ellipsis col-xs-10" data-container="body">@T["Version History"]</span>
+                            <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-10 col-xs-10 col-sm-10 col-md-10 no-padding" data-toggle="tooltip" data-placement="bottom" data-container="body" style="font-size: 13px; margin-left: 13px;"></span>
+                        </div>
+                        <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1 no-padding">
+                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" data-container="body" title="@T["Close"]" class="popup-close pull-right"><span class="su su-close"></span></a>
+                        </div>
+                    </div>
+                    <div class="modal-body col-lg-12">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active versions-tab">
+                                <a id="version-tab" href="" data-report-id="" data-created-by="" data-report-name="" class="folder-manage-tab folder-tab-color active-tab" data-purpose="View" role="tab" aria-controls="versions">@T["Versions"]</a>
+                            </li>
+                            <li role="presentation">
+                                <a id="item-log-tab" href="" data-report-id="" data-created-by="" data-report-name="" class="folder-manage-tab section-gray-heading" data-isrightpane="false" role="tab" aria-controls="file-logs">@T["File Logs"]</a>
+                            </li>
+                        </ul>
+                        <input id="report-action" type="hidden" value="">
+                        <input id="cur-item-id" type="hidden" ng-model="CurrentItemId" value="">
+                        <span style="display: none;">
+                            <input id="current-folder" type="text" ng-model="CurrentFolderId" value="">
+                        </span>
+                        <div class="total-move-container col-xs-12 version-container-padding">
+                            <div id="item-version-container" class="show col-xs-12 no-padding version-area" data-previous-parent-id="none" data-parent-id="home" data-type="self">
+                                <div class="col-xs-12 no-padding" style="display:block; padding-top:20px; float:left;">
+                                    <div id="grid" class="grid">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="item-log-container" class="hidden col-xs-12 no-padding version-area " data-previous-parent-id="none" data-parent-id="home" data-type="self">
+                                <div class="col-xs-12 no-padding" style="display:block; padding-top:20px; float:left; overflow:auto;">
+                                    <div id="loggrid" class="grid">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 modal-footer">
+                        <div class="col-xs-12 no-padding margin-top">
+                            <input type="button" id="close-button" title="@T["Close"]" class="app-button app-secondary-button app-btn-secondary pull-right popup-close" value="@T["Close"]" tabindex="-1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/x-jsrender" id="version_comment">
+            <div class="grid-content" title="{{:Comment}}" data-toggle="tooltip">{{:Comment}}</div>
+        </script>
+        <script type="text/x-jsrender" id="user_name">
+            <div class="grid-content" title="{{:CreatedByName}}" data-toggle="tooltip">{{:CreatedByName}}</div>
+        </script>
+        <script type="text/x-jsrender" id="created_date">
+            <div class="grid-content" title="{{:CreatedDateString}}" data-toggle="tooltip">{{:CreatedDateString}}</div>
+        </script>
+        <script type="text/x-jsrender" id="Options">
+            <div class="dropdown">
+                {{if ItemTypeId != "@((int)ItemType.Datasource)"}}
+                <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                    <span class="su su-options"></span>
+                </span>
+                <ul class="dropdown-menu" role="menu">
+                    {{if ItemTypeId == "@((int)ItemType.Dashboard)"}}
+                    <li>
+                        <a title="" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:Name}}?v={{:VersionNumber}}" target="_blank"><i class="su su-open"><i class="su-open path1"></i><i class="su-open path2"></i></i><span>@T["Open"]</span></a>
+                    </li>
+                    {{if CanWrite}}
+                    <li>
+                        <a title="@T["Edit"]" href="@Url.Action("DashboardDesigner", "Designer")/{{:ItemId}}/{{:CategoryName}}/{{:Name}}?v={{:VersionNumber}}" target="_blank">
+                            <i class="su su-edit"></i>
+                            <span>@T["Edit"]</span>
+                        </a>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                    {{if ItemTypeId == "@((int)ItemType.Widget)"}}
+                    <li>
+                        <a title="" href="@Url.Action("widgets", "FileRender")/{{:ItemId}}/{{:Name}}?v={{:VersionNumber}}" target="_blank"><i class="su su-open"><i class="su-open path1"></i><i class="su-open path2"></i></i><span>@T["Open"]</span></a>
+                    </li>
+                    {{/if}}
+                    @*{{if CanDownload == true}}
+                        {{if ItemTypeId == "@((int)ItemType.Dashboard)"}}
+                        <li>
+                            <a title="" href="@UrlHelper.GenerateUrl("DashboardDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:CategoryName}}/{{:Name}}/{{:VersionNumber}}" target="_blank"><i class="su su-download"></i><span>@T["Download"]</span></a>
+                        </li>
+                        {{else}}
+                        <li>
+                            <a title="" href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}/{{:VersionNumber}}" target="_blank"><i class="su su-download"></i><span>@T["Download"]</span></a>
+                        </li>
+                        {{/if}}
+                        {{/if}}*@
+                    {{if !IsCurrentVersion && CanWrite}}
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <a data-itemid="{{:ItemId}}" title="@T["Restore"]" data-item-version="{{:VersionNumber}}" data-item-type="{{:ItemTypeId}}" class="item-roll-back" href="javascript:void(0);"><i class="su su-roll-back"></i><span>@T["Restore"]</span></a>
+                    </li>
+                    {{/if}}
+                </ul>
+               {{else}}
+                {{if !IsCurrentVersion && CanWrite}}
+                <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                    <span class="su su-options"></span>
+                </span>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <a title="@T["Edit"]" href="@Url.Action("Index", "DataSourceDesigner")?datasourceId={{:ItemId}}&v={{:VersionNumber}}" target="_blank">
+                            <i class="su su-edit"></i>
+                            <span>@T["Edit"]</span>
+                        </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <a data-itemid="{{:ItemId}}" title="@T["Restore"]" data-item-version="{{:VersionNumber}}" data-item-type="{{:ItemTypeId}}" class="item-roll-back" href="javascript:void(0);"><i class="su su-roll-back"></i><span>@T["Restore"]</span></a>
+                    </li>
+                </ul>
+                {{/if}}
+                {{/if}}
+            </div>
+        </script>
+        <script type="text/x-jsrender" id="display_name">
+            <div class="grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</div>
+        </script>
+        <script type="text/x-jsrender" id="action">
+            <div class="grid-content" title="{{:DisplayAction}}" data-toggle="tooltip">{{:DisplayAction}}</div>
+        </script>
+        <script type="text/x-jsrender" id="event">
+            <div class="grid-content" title="{{:DisplayEvent}}" data-toggle="tooltip">{{:DisplayEvent}}</div>
+        </script>
+        <script type="text/x-jsrender" id="updated_date">
+            <div class="grid-content" title="{{:UpdatedDateString}}" data-toggle="tooltip">{{:UpdatedDateString}}</div>
+        </script>
+        <script>
+            $(document).ready(function () {
+                GridLocalization();
+                $("#grid").ejGrid({
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    pageSettings: { pageSize: 7 },
+                    allowSorting: true,
+                    allowSearching: true,
+                    allowFiltering: false,
+                    enableAltRow: false,
+                    allowSelection: true,
+                    enableRowHover: true,
+                    rowDataBound: function () {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
+                    dataBound: function (args) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
+                    columns: [
+                        {
+                            headerText: "@T["Version"]",
+                            field: "VersionNumber",
+                            width: 30
+                        },
+                        {
+                            template: true,
+                            templateID: "#user_name",
+                            headerText: "@T["User"]",
+                            width: 50,
+                            field: "CreatedByName"
+                        },
+                        {
+                            template: true,
+                            templateID: "#version_comment",
+                            headerText: "@T["Comments"]",
+                            width: 70,
+                            field: "Comment",
+                            allowSorting: false
+                        },
+                        {
+                            headerText: "@T["Date"]",
+                            width: 60,
+                            visible: false,
+                            field: "CreatedDate"
+                        },
+                        {
+                            template: true,
+                            templateID: "#created_date",
+                            headerText: "@T["Date"]",
+                            width: 70,
+                            field: "CreatedDateString"
+                        },
+                        {
+                            template: true,
+                            templateID: "#Options",
+                            headerText: "",
+                            width: 15,
+                            field: "option",
+                            allowSorting: false
+                        }
+                    ]
+                });
+
+                $("#loggrid").ejGrid({
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    pageSettings: { pageSize: 7 },
+                    allowSorting: true,
+                    allowSearching: false,
+                    allowFiltering: false,
+                    allowSelection: true,
+                    enableRowHover: true,
+                    rowDataBound: function () {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
+                    dataBound: function (args) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
+                    columns: [
+                        {
+                            template: true,
+                            templateID: "#action",
+                            headerText: "@T["Action"]",
+                            field: "DisplayAction",
+                            width: 25
+                        },
+                        {
+                            template: true,
+                            templateID: "#event",
+                            headerText: "@T["Event"]",
+                            field: "DisplayEvent",
+                            width: 55
+                        },
+                        {
+                            template: true,
+                            templateID: "#display_name",
+                            headerText: "@T["User"]",
+                            width: 25,
+                            field: "DisplayName"
+                        },
+                        {
+                            headerText: '@T["Date"]',
+                            width: 25,
+                            visible: false,
+                            field: "UpdatedDate"
+                        },
+                        {
+                            template: true,
+                            templateID: "#updated_date",
+                            headerText: "@T["Date"]",
+                            width: 25,
+                            field: "UpdatedDateString"
+                        }
+                    ]
+                });
+
+            });
+        </script>
+    </div>
+</body>

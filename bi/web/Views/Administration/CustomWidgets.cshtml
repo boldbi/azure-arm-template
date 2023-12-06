@@ -1,0 +1,115 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Widget Configuration"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isBIWidgetssTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "bi-widgets") ? "active" : string.Empty;
+    var isReportsWidgetsTab = (Context.Request.Query["tab"].ToString().ToLower() == "reports-widgets") ? "active" : string.Empty;
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.WidgetSettings);
+    var pageDescription = T["Configure any number of widgets for your applications by choosing widgets from the following list."];
+}
+
+@section meta{
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="user:is_admin" content="@isAdmin.ToString()" />
+    <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/widget-configuration.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-sites.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/widget-configuration.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-sites.min.css" />
+    </environment>
+}
+@section scripts {
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/widget-configuration.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-widget-page.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-sites.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/widget-configuration.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-widget-page.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-sites.min.js"></script>
+    </environment>
+
+    <script>
+    var subAppPath = "@ServerAppConfig.WebRootPath";
+        var isSelfHosted = "@isSelfHosted";
+        var widgetsPagePermissionUrl = "@Url.Action("CheckAdminPagePermission", "Administration")";
+    </script>
+}
+@section MainSection{
+
+@await Html.PartialAsync("_AdminMenu")
+<div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Widgets Configuration"] }, { "PageDescription", @pageDescription } })
+    <div id="widget-settings-header" class="col-xs-12 bi-page-header top-nav-btn-secton">
+        <div class="col-xs-12 no-padding">
+            <div class="col-xs-6 no-padding button-section">
+                <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-widget-settings" title="">@T["Cancel"]</a>
+                <button type="button" title="" id="update-widget-settings" name="update-widgets-settings" class="primary-button app-btn-primary pull-right update-system-settings">
+                    @T["Save"]
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="look-and-feel-container" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div id="look-and-feel-form" class="col-lg-12 col-md-12 bi-page-body">
+            <div id="widgetDesigner" style="height:100%;min-height:350px"></div>
+        </div>
+        @*The dependent teams haven't finished it, so we're hiding it*@
+        @*<div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isBIWidgetssTab">
+                    <a href="#bi-widgets" id="bi-sites-tab" aria-controls="bi-sites-tab" role="tab" data-toggle="tab">@T["BI Widgets"]</a>
+                </li>
+                <li role="presentation" class="@isReportsWidgetsTab">
+                    <a href="#reports-widgets" id="reports-sites-tab" aria-controls="reports-sites-tab" role="tab" data-toggle="tab">@T["Reports Widgets"]</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-xs-12 no-padding tab-content">
+            <div role="tabpanel" class="tab-pane bi-page-body col-xs-12 @isBIWidgetssTab" id="bi-widgets">
+                <div id="look-and-feel-form" class="col-lg-12 col-md-12">
+                    <div id="widgetDesigner" style="height:100%;min-height:350px"></div>
+                </div>
+                <div class="bi-page-footer col-xs-12">
+                    <div class="bi-page-actions col-lg-12 col-md-12 no-margin">
+                        <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary pull-right" id="cancel-widget-settings" title="">@T["Cancel"]</a>
+                        <button type="button" title="" id="update-widget-settings" name="update-widgets-settings" class="primary-button app-btn-primary pull-right update-system-settings">
+                            @T["Save"]
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane bi-page-body col-xs-12 @isReportsWidgetsTab" id="reports-widgets">
+                @await Html.PartialAsync("../Shared/_ReportsConnectedSites", new ViewDataDictionary(ViewData) { { "forReportsWidgetsConfiguration", true } })
+            </div>
+        </div>*@
+
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    @await Html.PartialAsync("../Items/_GetExternalSites", new ViewDataDictionary(ViewData) { { "forReportsWidgetsConfiguration", true } })
+</div>
+}

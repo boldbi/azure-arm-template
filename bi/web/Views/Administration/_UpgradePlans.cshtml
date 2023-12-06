@@ -1,0 +1,143 @@
+﻿@{
+    var priorityId = ViewData["PriorityOrderId"] != null ? ViewData["PriorityOrderId"].ToString() : "0";
+}
+
+
+@model List<SaaSPlanDetail>
+
+
+<div id="choose-plan-container" class="admin-page-container hide-block col-xs-12">
+    <div id="choose-plan-block" class="col-xs-12 no-padding">
+        <div class="col-md-12 import-area admin-page-header">
+            <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                <h1 class="h2 page-title">[[[SUBSCRIPTION]]]</h1>
+                <h5 class="page-description">[[[Manage the subscription and plan]]]</h5>
+            </hgroup>
+        </div>
+
+        <div id="choose-plan-form" class="col-md-12 form-horizontal no-padding" autocomplete="off">
+            <div class="plan-chooser-container col-md-12">
+                <div id="plan-chooser-body">
+                    <div class="field-container">
+                        @if (Model != null)
+                        {
+                            for (int i = 0; i < Model.Count; i++)
+                            {
+                                <div class="card-wrapper col-lg-4 col-sm-4 col-xs-12 no-padding">
+                                    <div class="card col-sm-3">
+                                        <div class="card-body">
+                                            <div class="price-banner">
+                                                <div class="price-container @Model[i].LicenseSettings.PlanName.ToLower()">
+                                                    <div class="text-h4">@Model[i].LicenseSettings.PlanName.ToUpper()</div>
+                                                    @if (Model[i].LicenseSettings.IsAuthorBasedLicense)
+                                                    {
+                                                        <div class="creator-count">Includes @Model[i].LicenseSettings.Authors creators</div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="creator-count">[[[Unlimited creators]]]</div>
+                                                    }
+                                                    <div class="plan-price-div">
+                                                        <span class="dollar-symbol">$</span><span class="upgrading-plan-price">@Model[i].LicenseSettings.Price</span><br /><span class="plan-duration">[[[/month]]]</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="features-container col-xs-12">
+                                                @if (GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier)
+                                                {
+                                                    <span class="user-count feature-detail col-xs-12 no-padding">
+                                                        <span class="su su-tick"></span>
+                                                        @if (Model[i].LicenseSettings.IsUserBasedLicense)
+                                                        {
+                                                            <span class="text-body"><strong>@Model[i].LicenseSettings.Users Users</strong></span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-body"><strong>[[[Unlimited Users]]]</strong></span>
+                                                        }
+                                                    </span>
+                                                }
+
+                                                @if (ServerAppConfig.AppSettings.AppBranding.Identifier == AppBranding.Syncfusion.Identifier)
+                                                {
+                                                    <span class="records-count feature-detail col-xs-12 no-padding">
+                                                        <span class="su su-tick"></span>
+                                                        <span class="text-body"><span class="text-semibold">@(Model[i].LicenseSettings.Storage)</span>[[[GB Storage]]]</span>
+                                                    </span>
+                                                }
+
+                                                <span class="dashboard-count feature-detail col-xs-12 no-padding">
+                                                    <span class="su su-tick"></span>
+                                                    @if (Model[i].LicenseSettings.IsDashboardBasedLicense)
+                                                    {
+                                                        <span class="text-body"><span class="text-semibold">@Model[i].LicenseSettings.Dashboards</span>[[[ Dashboards]]]</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-body">[[[Unlimited Dashboards]]]</span>
+                                                    }
+                                                </span>
+                                                @foreach (var additionalFeature in Model[i].AdditionalFeatures)
+                                                {
+                                                    <span class="feature-detail col-xs-12 no-padding">
+                                                        <span class="su su-tick"></span>
+                                                        <span class="text-body">@additionalFeature</span>
+                                                    </span>
+                                                }
+                                            </div>
+
+                                            @if (Model[i].LicenseSettings.PlanId.ToString().Equals(priorityId))
+                                            {
+                                                <button class="primary-button app-btn-primary choose-plan-button text-semibold disable-planchooser" id="currentPlan" data-plan-id="@Model[i].LicenseSettings.PlanId" disabled><span class="su-tick"></span><span class="choose-plan-text">[[[Current Plan]]]</span></button>
+                                            }
+                                            else
+                                            {
+                                                <button class="primary-button app-btn-primary choose-plan-button text-semibold" data-plan-id="@Model[i].LicenseSettings.PlanId" data-plan-userscount="@Model[i].LicenseSettings.Users"><span class="su-tick"></span><span class="choose-plan-text">[[[Choose Plan]]]</span></button>
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        @if (ServerAppConfig.AppSettings.AppBranding.Identifier == AppBranding.Syncfusion.Identifier)
+                        {
+                            <div class="card-wrapper col-lg-4 col-sm-4 col-xs-12 no-padding special-plans">
+                                <div class="card col-sm-3">
+                                    <div class="content text-body">[[[For Special Pricing Plans]]]</div>
+                                    <a href="https://www.@(GlobalAppSettings.BrandingDomain)/contact" target="_blank" class="contact-us-button">[[[Contact Us]]]</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+
+                    <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+                        <div class="splitter-horizontal no-margin"></div>
+                        @*<div class="col-lg-8 col-md-8 text-body">
+                                <span class="text-semibold pull-left">[[[Note:]]]</span><br />
+                                <span class="pull-left text-left">* [[[Day based on GMT.]]]</span><br />
+                                <span class="pull-left text-left">
+                                    * [[[The following actions would be taken when downgrading to a lower plan.]]]<br />
+                                    <span class="pull-left note-side-downgrade">
+                                        <span class="text-semibold pull-left note-side-header">[[[Users:]]]&#32; </span>[[[Changing the plan will deactivate any additional users beyond what is allowed in the new plan. Recently added users will be deactivated to meet the user limit of the new plan. System administrators will not be deactivated by default unless the active user count exceeds the limit of the new plan. The active users list can be modified from the]]] <a href="@Url.Action("Index", "UserManagement")">[[[User Management page]]]</a>.<br />
+                                    </span>
+                                </span>
+                            </div>*@
+                        <div class="col-lg-4 col-md-4 pull-right">
+                            <button type="button" title="" onclick="redirectToSubscriptionPlan();" class="secondary-button app-btn-secondary pull-right">
+                                [[[Go back]]]
+                            </button>
+                            <button type="button" title="" onclick="updateNewPlan();" id="updatechooseplan" class="primary-button app-btn-primary pull-right" disabled>
+                                [[[Update Plan]]]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,283 @@
+﻿@{
+    ViewBag.Title = T["Sites"].Value + " - "+ GlobalAppSettings.SystemSettings.OrganizationName;
+    var adminType = (AdminType)Enum.Parse(typeof(AdminType), GlobalAppSettings.HttpContextAccessor.HttpContext.Session.GetString("AdminType"));
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/sites.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script src="~/bundles/js/sites.js" asp-append-version="true"></script>
+    <script>
+			var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+			var addTenantUrl = "@Url.Action("AddTenants", "TenantsManagement")";
+			var baseRootUrl = "@Url.Content("~/")";
+			var activateTenantUrl = "@Url.Action("ActivateTenant", "TenantsManagement")";
+			var suspendTenantUrl = "@Url.Action("SuspendTenant", "TenantsManagement")";
+            var deleteTenantUrl = "@Url.Action("DeleteTenant", "TenantsManagement")";
+            var updateMasterTenantUrl = "@Url.Action("UpdateMasterTenant", "TenantsManagement")";
+            var masterSite = "@Url.Action("GetIsMasterSite", "TenantsManagement")";
+            var tenantName = "";
+    </script>
+    <script type="text/x-jsrender" id="application-name-template">
+        <a class="item-name grid-content" title="${TenantName}" data-toggle="tooltip" href="@Url.Action("ViewSite", "TenantsManagement")/${Id}">
+            ${TenantName}
+        </a>
+        ${if (IsMaster && TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+        <span class="su su-master-site-bi master-icon"></span>
+        ${/if}
+        ${if (IsMaster && TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+        <span class="su su-master-site-reports master-icon"></span>
+        ${/if}
+    </script>
+    <script type="text/x-jsrender" id="application-url-template">
+        <a class="grid-content" title="${SiteUrl}" data-toggle="tooltip" href="${SiteUrl}" target="_blank">${SiteUrl}</a>
+    </script>
+    <script type="text/x-jsrender" id="statusTemplate">
+        ${if (TenantStatus == "@((int)TenantStatus.DeploymentPending)")}
+        <span>@GlobalAppSettings.GetDescription(TenantStatus.DeploymentPending)</span>
+        ${else if (TenantStatus == "@((int)TenantStatus.Active)")}
+        <span>@GlobalAppSettings.GetDescription(TenantStatus.Active)</span>
+        ${else if (TenantStatus == "@((int)TenantStatus.Suspended)")}
+        <span>@GlobalAppSettings.GetDescription(TenantStatus.Suspended)</span>
+        ${else if (TenantStatus == "@((int)TenantStatus.Deleted)")}
+        <span>@GlobalAppSettings.GetDescription(TenantStatus.Deleted)</span>
+        ${/if}
+    </script>
+    <script type="text/x-jsrender" id="application-tenant-template">
+        ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+        <span>@AppBranding.Bold.ProductName</span>
+        ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+        <span>@AppBranding.BoldReports.ProductName</span>
+        ${/if}
+    </script>
+
+    <script type="text/x-jsrender" id="applicationname-header">
+        <div class="item-name">@T["Site Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="application-url-header">
+        <div class="item-header">@T["Site URL"]</div>
+    </script>
+    <script type="text/x-jsrender" id="application-status-header">
+        <div class="item-header">@T["Status"]</div>
+    </script>
+    <script type="text/x-jsrender" id="application-tenant-header">
+        <div class="item-header">@T["Tenant Type"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="options">
+        ${if (TenantStatus != "@((int)TenantStatus.Deleted)")}
+        <div class="dropdown actions-container">
+            <span class="dropdown-toggle option-icon" data-toggle="dropdown">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                ${if (TenantStatus == "@((int)TenantStatus.Suspended)")}
+                <li>
+                    <a href="javascript:void(0);" class="tenant-action" data-tenant-name="${TenantName}" data-tenant-id="${Id}" data-dns="${DNS}" data-tenant-type="${TenantType}" data-action="activate">
+                        <i class="su su-tick"></i>
+                        <span>@T["Activate"]</span>
+                    </a>
+                </li>
+                ${/if}
+                ${if (!IsMaster && TenantStatus == "@((int)TenantStatus.Active)")}
+                <li>
+                    <a href="javascript:void(0);" class="tenant-action" data-tenant-name="${TenantName}" data-tenant-id="${Id}" data-dns="${DNS}" data-tenant-type="${TenantType}" data-action="suspend">
+                        <i class="su su-suspend"></i>
+                        <span>@T["Suspend"]</span>
+                    </a>
+                </li>
+                ${/if}
+                ${if (TenantStatus == "@((int)TenantStatus.Active)" || TenantStatus == "@((int)TenantStatus.Suspended)")}
+                <li>
+                    <a href="javascript:void(0);" class="tenant-action" data-tenant-name="${TenantName}" data-tenant-id="${Id}" data-dns="${DNS}" data-tenant-type="${TenantType}" data-action="edit">
+                        <i class="su su-edit"></i>
+                        <span>@T["Edit"]</span>
+                    </a>
+                </li>
+                ${/if}
+                ${if (!IsMaster && TenantStatus == "@((int)TenantStatus.Active)" || TenantStatus == "@((int)TenantStatus.Suspended)" || TenantStatus == "@((int)TenantStatus.DeploymentPending)") }
+                <li>
+                    <a href="javascript:void(0);" class="tenant-action" data-tenant-name="${TenantName}" data-tenant-id="${Id}" data-dns="${DNS}" data-tenant-type="${TenantType}" data-action="delete">
+                        <i class="su su-delete"></i>
+                        <span>@T["Delete"]</span>
+                    </a>
+                </li>
+                ${/if}
+                ${if (!IsMaster && TenantType == "@((int)TenantType.BoldBIOnPremise)" && TenantStatus == "@((int)TenantStatus.Active)") }
+                <li>
+                    <a href="javascript:void(0);" class="tenant-action" data-tenant-name="${TenantName}" data-tenant-id="${Id}" data-dns="${DNS}" data-tenant-type="${TenantType}" data-action="make-master">
+                        <i class="su su-master-site-bi mastersite"></i>
+                        <span class="makemaster">@T["Master Site"]</span>
+                    </a>
+                </li>
+                ${/if}
+            </ul>
+        </div>
+        ${/if}
+    </script>
+    <script type="text/javascript">
+			$(function () {
+				var searchQuery = window.location.href.slice(window.location.href.indexOf('?') + 1).split('=');
+				if (searchQuery[0] == "searchKey") {
+					$("#search-tenants").val(searchQuery[1]);
+				}
+				else {
+					$("#search-tenants").val();
+				}
+
+				var data = new ejs.data.DataManager({
+					url: "@Url.Action("GetItems", "TenantsManagement")",
+					adaptor: new ejs.data.UrlAdaptor(),
+					crossDomain: true
+				});
+
+				var tenantsGrid = new ejs.grids.Grid({
+                    dataSource: data,
+					gridLines: 'None',
+					allowPaging: true,
+					allowSorting: true,
+					allowSelection: true,
+					pageSettings: { pageSize: 20 },
+					rowSelected: fnApplicationRowSelected,
+					rowSelecting: function (e) {
+                        this.multiSelectCtrlRequest = true;
+                    },
+					load: fnOnApplicationGridLoad,
+					actionBegin: fnOnApplicationGridActionBegin,
+                    actionComplete: fnOnApplicationGridActionComplete,
+                    dataBound: fnOnApplicationGridActionComplete,
+                    enableHover: true,
+                    enableAltRow: false,
+                    rowDataBound: function () {
+                        var height = $(".e-gridcontent").height();
+                        if (height != null) {
+                            rowBound();
+                        }
+                    },
+					columns: [
+						{
+							field: "ApplicationTypeId",
+							type: "int",
+							visible: false
+						},
+						{
+							allowFiltering: false,
+							allowSorting: true,
+							template: '#application-name-template',
+                            headerTemplate: '#applicationname-header',
+							width: 155,
+							field: 'TenantName',
+                            type: "string",
+                        },
+                        {
+                            visible: false,
+                            field: "IsMaster",
+                            type: "boolean",
+                            template: '#master-sites',
+                            width:80,
+                        },
+						{
+							template: '#application-url-template',
+                            headerTemplate: '#application-url-header',
+							width: 150,
+							field: 'DNS',
+							type: "string",
+						},
+						{
+							headerText: '@T["Created Date"]',
+							field: 'CreatedDateString',
+							allowFiltering: false,
+							width: 130,
+							type: "string",
+						},
+						{
+							template: '#application-tenant-template',
+                            headerTemplate: '#application-tenant-header',
+							width: 110,
+							field: 'TenantType',
+							type: "string",
+							allowSorting: false,
+							allowFiltering: false,
+						},
+						{
+							template: '#statusTemplate',
+                            headerTemplate: '#application-status-header',
+							width: 110,
+							allowSorting: false,
+							field: 'TenantStatus',
+							type: "string",
+						},
+						@if (adminType == AdminType.SuperAdmin)
+						{
+							<text>
+								 {
+									 allowSorting: false,
+									 template: "#options",
+									 width: 50,
+									 allowFiltering: false
+								 }
+							 </text>
+						}
+					]
+					});
+				    tenantsGrid.appendTo('#tenants_grid');
+			});
+    </script>
+}
+
+@section MainSection{
+<div class="col-xs-12 header-section no-padding no-margin width-alignment admin-header-width">
+    <div class="col-xs-12 admin-page-header">
+    <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+        <hgroup class="col-xs-12 header-group">
+            <h1 class="page-title">
+            @T["Sites"] (<span id="application-count"></span>)
+        </h1>
+        <h5 class="page-description">Add and manage your sites.</h5>
+        </hgroup>
+        
+
+    </div>
+    <div class="col-xs-4 top-nav-sec no-padding">
+        @await Html.PartialAsync("../Shared/_TopMenu")
+                    
+    </div>
+</div>
+<div class="col-md-12 import-area bi-page-header admin-page-icon">
+    <div class="col-xs-12 no-padding">
+        <div id="search-area" class="pull-left">
+            <input type="text" class="pull-left" id="search-tenants" placeholder="@T["Search sites"]" />
+            <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+            <span class="su su-search search-application pull-left" title="@T["Search"]"></span>
+        <div>
+    </div>
+    </div>
+    @if (ViewBag.IsMultiTenant)
+    {
+        <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+            <button type="button" class="primary-button pull-right" id="add-tenant">@T["Create Site"]</button>
+        </div>
+    }
+    </div>       
+</div>
+</div>
+
+<div id="base-container" class="admin-page-content-container full-page-container">
+    <div class="admin-page-content col-md-12 no-padding">
+        <div id="application-list-container" class="list col-xs-12 admin-page-body">
+            <div id="master-site-change"></div>
+            <div class="col-xs-12 no-padding">
+                <div id="tenants_grid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    <div id="add-tenant-popup" class="no-padding">
+        <iframe id="add-tenant-iframe" class="add-tenant-iframe"></iframe>
+    </div>
+</div>
+}

@@ -1,0 +1,354 @@
+﻿@{
+    Layout = null;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/'); ;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var dns = url.GetLeftPart(UriPartial.Authority);
+    var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
+    var widgetName = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetName != null ? @T[ViewBag.WidgetName].Value : string.Empty;
+    var widgetId = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetId != null ? @ViewBag.WidgetId : string.Empty;
+    bool IsWidgetDeleted = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsWidgetDeleted != null ? ViewBag.IsWidgetDeleted : false;
+    var widgetInformation = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetInformation != null ? ViewBag.WidgetInformation : new WidgetInformation(); ;
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="data_service:url" content="@designerServiceUrl" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+    {
+        <style>
+            :root {
+                --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+            }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+                --designer-font: var(--font-family) !important;
+            }
+        </style>
+    }
+
+    <style>
+        body {
+            background-color: white !important;
+            padding: 0.5em 1em !important;
+        }
+    </style>
+
+
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/scheduleiframe.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerdialog.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/scheduleiframe.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerdialog.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+    </environment>
+
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.calendars.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.richtexteditor.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.min.js"></script>
+    </environment>
+
+    @if (!isSelfHosted)
+    {
+        <link asp-append-version="true" href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    }
+
+    <style>
+        body {
+            background-color: white !important;
+            padding: 0.5em 1em !important;
+        }
+    </style>
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+</head>
+<body class="schedule-dialog custom-bootstrap-styles">
+    <input type="hidden" data-item-type="dashboard" id="itemType" />
+    <input type="hidden" value="@ViewBag.Fullname" id="fullname" />
+    <input type="hidden" value="@ViewBag.Username" id="userName" />
+    <input type="hidden" value="@globalAppSettings.SystemSettings.OrganizationName" id="orgName" />
+    <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.DateFormat" id="dateFormat" />
+    <input type="hidden" value="@_clientDateTimeInfo.ClientDateTime.TimeFormat" id="timeFormat" />
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="schedule-div">
+        <span id="item-id" hidden>@Context.Request.Query["itemId"].ToString()</span>
+        <div class="modal-dialog col-lg-12 popup-header no-margin no-padding" role="document">
+            <div class="modal-content col-lg-12" id="popup-container" data-spy="scroll">
+                <div class="modal-header no-margin col-sm-12">
+                    <div class="col-sm-10 col-xs-10 no-padding pull-left nav-top"><span title="@T["Schedule"]" class="su su-nav-schedule col-lg-1 col-xs-1 col-sm-1 col-md-1 header-icon"></span><span class="popup-title schedule-popup-title ellipsis col-lg-9 col-xs-9 col-sm-9 col-md-9 no-padding"></span><span class="dashboard-schedule"></span></div>
+                    <div class="col-sm-2 col-xs-2 title no-padding"><a href="javascript:void(0);" class="popup-close" title="@T["Close"]"><span id="schedule-popup" class="su su-close pull-right"></span></a></div>
+                    <div id="windowCaption" class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px;padding-top: 2px !important;">
+                        @T["Create a data driven or a time based schedule"]
+                    </div>
+                </div>
+                <div class="modal-body share-popup col-xs-12" id="schedule-dialog">
+                    <div class="col-sm-12 col-xs-12 no-margin no-padding schedule-popup-body">
+                        <div class="col-sm-12 col-xs-12 no-padding">
+                            <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Category "]<span class="mandatory">*</span></label></div>
+                            <div class="category-dropdown col-sm-4 col-xs-4">
+                                <select id="selected_category" data-live-search="true" title='@T["Select category"]' name="categoryId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
+                                    @if (ViewBag.CategoryId != null)
+                                    {
+                                        <option value="@ViewBag.CategoryId" selected="selected">@Context.Request.Query["categoryName"].ToString()</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select category"]</option>
+                                    }
+
+                                </select>
+                                <span id="category-message" class="ErrorMessage validate-error">@T["Please select category"]</span>
+                                <input type="hidden" id="category_change_validation" name="isCategoryChanged" value="false" />
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-xs-12 no-padding">
+                            <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Dashboard "]<span class="mandatory">*</span></label></div>
+                            <div id="dashboard-dropdown" class="dashboard-dropdown col-sm-4 col-xs-4">
+                                <select id="selected_dashboard" data-live-search="true" title='@T["Select dashboard"]' name="dashboardId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
+                                    @if (Context.Request.Query["actionType"].ToString().ToLower() == "create")
+                                    {
+                                        if (@Context.Request.Query["multiDashboardName"].ToString() != "" && @Context.Request.Query["multiDashboardName"].ToString() != "undefined")
+                                        {
+                                            <option value="@ViewBag.parentItemId" selected="selected">@Context.Request.Query["multiDashboardName"].ToString()</option>
+                                        }
+                                        else if (@Context.Request.Query["itemId"].ToString() != "")
+                                        {
+                                            <option value="@Context.Request.Query["itemId"]" selected="selected">@Context.Request.Query["itemName"].ToString()</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select dashboard"]</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (@Context.Request.Query["multiDashboardName"].ToString() != "")
+                                        {
+                                            <option value="" selected="selected">@Context.Request.Query["multiDashboardName"].ToString()</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@Context.Request.Query["itemId"].ToString()" selected="selected">@Context.Request.Query["itemName"].ToString()</option>
+                                        }
+                                    }
+
+
+                                </select>
+                                <input type="hidden" id="dashboard_change_validation" name="isDashboardChanged" value="false" />
+                                <span id="dashboard-message" class="ErrorMessage validate-error">@T["Please select the dashboard"]</span>
+                            </div>
+                            @*<div class="col-sm-1 col-xs-1 align-center text-right"><label style="text-align:right;">@T["Tabs"]</label></div>
+                                <div class="childdashboard-dropdown col-sm-4 col-xs-4">
+                                    <select id="selected_childdashboard" data-live-search="true" title='@T["Select dashboard"]' name="childdashboardId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
+                                        @if (HttpContext.Current.Request.QueryString["multiDashboardName"] != "")
+                                        {
+                                            <option value="@HttpContext.Current.Request.QueryString["itemId"]" selected="selected">@HttpContext.Current.Request.QueryString["itemName"]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected="selected">@T["All"]</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-sm-1 col-xs-1 no-padding tab-info">
+                                    <span class="dropdown-toggle cursor-type pull-left" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="col-xs-2 dropdown-menu tab-description">
+                                        @T["This can be enabled if the selected dashboard contains multiple tabs."]
+                                    </div>
+                                </div>*@
+                        </div>
+                        @if (enableWidgetScheduleExport)
+                        {
+                            <div class="col-sm-12 col-xs-12 no-padding">
+                                <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Widget "]</label></div>
+                                <div class="widget-dropdown col-sm-4 col-xs-4">
+                                    <select id="selected_widget" data-live-search="true" title='@T["Select widget"]' name="widgetId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
+                                        @if (Context.Request.Query["actionType"].ToString().ToLower() == "create")
+                                        {
+                                            <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select widget"]</option>
+                                        }
+                                        else
+                                        {
+                                            @if (!string.IsNullOrWhiteSpace(widgetId.ToString()) && !string.IsNullOrWhiteSpace(widgetName.ToString()))
+                                            {
+                                                <option value="@widgetId" selected="selected" data-excel="@widgetInformation.Exportoption.Excel.ToString().ToLower()" data-pdf="@widgetInformation.Exportoption.Pdf.ToString().ToLower()" data-csv="@widgetInformation.Exportoption.Csv.ToString().ToLower()" data-image="@widgetInformation.Exportoption.Image.ToString().ToLower()">@widgetName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select widget"]</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-sm-12 col-xs-12 no-padding">
+                            <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Schedule Name"]<span class="mandatory">*</span></label></div>
+                            <div class="col-sm-4 col-xs-4 name-field">
+                                <input type="text" class="form-control cls-schname" name="" id="schedule-name" data-maxlength="100">
+                                <div class="validate-error" id="schedule-name-error-container">
+                                    <div id="schedule-name-validator"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12 col-xs-12 no-padding alert-type">
+                            <div class="col-sm-2 col-xs-2 no-padding"><label>@T["Data Alerts"]</label></div>
+                            <div class="col-sm-3 col-xs-3 line-removal">
+                                <span class="material-switch">
+                                    <input type="checkbox" id="data-alerts" />
+                                    <label for="data-alerts" class="label-primary"></label>
+                                </span>
+                                <div class="col-sm-1 col-xs-1 no-padding data-alert-info">
+                                    <span class="dropdown-toggle cursor-type pull-left" data-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="col-xs-2 dropdown-menu data-alert-description">
+                                        @T["Receive email notifications when specified criteria is met; for example, when the total sales value is greater than $10,000."]
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*<div class="col-sm-9 col-xs-9 data-alerts-disabled bg-warning">
+                                    <div class="alert-img col-xs-1 no-padding">
+                                        <span class="su su-warning-alt"></span>
+                                    </div>
+                                    <span class="data-alerts-disabled-text col-xs-11 no-padding text-warning" style="margin-top: 10px;">@T["Data Alert is temporarily unavailable due to technical reasons. We regret the inconvenience caused."]</span>
+                                </div>*@
+                        </div>
+
+                        <div id="data-changes-div">
+                            <div id="serialize-columninfo" class="hide"></div>
+                            <div id="serialize-conditioninfo" class="hide"></div>
+                            <div id="alert-value" class="hide">false</div>
+                            <div id="previous-data" class="hide"></div>
+                        </div>
+                        <div class="col-sm-12 col-xs-12 no-padding enabled-div">
+                            <div class="col-sm-2 col-xs-2 no-padding  align-center">
+                                @Html.Label("enable-schedule", T["Enabled"].Value, new { @class = "enabled-label" })
+                            </div>
+                            <div class="col-sm-10 col-xs-10 pull-left no-margin enabled-label-div line-removal">
+                                <span class="material-switch text-left">
+                                    <input type="checkbox" name="Enabled" id="enable-schedule" checked="checked" />
+                                    <label class="label-primary" for="enable-schedule"></label>
+                                </span>
+                                <span class="validation-message"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer col-xs-12">
+                    <div class="col-sm-12 col-xs-12 no-margin" id="next-container">
+                        <input id="schedule-back" type="button" title="@T["Back"]" value='@T["Back"]' tabindex="6" class="secondary-button app-btn-secondary pull-left button-left">
+                        <input id="schedule-next-cancel" title="@T["Cancel"]" type="button" value='@T["Cancel"]' tabindex="5" class="secondary-button app-btn-secondary leftmargin pull-right">
+                        <input id="schedule-next" title="@T["Next"]" type="button" value='@T["Next"]' tabindex="4" class="primary-button app-btn-primary pull-right">
+                    </div>
+                    <div id="submit-container" class="col-sm-12 col-xs-4 no-margin">
+                        <input id="schedule-back" type="button" title="@T["Back"]" value='@T["Back"]' tabindex="6" class="secondary-button app-btn-secondary pull-left button-left">
+                        <input id="schedule-submit-cancel" title="@T["Cancel"]" type="button" value='@T["Cancel"]' tabindex="5" class="secondary-button app-btn-secondary leftmargin pull-right button-right">
+                        <input id="schedule-submit" title="@T["Schedule"]" type="button" value='@T["Schedule"]' tabindex="4" class="primary-button app-btn-primary pull-right button-right">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>
+
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerdialog.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerdialog.min.js"></script>
+</environment>
+
+<script>
+    var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+   var actionType = "@Context.Request.Query["actionType"].ToString()";
+    var itemId = "@Context.Request.Query["itemId"].ToString()";
+    var itemName = "@Context.Request.Query["itemName"].ToString()";
+    var scheduleId = "@Context.Request.Query["scheduleId"].ToString()";
+    var multiDashboardName = "@Context.Request.Query["multiDashboardName"].ToString()";
+    var isScheduledItemDeleted = @Json.Serialize(Context.Request.Query["isScheduledItemDeleted"].ToString());
+    var categoryName = "@Context.Request.Query["categoryName"].ToString()";
+    var getDashboardUrl = "@Url.Action("GetItems", "dashboards")";
+    var getScheduleInfoUrl = "@Url.Action("GetScheduleInfo", "scheduler")";
+    var getChildDashboardUrl = "@Url.Action("GetChildDashboards", "scheduler")";
+    var checkScheduleNameExistUrl = "@Url.Action("CheckScheduleNameExist", "scheduler")";
+    var recurrenceType = "@Url.Action("ScheduleRecurrenceType", "scheduler")";
+    var scheduleRecipients = "@Url.Action("RecipientsList", "scheduler")";
+    var emailEditor = "@Url.Action("EmailEditor", "scheduler")";
+    var dataChanges = "@Url.Action("DataChanges", "scheduler")";
+    var getwidgetUrl = "@Url.Action("GetWidgets", "scheduler")";
+    var getCategoryUrl = "@Url.Action("GetCategories", "scheduler")";
+    var getTenantStatusUrl = "@Url.Action("GetTenantStatus", "PartialView")";
+    var getNotificationCountUrl = "@Url.Action("GetNotificationCount", "PartialView")";
+    var dataAlertUrl = "@Url.Action("DataAlert", "scheduler")";
+    var dataLanguage = "@ViewBag.DataLanguage";
+    var currentDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+    var currentTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
+    var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+    var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+    var custombrandName = "@ServerAppConfig.CustomBrandName";
+    var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+    var cdnLink = "@cdnLink";
+    var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+    var appVersion = "@ServerAppConfig.ProductVersion";
+    var enableWidgetScheduleExport = @Json.Serialize(enableWidgetScheduleExport);
+    var isWidgetDeleted = @Json.Serialize(IsWidgetDeleted);
+    var widgetName = "@widgetName";
+    var getwidgetsDetailUrl = "@Url.Action("GetWidgetsDetails", "scheduler")";
+
+    $("#selected_dashboard,#selected_category").selectpicker();
+    $("#selected_childdashboard").attr("disabled", true);
+    if (actionType == "Create") {
+        createSchedule(itemId, itemName, categoryName, multiDashboardName);
+    }
+    else {
+        editSchedule(scheduleId, itemId, itemName, categoryName, multiDashboardName, isScheduledItemDeleted, isWidgetDeleted);
+    }
+    if (($(parent.window).width()) > 1400) {
+        $(".schedule-dialog").addClass("lg-schedule-flexible");
+    }
+
+    if (($(parent.window).width()) < 1400) {
+        $(".schedule-dialog").removeClass("lg-schedule-flexible");
+    }
+    addPlacehoder("#schedule-dialog");
+
+</script>

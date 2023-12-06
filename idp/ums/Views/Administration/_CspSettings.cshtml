@@ -1,0 +1,104 @@
+﻿@using Syncfusion.Server.Base.DataClasses.Core;
+@{
+    ViewBag.Title = T["ContentSecurityPolicy"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var isCSPTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "csp-settings") ? "active" : string.Empty;
+    var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
+
+}
+
+<div role="tabpanel" class="tab-pane col-xs-12 col-lg-12 col-md-12 col-sm-12 admin-page-body @isCSPTab" id="csp">
+    <form id="csp-settings-form" class="no-padding col-xs-12 no-padding content-display text-wrap" autocomplete="off">
+        <div class="col-xs-12 no-padding enable-csp ">
+            <div class="col-xs-12 no-padding">
+                <div class="info-label">
+                    @Html.CheckBox("enable-csp", (bool)contentSecurityPolicySettings.EnableCSP, new { @class = "material-checkbox" })
+                    @Html.Hidden("enable-csp")
+                    <label for="enable-csp">
+                        @T["Enable Content-Security-Policy"]
+                    </label>
+                </div>
+                <div class="info-message">
+                    @T["You can configure a content security policy (CSP) for your site. CSP will not be applied if this option is disabled."]
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding src-names-list">
+            <div class="info-label">
+                @Html.Label("style-src", T["Style Source"].Value, new { @class = "app-textbox-label" })
+            </div>
+            <div class="info-message">
+                @T["This directive specifies valid sources for stylesheets."]
+            </div>
+            <span id="style-src-content" class="src-input-class">
+                <span id="style-src-chip-content" class="src-input-chip"></span>
+                <input id="txt-stylesrc" autocomplete="off" class="form-control txt-input-src" placeholder="@T["Enter a list of URLs separated by commas."]" maxlength="253">
+            </span>
+            <span class="style-src-validation validation-errors"></span>
+        </div>
+        <div class="col-xs-12 no-padding src-names-list">
+            <div class="info-label">
+                @Html.Label("script-src", T["Script Source"].Value, new { @class = "app-textbox-label" })
+            </div>
+            <div class="info-message">
+                @T["This directive specifies valid sources for JavaScript."]
+            </div>
+            <span id="script-src-content" class="src-input-class">
+                <span id="script-src-chip-content" class="src-input-chip"></span>
+                <input id="txt-scriptsrc" autocomplete="off" class="form-control txt-input-src" placeholder="@T["Enter a list of URLs separated by commas."]" maxlength="253">
+            </span>
+            <span class="script-src-validation validation-errors"></span>
+        </div>
+        <div class="col-xs-12 no-padding src-names-list">
+            <div class="info-label">
+                @Html.Label("font-src", T["Font Source"].Value, new { @class = "app-textbox-label" })
+            </div>
+            <div class="info-message">
+                @T["This directive specifies valid sources for fonts."]
+            </div>
+            <span id="font-src-content" class="src-input-class">
+                <span id="font-src-chip-content" class="src-input-chip"></span>
+                <input id="txt-fontsrc" autocomplete="off" class="form-control txt-input-src" placeholder="@T["Enter a list of URLs separated by commas."]" maxlength="253">
+            </span>
+            <span class="font-src-validation validation-errors"></span>
+        </div>
+        <div class="col-xs-12 no-padding src-names-list">
+            <div class="info-label">
+                @Html.Label("img-src", T["Image Source"].Value, new { @class = "app-textbox-label" })
+            </div>
+            <div class="info-message">
+                @T["This directive specifies valid sources for images."]
+            </div>
+            <span id="img-src-content" class="src-input-class">
+                <span id="img-src-chip-content" class="src-input-chip"></span>
+                <input id="txt-imgsrc" autocomplete="off" class="form-control txt-input-src" placeholder="@T["Enter a list of URLs separated by commas."]" maxlength="253">
+            </span>
+            <span class="img-src-validation validation-errors"></span>
+        </div>
+        <div class="col-xs-12 no-padding src-names-list">
+            <div class="info-label">
+                @Html.Label("connect-src", T["Connect Source"].Value, new { @class = "app-textbox-label" })
+            </div>
+            <div class="info-message">
+                @T["This directive specifies the sources that can be used to make Fetch/XHR requests."]
+            </div>
+            <span id="connect-src-content" class="src-input-class">
+                <span id="connect-src-chip-content" class="src-input-chip"></span>
+                <input id="txt-connectsrc" autocomplete="off" class="form-control txt-input-src" placeholder="@T["Enter a list of URLs separated by commas."]" maxlength="253">
+            </span>
+            <span class="connect-src-validation validation-errors"></span>
+        </div>
+        <div class="col-xs-12 no-padding src-names-list bottom-src-bottom-margin">
+            <div class="info-label">
+                @Html.Label("frame-src", T["Frame Source"].Value, new { @class = "app-textbox-label" })
+            </div>
+            <div class="info-message">
+                @T["This directive specifies valid sources for the nested document using elements like &lt;frame&gt; and &lt;iframe&gt;."]
+            </div>
+            <span id="frame-src-content" class="src-input-class">
+                <span id="frame-src-chip-content" class="src-input-chip"></span>
+                <input id="txt-framesrc" autocomplete="off" class="form-control txt-input-src" placeholder="@T["Enter a list of URLs separated by commas."]" maxlength="253">
+            </span>
+            <span class="frame-src-validation validation-errors"></span>
+        </div>
+    </form>
+</div>

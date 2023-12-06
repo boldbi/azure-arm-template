@@ -1,0 +1,48 @@
+﻿@{
+    Layout = null;
+    var imageHelper = new ImageHelper();
+}
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>@GlobalAppSettings.SystemSettings.OrganizationName - @T["Permission Denied"]</title>
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+</head>
+@if (!CloudAppConfig.IsSelfHosted)
+{
+    <body>
+        <div>
+            <div class="col-md-12">
+                <div class="col-xs-12 text-center" style="color: #ff0000; margin-top: 60px; font-size: 30px">@T["You do not have permission to view this page."]</div>
+            </div>
+        </div>
+    </body>
+}
+else
+{
+    <body class="error-full-content">
+        <div class="error-page-outer">
+            <div class="error-page-content">
+                <div class="error-inside">
+                    <div class="error-image-center-1">
+                        <img src="@Url.Content("~/logos?type=login")" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" class="error-image-1">
+                    </div>
+                    <div class="error-image-center-2">
+                        <img src="@imageHelper.AccessDeniedImage()" class="error-image-2">
+                    </div>
+                    <div class="error-type">@T["Access Denied"]</div>
+                    <div class="error-text">
+                        @T["You do not have permission to view this page."]
+                        <br>
+                        @T["Please contact your administrator."]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+}
+</html>

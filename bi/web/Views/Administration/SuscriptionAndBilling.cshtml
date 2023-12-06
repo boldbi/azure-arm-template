@@ -1,0 +1,64 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = "[[[Subscription And Billing]]] - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/notification-settings.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/notification-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/notification-settings.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/notification-settings.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div class="col-xs-12 no-padding">
+        <div class="admin-page-container">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-12 import-area admin-page-header">
+                    <hgroup class="col-lg-6 col-md-6 col-sm-6 col-xs-12 no-padding">
+                        <h1 class="h2 page-title">[[[SUBSCRIPTION AND BILLING]]]</h1>
+                        <h5 class="page-description">[[[Manage subscriptions and billing for @GlobalAppSettings.BrandingDisplayName]]]</h5>
+                    </hgroup>
+                </div>
+
+                <div id="subscription-and-billing-container" class="col-xs-12 no-padding">
+                    <div class="admin-page-body col-xs-12">
+                        <ul class="col-xs-12 no-margin">
+                            <li class="content-list">
+                                [[[Billing administrators can manage payments and subscriptions under the subscription page.]]]
+                            </li>
+                            <li class="content-list">
+                                [[[By default, only the owner can be a billing administrator.]]]
+                            </li>
+                            <li class="content-list">
+                                [[[The owner can also assign billing administrator/notifier roles to an account.]]]
+                            </li>
+                        </ul>
+                        <div class="col-xs-12 no-padding redirect-container">
+                            <a href="@(ServerAppConfig.AppSettings.EndPoints.TenantAppUrl.TrimEnd('/') + "/sites/" + _globalAppSettings.SystemSettings.TenantId + "/subscription")" target="_blank">
+                                Manage Subscription and Billing
+                                <span class="su su-redirect"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

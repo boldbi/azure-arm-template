@@ -1,0 +1,139 @@
+﻿@using System.Configuration
+
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var idPUrl = globalAppSettings.SystemSettings.IDPUrl;
+    var userId = ViewBag.UserId;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/comments-page.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/comments-page.min.css" />
+    </environment>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+<script>
+    var rootUrl = "@rootUrl";
+    var getAllCommentsUrl = { "web": "@Url.Action("GetAllComments","comments")", "api": "/comments/operation" };
+    var addCommentUrl = { "web": "@Url.Action("AddComment", "comments")", "api": "/comments/operation" };
+    var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+    var commentImageUrl = { "web": "@Url.Action("CommentImages", "comments")", "api": "/comments/upload-image" };
+    var editCommentUrl = { "web": "@Url.Action("EditComment", "comments")", "api": "/comments/operation" };
+    var deleteCommentUrl = { "web": "@Url.Action("DeleteComment", "comments")", "api": "/comments/operation" };
+    var unWatchUrl = { "web": "@Url.Action("UnWatch", "items")", "api":  "/items/un-watch" };
+    var userMentionDataSourceUrl = { "web": "@Url.Action("GetUserMentionSuggestionList", "comments")", "api": "/comments/user-mention-list" };
+    var watchUrl = { "web": "@Url.Action("Watch", "items")", "api": "/items/watch" };
+    var avatarUrl = "@idPUrl/User/Avatar";
+    var idpUrl = "@globalAppSettings.SystemSettings.IDPUrl";
+    var i_am_ie9 = false;
+    var getdefaultavatarUrl="@Url.Action("getdefaultavatar", "User")";
+    var itemId = "@ViewBag.itemId";
+    var isSydjViewer = "@ViewBag.ViewerVersion" == "v2";
+    var getItemWatchUrl = { "web": "@Url.Action("GetItemWatch", "Comments")", "api": "/comments/item-watch" };
+    var cdnLink = "@dashboardServerResourceUrl";
+    var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+    var userId = "@userId";
+</script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.min.js"></script>
+    </environment>
+    <!--[if LT IE  10]>
+        <script>
+            i_am_ie9 = true;
+        </script>
+    <![endif]-->
+</head>
+<body class="displayNone">
+    <div class="hidden">
+        <textarea id="temp" class="hidden"></textarea>
+        <div id="toRemoveCulture"></div>
+    </div>
+    @if (ViewBag.ItemType == "dashboard")
+    {
+        <div id="itemType" class="displayNone" data-item-type="dashboard"></div>
+    }
+    @if (ViewBag.ItemType == "individual-widget")
+    {
+        <div id="itemType" class="displayNone" data-item-type="widget"></div>
+    }
+    <div class="base-comment-container">
+        <input type="hidden" id="userName" value="@(userId)" />
+        <div class="header-section col-xs-12 no-padding">
+            <div id="header-pane" class="col-xs-10 no-padding">
+                <span class="view-heading col-xs-10 no-padding" id="view-heading" style="display: none">
+                    @T["COMMENTS"]
+                </span>
+            </div>
+            <div class="col-xs-2 no-padding" id="close-comment">
+                <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" style="display: none"><span class="su su-close"></span></a>
+            </div>
+        </div>
+        <div id="comment_action_area" class="col-xs-12">
+            <input id="comment_action_slider" class="form-control" placeholder="@T["Write a comment"]" type="text">
+        </div>
+        <div id="comment_submit_container" class="comment-submit-container pull-left" style="display: none;">
+            <textarea id="rte-post" class="form-control comment-area" maxlength="4000"></textarea>
+            <span class='message'>*@T["4000 characters maximum"]</span>
+            <span class="error-message"></span>
+            <div class="post-watch col-xs-12 no-right-padding no-left-padding">
+
+                <div class="col-xs-12 col-md-6 no-right-padding pull-right">
+                    <button class="secondary-button app-btn-secondary pull-right header-comment-close">@T["Cancel"]</button>
+                    <input id="post-comment" class="primary-button app-btn-primary pull-right" value="@T["Post"]" type="submit">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 count-sort">
+            <div class="comments-count col-xs-6 no-padding">
+                <div class="watch-txt-container">
+                    <span id="watchItem" class="su su-notification-settings watch-action watch" title="@T["Watch"]" data-html='false' data-toggle='tooltip'></span>
+                </div>
+                <span id="comment_count">0</span>
+                <span class="">@T["Comment(s)"]</span>
+            </div>
+            <div id="commentSorting" class="col-xs-6 no-padding">
+                <span class="col-xs-3 sort-new sort-active no-padding">@T["Newest"]</span>
+                <span class="col-xs-3 sort-old sort-inactive no-padding">@T["Oldest"]</span>
+            </div>
+        </div>
+        <div id="parent-scroll-element">
+            <div id="scroll-element">
+                <div>
+                    <div id="list_container" class="col-xs-12 no-padding">
+                        <ul id="commentList" class="comment-list"></ul>
+                    </div>
+                    <div class="additional-content col-xs-12">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display:none">
+            <input type="text" id="autocomplete-input" />
+        </div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+</body>
+</html>

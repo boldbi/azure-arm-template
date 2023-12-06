@@ -1,0 +1,29 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<script>
+    var shareItemSuggestionListUrl = "@Url.Action("ShareItemSuggestionList", "items")";
+</script>
+<input type="text" id="user-group-search-hidden-input" hidden />
+<input type="text" id="user-group-search-input" class="form-control" />
+<environment include="Development,CloudDevelopment">
+    <script>
+        var userGroupSuggestion = "@dashboardServerResourceUrl/cdn/scripts/item-user-group-suggestion.js?v=@ServerAppConfig.ProductVersion";
+    </script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script>
+        var userGroupSuggestion = "@dashboardServerResourceUrl/cdn/scripts/item-user-group-suggestion.min.js?v=@ServerAppConfig.ProductVersion";
+    </script>
+</environment>
+<head>
+    <script>
+        var preloadLink = document.createElement("script");
+        preloadLink.type = "text/javascript";
+        preloadLink.src = userGroupSuggestion;
+        document.head.appendChild(preloadLink);
+    </script>
+</head>

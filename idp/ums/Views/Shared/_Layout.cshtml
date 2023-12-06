@@ -1,0 +1,231 @@
+﻿@using Newtonsoft.Json
+@{
+    var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
+
+    var currentUserId = Context.User.GetUserId();
+
+    var showMenuBar = Context.User.Identity.IsAuthenticated && (ViewBag.ShowMenuBar == null || ViewBag.ShowMenuBar) && Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) || await new UserManagement().IsTenantMangementUser(currentUserId);
+
+    var helpSiteBaseUrl = GlobalAppSettings.Configuration.GetSection("AppSettings")["documentation:base_url"];
+    var isMobile = DeviceDetection.IsMobile;
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var cookieValue = string.IsNullOrWhiteSpace(Context.Request.Cookies["boldservice.client.locale"]) ? string.Empty : Context.Request.Cookies["boldservice.client.locale"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("_PasswordPolicyRules")
+    @RenderSection("meta", false)
+    @await Html.PartialAsync("_OGPContent")
+    <title>
+        @ViewBag.Title
+    </title>
+    <style>
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        #layout-body-loader-icon {
+            position: absolute;
+            top: 50%;
+            left: 50% !important;
+            margin-left: -27px;
+            margin-top: -27px;
+        }
+    </style>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    @await Html.PartialAsync("~/Views/Shared/_Toast.cshtml")
+    @await Html.PartialAsync("../Shared/_diagnosticlogs")
+    <link rel="stylesheet" href="~/bundles/css/layout.css" asp-append-version="true" />
+
+    @RenderSection("styles", false)
+    <script type="text/javascript">
+        var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
+        var cookieValue = @Html.Raw(JsonConvert.SerializeObject(@cookieValue));
+        var value = {
+            Locale: navigator.language,
+            TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        setTimeout(function () {
+            if (isEmptyOrWhitespace(cookieValue) || cookieValue != JSON.stringify(value)) {
+                SetHttpOnlyCookie("boldservice.client.locale", JSON.stringify(value), 365);
+            }
+        }, 5000);
+    </script>
+</head>
+<body ng-app="serverApp" class="clearfix col-xs-12 no-padding" id="body">
+    <div class="loader-blue loader-icon" id="layout-body-loader-icon">
+        <svg class="circular">
+            <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+        </svg>
+    </div>
+    <div id="server-app-container" style="opacity: 0">
+        @if (CloudAppConfig.IsSelfHosted)
+        {
+            <section id="header-area" class="mobile-visible">
+                <div class="header-bar col-lg-12 col-md-12 col-sm-12">
+                    @if (showMenuBar)
+                    {
+                        <div class="mobile-menu-icon text-center mobile-visible collapsed" data-toggle="collapse" aria-expanded="false" data-target="#menu-area">
+                            <span>
+                                <i class="su su-mobile-menu-icon"></i>
+                            </span>
+                        </div>
+                    }
+                    <div class="org-name-wrapper">
+                        <h5 class="header-org-name">@GlobalAppSettings.SystemSettings.OrganizationName</h5>
+                    </div>
+                </div>
+            </section>
+            @if (showMenuBar)
+            {
+                if (isMobile)
+                {
+                    <section id="menu-area" class="collapse width">
+                        @await Html.PartialAsync("../Shared/_Menu")
+                    </section>
+                }
+                else
+                {
+                    <section id="menu-area" class="collapse">
+                        @await Html.PartialAsync("../Shared/_Menu")
+                    </section>
+                }
+            }
+        }
+        else
+        {
+            <section id="menu-area">
+                @await Html.PartialAsync("../Shared/_Menu")
+            </section>
+        }
+
+        <div id="content-area" class="clearfix col-xs-12">
+            @RenderSection("MainSection", true)
+            <div id="success-alert">
+                <div id="image-container">
+                    <img src="@Url.Content("~/images/success-toast.svg")" />
+                </div>
+                <div id="message">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span>
+                </div>
+                <div class="close-div">
+                    <i class="su su-close"></i>
+                </div>
+            </div>
+            <div id="warning-alert">
+                <div id="image-container">
+                    <img src="@Url.Content("~/images/warning-image.jpg")" />
+                </div>
+                <div id="message">
+                    <h1 id="message-header"></h1>
+                    <span id="message-content"></span><span id="view" class="view-more">@T["View more"]</span>
+                    <div id="container">
+                        <textarea id="text-error-area" class="scroller" name="text" value=""></textarea>
+                        <span id="copy-error-area" class="pull-right app-hyperlink" data-toggle="tooltip" title="@T["Click to copy"]"><span class="su su-copy"></span></span>
+                    </div>
+                </div>
+                <div class="close-div">
+                    <i class="su su-close"></i>
+                </div>
+            </div>
+            <div id="mobile-alert">
+                <span id="message"></span>
+            </div>
+            <div id="progress-alert-container" class="custom-bootstrap-styles"></div>
+        </div>
+        @if (!CloudAppConfig.IsSelfHosted)
+        {
+            @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "IsLayoutFooter", true } })
+        }
+
+        @if (includeMessageBox)
+        {
+            <div id="messageBox">
+                <div class="message-box-close"></div>
+                <div class="message-content text-center"></div>
+            </div>
+        }
+    </div>
+
+    <div id="alert-notification">
+    </div>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/layout.js" asp-append-version="true"></script>
+    @RenderSection("scripts", false)
+
+    @if (includeMessageBox)
+    {
+        <script>
+            $(document).ready(function () {
+                var messageBoxDialog = new ej.popups.Dialog({
+                    header: "title",
+                    width: (window.innerWidth > 460) ? "472px" : (window.innerWidth - 10),
+                    visible: false,
+                    height: "auto",
+                    isModal: true,
+                    footerTemplate: "footer",
+                    animationSettings: { effect: 'Zoom' },
+                    close: "onMessageDialogClose"
+                });
+                messageBoxDialog.appendTo("#messageBox");
+            });
+        </script>
+    }
+
+    @if (!showMenuBar)
+    {
+        <script>
+            $(document).ready(function () {
+                $("#base-footer-div").css("padding-left", "0px");
+            });
+        </script>
+        <style type="text/css">
+            body #server-app-container #content-area {
+                padding: 80px 30px 30px !important;
+            }
+        </style>
+    }
+
+    <script type="text/javascript">
+        var isLicenseExpiredUrl = "@Url.Action("IsLicenseExpired", "Home")";
+        var manageLicenseUrl = "@Url.Action("LicenseSettings", "Administration")";
+        var validateIsolationCodeUrl = "@Url.Action("IsValidIsolationCode", "TenantsManagement")";
+        var boldContactUrl = "https://www.syncfusion.com/support/directtrac/incidents/newincident";
+        var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();
+
+        $(window).on("load", function () {
+            $('.lazyload').each(function () {
+                img = document.createElement('img');
+                img.onload = imageOnLoad;
+                img.src = $(this).attr("data-src");
+                img.alt = $(this).attr("data-alt");
+                img.id = $(this).attr("data-id");
+                $(img).attr("onerror", $(this).attr("data-default"));
+                $(img).addClass($(this).attr("data-class"));
+                img.style = "display: none";
+                $(this).parent().append(img);
+            });
+        });
+
+        function imageOnLoad() {
+            $(this).show().parent().find("div.lazyload").remove();
+        }
+
+        $(document).ready(function () {
+            generateProfileAvatar();
+        });
+    </script>
+</body>
+</html>

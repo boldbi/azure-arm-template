@@ -1,0 +1,162 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var isMultiTab = ViewBag.MultiTabId != null && ViewBag.MultiTabId.ToString() != string.Empty;
+    var isPinWidget = ViewBag.PinWidget;
+    var isBingMapRequired = (ViewBag.IsBingMapRequired != null && ViewBag.IsBingMapRequired) ? true : false;
+}
+
+@if (isPinWidget)
+{
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+}
+@await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+<link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+<script asp-append-version="true" src="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+<script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+@if (isMobile)
+{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-viewer-mobile-v2.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-viewer-mobile-v2.min.css" />
+    </environment>
+}
+else
+{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-viewer-v2.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-viewer-v2.min.css" />
+    </environment>
+
+}
+<environment include="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.css" />
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.min.css" />
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+</environment>
+
+@if (isBingMapRequired)
+{
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+}
+
+@if (isMultiTab)
+{
+    <environment include="Development,CloudDevelopment">
+        <script>
+            var multiTabDashboardOptionStyle = "@dashboardServerResourceUrl/cdn/css/designer/dashboard-options.css?v=@ServerAppConfig.ProductVersion";
+        </script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script>
+            var multiTabDashboardOptionStyle = "@dashboardServerResourceUrl/cdn/css/designer/dashboard-options.min.css?v=@ServerAppConfig.ProductVersion";
+        </script>
+    </environment>
+}
+
+<script>
+    var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
+    var isMultiTab = @Json.Serialize(isMultiTab);
+
+    if (isMultiTab) {
+        var preloadLink = document.createElement("link");
+        preloadLink.rel = "stylesheet";
+        preloadLink.href = multiTabDashboardOptionStyle;
+        document.head.appendChild(preloadLink);
+    }
+</script>
+@*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+<script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.common.all.min.js"></script>
+<script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.common.all.min.js"></script>
+
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard.min.js"></script>
+</environment>
+
+@if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+{
+    <style>
+        :root {
+            --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+        }
+    </style>
+}
+else
+{
+    <style>
+        :root {
+            --designer-font: var(--font-family) !important;
+        }
+    </style>
+}
+
+@if (!isSelfHosted)
+{
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
+
+}
+
+@await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+@if (isMobile)
+{
+    if (isMultiTab)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer-mobile.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer-mobile.min.js"></script>
+        </environment>
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-mobile-v2.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-mobile-v2.min.js"></script>
+        </environment>
+    }
+
+}
+else
+{
+    if (isMultiTab)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-viewer.min.js"></script>
+        </environment>
+    }
+    else
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-v2.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-viewer-v2.min.js"></script>
+        </environment>
+    }
+
+}

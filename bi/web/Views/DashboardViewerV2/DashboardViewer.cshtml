@@ -1,0 +1,381 @@
+﻿@using Newtonsoft.Json
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = ViewBag.ItemName + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var itemDetail = ViewBag.itemDetail as ItemDetail;
+    var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
+    var enableComment = "false";
+    var isUserAuthenticated = "false";
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var userId = ViewBag.UserId;
+    var parentId = ViewBag.ParentId;
+    var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && itemDetail.IsPublic;
+    var canEdit = itemDetail.CanWrite;
+    var loginImage = globalAppSettings.SystemSettings.LoginLogo;
+    var dataServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings).TrimEnd('/');
+    var provider = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : ViewBag.DataSourceProviders[0].Provider) : string.Empty;
+    var service = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : (ViewBag.DataSourceProviders[0] == null ? string.Empty : ViewBag.DataSourceProviders[0].Service[0])) : string.Empty;
+    var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var faviconFallbackUrl = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + IconFileNames.Favicon;
+    var isUserAuthenticatedInCurrentTenant = ViewBag.IsUserAuthenticatedInCurrentTenant;
+    bool isSlideshow = ViewBag.IsSlideshow == null ? false : Convert.ToBoolean(ViewBag.IsSlideshow);
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var filterQuery = ViewBag.FilterQuery;
+    var isBingMapRequired = ViewBag.IsBingMapRequired;
+    if (embedConfig.IsEmbedDashboard || embedConfig.IsEmbedCode)
+    {
+        canEdit = false;
+    }
+    ViewBag.ViewId = ViewBag.ViewDetails.ViewId != Guid.Empty ? ViewBag.ViewDetails.ViewId : string.Empty;
+    var widgetId = ViewBag.WidgetId;
+    var pinWidget = ViewBag.IsPinWidgetMode;
+    var bodyClass = pinWidget ? "pin-widget" : "";
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+    var multiTabUrl = ViewBag.MultiTabDashboardDetails != null ? Url.Action("Dashboards", "Dashboards") + "/" + ViewBag.MultiTabDashboardDetails.Id + "/" + ViewBag.MultiTabDashboardDetails.CategoryName + "/" + ViewBag.MultiTabDashboardDetails.Name : string.Empty;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var isUsageAnalytics = ViewBag.IsUsageAnalytics != null;
+    var getWidgetEmbedCode = globalAppSettings.SystemSettings.GetWidgetEmbedCode;
+    var isViewNotFound = (ViewBag.ViewNotFound != null && ViewBag.ViewNotFound ) ? true : false;
+    var isCommentNotFound = (ViewBag.CommentNotFound != null && ViewBag.CommentNotFound) ? true : false;
+    var isInvalidComment = (ViewBag.InValidCommentId != null && ViewBag.InValidCommentId) ? true : false;
+    var dashboardCutomTheme = string.Empty;
+    var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
+    var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
+    var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
+    if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
+    {
+        dashboardCutomTheme = Context.Request.Query["embed_theme"];
+    }
+    else
+    {
+        dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
+    }
+}
+<!DOCTYPE html>
+
+<html style="height:100%;width:100% ; overflow:hidden;" lang="@globalAppSettings.SystemSettings.Language">
+<head>
+    <title>@ViewBag.Title</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="@itemDetail.Description" />
+    <meta name="viewport" content="width=device-width" />
+    @if (!isSelfHosted && !globalAppSettings.SystemSettings.IsDebug)
+    {
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    }
+    <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="designer_service:url" content="@dataServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+    <meta name="data_service:url" content="@dataServiceUrl" />
+    <meta name="data_service_host:url" content="@dataServiceUrl.TrimEnd('/')" />
+    <meta name="dashboard:version" content="@ViewBag.Version" />
+    <meta name="dashboard:id" content="@ViewBag.ItemId" />
+    <meta name="dashboard:name" content="@ViewBag.ItemName" />
+    <meta name="category:name" content="@itemDetail.CategoryName" />
+    <meta name="dashboard:description" content="@Html.Raw(ViewBag.ItemDescription)" />
+    <meta name="datasource:version" content="@ViewBag.DatasourceVersion" />
+    <meta name="datasource:id" content="@ViewBag.DatasourceId" />
+    <meta name="isdraft" content="false" />
+    <meta name="user:culture" content="@ViewBag.Culture" />
+    <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
+    <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
+
+    <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href != '@faviconFallbackUrl') this.href = '@faviconFallbackUrl';" />
+
+    @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+    {
+        <style>
+            :root {
+                --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+            }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+                --designer-font: var(--font-family) !important;
+            }
+        </style>
+    }
+
+    @await Html.PartialAsync("_OGPContent", new ViewDataDictionary(ViewData) { { "PageTitle", ViewBag.Title }, { "OrganizationName", globalAppSettings.SystemSettings.OrganizationName }, { "Logo", loginImage }, { "Description", itemDetail.Description } })
+<script>
+        @{
+            var userName = "";
+            if (Context.User.Identity.IsAuthenticated && Context.User != null && Context.User.Identity != null && isUserAuthenticatedInCurrentTenant || (embedConfig.IsEmbedCode && !isPublic))
+            {
+                enableComment = (isSlideshow || !(embedConfig.HasDashboardComments || embedConfig.HasWidgetComments)) ? "false" : "true";
+                isUserAuthenticated = embedConfig.IsEmbedCode ? "false" : "true";
+                userName = embedConfig.IsEmbedCode ? embedConfig.UserInfo.Email.ToString(): emailAddress.ToLower();
+            }
+            else
+            {
+                enableComment = "false";
+                isUserAuthenticated = "false";
+            }
+        }
+
+        var viewId = "@ViewBag.ViewId";
+        var isDebug = "@isDebug";
+        var idpreferenceId = "@idpreferenceId";
+        var idpUrl = "@idPUrl";
+        var displayName = "@displayName";
+        var commentPageUrl = "@Url.Action("CommentPartialView", "Comments")";
+        var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
+        var userId = "@userId";
+        var userName = "@userName";
+        var enableComment = "@enableComment";
+        var isDashboardCommented = @Json.Serialize(Convert.ToBoolean(ViewBag.IsDashboardCommented));
+        var commentedWidgets = @Html.Raw(Json.Serialize(ViewBag.CommentedWidgets));
+        var isUserAuthenticated = "@isUserAuthenticated";
+        var viewUrl = "@Url.Action("Dashboards", "Dashboards")";
+        var isMultiDashboard = "@ViewBag.IsMultiDashboard";
+        var itemViewShareIframeUrl = "@Url.Action("shareItemView", "items")";
+        var favoriteItemUrl = { "web": "@Url.Action("MakeFavorite", "Items")", "api": "/favorites/edit" };
+        var addViewUrl = { "web": "@Url.Action("onfiltersave", "DashboardViews")", "api": "/items/views/add" };
+        var getSavedViewUrl = { "web": "@Url.Action("GetViews", "DashboardViews")", "api": "/items/views/get-by-item-id" };
+        var getViewParameterUrl = "@Url.Action("GetDashboardViewParameter", "DashboardViews")";
+        var deleteViewUrl = { "web": "@Url.Action("DeleteView", "DashboardViews")", "api": "/items/views/delete" };
+        var updateViewUrl = { "web": "@Url.Action("UpdateView", "DashboardViews")", "api": "/items/views/edit" };
+        var saveViewPopup = "@Url.Action("SaveView", "DashboardViews")";
+        var viewDashboardUrlAction = "@Url.Action("Dashboards", "Dashboards")";
+         var dashboardSettingsUrl = "@Url.Action("DashboardSettings", "Administration")";
+        var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
+        var pinWidgetToHomepageUrl = "@Url.Action("PinWidgetToHomepage", "Boards")";
+        var updateTemplateDashboardUrl = "@Url.Action("UpdateTemplateDashboardWithCustomerData", "Dashboards")";
+        var getTemplateDashboardStatusUrl = "@Url.Action("GetTemplateDashboardStatus", "Dashboards")";
+        var triggerDashboardRenderComplete = "@Url.Action("DashboardOptions", "FileRender")";
+        var IsDashboardSessionActive = "@Url.Action("IsSessionActive", "Accounts")";
+        var pageurl = "@requestUrl.LocalPath";
+        var canEdit = @Json.Serialize(canEdit);
+        var dashboardItemDetail = @Html.Raw(Json.Serialize(itemDetail));
+        var showMyDashboards = @Json.Serialize(Convert.ToBoolean(ViewBag.ShowMyDashboards));
+        var isAdmin = @Json.Serialize(isAdmin);
+        var isPublic = @Json.Serialize(isPublic);
+        var embedConfig = @Html.Raw(Json.Serialize(embedConfig));
+        var Commentswidgets = "@Url.Action("WidgetCommentPartialView", "Comments")";
+        var editDashboardUrl = "@Url.Action("DashboardDesigner", "Designer")" + "/@itemDetail.Id";
+        var myDashboardsUrl = encodeURI("@Url.Action("Dashboards", "Dashboards")" + "?view=all");
+        var editDashboardEmbedUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var isSlideshow = @Json.Serialize(isSlideshow);
+        var parentId = "@parentId";
+        var isFavorite = "@ViewBag.IsFavorite";
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var commonImageIe = "@Url.Content("~/dashboardservice/themes/common-images/IE.png")";
+        var commonImageEdge = "@Url.Content("~/dashboardservice/themes/common-images/Edge.png")";
+        var commonImageFirefox = "@Url.Content("~/dashboardservice/themes/common-images/Firefox.png")";
+        var commonImageChrome = "@Url.Content("~/dashboardservice/themes/common-images/Chrome.png")";
+        var commonImageOpera = "@Url.Content("~/dashboardservice/themes/common-images/Opera.png")";
+        var commonImageSafari = "@Url.Content("~/dashboardservice/themes/common-images/Safari.png")";
+        var exportFormat = @Html.Raw(Json.Serialize(ViewBag.ExportFormat));
+        var cdnPath = "@dashboardDesignerResourceUrl/cdn/scripts/designer/";
+        var sharedDataSources = @Html.Raw(ViewBag.SharedDatasources);
+        var viewDetails = @Html.Raw(Json.Serialize(ViewBag.ViewDetails));
+        var isUserAuthenticatedInCurrentTenant = @Json.Serialize(isUserAuthenticatedInCurrentTenant);
+        var autosaveFilter = @Json.Serialize(globalAppSettings.SystemSettings.IsEnableAutosaveFilter);
+        var theming = @(!ServerAppConfig.IsSelfHosted ? "false" : themeInViewer ? Json.Serialize(globalAppSettings.SystemSettings.Theming) : "false");
+        var isUserAutosaveFilter = @Html.Raw(Json.Serialize(ViewBag.IsUserAutosaveFilter));
+        var hasDefaultView = @Json.Serialize(ViewBag.HasDefaultView);
+        var dashboardServerApiUrl = "@dashboardServerApiUrl";
+        var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
+        var filterQuery = @Html.Raw(Json.Serialize(filterQuery));
+        var dashboardTheme = "@(!ServerAppConfig.IsSelfHosted ? "" : themeInViewer ? ViewBag.Theme : "")";
+        var isDefaultView =  @Json.Serialize(ViewBag.IsDefaultView);
+        var isWidgetRequest = @Json.Serialize(pinWidget);
+        var widgetId = "@widgetId";
+        var multiTabUrl = "@multiTabUrl";
+        var isMultiTab  = @Json.Serialize(ViewBag.UrlHasMultiTab);
+        var multiTabId = "@ViewBag.MultiTabId";
+        var isSelfHosted = @Json.Serialize(isSelfHosted);
+        var modelLanguage = "@ViewBag.ModelLanguage";
+        var rootUrlAction = "@rootUrl";
+        var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+        var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+        var custombrandName = "@ServerAppConfig.CustomBrandName";
+        var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+        var serverAppPathBase = "@GlobalAppSettings.HttpPathBase";
+        var isUsageAnalytics = @Json.Serialize(isUsageAnalytics);
+        var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+        var parentItemId = "@ViewBag.ParentItemId";
+        var isViewNotFound = @Html.Raw(Json.Serialize(isViewNotFound));
+        var isCommentNotFound = @Html.Raw(Json.Serialize(isCommentNotFound));
+        var isInvalidComment = @Html.Raw(Json.Serialize(isInvalidComment));
+        var dashboardCustomThemename = "@dashboardCutomTheme";
+        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
+        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var getWidgetEmbedCode = @Json.Serialize(getWidgetEmbedCode);
+        var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+        var appVersion = "@ServerAppConfig.ProductVersion";
+        var isBingMapRequired = @Json.Serialize(isBingMapRequired);
+        var canCheckSessionInActive = @Html.Raw(Json.Serialize(canShowSession));
+        var isAuthenticated = @Html.Raw(Json.Serialize(isAuthenticated));
+</script>
+    <style>
+        #warning-alert, #success-alert {
+            font-family: var(--font-family);
+        }
+
+        .viewer-blue-loader {
+            display: block !important;
+        }
+
+        .displayNone {
+            display: none;
+        }
+    </style>
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body id="body" class="@bodyClass" ng-app="serverApp" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%;">
+    <div class="preloader-wrap viewer-blue-loader" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: white; z-index : 2;">
+        <div id="loader_image" align="center" style="position:relative;top:45%;">
+            <div class="loader-blue loader-icon" id="loader-icon">
+                <svg class="circular">
+                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <input id="favorite_Item" type="hidden" data-item-id="@ViewBag.ItemId" data-parent-id="@ViewBag.ParentId" data-favorite-value="@ViewBag.IsFavorite">
+    <input id="dashboard_Comment" type="hidden" data-item-id="@ViewBag.ItemId" data-category-name="@ViewBag.itemDetail.CategoryName" data-item-name="@ViewBag.itemDetail.Name">
+    <input id="isMultiDashboard" type="hidden" data-item-id="@ViewBag.IsMultiDashboard" data-parent-id="@ViewBag.ParentId">
+    <input id="is_mobile" type="hidden" value="@isMobile.ToString().ToLower()">
+    <input id="comment_Type" type="hidden" data-item-id="@ViewBag.DataItemId" data-item-type="@ViewBag.ItemType">
+    <input id="item-version" type="hidden" value="@ViewBag.Version" />
+
+    <div id="dashboard" class="ng-non-bindable"></div>
+    @if (isMobile)
+    {
+        if (!isUsageAnalytics && (!embedConfig.IsEmbedDashboard || embedConfig.HasViews || embedConfig.HasDashboardComments))
+        {
+            <nav id="server-mobile-navbar" class="navbar navbar-inverse custom-bootstrap-styles">
+                <div class="container-fluid">
+                    <ul class="nav navbar-nav col-xs-12 no-padding no-margin">
+                        <li class="@(enableComment.ToLower() == "true" && embedConfig.HasViews && embedConfig.HasDashboardComments ? "col-xs-4":"col-xs-6") icon">
+                            <a href="javascript:void(0)" class="su su-nav-dashboard active">
+                                <span class="nav-menu-label">@T["Dashboard"]</span>
+                            </a>
+                        </li>
+                        @if (enableComment.ToLower() == "true" && (!embedConfig.IsEmbedDashboard || embedConfig.HasDashboardComments))
+                        {
+                            <li class="@(embedConfig.HasViews ? "col-xs-4":"col-xs-6") icon" id="comment-li">
+                                @if (ViewBag.IsDashboardCommented == "true")
+                                {
+                                    <a href="javascript:void(0)" class="su su-with-comment server-comment">
+                                        <span class="nav-menu-label">@T["Comment"]</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="javascript:void(0)" class="su su-without-comment server-comment">
+                                        <span class="nav-menu-label">@T["Comment"]</span>
+                                    </a>
+                                }
+                            </li>
+                        }
+
+                        @if (!embedConfig.IsEmbedDashboard || embedConfig.HasViews)
+                        {
+                            <li class="@(embedConfig.HasDashboardComments && enableComment.ToLower() == "true" ? "col-xs-4":"col-xs-6") icon" id="view-li">
+                                <a href="javascript:void(0)" class="su-view">
+                                    <span class="nav-menu-label">@T["Views"]</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </nav>
+        }
+    }
+
+    @if (Context.User.Identity.IsAuthenticated && Context.User != null && Context.User.Identity != null && isUserAuthenticatedInCurrentTenant || embedConfig.IsEmbedCode)
+    {
+        <div id="commentModuleContainer" class="displayNone" style="background-color: #fff;">
+            <iframe id="commentModuleContainer_iframe" class="comment-popup-frame" data-item-id="@ViewBag.ItemId" style="height: 100%; width: 100%;"></iframe>
+            <div class="loader-blue loader-icon " id="comment-module-container-loader-icon">
+                <svg class="circular">
+                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                </svg>
+            </div>
+        </div>
+
+        <div id="widgetCommentModuleContainer" class="displayNone" style="background-color:  #fff; z-index: 1000001;">
+            <div class="loader-blue loader-icon " id="widget-comment-module-container-loader-icon">
+                <svg class="circular">
+                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                </svg>
+            </div>
+        </div>
+    }
+
+    @* ******************* Please add new iframes below this line *************** *@
+    <div id="commentImage_popup" class="col-md-12 no-padding hidden custom-bootstrap-styles" style="display: none;">
+        <div class="col-lg-12 no-padding" id="PopupContainer">
+            <div class="col-md-12">
+                <div class="col-xs-12 no-padding" style="float:right">
+                    <a href="javascript:void(0);" onclick="commentImageDialogClose()" class="PopupClose closePopupImage"><span class="su su-close"></span></a>
+                </div>
+            </div>
+            <div class="dialogBody col-xs-12 no-padding">
+                <img id="commentImage_popup_image" src="" style="width: 100%;">
+            </div>
+        </div>
+    </div>
+    <div id="pin-widget-popup" class="displayNone" data-item-id="@(parentId != null ? parentId : ViewBag.ItemId)" data-widget-id="" data-widget-name="" data-widget-type="">
+        <iframe id="pin-widget-popup-iframe" class="" style="height: 100%; width: 100%;"></iframe>
+    </div>
+    @if (!ViewData.ContainsKey("GlobalSettings"))
+    {
+        @await Html.PartialAsync("~/Views/DashboardViewerV2/_DashboardViewerScripts.cshtml", new ViewDataDictionary(ViewData) { { "GlobalSettings", ViewBag.GlobalSettings}, {"PinWidget", pinWidget } })
+    }
+    else
+    {
+        @await Html.PartialAsync("~/Views/DashboardViewerV2/_DashboardViewerScripts.cshtml", new ViewDataDictionary(ViewData) {{ "PinWidget", pinWidget }})
+    }
+
+
+
+    @if (itemDetail.IsSampleData && !isMobile && !isSlideshow && !embedConfig.IsEmbedDashboard && isUserAuthenticatedInCurrentTenant)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.min.js"></script>
+        </environment>
+
+        <div class="pull-right" id="sample-data-notification" style="display:none">
+            @if (itemDetail.CanWrite && permissions[ItemType.Datasource])
+            {
+                <button id="sample-data-button" type="button" data-placement="bottom" title="@T["This dashboard contains sample data."]" data-toggle="tooltip" class="sample-data primary-button app-btn-primary" data-access-token="@ViewBag.AccessToken" data-dashboard-id="@itemDetail.Id" data-dashboard-name="@itemDetail.Name" data-dashboard-version="@ViewBag.VersionNumber" data-authorize-url="@dataServiceUrl/v1.0/connection/authorize?provider=@(provider)&service=@(service)&token=@(ViewBag.AccessToken)&server=@(new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl())">
+                    @T["Connect Your Data"]
+                </button>
+            }
+            else
+            {
+                <button type="button" data-placement="bottom" data-html="true"  title='@T["This dashboard contains sample data."]</br>@T["You need permission to edit this dashboard and create a new data source to connect your data."]' data-toggle="tooltip" class="sample-data primary-button app-btn-primary disabled-template-button">
+                    @T["Connect Your Data"]
+                </button>
+            }
+        </div>
+    }
+</body>
+</html>

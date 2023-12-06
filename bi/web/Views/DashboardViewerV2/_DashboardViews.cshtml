@@ -1,0 +1,195 @@
+﻿@{
+    Layout = null;
+    var isMultiTab = ViewBag.MultiTabId != null && ViewBag.MultiTabId.ToString() != string.Empty;
+}
+
+<style type="text/css">
+    .options {
+        margin-top: 0px;
+    }
+
+    .tooltip {
+        position: absolute;
+        z-index: 1070;
+        display: block;
+        font-family: var(--font-family);
+        font-style: normal;
+        font-weight: normal;
+        letter-spacing: normal;
+        line-break: auto;
+        line-height: 1.42857143;
+        text-align: left;
+        text-align: start;
+        text-decoration: none;
+        text-shadow: none;
+        text-transform: none;
+        white-space: normal;
+        word-break: normal;
+        word-spacing: normal;
+        word-wrap: normal;
+        font-size: 12px;
+        opacity: 0;
+        filter: alpha(opacity=0);
+    }
+
+        .tooltip.in {
+            opacity: 0.9;
+            filter: alpha(opacity=90);
+        }
+
+        .tooltip.top {
+            margin-top: -3px;
+            padding: 5px 0;
+        }
+
+        .tooltip.right {
+            margin-left: 3px;
+            padding: 0 5px;
+        }
+
+        .tooltip.bottom {
+            margin-top: 3px;
+            padding: 5px 0;
+        }
+
+        .tooltip.left {
+            margin-left: -3px;
+            padding: 0 5px;
+        }
+
+    .tooltip-inner {
+        max-width: 200px;
+        padding: 3px 8px;
+        color: #ffffff;
+        text-align: center;
+        background-color: #000000;
+        border-radius: 4px;
+    }
+
+    .tooltip-arrow {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-style: solid;
+    }
+
+    .tooltip.top .tooltip-arrow {
+        bottom: 0;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px 5px 0;
+        border-top-color: #000000;
+    }
+
+    .tooltip.top-left .tooltip-arrow {
+        bottom: 0;
+        right: 5px;
+        margin-bottom: -5px;
+        border-width: 5px 5px 0;
+        border-top-color: #000000;
+    }
+
+    .tooltip.top-right .tooltip-arrow {
+        bottom: 0;
+        left: 5px;
+        margin-bottom: -5px;
+        border-width: 5px 5px 0;
+        border-top-color: #000000;
+    }
+
+    .tooltip.right .tooltip-arrow {
+        top: 50%;
+        left: 0;
+        margin-top: -5px;
+        border-width: 5px 5px 5px 0;
+        border-right-color: #000000;
+    }
+
+    .tooltip.left .tooltip-arrow {
+        top: 50%;
+        right: 0;
+        margin-top: -5px;
+        border-width: 5px 0 5px 5px;
+        border-left-color: #000000;
+    }
+
+    .tooltip.bottom .tooltip-arrow {
+        top: 0;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 0 5px 5px;
+        border-bottom-color: #000000;
+    }
+
+    .tooltip.bottom-left .tooltip-arrow {
+        top: 0;
+        right: 5px;
+        margin-top: -5px;
+        border-width: 0 5px 5px;
+        border-bottom-color: #000000;
+    }
+
+    .tooltip.bottom-right .tooltip-arrow {
+        top: 0;
+        left: 5px;
+        margin-top: -5px;
+        border-width: 0 5px 5px;
+        border-bottom-color: #000000;
+    }
+</style>
+
+<script>
+    var checkDefaultViewExistUrl = "@Url.Action("checkdefaultviewexist", "DashboardViews")";
+    var updateDefaultValueUrl = "@Url.Action("setorremoveasdefault", "DashboardViews")";
+    var autosaveDashboardFilterUrl = "@Url.Action("autosavedashboardfilter", "DashboardViews")";
+    var getParameterToRenderDashboardUrl = "@Url.Action("getparametertorenderdashboard", "FileRender")";
+    var isMultiTab = @Json.Serialize(isMultiTab);
+    var emptyGuid = "@Guid.Empty";
+    var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+</script>
+
+<div class="list-group server-dashboard-view custom-bootstrap-styles" id="dashboard-view-toogle" style="display: none">
+    <div class="header-section col-xs-12 no-padding">
+        <div id="header-pane" class="col-xs-10 no-padding">
+            <span class="view-heading " id="view-heading" style="display: none">
+                @T["VIEWS"]
+            </span>
+        </div>
+        <div class="col-xs-2 no-padding" id="close-container">
+            <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" style="display: none"><span class="su su-close"></span></a>
+        </div>
+    </div>
+    <nav class="list-group" style="display: none" id="dashboard-views">
+        <div id="no-filters" style="float: left; display: none">
+            <div class="cursor-default">
+                <label class="cursor-default txt-overflow">@T["No views found."]</label>
+                <br style="clear: both">
+            </div>
+        </div>
+        <div id="saved-filter" style="display: block;float: left">
+        </div>
+    </nav>
+</div>
+
+<div id="delete-div" style="display: none" class="col-lg-12 no-padding custom-bootstrap-styles">
+    <input type="hidden" id="delete_item"/>
+    <div id="PopupContainerDelete">
+        <div class="dialogBody no-padding delete-dialog-body">
+            <div>
+                <div class="deleteItem">
+                    <span id="delete-content" class="no-padding">@Html.Raw("<span>" +string.Format(T["Are you sure you want to delete the view — {0}?"].Value, "</span><span id='delete_item_name' class='delete-item-body highlight-name delete_item_name'></span>"))</span>
+                    <span style="white-space: nowrap; float: left; display: none" class="centerAlign no-padding" id="delete-confirmation">@T["View has been deleted successfully."]</span>
+                    <span style="white-space: nowrap; float: left; display: none" class="centerAlign no-padding " id="delete-error">@T["Try again later"]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="messageBox" class="custom-bootstrap-styles">
+    <div class="message-header"></div>
+    <div class="message-box-close"></div>
+    <div class="message-content text-center"></div>
+    <div class="message-box-btn-holder"></div>
+</div>

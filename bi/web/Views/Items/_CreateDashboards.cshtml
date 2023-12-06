@@ -1,0 +1,168 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var tenantInfoId = globalAppSettings.SystemSettings.TenantId;
+    var data = new List<TemplateDataSource>();
+    var permissions = Model as Dictionary<ItemType, bool>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var themeAppearanceName = globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.ThemeAppearance : "light";
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+}
+
+<!DOCTYPE html>
+<head>
+    <style>
+        #create-dashboard-popup #loader-icon {
+            position: absolute;
+            margin-left: 38px;
+        }
+
+        #create-dashboard-popup .loader-gif {
+            position: absolute;
+            top: 140px;
+        }
+
+        .display-none {
+            display: none !important;
+        }
+    </style>
+    <script>
+        var rootBaseUrl = "@Url.Content("~/")";
+        var tenantInfoId = "@tenantInfoId";
+        var getTemplateDashboardStatusUrl = "@Url.Action("GetTemplateDashboardStatus", "Dashboards")";
+        var addTemplateDashboardUrl = "@Url.Action("AddTemplateDashboard", "Dashboards")";
+        var getTemplateDashboardUrl = "@Url.Action("GetTemplateDashboards", "items")";
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        window.templatedashboardsList = @Html.Raw(Json.Serialize(@data));
+        var dataServiceUrl = "@designerServiceUrl.TrimEnd('/')";
+        window.canCreateDataSource = "@Json.Serialize(permissions[ItemType.Datasource])";
+        var serverAppPathBase = "@GlobalAppSettings.HttpPathBase";
+    </script>
+
+    <environment include="Development,CloudDevelopment">  
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
+    </environment>
+
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css" />
+        </environment>
+    }
+</head>
+<body>
+    <div id="create-dashboard-popup" class="fluent-popup display-none custom-bootstrap-styles custom-server-style">
+        <div class="create-dashboard-popup-body no-padding">
+            <div class="temp-dashboard-title">
+                <h4 class="no-margin">@T["Select Dashboard Template"]</h4>
+                <p>@T["Quickly create a dashboard with the help of dashboard templates. Choose your required connection, build a dashboard, and share with other users within minutes."]</p>
+            </div>
+            <div id="template-listing-container" class="template-listing-container" ng-app="serverApp" ng-controller="templateDashboardController">
+                <div ng-show="showLoader" class="preloader-wrap">
+                    <div id="loader_image" align="center">
+                        <div class="loader-blue loader-icon" id="loader-icon">
+                            <svg class="circular">
+                                <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 template-item no-padding">
+                    <div class="col-xs-2 template-datasource" ng-init="filter[categories]={}">
+                        <div id="template-datasource-search-area" class="col-xs-12 pull-left">
+                            <input type="text" id="template-datasource-search-items" class="pull-left no-margin" ng-model="query" placeholder="@T["Search Template"]" />
+                            <span class="su close-icon su-inner-close pull-left no-margin clear-search" ng-click="query = ''" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-item pull-left no-margin" title="@T["Search"]"></span>
+                        </div>
+                        <div class="col-xs-12 checkbox-groups no-padding">
+                            <h1 class="template-datasource-label domain-label">@T["Domains"]</h1>
+                            <ul class="datasource-list-group">
+                                <li ng-repeat="value in getItems(categories[0], templatedashboards)">
+                                    <input ng-model="filter[categories[0]][value]" class="template-dashboard-{{categories[0]}}-checkbox-{{$index + 1}}" type="checkbox" />
+                                </li>
+                            </ul>
+                            <h1 class="template-datasource-label service-label">@T["Services"]</h1>
+                            <ul class="datasource-list-group">
+                                <li ng-repeat="value in getItems(categories[1], templatedashboards)">
+                                    <input ng-model="filter[categories[1]][value]" class="template-dashboard-{{categories[1]}}-checkbox-{{$index + 1}}" type="checkbox" />
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-xs-10 template-dashboard-content-section no-padding">
+                        <div class="col-xs-12 no-padding template-dashboard-content-outer-div" ng-repeat="datasource in  filteredSamples =(templatedashboards | filter:query | filter: filterByDatasource  )">
+                            <div class="col-xs-12 template-dashboard-content-inner-div" ng-class="$last ? 'last-inner-div' : ''" ng-repeat="dashboard in datasource.Dashboards">
+                                <div class="col-xs-6 template-dashboard-image">
+                                    @if (ServerAppConfig.IsSelfHosted)
+                                    {
+                                        <img ng-src="@dashboardServerResourceUrl/cdn/css/template_dashboards/{{dashboard.ImageName | lowercase}}" />
+                                    }
+                                    else
+                                    {
+                                        <img ng-src="@(GlobalAppSettings.CdnDomain)/static/template-dashboards/v2/{{dashboard.ImageName | lowercase}}" />
+                                    }
+                                    <span class="su su-maximize temp-image-maximize"></span>
+                                </div>
+                                <div class="col-xs-6 template-dashboard-content">
+                                    <h4 class="template-dashboard-name">{{dashboard.ShowCaseName}}</h4>
+                                    <p class="template-dashboard-description">{{dashboard.Description}}</p>
+                                    <img class="service-image" title="{{datasource.Name}}" data-toggle="tooltip" ng-src="@globalAppSettings.SystemSettings.CDNLink.TrimEnd('/')/cdn/css/designer/@themeAppearanceName.Trim()/images/datasource/{{datasource.Provider | lowercase}}/{{datasource.Service | lowercase}}.png" />
+                                    <div class="template-dashboard-buttons-div">
+                                        <button ng-if="canCreateDataSource && !IsNullorWhitespace(dashboard.Type)" data-authorize-url="@designerServiceUrl.TrimEnd('/')/v1.0/connection/authorize?provider={{datasource.Provider}}&service={{datasource.Service}}&type={{dashboard.Type}}&token={{accessToken}}&server=@(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl())"
+                                                class="template-dashboard-add-button primary-button app-btn-primary" data-access-token="{{accessToken}}"
+                                                data-category-name="{{datasource.Provider}}" data-template-filename="{{dashboard.FileName}}"
+                                                data-template-description="{{dashboard.Description}}" data-template-name="{{dashboard.Name}}"
+                                                data-connection-provider="{{datasource.Provider}}" data-connection-service="{{datasource.Service}}"
+                                                data-type="{{dashboard.Type}}" type="button">
+                                            @T["Connect your data"]
+                                        </button>
+                                        <button ng-if="canCreateDataSource && IsNullorWhitespace(dashboard.Type)" data-authorize-url="@designerServiceUrl.TrimEnd('/')/v1.0/connection/authorize?provider={{datasource.Provider}}&service={{datasource.Service}}&token={{accessToken}}&server=@(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl())"
+                                                class="template-dashboard-add-button primary-button app-btn-primary" data-access-token="{{accessToken}}"
+                                                data-category-name="{{datasource.Provider}}" data-template-filename="{{dashboard.FileName}}"
+                                                data-template-description="{{dashboard.Description}}" data-template-name="{{dashboard.Name}}"
+                                                data-connection-provider="{{datasource.Provider}}" data-connection-service="{{datasource.Service}}"
+                                                type="button">
+                                            @T["Connect your data"]
+                                        </button>
+
+                                        <button ng-show="!canCreateDataSource" class="template-dashboard-add-button primary-button app-btn-primary disabled-template-button" type="button" disabled
+                                                title="@T["You need permission to create a new data source to connect your data."]" data-toggle="tooltip" data-container="body">
+                                            @T["Connect your data"]
+                                        </button>
+
+                                        <button class="add-sample-data-dashboard" ng-class="canCreateDataSource ? 'secondary-button app-btn-secondary' : 'primary-button app-btn-primary'" data-category-name="{{datasource.Provider}}"
+                                                data-template-filename="{{dashboard.FileName}}" data-access-token="{{accessToken}}"
+                                                data-template-description="{{dashboard.Description}}" data-template-name="{{dashboard.Name}}"
+                                                data-connection-provider="{{datasource.Provider}}" data-connection-service="{{datasource.Service}}"
+                                                type="button">
+                                            @T["Load with sample data"]
+                                        </button>
+                                    </div>
+                                    <span id="connect-data" class="process-notify display-none">@T["Waiting for authorization..."]</span>
+                                    <span id="load-sample-data" class="process-notify display-none">@T["Your dashboard is being prepared. We will notify you once the dashboard is ready."]</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-filter-division" ng-show="!filteredSamples.length">
+                            <p id="empty-filter">@T["No templates found."]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-dashboard-image-popup" class="modal">
+        <span class="create-dashboard-image-popup-close">&times;</span>
+        <img id="create-dashboard-image-popup-content">
+    </div>
+</body>

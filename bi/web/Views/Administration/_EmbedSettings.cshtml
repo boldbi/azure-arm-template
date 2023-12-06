@@ -1,0 +1,121 @@
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Embed Settings"].Value+ " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var embedEnabled = Convert.ToBoolean(ViewBag.EmbedSettings);
+    var embedSecretCode = globalAppSettings.SystemSettings.EmbedSecret;
+    var isGenerate = string.IsNullOrWhiteSpace(embedSecretCode);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.EmbedLogin);
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var embdConfigHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.EmbedConfig);
+    var pageDescription = T["Configuration for the Embedded Dashboards."];
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/embed-settings.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/embed-settings.min.css" />
+    </environment>
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-settings.min.js"></script>
+    </environment>
+}
+
+
+@section MainSection{
+    <script>
+        var isGenerate = "@isGenerate";
+        var isResetEmbedSecretUrl = "@Url.Action("ResetEmbedSecret", "Administration")";
+        var updateSystemSettingsValueUrl = "@Url.Action("UpdateSystemSettingValue", "Administration")";
+        var getEmbedConfigDashboardDetailUrl = "@Url.Action("GetEmbedConfigDashboardDetailUrl", "Administration")";
+        var downloadEmbedConfigJsonUrl = "@Url.Action("DownloadEmbedConfigJSON", "Administration")";
+        var addSampleDashboardUrl = "@Url.Action("AddSampleItem", "Administration")";
+    </script>
+
+    @await Html.PartialAsync("_AdminMenu")
+<div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") top-nav-header-without-btn">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Embed Settings"] }, { "PageDescription", @pageDescription } })
+</div>
+<div id="embed-settings-container" class="bi-page-container  @(ViewBag.Embed ? string.Empty : "unlock-enterprise-features blur-content") @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div id="embed-settings-body" class="col-xs-12 bi-page-body">
+            <div class="embed-authentication col-xs-12 no-padding">
+                <div class="material-switch inline-align">
+                    <input type="checkbox" id="restrict-embed-enabled" @(embedEnabled ? "checked" : string.Empty) />
+                    <label for="restrict-embed-enabled" class="label-primary"></label>
+                </div>
+                <div class="app-textbox-label inline-align activation">
+                    @T["Enable embed authentication"]
+                </div>
+                <div class="embed-loader inline-align">
+                    <span class="loader-align"></span>
+                </div>
+            </div>
+            <div id="get-secret-code" class="input-field-wrapper col-xs-12 no-padding">
+                <label class="app-textbox-label activation">
+                    @T["Embed secret"]
+                </label>
+                <div class="info-message">@string.Format(T["Anyone with access to the secret key may create a {0} to access the dashboard, as any user, with any options. Keep embed authentication disabled if you are not using it."].Value, "URL")</div>
+                <div class="secret-code-container">
+                    <div id="secret-code-link">
+                        <input type="text" id="secret-code" name="" class="form-control" placeholder="@T["Embed secret"]" autocomplete="off" disabled="disabled" onClick="this.setSelectionRange(0, this.value.length)" readonly>
+                        <div class="form-control su su-copy text focus" id="secret-code-copy" disabled="disabled" data-original-title="@T["Click to copy"]"></div>
+                    </div>
+                    <button type="button" title="" id="get-embed-code" onclick="getEmbedSecret();" class="primary-button app-btn-primary" @(embedEnabled ? string.Empty : "disabled")>
+                        @if (isGenerate)
+                        {
+                            @T["Generate Secret"]
+                        }
+                        else
+                        {
+                            @T["Regenerate"]
+                        }
+                    </button>
+                    <div class="bg-warning secret-code-notification">
+                        @T["Store the secret key somewhere safe. As soon as you navigate away from this page, we will not be able to retrieve or restore this generated secret."]
+                    </div>
+                </div>
+                <div class="info-message" style="padding-top: 10px;">
+                    <span class="note-label">@T["Note:"]</span>
+                        <span>@string.Format(T["You can use this Embed Secret code to render in {0} based Embedding and Single Sign-On authentication {1} based Embedding"].Value, "Javascript", "Iframe")</span>
+                </div>
+            </div>
+        </div>
+        <div id="get-embed-config" class="row input-field-wrapper">
+            <div class="col-xs-8 field-container-dashboard">
+                <label class="app-textbox activation">
+                    @T["Embed Configuration"]
+                </label>
+                <div class="message">@Html.Raw(string.Format(T["{0} file will be exported with the details required for basic Dashboard Embedding. You can use this {0} file to run the {1} sample available {2}here{3}."].Value, "JSON", ".NET core", "<a class='app-hyperlink' href='" + helpSiteBaseUrl + embdConfigHelpSiteUrl + "' target='_blank'>", "</a>"))</div>
+                <div class="generate-code-container">
+                    <button type="button" title="" id="gen-embed-config" class="primary-button app-btn-primary" @(!embedEnabled ? "disabled" : string.Empty)>
+                        @T["Download"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+
+<div id="create-presentation-popup" style="display:none;">
+        <div id="create-presentation-div">
+            @{ await Html.RenderPartialAsync("~/Views/Administration/_EmbedConfigDialog.cshtml");}
+        </div>
+</div>
+
+    @if (!ViewBag.Embed)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

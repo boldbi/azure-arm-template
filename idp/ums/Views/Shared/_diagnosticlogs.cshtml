@@ -1,0 +1,24 @@
+﻿<script>
+    var getDiagnosticLogsUrl = "@Url.Action("GetDiagnosticLogs", "Administration")";
+</script>
+<div id="download-logs-dialog-content" class="custom-template"></div>
+<div id="download-logs-dialog" class="" style="visibility: hidden">
+    <p>@T[$"Please note that these logs only contain diagnostic logs required for {AppBranding.Bold.ProductName} and {AppBranding.BoldReports.ProductName} applications, and do not contain any of your organizational data. When reporting product-related issues, kindly download and attach the logs to your support ticket."]</p>
+    <div id="download-logs-dialog-dropdown-container" class="col-xs-12">
+        @Html.Label("download-logs-dialog-dropdown", "Select a time period", new { @class = "col-xs-12 download-logs-dialog-dropdown-label" })
+        @Html.DropDownList("download-logs-dialog-dropdown", new List<SelectListItem>
+           {
+        new SelectListItem{Text="All", Value=((int)(Interval.All)).ToString(), Selected = true},
+        new SelectListItem{Text="Last 1 Hour", Value=((int)(Interval.Last1Hour)).ToString()},
+        new SelectListItem{Text="Last 24 Hour", Value=((int)(Interval.Last24Hour)).ToString()},
+        new SelectListItem{Text="Last 7 Days", Value=((int)(Interval.Last7Days)).ToString()},}, new { id = "download-logs-dialog-dropdown", @class = "col-xs-12", data_live_search = "false" })
+        <div>
+            @Html.CheckBox("is-include-configuration", new { @class = "material-checkbox", @id = "is-include-configuration" })
+            @Html.Label("is-include-configuration",T["Include configuration files"].Value)
+        </div>
+    </div>
+    <div id="download-logs-dialog-buttons" class="col-xs-12">
+        <button id="download-logs-dialog-cancel" class="secondary-button pull-right">@T["Cancel"]</button>
+        <button id="download-logs-dialog-proceed" class="primary-button pull-right">@T["Download Diagnostic Logs"]</button>
+</div>
+</div>

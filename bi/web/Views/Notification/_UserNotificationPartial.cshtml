@@ -1,0 +1,164 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var idPAvatarUrl = globalAppSettings.SystemSettings.IDPUrl + "/User/Avatar";
+    var displayNameElement = "<span class='notification-display-name'>{{item.DoneByFullName}}</span>";
+}
+
+<script>
+    var userSystemnotificationUrl = "@Url.Action("getnotificationsonrequest", "notification")";
+    var viewUrl = "@Url.Action("Dashboards", "Dashboards")";
+    var viewWidgetUrl = "@Url.Action("widgets", "widgets")";
+</script>
+
+<div id="user-notification-container" ng-app="serverApp" ng-controller="UserNotificationController" class="col-xs-12 no-padding" style="display:none">
+    <div class="notification-header col-xs-12">
+        <span class="su su-arrow-back" onclick="closeUserNotification()"></span>
+        <span class="notification-title">@T["Notifications"]</span>
+        <a ng-show="notifications.length != 0" class="notification-setting-link ng-hide" href="@(Url.Action("Profilepage", "User").TrimEnd('/') + "?tab=profile-notifications")">@T["SETTINGS"]</a>
+    </div>
+    <div id="notification-content" class="notification-content-container-partial col-xs-12 no-padding" onscroll="onNotificationScroll()">
+        <ul ng-if="notifications.length!=0" id="notification-list-ul" class="notification-list-ul" ng-repeat="(key, value) in notifications | groupBy: valueGroupBy">
+            <div class="notification-sub-heading">{{key}}</div>
+            <li ng-repeat="item in value" notification-repeat-directive>
+                <div class="notification-tile">
+                    <div class="notification-tile-div1">
+                        <div class="profile-pic-tag" data-id={{item.DoneByIdPId}} data-type="user" data-display-name={{item.DoneByFullName}} data-image-size="24" data-toggle="tooltip" title={{item.DoneByFullName}} data-placement="top"></div>
+                        <span ng-switch="item.LogTypeId" class="notification-display-content">
+                            <span ng-switch-when="@((int) ItemCommentLogType.Added)">
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard) ">@T["You have commented on the dashboard"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget) ">@T["You have commented on the widget"]</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard) ">@Html.Raw(string.Format(T["{0} has commented on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget) ">@Html.Raw(string.Format(T["{0} has commented on the widget"].Value, displayNameElement))</span>
+                            </span>
+                            <span ng-switch-when="@((int) ItemCommentLogType.Edited)">
+
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@T["You have edited your comment on the dashboard"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@T["You have edited your comment on the widget"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@T["You have edited a comment on the dashboard"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@T["You have edited a comment on the widget"]</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has edited your comment on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has edited your comment on the widget"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has edited a comment on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has edited a comment on the widget"].Value, displayNameElement))</span>
+
+                            </span>
+                            <span ng-switch-when="@((int) ItemCommentLogType.Deleted)">
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@T["You have deleted your comment on the dashboard"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@T["You have deleted your comment on the widget"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@T["You have deleted a comment on the dashboard"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@T["You have deleted a comment on the widget"]</span>
+
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has deleted your comment on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has deleted your comment on the widget"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has deleted a comment on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.CommentOwner != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has deleted a comment on the widget"].Value, displayNameElement))</span>
+                            </span>
+                            <span ng-switch-when="@((int) ItemCommentLogType.UserMention)">
+                                <span ng-if="item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has mentioned you in the comment on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has mentioned you in the comment on the widget"].Value, displayNameElement))</span>
+                            </span>
+                            <span ng-switch-when="@((int) ItemCommentLogType.Replied)">
+
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.ParentCommentDetail.UserId == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@T["You have replied to your comment on the dashboard"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.ParentCommentDetail.UserId == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@T["You have replied to your comment on the widget"]</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.ParentCommentDetail.UserId != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["You have replied to {0}'s comment on the dashboard"].Value,"<span class='notification-display-name'>{{item.ParentCommentDetail.UserDisplayName}}</span>"))</span>
+                                <span ng-if="item.DoneById == item.CurrentUserId && item.ParentCommentDetail.UserId != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["You have replied to {0}'s comment on the widget"].Value,"<span class='notification-display-name'>{{item.ParentCommentDetail.UserDisplayName}}</span>"))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.ParentCommentDetail.UserId == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has replied to your comment on the dashboard"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.ParentCommentDetail.UserId == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has replied to your comment on the widget"].Value, displayNameElement))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.ParentCommentDetail.UserId != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard)">@Html.Raw(string.Format(T["{0} has replied to {1}'s comment on the dashboard"].Value, displayNameElement,"<span class='notification-display-name'>{{item.ParentCommentDetail.UserDisplayName}}</span>"))</span>
+                                <span ng-if="item.DoneById != item.CurrentUserId && item.ParentCommentDetail.UserId != item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget)">@Html.Raw(string.Format(T["{0} has replied to {1}'s comment on the widget"].Value, displayNameElement,"<span class='notification-display-name'>{{item.ParentCommentDetail.UserDisplayName}}</span>"))</span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="notification-link">
+                        <span class="notification-type-icon">
+                            <span class="su su-without-comment"></span>
+                        </span>
+                        <span ng-switch="item.ItemTypeId" class="notification-link-content">
+                            <span ng-switch-when="@((int) ItemType.Dashboard)">
+                                <a target="_blank" class="notification-item-link" href="{{getNotificationUrl(item)}}">{{item.ItemName}}</a>
+                            </span>
+                            <span ng-switch-when="@((int) ItemType.Widget)">
+                                <span ng-if="item.WidgetDetail==null || item.WidgetDetail.length == 0">
+                                    <a target="_blank" class="notification-item-link" href="{{getNotificationUrl(item)}}">{{item.ItemName}}</a>
+                                </span>
+                                <span ng-if="item.WidgetDetail!=null || item.WidgetDetail.length != 0">
+                                   @Html.Raw(string.Format(T["{0} in dashboard {1}"].Value, "<a target='_blank' class='notification-item-link' href='{{getNotificationUrl(item)}}'>{{item.ItemName}}</a><span>", "</span><a target='_blank' class='notification-item-link' href='{{getNotificationUrl(item)}}'>{{item.WidgetDetail[0].DashboardItemName }}</a>"))
+                                </span>
+                            </span>
+                            <span ng-switch-default>
+                                {{item.ItemName}}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="time-option">
+                        <span id="tooltip_dom{{$index}}" ng-if="item.IsToday && timerMinutes+item.MinutesAgo<60" class="notification-period" title="{{item.UpdatedDateString}}" data-html="false" data-toggle="tooltip" data-placement="right" data-container="body">
+                            <span ng-if="timerMinutes+item.MinutesAgo==0" class="notification-period">
+                                <span ng-bind="returnString('@T["Just now"]')"></span>
+                            </span>
+                            <span ng-if="timerMinutes+item.MinutesAgo!=0 && timerMinutes+item.MinutesAgo!=1" class="notification-period">
+                                <span ng-bind="timerMinutes+getInitMinutes(item.MinutesAgo)" class="timer-class"></span>
+                                <span ng-bind="returnString('@T["Minutes ago"]')"></span>
+                            </span>
+                            <span ng-if="timerMinutes+item.MinutesAgo!=0 && timerMinutes+item.MinutesAgo==1" class="notification-period">
+                                <span ng-bind="returnString('@T["A minute ago"]')" class="timer-class"></span>
+                            </span>
+                        </span>
+                        <span id="tooltip_dom{{$index}}" ng-if="item.IsToday && timerMinutes+item.MinutesAgo>=60" class="notification-period" title="{{item.UpdatedDateString}}" data-html="false" data-toggle="tooltip" data-placement="right" data-container="body">
+                            <span ng-if="timerMinutes+item.MinutesAgo<120" class="notification-period">
+                                <span ng-bind="returnString('@T["An hour ago"]')"></span>
+                            </span>
+                            <span ng-if="timerMinutes+item.MinutesAgo>=120" class="notification-period">
+                                <span ng-bind="getInitHours(timerMinutes+item.MinutesAgo,item)"></span>
+                                <span ng-bind="returnString('@T["Hours ago"]')"></span>
+                            </span>
+                        </span>
+                        <span id="tooltip_dom{{$index}}" ng-if="!item.IsToday && item.TimeAgo.toLowerCase().includes('yesterday')" class="notification-period" title="{{item.UpdatedDateString}}" data-html="false" data-toggle="tooltip" data-placement="right" data-container="body">
+                            <span class="notification-period" ng-bind="getInitDays(item)">
+                            </span>
+                        </span>
+                        <span id="tooltip_dom{{$index}}" ng-if="!item.IsToday && !item.TimeAgo.toLowerCase().includes('yesterday')" class="notification-period">
+                            <span class="notification-period" ng-bind="item.UpdatedDateString">
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div id="user-notification-loader" ng-show="isNotificationLoading" class="ng-hide">
+            <svg x="0px" y="0px" width="24px" height="30px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+                <rect x="0" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                    <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.8s" repeatCount="indefinite" />
+                 </rect>
+                <rect x="8" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                    <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.8s" repeatCount="indefinite" />
+                 </rect>
+                <rect x="16" y="10" width="4" height="10" fill="#0565FF" opacity="0.2">
+                    <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.8s" repeatCount="indefinite" />
+                </rect>
+            </svg>
+        </div>
+        <div ng-if="isFinal && notifications.length!=0 && notifications.length>=20" id="no-more-notification-info" class="additional-content col-xs-12">
+            <div>
+                <h5>@T["No more notifications found"]</h5>
+            </div>
+        </div>
+        <div ng-show="notifications.length==0 && isNotificationLoaded" id="no-notification-info" class="additional-content ng-hide">
+            <div>
+                <img src="@GlobalAppSettings.CdnDomain/static/default-pages/v1/notifications.svg" loading="lazy" />
+                <h5>@T["Notification"]</h5>
+                <p>@T["When your team starts working on things, notifications will show up here."]</p>
+                <a href="@(Url.Action("Profilepage", "User").TrimEnd('/') + "?tab=profile-notifications")">@T["Notification settings"]</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="user-notification-backdrop" style="display: none;"></div>

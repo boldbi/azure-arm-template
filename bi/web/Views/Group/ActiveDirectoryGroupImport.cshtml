@@ -1,0 +1,234 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+
+    ViewBag.Title = String.Format(T["{0} Groups Import"].Value, ViewBag.AdImportGroup ? "Active Directory" : "Azure AD") + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = null;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportAzureAdGroups);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var tab = "/user-directory-settings" + (ViewBag.AdImportGroup ? "" : "?tab=azure-ad");
+    @if (ViewBag.AdImportGroup)
+    {
+        ViewBag.PageHeader = @String.Format(T["Import Groups — {0}"].Value, "Active Directory");
+        ViewBag.PageDescription = @String.Format(T["Select groups to import from {0}."].Value, "Active Directory");
+    }
+    else
+    {
+        ViewBag.PageHeader = @String.Format(T["Import Groups — {0}"].Value, "Azure AD");
+        ViewBag.PageDescription = @String.Format(T["Select groups to import from {0}."].Value, "Azure AD");
+    }
+    ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
+    ViewBag.BackIconTitle = T["Groups"];
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/group-active-directory.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/group-active-directory.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/group-active-directory.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/group-active-directory.min.js"></script>
+    </environment>
+    @if (ViewBag.AdImportGroup)
+    {
+        <script>
+            var saveSelectedActiveDirectoryGroupsUrl = "@Url.Action("SaveSelectedActiveDirectoryGroups", "group")";
+            var searchActiveDirectoryGroupsUrl = "@Url.Action("SearchActiveDirectoryGroups", "group")";
+        </script>
+    }
+    else
+    {
+        <script>
+            var saveSelectedActiveDirectoryGroupsUrl = "@Url.Action("SaveSelectedAzureADGroups", "Group")";
+            var searchActiveDirectoryGroupsUrl = "@Url.Action("SearchAzureADGroups", "Group")";
+        </script>
+    }
+}
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+
+    <script type="text/x-jsrender" id="user-detail-validation">
+        {{if IsDuplicated}}
+        <span class="su su-login-error group-import-validation" title="{{:DisplayMessage}}" data-html="true" data-toggle="tooltip" data-placement="left"></span>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="group-name-template">
+        <span title="{{:~renderDoubleQuotes(GroupName)}}" class="grid-content" data-toggle="tooltip">
+            {{:GroupName}}
+        </span>
+    </script>
+
+    <script type="text/x-jsrender" data-toggle="tooltip" id="group-description-template">
+        <span title="{{:~renderDoubleQuotes(GroupDescription)}}" class="grid-content" data-toggle="tooltip">
+            {{:GroupDescription}}
+        </span>
+    </script>
+    <script type="text/x-jsrender" id="checkbox-row-template">
+        {{if IsDuplicated}}
+        <input disabled type="checkbox" class="checkbox-row-disabled material-checkbox" name="checkbox-row-disabled" data-checked-id="{{:GroupId}}" id="row-check{{:GroupId}}" />
+        <input name="row-check{{:GroupId}}" type="hidden" value="false">
+        <label for="row-check{{:GroupId}}"> </label>
+        {{else}}
+        <input type="checkbox" class="checkbox-row material-checkbox" name="checkbox-row" data-checked-id="{{:GroupId}}" id="row-check{{:GroupId}}" />
+        <input name="row-check{{:GroupId}}" type="hidden" value="false">
+        <label for="row-check{{:GroupId}}"> </label>
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="checkbox-header-template">
+        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
+        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
+    </script>
+
+    <script type="text/x-jsrender" id="name-header">
+        <div class="item-header">@T["Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="description-header">
+        <div class="item-header">@T["Description"]</div>
+    </script>
+    <script type="text/x-jsrender" id="group-id-header">
+        <div class="item-header">@T["group id"]</div>
+    </script>
+
+    <script type="text/javascript">
+            @if (ViewBag.AdImportGroup)
+            {
+                <text>
+            var data = ej.DataManager({
+                url: "@Url.Action("SearchActiveDirectoryGroups", "group")",
+                adaptor: new ej.UrlAdaptor()
+            });
+            </text>
+            }
+            else
+            {
+                <text>
+            var data = ej.DataManager({
+                url: "@Url.Action("SearchAzureADGroups", "group")",
+                adaptor: new ej.UrlAdaptor()
+            });
+            </text>
+            }
+
+            ej.support.stableSort = false;
+            GridLocalization(window.Server.App.Localization.GroupResourceEmpty);
+        $(function () {
+                $("#ad-group-import").val("");
+                addPlacehoder("#search-area");
+                $("#Grid").ejGrid({
+                    dataSource: data,
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    enableAltRow: false,
+                    enableRowHover: true,
+                    allowSorting: true,
+                    allowSelection: true,
+                    allowScrolling: false,
+                    allowFiltering: false,
+                    allowSearching: true,
+                    locale: "en-US",
+                    selectionType: ej.Grid.SelectionType.Multiple,
+                    filterSettings: { filterType: "menu" },
+                    pageSettings: { pageSize: 20 },
+                    selectionSettings: { selectionMode: ["row"] },
+                    actionComplete: "fnActionComplete",
+                    create: "fnCreate",
+                    recordClick: "fnRecordClick",
+                    actionBegin: "fnOnADGroupGridActionBegin",
+                    rowDataBound: function () {
+                        $("input.checkbox-row-disabled").parents("tr").addClass("row-disabled");
+                    },
+
+                    dataBound: function (args) {
+                        $("#checkbox-header").change(headCheckboxOnChange);
+                        $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                        this.model.indexes = {}; /* Additional property*/
+
+                    },
+                    columns: [
+                        { headerTemplateID: "#checkbox-header-template", template: true, templateID: "#checkbox-row-template", textAlign: ej.TextAlign.Center, width: 5 },
+                        { field: "GroupName", cssClass: "group-name", headerText: "@T["Name"]", templateID: "#group-name-template", headerTemplateID: "#name-header", width: 30, type: "string" },
+                        { field: "GroupDescription", cssClass: "desc", headerText: "@T["Description"]", templateID: "#group-description-template", headerTemplateID: "#description-header", width: 50, type: "string" },
+                        { field: "GroupId", cssClass: "item-id", headerText: "@T["group id"]", headerTemplateID: "#group-id-header", width: 10, visible: false },
+                        { field: "", width: 5, templateID: "#user-detail-validation", allowFiltering: false }
+                    ]
+                });
+                $.views.helpers({
+                    renderDoubleQuotes: function (inputString) {
+                        return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+                    }
+                });
+            });
+    </script>
+    <div class="col-xs-12 no-padding no-margin width-alignment">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection")
+        </div>
+        <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <input type="button" disabled="" value="@T["Import groups"]" title="@T["Import the selected groups from the list"]" onclick="SaveActiveDirectoryGroups()" id="import-button" class="primary-button app-btn-primary pull-right pull-right" />
+                </div>
+                <div id="search-area" class="pull-left col-xs-4">
+                    <input type="text" id="ad-group-import" class="pull-left no-margin" placeholder="@T["Search groups"]" autocomplete="off" />
+                    <span class="su close-icon su-inner-close pull-left no-margin" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-icon pull-left no-margin " title="@T["Search"]"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="active-directory-container bi-page-container col-xs-12 @(ViewBag.ThirdPartyLogins ? string.Empty : "unlock-enterprise-features blur-content") bg-grid">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div class="import-active-directory">
+                <div class="col-md-12 col-xs-12 bi-page-body">
+                    <div class="col-md-12 col-xs-12 no-padding no-margin">
+                        <div class="col-md-8 col-xs-8 group-import-header">
+                            <span class="directory-path no-padding">
+                                @(ViewBag.AdImportGroup ? T["Directory Path"] : T["Tenant Name"]) :<input type="hidden" name="url" value="@(ViewBag.AdImportGroup ? ViewBag.ActiveDirectory.LdapUrl : ViewBag.ActiveDirectory.TenantName)">
+                            </span>
+                            <span class="no-padding">
+                                @(ViewBag.AdImportGroup ? ViewBag.ActiveDirectory.LdapUrl : ViewBag.ActiveDirectory.TenantName)<a href="@Url.Action("Administration", "Administration")@tab" title="@String.Format(T["Update {0} Configuration settings"].Value, "Active Directory")" class="link-button app-btn-link">@T["Modify"]</a>
+                            </span>                              
+                            <div class="error-message no-padding">@TempData["ErrorMessage"]</div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 no-padding user-data-grid">
+                        <span class="import-message">
+                            @T["Please search and select the groups from the following list to import"]
+                        </span>
+                        <div class="col-xs-12 no-padding no-margin">
+                            <div class="list" id="grid-validation-messages pull-left">
+                                <div class="col-xs-12">
+                                    <span id="grid-nodata-validation" class="grid-nodata-validation no-padding">@T["There is no data in the uploaded file. Please check and try uploading again."]</span>
+                                    <span id="grid-validation" class="grid-validation no-padding">@Html.Raw(String.Format(T["{0} group(s) has been imported successfully."].Value, "<span id='groupcount' class='groupcount'>" + ViewBag.UserCount + "</span>"))</span>
+                                    <span id="grid-error-validation" class="grid-error-validation no-padding">@T["Duplicate or Invalid data is found. Please change the data accordingly and re-import."] </span>
+                                    <span id="empty-validation" class="validation-message pull-right empty-validation no-padding">@T["Please select group(s) to import"]</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="grid-container" class="col-xs-12 no-padding">
+                            <div class="col-md-12 no-padding ">
+                                <div id="Grid" class="grid">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-5 no-padding"></div>
+            <div class="col-xs-7 no-padding"></div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    <input type="hidden" name="AllUserList" id="all-user-list" value="@ViewBag.Pathname" />
+    <input type="hidden" id="user-count" data-value="@ViewBag.UserExists" />
+    <input type="hidden" id="csv-file-error" data-value="@ViewBag.result" />
+
+    @await Html.PartialAsync("../UserManagement/_LimitUserCreation")
+    @if (!ViewBag.ThirdPartyLogins)
+    {
+        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
+    }
+}

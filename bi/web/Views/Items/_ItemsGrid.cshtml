@@ -1,0 +1,727 @@
+﻿@inject ServerPrincipal _identityResponse
+@using Newtonsoft.Json
+@{
+    var refreshDisabledContent = T["Refresh Disabled"];
+    var failureAttempt = T["Failure at "];
+    var gridName = ViewBag.gridName;
+    var permissionData = ViewBag.Permissions;
+    var userId = _identityResponse.User.UserId;
+    var globalAppSettings = _globalAppSettings;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var query = ViewBag.SearchQuery;
+    var theme = ViewBag.Theme;
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var schemes = customUI?.Profiles != null && customUI.Profiles[0].DataSources != null ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].DataSources.Scheme).FirstOrDefault() : null;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var providerTypeUrl = dashboardDesignerResourceUrl + "/cdn/css/designer" + theme;
+}
+<script>
+    var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
+    var moveIframeUrl = "@Url.Action("moveviewitem", "items")";
+    var versionIframeUrl = "@Url.Action("itemversion", "items")";
+    var deleteConfirmationUrl = "@Url.Action("deleteconfirmation", "items")";
+    var deleteItemUrl = "@Url.Action("deleteitem", "items")";
+    var editFilePopupUrl = "@Url.Action("getfiledetails", "files")";
+    var makePublicUrl = "@Url.Action("makeitempublic", "items")";
+    var removePublicUrl = "@Url.Action("RemovePublic", "items")";
+    var designerUrl = "@Url.Action(globalAppSettings.SystemSettings.InstallationFolder + "dashboarddesigner.exe", "dashboarddesigner")";
+    var favoriteItemUrl = "@Url.Action("MakeFavorite", "items")";
+    var addWidgetUrl = "@Url.Action("addwidget", "widgets")";
+    var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
+    var checkDashboardCreationLimit = "@Url.Action("CheckDashboardCreationLimit", "Designer")";
+    var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
+    var linkedDashboardViewUrl = "@Url.Action("viewlinkeddashboards", "datasources", new { dataSourceId = " " })";
+    var i_am_ie9 = false;
+    var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
+</script>
+<!--[if LT IE  10]>
+        <script>
+            i_am_ie9 = true;
+        </script>
+    <![endif]-->
+
+<div id="items">
+</div>
+
+<script type="text/x-jsrender" id="itemnameheader">
+    <div class="item-name">@T["Name"]</div>
+</script>
+<script type="text/x-jsrender" id="descriptionheader">
+    <div class="item-header">@T["Description"]</div>
+</script>
+<script type="text/x-jsrender" id="categoryheader">
+    <div class="item-header">@T["Category"]</div>
+</script>
+<script type="text/x-jsrender" id="ownerheader">
+    <div class="item-header">@T["Owner"]</div>
+</script>
+<script type="text/x-jsrender" id="displayname">
+    <div class="item-header">@T["Data Type"]</div>
+</script>
+<script type="text/x-jsrender" id="last-modified-header">
+    <div class="item-header">@T["Last Modified"]</div>
+</script>
+<script type="text/x-jsrender" id="data-rows-header">
+    <div class="item-header">@T["Data Rows"]</div>
+</script>
+<script type="text/x-jsrender" id="data-status-header">
+    <div class="item-header">@T["Data Refresh Status"]</div>
+</script>
+<script type="text/x-jsrender" id="description">
+    <div class="item-description grid-content" title="{{:~renderDoubleQuotes(Description)}}" data-toggle="tooltip" data-placement="top">
+        <span>
+            {{:Description}}
+        </span>
+    </div>
+</script>
+
+<script type="text/x-jsrender" id="category">
+    <span title="{{:CategoryName}}" data-toggle="tooltip" data-placement="top">
+        {{:CategoryName}}
+    </span>
+</script>
+
+<script type="text/x-jsrender" id="createdbydisplayname">
+    <span title="{{:CreatedByDisplayName}}" data-toggle="tooltip" data-placement="top">
+        {{:CreatedByDisplayName}}
+    </span>
+</script>
+
+<script type="text/x-jsrender" id="modifieddate">
+    <span title="{{:ModifiedDate}}" data-toggle="tooltip" data-placement="top">
+        {{:ModifiedDate}}
+    </span>
+</script>
+
+<script type="text/x-jsrender" id="data-source-display-name">
+    {{if DatasourceType == "@((int)ConnectionMode.FailedToFetch)"}}
+        <div>
+            <span class="failed data-refresh-status su-schedule-status"></span><span>@T["Failed to fetch"]</span>
+        </div>
+    {{else}}
+        {{if DisplayName == "Unknown"}}
+            <img class="service-image"
+                 title="@T["Please edit and save the data source again in order to obtain the data type of this data source."]" data-toggle="tooltip" src="@providerTypeUrl/images/datasource/{{:ProviderType}}/{{:IconName}}.png" style="width:20px;height:20px">
+            <span title="@T["Please edit and save the data source again in order to obtain the data type of this data source."]" data-toggle="tooltip" data-placement="top">
+                {{:DisplayName}}
+            </span>
+        {{else}}
+            <img class="service-image" title="{{:DisplayName}}" data-toggle="tooltip" src="@providerTypeUrl/images/datasource/{{:ProviderType}}/{{:IconName}}.png" style="width:20px;height:20px">
+            <span title="{{:DisplayName}}" data-toggle="tooltip" data-placement="top">
+                {{:DisplayName}}
+            </span>
+        {{/if}}
+    {{/if}}
+</script>
+
+<script type="text/x-jsrender" id="itemname">
+    {{if ItemType=="2"}}
+    <div class="item-name no-left-margin grid-content" title="{{:Name}}" data-toggle="tooltip" data-placement="top">
+        {{if ItemType=="2"}}
+        <span><a href="{{:~urlEncode(CategoryName, Name)}}" target="_blank">{{:Name}}</a></span>
+        {{else ItemType=="8"}}
+        <span><a href="{{:~widgetUrlEncode(Name)}}" target="_blank">{{:Name}}</a></span>
+        {{else ItemType=="1"}}
+        <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:Name}}" target="_blank">{{:Name}}</a></span>
+        @*{{else ItemType=="@((int)ItemType.File)"}}
+            <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" target="_blank">{{:Name}}</a></span>*@
+        {{else}}
+        <span>{{:Name}}</span>
+        {{/if}}
+    </div>
+    {{else}}
+    <div class="item-name grid-content" title="{{:Name}}" data-toggle="tooltip" data-placement="top">
+        {{if ItemType=="2"}}
+        <span><a href="{{:~urlEncode(CategoryName, Name)}}" target="_blank">{{:Name}}</a></span>
+        {{else ItemType=="8"}}
+        <span><a href="{{:~widgetUrlEncode(Name)}}" target="_blank">{{:Name}}</a></span>
+        {{else ItemType=="1"}}
+        <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:Name}}" target="_blank">{{:Name}}</a></span>
+        @*{{else ItemType=="@((int)ItemType.File)"}}
+            <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" target="_blank">{{:Name}}</a></span>*@
+        {{else ItemType=="@((int)ItemType.Datasource)" && IsDraft}}
+        <span class="datasource-name">{{:Name}}</span>
+        <span class="badge badge-secondary1 badge-secondary2">@T["Draft"]</span>
+        {{else}}
+        <span>{{:Name}}</span>
+        {{/if}}
+    </div>
+    {{/if}}
+</script>
+
+<script type="text/x-jsrender" id="options">
+    <div class="dropdown context-menu @(schemes != null && !schemes.ContextMenu ? "hide" : string.Empty)">
+        <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+            <i class="su su-options"></i>
+        </span>
+        <ul class="dropdown-menu" role="menu">
+
+            {{if CanDownload}}
+            {{if ~checkMobile()}}
+            {{if ItemType=="@((int)ItemType.File)"}}
+            <li>
+                <a href="javascript:void(0);" title="" ispublic="{{:IsPublic}}" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" class="get-link option-click" data-url="{{:~fileUrlEncode(Id)}}">
+                    <i class="su su-link"></i>
+                    <span>@T["Get Link"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+
+            {{if ItemType=="@((int)ItemType.File)"}}
+            <li>
+                @*<a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download Report"]</span>
+            </a>
+            {{else ItemType=="@((int)ItemType.Dashboard)" }}
+            <a href="@UrlHelper.GenerateUrl("DashboardDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:CategoryName}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download Dashboard"]</span>
+            </a>
+            {{else}}*@
+                @*<a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeString}}/{{:Name}}" title="">
+                <i class="su su-download"></i>
+                <span>@T["Download"]</span>
+            </a>*@
+            </li>
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if @(permissionData[ItemType.Dashboard].ToString().ToLower()) == true && !IsDraft}}
+            <li class="@(schemes != null && !schemes.CreateDashboard ? "hide" : string.Empty)">
+                <a href="@Url.Action("DashboardDesigner", "Designer")?datasourceId={{:Id}}" target="_blank" class="create-dashboard-using-datasource" title="@T["Create dashboard using this Data Source"]" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                    <i class="su su-nav-dashboard"></i>
+                    <span>@T["Create Dashboard"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider @(schemes != null && !schemes.CreateDashboard ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)"}}
+            <li class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
+                <a href="@Url.Action("Index", "DataSourceDesigner")?datasourceId={{:Id}}" title="" target="_blank">
+                    <i class="su su-edit"></i>
+                    <span>@T["Edit Data Source"]</span>
+                </a>
+            </li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Edit ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            <li class="@(schemes != null && !schemes.Info ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="item-info">
+                    <i class="su su-info"></i>
+                    <span>@T["Info"]</span>
+                </a>
+            </li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Info ? "hide" : string.Empty)"></li>
+            {{/if}}
+
+            {{if ItemType == "@((int)ItemType.Datasource)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.Preview ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" id="item-preview" data-item-id="{{:Id}}">
+                    <i class="su su-data-preview" style="padding: 0px 8px;">
+                        <span class="su su-data-preview path1" style="font-size:14px"></span>
+                    </i>
+                    <span>@T["Preview Data"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Preview ? "hide" : string.Empty)"></li>
+            {{/if}}
+            @*{{if ItemType == "@((int)ItemType.Datasource)"}}
+            @if (ServerAppConfig.IsSelfHosted)
+            {
+                <li class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
+                    <a href="javascript:void(0);" title="" id="edit-table-column" data-item-id="{{:Id}}">
+                        <i class="su su-update-schema" style="padding: 0px 8px;">
+                        </i>
+                        <span>@T["Update Schema"]</span>
+                    </a>
+                </li>
+                <li role="separator" class="divider @(schemes != null && !schemes.Edit ? "hide" : string.Empty)"></li>
+            }
+            {{/if}}*@
+            {{if ItemType == "@((int)ItemType.Datasource)"}}
+            <li>
+                <a href="javascript:void(0);" class="get-embed-code-option-click">
+                    <i class="su su-embed"></i>
+                    <span>@T["Get Embed code"]</span>
+                </a>
+            </li>
+            {{if !IsDraft}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Edit ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.RefreshData ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="refresh-data" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                    <i class="su su-refresh"></i>
+                    <span>@T["Refresh Data"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
+            <li class="@(schemes != null && !schemes.RefreshSetting ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="edit-schedule" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                    <i class="su su-nav-schedule"></i>
+                    <span>@T["Refresh Settings"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if !IsDraft}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)"}}
+            <li>
+                <a href="javascript:void(0);" title="" class="refresh-history" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}">
+                    <i class="su su-refresh-history"></i>
+                    <span>@T["Refresh History"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if !IsDraft}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)"}}
+            <li>
+                <a href="javascript:void(0)" title="" class="view-linked-dashboard" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                    <i class="su su-view-linked-dashboard"></i>
+                    <span>@T["View Linked Dashboards"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if !IsLocked}}
+            {{if ~checkMobile()}}
+            {{if CanCopy}}
+            {{if !IsDraft}}
+            <li class="@(schemes != null && !schemes.Copy ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="copyItem" data-action='Copy' data-itemId="{{:Id}}" data-itemname="{{:Name}}">
+                    <i class="su su-copy"></i>
+                    <span>@T["Copy Data Source"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Copy ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if (CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Datasource].ToString().ToLower()) == true) && !IsDraft}}
+            <li class="@(schemes != null && !schemes.Publish ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" class="publish-datasource">
+                    <i class="su su-publish"></i>
+                    <span>@T["Publish"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider @(schemes != null && !schemes.Publish ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if (CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Datasource].ToString().ToLower()) == true) && !IsDraft}}
+            {{if ItemType=="@((int)ItemType.File)"}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Share ? "hide" : string.Empty)"></li>
+            {{/if}}
+            <li class="@(schemes != null && !schemes.Share ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" class="item-permissions" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                    <i class="su su-manage-permission"></i>
+                    <span>@T["Sharing Permissions"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+
+            {{if @*CanDownload ||*@ CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true}}
+            {{if !IsDraft}}
+            <li role="separator" class="divider  @(schemes != null && !schemes.VersionHistory ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if !IsDraft}}
+            <li class="@(schemes != null && !schemes.VersionHistory ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" class="version-button" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                    <i class="su su-versions"></i>
+                    <span>@T["Version History"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if CanWrite || CanDelete || ItemType=="@((int)ItemType.Report)"}}
+            {{/if}}
+            {{/if}}
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType=="@((int)ItemType.Dashboard)"}}
+            <li role="separator" class="divider @(schemes != null && !schemes.UpdateDashboard ? "hide" : string.Empty)"></li>
+            <li class="@(schemes != null && !schemes.UpdateDashboard ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="item-edit" data-item-id="{{:Id}}">
+                    <i class="su su-edit"></i>
+                    <span>@T["Update Dashboard"]</span>
+                </a>
+            </li>
+            @*{{else}}
+        <li>
+            <a href="javascript:void(0);" title="" class="item-edit" data-item-id="{{:Id}}">
+                <i class="su su-edit"></i>
+                <span>@T["Update"]</span>
+            </a>
+        </li>*@
+            {{/if}}
+            {{/if}}
+            {{/if}}
+            @*{{if CanWrite}}
+        {{if ~checkMobile()}}
+        {{if ItemType=="@((int)ItemType.Dashboard)"}}
+        <li>
+            <a href="javascript:void(0);" title="" class="update-datasource" data-item-id="{{:Id}}">
+                <i class="su su-datasource"></i>
+                <span>@T["Update Data Source(s)"]</span>
+            </a>
+        </li>
+        {{/if}}
+        {{/if}}
+        {{/if}}*@
+
+            {{if ~checkMobile()}}
+            {{if CanDelete}}
+            <li role="separator" class="divider @(schemes != null && !schemes.Delete ? "hide" : string.Empty)"></li>
+            <li class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
+                {{if ItemType=="@((int)ItemType.Datasource)"}}
+                <a href="javascript:void(0);" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-datasource-type="{{:DatasourceType}}">
+                    <i class="su su-delete"></i>
+                    <span>@T["Delete"]</span>
+                </a>
+                {{else}}
+                <a href="javascript:void(0);" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                    <i class="su su-delete"></i>
+                    <span>@T["Delete"]</span>
+                </a>
+                {{/if}}
+            </li>
+            {{/if}}
+            {{/if}}
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-jsrender" id="data-rows">
+    {{if DatasourceType=="@((int)ConnectionMode.Extract)"}}
+    <span title="{{:RowCount}}" data-toggle="tooltip" data-placement="top">
+        {{:RowCount}}
+    </span>
+    {{else}}
+    <span>&#45;</span>
+    {{/if}}
+</script>
+
+<script type="text/x-jsrender" id="data-status">
+    {{if DatasourceType=="@((int)ConnectionMode.Extract)"}}
+    <div>
+        {{if ScheduleStatus=="@((int)ScheduleStatus.Success)"}}
+        <div>
+            {{if !IsScheduleEnabled}}
+                <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value,"{{:LastAttemptAt}}"))" data-status="success" title="@T["Refresh Disabled"]">
+                    <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'success'}}"></span>
+                    <Span class="data-refresh">@T["Refresh Disabled"]</Span>
+                </span>
+                <div class="success-refresh">
+                    <Span class="lastsuccessful">@Html.Raw(String.Format(T["Last Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
+                </div>
+            {{else}}
+                <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="success" data-status="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))" data-refresh-status="success" title="@Html.Raw(String.Format(T["Successful at {0}"].Value,"{{:LastAttemptAt}}"))">
+                    <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'success'}}"></span>
+                    <Span class="data-refresh">@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
+                </span>
+                <div class="success-refresh hide">
+                    <Span class="lastsuccessful">@Html.Raw(String.Format(T["Last Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
+                </div>
+            {{/if}}
+        </div>
+        {{else ScheduleStatus=="@((int)ScheduleStatus.Fail)"}}
+        <div>
+            <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["Failure at {0}"].Value,"{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
+                <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
+                {{if !IsScheduleEnabled}}
+                       <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                  {{else}}
+                       <span class="data-refresh">@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
+                 {{/if}}
+            </span>
+            {{if LastSuccessfulAttemptAt != null}}
+            <div>
+                <span class="last-successful" data-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value,"{{:LastSuccessfulAttemptAt}}"))">
+                    @Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))
+                </span>
+            </div>
+            {{/if}}
+        </div>
+        {{else ScheduleStatus=="@((int)ScheduleStatus.Run)"}}
+        <div>
+            <span data-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Refresh Started at {0}"].Value, "{{:LastAttemptAt}}"))">
+                <span class="refresh-started data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
+                <span>@Html.Raw(String.Format(T["Refresh Started at {0}"].Value, "{{:LastAttemptAt}}"))</span>
+            </span>
+            {{if LastSuccessfulAttemptAt != null}}
+            <div>
+                <span class="last-successful" data-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value,"{{:LastSuccessfulAttemptAt}}"))">
+                    @Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))
+                </span>
+            </div>
+            {{/if}}
+        </div>
+        {{else !IsScheduleConfigured}}
+        <div>
+            <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="not-refreshed" data-last-attempt="" data-status="refreshnotconfigured" title="@T["Refresh schedule not configured"]">
+                <span class="not-refreshed data-refresh-status su su-schedule-status"></span>
+                <span class="data-refresh">@T["Refresh schedule not configured"]</span>
+            </span>
+        </div>
+        {{else}}
+        <div>
+            <span class="refresh-data" data-toggle="tooltip" data-placement="top" data-icon="not-refreshed" data-last-attempt="" data-status="notrefreshed" title="{{:!IsScheduleEnabled ? "@T["Refresh Disabled"]" : "@T["Not refreshed yet"]" }}">
+                <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'not-refreshed'}}"></span>
+                {{if !IsScheduleEnabled}}
+                     <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                {{else}}
+                     <span class="data-refresh">@T["Not refreshed yet"]</span>
+                {{/if}}
+            </span>
+        </div>
+        {{/if}}
+    </div>
+    {{else DatasourceType=="@((int)ConnectionMode.ExtractWithoutRefresh)"}}
+    <div>
+        <span class="not-applicable data-refresh-status su su-schedule-status"></span>
+        <span>NA</span>
+    </div>
+    {{else DatasourceType=="@((int)ConnectionMode.MergeDataSource)"}}
+    <div>
+        <span class="not-applicable data-refresh-status su su-schedule-status"></span>
+        <span>@T["Combined Data Source"]</span>
+    </div>
+    {{else DatasourceType=="@((int)ConnectionMode.Live)"}}
+    <div>
+        <span class="live-connection data-refresh-status su-schedule-status"></span>
+        <span  data-toggle="tooltip" data-placement="top" title="@T["Live Connection"]">@T["Live Connection"]</span>
+    </div>
+    {{else}}
+    <div>
+        <span class="failed data-refresh-status su-schedule-status"></span>
+        <span>@T["Failed to fetch"]</span>
+    </div>
+    {{/if}}
+</script>
+<div id="ItemAction" title="@T["Item Actions"]" class="no-padding"></div>
+<div><iframe id="hiddeniframe" src="" style="display:none"></iframe></div>
+<input type="hidden" id="applauncherinputhidden" style="width:0;margin:0;border:0;height:0; display:inherit" />
+
+<script type="text/javascript" language="javascript">
+    var gridName = $('#item-grid-container').attr("data-grid-name");
+    var toolbarItems = [{ templateID: "#openTemplate" }, { templateID: "#openwithdashboarddesignerTemplate" }, { templateID: "#DownloadTemplate" }, { templateID: "#Separator1" }, { templateID: "#can-edit-template" }, { templateID: "#can-delete-template" }, { templateID: "#separator2" }, { templateID: "#move-template" }, { templateID: "#copy-template" }, { templateID: "#clone-template" }, { templateID: "#separator3" }, { templateID: "#schedule-template" }, { templateID: "#Separator4" }, { templateID: "#VersionTemplate" }];
+    var categoryName = "@Context.Request.Query["categoryName"]".toString();
+    var filters = { filterType: "menu" };
+    if (gridName == "dashboards" && categoryName != "") {
+        var filters = { filterType: "menu", "filteredColumns": [{ field: "CategoryName", operator: "equal", value: categoryName }] };
+    }
+    if ("@query" != "") {
+         var gridObj = $("#items").data("ejGrid");
+         var filters = { filterType: "menu", "filteredColumns": [{ field: "Name", operator: "equal", value: "@query" }] };
+    }
+
+
+    $(document).ready(function () {
+        ej.support.enableLocalizedSort = true;
+        GridLocalization();
+        $("#items").ejGrid({
+            dataSource: ej.DataManager({ url: "@Url.Action("GetItems", (string)gridName)", adaptor: "UrlAdaptor" }),
+            gridLines: ej.Grid.GridLines.None,
+            allowPaging: true,
+            pageSettings: { pageSize: 20 },
+            allowSorting: true,
+            enableAltRow: false,
+            allowSearching: true,
+            allowFiltering: true,
+            allowSelection: true,
+            filterSettings: filters,
+            actionBegin: "fnActionBegin",
+            actionComplete: "fnActionComplete",
+            rowSelecting: function (args) {
+                if (args.target.hasClass("favoriteItem")) {
+                    args.cancel = true;
+                }
+            },
+            rowDataBound: function () {
+                var height = $(".e-gridcontent").height();
+                if (height != null) {
+                    rowBound();
+                }
+            },
+            dataBound: function (args) {
+                if (location.pathname.toLowerCase() === "/" || location.pathname.split("/")[location.pathname.split("/").length - 1].toLowerCase() == "dashboards") {
+                    refreshScroller();
+                }
+                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+            },
+            enableRowHover: true,
+            columns: [
+                {
+                    headerText: "@T["Name"]",
+                    template: true,
+                    headerTemplateID: "#itemnameheader",
+                    templateID: "#itemname",
+                    field: "Name",
+                    cssClass: gridName == "dashboards" ? "align-name" : "",
+                    width: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)) ? 55 : 80,
+                    type: "string",
+                    allowFiltering: true
+                },
+                {
+                    headerText: "@T["Description"]",
+                    width: gridName == "datasources" ? 70 : 120,
+                    template: true,
+                    headerTemplateID: "#descriptionheader",
+                    field: "Description",
+                    templateID: "#description",
+                    type: "string",
+                    allowFiltering: true,
+                    visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1040))
+                },
+                {
+                    headerText: "@T["Category"]",
+                    width: 70,
+                    field: "CategoryName",
+                    headerTemplateID: "#categoryheader",
+                    visible: (("@isMobile.ToString().ToLower()" == "false") && (window.innerWidth > 1040) && (gridName == "dashboards")),
+                    allowFiltering: true,
+                    template: true,
+                    templateID: "#category",
+                    type: "string"
+                },
+                {
+                    headerText: "@T["Owner"]",
+                    width: (window.innerWidth > 1200) ? 60 : 50,
+                    headerTemplateID: "#ownerheader",
+                    field: "CreatedByDisplayName",
+                    visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)),
+                    allowFiltering: true,
+                    template: true,
+                    templateID: "#createdbydisplayname",
+                    type: "string"
+                },
+                {
+                    headerText: "@T["Data Type"]",
+                    width: (window.innerWidth > 1200) ? 60 : 50,
+                    field: "DisplayName",
+                    visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)),
+                    allowFiltering: true,
+                    template: true,
+                    headerTemplateID: "#displayname",
+                    templateID: "#data-source-display-name",
+                },
+                {
+                    headerText: "@T["Last Modified"]",
+                    width: gridName == "datasources" ? 50 : 70,
+                    field: "ModifiedDate",
+                    visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)),
+                    template: true,
+                    headerTemplateID: "#lastmodifiedheader",
+                    templateID: "#modifieddate",
+                    allowFiltering: false
+                },
+                {
+                    headerText: "@T["Data Refresh Status"]",
+                    width: 85,
+                    field: "ModifiedDate",
+                    visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200) && (gridName == "datasources")),
+                    template: true,
+                    headerTemplateID: "#data-status-header",
+                    templateID: "#data-status",
+                    allowFiltering: false
+                },
+                {
+                    template: true,
+                    templateID: "#options",
+                    width: (window.innerWidth > 1200) ? 15 : 25,
+                    allowFiltering: false,
+                    allowSorting: false
+                }
+            ]
+        });
+
+        $.views.helpers({
+            urlEncode: function (category, item) {
+                return encodeURI("@Url.Action("Index", "FileRender")/" + category + "/" + item);
+            },
+            widgetUrlEncode: function (item) {
+                return encodeURI("@Url.Action("widgets", "FileRender")/" + item);
+            },
+            fileUrlEncode: function (item) {
+                return encodeURI("@Url.Action("Download", "Files")/" + item + "?compress=true");
+            },
+            checkMobile: function () {
+                return ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1040));
+            },
+            checkTablet: function () {
+                return window.innerWidth > 900;
+            },
+            renderDoubleQuotes: function (inputString) {
+                return inputString.replace(new RegExp("\"", 'g'), '&quot;');
+            },
+            refreshEncode: function (IsScheduleEnabled, LastAttemptAt) {
+                return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
+            }
+        });
+        
+        $.views.converters("toLowerCase", function (name) {
+            if (name != null) {
+                name = String(name).trim();
+                if (name !== '') {
+                    return name.toLowerCase();
+                }
+            }
+            return '';
+        });
+    });
+</script>
+
+@await Html.PartialAsync("../Items/_ItemInfo")
+@if (!isMobile)
+{
+    @await Html.PartialAsync("../Items/_PublishDashboard")
+    @await Html.PartialAsync("../Items/_GetExternalSites")
+    @await Html.PartialAsync("../Items/_CopyItem")
+}

@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewBag.Title = "EmailActivityLogs";
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.min.js"></script>
+    </environment>
+}
+
+<script type="text/javascript">
+    var filterEmailLogsUrl = "@Url.Action("GetEmailLogs", "Administration")";
+    var emailSettingsPagePermissionUrl = "@Url.Action("CheckAdminPagePermission", "Administration")";
+    var emailActivityLogDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+    var emailActivityLogTimeFomat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
+</script>
+
+<div class="filter-section">
+    <div class="col-sm-3 col-xs-3 date-picker no-padding">
+        <input type="text" name="email-log-filter-date-range" class="form-control full-width" id="datePicker">
+    </div>
+    <div class="dropdown email-settings-drop-down col-xs-12">
+        @Html.DropDownList("emailEvent", ViewBag.EmailEvent as IEnumerable<SelectListItem>, new { id = "email-event", @class = "selectpicker form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["All Event"].Value, data_live_search = "true", data_live_search_placeholder = T["Search"].Value })
+    </div>
+    <button type="button" id="email-log-filter-apply-button" class="btn apply-button">@T["Apply"]</button>
+</div>
+
+<div id="emailActivityLogGrid" class="col-lg-12 no-padding dialog-override">
+</div>
+<script type="text/x-jsrender" id="options">
+    <span title="@T["View"]" data-toggle="dropdown">
+        <a href="javascript:void(0);" class="email-log-info" data-email>
+            <span>@T["View"]</span>
+        </a>
+    </span>
+</script>
+<script>
+    GridLocalization(window.Server.App.Localization.EmailActivityLogsEmpty);
+    $("#emailActivityLogGrid").ejGrid({
+        dataSource: ej.DataManager({ url: "@Url.Action("GetEmailLogs", "Administration")", adaptor: "UrlAdaptor" }),
+        gridLines: ej.Grid.GridLines.None,
+        allowPaging: true,
+        pageSettings: { pageSize: 20 },
+        allowSorting: true,
+        enableAltRow: false,
+        allowSearching: true,
+        allowFiltering: true,
+        allowSelection: true,
+        filterSettings: { filterType: "menu" },
+        actionBegin: "fnActionBegin",
+        toolbarSettings: { showToolbar: false, toolbarItems: [ej.Grid.ToolBarItems.Search] },
+        rowDataBound: function () {
+            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+        },
+        dataBound: function () {
+            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+        },
+        columns: [
+            { field: 'Event', headerText: "@T["Event"]", type: "string", width: 120, allowFiltering: false, allowSorting: true },
+            { field: 'ModifiedDateString', headerText: "@T["Date"]", type: "string", width: 80, allowFiltering: false, allowSorting: true },
+            { field: 'RecipientEmail', headerText: "@T["Recipient"]", type: "string", width: 120, allowFiltering: true, allowSorting: true },
+            { field: 'InitiatedBy', headerText: "@T["Initiated By"]", type: "string", width: 120, allowFiltering: false, allowSorting: true },
+            { field: 'Status', headerText: "@T["Status"]", type: "string", width: 80, allowFiltering: true, allowSorting: false },
+            {
+                template: true,
+                allowSorting: false,
+                headerText: "@T["Actions"]",
+                templateID: "#options",
+                width: 75,
+                allowFiltering: false
+            }
+        ]
+    });
+</script>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailActivityLog.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailActivityLog.min.js"></script>
+</environment>

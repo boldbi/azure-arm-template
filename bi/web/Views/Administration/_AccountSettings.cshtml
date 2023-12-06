@@ -1,0 +1,107 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Manage Account Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.AccountSiteSettings);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var pageDescription = T["Configuration for managing user accounts."];
+    var disableEmailActivation = globalAppSettings.SystemSettings.CustomUI?.Profiles != null && globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings?.UserActivation != null ? globalAppSettings.SystemSettings.CustomUI.Profiles[0].Settings.UserActivation.DisableEmailActivation : false;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+    </environment>
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-settings.min.js"></script>
+    </environment>
+    <script type="text/javascript">
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var SystemSettingsProperties = @Html.Raw(Json.Serialize(ViewBag.SystemSettings));
+        var checkMailSettingUrl = "@Url.Action("CheckMailSettingsExist", "Administration")";
+        var emailActivation = "@ActivationType.EmailActivation";
+        var updateAccountsSettingsUrl = "@Url.Action("UpdateAccountsSettings", "Administration")";
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+<div id="user-settings-header" class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Accounts Settings"] }, { "PageDescription", @pageDescription } })
+    <div class="col-xs-12 bi-page-header top-nav-btn-secton">
+        <div class="col-xs-12 no-padding">
+            <div class="col-xs-6 no-padding button-section">
+                <a href="@Url.Action("Index","Home")" class="secondary-button app-btn-secondary pull-right" id="UpdateSystemSettingsCancel-bottom" title="">@T["Cancel"]</a>
+                <button type="button" title="" id="UpdateSystemSettings-bottom" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+                    <span>@T["Save"]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="user-settings-container" class="bi-page-container @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+    <div class="bi-page-content col-xs-12 no-padding">
+        <div class="col-xs-12 bi-page-body">
+            <form id="acc-activate-setting" name="accActivationSettingsForm" class="col-xs-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+                <div class="account-activation-container col-xs-12 no-padding">
+                    <div class="col-xs-12 no-padding">
+                        <label class="account-field-label activation">@T["Account Activation Mode"]</label>
+                    </div>
+                    <div class="activation-mode" id="automatic">
+                        <input type="radio" id="automatic-account-activation" name="activation" class="css-radio" value=@ActivationType.AutomaticActivation @((int)ViewBag.ActivationType == (int)ActivationType.AutomaticActivation ? "checked" : string.Empty) />
+                        <label for="automatic-account-activation" class="radio-btn-label notransition" id="labelautomatic">@T["Automatic"]</label>
+                    </div>
+                    <div class="activation-mode" id="email">
+                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled" : string.Empty) />
+                        <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
+                    </div>
+                    @if (@ViewBag.EmailSettingResult == "failure")
+                    {
+                        <div class="bg-warning email-settings-validation validation-errors">
+                            @T["Activation emails cannot be sent until the email settings are configured. You can select 'Automatic Activation' to activate the user without configuring the email settings."]
+                        </div>
+                    }
+                </div>
+                <div class="col-xs-12 no-padding email-container">
+                    <div class="col-xs-12 no-padding">
+                        <label class="account-field-label is-email-required">@T["User Email"]</label>
+                        <div class="info-message">@T["This setting controls whether an email address is required for creating new users or not."]</div>
+                    </div>
+                    <div class="email-not-required activation-mode" id="not-required">
+                        <input type="radio" id="email-not-required" name="email-required" class="css-radio" value="false" @(!globalAppSettings.SystemSettings.IsEmailRequired ? "checked" : string.Empty) @(globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled" : string.Empty) />
+                        <label for="email-not-required" class="radio-btn-label notransition @(globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled-lable-color" : string.Empty)" id="label-email-not-required">@T["Not Required"]</label>
+                    </div>
+                    <div class="email-not-required activation-mode" id="required">
+                        <input type="radio" id="email-required" name="email-required" class="css-radio" value="true" @(((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation || globalAppSettings.SystemSettings.IsEmailRequired) ? "checked" : string.Empty) />
+                        <label for="email-required" class="radio-btn-label notransition" id="label-email-required">@T["Required"]</label>
+                    </div>
+                    <div class="col-xs-12 no-padding">
+                        <div id="email-required-warning" class="bg-warning email-settings-validation validation-errors hide">
+                            @T["When the account activation preference is email, an email address is mandatory for activating the account."]
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+}

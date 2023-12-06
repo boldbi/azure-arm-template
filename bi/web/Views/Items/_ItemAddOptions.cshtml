@@ -1,0 +1,72 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
+    var model = Model as Dictionary<ItemType, bool>;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var isNotHomepage = requestUrl.LocalPath.ToLower() != Url.Action("Index", "Home");
+    var showCreate = model[ItemType.Dashboard] || model[ItemType.Category] || model[ItemType.Schedule] || model[ItemType.Slideshow] || model[ItemType.Datasource];
+    var showUpload = model[ItemType.Dashboard] && (GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier || emailAddress.EndsWith("@syncfusion.com", StringComparison.OrdinalIgnoreCase) || emailAddress.Equals(ServerAppConfig.AppSettings.Syncfusion.Support.ConciergeEmail)) && isNotHomepage;
+    var showImport = model[ItemType.Dashboard] && requestUrl.LocalPath.ToLower() == Url.Action("Dashboards", "Dashboards") && isNotHomepage;
+    var isDashboardsPage = ViewBag.IsDashboardsPage != null && ViewBag.IsDashboardsPage;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var absoluteUrl = requestUrl.AbsolutePath.ToString().ToLower();
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+	<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <title>
+        @ViewBag.Title
+    </title>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    <script>
+	        var canCreateDashboard = @Json.Serialize(model[ItemType.Dashboard]);
+	        var isCategoryExistUrl = "@Url.Action("iscategoryexist", "category")";
+	        var addCategoryUrl = "@Url.Action("addcategory", "category")";
+	        var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
+	        var getCategoryItem = "@Url.Action("RefreshCategoryList", "Dashboards")";
+	        var editcategoryUrl = "@Url.Action("editcategory", "category")";
+	        var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
+    </script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
+    </environment>
+
+    @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0))
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.min.css" />
+        </environment>
+    }
+	</head>
+	<body>
+    @if (model[ItemType.Category])
+	    {
+	        @await Html.PartialAsync("../Items/_AddCategory")
+	    }
+
+	    @if (isDashboardsPage)
+	    {
+	        @await Html.PartialAsync("../Items/_EditCategory")
+	    }
+	</body>
+</html>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+</environment>

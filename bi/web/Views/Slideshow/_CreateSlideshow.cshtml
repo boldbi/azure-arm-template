@@ -1,0 +1,168 @@
+﻿@{
+    Layout = null;
+    var canCreateCategory = ViewBag.CanCreateCategory != null ? ViewBag.CanCreateCategory : false;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+}
+
+<!DOCTYPE html>
+<head>
+    <title>@T["Create Slideshow"]</title>
+    <script>
+        var checkSlideshowNameExistUrl = "@Url.Action("IsslideshowNameExist", "Slideshow")";
+        var createSlideShowUrl = "@Url.Action("AddSlideshow", "Slideshow")";
+        var getCreateSlideShowDetailUrl = "@Url.Action("GetCreateSlideshowDetail", "Slideshow")";
+        var geteditSlideshowDetailUrl = "@Url.Action("GetEditSlideshowDetail", "Slideshow")";
+        var checkMultiTabDashboardNameExistUrl = "@Url.Action("IsMultiTabDashboardNameExist", "Slideshow")";
+        var createMultiTabDashboardUrl = "@Url.Action("AddMultiTabDashboard", "Dashboards")";
+        var editMultiTabDashboardUrl = "@Url.Action("EditMultiTabDashboard", "Dashboards")";
+        var getCreateMultiTabDashboardDetailUrl = "@Url.Action("GetCreateMultiTabDashboardDetail", "Slideshow")";
+        var geteditMultiTabDashboardDetailUrl = "@Url.Action("GetEditMultiTabDashboardDetail", "Slideshow")";
+        var canCreateCategory = @Json.Serialize(canCreateCategory);
+    </script>
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.min.js"></script>
+    </environment>
+
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-slideshow.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-slideshow.min.css" />
+        </environment>
+    }
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+
+<div class="overflow-none create-presentation-popup" id="create-presentation-container">
+    <div class="modal col-xs-12 no-padding" tabindex="-1" role="dialog" style="display:none">
+        <div class="modal-dialog col-xs-12 popup-header no-padding" role="document">
+            <div class="modal-content no-padding col-xs-12" id="slideshow-popup-container" data-spy="scroll">
+                <div class="col-xs-12 modal-header no-padding">
+                    <div class="col-xs-11 no-padding">
+                        <span id="multitab-icon" class="su su-multi-tabbed"></span>
+                        <span class="modal-title popup-title slideshow-popup-title ellipsis col-xs-10" data-container='presentation-container'>@T["Create Slideshow"]</span>
+                    </div>
+                    <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1  no-padding pull-right">
+                        <a href="javascript:void(0);" title="@T["Close"]" data-toggle='tooltip' data-placement="left" class="create-presentation-popup-close pull-right popup-close">
+                            <span class="su su-close"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-body col-xs-12 no-padding">
+                    <div id="presentation-container" class="col-xs-12 create-presentation-container no-padding">
+                        <div class="col-xs-5 slideshow-name form-row no-padding">
+                            <span class="form-label col-xs-12">
+                                @T["Name"]
+                                <span class="mandatory">*</span>
+                            </span>
+                            <span class="form-field col-xs-12">
+                                <input type="text" id="slideshow-name" autofocus name="slideshowName" class="form-control text" tabindex="1" data-maxlength="255">
+                                <span id="name-validation-message" style="display:none" class="ErrorMessage"></span>
+                            </span>
+                        </div>
+                        <div class="col-xs-6 category-field form-row no-padding">
+                            <span class="form-label col-xs-12">
+                                @T["Category"]
+                                <span class="mandatory">*</span>
+                            </span>
+                            <span class="form-field col-xs-12">
+                                <select class="selectpicker" id="select-multitab-category" data-size="5" data-live-search="true" title='@T["Select multitab dashboard category"]' style="width: 100%; margin-bottom: 15px;" data-none-results-text = "@T["No results match"]">
+                                    <option value="" selected="selected" disabled="disabled">@T["Select Category"]</option>
+                                </select>
+                                @if (canCreateCategory)
+                                {
+                                    <span class="add-new-button">
+                                        <button class="btn btn-default" id="add-new-category" type="button" title="@T["Add new Category"]" data-toggle="tooltip"><span class="su-add"></span></button>
+                                    </span>
+                                }
+                                <span id="multi-tab-category-validation-message" style="display:none" class="ErrorMessage"></span>
+                            </span>
+                        </div>
+                        <div class="col-xs-7 duration-field form-row no-padding">
+                            <span class="form-label col-xs-12">
+                                @T["Duration (Min: 5 & Max: 300 secs)"]
+                                <span class="mandatory">*</span>
+                            </span>
+                            <span class="form-field col-xs-12">
+                                <input id="loop_interval" type="text" name="duration" class="form-control text" tabindex="2" min="5" max="300" maxlength="3">
+                                <span id="duration-validation-message" style="display:none" class="ErrorMessage"></span>
+                            </span>
+                        </div>
+                        <div class="col-xs-12">
+                            <div class="col-xs-12 no-padding display-dashboard">
+                                <div id="add-dashboard-widgets" class="col-xs-12 no-padding">
+                                    <div class="col-xs-12 add-dashboard-widgets-button">
+                                        <a class="add-button-content" href="javascript:void(0)" tabindex="3">
+                                            <span class="su su-add"></span>
+                                            <span class="add-btn-text">@T["Add Dashboards"]</span>
+                                        </a>
+                                    </div>
+                                    <div class="item-dropdown-container col-xs-12 no-padding" style="display: none">
+                                        <div id="item-dropdowns" class="col-xs-10 no-padding">
+                                            <div class="form-field col-xs-3 item-type-dropdown">
+                                                <select class="selectpicker" id="select_type" style="width: 100%; margin-bottom: 15px;">
+                                                    <option value="@((int)ItemType.Dashboard)" selected="selected">@T["Dashboards"]</option>
+                                                    @*<option value="@((int)ItemType.Widget)">@T["Widgets"]</option>*@
+                                                </select>
+                                            </div>
+                                            <div class="form-field col-xs-4 slide-category-dropdown">
+                                                <select class="selectpicker" id="select_category" data-size="5" data-live-search="true" title='@T["Select category"]' style="width: 100%; margin-bottom: 15px;" data-none-results-text="@T["No results match"]">
+                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select category"]</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-field slide-dashboard-dropdown col-xs-5" style="display: none">
+                                                <select class="selectpicker" id="select_dashboard" data-size="5" data-live-search="true" title='@T["Select dashboard"]' style="width: 100%; margin-bottom: 15px;" data-none-results-text="@T["No results match"]">
+                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select dashboard"]</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-field slide-childdashboard-dropdown col-xs-4" style="display: none">
+                                                <select id="select_childdashboard" data-live-search="true" title='@T["Select tab"]' name="childdashboardId" class="selectpicker" data-size="5" data-none-results-text="@T["No results match"]">
+                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select tab"]</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-field slide-view-dropdown col-xs-4" style="display: none">
+                                                <select id="select_view" data-live-search="true" title='@T["Select view"]' name="childdashboardId" class="selectpicker" data-size="5" data-none-results-text="@T["No results match"]">
+                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select view"]</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-field slide-widget-dropdown col-xs-5" style="display: none">
+                                                <select class="selectpicker" id="select_widget" data-size="5" data-live-search="true" title='@T["Select widget"]' style="width: 100%; margin-bottom: 15px;" data-none-results-text="@T["No results match"]">
+                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select Widget"]</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-field col-xs-2">
+                                            <input type="button" id="add-slide-button" title="@T["Add"]" class="primary-button pull-right" disabled value="@T["Add"]" />
+                                        </div>
+                                        <div class="col-xs-12 no-padding">
+                                            <span id="duplicate-item-validation-message" style="display:none" class="ErrorMessage"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="show-content" class="col-xs-12 no-padding"></div>
+                                <ul id="sortable" class="col-xs-12 display-dashboard-container no-padding"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer col-xs-12 no-padding">
+                    <div class="col-lg-12 margin-top">
+                        <input type="button" title="" class="btn primary-button app-btn-primary" style="display:none" id="edit-slideshow" disabled onclick="editSlideshowMethod()" tabindex="4" value="@T["Save"]">
+                        <input type="button" title="" class="btn primary-button app-btn-primary" id="create-slideshow" disabled onclick="createSlideshowMethod()" tabindex="4" value="@T["Create"]">
+                        <input type="button" title="" class="btn secondary-button app-btn-secondary" id="cancel-slideshow" value="@T["Cancel"]" tabindex="5">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

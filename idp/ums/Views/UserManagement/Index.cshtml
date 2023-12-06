@@ -1,0 +1,397 @@
+﻿@using System.Configuration
+@using System.Web
+@{
+    var idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    ViewBag.Title = T["Users"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-management-module.css" asp-append-version="true" />
+}
+
+@section scripts{
+    <script src="~/bundles/js/user-management.js" asp-append-version="true"></script>
+
+    <script>
+        var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+        var postactionUrl = "@Url.Action("postaction", "UserManagement")";
+        var isPresentUserNameAndEmailId = "@Url.Action("isPresentUserNameAndEmailId", "UserManagement")";
+        var isPresentusernameUrl = "@Url.Action("IsPresentusername", "UserManagement")";
+        var avatarUrl = "@(idPUrl + Url.Action("Avatar", "User"))";
+        var deleteFromUserListUrl = "@Url.Action("DeleteFromUserList", "UserManagement")";
+        var userPageUrl = "@Url.Action("Index", "UserManagement")";
+        var deleteSingleFromUserListUrl = "@Url.Action("DeleteSingleFromUserList", "UserManagement")";
+        var getItemsUrl = "@Url.Action("GetItems", "TenantsManagement")";
+        var grantAccessUrl = "@Url.Action("GrantUserAccessForTenants", "UserManagement")";
+        var isEmailRequired = @Json.Serialize((GlobalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation) || (GlobalAppSettings.SystemSettings.ActivationType == ActivationType.AutomaticActivation && GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.Required));
+        var makeAdminUrl = "@Url.Action("AssignRole", "UserManagement")";
+        var removeAdminUrl = "@Url.Action("RemoveRole", "UserManagement")";
+        var getUserSUrl = "@Url.Action("GetAllUserList", "TenantsManagement")";
+        var unlockUserUrl = "@Url.Action("UnlockUser", "UserManagement")";
+    </script>
+    <script>
+        window.data = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.users)));
+                var baseRootUrl = "@Url.Content("~/")";
+
+    </script>
+    <script type="text/javascript">
+        function selectItems(e) {
+            var parentRow = $(e.event.currentTarget.parentNode).parents(".user-row-details");
+            $(parentRow).hasClass('user-table-row-selected')
+                ? $(parentRow).removeClass('user-table-row-selected')
+                : $(parentRow).addClass("user-table-row-selected");
+            ($(".grid-view-table").find(".user-table-row-selected").length > 0)
+                ? $("#add-user-in-group").fadeIn("slow")
+                : $("#add-user-in-group").fadeOut("slow");
+        }
+
+    </script>
+
+    <script type="text/x-jsrender" id="user-profile-template">
+        ${if (Email != "")}
+        <a class="item-name grid-content" title="${DisplayName}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?userid=${UserId}&email=${Email}">${DisplayName}</a>
+        ${else}
+        <a class="item-name grid-content" title="${DisplayName}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?userid=${UserId}">${DisplayName}</a>
+        ${/if}
+        ${if (DirectoryType.Id == @((int)DirectoryType.AzureAD))}
+        <span class="su su-azure-ad grid-directory-icon"> </span>
+        ${else if (DirectoryType.Id == @((int)DirectoryType.ExternalDatabase))}
+        <span class="su su-datasource grid-directory-icon"> </span>
+        ${else if (DirectoryType.Id == @((int)DirectoryType.WindowsAD))}
+        <span class="su su-windows-ad grid-directory-icon"> </span>
+        ${else if (DirectoryType.Id == @((int)DirectoryType.OAuth2))}
+        <span class="su su-oauth grid-directory-icon"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span>
+        ${else if (DirectoryType.Id == @((int)DirectoryType.OpenIDConnect))}
+        <span class="su su-openid grid-directory-icon"> </span>
+        ${else if (DirectoryType.Id == @((int)DirectoryType.JWTSSO))}
+        <span class="su su-single-sign-on grid-directory-icon"> </span>
+        ${else if (DirectoryType.Id == @((int)DirectoryType.AzureADB2C))}
+        <span class="su su-azure-b2c grid-directory-icon"> </span>
+        ${/if}
+    </script>
+    <script type="text/x-jsrender" id="user-username-template">
+        <span class="grid-content" title="${Username}" data-toggle="tooltip">${Username}</span>
+    </script>
+    <script type="text/x-jsrender" id="user-email-template">
+        <span class="grid-content" title="${Email}" data-toggle="tooltip">${Email}</span>
+    </script>
+    <script type="text/x-jsrender" id="email-verification-template">
+        ${if (EmailVerified)}
+        @T["Completed"]
+        ${else}
+        @T["Pending"]
+        ${/if}
+    </script>
+    <script type="text/x-jsrender" id="status-description-template">
+        ${UserStatus}
+    </script>
+    <script type="text/x-jsrender" id="filter-template">
+        <span>
+            <a class="e-filtericon e-icon e-filterset" href="">
+            </a>
+        </span>
+    </script>
+    <script type="text/x-jsrender" id="role-template">
+        ${Role}
+    </script>
+    <script type="text/x-jsrender" id="itemname-header">
+        <div class="item-name">@T["Name"]</div>
+    </script>
+    <script type="text/x-jsrender" id="username-header">
+        <div class="item-header">@T["Username"]</div>
+    </script>
+    <script type="text/x-jsrender" id="email-header">
+        <div class="item-header">@T["Email Address"]</div>
+    </script>
+    <script type="text/x-jsrender" id="status-header">
+        <div class="item-header">@T["Status"]</div>
+    </script>
+    <script type="text/x-jsrender" id="email-verification-header">
+        <div class="item-header">@T["Email Verification"]</div>
+    </script>
+    <script type="text/x-jsrender" id="role-header">
+        <div class="item-header">@T["Role"]</div>
+    </script>
+
+    <script type="text/x-jsrender" id="options">
+        <div class="dropdown">
+            <span class="dropdown-toggle option-icon" data-toggle="dropdown" data-placement="top" data-content="${UserName}">
+                <span class="su su-options"> </span>
+            </span>
+            <ul class="dropdown-menu" role="menu">
+                ${if (UserStatus == "@UserLockedStatus.Locked")}
+                <li class="unlock-user" data-content="${UserId}">
+                    <a class="unlock-user-class">
+                        <i class="su su-unlock-user"></i>
+                        <span>@T["Unlock User"]</span>
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                ${/if}
+                <li class="view-user">
+                    ${if ((Email != ""))}
+                    <a href="@Url.Action("ViewProfile", "UserManagement")?userid=${UserId}&email=${Email}" title="">
+                        <i class="su su-eye"></i>
+                        <span>@T["View"]</span>
+                    </a>
+                    ${else}
+                    <a href="@Url.Action("ViewProfile", "UserManagement")?userid=${UserId}" title="">
+                        <i class="su su-eye"></i>
+                        <span>@T["View"]</span>
+                    </a>
+                    ${/if}
+                </li>
+                ${if (UserId != "@ViewBag.LoggedUser")}
+                ${if (Role == "")}
+                <li class="assign-role" data-content="${UserId}">
+                    <a class="make-admin-class">
+                        <i class="su su-user-settings"></i>
+                        <span>@T["Make Admin"]</span>
+                    </a>
+                </li>
+                ${/if}
+                ${if (Role == "@Role.Admin")}
+                <li class="assign-role" data-content="${UserId}">
+                    <a class="remove-admin-class" title="">
+                        <i class="su su-user-settings"></i>
+                        <span>@T["Remove Admin"]</span>
+                    </a>
+                </li>
+                ${/if}
+                <li class="delete-user" data-content="${UserId}">
+                    <a class="delete-class" title="">
+                        <i class="su su-delete"></i>
+                        <span>@T["Delete"]</span>
+                    </a>
+                </li>
+                ${/if}
+            </ul>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        $(function() {
+            $("#search-users").val("");
+            var data = new ejs.data.DataManager({
+                url: "@Url.Action("GetAllUserList", "TenantsManagement")?includeInactiveUsers=true",
+                adaptor: new ejs.data.UrlAdaptor(),
+            });
+
+            var userGrid = new ejs.grids.Grid({
+                dataSource: data,
+                gridLines: 'None',
+                allowPaging: true,
+                allowSorting: true,
+                pageSettings: { pageSize: 20 },
+                allowSelection: true,
+                selectionSettings: { type: 'Multiple' },
+                enableHover: true,
+                enableAltRow: false,
+                rowSelecting: function (e) {
+                    this.multiSelectCtrlRequest = true;
+                },
+                beforeDataBound: fnbeforeDataBound,
+                dataBound: function (args) {
+                    $('[data-toggle="tooltip"]').tooltip(
+                        {
+                            container: 'body'
+                        });
+                        fnOnUserRowSelected();
+                },
+                rowSelected: fnOnUserRowSelected,
+                rowDeselected: fnOnUserRowSelected,
+                load: fnOnUserGridActionBegin,
+                actionBegin: fnOnUserGridActionBegin,
+                columns: [
+                    {
+                        width: 0,
+                        visible:false,
+                        field: "UserId",
+                        type: "string"
+                    },
+                    {
+                        allowFiltering: false,
+                        allowSorting: true,
+                        template: '#user-profile-template',
+                        width: 115,
+                        headerTemplate: '#itemname-header',
+                        field: "DisplayName",
+                        type: "string"
+                    },
+                    {
+                        allowFiltering: false,
+                        allowSorting: true,
+                        field: "Username",
+                        template: "#user-username-template",
+                        headerText: "@T["Username"]",
+                        headerTemplate: "#username-header",
+                        type: "string",
+                        width: 155
+                    },
+                    {
+                        field: 'Email',
+                        allowFiltering: false,
+                        headerText: '@T["Email Address"]',
+                        template: '#user-email-template',
+                        headerTemplate: '#email-header',
+                        type: "string",
+                        width: 155
+                    },
+                    {
+                        field: "Role",
+                        headerText: "@T["Role"]",
+                        headerTemplate: "#role-header",
+                        template: "#role-template",
+                        width: 80,
+                        allowFiltering: false,
+                    },
+                    {
+                        field: "IsActivated",
+                        headerText: "@T["Email Verification"]",
+                        headerTemplate: "#email-verification-header",
+                        template: "#email-verification-template",
+                        width: 120,
+                        type: "string",
+                        allowFiltering: false
+                    },
+                    {
+                        field: "StatusDescription",
+                        headerText: "@T["Status"]",
+                        headerTemplate: "#status-header",
+                        template: "#status-description-template",
+                        width: 80,
+                        allowFiltering: false
+                    },
+                    {
+                        allowSorting: false,
+                        template: "#options",
+                        width: 50,
+                        allowFiltering: false
+                    }
+                ]
+            });
+            userGrid.appendTo('#user_grid');
+        });
+
+        $(document).ready(function() {
+            $("#new-user-dropdown").tooltip();
+            $("#synchronize-dropdown").tooltip();
+        });
+    </script>
+}
+
+@section MainSection{
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment admin-header-width">
+        <div class="col-xs-12 admin-page-header">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="h2 page-title">
+                        <input type="hidden" id="user-count-text" value="@ViewBag.UserCount">
+                        @T["USERS"] (<span id="user-count" value="@ViewBag.UserCount">@ViewBag.UserCount</span>)
+                    </h1>
+                    <h5 class="page-description">@T["Add and manage your users."]</h5>
+                </hgroup>                
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+
+        <div class="col-md-12 import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div id="search-area" class="pull-left">
+                    <input type="text" class="pull-left" id="search-users" placeholder="@T["Search users"]" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                </div>
+                <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
+                    @if (DeviceDetection.IsMobile)
+                    {
+                        <button class="primary-button pull-right" id="new-user-dropdown" title="@T["Add new user"]" data-toggle="tooltip" onclick="onUserAddDialogOpen()">
+                            @T["New User"]
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="dropdown-toggle primary-button pull-right" data-toggle="dropdown" data-placement="left" id="new-user-dropdown" title="@T["Add new user"]">
+                            <span>@T["New User"] </span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu add-user-dropdown multi-level pull-right" role="menu" id="dropdown-options">
+                            <li id="create-user" title="@T["Add new user"]" onclick="onUserAddDialogOpen()">
+                                <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
+                                    <i class="su su-user-add"> </i>
+                                    <span>@T["Add User"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="@Url.Action("UploadFileFormAction", "UserManagement")" title="@T["Import users from CSV"]" data-toggle="tooltip" data-placement="bottom">
+                                    <i class="su su-download"> </i>
+                                    <span>@T["Import from CSV"]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    <button class="primary-button pull-right" id="assign-user-role-button" onclick="onMakeMultipleAdminDialogOpen()" disabled>
+                        @T["Make Admin"]
+                    </button>
+                    <button class="secondary-button pull-right" id="grant-user-button" onclick="onAddTenantsDialogOpen()" disabled>
+                        @T["Grant Site Access"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="base-container" class="admin-page-content-container full-page-container">
+        <div class="admin-page-content col-md-12 no-padding">
+            <div id="user-list-container" class="list col-xs-12 admin-page-body">
+                <div class="col-xs-12 no-padding ">
+                    <div id="user_grid">
+                    </div>
+                </div>
+
+
+                @if (ViewBag.ExternalUsers.HasAzureAdUsers)
+                {
+                    <div id="azure-ad-indication" class="ad-azure-indication col-lg-12"><span class="su su-azure-ad"> </span> - @T["Azure AD User"]</div>
+                }
+                @if (ViewBag.ExternalUsers.HasDatabaseUsers)
+                {
+                    <div id="database-indication" class="ad-azure-indication col-lg-12"><span class="su su-datasource"> </span> - @T["Database User"]</div>
+                }
+                @if (ViewBag.ExternalUsers.HasAdUsers)
+                {
+                    <div id="ad-indication" class="ad-azure-indication col-lg-12"><span class="su su-windows-ad"> </span> - @T["Windows AD User"]</div>
+                }
+                @if (ViewBag.ExternalUsers.HasOAuthUsers)
+                {
+                    <div id="oauth-indication" class="ad-azure-indication col-lg-12"><span class="su su-oauth"><span class="su su-oauth path1"></span><span class="su su-oauth path2"></span><span class="su su-oauth path3"></span></span> - @T["OAuth User"]</div>
+                }
+                @if (ViewBag.ExternalUsers.HasOpenIdUsers)
+                {
+                    <div id="openid-indication" class="ad-azure-indication col-lg-12"><span class="su su-openid"> </span> - @T["OpenID Connect User"]</div>
+                }
+                @if (ViewBag.ExternalUsers.HasJwtSsoUsers)
+                {
+                    <div id="jwt-indication" class="ad-azure-indication col-lg-12"><span class="su su-single-sign-on"> </span> - @T["JWT SSO User"]</div>
+                }
+                @if (ViewBag.ExternalUsers.HasAzureAdB2CUsers)
+                {
+                    <div id="azureadb2c-indication" class="ad-azure-indication col-lg-12"><span class="su su-azure-b2c"> </span> - @T["Azure AD B2C User"]</div>
+                }
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+    <div id="grant-access-dialog"></div>
+    <div id="add-tenants-report-dialog"></div>
+    @await Html.PartialAsync("../UserManagement/_GrantAccessDialog")
+    @await Html.PartialAsync("../UserManagement/_GrantAccessReport")
+    @await Html.PartialAsync("../UserManagement/_UserAddDialog")
+    @await Html.PartialAsync("../UserManagement/_MultipleUserDeleteDialog")
+    @await Html.PartialAsync("../UserManagement/_SingleUserDeleteDialog")
+    @await Html.PartialAsync("../UserManagement/_MakeSingleAdminDialog")
+    @await Html.PartialAsync("../UserManagement/_RemoveAdminDialog")
+    @await Html.PartialAsync("../UserManagement/_MakeMultipleAdminDialog")
+    @await Html.PartialAsync("../UserManagement/_UnlockUserDialog")
+}

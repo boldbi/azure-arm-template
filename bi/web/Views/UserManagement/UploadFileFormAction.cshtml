@@ -1,0 +1,215 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var fileName = ViewBag.FileName;
+
+    ViewBag.Title = T["Users"].Value + " - " + String.Format(T["{0} Import"].Value, "CSV") + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ImportCsvUsers);
+    ViewBag.PageDescription = @String.Format(T["Import users from {0}."].Value, "CSV");
+    ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
+    ViewBag.BackIconTitle = T["Users"];
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
+    </environment>
+    <script>
+        var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
+        var postactionUrl = "@Url.Action("postaction", "UserManagement")";
+        var isPresentEmailId = "@Url.Action("IsPresentEmailId", "UserManagement")";
+        var isPresentusernameUrl= "@Url.Action("IsPresentusername", "UserManagement")";
+        var updateUserIntoGroupUrl = "@Url.Action("UpdateUserIntoGroup", "UserManagement")";
+        var getAddUserInGroupDialogUrl ="@Url.Action("GetAddUserInGroupDialog", "UserManagement")";
+        var checkGroupnameUrl = "@Url.Action("CheckGroupname", "Group")";
+        var saveUserIntoGroupUrl = "@Url.Action("SaveUserIntoGroup", "UserManagement")";
+        var avatarUrl = "@Url.Action("Avatar", "UserManagement")";
+        var getAllActiveGroupListUrl = "@Url.Action("GetAllActiveGroupList", "UserManagement")";
+        var deleteFromUserListUrl = "@Url.Action("DeleteFromUserList", "UserManagement")";
+        var userPageUrl = "@Url.Action("Index", "UserManagement")";
+        var saveSelectedCSVUserUrl = "@Url.Action("SaveSelectedCSVUser", "UserManagement")";
+        var deleteSingleFromUserListUrl = "@Url.Action("DeleteSingleFromUserList", "UserManagement")";
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "UserManagement")";
+        var userImportSuccessUrl = "@Url.Action("BulkImportResult", "UserManagement")";
+        var viewCurrentImportUrl = "@Url.Action("BulkUserImportResult", "UserManagement")";
+        var isAutomaticActivation = @Json.Serialize(globalAppSettings.SystemSettings.ActivationType == ActivationType.AutomaticActivation);
+        var bulkImportFileName = "@fileName";
+    </script>
+    <script type="text/x-jsrender" id="csv-user-name">
+        {{if Username != ""}}
+            {{:Username}}
+        {{else}}
+           --
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="csv-user-emai">
+        {{if Email != ""}}
+            {{:Email}}
+        {{else}}
+            --
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="csv-user-full-name">
+        {{if DisplayName != ""}}
+        {{:DisplayName}}
+        {{else}}
+        --
+        {{/if}}
+    </script>
+    <script type="text/x-jsrender" id="csv-user-pswd">
+        {{if Password != ""}}
+            {{:Password}}
+        {{else}}
+            --
+        {{/if}}
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("a").click(function () {
+                return checkUserImported(this);
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        var data1 = @Html.Raw(ViewBag.ser);
+        var csvImportGridColumn = [
+            { field: "Username", templateID: "#csv-user-name", cssClass: "user-name", headerText: "@T["Username"]", width: 50, visible: isSelfHosted },
+            { field: "Email", templateID: "#csv-user-emai", cssClass: "email-id", headerText: "@T["Email Address"]", width: 50 },
+            { field: "DisplayName", templateID: "#csv-user-full-name", cssClass: "name",headerText: "@T["Display Name"]", width: 50 }
+        ];
+        if (isAutomaticActivation) {
+            csvImportGridColumn.push({ field: "Password", templateID: "#csv-user-pswd", cssClass: "password", headerText: "@T["Password"]", width: 30 });
+        }
+        csvImportGridColumn.push({ field: "DisplayMessage", cssClass: "user-validation", headerText: "@T["Error"]", width: 100, visible: false });
+        $(document).ready(function() {
+            $(function () {
+                var data = data1.Value.Data;
+                $("#user_import_grid").ejGrid({
+                    dataSource: data,
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    pageSettings: { pageSize: 20 },
+                    allowSorting: false,
+                    allowSelection: false,
+                    allowScrolling: false,
+                    actionBegin: "fnUploadFileActionBegin",
+                    locale: "en-us",
+                    enableAltRow: false,
+                    enableRowHover: true,
+                    actionComplete:"onComplete",
+                    dataBound: function (args) {
+                        if (data1.Value.IsUserLimitExceed)
+                        {
+                            $("#limit-user").ejDialog("open");
+                            if (data1.Data.UserLicense.UsersLeft > 0){
+                                $("#limit-import-ad").show();
+                                $(".importad-allowed-count").html(data1.Data.UserLicense.UsersLeft);
+                                $("#limit-import-ad .licensed-user-count").html(data1.Data.UserLicense.Users);
+                            } else {
+                                $("#zero-user-acc .licensed-user-count").html(data1.Data.UserLicense.Users);
+                                $("#zero-user-acc").show();
+                            }
+                        }
+                    },
+                    columns: csvImportGridColumn,
+                });
+
+            });
+
+        });
+        function onComplete(args) {
+            if(args.model.currentViewData.length>0){
+                $('#import-button').prop("disabled", false);
+            }
+            else {
+                $("#import-button").prop("disabled", true);
+            }
+
+            var gridObj = $("#user_import_grid").data("ejGrid");
+            if (gridObj.getSelectedRecords().length == 0) {
+                this.getContentTable().find("tbody .emptyrecord").html(window.Server.App.Localization.UsersResourceEmpty);
+            }
+        }
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("../Administration/_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="col-xs-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Import Users"] } })
+        </div>
+        <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <input type="button" value="@T["Import Users"]" title="@T["Import users from the list below"]" onclick="SaveUserListFromCSV()" id="import-button" class="primary-button app-btn-primary pull-right bi-header-btn" disabled />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid bi-page-container col-xs-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div class="content-section bi-page-body">
+                <form id="csv-form" action="@Url.Action("UploadFileFormAction", "UserManagement")" method="post" onsubmit="" enctype="multipart/form-data">
+                    <div class="col-md-12 col-xs-12 import-file no-padding">
+                        <div class="col-md-10 col-xs-10 no-padding">
+                            <div class="no-padding browse-file">
+                                <div class="browse-file-group">
+                                    <input type="text" class="form-control no-margin" id="filename" value="@String.Format(T["Browse file path {0}"].Value, "(.csv)")" readonly>
+                                    <span id="trigger-file" class="input-group-addon btn popup no-left-border">@T["Browse"]</span>
+                                    <input type="file" accept=".csv" name="csvfile" id="csvfile" class="btn popup upload-btn no-padding">
+                                </div>
+                                @if (ViewBag.result.ToLower() == "error")
+                                {
+                                    <span id="user-import-validation-msg">@String.Format(T["Please upload a valid {0} file."].Value, "csv")</span>
+                                }
+                                else if (ViewBag.ValidateMessage.ToLower() != "success")
+                                {
+                                    <span id="user-import-validation-msg">@ViewBag.ValidateMessage</span>
+                                }
+                                else if (ViewBag.InvalidUser != null)
+                                {
+                                    <span id="user-import-validation-msg">@Html.Raw(ViewBag.InvalidUser)</span>
+                                }
+                                else
+                                {
+                                    <span id=""></span>
+                                }
+                            </div>
+                            <div class="file-upload-btn">
+                                <input type="submit" class="primary-button app-btn-primary" title="@String.Format(T["Upload {0} File here"].Value, "CSV")" id="csv-upload" disabled="" value="@T["Upload"]" />
+                            </div>
+                            <div class="separator"></div>
+                            <p class="download-template-text"><a href="@Url.Action("DownloadTemplate", "UserManagement")" class="download-template" title="@T["Download sample template"]">@T["Download Template"]</a></p>
+                        </div>
+                    </div>
+                </form>
+                <div class="col-xs-12 grid-area no-padding">
+                    <div class="list" id="grid-validation-messages">
+                        <span id="grid-nodata-validation">@T["There is no data in the uploaded file. Please check and try uploading again."]</span>
+                        <span id="grid-validation">@Html.Raw(String.Format(T["{0} user(s) has been added successfully."].Value, "<span id='userCount'>@ViewBag.UserCount</span>"))</span>
+                        <span id="grid-error-validation">@T["Duplicate or Invalid data is found. Please change the data accordingly and re-upload the file."] </span>
+                    </div>
+                    <div id="grid-container" class="col-md-12 no-padding">
+                        <div class="col-md-12 container-fluid page-inner-padding no-padding ">
+                            <div id="user_import_grid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="all-user-list" id="all-user-list" value="@ViewBag.Pathname" />
+            <input type="hidden" id="existing-user-count" data-value="@ViewBag.UserExists" />
+            <input type="hidden" id="csv-file-error" data-value="@((ViewBag.ValidateMessage=="Success" && ViewBag.result=="Success")?"Success":"Error")" />
+            @await Html.PartialAsync("../UserManagement/_LimitUserCreation")
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+}

@@ -1,0 +1,279 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerrecurrence.css"/>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerrecurrence.min.css"/>
+    </environment>
+
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+<script>
+        var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceType", "scheduler")";
+        var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "scheduler")";
+        var timeZone = "@globalAppSettings.SystemSettings.TimeZone";
+        var clientTimeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+</script>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecurrence.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecurrence.min.js"></script>
+    </environment>
+
+</head>
+<body>
+    <div id="time-intervals-div" class="custom-bootstrap-styles">
+        <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row">
+            <div class="col-sm-1 col-xs-1 no-padding type-label align-center margin-issue"><label>@T["Type"]</label></div>
+            <div id="recurrence-type-container" class="col-sm-4 col-xs-4 no-margin i-search-fields">
+                <select id="recurrence-type" class="selectpicker" title=""></select>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row" id="frequency">
+
+            <div class="col-sm-12 col-xs-12 no-padding" id="hourly-schedule-option">
+                <div class="col-sm-12 col-xs-12 no-padding">
+                    <div class="col-sm-1 col-xs-1 no-padding recurs-label align-center margin-issue"><label>@T["Recurs"]</label></div>
+                    <div class="col-xs-10" id="daily-schedule">
+                        <div class="pull-left">
+                            <div class="pull-left">
+                                @Html.Label("every-x-hours", T["Every"].Value, new { @class = "pointer normal-font notransition" })
+                            </div>
+                            <div class="clspad pull-left top-margin"><input type="text" class="time-width pull-left validation-input col-sm-4 col-xs-4 change-event" id="every-x-hours-value" /></div>
+                            <div class="clspad pull-left"><label for="every-x-hours" class="pointer normal-font pull-left">HH:MM</label></div>
+                            <div>
+                                <span class="frequency-error">@T["Please enter minimum 15 minutes"]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row" id="daily-schedule-option">
+            <div class="col-sm-12 col-xs-12 no-padding">
+                <div class="col-sm-1 col-xs-1 no-padding recurs-label align-center margin-issue"><label>@T["Recurs"]</label></div>
+                <div class="col-sm-10 col-xs-10" id="daily-schedule">
+                    <div class="pull-left">
+                        <div class="pull-left">
+                            @Html.RadioButton("daily-recurrence-type", " ", new { @class = "css-radio", @id = "daily-every-x-days" })
+                            @Html.Label("daily-every-x-days", T["Every"].Value, new { @class = "pointer normal-font notransition" })
+                        </div>
+                        <div class="clspad pull-left top-margin"><input type="text" for="daily-every-x-days" class="form-control pull-left change-event" id="every-x-days"></div>
+                        <div class="clspad pull-left"><label for="daily-every-x-days" class="pointer normal-font pull-left">@T["day(s)"]</label></div>
+                    </div>
+                    <div class="pull-left clspadleft">
+                        @Html.RadioButton("daily-recurrence-type", " ", new { @class = "css-radio", @id = "daily-weekdays" })
+                        @Html.Label("daily-weekdays", T["Every weekday"].Value, new { @class = "pointer normal-font notransition" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding cls-options recurrence-field-row" id="weekly-schedule-option">
+            <div class="col-sm-12 col-xs-12 no-padding no-margin">
+                <div class="col-sm-1 col-xs-1 recurs-label no-padding align-center margin-issue"><label>@T["Recurs"]</label></div>
+                <div class="col-sm-10 col-xs-10">
+                    <label class="pointer normal-font pull-left mar-top">@T["Every"]</label>
+                    <div class="monthly-select pull-left">
+                        <input type="text" class="form-control pull-left change-event" id="every-x-weeks">
+                    </div>
+                    <label class="pointer normal-font button-left pull-left mar-top">@T["week(s)"]</label>
+                </div>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding no-margin change-event">
+                <div class="col-sm-1 col-xs-1 margin-issue"></div>
+                <div class="col-sm-10 col-xs-10" id="days-check-box">
+                    <div id="enable-sunday" class="col-sm-2 col-xs-2 no-padding no-margin">
+                        @Html.CheckBox("sun", false, new { @class = "material-checkbox  pull-left daygroup" })
+                        @Html.Label("sun", T["Sunday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                    <div id="enable-monday" class="col-sm-2 col-xs-2 no-padding no-margin">
+                        @Html.CheckBox("mon", false, new { @class = "material-checkbox  pull-left daygroup" })
+                        @Html.Label("mon", T["Monday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                    <div id="enable-tuesday" class="col-sm-2 col-xs-2 no-padding no-margin">
+                        @Html.CheckBox("tues", false, new { @class = "material-checkbox  pull-left daygroup" })
+                        @Html.Label("tues", T["Tuesday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                    <div id="enable-wednesday" class="col-sm-2 col-xs-3 no-padding no-margin">
+                        @Html.CheckBox("wed", false, new { @class = "material-checkbox  pull-left daygroup" })
+                        @Html.Label("wed", T["Wednesday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding no-margin change-event">
+                <div class="col-sm-1 col-xs-1 margin-issue"></div>
+                <div class="col-sm-10 col-xs-10" id="days-check-box">
+                    <div id="enable-thursday" class="col-sm-2 col-xs-2 no-padding no-margin">
+                        @Html.CheckBox("thu", false, new { @class = "material-checkbox pull-left daygroup" })
+                        @Html.Label("thu", T["Thursday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                    <div id="enable-friday" class="col-sm-2 col-xs-2 no-padding no-margin">
+                        @Html.CheckBox("fri", false, new { @class = "material-checkbox pull-left daygroup" })
+                        @Html.Label("fri", T["Friday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                    <div id="enable-saturday" class="col-sm-2 col-xs-2 no-padding no-margin">
+                        @Html.CheckBox("sat", false, new { @class = "material-checkbox pull-left daygroup" })
+                        @Html.Label("sat", T["Saturday"].Value, new { @class = "pointer normal-font" })
+                    </div>
+                    <div class="col-sm-4 col-xs-4 no-padding no-margin validate-error" id="weekly-day-error-container">
+                        <div id="weekly-days-validator"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding cls-options recurrence-field-row" id="monthly-schedule-option">
+            <div class="col-sm-12 col-xs-12 no-padding no-margin">
+                <div class="col-sm-1 col-xs-1 no-padding recurs-label align-center margin-issue"><label>@T["Recurs"]</label></div>
+                <div class="col-sm-10 col-xs-10">
+                    @Html.RadioButton("monthly", " ", new { @class = "css-radio" })
+                    @Html.Label("monthly", T["Day"].Value, new { @class = "pointer normal-font pull-left mar-top notransition" })
+                    <div class="cls-day pull-left"><input type="text" class="pull-left change-event" id="monthly-date"></div>
+                    <label for="monthly" class="pointer normal-font pull-left mar-top">@T["of every"]</label>
+                    <div class="cls-day pull-left">
+                        <input type="text" class="change-event" id="monthly-every-x-months" />
+                    </div>
+                    <label for="monthly" class="pointer normal-font pull-left">@T["month(s)"]</label>
+                </div>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding">
+                <div class="col-sm-1 col-xs-1 margin-issue"></div>
+                <div class="col-sm-10 col-xs-10">
+                    <div class="pull-left">
+                        @Html.RadioButton("monthly", " ", new { @class = "css-radio", @id = "monthly-dow" })
+                        @Html.Label("monthly-dow", T["The"].Value, new { @class = "pointer normal-font pull-left notransition" })
+                    </div>
+                    <div id="monthly-dow-week-container" class="i-search-fields monthly-select no-padding small-width bs-width pull-left">
+                        <select id="monthly-dow-week" data-width="110px" class="selectpicker schedule pull-left change-event" data-size="5"></select>
+                    </div>
+                    <div id="monthly-dow-day-container" class="i-search-fields monthly-select large-width pull-left">
+                        <select id="monthly-dow-day" data-width="160px" class="selectpicker schedule pull-left change-event" data-size="5"></select>
+                    </div>
+                    <div class="pull-left">
+                        <label for="monthly-dow" class="pointer pull-left normal-font button-left">@T["of every"]</label>
+                        <div class="monthly-select top-margin pull-left"><input type="text" id="monthly-dow-every-x-months" class="pull-left change-event"></div>
+                        <label for="monthly-dow" class="pull-left pointer normal-font button-left">@T["month(s)"]</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 no-padding cls-options no-topmargin recurrence-field-row" id="yearly-schedule-option">
+            <div class="col-sm-12 col-xs-12 no-padding">
+                <div class="col-sm-1 col-xs-1 no-padding recurs-label margin-issue"><label>@T["Recurs"]</label></div>
+                <div class="col-sm-10 col-xs-10">
+                    <label class="pull-left normal-font mar-top">@T["Every"]</label>
+                    <div class="monthly-select pull-left change-event"><input type="text" id="every-x-years"></div>
+                    <label class="pull-left button-left normal-font mar-top">@T["year(s)"]</label>
+                </div>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding">
+                <div class="col-sm-1 col-xs-1 margin-issue"></div>
+                <div class="col-sm-10 col-xs-10">
+                    @Html.RadioButton("yearly", " ", new { @class = "css-radio", @id = "yearly" })
+                    @Html.Label("yearly", T["The"].Value, new { @class = "pointer normal-font pull-left notransition" })
+                    <div class="monthly-select pull-left large-width">
+                        <select id="yearly-month" class="selectpicker small-width schedule change-event" data-width="160px" data-size="5"></select>
+                    </div>
+                    <div class="monthly-select pull-left change-event"><input type="text" class="pull-left" id="yearly-day"></div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-xs-12 no-padding">
+                <div class="col-sm-1 col-xs-1 margin-issue"></div>
+                <div class="col-sm-10 col-xs-10">
+                    @Html.RadioButton("yearly", " ", new { @class = "css-radio", @id = "yearly-dow" })
+                    @Html.Label("yearly-dow", T["The"].Value, new { @class = "pointer normal-font pull-left notransition" })
+                    <div id="yearly-dow-week-container" class="no-margin i-search-fields pull-left bs-month-width">
+                        <div class="monthly-select small-width bs-width">
+                            <select id="yearly-dow-week" data-width="110px" class="selectpicker pull-left schedule change-event" data-size="5"></select>
+                        </div>
+                    </div>
+                    <div id="yearly-dow-day-container" class="no-margin i-search-fields pull-left">
+                        <div class="monthly-select large-width">
+                            <select id="yearly-dow-day" data-width="160px" class="selectpicker pull-left schedule change-event" data-size="5"></select>
+                        </div>
+                    </div>
+                    <div id="yearly-dow-month-container" class="no-margin i-search-fields  pull-left">
+                        <label class="pointer normal-font pull-left button-left" for="yearly-dow">@T["of"]</label>
+                        <div class="monthly-select pull-left large-width">
+                            <select data-width="160px" id="yearly-dow-month" class="selectpicker pull-left schedule change-event" data-size="5"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row" id="no-view-start">
+
+            <div class="col-sm-1 col-xs-1 no-padding starts-label align-center margin-issue"><label class="end-label">@T["Starts on"]</label></div>
+            <div class="col-sm-3 col-xs-3">
+                <div class="pull-left"><input type="text" class="form-control full-width" name="" id="start-date"></div>
+            </div>
+            <input type="hidden" />
+            @if (!string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.TimeZone))
+            {
+                <div class="col-sm-7 col-xs-7 " id="system-time">(@T["Your time will be "]: - <label class="normal-font" id="zone"></label>)</div>
+            }
+            else
+            {
+                <div class="col-sm-7 col-xs-7 " id="system-time">(@T["Time Zone"] - <label class="normal-font" id="zone"></label>)</div>
+            }
+            <input type="hidden" id="hour-difference" />
+            <input type="hidden" id="minute-difference" />
+            <div class="col-sm-12 col-xs-12 validate-error" id="start-date-error-container">
+                <div class="col-sm-2 col-xs-2"></div>
+                <div class="col-sm-8 col-xs-8 no-margin" id="start-date-validator"></div>
+            </div>
+
+        </div>
+        @if (!string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.TimeZone))
+        {
+            <div id="time-zone" class="col-sm-12 col-xs-12">(@T["Application Time Zone"]: @globalAppSettings.SystemSettings.TimeZone)</div>
+        }
+
+        <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row" id="no-view-end">
+            <div class="col-sm-1 col-xs-1 no-padding ends-label align-center margin-issue"><label>@T["Ends"]</label></div>
+            <div id="schedule-end-type" class="col-sm-10 col-xs-10 no-padding no-margin">
+                <div class="clsnever pull-left">
+                    @Html.RadioButton("end-type", "never", new { @class = "css-radio", @id = "no-end-date", @checked = "checked" })
+                    @Html.Label("no-end-date", T["Never"].Value, new { @class = "pointer normal-font pull-left notransition" })
+                </div>
+                <div class="clsend pull-left">
+                    @Html.RadioButton("end-type", "endafter", new { @class = "css-radio", @id = "end-after" })
+                    @Html.Label("end-after", T["After"].Value, new { @class = "pointer normal-font pull-left notransition" })
+                    <div class="pull-left leftmargin top-margin"><input type="text" id="occurence-count" class="form-control pull-left change-event"></div>
+                    <label for="end-after" class="pointer normal-font button-left pull-left">@T["Occurrences"]</label>
+                </div>
+                <div class="clsend pull-left">
+                    @Html.RadioButton("end-type", "endBy", new { @class = "css-radio", @id = "endBy" })
+                    @Html.Label("endBy", T["On"].Value, new { @class = "pointer normal-font pull-left notransition" })
+                    <div class="monthly-select pull-left"><input type="text" class="form-control full-width pull-left" name="" id="end-date"></div>
+                </div>
+                <div class="clsend pull-left validate-error" id="end-date-validator"></div>
+            </div>
+            <div class="col-sm-12 col-xs-12 validate-error" id="end-date-error-container">
+                <div class="col-sm-1 col-xs-1 margin-issue"></div>
+                <div class="col-sm-8 col-xs-8 no-margin" id="end-date-validator"></div>
+            </div>
+        </div>
+        <div class="col-sm-1 col-xs-1 margin-issue"></div>
+        <div class="col-sm-10 col-xs-10" id="schedule-message-container"><span class="su su-info"></span><span id="schedule-message"></span></div>
+    </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    </environment>
+
+</body>
+</html>
+

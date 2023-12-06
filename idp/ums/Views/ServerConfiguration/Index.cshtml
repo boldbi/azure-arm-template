@@ -1,0 +1,222 @@
+﻿@{
+    Layout = null;
+    var displayName = GlobalAppSettings.BrandingDisplayName;
+    var connectionType = GlobalAppSettings.Configuration["IdP:AzureBlobConnectionType"];
+    var storageAccountName = GlobalAppSettings.Configuration["IdP:AzureBlobStorageAccountName"];
+    var accessKey = GlobalAppSettings.Configuration["IdP:AzureBlobStorageAccessKey"];
+    var blobServiceEndpoint = GlobalAppSettings.Configuration["IdP:AzureBlobServiceEndpoint"];
+    var containerName = GlobalAppSettings.Configuration["IdP:AzureBlobContainerName"];
+    var hasDRMConfiguration = ViewBag.HasDRMConfiguration ? "true" : "false";
+    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
+    var pathbase = Context.Request.PathBase;
+    var serverUserHelp = string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2} to connect and use the database."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration, ViewBag.TenantType) + "'>", "</a>", helpLinkData);
+    var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
+    var postgresSQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQL_Connection_Parameters);
+    var mySQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MySQL_Connection_Parameters);
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <meta name="has-drm-configuration" content="@hasDRMConfiguration">
+    <meta name="IdStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdStorageConfiguration)" />
+    <meta name="AdminCreation" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation)" />
+    <meta name="ServerStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ServerStorageConfiguration)" />
+    <meta name="ServerDataStoreConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ServerDataStoreConfiguration)" />
+    <meta name="IdDatabaseConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration)" />
+    @await Html.PartialAsync("../Shared/_PasswordPolicyRules")
+<title> @Html.Raw(string.Format(T["Welcome to {0}"].Value, displayName))</title>
+    <link rel="icon" href="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/favicon.ico")" />  
+
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+
+    <link rel="stylesheet" href="~/bundles/css/system-configuration.css" asp-append-version="true" />
+    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/system-configuration.js" asp-append-version="true"></script>
+    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+
+    <script>
+        var idStorageConfiguration = $('meta[name="IdStorageConfiguration"]').attr("content");
+        var adminCreation = $('meta[name="AdminCreation"]').attr("content");
+        var serverStorageConfiguration = $('meta[name="ServerStorageConfiguration"]').attr("content");
+        var serverDataStoreConfiguration = $('meta[name="ServerDataStoreConfiguration"]').attr("content");
+
+        var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
+        var connectDatabaseUrl = "@Url.Action("ConnectDatabase", "ServerConfiguration")";
+        var generateDatabaseUrl = "@Url.Action("GenerateDatabase", "ServerConfiguration")";
+        var generateSQLTablesUrl = "@Url.Action("GenerateTablesInDB", "ServerConfiguration")";
+        var checkTableExistsUrl = "@Url.Action("CheckTableAlreadyExists", "ServerConfiguration")";
+        var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
+        var deleteStatusUrl = "@Url.Action("DeleteProgressFile", "ServerConfiguration")";
+        var blobDetails = "@Url.Action("GetAzureDetails", "TenantsManagement")";
+        var blobExist = "@Url.Action("IsBlobExists", "ServerConfiguration")";
+        var updateLicenseKeyUrl = "@Url.Action("ApplyLicenseKey", "ServerConfiguration")";
+        var validateLicenseKeyUrl = "@Url.Action("ValidateLicenseKey", "ServerConfiguration")";
+
+        var storageType = "@ViewBag.StorageType";
+
+        var serverSetupImageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-startup-image.svg")";
+        var adminSetupImageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-admin-setup.svg")";
+        var storageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/file-storage-image.svg")";
+        var offlineSetupImageUrl = "@Url.Content("~/images/static/startup/offline-setup.png")";
+        var startupHome = "@Url.Content("~/images/static/startup/login-to-activate.png")";
+
+        var isBoldBI = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName)".toLowerCase() == "true";
+        var isAzureApplication = ("@ViewBag.IsAzureApplication".toLowerCase() === "true");
+        var isBoldReports = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldReports.DisplayName)".toLowerCase() == "true";
+        var connectionType = "@connectionType";
+        var storageAccountName = "@storageAccountName";
+        var accessKey = "@Html.Raw(accessKey)";
+        var blobServiceEndpoint = "@blobServiceEndpoint";
+        var containerName = "@containerName";
+        var hasDRMConfiguration = "@ViewBag.HasDRMConfiguration";
+        var sqlParameter = "@sqlParameter";
+        var postgresSQLParameter = "@postgresSQLParameter";
+        var mySQLParameter = "@mySQLParameter";
+        var databaseConfigurationUrl = $('meta[name="IdDatabaseConfiguration"]').attr("content");
+        var isSiteCreation = false;
+        var isSimpleModeValue = "true";
+        var actionType = "";
+        var biProductname = "@AppBranding.Bold.ProductName";
+        var reportsProductname = "@AppBranding.BoldReports.ProductName";
+
+        $(document).ready(function () {
+            $(document).click(function (e) {
+                if (e.target.id != "info-icon") {
+                    $('#prefix-message').css("display", "none");
+                }
+                if (e.target.id != "info-icon-postgressql") {
+                    $('#prefix-message-postgresql').css("display", "none");
+                }
+            });
+        });
+    </script>
+</head>
+<body id="startup-page-container-waiting-element" class="startup-page-container-body">
+    <div id="startup-waiting-element" class="startup-waiting-popup storage-page-content">
+        @await Html.PartialAsync("_Header.OnpremiseStartup")
+        <div class="system-startUp-settings-bg">
+            <div class="startup-page-conatiner" id="startup-page-conatiner">
+                <div id="system-settings-general" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7" id="image-parent-container">
+                        <div class="image-container">
+                            <img class="startup-image" src="@Url.Content("~/images/static/startup/login-to-activate.png")" />
+                            <div class="startup-content display-none">
+                                <span class="first-content">@T["Step 1: You’re an administrator"]</span>
+                                <span class="second-content">@T["Administrators have complete control over the application."]</span>
+                                @if (!CloudAppConfig.IsHideHelpLink)
+                                {
+                                    <a id="help-link" href="@(await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation))" target="_blank">@T["Need help?"]</a>
+                                }
+                            </div>
+                            <div class="welcome-content">
+                                <span class="first-content">@T["See Clearly. Act Boldly."]</span>
+                                @if (!CloudAppConfig.IsHideHelpLink)
+                                {
+                                    <a href="@(await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.SetupHelp))" target="_blank">@T["Need setup help?"]</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5" id="system-settings-welcome-container">
+                        <div class="welcome-content">
+                            <span class="first-content">@Html.Raw(string.Format(T["Welcome to {0} Enterprise Server"].Value, "<span>" + displayName + "</span>"))
+                            </span>
+                            <span class="second-content">
+                                @T["To proceed with the installation, please activate your account."]
+                            </span>
+                            <div class="btn-holder">
+                                <button type="button" id="online-license" license-service-url="@ViewBag.SubscriptionUrl" class="proceed-button content-display">@T["Login to activate account"]</button>
+                            </div>
+                            <div class="col-xs-12 align-center">
+                                <span class="link-header">@T["Behind Firewall?"] <a id="offline-license" class="link-decoration" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads)" data-tenant-type="@((int)ViewBag.TenantType)">@T["Upload your license file."]</a></span>
+                            </div>
+                            <div class="divider-container col-xs-12">
+                                <hr class="connect-line-left"><div class="content text-body">@T["or Connect with"]</div><hr class="connect-line-right">
+                            </div>
+                            <div class="col-xs-12  align-center">
+                                <span class="link-header">@T["Don’t have an account?"] <a class="link-decoration" target="_blank" href="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Pricing)">@T["Sign Up"]</a></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="system-settings-offline-license col-lg-5 col-md-5 col-sm-5 col-xs-5" id="system-settings-offline-license-container">
+                        <div id="popup-container" class="col-xs-12 no-padding">
+                            <div class="col-xs-12 upload-header no-padding">
+                                <div class="col-xs-12 no-padding">
+                                    <span class="popup-title">@T["Offline Setup"]</span>
+                                    <p class="title-description">@Html.Raw(string.Format(T["Provide the {0} license file downloaded from the website to proceed with the offline installation. If you do not have a license file, you can download it {1}here{2}."].Value, displayName, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads) + "'>", "</a>"))
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 upload-content no-padding">
+                                <div id="upload-section" class="col-xs-12 no-padding">
+                                    <div id="file-lable" class="col-xs-12">
+                                        <label id="upload-lable">@T["Select the License Key file"]</label>
+                                    </div>
+                                    <div class="upload-btn-wrapper col-xs-12 no-padding">
+                                        <input type="text" id="file-name" class="col-xs-8" placeholder="@T["choose file"]" readonly="readonly" />
+                                        <img id="browse-lic" class="col-xs-4" src="~/images/common/folder.svg" />
+                                        <input type='file' id="getFile" accept=".lic" class="display-none">
+                                        <div id="tenant-type" class="display-none"></div>
+                                        <div class="validation-error-message col-xs-12 display-none"></div>
+                                    </div>
+                                    <div id="license-details" class="col-xs-12">
+                                        <div id="customer-email-container" class="col-xs-12 no-padding display-none">
+                                            <label class="col-xs-4 no-padding license-detail-lable">@T["Email"]</label>
+                                            <p id="customer-email" class="col-xs-8 no-padding"></p>
+                                        </div>
+                                        <div id="subscription-id-container" class="col-xs-12 no-padding display-none">
+                                            <label class="col-xs-4 no-padding  license-detail-lable">@T["Subscription Id"]</label>
+                                            <p id="subscription-id" class="col-xs-8 no-padding"></p>
+                                        </div>
+                                        <div id="subscription-name-container" class="col-xs-12 no-padding display-none">
+                                            <label class="col-xs-4 no-padding  license-detail-lable">@T["Subscription Name"]</label>
+                                            <p id="subscription-name" class="col-xs-8 no-padding"></p>
+                                        </div>
+                                        <div id="plan-name-container" class="col-xs-12 no-padding display-none">
+                                            <label class="col-xs-4 no-padding  license-detail-lable">@T["Plan Name"]</label>
+                                            <p id="plan-name" class="col-xs-8 no-padding"></p>
+                                        </div>
+                                        <div id="tenant-status-container" class="col-xs-12 no-padding display-none">
+                                            <label class="col-xs-4 no-padding  license-detail-lable">@T["Tenant Status"]</label>
+                                            <p id="tenant-status" class="col-xs-8 no-padding">Licensed</p>
+                                        </div>
+                                        <div id="expiry-date-container" class="col-xs-12 no-padding display-none">
+                                            <label class="col-xs-4 no-padding  license-detail-lable">@T["Expiry Date"]</label>
+                                            <p id="expiry-date" class="col-xs-8 no-padding"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 upload-footer btn-holder">
+                                <input id="return-startup-home" type="button" value="@T["Back"]" onclick="returnStartupHome()" class="col-xs-6 remove-margin-left secondary-button">
+                                <input disabled id="confirm-license" type="button" value="@T["Next"]" onclick="confirmLicenseUpdate()" class="col-xs-6 proceed-button">
+                            </div>
+                        </div>
+                    </div>
+                    @await Html.PartialAsync("_DatabaseConfiguration")
+                    @await Html.PartialAsync("_FileStorage")
+                    @await Html.PartialAsync("_UserAccount")
+                    
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 display-none" id="progress-parent-container">
+                        <div class="image-container">
+                            <img class="startup-image" src="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-deployment-image.svg")" />
+                            <div class="progressBar-container">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 10%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="deployment-status">@T["Fetching information..."]</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
