@@ -862,6 +862,17 @@ CREATE TABLE {database_name}.BOLDTC_QueryMetrics (
 )
 ;
 
+CREATE TABLE {database_name}.BOLDTC_TenantSettings (
+	Id int NOT NULL AUTO_INCREMENT,
+	TenantInfoId char(38) NOT NULL,
+	Settings longtext NOT NULL,
+	CreatedDate datetime NOT NULL,
+	ModifiedDate datetime NOT NULL,
+	IsActive tinyint(1) NOT NULL,
+  CONSTRAINT PK_BOLDTC_TENANTSETTINGS PRIMARY KEY (Id ASC)
+)
+;
+
 CREATE TABLE {database_name}.BOLDTC_UserAttributes(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(255) NOT NULL,
@@ -1295,6 +1306,9 @@ ALTER TABLE {database_name}.BOLDTC_UserLog ADD CONSTRAINT BOLDTC_UserLog_fk3 FOR
 
 ALTER TABLE {database_name}.BOLDTC_EmailActivityLog ADD CONSTRAINT BOLDTC_EmailActivityLog_fk0 FOREIGN KEY (UserId) REFERENCES {database_name}.BOLDTC_User(Id)
 ;
+
+ALTER TABLE {database_name}.BOLDTC_TenantSettings ADD CONSTRAINT BOLDTC_TenantSettings_fk0 FOREIGN KEY (TenantInfoId) REFERENCES {database_name}.BOLDTC_TenantInfo(Id)
+; 
 
 ALTER TABLE  {database_name}.BOLDTC_UserAttributes ADD FOREIGN KEY(UserId) REFERENCES {database_name}.BOLDTC_User (Id)
 ;

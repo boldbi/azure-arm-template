@@ -1,0 +1,71 @@
+﻿@model TenantInfo
+@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"] == "global-site-settings") ? "active" : string.Empty;
+    var globalSettingsOptionCount = Enum.GetNames(typeof(GlobalSettingsOptions)).Length;
+}
+<script type="text/javascript">
+    var tenantInfoId = "@Model.TenantInfoId";
+    var updateTenantSettingsUrl = "@Url.Action("UpdateTenantSettings", "TenantsManagement")";
+</script>
+
+<div role="tabpanel" class="tab-pane @activeTab" id="site-settings-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 site-settings">
+            <div class="col-xs-12 all-settings">
+                <div>
+                    <input type="checkbox" id="all-settings" class="enable-disable" checked="@((Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Count > 0))" indeterminate="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Count != 0 && Model.GlobalSettings.GlobalSettingsInfo.Count != globalSettingsOptionCount)" />
+                    <label for="all-settings" class="">@T["Inherit Global Settings"]</label>
+                </div>
+            </div>
+            <div class="col-xs-12 switch-padding">
+                <div>
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.DateTime.ToString())" id="date-and-time" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.DateTime.ToString()))" />
+                    <label for="date-and-time"> @EnumHelper.GetDescription(GlobalSettingsOptions.DateTime)</label>
+                </div>
+                <div class="settings-info">@T["The date format, time format, and time zone information will be inherited from UMS."]</div>
+            </div>
+            <div class="col-xs-12 switch-padding">
+                <div>
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.Language.ToString())" id="language" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.Language.ToString()))" />
+                    <label for="language"> @EnumHelper.GetDescription(GlobalSettingsOptions.Language)</label>
+                </div>
+                <div class="settings-info">@T["The language preference for localization will be inherited from UMS."]</div>
+
+            </div>
+            <div class="col-xs-12 switch-padding">
+                <div>
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.LookAndFeel.ToString())" id="look-and-feel" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.LookAndFeel.ToString()))" />
+                    <label for="look-and-feel"> @EnumHelper.GetDescription(GlobalSettingsOptions.LookAndFeel)</label>
+                </div>
+                <div class="settings-info">@T["The font family and theme preference will be inherited from UMS."]</div>
+            </div>
+            <div class="col-xs-12 switch-padding">
+                <div>
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.Branding.ToString())" id="branding" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.Branding.ToString()))" />
+                    <label for="branding">@EnumHelper.GetDescription(GlobalSettingsOptions.Branding)</label>
+                </div>
+                <div class="settings-info">@T["Branding image, copyright, and powered-by information will be inherited from UMS."]</div>
+            </div>
+            <div class="col-xs-12 switch-padding">
+                <div>
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.Email.ToString())" id="email" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.Email.ToString()))" />
+                    <label for="email">@EnumHelper.GetDescription(GlobalSettingsOptions.Email)</label>
+                </div>
+                <div class="settings-info">@T["The email configuration will be inherited from UMS."]</div>
+            </div>
+            <div class="col-xs-12 switch-padding">
+                <div>
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.Account.ToString())" id="account" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.Account.ToString()))" />
+                    <label for="account">@EnumHelper.GetDescription(GlobalSettingsOptions.Account)</label>
+                </div>
+                <div class="settings-info">@T["The user account activation mode and other related settings will be inherited from UMS."]</div>
+            </div>
+        </div>
+    </div>
+    <div class="admin-page-footer col-xs-12 col-md-12">
+        <div class="admin-page-actions col-lg-12 col-md-12 no-margin">
+            <a href="@Url.Action("Sites", "TenantsManagement")" class="secondary-button pull-right" id="cancel-tenant-settings" title="">@T["Cancel"]</a>
+            <input type="button" id="update-tenant-settings" class="primary-button pull-right" value="@T["Save"]" />
+        </div>
+    </div>
+</div>
