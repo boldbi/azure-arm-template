@@ -2111,6 +2111,7 @@ var Designer = {
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
                 joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
+				joinMessagePostgreSql: "PostgreSQL does not support the not equal operator in the FULL OUTER JOIN.",
                 joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
             },
             parameterMessages: {
