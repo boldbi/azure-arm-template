@@ -342,19 +342,6 @@ function onRecoveryCodeDialogClose() {
     window.location.reload();
 }
 
-function copyToClip() {
-    value = document.getElementById("copy-recovery").value;
-    navigator.clipboard.writeText(value)
-    setTimeout(function () {
-        $("#recovery-code-copy").attr("data-original-title", window.Server.App.LocalizationContent.Copied);
-        $("#recovery-code-copy").tooltip('show');
-    }, 200);
-    setTimeout(function () {
-        $("#recovery-code-copy").attr("data-original-title", window.Server.App.LocalizationContent.ClicktoCopy);
-        $("#recovery-code-copy").tooltip();
-    }, 3000);
-}
-
 
 function regenerateRecoveryCode() {
     showWaitingPopup('content-area');
@@ -390,6 +377,34 @@ function regenerateRecoveryCode() {
 function onMfaDialogOpen() {
     $(".verification-ok-button").attr("disabled", true);
     document.getElementById("authenticator-application-box").ej2_instances[0].show();
+}
+
+function copyToClipboard(inputId, buttonId) {
+    if (typeof (navigator.clipboard) != 'undefined') {
+        var value = $(inputId).val();
+        var copyText = $(inputId);
+        copyText.attr("type", "text").select();
+        navigator.clipboard.writeText(value)
+        if (inputId === "#copy-recovery") {
+            $("#copy-recovery").css("display", "none");
+        }
+    }
+    else {
+        var copyText = $(inputId);
+        copyText.attr("type", "text").select();
+        document.execCommand("copy");
+        if (inputId === "#copy-recovery") {
+            $("#copy-recovery").css("display", "none");
+        }
+    }
+    setTimeout(function () {
+        $(buttonId).attr("data-original-title", window.Server.App.LocalizationContent.Copied);
+        $(buttonId).tooltip('show');
+    }, 200);
+    setTimeout(function () {
+        $(buttonId).attr("data-original-title", window.Server.App.LocalizationContent.ClickToCopy);
+        $(buttonId).tooltip();
+    }, 3000);
 }
 
 function onMfaDialogClose() {
