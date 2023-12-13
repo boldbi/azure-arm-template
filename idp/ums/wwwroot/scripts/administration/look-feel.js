@@ -208,7 +208,7 @@ $(document).on("change", "input[name='appearance']", function (e) {
 });
 
 function onUploadFontDialogClose() {
-    $("#upload-font").attr("disabled", true);
+    $("#upload-font, #font-name").attr("disabled", true);
     $("#font-name").val('');
     $('input[type="file"]').val(null);
     $("#font-file-name").val(window.Server.App.LocalizationContent.BrowseFont);
