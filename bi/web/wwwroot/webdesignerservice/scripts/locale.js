@@ -5636,6 +5636,8 @@
                 removeLoader: "Hide Loading Indicator",
 				commonTimeInterval: "Common Time Interval",
 				differentTimeInterval: "Differed Time Interval",
+				commonTimeErrorMessage: "Common Time Interval cannot be empty",
+				differentTimeErrorMessage: "Differed Time Interval cannot be empty",
                 removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data"
             },
             dialogText: {
@@ -5815,7 +5817,7 @@
                     avgDesc: "Returns the average of the values in the given expression.",
                     avgEx: "AVG(numeric_expression)",
 					sumdDesc: "Returns the sum of the Distinct values in the given expression.",
-                    sumdEx: "SUMD(expression)",
+                    sumdEx: "SUMD(numeric_expression)",
                     avgdDesc: "Returns the average of the Distinct values in the given expression.",
                     avgdEx: "AVGD(expression)",
                     countDesc: "Returns the number of items in the given expression.",

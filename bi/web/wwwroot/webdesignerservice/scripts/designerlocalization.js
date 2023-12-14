@@ -4598,6 +4598,8 @@ var Designer = {
                 timeInterval: "Time Interval",
                 removeLoader: "Hide Loading Indicator",
 				commonTimeInterval: "Common Time Interval",
+				commonTimeErrorMessage: "Common Time Interval cannot be empty",
+				differentTimeErrorMessage: "Differed Time Interval cannot be empty",
 				differentTimeInterval: "Differed Time Interval",
                 removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data"
             },
@@ -4836,7 +4838,7 @@ var Designer = {
                     avgEx: "AVG(numeric_expression)",
 					
 					sumdDesc: "Returns the sum of the Distinct values in the given expression.",
-                    sumdEx: "SUMD(expression)",
+                    sumdEx: "SUMD(numeric_expression)",
 
                     avgdDesc: "Returns the average of the Distinct values in the given expression.",
                     avgdEx: "AVGD(expression)",
