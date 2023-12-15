@@ -9,3 +9,9 @@ CREATE TABLE IF NOT EXISTS BOLDTC_TenantSettings (
   CONSTRAINT  BOLDTC_TenantSettings_fk0  FOREIGN KEY ( TenantInfoId ) REFERENCES  BOLDTC_TenantInfo ( Id )
 )
 ;
+
+ALTER TABLE BOLDTC_TenantInfo ADD COLUMN IF NOT EXISTS  AdditionalParameters varchar(1026) NULL
+;
+
+ALTER TABLE BOLDTC_TenantInfo ADD COLUMN IF NOT EXISTS  ImDbAdditionalParameters varchar(1026) NULL
+;

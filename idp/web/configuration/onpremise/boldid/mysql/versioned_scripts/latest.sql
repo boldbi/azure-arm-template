@@ -9,3 +9,9 @@ CREATE TABLE IF NOT EXISTS {database_name}.BOLDTC_TenantSettings (
   CONSTRAINT BOLDTC_TenantSettings_fk0 FOREIGN KEY (TenantInfoId) REFERENCES {database_name}.BOLDTC_TenantInfo(Id)
 )
 ;
+
+ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD AdditionalParameters longtext NULL
+;
+
+ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD ImDbAdditionalParameters longtext NULL
+;

@@ -35,9 +35,11 @@ $(document).ready(function () {
     var tenantTypeDropDown = getDropDownValue("tenant-type");
     if (tenantTypeDropDown != "BoldBiOnPremise") {
         $(".reports-branding").css("display", "none");
+         $(".selector").addClass("selector-alignment");
     }
     else {
         $(".bi-branding").css("display", "inline");
+         $(".selector").addClass("selector-alignment");
     }
 
     if (isCommonLogin && !isBoldReportsTenantType()) {

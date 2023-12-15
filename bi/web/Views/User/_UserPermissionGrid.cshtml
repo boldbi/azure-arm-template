@@ -15,39 +15,41 @@
 </script>
 
 <script type="text/x-jsrender" id="itemName">
-    <div class="item-name" data-placement="top">
-        {{if ItemType=="@((int)ItemType.Dashboard)" && ItemName!="-"}}
-        {{if IsDraft}}
-        <span><a href="@Url.Action("DashboardDesigner", "Designer")/{{:ItemId}}/draft/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+    <div class="item-name" title="{{:ItemName}}" data-toggle="tooltip" data-placement="top">
+        {{if ~isDash(ItemName)}}
+            <span>{{:ItemName}}</span>
         {{else}}
-        <span><a href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
-        {{/if}}
-        {{else ItemType=="@((int)ItemType.Widget)" && ItemName!="-"}}
-        <span><a href="@Url.Action("Widgets", "FileRender")/{{:ItemId}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
-        {{else ItemType=="@((int)ItemType.Category)" && ItemName!="-"}}
-        <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
-        {{else ItemType=="@((int)ItemType.Slideshow)" && ItemName!="-"}}
-        <span><a href="@Url.Action("SlideshowPreview", "Slideshow")/{{:ItemId}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
-        {{else ItemType=="@((int)ItemType.Schedule)"}}
-        <span>{{:ItemName}}</span>
-        @*{{else ItemType=="@((int)ItemType.File)"}}
-        <span><a href="@UrlHelper.GenerateUrl("ItemDownload", "Download", "FileRender", null, RouteTable.Routes, HttpContext.Current.Request.RequestContext, false)/{{:ItemTypeDescription}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>*@
-        {{else}}
-        <span>{{:ItemName}}</span>
+            {{if ItemType=="@((int)ItemType.Dashboard)"}}
+                {{if IsDraft}}
+                    <span><a href="@Url.Action("DashboardDesigner", "Designer")/{{:ItemId}}/draft/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                {{else}}
+                    <span><a href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:CategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+            {{/if}}
+            {{else ItemType === @((int)ItemType.Widget)}}
+                <span><a href="@Url.Action("Widgets", "FileRender")/{{:ItemId}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+            {{else ItemType === @((int)ItemType.Category)}}
+                <span><a href="@Url.Action("Dashboards", "Dashboards")?category={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+            {{else ItemType === @((int)ItemType.Slideshow)}}
+                <span><a href="@Url.Action("SlideshowPreview", "Slideshow")/{{:ItemId}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+            {{else ItemType === @((int)ItemType.Schedule)}}
+                <span>{{:ItemName}}</span>
+            {{else}}
+                <span>{{:ItemName}}</span>
+            {{/if}}
         {{/if}}
     </div>
 </script>
+<script type="text/x-jsrender" id="entitytemplate">
+    <div class="grid-content" title="{{:PermissionEntityDescription}}" data-toggle="tooltip">{{:PermissionEntityDescription}}</div>
+</script>
+<script type="text/x-jsrender" id="accessmodetemplate">
+    <div class="item-name" title="{{:PermissionAccessDescription}}" data-toggle="tooltip">{{:PermissionAccessDescription}}</div>
+</script>
+<script type="text/x-jsrender" id="grouptemplate">
+    <div class="item-name" title="{{:GroupName}}" data-toggle="tooltip">{{:GroupName}}</div>
+</script>
 
 <script type="text/javascript">
-    function onQueryCellInfo(args) {
-        if(args.data[args.column.field] !=="-"){
-            $(args.cell).attr({
-                "data-toggle": "tooltip",
-                "data-container": "body",
-                "title": args.data[args.column.field]
-            });
-        }
-    }
 
     function refreshTooltipAndPositionForGrid(args) {
         $("[data-toggle=tooltip]").tooltip();
@@ -60,6 +62,9 @@
         },
         widgetUrlEncode: function (item) {
             return encodeURI("@Url.Action("widgets", "FileRender")/" + item);
+        },
+        isDash: function (itemName) {
+            return itemName === "--";
         }
     });
     $(document).ready(function () {
@@ -86,8 +91,8 @@
                 groupedColumns: ["ItemTypeDescription"]
             },
             columns:[
-                {field:"PermissionAccessDescription", headerText:"@T["Access Mode"]", width: 130 },
-                {field:"PermissionEntityDescription", headerText:"@T["Entity"]", width: 80 },
+                {field:"PermissionAccessDescription", headerText:"@T["Access Mode"]", templateID: "#accessmodetemplate", width: 130 },
+                {field:"PermissionEntityDescription", headerText:"@T["Entity"]", templateID: "#entitytemplate", width: 80 },
                 {field:"ItemName",
                     headerText:"@T["Scope"]",
                     template: true,
@@ -96,10 +101,9 @@
                     type: "string",
                     width: 240
                 },
-                {field:"GroupName", headerText:"@T["Inherited from Group"]", width: 120 },
+                {field:"GroupName", headerText:"@T["Inherited from Group"]", templateID: "#grouptemplate", width: 120 },
                 {field:"ItemTypeDescription", headerText:"@T["Resources"]", allowSorting:false, allowFiltering:false }
             ],
-            queryCellInfo: "onQueryCellInfo",
             dataBound: "refreshTooltipAndPositionForGrid",
             actionComplete: "refreshTooltipAndPositionForGrid"
         });
