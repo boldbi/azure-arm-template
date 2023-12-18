@@ -2112,7 +2112,8 @@ var Designer = {
                 joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
 				joinMessagePostgreSql: "PostgreSQL does not support the not equal operator in the FULL OUTER JOIN.",
-                joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
+                joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
+				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",

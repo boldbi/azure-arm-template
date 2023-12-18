@@ -11,4 +11,5 @@ CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
    chartType TEXT,
    uservote TEXT,
    isreported BOOLEAN)
+;ALTER TABLE {database_name}.BOLDBI_ScheduleRunHistory ADD LogExist tinyint NOT NULL DEFAULT 0
 ;

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 6.19.7
+*  version : 6.19.8
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -36878,11 +36878,11 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                             this.selectedStartDateValue = null;
                             this.selectedEndDateValue = null;
                             this._updateInputs(target.hasClass("e-input-main"));
-			if (evt.keyCode === divideBy13) {
+			            if (evt.keyCode === divideBy13) {
                             if (BoldBIDashboard.isNullOrUndefined(this.container.find(".e-dashboarddatepicker-apply-btn").attr('disabled'))) {
                                 this.container.find(".e-dashboarddatepicker-apply-btn").focus();
                             }
-                        }                        
+                        }
                     } else {
                         this._removeDatePickerFocus();
                         if (isWrongFormat) {

@@ -970,6 +970,7 @@
 				dataCacheConfigFlushCache: "Clear Cache",
 				dataCacheConfigRefreshTime: "Display refresh time",
 				dataCacheConfigSuccessMessage: "Settings has been updated successfully.",
+                dataCacheAlertContent: "The functionality of the data cache will be rendered ineffective due to the activation of data refresh settings. Please undo auto refresh and enable the data cache.",
                 headerNewConnectionText: "NEW CONNECTION",
                 newDataSourceText: "NEW DATA SOURCE",
                 dataSourceTypeText: "Data Source Type",
@@ -1159,6 +1160,9 @@
 				impersonateInfo: "While using Windows AD login in Bold BI you can impersonate the logged-in user while processing the data from ",
 				enableImpersonate: "Impersonate User",
 				emptyCollection: "No collections in the currently selected DB",
+                invalidSheetsNoteTxt: "Ignore invalid data sheets and continue data extraction by clicking ‘Yes’.",
+                continueButtonText: "Yes",
+                closeBtnText: "No",
                 dataSourceType: {
                     file: "File",
                     excel: "Excel",
@@ -2629,7 +2633,8 @@
 				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
 				joinMessagePostgreSql: "PostgreSQL does not support the not equal operator in the FULL OUTER JOIN.",
-				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN"
+				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
+				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -5638,7 +5643,9 @@
 				differentTimeInterval: "Differed Time Interval",
 				commonTimeErrorMessage: "Common Time Interval cannot be empty",
 				differentTimeErrorMessage: "Differed Time Interval cannot be empty",
-                removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data"
+                removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data",
+                refreshAlertContent: "Enabling the data refresh settings allows the retrieval of live data, disregarding the use of the data cache and overriding it. Please disable the data cache and enable refresh settings.",
+                lastRefreshContent: "Last Refreshed at"
             },
             dialogText: {
                 appendText: "Append Text",

@@ -16,12 +16,12 @@ CREATE TABLE [BOLDTC_TenantSettings] (
 ALTER TABLE [BOLDTC_TenantSettings] WITH CHECK ADD CONSTRAINT [BOLDTC_TenantSettings_fk0] FOREIGN KEY ([TenantInfoId]) REFERENCES [BOLDTC_TenantInfo]([Id])
 END;
 
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BOLDTC_TenantInfo' AND COLUMN_NAME = 'AdditionalParameters1')
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BOLDTC_TenantInfo' AND COLUMN_NAME = 'AdditionalParameters')
 BEGIN
-    ALTER TABLE [BOLDTC_TenantInfo] ADD [AdditionalParameters1] nvarchar(max) NULL
+    ALTER TABLE [BOLDTC_TenantInfo] ADD [AdditionalParameters] nvarchar(max) NULL
 END;
 
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BOLDTC_TenantInfo' AND COLUMN_NAME = 'ImDbAdditionalParameters1')
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BOLDTC_TenantInfo' AND COLUMN_NAME = 'ImDbAdditionalParameters')
 BEGIN
-    ALTER TABLE [BOLDTC_TenantInfo] ADD [ImDbAdditionalParameters1] nvarchar(max) NULL
+    ALTER TABLE [BOLDTC_TenantInfo] ADD [ImDbAdditionalParameters] nvarchar(max) NULL
 END;

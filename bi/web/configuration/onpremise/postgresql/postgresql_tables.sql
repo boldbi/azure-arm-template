@@ -946,7 +946,8 @@ CREATE TABLE SyncDS_ScheduleRunHistory(
 	ModifiedDate timestamp NOT NULL,
 	Message text NULL,
 	IsOnDemand smallint NOT NULL DEFAULT (0),
-	IsActive smallint NOT NULL)
+	IsActive smallint NOT NULL,
+	LogExist smallint NOT NULL DEFAULT (0))
 ;
 
 CREATE TABLE SyncDS_DSMetrics (

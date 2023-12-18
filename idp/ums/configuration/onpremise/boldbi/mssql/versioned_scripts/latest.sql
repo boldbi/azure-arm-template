@@ -12,3 +12,5 @@ CREATE TABLE [BoldBI_ai_qnawidgethistory] (
    uservote TEXT,
    isreported BIT)
 ;
+ALTER TABLE [BOLDBI_ScheduleRunHistory] ADD [LogExist] bit NOT NULL DEFAULT '0'
+;
