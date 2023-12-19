@@ -7538,6 +7538,7 @@
 				datasourceTextContent: "in the data source:",
 				acceptText: "I accept",
 				uploadAnyWay: "Upload Anyway.",
+				uploadAnyWayBtn: "Upload Anyway",
 				onlySchemaErrorText1: "You can upload despite the schema mismatch by clicking",
 				onlySchemaErrorText2: "Alternatively, you can resolve this by configuring these datasources individually from the configuration window.",
 				otherDsErrorText: "You can resolve other errors by configuring these datasources individually from the configuration window.",
