@@ -11,5 +11,7 @@ CREATE TABLE SyncDS_ai_qnawidgethistory (
    chartType TEXT,
    uservote TEXT,
    isreported BOOLEAN)
-;ALTER TABLE SyncDS_ScheduleRunHistory ADD COLUMN LogExist smallint NOT NULL default 0
+;
+
+ALTER TABLE SyncDS_ScheduleRunHistory ADD COLUMN LogExist smallint NOT NULL default 0
 ;
