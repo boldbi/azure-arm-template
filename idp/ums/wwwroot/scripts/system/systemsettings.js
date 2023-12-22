@@ -770,10 +770,6 @@ function ResizeHeightForDOM() {
 
     //}
 
-    if (height > modalheight) {
-        $(".dialog-body-div").css("height", height);
-    } else {
-        $(".dialog-body-div").css("height", modalheight);
-    }
+    $(".dialog-body-div").css("height", "auto");
     gridHeight = height;
 }
