@@ -34,7 +34,7 @@ $(document).ready(function () {
     }
 
     var tenantTypeDropDown = getDropDownValue("tenant-type");
-    if (tenantTypeDropDown != "BoldBiOnPremise") {
+    if (tenantTypeDropDown.toLowerCase() != "boldbionpremise") {
         $(".reports-branding").css("display", "inline");
         $(".bi-branding").css("display", "none");
         $(".selector").addClass("selector-alignment");
