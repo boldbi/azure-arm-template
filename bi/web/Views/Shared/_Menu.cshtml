@@ -67,6 +67,7 @@
     }
     var absolutePath = requestUrl.AbsolutePath.ToString().ToLower();
     var showSideNavMenu = absolutePath.ToLower().Contains("/dashboard-designer") || absolutePath.ToLower().Contains("/datasource-designer");
+    var isUMSLogoInherited = globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.Branding);
 }
 
 <environment include="Development,CloudDevelopment">
@@ -380,4 +381,6 @@
     var enablePublishModule = @Json.Serialize(@ServerAppConfig.IsSelfHosted) ? @Json.Serialize(ServerAppConfig.EnablePublishModule) : @Json.Serialize(globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule);
     var allItemsCount = @Html.Raw(JsonConvert.SerializeObject(allItemsCount));
     var hasOwnedDashboard = @Json.Serialize(hasOwnedDashboard);
+    var isUMSLogoInherited = @Json.Serialize(isUMSLogoInherited);
+    var headerLogo = "@globalAppSettings.SystemSettings.MainScreenLogo";
 </script>

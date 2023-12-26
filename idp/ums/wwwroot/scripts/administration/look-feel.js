@@ -1,6 +1,6 @@
 ﻿const additionalSpecialChar = /^[a-zA-Z_0-9`~!\$\^()=\-\.\{\} ]+$/;
-const specialChar = /^[a-zA-Z0-9-_]*$/;
-const specialCharWithHyphen = /^[a-zA-Z0-9-]*$/;
+const specialChar = /^[a-zA-Z0-9-_\s]*$/;
+
 $(document).ready(function () {
     addPlacehoder("#font-upload-dialog");
     var fontUploadDialog = new ejs.popups.Dialog({
@@ -166,7 +166,7 @@ $(document).on("change", "#font-file", function (e) {
     $("#font-name").val(fontName);
     $('#font-file-name').closest('div').removeClass("has-error");
     $(".validation-message").html("");
-    $('#upload-font,  #font-name').attr("disabled", false);
+    $('#upload-font, #font-name').attr("disabled", true);
     var fontFamily = document.getElementById("fontfamily").ej2_instances[0];
     var fontFamilyList = fontFamily.getItems();
     if (!specialChar.test(fontName)) {
@@ -175,11 +175,15 @@ $(document).on("change", "#font-file", function (e) {
         $('#upload-font, #font-name').attr("disabled", "disabled");
     }
     else {
+        $('#upload-font, #font-name').attr("disabled", false);
         for (var item = 0; item < fontFamilyList.length; item++) {
             if (fontName === fontFamilyList[item].dataset.value.toLowerCase()) {
                 $('.validation').closest('div').addClass("has-error");
                 $(".validation-message").css("display", "block").text(window.Server.App.LocalizationContent.CssFileExist);
-                $('#upload-font').attr("disabled", true);
+                $('#upload-font, #font-name').attr("disabled", true);
+            }
+            else {
+                keyvalidationfontname();
             }
         }
     }
@@ -204,7 +208,7 @@ $(document).on("change", "input[name='appearance']", function (e) {
 });
 
 function onUploadFontDialogClose() {
-    $("#upload-font").attr("disabled", true);
+    $("#upload-font, #font-name").attr("disabled", true);
     $("#font-name").val('');
     $('input[type="file"]').val(null);
     $("#font-file-name").val(window.Server.App.LocalizationContent.BrowseFont);
@@ -233,6 +237,7 @@ function onUploadApplicationThemeDialogClose() {
     $('#applicationtheme-file').closest('div').removeClass("has-error");
     $(".validation").closest("div").removeClass("has-error");
     $(".validation-message").html("");
+    $('#upload-applicationtheme,#applicationtheme-name').attr("disabled", "disabled");
     document.getElementById("application-theme-upload-dialog").ej2_instances[0].hide();
 }
 
@@ -244,6 +249,7 @@ function onUploadDashboardThemeDialogClose() {
     $('#dashboardtheme-file').closest('div').removeClass("has-error");
     $(".validation").closest("div").removeClass("has-error");
     $(".validation-messages").html("");
+    $('#upload-dashboardtheme, #dashboardtheme-name').attr("disabled", "disabled");
     document.getElementById("dashboard-theme-upload-dialog").ej2_instances[0].hide();
 }
 
@@ -280,6 +286,9 @@ $(document).on("change", "#applicationtheme-file", function (e) {
                 $('#applicationtheme-name').closest('div').addClass("has-error");
                 $("#invalid-applicationtheme-name").html(window.Server.App.LocalizationContent.CssFileExist);
                 $('#upload-applicationtheme').attr("disabled", "disabled");
+            }
+            else {
+                keyvalidation("#applicationtheme-name");
             }
         }
     }
@@ -319,6 +328,9 @@ $(document).on("change", "#dashboardtheme-file", function (e) {
                 $('#dashboardtheme-name').closest('div').addClass("has-error");
                 $("#invalid-dashboardtheme-name").html(window.Server.App.LocalizationContent.CssFileExist);
                 $('#upload-dashboardtheme').attr("disabled", "disabled");
+            }
+            else {
+                keyvalidation("#dashboardtheme-name");
             }
         }
     }
@@ -363,6 +375,20 @@ function keyvalidation(id) {
     }
 }
 
+function keyvalidationfontname() {
+    if ($("#font-name").val().trim() == '') {
+        $('#upload-font').attr("disabled", "disabled");
+    }
+    else if (!specialChar.test($("#font-name").val())) {
+        $('#font-name').closest('div').addClass("has-error");
+        $("#invalid-font-name").html(window.Server.App.LocalizationContent.FileNameInvalid);
+        $('#upload-font').attr("disabled", "disabled");
+    }
+    else {
+        $("#upload-font").removeAttr("disabled");
+    }
+}
+
 $(document).on("keydown keyup", "#applicationtheme-name", function () {
     keyvalidation("#applicationtheme-name");
 });
@@ -376,15 +402,5 @@ function uploadformValidation() {
 }
 
 $(document).on("keydown keyup", "#font-name", function () {
-    if ($("#font-name").val().trim() == '') {
-        $('#upload-font').attr("disabled", "disabled");
-    }
-    else if (!specialChar.test($("#font-name").val())) {
-        $('#font-name').closest('div').addClass("has-error");
-        $("#invalid-font-name").html(window.Server.App.LocalizationContent.FileNameInvalid);
-        $('#upload-font').attr("disabled", "disabled");
-    }
-    else {
-        $("#upload-font").removeAttr("disabled");
-    }
+    keyvalidationfontname();
 });

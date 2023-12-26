@@ -972,17 +972,4 @@ function regenerateRecoveryCode() {
     });
 }
 
-function copyToClip() {
-    value = document.getElementById("copy-recovery").value;
-    navigator.clipboard.writeText(value)
-    setTimeout(function () {
-        $("#recovery-code-copy").attr("data-original-title", window.Server.App.LocalizationContent.Copied);
-        $("#recovery-code-copy").tooltip('show');
-    }, 200);
-    setTimeout(function () {
-        $("#recovery-code-copy").attr("data-original-title", window.Server.App.LocalizationContent.ClickToCopy);
-        $("#recovery-code-copy").tooltip();
-    }, 3000);
-}
-
 

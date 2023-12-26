@@ -954,7 +954,8 @@ CREATE TABLE [BOLDBI_ScheduleRunHistory](
 	[Message] [nvarchar](max) NULL,
 	[ModifiedDate] [datetime] NOT NULL,
 	[IsOnDemand] [bit] NOT NULL DEFAULT (0),
-	[IsActive] [bit] NOT NULL)
+	[IsActive] [bit] NOT NULL,
+	[LogExist] [bit] NOT NULL DEFAULT (0))
 ;
 CREATE TABLE [BoldBI_DSMetrics]  (
    Id INT IDENTITY(1,1) PRIMARY KEY,
@@ -978,11 +979,10 @@ CREATE TABLE [BoldBI_ai_qnawidgethistory] (
    searchid VARCHAR(255) PRIMARY KEY,
    question TEXT,
    tableinfo TEXT,
-   schemasequence TEXT,
    fieldinfo TEXT,
    message TEXT,
    haserror BIT,
-   sqlquery TEXT,
+   chartType TEXT,
    uservote TEXT,
    isreported BIT)
 ;

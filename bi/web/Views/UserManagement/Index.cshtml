@@ -23,6 +23,7 @@
     var passwordPolicy = ServerAppConfig.PasswordPolicy;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(permissions, _identityResponse.IsAdmin, _featureManager);
     var pageDescription = T["Add and manage your users."];
+    var showGroupModule =  globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null  || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable);
 }
 
 @section scripts{
@@ -454,12 +455,15 @@
                                     <span>@T["Remove User"]</span>
                                 </a>
                             </li>
-                            <li>
-                                <a class="dropdown-toggle user-add-group" data-toggle="tooltip" data-placement="left" title="@T["Assign a group to selected users"]">
+                            @if (showGroupModule)
+                            {
+                                <li>
+                                    <a class="dropdown-toggle user-add-group" data-toggle="tooltip" data-placement="left" title="@T["Assign a group to selected users"]">
                                     <i class="su su-group-1"> </i>
                                     <span>@T["Assign Group"]</span>
-                                </a>
-                            </li>
+                                    </a>
+                                </li>
+                            }
                          </ul>
                     </li>
                 </ul>

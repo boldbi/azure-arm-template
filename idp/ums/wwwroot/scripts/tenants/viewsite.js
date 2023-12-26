@@ -89,6 +89,14 @@ $(document).ready(function () {
     });
     addTenantDialog.appendTo("#add-tenant-popup");
 
+    initializeEj2CheckBox("all-settings");
+    initializeEj2CheckBox("date-and-time");
+    initializeEj2CheckBox("look-and-feel");
+    initializeEj2CheckBox("branding");
+    initializeEj2CheckBox("email");
+    initializeEj2CheckBox("account");
+    initializeEj2CheckBox("language");
+
     var query = window.location.search;
     if (query.includes("?tab=general")) {
         $('a[href="#application-tab"]').tab("show");
@@ -110,6 +118,9 @@ $(document).ready(function () {
             isAttributeTabLoaded = true;
         }
         $('a[href="#custom-attribute-tab"]').tab("show");
+    }
+    else if (query.includes("?tab=site-settings")) {
+        $('a[href="#site-settings-tab"]').tab("show");
     }
     else {
         isFreshLoad = false;
@@ -134,6 +145,10 @@ $(document).ready(function () {
         else if (tab === "attributes" && isActiveSite) {
             $("#custom-attribute a").attr("href", "#custom-attribute-tab");
             $('a[href="#custom-attribute-tab"]').tab('show');
+        }
+        else if (tab === "site-settings") {
+            $("#site-settings a").attr("href", "#site-settings-tab");
+            $('a[href="#site-settings-tab"]').tab('show');
         }
         else {
             $("#application a").attr("href", "#application-tab");
@@ -195,10 +210,10 @@ $(document).ready(function () {
                                             if (result.activation == 0) {
                                                 SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAddedActivated, 7000)
                                             }
-                                            else if (result.result == "success" && result.activation == 1) {
+                                            else if (result.result  && result.activation == 1) {
                                                 SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAdded, 7000);
                                             }
-                                            else if (result.result == "failure" && result.isAdmin == true && result.activation == 1) {
+                                            else if (!result.result && result.isAdmin == true && result.activation == 1) {
                                                 WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, null, 7000);
                                             }
                                             g.refresh();
@@ -251,6 +266,9 @@ $(document).on("shown.bs.tab", 'a[data-toggle="tab"]', function (e) {
             getAttributes();
             isAttributeTabLoaded = true;
         }
+    }
+    else if (target.indexOf("#site-settings-tab") !== -1) {
+        data = "site-settings";
     }
     pushUrl(data);
     needPush = true;
@@ -974,6 +992,30 @@ function enableIsolationCode() {
     }
 }
 
+$(document).on("click", "#update-tenant-settings", function () {
+    var globalSettingsOptions = [];
+    $(".enable-disable").each(function () {
+        if (this.id != "all-settings" && document.getElementById(this.id).ej2_instances[0].checked) {
+            globalSettingsOptions.push(document.getElementById(this.id).ej2_instances[0].value);
+        }
+    });
+
+    showWaitingPopup("content-area");
+    $.ajax({
+        type: "POST",
+        data: { tenantInfoId: tenantInfoId, globalSettingsOptions: globalSettingsOptions },
+        url: updateTenantSettingsUrl,
+        success: function (result) {
+            if (result.Status) {
+                SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.SiteSettingsSucess, 7000);
+            } else {
+                WarningAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.SiteSettingsError, 7000);
+            }
+            hideWaitingPopup("content-area");
+        }
+    });
+});
+
 $(document).on("click", "#update-isolation-code", function (e) {
     var isolationCode = $("#isolation-code").val().trim();
     var tenantInfoId = $(".isolation-code-value").attr("data-tenant-id");
@@ -1014,7 +1056,68 @@ $(document).on("click", "#data-security", function (e) {
     enableIsolationCode();
 });
 
+function initializeEj2CheckBox(id) {
+    var checkbox = new ejs.buttons.CheckBox({ created: onCreateGlobalSettings, cssClass: "e-check-box", change: onChangeGlobalSettings });
+    checkbox.appendTo('#' + id);
+}
+
+function onCreateGlobalSettings() {
+    if (this.element.id == "all-settings" && $("." + this.cssClass).find("#" + this.element.id).attr("indeterminate") == "indeterminate") {
+        this.indeterminate = true;
+    }
+    else {
+        this.checked = $("." + this.cssClass).find("#" + this.element.id).attr("checked") == "checked";
+        this.value = $("." + this.cssClass).find("#" + this.element.id).attr("value");
+    }
+}
+
+function changeIndeterminateState() {
+    var checkedCount = 0;
+    var unCheckedCount = 0;
+    $(".enable-disable").each(function () {
+        if (this.id != "all-settings") {
+            if (document.getElementById(this.id).ej2_instances[0].checked) {
+                checkedCount++;
+            }
+            else {
+                unCheckedCount++
+            }
+        }
+    });
+
+    if (checkedCount > 0 && unCheckedCount > 0) {
+        document.getElementById("all-settings").ej2_instances[0].indeterminate = true;
+    }
+    else if (checkedCount > 0 && unCheckedCount == 0) {
+        document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
+        document.getElementById("all-settings").ej2_instances[0].checked = true;
+    }
+    else {
+        document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
+        document.getElementById("all-settings").ej2_instances[0].checked = false;
+    }
+}
+
+function onChangeGlobalSettings(args) {
+    document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
+    if (this.element.id == "all-settings" && args.checked) {
+        $(".enable-disable").each(function () {
+            document.getElementById(this.id).ej2_instances[0].checked = true;
+        });
+    }
+    else if (this.element.id == "all-settings" && !args.checked) {
+        document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
+        $(".enable-disable").each(function () {
+            document.getElementById(this.id).ej2_instances[0].checked = false;
+        });
+    }
+    else {
+        changeIndeterminateState();
+    }
+}
+
 $(document).on("click", "#new-user-button", function () {
     var usersgrid = document.getElementById('users_grid').ej2_instances[0];
     usersgrid.clearSelection();
 });
+

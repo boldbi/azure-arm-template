@@ -15,7 +15,7 @@ $(document).ready(function () {
     addPlacehoder("#search-area");
     createWaitingPopup('user_grid');
     createWaitingPopup('user-add-dialog');
-    createWaitingPopup('movable-dialog');
+    createWaitingPopup('movable-dialog'); 
     createWaitingPopup('user-delete-confirmation');
     createWaitingPopup('grant-access-dialog');
     createWaitingPopup('make-admin-confirmation');
@@ -199,10 +199,10 @@ $(document).ready(function () {
                                                 if (result.activation == 0) {
                                                     SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAddedActivated, 7000);
                                                 }
-                                                else if (result.result == "success" && result.activation == 1) {
+                                                else if (result.result  && result.activation == 1) {
                                                     SuccessAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserAdded, 7000);
                                                 }
-                                                else if (result.result == "failure" && result.isAdmin == true && result.activation == 1) {
+                                                else if (!result.result  && result.isAdmin == true && result.activation == 1) {
                                                     WarningAlert(window.Server.App.LocalizationContent.AddUser, window.Server.App.LocalizationContent.UserActivationEmailCannotSent, null, 7000);
                                                 }
                                                 userGrid.refresh();

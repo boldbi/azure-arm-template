@@ -7,7 +7,14 @@
     var orgName = string.Empty;
     var headerLogo = string.Empty;
     var footerlogo = string.Empty;
-    if (!string.IsNullOrWhiteSpace(ViewBag.appsettings.SystemSettings.LoginLogo))
+    if ((bool)(ViewBag.appsettings.SystemSettings.UseCustomBranding))
+    {
+        headerLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=login";
+        favLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon" + "&ramd=" + Syncfusion.Server.Base.Helpers.DateTimeHelper.DateTimeToUnixTimeStamp(DateTime.Now);
+        footerlogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=poweredby";
+        orgName = ViewBag.appsettings.SystemSettings.OrganizationName;
+    }
+    else if (!string.IsNullOrWhiteSpace(ViewBag.appsettings.SystemSettings.LoginLogo))
     {
         headerLogo = new Uri(ViewBag.appsettings.SystemSettings.LoginLogo).PathAndQuery;
         favLogo = new Uri(ViewBag.appsettings.SystemSettings.FavIcon).PathAndQuery + "&ramd=" + Syncfusion.Server.Base.Helpers.DateTimeHelper.DateTimeToUnixTimeStamp(DateTime.Now);

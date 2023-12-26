@@ -855,6 +855,17 @@ CREATE TABLE BOLDTC_QueryMetrics (
 )
 ;
 
+CREATE TABLE BOLDTC_TenantSettings (
+	Id SERIAL NOT NULL,
+	TenantInfoId uuid NOT NULL,
+	Settings text NOT NULL,
+	CreatedDate timestamp NOT NULL,
+	ModifiedDate timestamp NOT NULL,
+	IsActive smallint NOT NULL,
+  CONSTRAINT PK_BOLDTC_TENANTSETTINGS PRIMARY KEY (Id)
+)
+;
+
 CREATE TABLE BOLDTC_UserAttributes(
 	Id SERIAL primary key NOT NULL,
 	Name varchar(255) NOT NULL,
@@ -1375,6 +1386,11 @@ ALTER TABLE  BOLDTC_UserLog  VALIDATE CONSTRAINT  BOLDTC_UserLog_fk3
 ;
 
 ALTER TABLE BOLDTC_EmailActivityLog  ADD CONSTRAINT BOLDTC_EmailActivityLog_fk0 FOREIGN KEY (UserId) REFERENCES BOLDTC_User(Id)
+;
+
+ALTER TABLE  BOLDTC_TenantSettings  ADD CONSTRAINT  BOLDTC_TenantSettings_fk0  FOREIGN KEY ( TenantInfoId ) REFERENCES  BOLDTC_TenantInfo ( Id )
+;
+ALTER TABLE  BOLDTC_TenantSettings  VALIDATE CONSTRAINT  BOLDTC_TenantSettings_fk0
 ;
 
 ALTER TABLE BOLDTC_UserAttributes ADD FOREIGN KEY(UserId) REFERENCES BOLDTC_User (Id)
