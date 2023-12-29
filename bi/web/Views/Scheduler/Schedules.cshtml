@@ -15,6 +15,7 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
     var pageDescription = T["Create and manage dashboard schedules to send out dashboard reports either at a specific date and time interval or when data changes."];
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Schedule;
 }
 @model List<ScheduleViewModel>
 
@@ -31,7 +32,22 @@
 }
 
 @section scripts{
+    <script>
+        var partialViewsUrl = @Json.Serialize(partialViewsUrl);
+        var isMobile = @Json.Serialize(isMobile)
+                var buildVersion = "@ServerAppConfig.ProductVersion";
+        $(function () {
+            $.ajax({
+                type: "GET",
+                url: partialViewsUrl,
+                async: true,
+                success: function (response) {
+                    $('#server-app-container #content-area').append(response);
 
+                },
+            });
+        });
+    </script>
     <script>
         var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
         var enableScheduleUrl = "@Url.Action("EnableSchedule", "scheduler")";
@@ -176,6 +192,43 @@
                                 }
                             ]
                         });
+
+                    var preloadStyles = [];
+                    preloadStyles.push(createSlideshowStyle);
+                    preloadStyles.push(createDashboardStyle);
+                    preloadStyles.push(itemVersionStyle);
+                    preloadStyles.push(addCategoryStyle);
+
+                    var preloadScripts = [];
+                    preloadScripts.push(createSlideshowScript);
+                    preloadScripts.push(editCategoryScript);
+                    preloadScripts.push(createCategoryScript);
+
+                    function DashboarDelayResources(resourceLinkArray, resourceType) {
+                        for (var resource = 0; resource < resourceLinkArray.length; resource++) {
+                            var isScriptAppended = false;
+                            if (resourceType == "script") {
+                                isScriptAppended = document.querySelector("script[src='" + resourceLinkArray[resource] + "']") !== null;
+                                if (!isScriptAppended) {
+                                    var preloadLink = document.createElement(resourceType);
+                                    preloadLink.type = "text/javascript";
+                                    preloadLink.src = resourceLinkArray[resource];
+                                    document.head.appendChild(preloadLink);
+                                }
+                            }
+                            else {
+                                isScriptAppended = document.querySelector("link[href='" + resourceLinkArray[resource] + "']") !== null;
+                                if (!isScriptAppended) {
+                                    var preloadLink = document.createElement("link");
+                                    preloadLink.rel = "stylesheet";
+                                    preloadLink.href = resourceLinkArray[resource];
+                                    document.head.appendChild(preloadLink);
+                                }
+                            }
+                        }
+                    }
+                    DashboarDelayResources(preloadStyles, "style");
+                    DashboarDelayResources(preloadScripts, "script");
                 });
         </script>
     }
@@ -361,7 +414,6 @@
     @if (!isMobile)
     {
         @await Html.PartialAsync("../Items/_AddItems")
-        @await Html.PartialAsync("../Items/_ItemVersion")
         @await Html.PartialAsync("../Items/_ItemInfo")
     }
 
@@ -379,10 +431,5 @@
         <iframe id="permission-iframe"></iframe>
     </div>
 
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    </environment>
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 }

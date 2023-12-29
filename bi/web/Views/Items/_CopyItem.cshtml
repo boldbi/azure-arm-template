@@ -3,17 +3,12 @@
     var globalAppSettings = _globalAppSettings;
     var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var permision = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
-    var canCreateCategory = permision[ItemType.Category];
-    var hacCreateDataSourcePermission = permision.ContainsKey(ItemType.Datasource) && permision[ItemType.Datasource];
 }
 
 <script>
     var copyDatasourceItemUrl = "@Url.Action("CopyDatasource", "items")";
     var copyItemUrl = "@Url.Action("copyitem", "items")";
     var cloneItemUrl = "@Url.Action("cloneitem", "items")";
-    var canCreateCategory = "@canCreateCategory";
-    var hacCreateDataSourcePermission = "@hacCreateDataSourcePermission"
     function load() {
         if (($(parent.window).width()) > 1400) {
             $(".dialog").addClass("iframe");
@@ -41,19 +36,10 @@
                 </div>
                 <div class="col-xs-12" id="copyaction-category-division" style=display:none>
                     <div class="col-xs-12 no-padding text-label">@T["Copy to Category"]</div>
-                    @if (canCreateCategory)
-                    {
-                        <div class="col-xs-12 no-padding dropup">
-                            <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
-                            <span class="category-validation-error text"></span>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="col-xs-12 no-padding dropup">
-                            <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
-                        </div>
-                    }
+                    <div class="col-xs-12 no-padding dropup">
+                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3" style="width:230px;"></select>
+                        <span class="category-validation-error text"></span>
+                    </div>
                 </div>
                 <input type="hidden" id="CopyItemIdHidden" value="" />
                 <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />

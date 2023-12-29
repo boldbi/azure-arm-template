@@ -1,4 +1,14 @@
-﻿<script>
+﻿@{
+    Layout = null;
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var dataSourcePageUrl = Url.Action("DataSources", "DataSources");
+    var schedulePageUrl = Url.Action("Schedules", "Scheduler");
+    var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
+}
+
+<script>
     var addCategoryIframeUrl = "@Url.Action("addcategory", "category")";
     var addDatasourceIframeUrl = "@Url.Action("adddatasource", "datasources")";
     var addFileIframeUrl = "@Url.Action("AddFile", "Files")";
@@ -31,9 +41,14 @@
     <iframe id="create-datasource-iframe" class="create-datasource-frame"></iframe>
 </div>
 
-<div id="create-presentation-popup" class="no-padding" style="display:none">
-    <div id="create-presentation-div">
-        @{ await Html.RenderPartialAsync("~/Views/Slideshow/_CreateSlideshow.cshtml");}
+@if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+{
+    <div id="create-presentation-popup" class="no-padding" style="display:none">
+        <div id="create-presentation-div">
+            @{
+                await Html.RenderPartialAsync("~/Views/Slideshow/_CreateSlideshow.cshtml");
+            }
+        </div>
     </div>
-</div>
+}
 @await Html.PartialAsync("../Items/_CreateDashboards", ViewBag.ItemAddOptions as Dictionary<ItemType, bool>)
