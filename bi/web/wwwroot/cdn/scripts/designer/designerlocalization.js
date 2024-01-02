@@ -414,7 +414,8 @@ var Designer = {
                     excelExportText: "Allow Excel Export",
                     imageExportText: "Allow Image Export",
                     pdfExportText: "Allow PDF Export",
-                    hiddenColumnExportText: "Include Hidden Columns"
+                    hiddenColumnExportText: "Include Hidden Columns",
+					pagesizeToolTip: "If the page size option is not chosen in the drop-down menu, then all of the options are taken into consideration when exporting PDFs."
                 },
 				viewDataActions: {
                     allowViewDataExporting: "Allow Exporting",
