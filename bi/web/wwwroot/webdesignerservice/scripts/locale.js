@@ -517,7 +517,6 @@
                     expandAllNode: "Expand Nodes by Default",
                     enablePersistence: "Save Nodes State",
                     allowTextWrap: "Allow Text Wrap",
-                    enableWrap: "Enable Wrap",
                     allowColumnResize: "Allow Column Resize",
                     drawType: "Draw Type",
                     position: "Position",
