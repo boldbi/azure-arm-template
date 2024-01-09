@@ -7567,7 +7567,8 @@
                 errorContent2: ", and try again by reframing the question. To see the error details, ",
 				feedbackNote: "Note: ",
 				feedbackEmailSettings: "Email settings",
-                feedbackNeedsToConfigure: " need to be configured for sending these details."
+                feedbackNeedsToConfigure: " need to be configured for sending these details.",
+                descriptionContent: "The Q&A widget, powered by OpenAI, involves sending your data schema and the question for NLP analysis. Your data privacy and security are paramount. Use of the Q&A widget strictly adheres to our Privacy Policy."
 			},
 		    replaceValues: { 
 				applyBtnText: "Apply",
