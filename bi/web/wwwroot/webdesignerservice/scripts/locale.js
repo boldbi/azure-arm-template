@@ -1030,6 +1030,7 @@
                 prestoText: "Presto",
                 mysqlText: "MySQL",
                 postgresqlText: "PostgreSQL",
+				apacheDorisText: "Apache Doris",
                 amazonRDSOracleText: "Oracle",
                 amazonRDSMariaDBText: "MariaDB",
                 amazonRDSAmazonAuroraMySQLText: "Amazon Aurora MySQL",
@@ -1086,6 +1087,7 @@
 				workspaces: "WorkSpaces",
 				apiKey: "ApiKey",
 				regionEndpoint: "RegionEndPoint",
+				type: "Type",
                 enableSSL: "Enable SSL",
                 mode: "Mode",
                 live: "Live",
@@ -1215,6 +1217,8 @@
                     Clickhouse:"Clickhouse",
 					azureDataExplorer: "Azure Data Explorer",
 					rockSet: "Rockset",
+					bolddatastore : "Bold Data Store",
+					apacheDoris: "Apache Doris",
                     redShift:"Redshift",
                     azureSQLDataWarehouse:"AzureSQLDataWarehouse",
                     jira: {
@@ -2481,7 +2485,10 @@
                 AccessDeniedText: "Access denied for the request",
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
-				exportFailedContent: "Your export request has failed."
+				exportFailedContent: "Your export request has failed.",
+                dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
+                etlDialogHeaderText: "Redirect to Bold ETL",
+                etlContinuebtnText: "Continue with connector"
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
@@ -6155,6 +6162,11 @@
                 filePathType: "File Path",
                 files: "File",
                 folder: "Folder"
+            },
+            connectorType: {
+                connectorType: "Connector Type",
+                new: "New",
+                legacy: "Legacy"
             },
 			authenticationType: {
                 authenticationType: "Authentication Type",

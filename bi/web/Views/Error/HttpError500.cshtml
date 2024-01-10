@@ -9,6 +9,7 @@
     var internalServerLogo = string.Empty;
     var dashboardServerResourceUrl = string.Empty;
     var homePageUrl = Url.Action("Dashboards", "Dashboards");
+    var etlError = ViewBag.BoldETL != null ? ViewBag.BoldETL : false;
     internalServerLogo = themeBasedImageHelper.ServerErrorImage();
     if (ServerAppConfig.IsSelfHosted)
     {
@@ -42,7 +43,15 @@
 <html class="dashboard-server">
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@T["Internal Server Error"] @(!canShowOrgName ? string.Empty : (" - " + organisationName))</title>
+    @if (!etlError)
+    {
+        <title>@T["Internal Server Error"] @(!canShowOrgName ? string.Empty : (" - " + organisationName))</title>
+    }
+    else
+    {
+        <title>@T["Redirection Error in BoldETL"] @(!canShowOrgName ? string.Empty : (" - " + organisationName))</title>
+    }
+    
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
@@ -73,11 +82,23 @@
                 <div class="error-image-center-2">
                     <img src="@internalServerLogo" class="error-image-2">
                 </div>
+                
                 <div class="error-type">@T["Internal Server Error (500)"]</div>
-                <div class="error-text">
+                @if (!etlError)
+                {
+                    <div class="error-text">
                         <span>@T["Sorry! The server has encountered an internal error and was unable to complete your request."]</span>
 
-                </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="error-text">
+                        <span>@T["We regret to inform you that we're currently experiencing difficulties redirecting you to the BoldETL application. Kindly attempt to refresh the page after some time. If the issue persists, please consider creating a support ticket by clicking here."]</span>
+
+                    </div>
+                }
+
                 @if (!string.IsNullOrWhiteSpace(errorMessage))
                 {
                     <div id="deploy-error-container">
