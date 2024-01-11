@@ -21,6 +21,8 @@
     {
         groupImport = customUI?.Profiles[0]?.GroupImport != null ? customUI?.Profiles[0]?.GroupImport[0] : new GroupImport();
     }
+    var showGroupModule = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable);
+    var canShowForAdminGroup = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable) || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable && globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.ExcludeSysGroup);
 }
 
 
@@ -41,6 +43,7 @@
         var deleteGroupUrl = "@Url.Action("DeleteGroup", "group")";
         var groupPageUrl = "@Url.Action("group", "group")";
         var deleteFromGroupListUrl = "@Url.Action("DeleteFromGroupList", "group")";
+        var showGroupModule = @Json.Serialize(showGroupModule);
     </script>
     <script type="text/x-jsrender" id="checkbox-row-template">
         <input type="checkbox" class="checkbox-row material-checkbox" name="checkbox-row" data-checked-id="{{:GroupId}}" id="row-check{{:GroupId}}" />
@@ -92,7 +95,7 @@
                     </li>
                 }
                 {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
-                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                 {
                     <li class="menu-group">
                         <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "Azure AD")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
@@ -102,7 +105,7 @@
                     </li>
                 }
                 {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
-                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                 {
                     <li class="menu-group">
                         <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "Windows AD")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
@@ -112,7 +115,7 @@
                     </li>
                 }
                 {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
-                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                 {
                     <li class="menu-group">
                         <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "OAuth")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
@@ -122,7 +125,7 @@
                     </li>
                 }
                 {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
-                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                 {
                     <li class="menu-group">
                         <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "OpenID")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
@@ -131,15 +134,28 @@
                         </a>
                     </li>
                 }
-                {{else}}
-                @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                {{else GroupId == @ServerAppConfig.AdminGroupId }}
+                @if (((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && showGroupModule) || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable && globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.ExcludeSysGroup))
                 {
-                    <li class="menu-group">
-                        <a href="@Url.Action("viewgroup", "group")/{{:GroupId}}?isAddUser=True" class="user-add-class" title="@T["Add Users"]" data-toggle="tooltip" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                            <i class="su su-user-add"></i>
-                            <span class="menu-text">@T["Add Users"]</span>
-                        </a>
-                    </li>
+                        <li class="menu-group">
+                            <a href="@Url.Action("viewgroup", "group")/{{:GroupId}}?isAddUser=True" class="user-add-class" title="@T["Add Users"]" data-toggle="tooltip" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                                <i class="su su-user-add"></i>
+                                <span class="menu-text">@T["Add Users"]</span>
+                            </a>
+                        </li>
+                }
+                {{else GroupId != @ServerAppConfig.AdminGroupId}}
+                @if (showGroupModule)
+                {
+                       @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
+                       {
+                           <li class="menu-group">
+                               <a href="@Url.Action("viewgroup", "group")/{{:GroupId}}?isAddUser=True" class="user-add-class" title="@T["Add Users"]" data-toggle="tooltip" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
+                                   <i class="su su-user-add"></i>
+                                   <span class="menu-text">@T["Add Users"]</span>
+                               </a>
+                           </li>
+                       }
                 }
                 {{/if}}
                 <li class="menu-group">
@@ -149,19 +165,25 @@
                     </a>
                 </li>
                 {{if CanDelete}}
-                <li class="menu-group">
-                    <a href="javascript:void(0);" class="delete user-delete-class" data-groupid="{{:GroupId}}" title="@T["Delete"]" data-toggle="tooltip" data-groupname="{{:GroupName}}">
-                        <i class="su su-delete"></i>
-                        <span class="menu-text">@T["Delete"]</span>
-                    </a>
-                </li>
+                @if (showGroupModule)
+                {
+                   <li class="menu-group">
+                      <a href="javascript:void(0);" class="delete user-delete-class" data-groupid="{{:GroupId}}" title="@T["Delete"]" data-toggle="tooltip" data-groupname="{{:GroupName}}">
+                          <i class="su su-delete"></i>
+                          <span class="menu-text">@T["Delete"]</span>
+                      </a>
+                   </li>
+                }
                 {{else}}
-                <li class="menu-group">
-                    <a href="javascript:void(0);" class="user-delete-class" data-groupid="{{:GroupId}}" title="@T["You cannot delete the administrator group."]" data-toggle="tooltip" data-placement="top" data-groupname="{{:GroupName}}">
-                        <i class="su su-delete disabled-icon-color"></i>
-                        <span class="menu-text disabled-icon-color">@T["Delete"]</span>
-                    </a>
-                </li>
+                @if (canShowForAdminGroup)
+                {
+                    <li class="menu-group">
+                        <a href="javascript:void(0);" class="user-delete-class" data-groupid="{{:GroupId}}" title="@T["You cannot delete the administrator group."]" data-toggle="tooltip" data-placement="top" data-groupname="{{:GroupName}}">
+                            <i class="su su-delete disabled-icon-color"></i>
+                            <span class="menu-text disabled-icon-color">@T["Delete"]</span>
+                        </a>
+                    </li>
+                }
                 {{/if}}
             </ul>
         </div>
@@ -209,6 +231,7 @@
                     {
                         headerTemplateID: "#checkbox-header-template",
                         template: true,
+                        visible: showGroupModule,
                         templateID: "#checkbox-row-template",
                         textAlign: ej.TextAlign.Center,
                         allowFiltering: false,
@@ -307,7 +330,7 @@
                     <span class="su su-search search-group pull-left no-margin" title="@T["Search"]"></span>
                 </div>
                 <ul id="group-header" class="pull-right col-xs-6 no-padding groups-menu button-section">
-                    @if (!(groupImport.HideCreateGroup && groupImport.HideAzureAD && groupImport.HideOAuth && groupImport.HideOpenID && groupImport.HideWindowsAD))
+                    @if (!(groupImport.HideCreateGroup && groupImport.HideAzureAD && groupImport.HideOAuth && groupImport.HideOpenID && groupImport.HideWindowsAD) && showGroupModule)
                     {
                         <li class="dropdown no-padding">
                             @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || ViewBag.IsUserHasCreateGroupPermission)
@@ -318,15 +341,15 @@
                                 </button>
                             }
                             <ul class="dropdown-menu pull-right" role="menu" id="dropdown-options">
-                                @if (!groupImport.HideCreateGroup)
-                                {
-                                    <li id="new-group-button" title="@T["Add new group"]">
-                                        <a href="javascript:void(0)" title="@T["Add new group"]" data-toggle="tooltip" data-placement="top">
-                                            <i class="su su-group-1"></i>
-                                            <span>@T["Create Group"]</span>
-                                        </a>
-                                    </li>
-                                }
+                                    @if (!groupImport.HideCreateGroup)
+                                    {
+                                        <li id="new-group-button" title="@T["Add new group"]">
+                                            <a href="javascript:void(0)" title="@T["Add new group"]" data-toggle="tooltip" data-placement="top">
+                                                <i class="su su-group-1"></i>
+                                                <span>@T["Create Group"]</span>
+                                            </a>
+                                        </li>
+                                    }
 
                                 @if (ServerAppConfig.IsSelfHosted && !isAzureApplication && enableWindowsAD && !groupImport.HideWindowsAD && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                                 {
@@ -423,7 +446,7 @@
 
                         }
                     }
-                    @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup])
+                    @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup]) && showGroupModule)
                     {
                         <li class="flying-add hide" id="add-user-in-groups">
                             <button class="critical-action-button app-btn-danger group-delete-button" title="@T["Delete selected Groups"]" data-directory-type="@((int)DirectoryType.AzureAD)" data-groupid="1">@T["Delete Groups"]</button>

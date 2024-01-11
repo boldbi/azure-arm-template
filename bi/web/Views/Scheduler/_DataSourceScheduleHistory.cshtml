@@ -4,27 +4,46 @@
     <script>
         var scheduleHistoryUrl = "@Url.Action("DataSourceScheduleHistory", "items")";
         var scheduleLogUrl = "@Url.Action("ViewScheduleLogs", "items")";
+        var scheduleCurrentStatusUrl = "@Url.Action("ViewCurrentRefreshStatus", "items")";
     </script>
 </head>
 <body>
-    <div id="run-history-container" class="col-xs-12 no-padding dialog" style="display:none">
+    <div id="run-history-container" class="col-xs-12 no-padding dialog refresh-history-container" style="display:none">
         <div class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog col-lg-12 popup-header no-padding" role="document">
                 <div class="modal-content col-lg-12" data-spy="scroll">
-                    <div class="col-lg-12 modal-header">
-                        <div class="col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding">
-                            <span class="su su-run-history head-icon col-lg-1 col-xs-1 col-sm-1 col-md-1 header-icon"></span>
-                            <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-10 col-xs-10 col-sm-10 col-md-10 no-padding" data-toggle="tooltip" data-placement="bottom" data-container="body" style="font-size:16px;"></span>
+                    <div class="col-lg-12 modal-header modal-header-datasource">
+                        <div class="col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding header-placement">
+                            <span style="right:20px" class="version-modal-title popup-title ellipsis col-xs-10" data-container="body">@T["Refresh History"]</span>
+                            <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-10 col-xs-10 col-sm-10 col-md-10 no-padding" data-toggle="tooltip" data-placement="bottom" data-container="body" style="font-size:13px;"></span>
                         </div>
                         <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1 no-padding">
                             <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" data-container="body" title="@T["Close"]" class="popup-close pull-right"><span class="su su-close"></span></a>
                         </div>
                     </div>
-                    <div class="modal-body col-lg-12">
-                        <div class="total-move-container col-xs-12 version-container-padding">
+                    <div class="modal-body modal-body-datasource col-lg-12">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active versions-tab tab-margin">
+                                <a id="history-tab" href="" data-report-id="" data-created-by="" data-report-name="" class="folder-manage-tab folder-tab-color active-tab" data-purpose="View" role="tab" aria-controls="versions">@T["REFRESH LOGS"]</a>
+                            </li>
+                            <li role="presentation" class="tab-margin">
+                                <a id="refresh-log-tab" href="" data-report-id="" data-created-by="" data-report-name="" class="folder-manage-tab section-gray-heading" data-isrightpane="false" role="tab" aria-controls="file-logs">@T["MISSING LOGS"]</a>
+                            </li>
+                        </ul>
+                        <div id="message-tag">
+                            <span class="su su-info"></span>
+                            <div class="message">@T["A refresh cannot be initiated because another refresh is already in progress. Click Check Status to view the current refresh progress."]</div>
+                        </div>
+                        <div class="total-move-container total-move-container-datasource col-xs-12 version-container-padding">
                             <div id="item-history-container" class="show col-xs-12 no-padding version-area" data-previous-parent-id="none" data-parent-id="home" data-type="self">
                                 <div class="col-xs-12 no-padding" style="display:block; padding-top:20px; float:left;">
                                     <div id="historygrid" class="grid">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="refresh-log-container" class="hidden col-xs-12 no-padding version-area " data-previous-parent-id="none" data-parent-id="home" data-type="self">
+                                <div class="col-xs-12 no-padding" style="display:block; padding-top:20px; float:left;">
+                                    <div id="refreshloggrid" class="grid">
                                     </div>
                                 </div>
                             </div>
@@ -82,6 +101,8 @@
     {{if ExecutedDateString == "Yet to complete"}}
     <div class="grid-content" title="{{:ExecutedDateString}}">{{:ExecutedDateString}}</div>
     <span class="grid-content su su-help add-space-for-info" title="@T["A data refresh is currently in progress. Another refresh request will not be initiated until the current one is complete, or 12 hours have elapsed since the initial request."]"></span>
+    {{else ExecutedDateString == "Check status"}}
+    <a class="grid-content current_status" title="{{:ExecutedDateString}}">{{:ExecutedDateString}}</a>
     {{else ExecutedDateString == "Status unknown"}}
     <div class="grid-content" title="{{:ExecutedDateString}}">{{:ExecutedDateString}}</div>
     <span class="grid-content su su-help add-space-for-info" title="@T["The completion status of the refresh is not being updated by the refreshing service."]"></span>
@@ -98,6 +119,18 @@
 </script>
 <script type="text/x-jsrender" id="log_details">
     <div class="grid-content" title="{{:Details}}">{{:Details}}</div>
+</script>
+<script type="text/x-jsrender" id="logs_started_date">
+    <div class="grid-content" data-toggle="tooltip">{{:StartedDateString}}</div>
+</script>
+<script type="text/x-jsrender" id="action">
+    <div class="grid-content" title="{{:Status}}" data-toggle="tooltip">{{:Status}}</div>
+</script>
+<script type="text/x-jsrender" id="event">
+    <div class="grid-content" data-toggle="tooltip">{{:MissingType}}</div>
+</script>
+<script type="text/x-jsrender" id="logs_updated_date">
+    <div class="grid-content" data-toggle="tooltip">{{:ExecutedDateString}}</div>
 </script>
 <script type="text/javascript">
     $(function () {
@@ -117,7 +150,7 @@
         $("#historygrid").ejGrid({
             gridLines: ej.Grid.GridLines.None,
             allowPaging: true,
-            pageSettings: { pageSize: 10 },
+            pageSettings: { pageSize:  8  },
             allowSorting: true,
             allowSearching: true,
             allowFiltering: false,
@@ -190,6 +223,53 @@
                     headerText: "@T["Logs"]",
                     width: 25,
                     field: ""
+                }
+            ]
+        });
+
+        $("#refreshloggrid").ejGrid({
+            gridLines: ej.Grid.GridLines.None,
+            allowPaging: true,
+            pageSettings: { pageSize: 4 },
+            allowSorting: true,
+            allowSearching: false,
+            allowFiltering: false,
+            allowSelection: true,
+            enableRowHover: true,
+            rowDataBound: function (args) {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
+            dataBound: function (args) {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
+            columns: [
+                // {
+                //     template: true,
+                //     templateID: "#action",
+                //     headerText: "@T["Action"]",
+                //     field: "Status",
+                //     width: 25
+                // },
+                {
+                    template: true,
+                    templateID: "#logs_started_date",
+                    headerText: "@T["Start Date"]",
+                    width: 20,
+                    field: "StartedDateString"
+                },
+                {
+                    template: true,
+                    templateID: "#logs_updated_date",
+                    headerText: "@T["End Date"]",
+                    width: 20,
+                    field: "ExecutedDateString"
+                },
+                {
+                    template: true,
+                    templateID: "#event",
+                    headerText: "@T["Details"]",
+                    field: "MissingType",
+                    width: 60
                 }
             ]
         });

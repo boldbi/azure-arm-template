@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 6.18.11
+*  version : 6.19.14
 *  Copyright Syncfusion Inc. 2001 - 2023. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -36388,13 +36388,11 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                     }
                     if (start !== null && end !== null && start <= end) {
                         if (this.model.datePickerType === "single") {
-                            if (this.startDate <= start) {
-                                this.singleCalenderDate = start;
-                                this.selectedDate = { date: new Date(start.getTime()) };
-                                this.prevDate = start;
-                                this._updateCalendar("single");
-                                this._updateInputs(true);
-                            }
+                            this.singleCalenderDate = start;
+                            this.selectedDate = { date: new Date(start.getTime()) };
+                            this.prevDate = start;
+                            this._updateCalendar("single");
+                            this._updateInputs(true);
                         } else {
                             this.leftCalenderDate = start;
                             this.rightCalenderDate = end;
@@ -36407,6 +36405,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                         }
                     }
                 }
+                this._removeDatePickerWrongFormat();
             } else if (this.model.datePickerType === "range") {
                 this.oldSelectedStartDate = this.selectedStartDate = { date: new Date(this.startDate.getTime()) };
                 this.oldSelectedEndDate = this.selectedEndDate = { date: new Date(this.endDate.getTime()) };
@@ -36432,6 +36431,8 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             this.selectedDate = null;
             this.oldSelectedStartDate = null;
             this.oldSelectedEndDate = null;
+            this.selectedStartDateValue = null;
+            this.selectedEndDateValue = null;
             this.seperator = !BoldBIDashboard.isNullOrUndefined(this.model.locale) ? !BoldBIDashboard.isNullOrUndefined(this.model.locale.seperator) ? this.model.locale.seperator : this.defaults.locale.seperator : this.defaults.locale.seperator;
             this.format = !BoldBIDashboard.isNullOrUndefined(this.model.locale) ? !BoldBIDashboard.isNullOrUndefined(this.model.locale.format) ? this.model.locale.format : this.defaults.locale.format : this.defaults.locale.format;
             this.daysOfWeek = !BoldBIDashboard.isNullOrUndefined(this.model.locale) ? !BoldBIDashboard.isNullOrUndefined(this.model.locale.daysOfWeek) ? this.model.locale.daysOfWeek : this.defaults.locale.daysOfWeek : this.defaults.locale.daysOfWeek;
@@ -36752,7 +36753,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
         _keyup: function (evt) {
             var divideBy13 = 13;
             if (evt.keyCode === divideBy13) {
-                this._onFocusOut(evt);
+                this._onValidKeyPress(evt);
             } else {
                 this._keyNavigate(evt);
             }
@@ -36767,18 +36768,24 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             }
         },
 
-        _onFocusIn: function(args){
-		var dateRangeType = args.currentTarget.getAttribute("name");
-		bbdesigner$(args.currentTarget).addClass('e-focus');
-		if(dateRangeType ==="daterangepicker_start"){
-			this.container.find(".e-fromspan").addClass("e-focus");
-		}
-		else if(dateRangeType ==="daterangepicker_end"){
-			this.container.find(".e-tospan").addClass("e-focus");
-		}
-	},
+        _onFocusIn: function (args) {
+            var dateRangeType = args.currentTarget.getAttribute("name");
+            bbdesigner$(args.currentTarget).addClass('e-focus');
+            if (dateRangeType === "daterangepicker_start") {
+                this.container.find(".e-fromspan").addClass("e-focus");
+                this._removeEndDateFocus();
+            } else if (dateRangeType === "daterangepicker_end") {
+                this.container.find(".e-tospan").addClass("e-focus");
+                this._removeStartDateFocus();
+            }
+	    },
 
-        _onFocusOut: function (evt) {
+        _onFocusOut: function (args) {
+            this._onValidKeyPress (args);
+        },
+
+        _onValidKeyPress: function (evt) {
+            var divideBy13 = 13;
             var zero = 0,
                 one = 1,
                 two = 2,
@@ -36790,55 +36797,71 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 year = null,
                 month = null,
                 day = null;
-            if (val.length === zero) {
-                this._updateInputs(target.hasClass("e-input-main"));
-
-                return;
-            }
             if (this.model.datePickerType === "single") {
                 start = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(val) : BoldBIDashboard.globalize.parseDate(val, this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedDate) ? this.selectedStartDate : null);
-                start = BoldBIDashboard.isNullOrUndefined(start) ? this.prevDate : start;
-                year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.startDate.getFullYear() : start.getFullYear() : start.getFullYear();
-                month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.startDate.getMonth() : start.getMonth() : start.getMonth();
-                day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.startDate.getDate() : start.getDate() : start.getDate();
-                start = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : start;
-                if (start >= this.startDate && start <= this.endDate || !this.model.limitDate) {
-                    this.singleCalenderDate = this._setCalendarDate(start);
-                    this.selectedDate = { date: new Date(start.getTime()) };
-                    this._updateCalendar("single");
-                    if (this.prevDate === null) {
-                        this.prevDate = new Date();
+                if (BoldBIDashboard.isNullOrUndefined(start) || (this.model.limitDate && (+this.startDate > +start || +this.endDate < start))) {
+                    if (!BoldBIDashboard.isNullOrUndefined(this.prevDate) || !this.isNullOrUndefinedOrEmpty(val)) {
+                        this._removeDatePickerFocus();
+                        bbdesigner$(this.target).addClass("e-wrong-format");
+                    } else {
+                        this._removeDatePickerWrongFormat();
+                        bbdesigner$(this.target).addClass("e-popup-focus");
                     }
-                    val = BoldBIDashboard.globalize.format(start, this.format, this.model.locale.culture);
-                    if (!this.isNullOrUndefinedOrEmpty(this.model.selected) && !this.isNullOrUndefinedOrEmpty(val) && !this.codeTriggeredEvent && this.prevDate.getTime() !== this.selectedDate.date.getTime()) {
-                        this._trigger("selected", { datePickerType: BoldBIDashboard.DashboardDatePicker.Type.Single, dateFormat: this.format, value: val });
-                    }
-                    this.prevDate = this.selectedDate.date;
-                }
-                this._updateInputs(true);
-
-                return;
-            }
-            if (target.hasClass("e-input-main")) {
-                if (this.mainInputVal === val.trim()) {
-                    return;
-                }
-                var dates = val.split(" " + this.seperator + " ");
-                if (dates.length === two) {
-                    start = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(dates[0]) : BoldBIDashboard.globalize.parseDate(dates[0], this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) ? this.selectedStartDate.date : null);
-                    start = BoldBIDashboard.isNullOrUndefined(start) ? this.startDate : start;
+                } else {
+                    start = BoldBIDashboard.isNullOrUndefined(start) ? this.prevDate : start;
                     year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.startDate.getFullYear() : start.getFullYear() : start.getFullYear();
                     month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.startDate.getMonth() : start.getMonth() : start.getMonth();
                     day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.startDate.getDate() : start.getDate() : start.getDate();
                     start = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : start;
+                    if (start >= this.startDate && start <= this.endDate || !this.model.limitDate) {
+                        this.singleCalenderDate = this._setCalendarDate(start);
+                        this.selectedDate = { date: new Date(start.getTime()) };
+                        this._updateCalendar("single");
+                        if (this.prevDate === null) {
+                            this.prevDate = new Date();
+                        }
+                        this._removeDatePickerWrongFormat();
+                        bbdesigner$(this.target).addClass("e-popup-focus");
+                        if (evt.keyCode === divideBy13) {
+                            target.blur();
+                            this.hidePopup();
+                            this.prevDate = this.selectedDate.date;
+                            val = BoldBIDashboard.globalize.format(start, this.format, this.model.locale.culture);
+                            if (!this.isNullOrUndefinedOrEmpty(this.model.selected) && !this.isNullOrUndefinedOrEmpty(val) && !this.codeTriggeredEvent) {
+                                this._trigger("selected", { datePickerType: BoldBIDashboard.DashboardDatePicker.Type.Single, dateFormat: this.format, value: val });
+                            }    
+                        }
+                    }
+                }
+                return;
+            }
+            if (target.hasClass("e-input-main")) {
+                var isWrongFormat = false;
+                var dates = val.split(" " + this.seperator + " ");
+                if (dates.length === two) {
+                    start = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(dates[0]) : BoldBIDashboard.globalize.parseDate(dates[0], this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) ? this.selectedStartDate.date : null);
+                    if (BoldBIDashboard.isNullOrUndefined(start) || (this.model.limitDate && (+this.startDate > +start || +this.endDate < start))) {
+                        isWrongFormat = true;
+                    } else {
+                        year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.startDate.getFullYear() : start.getFullYear() : start.getFullYear();
+                        month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.startDate.getMonth() : start.getMonth() : start.getMonth();
+                        day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.startDate.getDate() : start.getDate() : start.getDate();
+                        start = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : start;
+                    }
+                    
                     end = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(dates[1]) : BoldBIDashboard.globalize.parseDate(dates[1], this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) ? this.selectedEndDate.date : null);
-                    end = BoldBIDashboard.isNullOrUndefined(end) ? this.endDate : end;
-                    year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.endDate.getFullYear() : end.getFullYear() : end.getFullYear();
-                    month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.endDate.getMonth() : end.getMonth() : end.getMonth();
-                    day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.endDate.getDate() : end.getDate() : end.getDate();
-                    end = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : end;
-                    if (this._isWithinDateRange(start) && this._isWithinDateRange(end)) {
-                        if (start <= end) {
+                    if (BoldBIDashboard.isNullOrUndefined(end) || (this.model.limitDate && (+this.endDate < +end || +this.startDate > +end))) {
+                        isWrongFormat = true;
+                    } else {
+                        year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.endDate.getFullYear() : end.getFullYear() : end.getFullYear();
+                        month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.endDate.getMonth() : end.getMonth() : end.getMonth();
+                        day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.endDate.getDate() : end.getDate() : end.getDate();
+                        end = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : end;
+                    }
+                    isWrongFormat = !isWrongFormat ? (+start > +end) : isWrongFormat;
+                    if (!isWrongFormat) {
+                        this._removeDatePickerWrongFormat();
+                        bbdesigner$(this.target).addClass("e-popup-focus");
                             if (!BoldBIDashboard.isNullOrUndefined(start)) {
                                 this.leftCalenderDate = this._setCalendarDate(new Date(start.getTime()));
                                 this.selectedStartDate = { date: new Date(start.getTime()) };
@@ -36849,54 +36872,122 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                                 this.selectedEndDate = { date: new Date(end.getTime()) };
                                 this._updateCalendar("right");
                             }
+                            this._toggleCustomRangeSelection();
+                            this._removeStartDateWrongFormat();
+                            this._removeEndDateWrongFormat();
+                            this.selectedStartDateValue = null;
+                            this.selectedEndDateValue = null;
+                            this._updateInputs(target.hasClass("e-input-main"));
+			            if (evt.keyCode === divideBy13) {
+                            if (BoldBIDashboard.isNullOrUndefined(this.container.find(".e-dashboarddatepicker-apply-btn").attr('disabled'))) {
+                                this.container.find(".e-dashboarddatepicker-apply-btn").focus();
+                            }
                         }
+                    } else {
+                        this._removeDatePickerFocus();
+                        if (isWrongFormat) {
+                            bbdesigner$(this.target).addClass("e-wrong-format");
+                        }
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
                     }
-                    this._toggleCustomRangeSelection();
+                } else {
+                    this._removeDatePickerFocus();
+                    bbdesigner$(this.target).addClass("e-wrong-format");
+                    this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
                 }
             } else if (target.hasClass("e-input-mini")) {
+                var isWrongFormat = true;
                 if (target.attr("name") === "daterangepicker_start") {
                     start = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(val) : BoldBIDashboard.globalize.parseDate(val, this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) ? this.selectedStartDate.date : null);
-                    start = BoldBIDashboard.isNullOrUndefined(start) ? this.startDate : start;
-                    year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.startDate.getFullYear() : start.getFullYear() : start.getFullYear();
-                    month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.startDate.getMonth() : start.getMonth() : start.getMonth();
-                    day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.startDate.getDate() : start.getDate() : start.getDate();
-                    start = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : start;
-                    if (!BoldBIDashboard.isNullOrUndefined(start) && this._isWithinDateRange(start)) {
-                        this.leftCalenderDate = this._setCalendarDate(new Date(start.getTime()));
-                        this.selectedStartDate = { date: new Date(start.getTime()) };
-                        this._updateCalendar("left");
-                        if (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) && start > this.selectedEndDate.date) {
-                            this.selectedEndDate = { date: new Date(start.getTime()) };
-                            this.rightCalenderDate = end = this._setCalendarDate(start);
-                            this._updateCalendar("right");
+                    var endInput = this.container.find("input[name=daterangepicker_end]");
+                    var endValue = endInput.val();
+                    end = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(endValue) : BoldBIDashboard.globalize.parseDate(endValue, this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) ? this.selectedEndDate.date : null);
+                    if (BoldBIDashboard.isNullOrUndefined(start) || (this.model.limitDate && (+this.startDate > +start || +this.endDate < start)) || (!BoldBIDashboard.isNullOrUndefined(end) && +end < +start)) {
+                        this.selectedStartDateValue = val;
+                        this._removeStartDateFocus();
+                        this.container.find("input[name=daterangepicker_start]").addClass("e-wrong-format");
+                        this.container.find(".e-fromspan").addClass("e-wrong-format");
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
+                    } else {
+                        year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.startDate.getFullYear() : start.getFullYear() : start.getFullYear();
+                        month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.startDate.getMonth() : start.getMonth() : start.getMonth();
+                        day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.startDate.getDate() : start.getDate() : start.getDate();
+                        start = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : start;
+                        if (!BoldBIDashboard.isNullOrUndefined(start)) {
+                            this.selectedStartDate = { date: new Date(start.getTime()) };
+                            this.leftCalenderDate = this._setCalendarDate(new Date(start.getTime()));
+                            this._updateCalendar("left");
+                            this._removeStartDateWrongFormat();
+                            this._removeStartDateFocus();
+                            if (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) && !(BoldBIDashboard.isNullOrUndefined(end) ||
+                                (this.model.limitDate && (+this.endDate < +end || +this.startDate > +end)) || (!BoldBIDashboard.isNullOrUndefined(start) && +end < +start))) {
+                                isWrongFormat = false;
+                                this.selectedEndDate = { date: new Date(end.getTime()) };
+                                this.rightCalenderDate = this._setCalendarDate(new Date(end.getTime()));
+                                this._updateCalendar("right");
+                                this._removeEndDateWrongFormat();
+                                this._removeEndDateFocus();
+                                this._toggleCustomRangeSelection();
+                            }
+                            this.selectedStartDateValue = null;
                         }
-                        this._toggleCustomRangeSelection();
+                        if (evt.keyCode === divideBy13) {
+                            if (!isWrongFormat) {
+                                this._updateInputs(target.hasClass("e-input-main"));
+                            }
+                            if (!this.container.find("input[name=daterangepicker_end]").hasClass("e-wrong-format")) {
+                                this.container.find(".e-tospan").addClass("e-focus");
+                            }
+                            this.container.find("input[name=daterangepicker_end]").focus();
+                        }
                     }
-                    this.container.find(".e-fromspan").removeClass("e-focus");
-                    target.removeClass("e-focus");
                 } else {
                     end = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(val) : BoldBIDashboard.globalize.parseDate(val, this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) ? this.selectedEndDate.date : null);
-                    end = BoldBIDashboard.isNullOrUndefined(end) ? this.endDate : end;
-                    year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.endDate.getFullYear() : end.getFullYear() : end.getFullYear();
-                    month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.endDate.getMonth() : end.getMonth() : end.getMonth();
-                    day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.endDate.getDate() : end.getDate() : end.getDate();
-                    end = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : end;
-                    if (!BoldBIDashboard.isNullOrUndefined(end) && this._isWithinDateRange(end)) {
-                        if (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) && end < this.selectedStartDate.date) {
-                            this.leftCalenderDate = start = this._setCalendarDate(new Date(end.getTime()));
-                            this.selectedStartDate = { date: new Date(end.getTime()) };
-                            this._updateCalendar("left");
+                    var startInput = this.container.find("input[name=daterangepicker_start]");
+                    var startValue = startInput.val();
+                    start = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(startValue) : BoldBIDashboard.globalize.parseDate(startValue, this.model.locale.displayFormat, this.model.locale.culture) || (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) ? this.selectedStartDate.date : null);
+                    if (BoldBIDashboard.isNullOrUndefined(end) || (this.model.limitDate && (+this.endDate < +end || +this.startDate > +end)) || (!BoldBIDashboard.isNullOrUndefined(start) && +end < +start)) {
+                        this.selectedEndDateValue = val;
+                        this._removeEndDateFocus();
+                        this.container.find("input[name=daterangepicker_end]").addClass("e-wrong-format");
+                        this.container.find(".e-tospan").addClass("e-wrong-format");
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
+                    } else {
+                        year = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('y') === minusOne ? this.endDate.getFullYear() : end.getFullYear() : end.getFullYear();
+                        month = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('M') === minusOne ? this.endDate.getMonth() : end.getMonth() : end.getMonth();
+                        day = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this.model.locale.displayFormat.indexOf('d') === minusOne ? this.endDate.getDate() : end.getDate() : end.getDate();
+                        end = !BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? new Date(year, month, day) : end;
+                        if (!BoldBIDashboard.isNullOrUndefined(end)) {
+                            this.selectedEndDate = { date: new Date(end.getTime()) };
+                            this.rightCalenderDate = this._setCalendarDate(new Date(end.getTime()));
+                            this._updateCalendar("right");
+                            this._removeEndDateWrongFormat();
+                            this._removeEndDateFocus();
+                            if (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) && !(BoldBIDashboard.isNullOrUndefined(start) ||
+                                (this.model.limitDate && (+this.startDate > +start || +this.endDate < start)) || (!BoldBIDashboard.isNullOrUndefined(end) && +end < +start))) {
+                                isWrongFormat = false;
+                                this.leftCalenderDate = this._setCalendarDate(new Date(start.getTime()));
+                                this.selectedStartDate = { date: new Date(start.getTime()) };
+                                this._updateCalendar("left");
+                                this._removeStartDateWrongFormat();
+                                this._removeStartDateFocus();
+                                this._toggleCustomRangeSelection();
+                            }
+                            this.selectedEndDateValue = null;
                         }
-                        this.selectedEndDate = { date: new Date(end.getTime()) };
-                        this.rightCalenderDate = this._setCalendarDate(end);
-                        this._updateCalendar("right");
+                        if (evt.keyCode === divideBy13) {
+                            if (!isWrongFormat) {
+                                this._updateInputs(target.hasClass("e-input-main"));
+                            }
+                            if (!BoldBIDashboard.isNullOrUndefined(this.container.find(".e-dashboarddatepicker-apply-btn").attr('disabled'))) {
+                                this.container.find(".e-dashboarddatepicker-cancel-btn").focus();
+                            } else {
+                                this.container.find(".e-dashboarddatepicker-apply-btn").focus();
+                            }
+                        }
                     }
-                    this._toggleCustomRangeSelection();
-                    this.container.find(".e-tospan").removeClass("e-focus");
-                    target.removeClass("e-focus");
                 }
             }
-            this._updateInputs(target.hasClass("e-input-main"));
             if (this.container && !this.isOpen) {
                 this._removeDatePickerFocus();
             }
@@ -36936,8 +37027,8 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 if (mainText.length === two && (!this.isOpen || updateMain)) {
                     this.element.val(mainText.join(" " + this.seperator + " "));
                 }
-            } else if (!BoldBIDashboard.isNullOrUndefined(this.selectedDate)) {
-                var dateString = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._getDateString(this.selectedDate.date) : BoldBIDashboard.globalize.format(this.selectedDate.date, this.model.locale.displayFormat, this.model.locale.culture);
+            } else if (!BoldBIDashboard.isNullOrUndefined(this.prevDate)) {
+                var dateString = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._getDateString(this.prevDate) : BoldBIDashboard.globalize.format(this.prevDate, this.model.locale.displayFormat, this.model.locale.culture);
                 this.element.val(dateString);
             } else if (this.model.datePickerType !== "range" && !BoldBIDashboard.isNullOrUndefined(this.model.showLatestDate) && this.model.showLatestDate) {
                 if (!BoldBIDashboard.isNullOrUndefined(this.endDate)) {
@@ -37034,6 +37125,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             }
             var selectedCalender = bbdesigner$(evt.currentTarget).closest(".e-dashboarddatepicker-calendar");
             if (selectedCalender.hasClass("single-calendar") && this.validateMonthNavigation(this.singleCalenderDate, !this.model.limitDate ? this.maxDate : this.endDate)) {
+                this.singleCalenderDate = this._setCalendarDate(this.singleCalenderDate);
                 this.singleCalenderDate.setMonth(this.singleCalenderDate.getMonth() + one);
                 this._updateCalendar("single");
             } else if (selectedCalender.hasClass("left-calendar")) {
@@ -37055,6 +37147,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             }
             var selectedCalender = bbdesigner$(evt.currentTarget).closest(".e-dashboarddatepicker-calendar");
             if (selectedCalender.hasClass("single-calendar") && this.validateMonthNavigation(!this.model.limitDate ? this.minDate : this.startDate, this.singleCalenderDate)) {
+                this.singleCalenderDate = this._setCalendarDate(this.singleCalenderDate);
                 this.singleCalenderDate.setMonth(this.singleCalenderDate.getMonth() - one);
                 this._updateCalendar("single");
             } else if (selectedCalender.hasClass("left-calendar")) {
@@ -37134,7 +37227,11 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                             attr({ "aria-selected": "false" });
                     }
                 } else {
-                    this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": false });
+                    if ((BoldBIDashboard.isNullOrUndefined(this.oldSelectedStartDate) && BoldBIDashboard.isNullOrUndefined(this.oldSelectedEndDate)) || (+this.selectedStartDate.date !== +this.oldSelectedStartDate.date || +this.selectedEndDate.date !== +this.oldSelectedEndDate.date)) {
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": false });
+                    } else {
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
+                    }
                     this.container.find(".e-dashboarddatepicker-ranges ul li[e-data-range='customPicker']").addClass("selected").attr({ "aria-selected": "false" });
                 }
             }
@@ -37324,12 +37421,37 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
         },
         _onTableMouseOut: function () {
             var startInput = this.container.find("input[name=daterangepicker_start]");
+            var startInputValue = startInput.val();
+            var start = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(startInputValue) : BoldBIDashboard.globalize.parseDate(startInputValue, this.model.locale.displayFormat, this.model.locale.culture);
             var endInput = this.container.find("input[name=daterangepicker_end]");
+            var endInputValue = endInput.val();
+            var end = BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? this._parseDate(endInputValue) : BoldBIDashboard.globalize.parseDate(endInputValue, this.model.locale.displayFormat, this.model.locale.culture);
             this._setCulture(this.model.locale.culture);
-            if (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate)) {
+            if (startInput.hasClass('e-wrong-format')) {
+                if (startInput.hasClass('e-focus')) {
+                    startInput.val(startInputValue);
+                } else {
+                    startInput.val(this.selectedStartDateValue);
+                }
+            } else if (startInput.hasClass('e-focus')) {
+                if (BoldBIDashboard.isNullOrUndefined(start)) {
+                    startInput.val(startInputValue);
+                }
+            } else if (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate)) {
                 startInput.val(BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? BoldBIDashboard.globalize.format(this.selectedStartDate.date, this.format, this.model.locale.culture) : BoldBIDashboard.globalize.format(this.selectedStartDate.date, this.model.locale.displayFormat, this.model.locale.culture));
-            }
-            if (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) {
+            }       
+            
+            if (endInput.hasClass('e-wrong-format')) {
+                if (endInput.hasClass('e-focus')) {
+                    endInput.val(endInputValue);
+                } else {
+                    endInput.val(this.selectedEndDateValue);
+                }
+            } else if (endInput.hasClass('e-focus')) {
+                if (BoldBIDashboard.isNullOrUndefined(end)) {
+                    endInput.val(endInputValue);
+                }
+            } else if (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) {
                 endInput.val(BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? BoldBIDashboard.globalize.format(this.selectedEndDate.date, this.format, this.model.locale.culture) : BoldBIDashboard.globalize.format(this.selectedEndDate.date, this.model.locale.displayFormat, this.model.locale.culture));
             }
         },
@@ -37338,14 +37460,28 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             if (this.container && this.isOpen) {
                 this.isOpen = false;
                 this.container.hide();
+                this._removeDatePickerWrongFormat();
                 this._removeDatePickerFocus();
+                if (this.model.datePickerType === "range") {
+                    this._removeStartDateFocus();
+                    this._removeStartDateWrongFormat();
+                    this._removeEndDateFocus();
+                    this._removeEndDateWrongFormat();
+                    this.selectedStartDateValue = null;
+                    this.selectedEndDateValue = null;
+                }
             }
         },
         toggle: function () {
             if (this.isOpen) {
                 this.hidePopup();
+                this._updateInputs(true);
             } else {
                 this.showPopup();
+                if (this.model.datePickerType === "range") {
+                    this.container.find("input[name=daterangepicker_start]").focus();
+                    this.container.find(".e-fromspan").addClass("e-focus");
+                }
             }
         },
         _makePopupPositionDecision: function () {
@@ -37395,7 +37531,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 zero = 0,
                 five = 5,
                 ten = 10;
-            if (this.container) {
+            if (this.container && !this.isOpen) {
                 this.container.width('auto');
                 this.container[zero].style.border = 'none';
                 this._trigger("popupShow", this);
@@ -37403,6 +37539,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 bbdesigner$(this.target).addClass("e-popup-focus");
                 this.isOpen = true;
                 if (this.model.datePickerType === "range") {
+                    this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
                     var rangeDiv = this.container.find(".e-dashboarddatepicker-content .e-dashboarddatepicker-ranges");
                     var height = this.container.find(".e-dashboarddatepicker-content .e-dashboarddatepicker-ranges ul").height() + ten;
                     var bottomPositionHeight = window.innerHeight - (this.controlWrapper.offset().top + this.element.height() + this.container.height());
@@ -37419,6 +37556,11 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                     }
                 }
                 this._makePopupPositionDecision();
+            } else {
+                if (this.model.datePickerType === "range") {
+                    this._removeStartDateFocus();
+                    this._removeEndDateFocus();
+                }
             }
         },
         hoverRange: function (evt) {
@@ -37464,6 +37606,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 this._setCulture(this.model.locale.culture);
                 var parsedDate = BoldBIDashboard.globalize.format(this.selectedDate.date, this.format, this.model.locale.culture);
                 this.element.val(!BoldBIDashboard.isNullOrUndefined(this.model.locale.displayFormat) ? BoldBIDashboard.globalize.format(this.selectedDate.date, this.model.locale.displayFormat, this.model.locale.culture) : parsedDate);
+                bbdesigner$(this.target).blur();
                 this.hidePopup();
                 this.prevDate = this.selectedDate.date;
                 if (!this.isNullOrUndefinedOrEmpty(this.model.selected) && !this.isNullOrUndefinedOrEmpty(parsedDate) && !this.codeTriggeredEvent) {
@@ -37523,6 +37666,15 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                     }
                 }
                 this._selectDate();
+                if (this.selectedStartDate !== null && this.selectedEndDate === null) {
+                    this._removeStartDateFocus();
+                    this._removeStartDateWrongFormat();
+                    this.selectedStartDateValue = null;
+                } else if (this.selectedStartDate !== null && this.selectedEndDate !== null) {
+                    this._removeEndDateFocus();
+                    this._removeEndDateWrongFormat();
+                    this.selectedEndDateValue = null;
+                }
                 if (!BoldBIDashboard.isNullOrUndefined(this.selectedRange)) {
                     this.prevSelectedRange = this.selectedRange.clone();
                     this.selectedRange = null;
@@ -37561,6 +37713,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 this._updateCalendar("right");
             }
             this._selectDate();
+            bbdesigner$(this.target).blur();
             this.hidePopup();
             this._updateInputs(true);
         },
@@ -37596,17 +37749,53 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             this._updateInputs(true);
             this._removeDatePickerFocus();
         },
-
-	_removeDatePickerFocus:function(){
-	    if(bbdesigner$(this.target).hasClass("e-popup-focus"))
-               {
-                    bbdesigner$(this.target).removeClass("e-popup-focus");
-               }
-	},
-		
-        _isWeekend: function(date) {
-			var zero = 0,
-			six = 6;
+        _removeDatePickerFocus: function() {
+            if(bbdesigner$(this.target).hasClass("e-popup-focus"))
+            {
+                bbdesigner$(this.target).removeClass("e-popup-focus");
+            }
+        },
+        _removeDatePickerWrongFormat: function () {
+            if(bbdesigner$(this.target).hasClass("e-wrong-format"))
+            {
+                bbdesigner$(this.target).removeClass("e-wrong-format");
+            }
+        },
+        _removeStartDateFocus: function () {
+            if (this.container.find("input[name=daterangepicker_start]").hasClass("e-focus")) {
+                this.container.find("input[name=daterangepicker_start]").removeClass("e-focus");
+            }
+            if (this.container.find(".e-fromspan").hasClass("e-focus")) {
+                this.container.find(".e-fromspan").removeClass("e-focus");
+            }
+        },
+        _removeEndDateFocus: function () {
+            if (this.container.find("input[name=daterangepicker_end]").hasClass("e-focus")) {
+                this.container.find("input[name=daterangepicker_end]").removeClass("e-focus");
+            }
+            if (this.container.find(".e-tospan").hasClass("e-focus")) {
+                this.container.find(".e-tospan").removeClass("e-focus");
+            }
+        },
+        _removeStartDateWrongFormat: function () {
+            if (this.container.find("input[name=daterangepicker_start]").hasClass("e-wrong-format")) {
+                this.container.find("input[name=daterangepicker_start]").removeClass("e-wrong-format");
+            }
+            if (this.container.find(".e-fromspan").hasClass("e-wrong-format")) {
+                this.container.find(".e-fromspan").removeClass("e-wrong-format");
+            }
+        },
+        _removeEndDateWrongFormat: function () {
+            if (this.container.find("input[name=daterangepicker_end]").hasClass("e-wrong-format")) {
+                this.container.find("input[name=daterangepicker_end]").removeClass("e-wrong-format");
+            }
+            if (this.container.find(".e-tospan").hasClass("e-wrong-format")) {
+                this.container.find(".e-tospan").removeClass("e-wrong-format");
+            }
+        },
+        _isWeekend: function (date) {
+            var zero = 0,
+            six = 6;
             return date.getDay() === zero || date.getDay() === six; // eslint-disable-line newline-before-return
         },
         _getDaysInMonth: function (date) {
@@ -37679,8 +37868,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             var divideBy37 = 37,
                 divideBy38 = 38,
                 divideBy39 = 39,
-                divideBy40 = 40,
-                divideBy13 = 13;
+                divideBy40 = 40;
             switch (evt.keyCode) {
                 case divideBy37:
                     if (evt.ctrlKey) {
@@ -37699,8 +37887,6 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                     }
                     break;
                 case divideBy40:
-                    break;
-                case divideBy13:
                     break;
                 default:
                     break;

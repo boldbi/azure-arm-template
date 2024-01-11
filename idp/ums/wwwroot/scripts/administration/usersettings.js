@@ -25,10 +25,10 @@ $(document).on("change", "input[name='activation']", function () {
             type: "POST",
             url: window.checkMailSettingUrl,
             success: function (result) {
-                if (result.result === "success") {
+                if (result.result) {
                     emailValidationMsg.addClass("hide");
                 }
-                else if (result.result === "failure" && result.isAdmin === true) {
+                else if (!result.result && result.isAdmin === true) {
                     emailValidationMsg.html(window.Server.App.LocalizationContent.ActivationMode).removeClass("hide");
                 }
             }

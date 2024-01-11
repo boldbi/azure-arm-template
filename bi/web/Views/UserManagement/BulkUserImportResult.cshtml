@@ -69,14 +69,17 @@
                 @await Html.PartialAsync("../Shared/_TopHeaderSection")
             </div>
             <div class="@(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport) ? "import-user-message" : string.Empty)" style="display:none">
-                @if (ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart")
-                {
-                    @T["The importing process will begin either within 3 minutes of the job creation time or after the completion of other import tasks already in the queue."]
-                }
-                else if (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)
-                {
-                    @T["The bulk user import status will be marked as completed within 3 minutes after all the users have been imported successfully."]
-                }
+                <span class="su su-info"></span>
+                <div class="message-tag">
+                    @if (ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart")
+                    {
+                        @T["The importing process will begin either within 3 minutes of the job creation time or after the completion of other import tasks already in the queue."]
+                    }
+                    else if (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)
+                    {
+                        @T["The bulk user import status will be marked as completed within 3 minutes after all the users have been imported successfully."]
+                    }
+                </div>
             </div>
             <div id="bulk-import-body" class="col-xs-12 bi-page-body job-details-container @(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && (ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)) ? "job-info-container" : string.Empty)">
                 <div id="job-info-container" class="col-xs-12 no-padding job-info-margin">
@@ -205,8 +208,8 @@
                         </div>
                     </div>
                 </div>
-                @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
             </div>
-        </div>        
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
     </div>
 }

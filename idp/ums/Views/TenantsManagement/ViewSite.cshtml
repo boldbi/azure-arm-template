@@ -6,6 +6,7 @@
     var isAttributesTab = (Context.Request.Query["tab"] == "attributes") ? "active" : string.Empty;
     var isIsolationCodeTab = (Context.Request.Query["tab"] == "isolation-code") ? "active" : string.Empty;
     var isUsersTab = (Context.Request.Query["tab"] == "users") ? "active" : string.Empty;
+    var isSettingsTab = (Context.Request.Query["tab"] == "settings") ? "active" : string.Empty;
 }
 
 @section styles{
@@ -189,10 +190,13 @@
                             <a href="#data-security-tab" aria-controls="data-security-tab" role="tab" data-toggle="tab">@T["Isolation Code"]</a>
                         </li>
                     }
+                    <li role="presentation" class="@isAttributesTab" id="custom-attribute">
+                        <a href="#custom-attribute-tab" aria-controls="custom-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
+                    </li>
                     @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
                     {
-                        <li role="presentation" class="@isAttributesTab" id="custom-attribute">
-                            <a href="#custom-attribute-tab" aria-controls="custom-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
+                        <li role="presentation" class="@isSettingsTab" id="site-settings">
+                            <a href="#site-settings-tab" aria-controls="site-settings-tab" role="tab" data-toggle="tab">@T["Settings"]</a>
                         </li>
                     }
                 }
@@ -201,16 +205,17 @@
 
     </div>
 
-    <div id="application-information-container" class="admin-page-content-container full-page-container">
+<div id="application-information-container" class="admin-page-content-container full-page-container" style=" height: calc(100% - 85px) !important;">
         <div class="admin-page-content col-xs-12 no-padding">
-
-            @if (Model.TenantInfoId != Guid.Empty && Model != null)
-            {
                 <div class="tab-content col-xs-12 no-padding">
                     @await Html.PartialAsync("_SiteDetail")
                     @await Html.PartialAsync("_SiteUsers")
                     @await Html.PartialAsync("_SiteDataSecurity")
                     @await Html.PartialAsync("_SiteCustomAttribute")
+                    @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
+                    {
+                        @await Html.PartialAsync("_GlobalSiteSettings")
+                    }
                 </div>
 
             }

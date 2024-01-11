@@ -16,6 +16,8 @@
     var passwordPolicy = ServerAppConfig.PasswordPolicy;
     ViewBag.BackIconRedirectionUrl = Url.Action("group", "group");
     ViewBag.BackIconTitle = T["Groups"];
+    var showGroupModule = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable);
+    var canShowForAdminGroup = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable) || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable && ViewBag.groupId == ServerAppConfig.AdminGroupId && globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.ExcludeSysGroup);
 }
 
 @section scripts{
@@ -199,12 +201,12 @@
         --
         {{/if}}
     </script>
-    <feature name=@FeatureManagement.EnableNavigateToUserProfileFromGroupView>
+    <feature name=@FeatureManagement.EnableGroupOwnerSupport>
         <script type="text/x-jsrender" id="NameTemplate">
             <a class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}">{{:DisplayName}}</a>
         </script>
     </feature>
-    <feature name=@FeatureManagement.EnableNavigateToUserProfileFromGroupView negate="true">
+    <feature name=@FeatureManagement.EnableGroupOwnerSupport negate="true">
         <script type="text/x-jsrender" id="NameTemplate">
             <span class="item-name grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
         </script>
@@ -227,18 +229,24 @@
     <script type="text/x-jsrender" id="actionstemplate">
 
         {{if @ViewBag.groupId !=1}}
-        @if (ViewBag.IsLocalDirectory)
+        @if (ViewBag.IsLocalDirectory && showGroupModule)
         {
-            <div>
-                <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
-            </div>
+                <div>
+                    <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+                </div>
         }
         {{else UserId != @ViewBag.CurrentUserId}}
-        @if (ViewBag.IsLocalDirectory)
+        @if (ViewBag.IsLocalDirectory && showGroupModule)
         {
-            <div>
-                <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
-            </div>
+                <div>
+                    <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+                </div>
+        }
+        else if (canShowForAdminGroup)
+        {
+                 <div>
+                     <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+                 </div>
         }
         {{/if}}
     </script>
@@ -262,63 +270,76 @@
                 <div class="col-xs-12 no-padding">
                     <div class="col-xs-6 no-padding button-section group-buttons pull-right">
                         <input type="button" class="primary-button app-btn-primary pull-right" id="add-custom-attribute" title="" value="@T["Add Attribute"]" data-id="@ViewBag.groupId" onclick="addCustomAttribute('group')">
-                        <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" title="@T["Manage"]">
-                            <span>@T["Manage"] </span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu manage-group-dropdown multi-level" role="menu" id="dropdown-options">
-                            <feature name=@FeatureManagement.Yokogawa>
-                                @if (ViewBag.IsLocalDirectory)
+                        @if (canShowForAdminGroup)
+                        {                       
+                            <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" title="@T["Manage"]">
+                                <span>@T["Manage"] </span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu manage-group-dropdown multi-level" role="menu" id="dropdown-options">
+                                <feature name=@FeatureManagement.EnableGroupOwnerSupport>
+                                    @if (ViewBag.IsLocalDirectory)
+                                    {
+                                        <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
+                                            <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
+                                                <i class="su su-user-add"> </i>
+                                                <span>@T["Add User"]</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </feature>
+                                <feature name=@FeatureManagement.EnableGroupOwnerSupport negate="true">
+                                    @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && ViewBag.IsLocalDirectory)
+                                    {
+                                        <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
+                                            <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
+                                                <i class="su su-user-add"> </i>
+                                                <span>@T["Add User"]</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </feature>
+                                <feature name=@FeatureManagement.EnableGroupOwnerSupport>
+                                    @if (ViewBag.IsLocalDirectory && ViewBag.groupId != 1)
+                                    {
+                                        <li id="add-owner-button" title="@T["Add Owner"]" onclick="addGroupOwnerDialogOpen()" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
+                                            <a href="javascript:void(0)" title="@T["Add Owner"]" data-toggle="tooltip" data-placement="top">
+                                                <i class="su su-add-owner"> </i>
+                                                <span>@T["Add Owner"]</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </feature>
+                                @if (isAdmin || granularPermissions[PermissionEntity.AllPermissions] || granularPermissions[PermissionEntity.SpecificPermissions])
                                 {
-                                    <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
-                                        <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
-                                            <i class="su su-user-add"> </i>
-                                            <span>@T["Add User"]</span>
+                                    <li>
+                                        <a href="@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId" title="@T["Manage Permissions"]" data-toggle="tooltip" data-placement="top">
+                                            <i class="su su-manage-permission"></i>
+                                            <span>@T["Manage Permissions"]</span>
                                         </a>
                                     </li>
                                 }
-                            </feature>
-                            <feature name=@FeatureManagement.Yokogawa negate="true">
-                                @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && ViewBag.IsLocalDirectory)
+                                @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup]) && ViewBag.groupId != 1)
                                 {
-                                    <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
-                                        <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
-                                            <i class="su su-user-add"> </i>
-                                            <span>@T["Add User"]</span>
+                                    <li id="delete-button" class="delete" title="@T["Delete Group"]" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
+                                        <a href="javascript:void(0)" title="@T["Delete Group"]" data-toggle="tooltip" data-placement="top">
+                                            <i class="su su-delete"></i>
+                                            <span>@T["Delete Group"]</span>
                                         </a>
                                     </li>
                                 }
-                            </feature>
-                            <feature name=@FeatureManagement.Yokogawa>
-                                @if (ViewBag.IsLocalDirectory && ViewBag.groupId != 1)
-                                {
-                                    <li id="add-owner-button" title="@T["Add Owner"]" onclick="addGroupOwnerDialogOpen()" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
-                                        <a href="javascript:void(0)" title="@T["Add Owner"]" data-toggle="tooltip" data-placement="top">
-                                            <i class="su su-add-owner"> </i>
-                                            <span>@T["Add Owner"]</span>
-                                        </a>
-                                    </li>
-                                }
-                            </feature>
+                            </ul>
+                        }
+                        else
+                        {
+
                             @if (isAdmin || granularPermissions[PermissionEntity.AllPermissions] || granularPermissions[PermissionEntity.SpecificPermissions])
                             {
-                                <li>
-                                    <a href="@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId" title="@T["Manage Permissions"]" data-toggle="tooltip" data-placement="top">
-                                        <i class="su su-manage-permission"></i>
-                                        <span>@T["Manage Permissions"]</span>
-                                    </a>
-                                </li>
+                                <button class="primary-button app-btn-primary pull-right" onclick="location.href='@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId'" title="@T["Manage Permissions"]" data-toggle="tooltip" data-placement="top">
+                                    <span>@T["Manage Permissions"]</span>
+                                </button>
                             }
-                            @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup]) && ViewBag.groupId != 1)
-                            {
-                                <li id="delete-button" class="delete" title="@T["Delete Group"]" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
-                                    <a href="javascript:void(0)" title="@T["Delete Group"]" data-toggle="tooltip" data-placement="top">
-                                        <i class="su su-delete"></i>
-                                        <span>@T["Delete Group"]</span>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
+                        }
                     </div>
                 </div>
             </div>
@@ -345,19 +366,22 @@
                                             <label>@T["Name"]</label>
                                             <span id="group-name" value="{{allGroupDetails.GroupName}}">{{allGroupDetails.GroupName}}</span>
                                             <label id="group-edit-button" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">
-                                                @if (ViewBag.groupId != 1)
+                                                @if (showGroupModule)
                                                 {
-                                                    <span class="bg-info" id="group-account-edit">
-                                                        <i class="su su-edit"></i>
-                                                        <input type="button" id="edit-group" value="@T["Edit"]" readonly>
-                                                    </span>
+                                                    @if (ViewBag.groupId != 1)
+                                                    {
+                                                        <span class="bg-info" id="group-account-edit">
+                                                            <i class="su su-edit"></i>
+                                                            <input type="button" id="edit-group" value="@T["Edit"]" readonly>
+                                                        </span>
+                                                    }
                                                 }
                                             </label>
                                         </div>
                                         <div class="hide group-input-field-edit">
                                             <label class="label-panel app-textbox-label">@T["Name"]<i class="mandatory">*</i> </label>
                                             <div class="col-sm-5 col-xs-12 group-list" id="group-name">
-                                                <input type="text" autocomplete="off" placeholder="@T["Group name"]" name="groupname" ng-bind="allGroupDetails.GroupName" ng-value="allGroupDetails.GroupName" class="form-control NotificationContent content-size" data-maxlength="60" id="group-info-name" @disabled />
+                                                <input type="text" autocomplete="off" placeholder="@T["Group name"]" name="groupname" ng-bind="allGroupDetails.GroupName" ng-value="allGroupDetails.GroupName" class="form-control NotificationContent content-size" data-maxlength="255" id="group-info-name" @disabled />
                                                 <span id="invalid-groupname" class="error-message validation-message" title="@T["Please enter the group name"]" data-content=""></span>
                                             </div>
                                         </div>
@@ -387,7 +411,7 @@
                                         <div class="hide group-input-field-edit">
                                             <label class="label-panel app-textbox-label" id="group-isolation-code">@T["Isolation Code"]<i class="mandatory">*</i> </label>
                                             <div class="col-sm-5 col-xs-12 group-list">
-                                                <input type="text" autocomplete="off" placeholder="@T["Group Isolation code"]" name="groupisolationcode" ng-bind="allGroupDetails.IsolationCode" ng-value="allGroupDetails.IsolationCode" class="form-control NotificationContent" maxlength="60" id="group-info-isolation-code" />
+                                                <input type="text" autocomplete="off" placeholder="@T["Group Isolation code"]" name="groupisolationcode" ng-bind="allGroupDetails.IsolationCode" ng-value="allGroupDetails.IsolationCode" class="form-control NotificationContent" maxlength="255" id="group-info-isolation-code" />
                                                 <span id="invalid-group-isolation-code" class="error-message validation-message" title="@T["Please enter the valid isolation code"]" data-content=""></span>
                                             </div>
                                         </div>
@@ -403,14 +427,20 @@
                             </div>
                             <input type="hidden" name="hiddengroupId" id="hidden-group-id" value="@ViewBag.groupId" />
                             <div id="people-container" class="tab-content col-md-12 col-xs-12 page-inner-small-padding droppable">
-                                <span style="" class="user-list-text" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">@T["Add user"]</span>
+                                @if (canShowForAdminGroup)
+                                {
+                                    <span style="" class="user-list-text" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">@T["Add user"]</span>
+                                }
                                 <div class="col-xs-12 pull-right user-content">
-                                    <div id="user-list-container" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">
-                                        <select class="selectpicker" multiple autofocus="" data-size="8" data-none-results-text="@T["No results match"]" data-live-search="true" data-actions-box="true" title='@T["Select user(s)"]' id="user-list" style="float: right;" @disabled>
-                                            <option ng-repeat="user in allUsers| orderBy:'DisplayName'" value="{{user.UserId}}" title="{{user.DisplayName}}">{{user.DisplayName}}</option>
-                                        </select>
-                                    </div>
-                                    <input id="user-save-button" disabled="" title="@T["Add selected user(s) to the group"]" class="group-save-button primary-button app-btn-primary" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)" type="button" value="@T["Add"]" name="save" />
+                                    @if (canShowForAdminGroup)
+                                    {
+                                        <div id="user-list-container" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">
+                                            <select class="selectpicker" multiple autofocus="" data-size="8" data-none-results-text="@T["No results match"]" data-live-search="true" data-actions-box="true" title='@T["Select user(s)"]' id="user-list" style="float: right;" @disabled>
+                                                <option ng-repeat="user in allUsers| orderBy:'DisplayName'" value="{{user.UserId}}" title="{{user.DisplayName}}">{{user.DisplayName}}</option>
+                                            </select>
+                                        </div>
+                                        <input id="user-save-button" disabled="" title="@T["Add selected user(s) to the group"]" class="group-save-button primary-button app-btn-primary" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)" type="button" value="@T["Add"]" name="save" />
+                                    }
                                     <div id="search-area">
                                         <input type="text" id="search-group-users" placeholder="@T["Search users"]" autocomplete="off" />
                                         <span class="su su-inner-close close-icon" id="clear-search" title="@T["Clear search"]"></span>

@@ -1034,6 +1034,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleRunHistory(
 	Message text NULL,
 	IsOnDemand tinyint NOT NULL DEFAULT 0,
 	IsActive tinyint NOT NULL,
+	LogExist tinyint NOT NULL DEFAULT 0,
 	PRIMARY KEY (Id))
 ;
 
@@ -1059,11 +1060,10 @@ CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
    searchid VARCHAR(255) PRIMARY KEY,
    question TEXT,
    tableinfo TEXT,
-   schemasequence TEXT,
    fieldinfo TEXT,
    message TEXT,
    haserror BOOLEAN,
-   sqlquery TEXT,
+   chartType TEXT,
    uservote TEXT,
    isreported BOOLEAN)
 ;
