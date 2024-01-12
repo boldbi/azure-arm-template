@@ -18,6 +18,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var isAzureAppService = GlobalAppSettings.GetRunTimeEnvironMent() == BoldServiceEnvironment.AzureAppService;
     var mssqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MSSQLConnectionParameters);
     var mysqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MySQLConnectionParameters);
     var postgresqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQLConnectionParameters);
@@ -108,9 +109,13 @@
                     <button type="button" title="" id="update-datacache-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
                         @T["Save"]
                     </button>
-                    <button type="button" title="" id="update-bold-etl-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
-                        @T["Save"]
-                    </button>
+                    @if (!isAzureAppService)
+                    {
+                        <button type="button" title="" id="update-bold-etl-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+                            @T["Save"]
+                        </button>
+                    }
+                    
                 </div>
             </div>
         </div>
@@ -122,9 +127,12 @@
                 <li role="presentation" class="@isDataCacheSettingsTab">
                     <a href="#data-cache" id="datacache-settings-tab" aria-controls="datacache-settings-tab" role="tab" data-toggle="tab">@T["Data Cache Configuration"]</a>
                 </li>
-                <li role="presentation" class="@isBoldETLTab">
-                    <a href="#bold-etl" id="datacache-settings-tab" aria-controls="bold_etl-settings-tab" role="tab" data-toggle="tab">@T["Bold ETL"]</a>
-                </li>
+                @if (!isAzureAppService)
+                {
+                    <li role="presentation" class="@isBoldETLTab">
+                        <a href="#bold-etl" id="datacache-settings-tab" aria-controls="bold_etl-settings-tab" role="tab" data-toggle="tab">@T["Bold ETL"]</a>
+                    </li>
+                }                
             </ul>
         </div>
     </div>
@@ -276,45 +284,48 @@
                 <div role="tabpanel" class="tab-pane col-xs-12 no-padding bi-page-body @isDataCacheSettingsTab" id="data-cache">
                     <div id="dataCacheDesigner" style="height:100%;min-height:350px"></div>
                 </div>
-                <div role="tabpanel" class="tab-pane col-xs-12 no-padding bi-page-body @isBoldETLTab" id="bold-etl">
-                    <div id="message-tag" class="col-xs-12 no-padding settings-page-fields form-fields-top-margin data-base-fields">
-                        <span class="su su-info"></span>
-                        <div class="message">@T["Please complete the configuration of the Bold ETL application here before proceeding to the application."]</div>
-                    </div>
-                    <div id="bold-etl-form" class="col-xs-12 form-horizontal bi-page-body" autocomplete="off">
-                        <div class="col-xs-12 no-padding">
-                            <div class="system-settings-page-container col-xs-12 no-padding" id="system-settings-db-selection-container">
-                                
-                                <div class="system-settings-db-selection-field col-xs-12 no-padding">
-                                    <form id="bold-etl-content-holder" class="no-padding col-xs-12 no-padding" autocomplete="off">
-                                        <div style="margin-top: 0px" class="col-xs-12 no-padding settings-page-fields form-fields-top-margin data-base-fields">
-                                            @Html.Label("bold-etl", T["ClientId"].Value, new { @class = "app-textbox-label" })
-                                            <div class="info-message info-margin">
-                                                @T[$"The Client ID of your registered application. This unique Client ID is used to identify your registered application within the ETL application. If you haven't registered an application yet, <a href='{ServerAppConfig.InternalAppIdpUrl}/etlservice/etl/app-register' target='_blank'>click here</a> to initiate the registration process."]
-                                            </div>
-                                            <input type="text" id="txt-clientid" name="clientid" value="@etlClientID" class="form-control validation-padding txt-holder" placeholder="@T["clientId"]" autocomplete="off">
-                                            <span class="startup-validation  validation-txt-errors"></span>
-                                        </div>
-                                        <div class="col-xs-12 form-fields-top-margin no-padding data-base-fields">
-                                            <div class="col-xs-12 no-padding">
-                                                @Html.Label("bold-etl", @T["Client Secret"].Value, new { @class = "app-textbox-label" })
+                @if (!isAzureAppService)
+                {
+                    <div role="tabpanel" class="tab-pane col-xs-12 no-padding bi-page-body @isBoldETLTab" id="bold-etl">
+                        <div id="message-tag" class="col-xs-12 no-padding settings-page-fields form-fields-top-margin data-base-fields">
+                            <span class="su su-info"></span>
+                            <div class="message">@T["Please complete the configuration of the Bold ETL application here before proceeding to the application."]</div>
+                        </div>
+                        <div id="bold-etl-form" class="col-xs-12 form-horizontal bi-page-body" autocomplete="off">
+                            <div class="col-xs-12 no-padding">
+                                <div class="system-settings-page-container col-xs-12 no-padding" id="system-settings-db-selection-container">
+
+                                    <div class="system-settings-db-selection-field col-xs-12 no-padding">
+                                        <form id="bold-etl-content-holder" class="no-padding col-xs-12 no-padding" autocomplete="off">
+                                            <div style="margin-top: 0px" class="col-xs-12 no-padding settings-page-fields form-fields-top-margin data-base-fields">
+                                                @Html.Label("bold-etl", T["ClientId"].Value, new { @class = "app-textbox-label" })
                                                 <div class="info-message info-margin">
-                                                    @T["This is the client secret linked to your application's Client ID. This confidential key is used for secure communication between the ETL application and the BI."]
+                                                    @T[$"The Client ID of your registered application. This unique Client ID is used to identify your registered application within the ETL application. If you haven't registered an application yet, <a href='{ServerAppConfig.InternalAppIdpUrl}/etlservice/etl/app-register' target='_blank'>click here</a> to initiate the registration process."]
+                                                </div>
+                                                <input type="text" id="txt-clientid" name="clientid" value="@etlClientID" class="form-control validation-padding txt-holder" placeholder="@T["clientId"]" autocomplete="off">
+                                                <span class="startup-validation  validation-txt-errors"></span>
+                                            </div>
+                                            <div class="col-xs-12 form-fields-top-margin no-padding data-base-fields">
+                                                <div class="col-xs-12 no-padding">
+                                                    @Html.Label("bold-etl", @T["Client Secret"].Value, new { @class = "app-textbox-label" })
+                                                    <div class="info-message info-margin">
+                                                        @T["This is the client secret linked to your application's Client ID. This confidential key is used for secure communication between the ETL application and the BI."]
+                                                    </div>
+                                                </div>
+                                                <div class="col-xs-12 no-padding settings-page-fields">
+                                                    <input type="password" id="txt-client-secret-db" name="clientsecret" class="form-control txt-holder validation-padding" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off">
+                                                    <span id="password-field" class="startup-validation validation-txt-errors"></span>
+                                                    <div class="su su-eye show-hide-password"></div>
+                                                    <span id="password-field" class="validation-txt-errors"></span>
                                                 </div>
                                             </div>
-                                            <div class="col-xs-12 no-padding settings-page-fields">
-                                                <input type="password" id="txt-client-secret-db" name="clientsecret" class="form-control txt-holder validation-padding" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" autocomplete="off">
-                                                <span id="password-field" class="startup-validation validation-txt-errors"></span>
-                                                <div class="su su-eye show-hide-password"></div>
-                                                <span id="password-field" class="validation-txt-errors"></span>
-                                            </div>
-                                        </div>
-                                    </form>                                    
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
 
         </div>
