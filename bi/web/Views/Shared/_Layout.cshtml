@@ -55,6 +55,21 @@
     var adminPageUrl = siteIdentifier + "/administration";
     var profilePagesUrl = siteIdentifier + "/profile";
     var userProfilePageUrl = siteIdentifier + "/user";
+    var createItemMenuStyle = string.Empty;
+    var addSampleItemStyle = string.Empty;
+    var addCategoryStyle = string.Empty;
+    var publishDashboardStyle = string.Empty;
+    var dashboardSecurityStyle = string.Empty;
+    var itemVersionStyle = string.Empty;
+    var createSlideshowStyle = string.Empty;
+    var createDashboardStyle = string.Empty;
+    var dashboardFeedbackStyle = string.Empty;
+    var createSlideshowScript = string.Empty;
+    var createCategoryScript = string.Empty;
+    var editCategoryScript = string.Empty;
+    var createItemMenuScript = string.Empty;
+    var userGroupSuggestion = string.Empty;
+    var itemActionScript = string.Empty;
 }
 @{
     var preloadScriptsFiles = new string[]
@@ -87,6 +102,45 @@
     };
     var bannerApiEndpoint = ServerAppConfig.AppSettings.BoldBiBannerApiEndpoint;
     var currentVersion = _globalAppSettings.SystemSettings.ProductVersion;
+
+    <environment include="Development,CloudDevelopment">
+        @{
+            createItemMenuStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-item-menu.css");
+            addSampleItemStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/addsampleitem.css");
+            addCategoryStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/add-category.css");
+            publishDashboardStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/publish-dashboard.css");
+            dashboardSecurityStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/dashboard-security.css");
+            itemVersionStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/itemversion.css");
+            createSlideshowStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-slideshow.css");
+            createDashboardStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-dashboard.css");
+            dashboardFeedbackStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/dashboard-feedback.css");
+            createSlideshowScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-slideshow.js");
+            createCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/add-category.js");
+            editCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/edit-category.js");
+            createItemMenuScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-item-menu.js");
+            userGroupSuggestion = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/item-user-group-suggestion.js");
+            itemActionScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/itemaction.js");
+        }
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        @{
+            createItemMenuStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-item-menu.min.css");
+            addSampleItemStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/addsampleitem.min.css");
+            addCategoryStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/add-category.min.css");
+            publishDashboardStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/publish-dashboard.min.css");
+            dashboardSecurityStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/dashboard-security.min.css");
+            itemVersionStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/itemversion.min.css");
+            createSlideshowStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-slideshow.min.css");
+            createDashboardStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-dashboard.min.css");
+            dashboardFeedbackStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/dashboard-feedback.min.css");
+            createSlideshowScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-slideshow.min.js");
+            createCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/add-category.min.js");
+            editCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/edit-category.min.js");
+            createItemMenuScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-item-menu.min.js");
+            userGroupSuggestion = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/item-user-group-suggestion.min.js");
+            itemActionScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/itemaction.min.js");
+        }
+    </environment>
 }
 <!DOCTYPE html>
 <html class="dashboard-server" lang="@globalAppSettings.SystemSettings.Language">
@@ -147,6 +201,23 @@
     {
         <link rel="prefetch" href="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/health-check">
     }
+    <script>
+        var createItemMenuStyle = @Json.Serialize(createItemMenuStyle);
+        var addSampleItemStyle = @Json.Serialize(addSampleItemStyle);
+        var addCategoryStyle = @Json.Serialize(addCategoryStyle);
+        var publishDashboardStyle = @Json.Serialize(publishDashboardStyle);
+        var dashboardSecurityStyle = @Json.Serialize(dashboardSecurityStyle);
+        var itemVersionStyle = @Json.Serialize(itemVersionStyle);
+        var createSlideshowStyle = @Json.Serialize(createSlideshowStyle);
+        var createDashboardStyle = @Json.Serialize(createDashboardStyle);
+        var dashboardFeedbackStyle = @Json.Serialize(dashboardFeedbackStyle);
+        var createSlideshowScript = @Json.Serialize(createSlideshowScript);
+        var createCategoryScript = @Json.Serialize(createCategoryScript);
+        var editCategoryScript = @Json.Serialize(editCategoryScript);
+        var createItemMenuScript = @Json.Serialize(createItemMenuScript);
+        var userGroupSuggestion = @Json.Serialize(userGroupSuggestion);
+        var itemActionScript = @Json.Serialize(itemActionScript);
+    </script>
 <script>
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
@@ -171,12 +242,11 @@
             </svg>
         </div>
     }
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
     </environment>
 
@@ -196,12 +266,20 @@
         {
             <environment include="Development,CloudDevelopment">
                 <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout.js"></script>
-                <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
             </environment>
             <environment exclude="Development,CloudDevelopment">
                 <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout.min.js"></script>
-                <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
             </environment>
+
+            @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+            {
+                <environment include="Development,CloudDevelopment">
+                    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
+                </environment>
+                <environment exclude="Development,CloudDevelopment">
+                    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
+                </environment>
+            }
         }
     }
     else

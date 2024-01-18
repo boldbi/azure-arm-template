@@ -1,0 +1,43 @@
+﻿@{
+    Layout = null;
+    var isMobile = ViewBag.IsMobile;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var requestedPage = ViewBag.RequestedPage;
+}
+
+@if (!isMobile)
+{
+    <div id="create-presentation-popup" class="no-padding" style="display:none">
+        <div id="create-presentation-div">
+            @{
+                await Html.RenderPartialAsync("~/Views/Slideshow/_CreateSlideshow.cshtml");
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("../Items/_ItemVersion")
+    @if (requestedPage == ItemType.Dashboard)
+    {
+        @await Html.PartialAsync("../Items/_MoveItem")
+        @await Html.PartialAsync("../Items/_DashboardSecurity")
+    }
+
+    @if (requestedPage == ItemType.Datasource)
+    {
+        @await Html.PartialAsync("../Items/_CopyItem")
+    }
+
+    @if (requestedPage == ItemType.Slideshow)
+    {
+        @await Html.PartialAsync("../Items/_GetLink")
+    }
+}
+
+@if (requestedPage == ItemType.Dashboard)
+{
+    @await Html.PartialAsync("../Items/_GetLink")
+    @await Html.PartialAsync("../Items/_CopyItem")
+}

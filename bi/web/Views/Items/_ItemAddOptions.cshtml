@@ -12,6 +12,9 @@
     var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
     var absoluteUrl = requestUrl.AbsolutePath.ToString().ToLower();
     var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+    var dataSourcePageUrl = Url.Action("DataSources", "DataSources");
+    var schedulePageUrl = Url.Action("Schedules", "Scheduler");
+    var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
 }
 
 <!DOCTYPE html>
@@ -35,14 +38,8 @@
 	        var editcategoryUrl = "@Url.Action("editcategory", "category")";
 	        var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
     </script>
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
-    </environment>
 
-    @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0))
+    @if ((absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0)) && absoluteUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && absoluteUrl.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && absoluteUrl.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
     {
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.css" />
@@ -51,6 +48,17 @@
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/add-category.min.css" />
         </environment>
     }
+
+    @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 && absoluteUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && absoluteUrl.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && absoluteUrl.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
+        </environment>
+    }
+
 	</head>
 	<body>
     @if (model[ItemType.Category])
@@ -64,9 +72,3 @@
 	    }
 	</body>
 </html>
-<environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-</environment>

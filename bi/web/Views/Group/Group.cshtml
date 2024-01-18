@@ -94,70 +94,15 @@
                         </a>
                     </li>
                 }
-                {{if DirectoryType == @((int)DirectoryType.AzureAD)}}
                 @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                 {
                     <li class="menu-group">
-                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "Azure AD")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                            <i class="su su-user-add disabled-icon-color"></i>
-                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
-                        </a>
-                    </li>
-                }
-                {{else DirectoryType == @((int)DirectoryType.WindowsAD)}}
-                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
-                {
-                    <li class="menu-group">
-                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "Windows AD")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                            <i class="su su-user-add disabled-icon-color"></i>
-                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
-                        </a>
-                    </li>
-                }
-                {{else DirectoryType == @((int)DirectoryType.OAuth2)}}
-                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
-                {
-                    <li class="menu-group">
-                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "OAuth")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                            <i class="su su-user-add disabled-icon-color"></i>
-                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
-                        </a>
-                    </li>
-                }
-                {{else DirectoryType == @((int)DirectoryType.OpenIDConnect)}}
-                @if (showGroupModule && (isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
-                {
-                    <li class="menu-group">
-                        <a href="javascript:void(0);" class="user-add-class" title="@String.Format(T["You cannot add users to {0} groups."].Value, "OpenID")" data-toggle="tooltip" data-placement="top" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                            <i class="su su-user-add disabled-icon-color"></i>
-                            <span class="menu-text disabled-icon-color">@T["Add Users"]</span>
-                        </a>
-                    </li>
-                }
-                {{else GroupId == @ServerAppConfig.AdminGroupId }}
-                @if (((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && showGroupModule) || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable && globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.ExcludeSysGroup))
-                {
-                        <li class="menu-group">
                             <a href="@Url.Action("viewgroup", "group")/{{:GroupId}}?isAddUser=True" class="user-add-class" title="@T["Add Users"]" data-toggle="tooltip" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                                <i class="su su-user-add"></i>
-                                <span class="menu-text">@T["Add Users"]</span>
-                            </a>
-                        </li>
+                            <i class="su su-user-add"></i>
+                            <span class="menu-text">@T["Add Users"]</span>
+                        </a>
+                    </li>
                 }
-                {{else GroupId != @ServerAppConfig.AdminGroupId}}
-                @if (showGroupModule)
-                {
-                       @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups])
-                       {
-                           <li class="menu-group">
-                               <a href="@Url.Action("viewgroup", "group")/{{:GroupId}}?isAddUser=True" class="user-add-class" title="@T["Add Users"]" data-toggle="tooltip" data-groupid="{{:GroupId}}" data-directory-type="{{:DirectoryType}}">
-                                   <i class="su su-user-add"></i>
-                                   <span class="menu-text">@T["Add Users"]</span>
-                               </a>
-                           </li>
-                       }
-                }
-                {{/if}}
                 <li class="menu-group">
                     <a href="@Url.Action("viewgroup","group")/{{:GroupId}}" title="@T["View"]" data-toggle="tooltip" data-groupid="{{:GroupId}}">
                         <i class="su su-eye"></i>
@@ -335,7 +280,7 @@
                         <li class="dropdown no-padding">
                             @if (isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || ViewBag.IsUserHasCreateGroupPermission)
                             {
-                                <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="dropdown" id="new-user-dropdown" title="@T["Add new group"]">
+                                <button class="dropdown-toggle primary-button app-btn-primary pull-right no-margin" data-toggle="dropdown" id="new-user-dropdown" title="@T["Add new group"]">
                                     <span>@T["New Group"] </span>
                                     <span class="caret"></span>
                                 </button>

@@ -3,21 +3,40 @@
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardSecurityHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.PublicDashboards);
+    var dashboardSecurityScript = string.Empty;
 }
 
 <!DOCTYPE html>
 <head>
+    <environment include="Development,CloudDevelopment">
+        @{
+            dashboardSecurityScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/dashboard-security.js");
+        }
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        @{
+            dashboardSecurityScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/dashboard-security.min.js");
+        }
+    </environment>
     <script>
         var getItemSettingsUrl = "@Url.Action("getitemsettings", "dashboards")";
         var dashboardUrl = "@Url.Action("Dashboards", "Dashboards")";
-    </script>
+        var dashboardSecurityScript = @Json.Serialize(dashboardSecurityScript);
 
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-security.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-security.min.js"></script>
-    </environment>
+        var preloadScripts = [];
+        preloadScripts.push(dashboardSecurityScript);
+
+        function DashboarDelayResources(resourceLinkArray, resourceType) {
+            for (var resource = 0; resource < resourceLinkArray.length; resource++) {
+                var preloadLink = document.createElement(resourceType);
+                preloadLink.type = "text/javascript";
+                preloadLink.src = resourceLinkArray[resource];
+                document.head.appendChild(preloadLink);
+            }
+        }
+
+        DashboarDelayResources(preloadScripts, "script");
+    </script>
 </head>
 <body>
     <div id="itemsettings-dialog-content" style="display:none">

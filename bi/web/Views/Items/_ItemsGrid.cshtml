@@ -16,8 +16,15 @@
     var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var providerTypeUrl = dashboardDesignerResourceUrl + "/cdn/css/designer" + theme;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dataSourcePageUrl = Url.Action("DataSources", "DataSources");
 }
+
 <script>
+    var requestUrl = @Json.Serialize(requestUrl);
+    var dataSourcePageUrl = @Json.Serialize(dataSourcePageUrl);
     var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
     var moveIframeUrl = "@Url.Action("moveviewitem", "items")";
     var versionIframeUrl = "@Url.Action("itemversion", "items")";
@@ -148,6 +155,10 @@
         <span>{{:Name}}</span>
         {{/if}}
     </div>
+       {{if LinkedDashboardsCount != 0}}
+         <span class="su su-view-linked-dashboard"></span>
+        <span class="view-count">{{:LinkedDashboardsCount}}</span>
+       {{/if}}
     {{/if}}
 </script>
 
@@ -562,7 +573,6 @@
          var filters = { filterType: "menu", "filteredColumns": [{ field: "Name", operator: "equal", value: "@query" }] };
     }
 
-
     $(document).ready(function () {
         ej.support.enableLocalizedSort = true;
         GridLocalization();
@@ -682,6 +692,49 @@
             ]
         });
 
+        if (requestUrl.toLowerCase().indexOf(dataSourcePageUrl.toLowerCase()) === 0){
+
+            var preloadStyles = [];
+            preloadStyles.push(publishDashboardStyle);
+            preloadStyles.push(createSlideshowStyle);
+            preloadStyles.push(createDashboardStyle);
+            preloadStyles.push(itemVersionStyle);
+            preloadStyles.push(addCategoryStyle);
+
+            var preloadScripts = [];
+            preloadScripts.push(createSlideshowScript);
+            preloadScripts.push(editCategoryScript);
+            preloadScripts.push(createCategoryScript);
+            preloadScripts.push(userGroupSuggestion);
+            preloadScripts.push(itemActionScript);
+
+            function DashboarDelayResources(resourceLinkArray, resourceType) {
+                for (var resource = 0; resource < resourceLinkArray.length; resource++) {
+                    var isScriptAppended = false;
+                    if (resourceType == "script") {
+                        isScriptAppended = document.querySelector("script[src='" + resourceLinkArray[resource] + "']") !== null;
+                        if (!isScriptAppended) {
+                            var preloadLink = document.createElement(resourceType);
+                            preloadLink.type = "text/javascript";
+                            preloadLink.src = resourceLinkArray[resource];
+                            document.head.appendChild(preloadLink);
+                        }
+                    }
+                    else {
+                        isScriptAppended = document.querySelector("link[href='" + resourceLinkArray[resource] + "']") !== null;
+                        if (!isScriptAppended) {
+                            var preloadLink = document.createElement("link");
+                            preloadLink.rel = "stylesheet";
+                            preloadLink.href = resourceLinkArray[resource];
+                            document.head.appendChild(preloadLink);
+                        }
+                    }
+                }
+            }
+            DashboarDelayResources(preloadStyles, "style");
+            DashboarDelayResources(preloadScripts, "script");
+        }
+
         $.views.helpers({
             urlEncode: function (category, item) {
                 return encodeURI("@Url.Action("Index", "FileRender")/" + category + "/" + item);
@@ -723,5 +776,4 @@
 {
     @await Html.PartialAsync("../Items/_PublishDashboard")
     @await Html.PartialAsync("../Items/_GetExternalSites")
-    @await Html.PartialAsync("../Items/_CopyItem")
 }

@@ -2,14 +2,11 @@
     Layout = null;
     var globalAppSettings = _globalAppSettings;
     var identityResponse = Context.RequestServices.GetRequiredService<ServerPrincipal>();
-    var itemAddPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
-    var canCreateCategory = itemAddPermissions[ItemType.Category];
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
 }
 
 <script>
     var moveItemUrl = "@Url.Action("moveitem", "items")";
-    var canCreateCategory = "@canCreateCategory";
 
     function load() {
         if (($(parent.window).width()) > 1400) {
@@ -35,20 +32,10 @@
             </div>
             <div class="col-xs-12" id="action-category-division">
                 <div class="col-xs-12 no-padding text-label" style="font-weight:bold">@T["Move to Category"]</div>
-                @if (canCreateCategory)
-                {
-                    <div class="col-xs-12 no-padding dropup">
-                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
-                        <span class="category-validation-error text"></span>
-                    </div>
-                }
-                else
-                {
-                    <div class="col-xs-12 no-padding dropup">
-                        <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
-                    </div>
-                }
-
+                <div class="col-xs-12 no-padding dropup">
+                    <select id="CategoryList" class="selectpicker" data-live-search="true" data-size="3"></select>
+                    <span class="category-validation-error text"></span>
+                </div>
             </div>
             <input type="hidden" id="MoveItemIdHidden" value="" />
             <input type="hidden" id="userIdHidden" value="@identityResponse.User.UserId" />

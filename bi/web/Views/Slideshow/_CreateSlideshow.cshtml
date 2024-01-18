@@ -1,17 +1,20 @@
 ﻿@{
     Layout = null;
-    var canCreateCategory = ViewBag.CanCreateCategory != null ? ViewBag.CanCreateCategory : false;
+    var itemAddPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var canCreateCategory = ViewBag.CanCreateCategory != null ? ViewBag.CanCreateCategory : ViewBag.ItemAddOptions != null ? itemAddPermissions[ItemType.Category] : false;
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
-    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var partialViewPageUrl = Url.Action("LoadPartialViews", "PartialView");
 }
 
 <!DOCTYPE html>
 <head>
     <title>@T["Create Slideshow"]</title>
     <script>
+        var partialViewPageUrl = @Json.Serialize(partialViewPageUrl);
+        var requestUrl = @Json.Serialize(requestUrl);
         var checkSlideshowNameExistUrl = "@Url.Action("IsslideshowNameExist", "Slideshow")";
         var createSlideShowUrl = "@Url.Action("AddSlideshow", "Slideshow")";
         var getCreateSlideShowDetailUrl = "@Url.Action("GetCreateSlideshowDetail", "Slideshow")";
@@ -21,23 +24,26 @@
         var editMultiTabDashboardUrl = "@Url.Action("EditMultiTabDashboard", "Dashboards")";
         var getCreateMultiTabDashboardDetailUrl = "@Url.Action("GetCreateMultiTabDashboardDetail", "Slideshow")";
         var geteditMultiTabDashboardDetailUrl = "@Url.Action("GetEditMultiTabDashboardDetail", "Slideshow")";
-        var canCreateCategory = @Json.Serialize(canCreateCategory);
+        if (requestUrl.indexOf(partialViewPageUrl.toLowerCase()) === -1) {
+            var canCreateCategory = @Json.Serialize(canCreateCategory);
+        }
     </script>
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.min.js"></script>
-    </environment>
 
-    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    @if (requestUrl.IndexOf(partialViewPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
     {
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-slideshow.css" />
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-slideshow.min.css" />
+        </environment>
+
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.min.js"></script>
         </environment>
     }
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")

@@ -1,4 +1,5 @@
-﻿@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+﻿@using Newtonsoft.Json;
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
 @{
     var globalAppSettings = _globalAppSettings;
     ViewBag.Title = T["Groups"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
@@ -18,6 +19,8 @@
     ViewBag.BackIconTitle = T["Groups"];
     var showGroupModule = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable);
     var canShowForAdminGroup = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable) || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable && ViewBag.groupId == ServerAppConfig.AdminGroupId && globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.ExcludeSysGroup);
+    var groupDetails = JsonConvert.DeserializeObject<Group>(ViewBag.groupDetails);
+    var groupDirectoryType = groupDetails.DirectoryType;
 }
 
 @section scripts{
@@ -33,6 +36,7 @@
     </environment>
     <script type="text/javascript">
         var groupDetails =@Html.Raw(ViewBag.groupDetails);
+        var groupDirectoryType = '@groupDirectoryType';
         groupDetails.GroupName = $('<div/>').html(groupDetails.GroupName).text();
         groupDetails.GroupDescription = $('<div/>').html(groupDetails.GroupDescription).text();
         var groupId = @ViewBag.groupId;
@@ -227,16 +231,17 @@
         <div class="item-header">@T["Email Address"]</div>
     </script>
     <script type="text/x-jsrender" id="actionstemplate">
-
         {{if @ViewBag.groupId !=1}}
-        @if (ViewBag.IsLocalDirectory && showGroupModule)
+        {{if @((int)groupDetails.DirectoryType) != DirectoryType }}
+        @if (showGroupModule)
         {
-                <div>
-                    <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
-                </div>
+            <div>
+                <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            </div>
         }
+        {{/if}}
         {{else UserId != @ViewBag.CurrentUserId}}
-        @if (ViewBag.IsLocalDirectory && showGroupModule)
+        @if (showGroupModule)
         {
                 <div>
                     <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
@@ -319,7 +324,7 @@
                                         </a>
                                     </li>
                                 }
-                                @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups] || granularPermissions[PermissionEntity.SpecificGroup]) && ViewBag.groupId != 1)
+                                @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]|| granularPermissions[PermissionEntity.SpecificGroup]) && ViewBag.groupId != 1)
                                 {
                                     <li id="delete-button" class="delete" title="@T["Delete Group"]" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
                                         <a href="javascript:void(0)" title="@T["Delete Group"]" data-toggle="tooltip" data-placement="top">
@@ -419,27 +424,38 @@
                                     <div class="hide form-element-label group-input-field-edit save-button-field">
                                         <div class="save-button">
                                             <input type="button" class="secondary-button app-btn-secondary pull-right popup-close" title="" id="group-edit-cancel-button" value="@T["Cancel"]">
-                                            <input id="group-title-container-save-button" title="" class="group-save-button pull-right primary-button app-btn-primary small-inner-margin no-margin" type="button" value="@T["Save"]" name="save" @disabled>
+                                            <input id="group-title-container-save-button" title="" class="group-save-button pull-right primary-button app-btn-primary small-inner-margin no-margin" type="button" value="@T["Save"]" name="save">
                                         </div>
                                     </div>
                                     <span id="group-edit-confirmation"></span>
                                 </form>
                             </div>
                             <input type="hidden" name="hiddengroupId" id="hidden-group-id" value="@ViewBag.groupId" />
+                            @if (groupDirectoryType.ToString() != "Local")
+                            {
+                                <div id="third-party-group-info" class="col-xs-12 no-padding profile-note-sec">
+
+                                    <label>
+                                        Adding users to groups imported from another provider won't synchronize changes with the original provider of the group. Moreover, users imported from a third-party provider cannot be added to a group imported from the same provider.
+                                    </label>
+                                </div>
+                            }
                             <div id="people-container" class="tab-content col-md-12 col-xs-12 page-inner-small-padding droppable">
                                 @if (canShowForAdminGroup)
                                 {
-                                    <span style="" class="user-list-text" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">@T["Add user"]</span>
+                                    <span style="" class="user-list-text">@T["Add user"]</span>
                                 }
                                 <div class="col-xs-12 pull-right user-content">
                                     @if (canShowForAdminGroup)
                                     {
-                                        <div id="user-list-container" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">
-                                            <select class="selectpicker" multiple autofocus="" data-size="8" data-none-results-text="@T["No results match"]" data-live-search="true" data-actions-box="true" title='@T["Select user(s)"]' id="user-list" style="float: right;" @disabled>
-                                                <option ng-repeat="user in allUsers| orderBy:'DisplayName'" value="{{user.UserId}}" title="{{user.DisplayName}}">{{user.DisplayName}}</option>
-                                            </select>
-                                        </div>
-                                        <input id="user-save-button" disabled="" title="@T["Add selected user(s) to the group"]" class="group-save-button primary-button app-btn-primary" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)" type="button" value="@T["Add"]" name="save" />
+                                        <div id="user-list-container">
+                                        <select class="selectpicker" multiple autofocus="" data-size="8" data-none-results-text="@T["No results match"]" data-live-search="true" data-actions-box="true" title='@T["Select user(s)"]' id="user-list" style="float: right;">
+                                            <option ng-repeat="user in allUsers | orderBy:'DisplayName'" ng-class="{ 'disabled-icon-color': allGroupDetails.DirectoryType == user.DirectoryType && allGroupDetails.DirectoryType != @((int)DirectoryType.Local) }" ng-disabled="allGroupDetails.DirectoryType == user.DirectoryType && allGroupDetails.DirectoryType != @((int)DirectoryType.Local)" value="{{user.UserId}}" title="{{user.DisplayName}}">
+                                                {{user.DisplayName}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <input id="user-save-button" disabled="" title="@T["Add selected user(s) to the group"]" class="group-save-button primary-button app-btn-primary" type="button" value="@T["Add"]" name="save" />
                                     }
                                     <div id="search-area">
                                         <input type="text" id="search-group-users" placeholder="@T["Search users"]" autocomplete="off" />
@@ -507,10 +523,4 @@
     @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
     @await Html.PartialAsync("../Items/_SharePermission")
     @await Html.PartialAsync("../CustomAttribute/_CustomAttribute")
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    </environment>
 }

@@ -429,7 +429,8 @@
                     excelExportText: "Allow Excel Export",
                     imageExportText: "Allow Image Export",
                     pdfExportText: "Allow PDF Export",
-                    hiddenColumnExportText: "Include Hidden Columns"
+                    hiddenColumnExportText: "Include Hidden Columns",
+					pagesizeToolTip: "If the page size option is not chosen in the drop-down menu, then all of the options are taken into consideration when exporting PDFs."
                 },
 				viewDataActions: {
                     allowViewDataExporting: "Allow Exporting",
@@ -1029,6 +1030,7 @@
                 prestoText: "Presto",
                 mysqlText: "MySQL",
                 postgresqlText: "PostgreSQL",
+				apacheDorisText: "Apache Doris",
                 amazonRDSOracleText: "Oracle",
                 amazonRDSMariaDBText: "MariaDB",
                 amazonRDSAmazonAuroraMySQLText: "Amazon Aurora MySQL",
@@ -1085,6 +1087,7 @@
 				workspaces: "WorkSpaces",
 				apiKey: "ApiKey",
 				regionEndpoint: "RegionEndPoint",
+				type: "Type",
                 enableSSL: "Enable SSL",
                 mode: "Mode",
                 live: "Live",
@@ -1214,6 +1217,8 @@
                     Clickhouse:"Clickhouse",
 					azureDataExplorer: "Azure Data Explorer",
 					rockSet: "Rockset",
+					bolddatastore : "Bold Data Store",
+					apacheDoris: "Apache Doris",
                     redShift:"Redshift",
                     azureSQLDataWarehouse:"AzureSQLDataWarehouse",
                     jira: {
@@ -2480,7 +2485,10 @@
                 AccessDeniedText: "Access denied for the request",
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
-				exportFailedContent: "Your export request has failed."
+				exportFailedContent: "Your export request has failed.",
+                dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
+                etlDialogHeaderText: "Redirect to Bold ETL",
+                etlContinuebtnText: "Continue with connector"
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
@@ -5012,8 +5020,12 @@
                 graphAPIDisplayText: "Graph API",
                 pagesDisplayText: "Pages",
                 campaignsDisplayText: "Campaigns",
-                emptyPagesValidation: "Error occurred while fetching the Pages",
-                emptyCampaignsValidation: "Error occurred while fetching the Campaigns",
+				emptyPagesValidation: 'No pages were found in your account',
+				emptyCampaignsValidation: 'No campaigns found in your account',
+				emptyAccountValidation: 'No account found',
+				errorPagesValidation: 'Error occurred while fetching the Pages',
+				errorCampaignsValidation: 'Error occurred while fetching the Campaigns',
+				errorAccountValidation: 'Error occured while fetching the account details',
                 nullCampaignValidation: "Cannot find any Campaign for the user",
                 dailyReach: "Daily Reach",
                 demographics: "Demographics",
@@ -6150,6 +6162,11 @@
                 filePathType: "File Path",
                 files: "File",
                 folder: "Folder"
+            },
+            connectorType: {
+                connectorType: "Connector Type",
+                new: "New",
+                legacy: "Legacy"
             },
 			authenticationType: {
                 authenticationType: "Authentication Type",
@@ -7484,7 +7501,6 @@
 				andText: " and ",
 				preparingDashboard: "Preparing dashboard",
 				preparingDatasource: "Preparing data source (",
-				errorText: "A dashboard with the same name already exists in the category",
 				mappingDsContent1: "The configured data source is used in following dashboards.",
 				mappingDsContent2: "Do you want to apply the configuration done to all the dashboards?",
 				mappingDsDialogTitle: "Configured Data Source",
@@ -7514,12 +7530,13 @@
 				backText: "Back",
 				RemoveText: "Remove",
 				yesButtonText: "Yes",
-				replaceDsText: "The data source {0} will be updated.",
+				replaceDsText: "The {0} data source will replace the {1} data source.",
 				replaceDsDialogHeaderText: "Rename datasource",
 				replaceDsIconTitle: "Edit name and description",
-				replaceDashboardContent: "The dashboard {0} will be updated.",
-				overWrite: "Update",
-                existingDashboardContent: "A dashboard with the same name already exists in the category",
+				replaceDashboardContent: "The {0} dashboard will replace the {1} dashboard.",
+				replaceText: "Replace",
+                existingDashboardContent: "A dashboard with the same name already exists in this category. Please change the dashboard name or choose to replace the existing dashboard.",
+                existingDataSourceContent: "A data source with the same name already exists in the server. Please change the data source name or choose to replace the existing data source.",
 				uploadingProgressText: "Uploading in progress. Please wait for the upload to complete or you can remove the uploading item to continue.",
                 invalidColumnText: "Columns:",
                 differentCategoryText: "{0} different categories",
@@ -7543,6 +7560,7 @@
 				onlySchemaErrorText2: "Alternatively, you can resolve this by configuring these datasources individually from the configuration window.",
 				otherDsErrorText: "You can resolve other errors by configuring these datasources individually from the configuration window.",
 				schemaDsNoteText: "Note:",
+                renameUpdateText: "Rename/Update",
             },
 			qandawidget:{
 				dialogTitle: "Provide Additional Feedback",
@@ -7561,7 +7579,8 @@
                 errorContent2: ", and try again by reframing the question. To see the error details, ",
 				feedbackNote: "Note: ",
 				feedbackEmailSettings: "Email settings",
-                feedbackNeedsToConfigure: " need to be configured for sending these details."
+                feedbackNeedsToConfigure: " need to be configured for sending these details.",
+                descriptionContent: "The Q&A widget, powered by OpenAI, involves sending your data schema and the question for NLP analysis. Your data privacy and security are paramount. Use of the Q&A widget strictly adheres to our Privacy Policy."
 			},
 		    replaceValues: { 
 				applyBtnText: "Apply",

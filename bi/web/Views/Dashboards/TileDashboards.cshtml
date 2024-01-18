@@ -32,6 +32,56 @@
     var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
     bool hideDashboardInfoSection = samePagePreview ? hideAuthorName && hideCategoryName : hideAuthorName && hideCategoryName && hideModifiedDate;
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var itemAddPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Dashboard;
+    var canCreateCategory = itemAddPermissions[ItemType.Category];
+    var hacCreateDataSourcePermission = itemAddPermissions.ContainsKey(ItemType.Datasource) && itemAddPermissions[ItemType.Datasource];
+    var itemsPartialScript = string.Empty;
+}
+
+<environment include="Development,CloudDevelopment">
+    @{
+        itemsPartialScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/items-partial-page.js");
+    }
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    @{
+        itemsPartialScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/items-partial-page.min.js");
+    }
+</environment>
+@section scripts{
+    <script>
+        var partialViewsUrl = @Json.Serialize(partialViewsUrl);
+        var itemsPartialScript = @Json.Serialize(itemsPartialScript);
+        var isMobile = @Json.Serialize(isMobile);
+        var buildVersion = "@ServerAppConfig.ProductVersion";
+        $(function () {
+            $.ajax({
+                type: "GET",
+                url: partialViewsUrl,
+                async: true,
+                success: function (response) {
+                    $('#server-app-container #content-area').append(response);
+
+                    var preloadLink = document.createElement("script");
+                    preloadLink.type = "text/javascript";
+                    preloadLink.src = itemsPartialScript;
+                    document.head.appendChild(preloadLink);
+
+                    var preloadLink1 = document.createElement("script");
+                    preloadLink1.type = "text/javascript";
+                    preloadLink1.src = createSlideshowScript;
+                    document.head.appendChild(preloadLink1);
+                    
+                    var preloadLink2 = document.createElement("script");
+                    preloadLink2.type = "text/javascript";
+                    preloadLink2.src = itemActionScript;
+                    document.head.appendChild(preloadLink2);
+
+                },
+            });
+        });
+    </script>
 }
 
 @section MainSection{
@@ -42,33 +92,6 @@
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tile-dashboards-page.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.min.js"></script>
-    </environment>
-
-    <environment include="Development,CloudDevelopment">
-        <script>
-            var createItemMenuStyle = "@dashboardServerResourceUrl/cdn/css/create-item-menu.css?v=@ServerAppConfig.ProductVersion";
-            var addSampleItemStyle = "@dashboardServerResourceUrl/cdn/css/addsampleitem.css?v=@ServerAppConfig.ProductVersion";
-            var addCategoryStyle = "@dashboardServerResourceUrl/cdn/css/add-category.css?v=@ServerAppConfig.ProductVersion";
-            var publishDashboardStyle = "@dashboardServerResourceUrl/cdn/css/publish-dashboard.css?v=@ServerAppConfig.ProductVersion";
-            var dashboardSecurityStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-security.css?v=@ServerAppConfig.ProductVersion";
-            var itemVersionStyle = "@dashboardServerResourceUrl/cdn/css/itemversion.css?v=@ServerAppConfig.ProductVersion";
-            var createSlideshowStyle = "@dashboardServerResourceUrl/cdn/css/create-slideshow.css?v=@ServerAppConfig.ProductVersion";
-            var createDashboardStyle = "@dashboardServerResourceUrl/cdn/css/create-dashboard.css?v=@ServerAppConfig.ProductVersion";
-            var dashboardFeedbackStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css?v=@ServerAppConfig.ProductVersion";
-        </script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script>
-            var createItemMenuStyle = "@dashboardServerResourceUrl/cdn/css/create-item-menu.min.css?v=@ServerAppConfig.ProductVersion" ;
-            var addSampleItemStyle = "@dashboardServerResourceUrl/cdn/css/addsampleitem.min.css?v=@ServerAppConfig.ProductVersion";
-            var addCategoryStyle = "@dashboardServerResourceUrl/cdn/css/add-category.min.css?v=@ServerAppConfig.ProductVersion";
-            var publishDashboardStyle = "@dashboardServerResourceUrl/cdn/css/publish-dashboard.min.css?v=@ServerAppConfig.ProductVersion";
-            var dashboardSecurityStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-security.min.css?v=@ServerAppConfig.ProductVersion";
-            var itemVersionStyle = "@dashboardServerResourceUrl/cdn/css/itemversion.min.css?v=@ServerAppConfig.ProductVersion";
-            var createSlideshowStyle = "@dashboardServerResourceUrl/cdn/css/create-slideshow.min.css?v=@ServerAppConfig.ProductVersion";
-            var createDashboardStyle = "@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css?v=@ServerAppConfig.ProductVersion";
-            var dashboardFeedbackStyle = "@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css?v=@ServerAppConfig.ProductVersion";
-        </script>
     </environment>
 
     <script>
@@ -129,6 +152,10 @@
         var dashboardItemCount = "@itemsCount[ItemType.Dashboard]";
         var sortOption = [{ "Name": '@customSortName', "Direction": '@customSortDirection' }];
         var enableSameTabLinkTarget = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+
+        var canCreateCategory = @Json.Serialize(canCreateCategory);
+        var hacCreateDataSourcePermission = "@hacCreateDataSourcePermission"
+        var copyItemType = "@Convert.ToInt32(ItemType.Dashboard)";
     </script>
     @if (samePagePreview && !isMobile)
     {
@@ -1100,14 +1127,11 @@
     @if (!isMobile)
     {
         @await Html.PartialAsync("../Items/_AddItems")
-        @await Html.PartialAsync("../Items/_ItemVersion")
         @await Html.PartialAsync("../Items/_SharePermission")
-        @await Html.PartialAsync("../Items/_DashboardSecurity")
         @await Html.PartialAsync("../Items/_PublishDashboard")
         @await Html.PartialAsync("../Items/_GetExternalSites")
-        @await Html.PartialAsync("../Items/_MoveItem")
     }
-            @await Html.PartialAsync("../Items/_CopyItem")
+
     @if (samePagePreview && !isMobile)
     {
         @await Html.PartialAsync("_DashboardIframe")

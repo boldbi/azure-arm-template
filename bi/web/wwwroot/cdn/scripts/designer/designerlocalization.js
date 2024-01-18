@@ -414,7 +414,8 @@ var Designer = {
                     excelExportText: "Allow Excel Export",
                     imageExportText: "Allow Image Export",
                     pdfExportText: "Allow PDF Export",
-                    hiddenColumnExportText: "Include Hidden Columns"
+                    hiddenColumnExportText: "Include Hidden Columns",
+					pagesizeToolTip: "If the page size option is not chosen in the drop-down menu, then all of the options are taken into consideration when exporting PDFs."
                 },
 				viewDataActions: {
                     allowViewDataExporting: "Allow Exporting",
@@ -933,6 +934,7 @@ var Designer = {
                 prestoText: "Presto",
                 mysqlText: "MySQL",
                 postgresqlText: "PostgreSQL",
+				apacheDorisText: "Apache Doris",
                 amazonRDSOracleText: "Oracle",
                 amazonRDSMariaDBText: "MariaDB",
                 amazonRDSAmazonAuroraMySQLText: "Amazon Aurora MySQL",
@@ -1090,6 +1092,7 @@ var Designer = {
                 servernametooltipinfo: "To allow the database server to create the data source, white list the IP addresses of Bold BI cloud servers from this ",
 				impersonateInfo: "While using Windows AD login in Bold BI you can impersonate the logged-in user while processing the data from ",
 				enableImpersonate: "Impersonate User",
+				type: "Type",
                 dataSourceType: {
                     file: "File",
                     excel: "Excel",
@@ -1125,6 +1128,8 @@ var Designer = {
                     postgres: "PostgreSQL",
                     redshift: "Amazon Redshift",
 					rockSet: "Rockset",
+					bolddatastore : "Bold Data Store",
+					apacheDoris: "Apache Doris",
                     influxdb: "InfluxDB",
                     amazonRDS: "Amazon RDS",
                     amazonRDSSqlServer: "AmazonRDSSqlServer",

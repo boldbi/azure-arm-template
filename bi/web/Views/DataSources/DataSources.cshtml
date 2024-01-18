@@ -9,6 +9,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
     var pageDescription = T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."];
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Datasource;
 }
 
 @model List<ItemDetail>
@@ -35,12 +36,27 @@
 }
 
 @section scripts{
-
+    <script>
+        var partialViewsUrl = @Json.Serialize(partialViewsUrl);
+        var isMobile = @Json.Serialize(isMobile)
+        var buildVersion = "@ServerAppConfig.ProductVersion";
+        $(function () {
+            $.ajax({
+                type: "GET",
+                url: partialViewsUrl,
+                async: true,
+                success: function (response) {
+                    $('#server-app-container #content-area').append(response);
+                },
+            });
+        });
+    </script>
     <script>
         var refreshHistory = "@ViewBag.RefreshHistory";
         var refreshHistoryItemName = "@ViewBag.ItemName";
         var refreshHistoryItemId = "@ViewBag.ItemId";
         var refreshHistoryItemType = "@Convert.ToInt32(ItemType.Datasource)";
+        var copyItemType = "@Convert.ToInt32(ItemType.Datasource)";
     </script>
     @if (!isMobile)
     {
@@ -135,6 +151,9 @@
                             @await Html.PartialAsync("../Items/_ItemsGrid", new ViewDataDictionary(ViewData) { { "gridName", "datasources" }, { "Permissions", @itemPermissions }, { "SearchQuery", ViewBag.FilterKey } })
                         </div>
                     </div>
+                    <div class="view-linked-dashboards col-lg-12">
+                        <div id="view-linked" class="dashboard-linked-view"><span class="su su-view-linked-dashboard"> </span> - @T["Total dashboards linked with the data source"]</div>
+                    </div>
                 }
                 else
                 {
@@ -173,7 +192,6 @@
     @if (!isMobile)
     {
         @await Html.PartialAsync("../Items/_AddItems")
-        @await Html.PartialAsync("../Items/_ItemVersion")
         @await Html.PartialAsync("../Items/_SharePermission")
         @await Html.PartialAsync("../Scheduler/_DataSourceScheduleHistory")
     }
