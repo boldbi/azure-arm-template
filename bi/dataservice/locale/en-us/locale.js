@@ -2640,7 +2640,7 @@
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
 				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
-				joinMessagePostgreSql: "PostgreSQL does not support the not equal operator in the FULL OUTER JOIN.",
+				joinMessagePostgreSql: "PostgreSQL does not support the not equal, less than or equal to, or greater than or equal to operators for the FULL OUTER JOIN.",
 				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
 				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
             },
@@ -6475,7 +6475,10 @@
                 includeFutureValueText: "Include items which will be added in future.",
 				manualModeText: "Manual",
 				datasourceModeText: "Data Source",
-				userFilterQueryModeText: "Query"
+				userFilterQueryModeText: "Query",
+                UserFilterNameAlertTitle: "Empty or Name allready exist",
+                UserFilterEmptyName: "Name should not be empty please porvide an valid name",
+                UserFilterNameAllreadyExist:"The userfilter name already exists"
             },
             dataPreview: {
                 dataPreview: "Data Preview",
