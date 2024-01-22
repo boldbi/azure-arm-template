@@ -5137,7 +5137,8 @@ var Designer = {
                 validRange: "Please enter a valid range"
             },
             enableFilter: {
-                clearFilter: "Clear Filter"
+                clearFilter: "Clear Filter",
+                filterAction: "Filter"
             },
             common: {
                 all: "All",
