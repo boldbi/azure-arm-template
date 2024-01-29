@@ -7565,6 +7565,9 @@
 				otherDsErrorText: "You can resolve other errors by configuring these datasources individually from the configuration window.",
 				schemaDsNoteText: "Note:",
                 renameUpdateText: "Rename/Update",
+                noneText: "None",
+                failedText: "Failed",
+                completedText: "Completed",
             },
 			qandawidget:{
 				dialogTitle: "Provide Additional Feedback",

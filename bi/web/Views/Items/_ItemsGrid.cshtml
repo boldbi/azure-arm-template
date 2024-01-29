@@ -155,10 +155,10 @@
         <span>{{:Name}}</span>
         {{/if}}
     </div>
-       {{if LinkedDashboardsCount != 0}}
+    {{if !IsDraft}}
          <span class="su su-view-linked-dashboard"></span>
         <span class="view-count">{{:LinkedDashboardsCount}}</span>
-       {{/if}}
+    {{/if}}
     {{/if}}
 </script>
 
@@ -588,7 +588,6 @@
             allowSelection: true,
             filterSettings: filters,
             actionBegin: "fnActionBegin",
-            actionComplete: "fnActionComplete",
             rowSelecting: function (args) {
                 if (args.target.hasClass("favoriteItem")) {
                     args.cancel = true;
@@ -689,7 +688,20 @@
                     allowFiltering: false,
                     allowSorting: false
                 }
-            ]
+            ],
+            actionComplete: function (args) {
+                 var draft = args.model.currentViewData;
+                 var isDraftTrueCount = 0;
+                 
+                 for (var i = 0; i < draft.length; i++) {
+                     if (draft[i].IsDraft === true) {
+                         isDraftTrueCount++;
+                     }
+                 }
+                 if (args.model.currentViewData.length !== isDraftTrueCount) {
+                     $(".view-linked-dashboards").show();                 
+                 }
+            }
         });
 
         if (requestUrl.toLowerCase().indexOf(dataSourcePageUrl.toLowerCase()) === 0){
@@ -758,7 +770,7 @@
                 return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
             }
         });
-        
+
         $.views.converters("toLowerCase", function (name) {
             if (name != null) {
                 name = String(name).trim();
