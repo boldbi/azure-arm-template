@@ -4552,6 +4552,10 @@ var Designer = {
 				replaceValues: "Replace Values",
                 changeColumnType: "Change Column Type",
                 fiscalYearStart: "Fiscal Year Start",
+                showValueType: {
+                    capitalizeEachWord: 'Capitalize Each Word',
+                },
+                showValueAs: "Show Value As",
                 sharedTable: {
                     header: "Shared Tables",
                     info: "The tables listed below are from the data sources that you have permission to access. Any changes to this table done by the owner of the data source will be reflected here.",
@@ -4797,6 +4801,9 @@ var Designer = {
 
                     endsWithDesc: "Returns true if the given string expression ends with the specified substring expression.",
                     endsWithEx: "ENDSWITH(string_expression, substring_expression)",
+
+                    initCapDesc: "Converts the first character in each word to uppercase and the remaining characters to lowercase.",
+                    initCapEx: "INITCAP(string_expression)",
 
                     leftDesc: "Returns the specified number of characters from start of the given string expression.",
                     leftEx: "LEFT(expression, numeric_expression)",
@@ -5280,6 +5287,7 @@ var Designer = {
                     weightedScore: "Weighted Score...",
                     measureFilterDisplayName: "Filter",
                     measureFormatDisplayName: "Format...",
+                    capitalizeEachWord: "Capitalize Each Word",
                     measureFormat: "MeasureFormat",
                     sortAscending: "Sort Ascending",
                     sortDescending: "Sort Descending",
@@ -5322,7 +5330,8 @@ var Designer = {
                     noCalculation: "No calculation",
                     percentOfRowTotal: "Percent Of Row Total",
                     percentOfColumnTotal: "Percent Of Column Total",
-                    percentOfGrandTotal: "Percent Of Grand Total"
+                    percentOfGrandTotal: "Percent Of Grand Total",
+                    showDimensionAs:"Show Value As"
                 },
                 numberFilterOption: {
                     equals: "Equals",

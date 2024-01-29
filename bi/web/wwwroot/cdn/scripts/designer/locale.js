@@ -5596,10 +5596,15 @@
                     nov: "Nov",
                     dec: "Dec"
                 },
+                showValueType: 
+                {
+                    capitalizeEachWord: 'Capitalize Each Word',
+                },
                 rename: "Rename",
 				replaceValues: "Replace Values",
                 changeColumnType: "Change Column Type",
                 fiscalYearStart: "Fiscal Year Start",
+                showValueAs: "Show Value As ",
                 sharedTable: {
                     header: "Shared Tables",
                     info: "The tables listed below are from the data sources that you have permission to access. Any changes to this table done by the owner of the data source will be reflected here.",
@@ -5805,6 +5810,8 @@
                     containsEx: "CONTAINS(string_expression, substring_expression)",
                     endsWithDesc: "Returns true if the given string expression ends with the specified substring expression.",
                     endsWithEx: "ENDSWITH(string_expression, substring_expression)",
+                    initCapDesc: "Converts the first character in each word to uppercase and the remaining characters to lowercase.",
+                    initCapEx: "INITCAP(string_expression)",
                     leftDesc: "Returns the specified number of characters from start of the given string expression.",
                     leftEx: "LEFT(expression, numeric_expression)",
                     lenDesc: "Returns the number of characters in the given string expression.",
@@ -6290,6 +6297,7 @@
                     weightedScore: "Weighted Score...",
                     measureFilterDisplayName: "Filter",
                     measureFormatDisplayName: "Format...",
+                    capitalizeEachWord: "Capitalize Each Word",
                     measureFormat: "MeasureFormat",
                     sortAscending: "Sort Ascending",
                     sortDescending: "Sort Descending",
@@ -6332,7 +6340,8 @@
                     noCalculation: "No calculation",
                     percentOfRowTotal: "Percent Of Row Total",
                     percentOfColumnTotal: "Percent Of Column Total",
-                    percentOfGrandTotal: "Percent Of Grand Total"
+                    percentOfGrandTotal: "Percent Of Grand Total",
+                    showDimensionAs:"Show Value As"
                 },
                 numberFilterOption: {
                     equals: "Equals",
