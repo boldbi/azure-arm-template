@@ -1972,7 +1972,8 @@ var Designer = {
                 AccessDeniedText: "Access denied for the request",
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
-				exportFailedContent: "Your export request has failed."
+				exportFailedContent: "Your export request has failed.",
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed."
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",

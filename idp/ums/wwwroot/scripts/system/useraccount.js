@@ -31,7 +31,7 @@
         rules: {
             username: {
                 isRequired: true,
-                hasWhiteSpace: false,
+                hasWhiteSpace: true,
                 isValidName: true,
                 isValidUser: true,
                 additionalSpecialCharValidation: false
@@ -39,15 +39,16 @@
             firstname: {
                 isRequired: true,
                 isValidName: true,
-                additionalSpecialCharValidation: false
+                additionalSpecialCharValidation: true
             },
             lastname: {
-                additionalSpecialCharValidation: false
+                isValidName: true,
+                additionalSpecialCharValidation: true
             },
             username: {
                 isRequired: true,
                 isValidUsernameLength: true,
-                isValidUsername: false
+                isValidUsername: true
             },
             email: {
                 isRequired: true,

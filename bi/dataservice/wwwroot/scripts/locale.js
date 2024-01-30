@@ -2486,6 +2486,7 @@
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
 				exportFailedContent: "Your export request has failed.",
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed.",
                 dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
                 etlDialogHeaderText: "Redirect to Bold ETL",
                 etlContinuebtnText: "Continue with connector"

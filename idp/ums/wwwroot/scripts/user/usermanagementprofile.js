@@ -840,7 +840,15 @@ function MakeSingleUserAdmin() {
         success: function (result) {
             hideWaitingPopup('make-admin-confirmation');
             onMakeAdminDialogClose();
-            window.location.reload();
+            setTimeout(function () {
+                window.location.reload();
+            }, 3000);
+            if (result.Status) {
+                SuccessAlert(window.Server.App.LocalizationContent.AssignRole, window.Server.App.LocalizationContent.MakeAdmin, 3000)
+            }
+            else {
+                WarningAlert(window.Server.App.LocalizationContent.AssignRole, window.Server.App.LocalizationContent.MakeAdminError, result.Message, 3000)
+            }
         }
     });
 
@@ -860,7 +868,15 @@ function removeAdmin() {
         success: function (result) {
             hideWaitingPopup("remove-admin-confirmation");
             onRemoveAdminDialogClose();
-            window.location.reload();
+            setTimeout(function () {
+                window.location.reload();
+            }, 3000);
+            if (result.Status) {
+                SuccessAlert(window.Server.App.LocalizationContent.RemoveRole, window.Server.App.LocalizationContent.RemoveAdmin, 3000)
+            }
+            else {
+                WarningAlert(window.Server.App.LocalizationContent.RemoveRole, window.Server.App.LocalizationContent.RemoveAdminError, result.Message, 3000)
+            }
         }
     });
 }
@@ -875,10 +891,14 @@ function deleteSingleUser() {
     doAjaxPost("POST", deleteSingleFromUserListUrl, "UserId=" + userId, function (data) {
         if (data.status) {
             window.location.href = userPageUrl;
+            SuccessAlert(window.Server.App.LocalizationContent.DeleteUser, window.Server.App.LocalizationContent.UserHasDeleted, 3000);
         } else {
+            WarningAlert(window.Server.App.LocalizationContent.DeleteUser, window.Server.App.LocalizationContent.FailedToDeleteUser, data.Message, 3000);
             hideWaitingPopup('singleuser-delete-confirmation');
             onSingleDeleteDialogClose();
-            window.location.reload();
+            setTimeout(function () {
+                window.location.reload();
+            }, 3000);
         }
     });
 }
