@@ -7457,6 +7457,7 @@
                 dashboardListLabelText: "DASHBOARDS LIST",
                 allLabelText: "All ",
                 uploadedLabelText: "Uploaded",
+                pendingLabelText: "Pending",
                 configuredLabelText: "Configured",
                 needAttentionLabelText: "Needs Attention",
                 categoryLabelText: "Category",
