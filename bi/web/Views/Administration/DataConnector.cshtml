@@ -15,12 +15,15 @@
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var pageDescription = T["Configure any number of connections for your applications by choosing connectors from the list below."];
     var pageHeader = T["Data connectors Configuration"];
+    var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
+    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
 }
 
 @section meta{
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="user:is_admin" content="@isAdmin.ToString()" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="etl_service:url" content="@navigateETLUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="intermediatedbstatus" content="@ViewBag.IntermediateDbStatus" />
 }

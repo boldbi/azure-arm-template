@@ -415,7 +415,15 @@ function registerApplication(isSimpleMode) {
             isSimpleMode: isSimpleMode,
         },
         success: function (setSystemSettingsResponse) {
-            window.location = setSystemSettingsResponse.redirectUrl;
+            if (setSystemSettingsResponse.redirectUrl != null) {
+                window.location = setSystemSettingsResponse.redirectUrl;
+            }
+            else {
+                $(".progressBar-container").hide();
+                $(".deployment-status").hide();
+                $(".deployment-error").show();
+                document.getElementById("error-display").innerHTML = setSystemSettingsResponse.error;
+            }
         },
         error: function (setSystemSettingsResponse) {
 

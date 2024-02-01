@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 7.3.3
+*  version : 7.3.4
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -15972,7 +15972,7 @@
                 if (this.text) this.text.html(text);
                 else {
                     this.text = BoldBIDashboard.buildTag("div.e-progress-txt", text);
-                    this.element.append(this.text);
+                    this.text.appendTo(this.element.find(".e-progress"));
                     this._setTop();
                 }
             }

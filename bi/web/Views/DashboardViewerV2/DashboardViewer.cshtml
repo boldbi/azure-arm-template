@@ -57,6 +57,8 @@
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
+    var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
+    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -84,6 +86,7 @@
     <meta name="designer_service:url" content="@dataServiceUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="data_service:url" content="@dataServiceUrl" />
+    <meta name="etl_service:url" content="@navigateETLUrl" />
     <meta name="data_service_host:url" content="@dataServiceUrl.TrimEnd('/')" />
     <meta name="dashboard:version" content="@ViewBag.Version" />
     <meta name="dashboard:id" content="@ViewBag.ItemId" />

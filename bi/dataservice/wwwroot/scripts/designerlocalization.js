@@ -439,6 +439,7 @@ var Designer = {
                     chartType: "Chart Type",
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
+                    enableZooming:"Enable Zooming",
                     showLegend: "Show Legend",
                     interactivity: "Interactivity",
 					showLegendTitle: "Show Title",

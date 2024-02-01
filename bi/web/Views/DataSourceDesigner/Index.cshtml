@@ -51,6 +51,8 @@
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isDataSourceConnection = string.Empty;
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
+    var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
+    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     if((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature)
     { 
         isDataSourceConnection = ViewBag.isDataSourceConnection;
@@ -79,6 +81,7 @@
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="site_identifier:url" content="@siteUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="etl_service:url" content="@navigateETLUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="data_service:url" content="@designerServiceUrl" />
     <meta name="datasource_schedule:url" content="@Url.Action("GetRecurrenceTypeView", "DataSources")" />
