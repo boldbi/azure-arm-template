@@ -10,6 +10,7 @@
     ViewBag.BackIconRedirectionUrl = Url.Action("DataSources", "DataSources");
     ViewBag.BackIconTitle = T["DataSources"];
     var pageHeader = T["Dependent Dashboards"];
+    var userId = _identityResponse.User.UserId;
 }
 @model List<ItemDetail>
 @section styles{
@@ -46,7 +47,14 @@
         var viewLinkedDashboardsURL = "@Url.Action("GetLinkedDashboards", "Dashboards")";
     </script>
     <script type="text/x-jsrender" id="item-name-template">
-        <a class="item-name grid-content" title="{{:Name}}" data-toggle="tooltip" href="@Url.Action("Dashboards", "Dashboards")/{{:Id}}/{{:CategoryName}}/{{:Name}}" target="_blank">{{:Name}}</a>
+        <div class="dashboard-name grid-content">
+        {{if IsUnlisted && CreatedById != (@userId)}}
+        <span class="datasource-name">{{:Name}}</span>
+        <span class="badge badge-secondary1 badge-secondary2">@T["Unlisted"]</span>
+        {{else}}
+        <span><a title="{{:Name}}" data-toggle="tooltip" href="@Url.Action("Dashboards", "Dashboards")/{{:Id}}/{{:CategoryName}}/{{:Name}}" target="_blank">{{:Name}}</a></span>
+        {{/if}}
+        </div>
     </script>
     <script type="text/x-jsrender" id="canread-template">
         {{if CanRead}}
@@ -72,6 +80,7 @@
     </script>
 
     <script type="text/x-jsrender" id="options">
+        {{if !IsUnlisted || CreatedById == @(userId)}}
         <div class="dropdown context-menu">
             <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
                 <span class="su su-options"> </span>
@@ -92,9 +101,17 @@
                 </li>
             </ul>
         </div>
+        {{else}}
+        <div class="dropdown context-menu">
+            <span class="dropdown-toggle option-icon" data-placement="left" data-toggle="tooltip" title="@T["Action disabled for unlisted dashboard"]" >
+                <span class="su su-options disabled-icon-color"> </span>
+                 </span>
+                </div>
+                    {{/if}}
     </script>
     <script type="text/javascript">
         $(document).ready(function () {
+        $("#search-linked-dashboards").val("");
         GridLocalization();
         var dashboards = @Html.Raw(Json.Serialize(Model));
         $("#view_linked_dashboards").ejGrid({
@@ -108,13 +125,14 @@
             pageSettings: { pageSize: 20 },
             filterSettings: { filterType: "menu" },
             selectionSettings: { selectionMode: ["row"] },
+            searchSettings: { fields: ["Name", "CategoryName", "CreatedByDisplayName"], key: "" },
             enableRowHover: true,
             enableAltRow: false,
             rowDataBound: function () {
-                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body'), trigger: 'hover' });
             },
             dataBound: function () {
-                    $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+                    $('[data-toggle="tooltip"]').tooltip({ container: $('body'), trigger: 'hover' });
             },
             actionBegin: "fnActionBegin",
             actionComplete: "fnActionComplete",

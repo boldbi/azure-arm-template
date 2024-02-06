@@ -20,11 +20,13 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
     var dataSourcePageUrl = Url.Action("DataSources", "DataSources");
+    var partialViewsPageUrl = Url.Action("LoadPartialViews", "PartialView");
 }
 
 <script>
-    var requestUrl = @Json.Serialize(requestUrl);
+    var requestedUrl = @Json.Serialize(requestUrl);
     var dataSourcePageUrl = @Json.Serialize(dataSourcePageUrl);
+    var partialViewsPageUrl = @Json.Serialize(partialViewsPageUrl);
     var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
     var moveIframeUrl = "@Url.Action("moveviewitem", "items")";
     var versionIframeUrl = "@Url.Action("itemversion", "items")";
@@ -155,10 +157,10 @@
         <span>{{:Name}}</span>
         {{/if}}
     </div>
-       {{if LinkedDashboardsCount != 0}}
+    {{if !IsDraft}}
          <span class="su su-view-linked-dashboard"></span>
         <span class="view-count">{{:LinkedDashboardsCount}}</span>
-       {{/if}}
+    {{/if}}
     {{/if}}
 </script>
 
@@ -692,7 +694,7 @@
             ]
         });
 
-        if (requestUrl.toLowerCase().indexOf(dataSourcePageUrl.toLowerCase()) === 0){
+        if (requestedUrl.toLowerCase().indexOf(dataSourcePageUrl.toLowerCase()) === 0) {
 
             var preloadStyles = [];
             preloadStyles.push(publishDashboardStyle);
@@ -758,7 +760,7 @@
                 return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
             }
         });
-        
+
         $.views.converters("toLowerCase", function (name) {
             if (name != null) {
                 name = String(name).trim();

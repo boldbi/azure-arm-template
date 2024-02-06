@@ -38,10 +38,15 @@ $(document).ready(function () {
             "custom-attribute-name": {
                 isRequired: true,
                 isValidName: true,
-                isAttributeExist: true
+                isAttributeExist: true,
+                maxlength: 255
             },
             "custom-attribute-value": {
-                isRequired: true
+                isRequired: true,
+                maxlength: 4000
+            },
+            "custom-attribute-description": {
+                maxlength: 1024
             }
         },
         highlight: function (element) {
@@ -58,10 +63,15 @@ $(document).ready(function () {
         },
         messages: {
             "custom-attribute-name": {
-                isRequired: window.Server.App.LocalizationContent.AttributeNameValidator
+                isRequired: window.Server.App.LocalizationContent.AttributeNameValidator,
+                maxlength: window.Server.App.LocalizationContent.AttributeLengthValidator.format("name","255")
             },
             "custom-attribute-value": {
-                isRequired: window.Server.App.LocalizationContent.AttributeValueValidator
+                isRequired: window.Server.App.LocalizationContent.AttributeValueValidator,
+                maxlength: window.Server.App.LocalizationContent.AttributeLengthValidator.format("value", "4000")
+            },
+            "custom-attribute-description": {
+                maxlength: window.Server.App.LocalizationContent.AttributeLengthValidator.format("description", "1024")
             }
         }
     });
@@ -77,6 +87,10 @@ $(document).ready(function () {
     $.validator.addMethod("isAttributeExist", function (value, element) {
         return isAttributeExist(value);
     }, window.Server.App.LocalizationContent.IsAttributeNameExist);
+
+    $.validator.addMethod("ismaxlength", function (value, element, params) {
+        return value.length <= params;
+    }, window.Server.App.LocalizationContent.AttributeLengthValidator);
 });
 
 function isAttributeExist() {

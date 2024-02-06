@@ -56,6 +56,8 @@
     var canCreateDatasource = permissions[ItemType.Datasource];
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
+    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
 
     Context.Response.Cookies.Append(ServerAppConfig.DesignerLanguageCookieName, ViewBag.Culture, new CookieOptions()
     {
@@ -100,6 +102,7 @@
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="etl_service:url" content="@navigateETLUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="data_service:url" content="@designerServiceUrl" />
     <meta name="datasource_schedule:url" content="@Url.Action("GetRecurrenceTypeView", "DataSources")" />

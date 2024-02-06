@@ -15,6 +15,8 @@
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var isEmbed = ViewBag.IsEmbed == null ? "false" : ViewBag.IsEmbed;
     var hasSettingsPagePermissionFlag = (isAdmin || granularPermissions[SettingsScopes.All]);
+    var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
+    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     if (ServerAppConfig.IsSelfHosted)
     {
         hasSettingsPagePermissionFlag = hasSettingsPagePermissionFlag || granularPermissions[SettingsScopes.Connectors];
@@ -43,6 +45,7 @@
     <meta name="viewport" content="width=device-width" />
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="site_identifier:url" content="@siteUrl" />
+    <meta name="etl_service:url" content="@navigateETLUrl" />
     <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />

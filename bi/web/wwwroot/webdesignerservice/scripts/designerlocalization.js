@@ -439,6 +439,7 @@ var Designer = {
                     chartType: "Chart Type",
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
+                    enableZooming:"Enable Zooming",
                     showLegend: "Show Legend",
                     interactivity: "Interactivity",
 					showLegendTitle: "Show Title",
@@ -1972,7 +1973,8 @@ var Designer = {
                 AccessDeniedText: "Access denied for the request",
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
-				exportFailedContent: "Your export request has failed."
+				exportFailedContent: "Your export request has failed.",
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed."
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
@@ -2116,7 +2118,7 @@ var Designer = {
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
                 joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
-				joinMessagePostgreSql: "PostgreSQL does not support the not equal operator in the FULL OUTER JOIN.",
+				joinMessagePostgreSql: "PostgreSQL does not support the not equal, less than or equal to, or greater than or equal to operators for the FULL OUTER JOIN.",
                 joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
 				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
             },
@@ -4552,6 +4554,10 @@ var Designer = {
 				replaceValues: "Replace Values",
                 changeColumnType: "Change Column Type",
                 fiscalYearStart: "Fiscal Year Start",
+                showValueType: {
+                    capitalizeEachWord: 'Capitalize Each Word',
+                },
+                showValueAs: "Show Value As",
                 sharedTable: {
                     header: "Shared Tables",
                     info: "The tables listed below are from the data sources that you have permission to access. Any changes to this table done by the owner of the data source will be reflected here.",
@@ -4797,6 +4803,9 @@ var Designer = {
 
                     endsWithDesc: "Returns true if the given string expression ends with the specified substring expression.",
                     endsWithEx: "ENDSWITH(string_expression, substring_expression)",
+
+                    initCapDesc: "Converts the first character in each word to uppercase and the remaining characters to lowercase.",
+                    initCapEx: "INITCAP(string_expression)",
 
                     leftDesc: "Returns the specified number of characters from start of the given string expression.",
                     leftEx: "LEFT(expression, numeric_expression)",
@@ -5137,7 +5146,8 @@ var Designer = {
                 validRange: "Please enter a valid range"
             },
             enableFilter: {
-                clearFilter: "Clear Filter"
+                clearFilter: "Clear Filter",
+                filterAction: "Filter"
             },
             common: {
                 all: "All",
@@ -5279,6 +5289,7 @@ var Designer = {
                     weightedScore: "Weighted Score...",
                     measureFilterDisplayName: "Filter",
                     measureFormatDisplayName: "Format...",
+                    capitalizeEachWord: "Capitalize Each Word",
                     measureFormat: "MeasureFormat",
                     sortAscending: "Sort Ascending",
                     sortDescending: "Sort Descending",
@@ -5321,7 +5332,8 @@ var Designer = {
                     noCalculation: "No calculation",
                     percentOfRowTotal: "Percent Of Row Total",
                     percentOfColumnTotal: "Percent Of Column Total",
-                    percentOfGrandTotal: "Percent Of Grand Total"
+                    percentOfGrandTotal: "Percent Of Grand Total",
+                    showDimensionAs:"Show Value As"
                 },
                 numberFilterOption: {
                     equals: "Equals",
@@ -5455,7 +5467,10 @@ var Designer = {
 				mapped:"Mapped",
 				unMapped:"Unmapped",
 				checked:"Checked",
-				unChecked: "Unchecked"
+				unChecked: "Unchecked",
+                UserFilterNameAlertTitle: "Empty or Name allready exist",
+                UserFilterEmptyName: "Name should not be empty please porvide an valid name",
+                UserFilterNameAllreadyExist:"The userfilter name already exists"
             },
             dataPreview: {
                 dataPreview: "Data Preview",

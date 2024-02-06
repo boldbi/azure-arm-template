@@ -1,8 +1,12 @@
-﻿@using Syncfusion.Server.Base;
+﻿@using Microsoft.AspNetCore.Http;
+@using Syncfusion.Server.Base;
 
 @{
     Layout = null;
     var imageHelper = new ImageHelper();
+    var errormessage = Context.Items["ErrorMessage"] as string;
+    var errorstacktrace = Context.Items["ErrorStackTrace"] as string;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
 }
 <!DOCTYPE html>
 <html>
@@ -12,6 +16,7 @@
     @await Html.PartialAsync("../Shared/_FontReference")
     @await Html.PartialAsync("../Shared/_ThemeReference")
     <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+    <script src="~/bundles/js/error.js" asp-append-version="true"></script>
 </head>
 <body class="error-full-content">
     <div class="error-page-outer">
@@ -25,13 +30,25 @@
                 <div class="error-type">@T["Database connection error"]</div>
                 <div class="error-text">
                     @T["Sorry! Server has encountered error while establishing the connection to application database. This error could be occurred due to below possible causes:"]
-
-                    <ul class="list-style">
-                        <li>@T["The database server might have been down."]</li>
-                        <li>@T["The login credentials for the database might have been changed."]</li>
-                        <li>@T["The database might have been corrupted."]</li>
-                    </ul>
                 </div>
+                @if (!string.IsNullOrWhiteSpace(errormessage))
+                {
+                    @if (GlobalAppSettings.SystemSettings.ShowStackTrace || isAdmin)
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@errormessage
+                                @T["ErrorStacktrace"]:@errorstacktrace</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@errormessage</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                }
             </div>
         </div>
     </div>

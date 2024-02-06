@@ -337,20 +337,20 @@ function fnbeforeDataBound(args) {
 function fnOnUserRowSelected(args) {
     var usergrid = document.getElementById('user_grid').ej2_instances[0];
     var selectedUsers = usergrid.getSelectedRecords();
-    if (usergrid.getSelectedRecords().length == 1 || usergrid.getSelectedRecords().length > 1) {
-        if (selectedUsers.some(x => x.Role == "Admin")) {
-            $("#assign-user-role-button").attr("disabled", true);
+    var hasSelectedUsers = selectedUsers.length > 0;
+    var isAdminSelected = selectedUsers.some(x => x.Role == "Admin");
+    var isInactiveSelected = selectedUsers.some(x => x.UserStatus == "InActive");
+    $("#assign-user-role-button, #grant-user-button").attr("disabled", true);
+    if (hasSelectedUsers) {
+        if (isAdminSelected) {
+            $("#grant-user-button").attr("disabled", false);
+        } else {
+            $("#grant-user-button, #assign-user-role-button").attr("disabled", false);
         }
-        else {
-            $("#assign-user-role-button").attr("disabled", false);
-        }
-    }
 
-    if (usergrid.getSelectedRecords().length == 1 || usergrid.getSelectedRecords().length > 1) {
-        $("#grant-user-button").attr("disabled", false);
-    }
-    else {
-        $("#grant-user-button, #assign-user-role-button").attr("disabled", true);
+        if (isInactiveSelected) {
+            $("#assign-user-role-button, #grant-user-button").attr("disabled", true);
+        }
     }
 }
 

@@ -4,6 +4,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardExportScheduleFailure);
     var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -32,34 +33,51 @@
 </head>
 <body>
     <div class="col-sm-12 col-xs-12 no-padding subscribe-popup-body" id="subscribers-panel">
+
         <div class="col-sm-12 col-xs-12 bottom-margin no-padding">
-            <div id="user-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
-                <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Users"]" data-hide-disabled="true" multiple="" data-actions-box="true"></select>
+            <div id="user-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields"
+                 data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? T["You cannot add users to the recipients before configuring the email settings."] : "")">
+                <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Users"]" data-hide-disabled="true" multiple="" data-actions-box="true" @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
+                </select>
             </div>
-            <div id="group-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields">
-                <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Groups"]" data-hide-disabled="true" multiple="" data-actions-box="true"></select>
+
+            <div id="group-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields"
+                 data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? T["You cannot add groups to the recipients before configuring the email settings."] : "")">
+                <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Groups"]" data-hide-disabled="true" multiple="" data-actions-box="true"
+                @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
+                </select>
             </div>
             <form id="email-form" class="col-sm-4 col-xs-4 no-margin">
-                <div class="inner-addon right-addon has-feedback">
-                    <input id="external-email" type="text" class="form-control" placeholder="@T["External Recipients (Email address)"]">
+                <div class="inner-addon right-addon has-feedback"
+                     data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? T["You cannot add External User to the recipients before configuring the email settings."] : "")">
+                    <input id="external-email"
+                    @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled='disabled'" : "")
+                           type="text" class="form-control" placeholder="@T["External Recipients (Email address)"]">
                     <span id="external-submit" class="su-add form-control-feedback" title="@T["Add external recipients"]"></span>
                 </div>
                 <span id="external-email-validation" class="alertMessages"></span>
             </form>
         </div>
+
         <div class="col-xs-12 col-sm-12 no-padding" id="selected-users-container">
             <div class="col-xs-8 col-sm-8 selected-recipients" id="selected-users"></div>
             <div id="selected-users-info" class="col-xs-4 col-sm-4 no-margin i-search-fields"></div>
+
+            
             <div id="failure-notification" class="col-xs-4 col-sm-4 no-margin">
                 <div id="enable-checkbox">
-                    @Html.CheckBox("enable-notification-to-owner", new { @class = "material-checkbox", @id = "enable-notification-to-owner" })
+                    @Html.CheckBox("enable-notification-to-owner",
+                    string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? new { @class = "material-checkbox", @id = "enable-notification-to-owner", @disabled = "disabled" } : new { @class = "material-checkbox", @id = "enable-notification-to-owner" })
                     @Html.Label("enable-notification-to-owner", T["Send failure notification to schedule owner"].Value)
                 </div>
                 <div id="enable-checkbox">
-                    @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox", @id = "enable-notification-to-recipient" })
+                    @Html.CheckBox("enable-notification-to-recipient",
+                    string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? new { @class = "material-checkbox", @id = "enable-notification-to-recipient", @disabled = "disabled" } : new { @class = "material-checkbox", @id = "enable-notification-to-recipient" })
                     @Html.Label("enable-notification-to-recipient", T["Send failure notification to recipient"].Value)
                 </div>
             </div>
+
+
             <div id="note-message" class="col-xs-4 col-sm-4">
                 <b>@T["Note: "]</b>
                 @(String.Format(T["The application deactivates your schedule after {0} consecutive failures."].Value, ServerAppConfig.FailureOccurrence))
@@ -91,6 +109,11 @@
                         <option value="Excel">Excel</option>
                         <option value="CSV">CSV</option>
                     </select>
+                </div>
+                <div id="show-pdf-checkbox" style="display:none;">
+                    <input type="checkbox" id="export-current-view" class="material-checkbox" checked="checked" />
+                    <input name="export-current-view" type="hidden" value="false">
+                    <label for="export-current-view" data-container="#show-pdf-checkbox">@T["Only export current view."]</label>
                 </div>
                 <div id="show-export-formats" class="col-sm-12 col-xs-12 no-padding">
                     <div id="show-image-format" class="col-xs-12 col-sm-12 no-padding no-margin" style="display:none;">
@@ -219,7 +242,7 @@
                 </div>
                 <div class="webhook-location-div hide">
                     <div class="report-name no-padding col-xs-12 link-item-name ellipsis" style="font-size: 12px;">
-                        @T["Please select an existing webhook or create new a webhook and refresh the dropdown."]
+                        @T["Please select an existing webhook or create a new webhook and refresh the dropdown."]
                     </div>
                     <div class="col-sm-12 col-xs-12 no-padding webhook-form-container">
                         <div class="col-sm-6 col-xs-6 select-webhook-div">

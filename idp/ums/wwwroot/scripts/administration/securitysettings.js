@@ -4,12 +4,14 @@ var fontSrcChipData = [];
 var imgSrcChipData = [];
 var connectSrcChipData = [];
 var frameSrcChipData = [];
+var frameAncChipData = [];
 var isStyleSrcChipBinded = false;
 var isScriptSrcsChipBinded = false;
 var isFontSrcChipBinded = false;
 var isImgSrcChipBinded = false;
 var isConnectSrcChipBinded = false;
 var isFrameSrcChipBinded = false;
+var isFrameAncChipBinded = false;
 $(document).ready(function () {
     var numericBox = new ejs.inputs.NumericTextBox({
         cssClass: 'e-outline e-custom',
@@ -70,6 +72,15 @@ $(document).ready(function () {
             frameSrcChipData[i] = frameSourcesList[i];
             if (frameSrcChipData[i].length != 0) {
                 srcChipConversion(frameSrcChipData, "frame-src-chip-content", "#txt-framesrc");
+            }
+        }
+    }
+
+    if (frameAncestorList != null && frameAncestorList != "") {
+        for (i = 0; i < frameAncestorList.length; i++) {
+            frameAncChipData[i] = frameAncestorList[i];
+            if (frameAncChipData[i].length != 0) {
+                srcChipConversion(frameAncChipData, "frame-anc-chip-content", "#txt-frameanc");
             }
         }
     }
@@ -332,7 +343,7 @@ function diableOrEnableCSPSettingsForm() {
     }
     else {
         $(".txt-input-src").val("");
-        $(".style-src-validation .script-src-validation .font-src-validation .img-src-validation .connect-src-validation .frame-src-validation").html("");
+        $(".style-src-validation .script-src-validation .font-src-validation .img-src-validation .connect-src-validation .frame-src-validation .frame-anc-validation").html("");
         $(".src-input-class").addClass("src-disabled");
         $(".src-input-class .src-input-ship .e-chip").addClass("disable-bg-color");
         $(".txt-input-src").prop('disabled', true);
@@ -342,12 +353,17 @@ function diableOrEnableCSPSettingsForm() {
         getSrcInstance("img-src-chip-content");
         getSrcInstance("connect-src-chip-content");
         getSrcInstance("frame-src-chip-content");
+
+        getSrcInstance("frame-anc-chip-content"); 
+
         styleSrcChipData = [];
         scriptSrcChipData = [];
         fontSrcChipData = [];
         imgSrcChipData = [];
         connectSrcChipData = [];
         frameSrcChipData = [];
+
+        frameAncChipData = []; 
     }
 }
 
@@ -370,6 +386,11 @@ $(document).on("focusin", ".txt-input-src", function (e) {
     else if (e.target.id == "txt-framesrc") {
         $("#frame-src-content").addClass("focused");
     }
+
+    else if (e.target.id == "txt-frameanc") {
+        $("#frame-anc-content").addClass("focused");
+    }
+
 });
 
 $(".txt-input-src").focusout(function (e) {
@@ -415,6 +436,15 @@ $(".txt-input-src").focusout(function (e) {
             objectConvertAsSrcDirectiveChip(frameSrcNames, targetId);
         }
         $("#frame-src-content").removeClass("focused");
+    }
+
+
+    else if (targetId == "txt-frameanc") {
+        var frameAncNames = $("#txt-frameanc").val() + ",";
+        if (frameAncNames.length > 1) {
+            objectConvertAsSrcDirectiveChip(frameAncNames, targetId);
+        }
+        $("#frame-anc-content").removeClass("focused");
     }
 
 });
@@ -523,18 +553,18 @@ $(document).on("keyup", "#frame-src-content", function (e) {
     }
 });
 
-$(document).on("keyup", "#frame-src-content", function (e) {
-    var frameSrcInstance = document.getElementById("frame-src-chip-content").ej2_instances;
-    if (frameSrcInstance != undefined && (frameSrcInstance[0].chips == null || frameSrcInstance[0].chips == 0)) {
-        if ($("#txt-framesrc").val() == "") {
-            applySrcContainer("#txt-framesrc");
+$(document).on("keyup", "#frame-anc-content", function (e) {
+    var frameAncInstance = document.getElementById("frame-anc-chip-content").ej2_instances;
+    if (frameAncInstance != undefined && (frameAncInstance[0].chips == null || frameAncInstance[0].chips == 0)) {
+        if ($("#txt-frameanc").val() == "") {
+            applySrcContainer("#txt-frameanc");
         }
-        frameSrcInstance[0].chips = [];
+        frameAncInstance[0].chips = [];
         setTimeout(function () {
-            $("#frame-src-chip-content").html("");
+            $("#frame-anc-chip-content").html("");
         }, 100);
-    } else if (frameSrcInstance == undefined && $("#txt-framesrc").val().length == 0) {
-        applySrcContainer("#txt-framesrc");
+    } else if (frameAncInstance == undefined && $("#txt-frameanc").val().length == 0) {
+        applySrcContainer("#txt-frameanc");
     }
 });
 $(document).on("paste", "#txt-stylesrc", function (e) {
@@ -639,6 +669,23 @@ $(document).on("paste", "#txt-framesrc", function (e) {
     }
 });
 
+$(document).on("paste", "#txt-frameanc", function (e) {
+    var data = e.originalEvent.clipboardData.getData('Text').trim();
+    var content = data.split(/[\s,;\r?\n]+/);
+    if (content.length > 1) {
+        for (var i = 0; i < content.length; i++) {
+            var value = content[i];
+            if (isSrcChipAlreadyExists(value, "frame-anc-chip-content") && value != "") {
+                frameAncChipData.push(value);
+                srcChipConversion(frameAncChipData, "frame-anc-chip-content", "#txt-frameanc");
+            }
+        }
+        setTimeout(function () {
+            $("#txt-frameanc").val("");
+        }, 100);
+    }
+});
+
 function objectConvertAsSrcDirectiveChip(inputValue, id) {
     if (inputValue.endsWith(",") || inputValue.endsWith(";") || inputValue.endsWith("\n")) {
         inputValue = inputValue.slice(0, -1).trim();
@@ -687,6 +734,15 @@ function objectConvertAsSrcDirectiveChip(inputValue, id) {
                 }
                 $("#" + id).parent().next().html("");
             }
+
+            else if (id == "txt-frameanc") {
+                if (isSrcChipAlreadyExists(inputValue, "frame-anc-chip-content")) {
+                    frameAncChipData.push(inputValue);
+                    srcChipConversion(frameAncChipData, "frame-anc-chip-content", "#txt-frameanc");
+                }
+                $("#" + id).parent().next().html("");
+            }
+
         }
         else {
             $("#" + id).val(inputValue);
@@ -733,6 +789,13 @@ function ClearSettingsFields() {
     if (frameSrcInstance == undefined && $("#txt-framesrc").val().length == 0) {
         applySrcContainer("#txt-framesrc");
     }
+
+    $("#txt-frameanc").val("");
+    var frameAncInstance = document.getElementById("frame-anc-chip-content").ej2_instances;
+    if (frameAncInstance == undefined && $("#txt-frameanc").val().length == 0) {
+        applySrcContainer("#txt-frameanc");
+    }
+
 }
 
 function isSrcChipAlreadyExists(obj, chipId) {
@@ -808,6 +871,20 @@ function isSrcChipAlreadyExists(obj, chipId) {
         }
         return true;
     }
+
+    else if (chipId == "frame-anc-chip-content") {
+        var frameAncInstance = document.getElementById("frame-anc-chip-content").ej2_instances;
+        if (frameAncInstance != undefined && frameAncInstance[0].chips != 0 && frameAncInstance[0].chips != null) {
+            for (i = 0; i < frameAncInstance[0].chips.length; i++) {
+                if (frameAncInstance[0].chips[i].toLowerCase() == obj.toLowerCase()) {
+                    $("#txt-frameanc").val("");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
 
 function srcChipConversion(srcChipData, chipId, inputId) {
@@ -889,6 +966,20 @@ function srcChipConversion(srcChipData, chipId, inputId) {
         }
     }
 
+    else if (inputId == "#txt-frameanc") {
+        if (!isFrameAncChipBinded) {
+            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onFrameAncChipDelete }, '#frame-anc-chip-content');
+            isFrameAncChipBinded = true
+        } else {
+            var frameAncInstance = document.getElementById("frame-anc-chip-content").ej2_instances;
+            frameAncInstance[0].chips = [];
+            frameAncInstance[0].chips = frameAncChipData;
+            frameAncInstance[0].createChip();
+            frameAncInstance[0].refresh();
+        }
+    }
+
+
     if ($("#" + chipId).height() > 140) {
         var element = document.getElementById(chipId);
         element.scrollTop = element.scrollHeight;
@@ -962,6 +1053,18 @@ function onFrameSrcChipDelete() {
     }
 }
 
+function onFrameAncChipDelete() {
+    $("#txt-frameanc").focus();
+    setTimeout(function () {
+        $(".frame-anc-validation").html("");
+    }, 100);
+    var frameAncInstance = document.getElementById("frame-anc-chip-content").ej2_instances;
+    if (frameAncInstance[0].chips.length == 1) {
+        applySrcContainer("#txt-frameanc");
+    }
+}
+
+
 function getSrcInstance(chipId) {
     var srcInstance = document.getElementById(chipId).ej2_instances;
     if (chipId == "style-src-chip-content") {
@@ -1000,6 +1103,12 @@ function getSrcInstance(chipId) {
             applySrcContainer("#txt-framesrc");
         }
     }
+    else if (chipId == "frame-anc-chip-content") {
+        if (srcInstance != undefined) {
+            srcInstance[0].chips = [];
+            applySrcContainer("#txt-frameanc");
+        }
+    }
     $("#" + chipId).html("");
 }
 
@@ -1034,6 +1143,13 @@ function applySrcContainer(inputId) {
         $("#frame-src-chip-content").hide();
         $(".frame-src-validation").html("");
     }
+
+    else if (inputId == "#txt-frameanc") {
+        $("#txt-frameanc").css("width", "100%").attr("placeholder", window.Server.App.LocalizationContent.CspPlaceHolder);
+        $("#frame-anc-chip-content").hide();
+        $(".frame-anc-validation").html("");
+    }
+
 }
 
 function removeSrcContainer(chipId, inputId) {
@@ -1049,8 +1165,9 @@ $(document).on("click", "#update-csp-settings", function () {
     var imgSrcList = [];
     var connectSrcList = [];
     var frameSrcList = [];
+    var frameAncList = [];
 
-     if ($(".style-src-validation").text() != "" || $(".script-src-validation").text() != "" || $(".font-src-validation").text() != "" || $(".img-src-validation").text() != "" || $(".connect-src-validation").text() != "" || $(".frame-src-validation").text() != "") {
+    if ($(".style-src-validation").text() != "" || $(".script-src-validation").text() != "" || $(".font-src-validation").text() != "" || $(".img-src-validation").text() != "" || $(".connect-src-validation").text() != "" || $(".frame-src-validation").text() != "" || $(".frame-anc-validation").text() != "") {
         return;
     }
 
@@ -1102,6 +1219,16 @@ $(document).on("click", "#update-csp-settings", function () {
         }
     }
 
+
+    var frameAncInstance = document.getElementById("frame-anc-chip-content").ej2_instances;
+    if (frameAncInstance != undefined) {
+        frameAncList = frameAncInstance[0].chips;
+        if (frameAncList == null) {
+            frameAncList = [];
+        }
+    }
+
+
     if ($("#enable-csp").is(":checked")) {
         contentSecurityPolicySettings = {
             EnableCSP: $("#enable-csp").is(":checked"),
@@ -1110,7 +1237,8 @@ $(document).on("click", "#update-csp-settings", function () {
             FontSource: fontSrcList.toString(),
             ImageSource: imgSrcList.toString(),
             ConnectSource: connectSrcList.toString(),
-            FrameSource: frameSrcList.toString()
+            FrameSource: frameSrcList.toString(),
+            FrameAncestor: frameAncList.toString()
         };
     }
 

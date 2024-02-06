@@ -454,6 +454,7 @@
                     chartType: "Chart Type",
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
+                    enableZooming: "Enable Zooming",
                     showLegend: "Show Legend",
                     showLegendAsDropDown: "Show Legend Items as Dropdown",
                     interactivity: "Interactivity", 
@@ -2486,9 +2487,11 @@
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
 				exportFailedContent: "Your export request has failed.",
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed.",
                 dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
                 etlDialogHeaderText: "Redirect to Bold ETL",
-                etlContinuebtnText: "Continue with connector"
+                etlContinuebtnText: "Continue with connector",
+                facebookAdsDialogmsgETL:"We are currently renewing Facebook Ads app verification with Meta. As a result, we recommend using Bold ETL to obtain data from Facebook Ads. To initiate this process, click on the 'Redirect to Bold ETL' button."
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
@@ -2640,7 +2643,7 @@
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
 				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
-				joinMessagePostgreSql: "PostgreSQL does not support the not equal operator in the FULL OUTER JOIN.",
+				joinMessagePostgreSql: "PostgreSQL does not support the not equal, less than or equal to, or greater than or equal to operators for the FULL OUTER JOIN.",
 				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
 				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
             },
@@ -5596,10 +5599,15 @@
                     nov: "Nov",
                     dec: "Dec"
                 },
+                showValueType: 
+                {
+                    capitalizeEachWord: 'Capitalize Each Word',
+                },
                 rename: "Rename",
 				replaceValues: "Replace Values",
                 changeColumnType: "Change Column Type",
                 fiscalYearStart: "Fiscal Year Start",
+                showValueAs: "Show Value As ",
                 sharedTable: {
                     header: "Shared Tables",
                     info: "The tables listed below are from the data sources that you have permission to access. Any changes to this table done by the owner of the data source will be reflected here.",
@@ -5805,6 +5813,8 @@
                     containsEx: "CONTAINS(string_expression, substring_expression)",
                     endsWithDesc: "Returns true if the given string expression ends with the specified substring expression.",
                     endsWithEx: "ENDSWITH(string_expression, substring_expression)",
+                    initCapDesc: "Converts the first character in each word to uppercase and the remaining characters to lowercase.",
+                    initCapEx: "INITCAP(string_expression)",
                     leftDesc: "Returns the specified number of characters from start of the given string expression.",
                     leftEx: "LEFT(expression, numeric_expression)",
                     lenDesc: "Returns the number of characters in the given string expression.",
@@ -6125,7 +6135,8 @@
                 validRange: "Please enter a valid range"
             },
             enableFilter: {
-                clearFilter: "Clear Filter"
+                clearFilter: "Clear Filter",
+                filterAction: "Filter"
             },
             common: {
                 all: "All",
@@ -6165,8 +6176,8 @@
             },
             connectorType: {
                 connectorType: "Connector Type",
-                new: "New",
-                legacy: "Legacy"
+                basic: "Basic",
+                advanced: "Advanced"
             },
 			authenticationType: {
                 authenticationType: "Authentication Type",
@@ -6289,6 +6300,7 @@
                     weightedScore: "Weighted Score...",
                     measureFilterDisplayName: "Filter",
                     measureFormatDisplayName: "Format...",
+                    capitalizeEachWord: "Capitalize Each Word",
                     measureFormat: "MeasureFormat",
                     sortAscending: "Sort Ascending",
                     sortDescending: "Sort Descending",
@@ -6331,7 +6343,8 @@
                     noCalculation: "No calculation",
                     percentOfRowTotal: "Percent Of Row Total",
                     percentOfColumnTotal: "Percent Of Column Total",
-                    percentOfGrandTotal: "Percent Of Grand Total"
+                    percentOfGrandTotal: "Percent Of Grand Total",
+                    showDimensionAs:"Show Value As"
                 },
                 numberFilterOption: {
                     equals: "Equals",
@@ -6475,7 +6488,10 @@
                 includeFutureValueText: "Include items which will be added in future.",
 				manualModeText: "Manual",
 				datasourceModeText: "Data Source",
-				userFilterQueryModeText: "Query"
+				userFilterQueryModeText: "Query",
+                UserFilterNameAlertTitle: "Empty or Name allready exist",
+                UserFilterEmptyName: "Name should not be empty please porvide an valid name",
+                UserFilterNameAllreadyExist:"The userfilter name already exists"
             },
             dataPreview: {
                 dataPreview: "Data Preview",
@@ -7443,6 +7459,7 @@
                 dashboardListLabelText: "DASHBOARDS LIST",
                 allLabelText: "All ",
                 uploadedLabelText: "Uploaded",
+                pendingLabelText: "Pending",
                 configuredLabelText: "Configured",
                 needAttentionLabelText: "Needs Attention",
                 categoryLabelText: "Category",
@@ -7561,6 +7578,9 @@
 				otherDsErrorText: "You can resolve other errors by configuring these datasources individually from the configuration window.",
 				schemaDsNoteText: "Note:",
                 renameUpdateText: "Rename/Update",
+                noneText: "None",
+                failedText: "Failed",
+                completedText: "Completed",
             },
 			qandawidget:{
 				dialogTitle: "Provide Additional Feedback",
