@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 7.4.5
+*  version : 7.4.6
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -20363,6 +20363,8 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
 
             popupShown: null,
 
+            clearFilterText: null,
+
             beforePopupShown: null,
 
             beforePopupHide: null,
@@ -21563,6 +21565,7 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
         },
 
         _refreshSearch: function () {
+            this._trigger("clearFilterText", {action: "clearFilter"});
             this._resetSearch();
             this._refreshPopup();
         },
