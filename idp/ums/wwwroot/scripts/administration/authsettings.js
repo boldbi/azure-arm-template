@@ -321,6 +321,9 @@ $(document).ready(function () {
         else if (name === "defaultauthentication") {
             updateAuthSettingsButton = $("#update-defaultauthlogin-settings");
         }
+        else if (name === "windowsad") {
+            updateAuthSettingsButton = $("#update-windowsad-settings");
+        }
 
         if (!data) {
             if (name === "oauth") {
@@ -353,6 +356,10 @@ $(document).ready(function () {
                 scope.ssoSettingsb2cForm.$setPristine();
                 $("#azure-b2c-image-upload-box").siblings(".validation-message").html("");
             }
+            else if (name === "windowsad") {
+                scope.windowsadSettingsForm.$setUntouched();
+                scope.windowsadSettingsForm.$setPristine();
+            }
 
         } else {
             if (name === "oauth" && scope.oauthSettingsForm.$invalid) {
@@ -371,6 +378,9 @@ $(document).ready(function () {
                 updateAuthSettingsButton.prop("disabled", true);
             }
             else if (name === "defaultauthentication") {
+                updateAuthSettingsButton.prop("disabled", true);
+            }
+            else if (name === "windowsad" && scope.windowsadSettingsForm.$invalid) {
                 updateAuthSettingsButton.prop("disabled", true);
             }
         }

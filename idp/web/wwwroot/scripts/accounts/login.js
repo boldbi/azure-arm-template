@@ -40,7 +40,11 @@ $(document).ready(function () {
         errorElement: "span",
         onkeyup: function (element, event) {
             if (event.keyCode != 9) $(element).valid();
-            else true;
+
+            if (element.name === "userName") {
+                // Remove whitespaces from the email field's value
+                $(element).val($(element).val().replace(/\s/g, ''));
+            }
         },
         onfocusout: function (element) { $(element).valid(); },
         rules: {
@@ -249,5 +253,4 @@ function getParameterByName(name) {
         urlValue = homeUrl;
     return urlValue;
 }
-
 

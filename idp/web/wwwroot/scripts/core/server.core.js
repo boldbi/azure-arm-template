@@ -524,7 +524,7 @@ function getMaxZIndex() {
 }
 
 function IsEmail(email) {
-    var filter = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+    var filter = /^([\wÀ-ÖØ-öø-ÿŒœŸÿ€ß.-]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\wÀ-ÖØ-öø-ÿŒœŸÿ€ß-]+\.)+))([a-zA-Z]{2,63}|[0-9]{1,3})(\]?)$/u;
     if (filter.test(email)) {
         return true;
     }
@@ -637,16 +637,16 @@ function messageBox(messageIcon, messageHeader, messageText, type, successCallba
 function IsValidName(validationType, inputString) {
     var regex;
     if (validationType.toLowerCase() === "username") {
-        regex = new RegExp(/[*\[\\\]\|\/\:\<\>\%\+\#\&\?\'\"\@\;\,]/);
+        regex = new RegExp(/[*\[\\\]\|\/\:\<\>\%\+\#\&\?\"\@\;\,]/);
     }
     else {
-        regex = new RegExp(/[*\[\\\]\|\/\:\<\>\%\+\#\?\'\"\;\,]/);
+        regex = new RegExp(/[*\[\\\]\|\/\:\<\>\%\+\#\?\"\;\,]/);
     }
     return !regex.test(inputString);
 }
 
 function UsernameValidation(username) {
-    var filter = /^(?:(?!\.{2}|_{2}|-{2})[\p{L}\p{N}0-9_.-]+@[\p{L}\p{N}\-]+(\.[\p{L}\-]+)*|[\p{L}\p{N}0-9_.-]+)$/u;
+    var filter = /^(?:(?!\.{2}|_{2}|-{2})[\p{L}\p{N}0-9_À-ÖØ-öø-ÿŒœŸÿ€ß'.`-]+@[\p{L}\p{N}\-]+(\.[\p{L}\-]+)*|[\p{L}\p{N}0-9_À-ÖØ-öø-ÿŒœŸÿ€ß'.`-]+)$/u;
     if (filter.test(username)) {
         return true;
     }

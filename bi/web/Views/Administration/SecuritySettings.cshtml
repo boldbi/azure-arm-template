@@ -14,6 +14,7 @@
     var imgSources = contentSecurityPolicySettings.ImageSource != null ? contentSecurityPolicySettings.ImageSource.Split(',') : contentSecurityPolicySettings.ImageSource;
     var connectSources = contentSecurityPolicySettings.ConnectSource != null ? contentSecurityPolicySettings.ConnectSource.Split(',') : contentSecurityPolicySettings.ConnectSource;
     var frameSources = contentSecurityPolicySettings.FrameSource != null ? contentSecurityPolicySettings.FrameSource.Split(',') : contentSecurityPolicySettings.FrameSource;
+    var frameAncestor = contentSecurityPolicySettings.FrameAncestor != null ? contentSecurityPolicySettings.FrameAncestor.Split(',') : contentSecurityPolicySettings.FrameAncestor;
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var CSPHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy);
     var pageDescription = T["Configure security-related settings for your site."];
@@ -44,6 +45,7 @@
         var imgSourcesList = @Html.Raw(Json.Serialize(imgSources));
         var connectSourcesList = @Html.Raw(Json.Serialize(connectSources));
         var frameSourcesList = @Html.Raw(Json.Serialize(frameSources));
+        var frameAncestorsList = @Html.Raw(Json.Serialize(frameAncestor));
         var contentSecurityPolicyUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy)";
         var xFrameOptionUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.XFrameOption)";
     </script>
@@ -167,7 +169,7 @@
                                 </span>
                                 <span class="connect-src-validation validation-errors"></span>
                             </div>
-                            <div class="col-xs-12 no-padding settings-page-fields form-fields-top-margin src-names-list bottom-src-bottom-margin">
+                            <div class="col-xs-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
                                 <div class="info-label">
                                     @Html.Label("frame-src", T["Frame Source"].Value, new { @class = "app-textbox-label" })
                                 </div>
@@ -179,6 +181,19 @@
                                     <input id="txt-framesrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
                                 </span>
                                 <span class="frame-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-xs-12 no-padding settings-page-fields form-fields-top-margin src-names-list bottom-src-bottom-margin">
+                                <div class="info-label">
+                                    @Html.Label("frame-src", T["Frame Ancestors"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @string.Format(T["This directive specifies valid parent domains that may embed a dashboard or complete application using an {0}. However, the CSP header will not apply this directive if the X-Frame-Options has already been enabled."].Value, "<iframe>")
+                                </div>
+                                <span id="frame-ancestors-content" class="frame-ancestors-input src-input-class">
+                                    <span id="frame-ancestors-chip-content" class="frame-ancestors-chip src-input-chip"></span>
+                                    <input id="txt-frameancestors" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="frame-ancestors-validation validation-errors"></span>
                             </div>
                         </form>
                     </div>

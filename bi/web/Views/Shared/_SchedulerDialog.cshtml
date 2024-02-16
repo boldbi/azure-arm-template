@@ -331,11 +331,16 @@
 
     $("#selected_dashboard,#selected_category").selectpicker();
     $("#selected_childdashboard").attr("disabled", true);
+
+    function htmlDecode(input) {
+        var doc = new DOMParser().parseFromString(input, "text/html");
+        return doc.documentElement.textContent;
+    }
     if (actionType == "Create") {
-        createSchedule(itemId, itemName, categoryName, multiDashboardName);
+        createSchedule(itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName);
     }
     else {
-        editSchedule(scheduleId, itemId, itemName, categoryName, multiDashboardName, isScheduledItemDeleted, isWidgetDeleted);
+        editSchedule(scheduleId, itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName, isScheduledItemDeleted, isWidgetDeleted);
     }
     if (($(parent.window).width()) > 1400) {
         $(".schedule-dialog").addClass("lg-schedule-flexible");
@@ -345,5 +350,6 @@
         $(".schedule-dialog").removeClass("lg-schedule-flexible");
     }
     addPlacehoder("#schedule-dialog");
+    widgetName = htmlDecode(widgetName);
 
 </script>

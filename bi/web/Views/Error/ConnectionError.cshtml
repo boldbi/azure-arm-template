@@ -5,6 +5,7 @@
     var loginLogo = string.Empty;
     var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
     var cdnLink = string.Empty;
+    var errorMessage = Context.Items["ErrorMessage"] as string;
     var dashboardServerResourceUrl = string.Empty;
     if (ServerAppConfig.IsSelfHosted)
     {
@@ -55,13 +56,23 @@
                 </div>
                 <div class="error-type">@T["Database connection error"]</div>
                 <div class="error-text">
-                    @T["Sorry! Server has encountered an error while establishing the connection to application database. This error could be occurred due to below possible causes:"]
-
-                    <ul class="list-style">
-                        <li>@T["The database server might have been down."]</li>
-                        <li>@T["The login credentials for the database might have been changed."]</li>
-                        <li>@T["The database might have been corrupted."]</li>
-                    </ul>
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        @T["Sorry! Server has encountered an error while establishing the connection to application database."]
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@errorMessage</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        @T["Sorry! Server has encountered an error while establishing the connection to application database. This error could be occurred due to below possible causes:"]
+                        <ul class="list-style">
+                            <li>@T["The database server might have been down."]</li>
+                            <li>@T["The login credentials for the database might have been changed."]</li>
+                            <li>@T["The database might have been corrupted."]</li>
+                        </ul>
+                    }
                 </div>
             </div>
         </div>

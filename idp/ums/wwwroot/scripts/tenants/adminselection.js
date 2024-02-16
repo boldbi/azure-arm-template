@@ -285,6 +285,10 @@ $(document).on("click", ".sort", function () {
             $("#order").attr("data-value", "ascending");
             $("#order").attr("data-original-title", "Sort by ascending");
         }
+
+        //changes the tooltip value dynamically
+        $("#order").attr('data-original-title', $("#order").attr("data-original-title")).tooltip('show');
+
         hideWaitingPopup('add-admin-element');
     }
 });
