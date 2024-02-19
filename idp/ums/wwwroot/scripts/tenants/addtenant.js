@@ -350,9 +350,11 @@ $(document).ready(function () {
             $("#header-title").html(window.Server.App.LocalizationContent.SiteCreation);
             if (item === "dashboards") {
                 $("#header-description").html(window.Server.App.LocalizationContent.BoldBiMultiTenancy);
+                $("#master-site-description").html(window.Server.App.LocalizationContent.MasterSiteDescription.format("dashboard", "dashboards"));
             }
             else {
                 $("#header-description").html(window.Server.App.LocalizationContent.BoldReportsMultiTenancy);
+                $("#master-site-description").html(window.Server.App.LocalizationContent.MasterSiteDescription.format("reports", "reports"));
             }
             if ($('input[name="identifier"]').prop("checked")) {
                 $("#tenant-identifier").attr("disabled", true);
@@ -586,10 +588,12 @@ function getTenant(id) {
                 if (isBoldReportsTenantType()) {
                     item = "reports";
                     $("#header-description").html(window.Server.App.LocalizationContent.BoldReportsMultiTenancy);
+                    $("#master-site-description").html(window.Server.App.LocalizationContent.MasterSiteDescription.format("reports", "reports"));
                 }
                 else {
                     item = "dashboards";
                     $("#header-description").html(window.Server.App.LocalizationContent.BoldBiMultiTenancy);
+                    $("#master-site-description").html(window.Server.App.LocalizationContent.MasterSiteDescription.format("dashboard", "dashboards"));
                 }
                 if (useSiteIdentifierEnable && data.TenantDetails.Tenant.UseSiteIdentifier) {
                     $(".site-url-identifier").removeClass("hide");

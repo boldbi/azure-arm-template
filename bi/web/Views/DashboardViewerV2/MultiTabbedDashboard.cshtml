@@ -35,6 +35,7 @@
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -119,6 +120,7 @@
             var showMyDashboards = @Json.Serialize(Convert.ToBoolean(ViewBag.ShowMyDashboards));
             var myDashboardsUrl = encodeURI("@Url.Action("Dashboards", "Dashboards")" + "?view=all");
             var modelLanguage = "@ViewBag.ModelLanguage";
+            var firstDayOfWeek = "@ViewBag.FirstDayOfWeek"
             var isSelfHosted = @Json.Serialize(isSelfHosted);
             var filterQuery = @Html.Raw(Json.Serialize(filterQuery));
             var isUserAuthenticatedInCurrentTenant = @Json.Serialize(isUserAuthenticatedInCurrentTenant);
@@ -168,6 +170,7 @@
             var canCheckSessionInActive = @Html.Raw(Json.Serialize(canShowSession));
             var isPublic = @Html.Raw(Json.Serialize(isPublic));
             var embedThemeEnabled = @Json.Serialize(embedThemeEnabled);
+        var isAuthenticated = @Html.Raw(Json.Serialize(isAuthenticated));
     </script>
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 </head>
