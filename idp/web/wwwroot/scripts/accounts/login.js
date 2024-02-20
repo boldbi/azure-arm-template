@@ -40,7 +40,11 @@ $(document).ready(function () {
         errorElement: "span",
         onkeyup: function (element, event) {
             if (event.keyCode != 9) $(element).valid();
-            else true;
+
+            if (element.name === "userName") {
+                // Remove whitespaces from the email field's value
+                $(element).val($(element).val().replace(/\s/g, ''));
+            }
         },
         onfocusout: function (element) { $(element).valid(); },
         rules: {
@@ -218,6 +222,29 @@ $(document).on("click", "#adfs-login-text", function () {
     $("#windows-login").trigger("click");
 });
 
+$(document).on("click", ".popup-login-button", function () {
+    var n = $(window).width() / 2 - 250
+        , t = $(window).height() / 2 - 300
+        , i = "width=500,height=600,status,resizable,left=" + n + ",top=" + t + "screenX=" + n + ",screenY=" + t;
+    popup = window.open($(".popup-login-button").attr("data-login-url"), "PopupWindow", i);
+    setInterval(openLoginWindow, 100);
+    setTimeout(closeLoginWindow, 10000000);
+});
+
+function openLoginWindow() {
+    var currentURL = popup.window.location.href;
+    var base = $('meta[name="base_url"]').attr("content");
+    var returnURL = $('meta[name="return_url"]').attr("content");
+    if (currentURL != null && currentURL.includes(base)) {
+        popup.close();
+        window.location.href = returnURL;
+    }
+}
+
+function closeLoginWindow() {
+    popup.close();
+}
+
 function FormValidate() {
     $("#access-denied").css("display", "none");
     if ($("#password-field").css("display") === "none") {
@@ -249,5 +276,4 @@ function getParameterByName(name) {
         urlValue = homeUrl;
     return urlValue;
 }
-
 

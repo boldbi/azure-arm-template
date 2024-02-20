@@ -66,7 +66,8 @@ var Designer = {
                     combineWidget: "Combine Widget",
                     separateline: "Line",
                     dateBucket: "Date Group",
-					textFilter: "Text Filter"
+					textFilter: "Text Filter",
+                    tabbedWidget: "Tab Widget"
                 },
                 widgetDescription: {
                     columnChartDesc: "Compare values for a set of unordered items across categories using vertical bars arranged horizontally.",
@@ -82,8 +83,8 @@ var Designer = {
                     bingmapsDesc: "Showcase markers encoded through latitude and longitude.",
                     treeMapDesc: "Visualize large amounts of data as clustered rectangles with a color scale.",
                     cardDesc: "Measure trends through key performance indicators like values and goals.",
-                    pieChartDesc: "Showcase the proportions of each item\'&nbsps contribution to the total in the form of pie slices.",
-                    doughnutChartDesc: "Showcase the proportions of each item\'&nbsps contribution to the total in the form of doughnut slices.",
+                    pieChartDesc: "Showcase the proportions of each item's contribution to the total in the form of pie slices.",
+                    doughnutChartDesc: "Showcase the proportions of each item's contribution to the total in the form of doughnut slices.",
                     pyramidChartDesc: "Proportional comparison between values showcased in a progressively increasing manner.",
                     funnelChartDesc: "Proportional comparison between values showcased in a progressively decreasing manner.",
                     areaChartDesc: "Compare values for a set of unordered items across categories through filled curves ordered vertically.",
@@ -113,7 +114,8 @@ var Designer = {
                     popDesc: "Filter based on Date Ranges selected.",
                     lineDesc: "Separate the widgets.",
                     dateBucketDesc: "Used to change the date format dynamically for the connected widgets.",
-					textFilterDesc: "Filter based on the search performed in the text box."
+					textFilterDesc: "Filter based on the search performed in the text box.",
+                    tabWidgetDesc: "Combine multiple widgets within tabs."
                 },
                 widgetDataRequiredMessage: {
                     gridDataRequiredMessage: "Grid requires atleast 1 Column to render",
@@ -161,9 +163,11 @@ var Designer = {
                     numberCardDataReq: "1 value and 0 or 1 image/sparkline.",
                     richTextEditorDataReq: "Text",
                     popDataReq: "1 column.",
-                    customWidgetOne: "1",
-                    customWidgetOneOrMore: "1 or more",
-                    customWidgetAnd: "and",
+                    customWidgetOne: " 1 ",
+                    customWidgetOneOrMore: " 1 or more ",
+                    customWidgetAnd: " and ",
+					customWidgetRequiresAtleast: " requires atleast ",
+                    customWidgetToRender: " to render.",
                     combineWidgetDataReq: "Any widgets",
                     lineDataReq: "None",
                     dateBucketDataReq: "None"
@@ -220,12 +224,11 @@ var Designer = {
                 argument: "Argument",
                 dimension: "Dimension",
                 measure: "Measure",
-				designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator.",
 				valueAsDimension: "Dimension(s)",				
                 designerExpDisableInfo: "You do not have permission to edit this datasource. Contact site administrator.",
                 minimumToolText: "The field bind in this section will be considered as a start value of the Gauge Range. For setting static values, use the properties panel.",
 				maximumToolText: "The field bind in this section will be considered as an end value of the Gauge Range. For setting static values, use the properties panel.",
-                rangeNavigatorToolTextMessage:"Range Navigator requires at least one value and one argument to render.The argument section supports only the Date field.",
+                rangeNavigatorToolTextMessage:"Range Navigator requires at least one value and one argument to render. The argument section supports only the Date field.",
 				hiddenColumnMessage: {
 					chart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column or Row section",
 					radarPolarChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section",
@@ -242,8 +245,8 @@ var Designer = {
                 headerText: "Properties",
                 propertyText: "PROPERTIES",
                 assignDataText: "ASSIGN DATA",
-                propertyPanelCommonItems: "Property panel doesn\'t support to show common properties for multiple items",
-                promptWindowContent: "Do you want to reset the data source?",
+                propertyPanelCommonItems: "Property panel doesn't support to show common properties for multiple items",
+                promptWindowContent: "Any unmatched fields will be removed from the widgets when switching the data source. Would you like to continue?",
                 enableCommentingTooltip: "Show/Hide the comment icon in dashboard published to dashboard server through which users can post comments and collaborate",
                 widgetName: "Name",
                 subHeaderText: "Subtitle",
@@ -253,7 +256,6 @@ var Designer = {
                 exportName: "Export Settings",
                 basicSettingsText: "Basic Settings",
                 tooltipSettingsText: "Tooltip Settings",
-				PaddingSettings:"Padding Settings",
                 linkText: "Link",
                 filterText: "Filter",
                 headerSettingsText: "Header Settings",
@@ -292,6 +294,13 @@ var Designer = {
                 alignmentSettingsText:"Alignment Settings",
 				contentSettingsText: "Content Settings",
                 kpiValueText: "KPI Value",
+				noDataContainerText: "No Data Appearance",
+				summaryRowText: "Summary Row",
+				customizeBtnText: "Customize",
+				changeButtonText: "Change",
+				persistenceNotificationsText: "Maintains the expanded and collapsed state of the nodes",
+                performanceDelayNotificationsText: "Enabling this property will disable virtualization in the Pivot grid, which can cause performance delays when working with large sets of records",
+				imagePaddingSettingsText: "Padding Settings",
 				widgetTitleLengthErrorText: "The name should not exceed 255 characters",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
@@ -346,8 +355,15 @@ var Designer = {
                     },
                     showPopup: "Show PopUp",
                     height: "Height",
-                    width: "Width"
+                    width: "Width",
+					interWidgetLinkingText: "Inter Widget Linking"
                 },
+				lineWidgetProperties: {
+					verticalOrientation: "Vertical Orientation",
+					lineWidgetThickness: "Thickness",
+					lineWidgetPadding: "Padding",
+					lineWidgetType: "Line Type"
+				},
                 rteBasicSettings: {
                     autofitContent: "Autofit Content",
                     contentPadding: "Content Padding",
@@ -383,22 +399,22 @@ var Designer = {
                         parameterizedUrl: "Parameterized URL"
                     },
                     backgroundImage: {
-                        recommendedFiles: " Recommended files: ",
+                        recommendedFiles: "Recommended files",
                         files: " png, jpeg, jpg ",
-                        recommendedSizes: " Recommended size: ",
+                        recommendedSizes: "Recommended size",
                         size: " Maximum 5 MB ",                        
                         initiatingUpload: "Initiating upload...",
                         uploading: "Uploading...",
                         uploadFailed: "Upload failed."
-
                     },
                     widgetTitleAutoFontSize: "Title Auto Font Size",
-                    widgetSubTitleAutoFontSize: 'Subtitle Auto Font Size',
+                    widgetSubTitleAutoFontSize: "Subtitle Auto Font Size",
 					widgetPaddingInfo: {
 						autoPaddingSetting: "Auto Padding Settings",
 						autoPadding: "Auto Padding",
-						padding: "Padding"
+						paddingText: "Padding"
 					},
+					showShadowText: "Show Shadow"
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -407,7 +423,8 @@ var Designer = {
                     viewDataText: "View Underlying Data",
                     pinWidgetText: "Pin Widget",
                     actionText: "Actions",
-                    allowExportingText: "Allow Exporting"
+                    allowExportingText: "Allow Exporting",
+					showHeaderText: "Show Header"
                 },
                 exportSettings: {
                     csvExportText: "Allow CSV Export",
@@ -439,22 +456,26 @@ var Designer = {
                     chartType: "Chart Type",
                     chartTypeandAxis: "Chart Type & Axis",
                     enableAnimation: "Enable Animation",
-                    enableZooming:"Enable Zooming",
+                    enableZooming: "Enable Zooming",
                     showLegend: "Show Legend",
-                    interactivity: "Interactivity",
-					showLegendTitle: "Show Title",
+                    showLegendAsDropDown: "Show Legend Items as Dropdown",
+                    interactivity: "Interactivity", 
+                    showLegendTitle: "Show Title",
 		            showTooltip:"Show Tooltip",
                     legend: "Legend",
+					legendShapeText: "Legend Shape",
                     legendPosition: "Legend Position",
-                    legendType:'Type',
-					legendPositioning: 'Position',
-					legendShape: 'Shape',
-					legendTitle: 'Title',
+                    legendType:"Type",
+					legendPositioning: "Position",
+					legendShapeListText: "Shape",
+					legendTitleListText: "Title",
 					legendTextOverFlow: "Text Overflow",
                     textwidth: "Text Width",
                     showValueLabels: "Show Value Labels",
                     isInversed:"Inverse Scroll Bar",
-		            enableSmoothScroll: "Enable Smooth Scroll",
+					rawData: "Show Raw Data",
+                    rawDataInfo: "This option will remove the aggregation in grid columns and show raw data.",
+					enableSmoothScroll: "Enable Smooth Scroll",
                     pageSize:"Page Size",
                     chartSize:"Chart Size",
                     valueLabelRotation: "Value Label Rotation",
@@ -466,8 +487,8 @@ var Designer = {
                     showItemsWithNoData: "Show Items With No Data",
 					emptyPointMode: "Empty Point Mode",
                     enableMultiSelect: "Enable Multiselect",
-                    showAll: "Show All",
                     allowFilter: "Allow Filter",
+                    showAll: "Show All",
                     defaultPosition: "Default Positions",
                     rangeSelection: "Range Selection",
                     orientation: "Orientation",
@@ -523,8 +544,21 @@ var Designer = {
 					hideEmptyHeaders: "Hide Empty Headers",
                     lineWidth:"Line Width",
                     emptyCellsContent:"Empty Cell Content",
-					rawData: "Show Raw Data",
-                    rawDataInfo:"This option will remove the aggregation in grid columns and show raw data.",
+					doughnutRadiusText: "Radius",
+					chartSeriesColumnWidth: "Column Width",
+					chartSeriesColumnSpacing: "Column Spacing",
+					showActualValueText: "Show Actual Value",
+					valueLabelColorText: "Value Color",
+					showDifferenceValueText: "Show Difference Value",
+					percentSizeText: "Size",
+					chartSeriesShapeText: "Series Shape",
+					fixedCalendarSelectionText: "Fixed Calendar Selection",
+					widgetOrderText: "Widgets Order",
+					tabWidgetOrderText: "Tab Order",
+					tabWidgetHideTabText: "Hide Tab",
+					headerColorText: "Header Color",
+					headerFontSizeText: "Header Font Size",
+					activeTabText: "Active  Tab",
                     apiType:"API Type",
                     listBoxShowAll:"Show All"
                 },
@@ -547,9 +581,9 @@ var Designer = {
                     lineStyleDialogTitleText: "Custom Line Style Settings",
                     lineStyleDialogOkBtnText: "Ok",
                     lineStyleDialogCancelBtnText: "Cancel",
-                    solid: 'Solid',
-                    dot: 'Dot',
-                    dash: 'Dash',
+                    solid: "Solid",
+                    dot: "Dot",
+                    dash: "Dash",
                     dotDash: "DotDash",
                     longDash: "LongDash",
                     longDashDotDot: "LongDashDotDot"
@@ -594,8 +628,12 @@ var Designer = {
                     confidenceInterval: "Confidence Interval",
                     SubmitForecast: "SubmitForecast",
                     legendText:"Legend Text",
-                    confidenceBandStyle: "Confidence Band Style"
-
+                    confidenceBandStyle: "Confidence Band Style",
+					forecastPointLengthText: "Length",
+					seasonalityText: "Seasonality",
+					forecastSubmitBtnText: "Apply",
+					showForecastText: "Forecast",
+					showConfidenceText: "Confidence"
                 },
                 axisSettings: {
                     showCategoryAxis: "Show Category Axis",
@@ -611,9 +649,14 @@ var Designer = {
                     axisType: "Axis Type",
                     showSecondaryValueAxis: "Show Secondary Value Axis",
                     primaryAxisRange: "Primary Axis Range",
+					primaryAxisFormatText: "Primary Axis Format",
+					secondaryAxisFormatText: "Secondary Axis Format",
+					axisFormatButtonText: "Format",
+					primaryAxisEditRangeText: "Edit Axis Range",
+					axisFormatText: "Axis Format",
                     titleColor: "Title Color",
-                    labelColor: "Label Color",
-                    negativeRegion: "Inverse Axis"
+                        labelColor: "Label Color",
+                        negativeRegion: "Inverse Axis"
                 },
                 gridLineSettings: {
                     primaryValueAxis: "Primary Value Axis",
@@ -622,12 +665,10 @@ var Designer = {
 					xAxis:"X-Axis",
 					yAxis:"Y-Axis"
                 },
-                trendLineSettings: {
-
-                },
                 seriesPaletteSettings: {
                     useDefaultPalette: "Use Default Palette",
-                    advancedSetting: "Advanced Setting"
+                    advancedSetting: "Advanced Setting",
+					colorMappingTypeText: "Color Mapping Type"
                 },
 				kpiBasicSettings: {
 					fixedLayout: "Fixed Layout",
@@ -682,7 +723,9 @@ var Designer = {
                     imageSource: "Image",
                     imageBrowse: "Browse Image",
                     imageURL: "URL",
-                    imagePattern: "Pattern"
+                    imagePattern: "Pattern",
+					imagePosition: "Image Alignment",
+					imageRotation: "Image Rotation"
                 },
                 animationSettings: {
                     enableAnimation: "Enable Animation",
@@ -691,8 +734,10 @@ var Designer = {
                 appearanceSettings: {
                     horizontalAlignment: "Horizontal Alignment",
                     autoFontSize: "Auto Font Size",
-                    scalingFactor: "Scaling Factor"
+                    scalingFactor: "Scaling Factor",
+					verticalAlignment: "Vertical Alignment"
                 },
+				responsiveMargin: "Responsive Margin",
                 seriesSettings: {
                     fixedRowsAndColumnsText: "Fixed Rows and Columns",
                     rowCountText: "Row Count",
@@ -769,8 +814,7 @@ var Designer = {
                     axisLabelIntersectAction: "Label Intersect Action",
                     enableTrim: "Enable Trim",
                     maximumLabelWidth: "Maximum Label Width",
-					sorting: "Sorting"
-                    
+                    sorting: "Sorting"
                 },
 				bubbleScatterAxisSettings:{
 					showXAxis: "Show X Axis",
@@ -784,7 +828,6 @@ var Designer = {
                     markerShape: "Marker Shape",
                     markerColor: "Color",
                     markerWidth: "Width",
-                    markerDefaultZoom: "Marker Based Zoom",
                     markerHeight: "Height",
 					markerDefaultZoom: "Marker Based Zoom"
                 },
@@ -837,7 +880,9 @@ var Designer = {
                     showRowGrandTotals: "Show Row Grand Totals",
                     showColumnGrandTotals: "Show Column Grand Totals",
                     showRowSubTotals: "Show Row Sub Totals",
-                    showColumnSubTotals: "Show Column Sub Totals"
+                    showColumnSubTotals: "Show Column Sub Totals",
+                    RowGrandTotalText: "Grand Total",
+                    ColumnGrandTotalText: "Grand Total"
                 },
                 pivotFormattingSettings: {
                     groupPanelBackground: "Group Panel Background",
@@ -849,6 +894,22 @@ var Designer = {
                     columnHeaderText:"Column Header",
                     valueText:"Value"
                 },
+				noDataContainerSettings: {
+                    hideIcon: "Hide Icon",
+                    showDefaultIcon: "Show Default Image",
+                    text: "Text",
+                    textColor: "Text Color",
+                    transparency: "Transparency"
+				},
+				interWidgetLinking:{
+					defaultInterWidgetLinking: "Configure how linking should behave with the tab widget. When default action is configured, the tab will be switched based on the index values in the current widget. This gives you the flexibility to switch between the tabs based on the value selected in the current widget. Custom action allows you to switch to a specific tab index so that any value selected in the current widget will switch the tab to the configured tab."
+				},
+				popSettings: {
+					popSettingsText: "PoP Settings",
+					popCustomizationText: "PoP Customization",
+					primaryBackgroundText: "Primary Background",
+					secondaryBackgroundText: "Secondary Background"
+				},
                 comboBox: {
                     defaultplaceHolderText: "All",
                     placeHolderPropertylabel: "Place Holder"
@@ -878,12 +939,49 @@ var Designer = {
 				dataSampling: "Data Sampling",
 				appendDsText: "Append Data",
 				dataLimit: "Data Limit",
+				dataCacheON: "ON",
+				dataCacheONtext: "Results will be cached.",
+				dataCacheOFF: "OFF",
+				dataCacheOFFtext: "Results will not be cached, your existing cache will be deleted.",
+				dataCacheInfo: "Data refreshed at ",
+				dataCacheMemory: "Maximum Memory Size",
+				dataCacheApply: "Apply",
+				dataCacheTitle: "Data Cache Settings",
+				dataCacheTimeExpire: "Expire After",
+				dataCacheInMemory: "In-Memory",
+				dataCacheRedis: "Redis",
+				dataCacheFileSystem: "Files System",
+				dataCacheMemoryMode: "Cache Modes",
+				clearCacheButtonText: "Clear",
+				redisServeErrorContent: "Configured redis cache server is not reachable. Please ensure that the redis server is properly running or else change the cache mode to inmemory in BoldServices\\bi\\dataservice\\appsettings.json",
+				redisServeErrorContentOnpremise: "Configured redis cache server is not reachable. Please ensure that the redis server is properly running or else change the cache mode to inmemory in Data Process setting",
+				redisServeErrorTitle: "Redis Server Error",
+				dataCacheModeText: "Cache Mode",
+				dataCacheFlushDBError: "Data not removed or data is empty.",
+				dataCacheFlushDBSuccess: "All respective data has been removed",
+				dataCacheFlushDBSuccessTitle: "Clear cache",
+				dataCacheFlushDBErrorTitle: "Clear cache empty message",
+				dataCacheTestConnectionSuccess: "Connection established successfully",
+				dataCacheTestConnectionError: "Invalid connection string",
+				dataCacheTestConnectionErrorTitle: "Test connection error message",
+				dataCacheConfigMode: "Cache mode",
+				dataCacheConfigConnString: "Connection string",
+				dataCacheConfigDefaultConnString: "localhost:6379",
+				dataCacheConfigConnStringValidation: "Connection string is empty",
+				dataCacheConfigTestConn: "Test Connection",
+				dataCacheConfigCacheSize: "Current cache size",
+				dataCacheConfigMaxCacheSize: "Maximum cache size",
+				dataCacheConfigFlushCache: "Clear Cache",
+				dataCacheConfigRefreshTime: "Display refresh time",
+				dataCacheConfigSuccessMessage: "Settings has been updated successfully.",
+                dataCacheAlertContent: "The functionality of the data cache will be rendered ineffective due to the activation of data refresh settings. Please undo auto refresh and enable the data cache.",
                 headerNewConnectionText: "NEW CONNECTION",
                 newDataSourceText: "NEW DATA SOURCE",
                 dataSourceTypeText: "Data Source Type",
                 backButtonText: "Back",
                 connectButtonText: "Connect",
                 cancelButtonText: "Cancel",
+				nextButtonText: "Next",
                 advanceOptionText: "Advance Options",
                 basicOption: "Basic Options",
                 setConnectionText: "Set Connection",
@@ -943,7 +1041,7 @@ var Designer = {
                 basicText: "Basic HTTP Authentication",
 				sqlaccess: "Elasticsearch SQL",
                 opendistro :"Open Distro",
-                opendistromessage: "<b>Note:</b> To connect to an Amazon Web Service hosted Elasticsearch instance, please use the Open Distro Connection Type.",
+                opendistromessage: "To connect to an Amazon Web Service hosted Elasticsearch instance, please use the Open Distro Connection Type.",
 				elasticsearchTypeText :"Connection Type",
                 authenticationText: "Authentication Type",
                 refreshSettingsText: "Refresh Settings",
@@ -961,46 +1059,12 @@ var Designer = {
                 parameterHeaderText: "Dashboard Parameter",
 				dataSamplingHeaderText: "Data Sampling",
 				dataCacheHeaderText: "Data Cache",
-				dataCacheON: "ON",
-				dataCacheONtext: ":Results will be cached.",
-				dataCacheOFF: "OFF",
-				dataCacheOFFtext: ":Results will not be cached, your existing cache will be deleted.",
-				dataCacheInfo: "Data refreshed at ",
-				dataCacheMemory: "Maximum Memory Size",
-				dataCacheApply: "Apply",
-				dataCacheTitle: "Data Cache Settings",
-				dataCacheTimeExpire: "Expire After",
-				dataCacheInMemory: "In-Memory",
-				dataCacheRedis: "Redis",
-				dataCacheFileSystem: "Files System",
-				dataCacheMemoryMode: "Cache Modes",
-				redisServeErrorContent: "Configured redis cache server is not reachable. Please ensure that the redis server is properly running or else change the cache mode to inmemory in BoldServices\\bi\\dataservice\\appsettings.json",
-				redisServeErrorContentOnpremise: "Configured redis cache server is not reachable. Please ensure that the redis server is properly running or else change the cache mode to inmemory in Data Process setting",
-				redisServeErrorTitle: "Redis Server Error",
-				dataCacheModeText: "Cache Mode",
-				dataCacheFlushDBError: "Data not removed or data is empty.",
-				dataCacheFlushDBSuccess: "All respective data has been removed",
-				dataCacheFlushDBSuccessTitle: "Clear cache",
-				dataCacheFlushDBErrorTitle: "Clear cache empty message",
-				dataCacheTestConnectionSuccess: "Connection established successfully",
-				dataCacheTestConnectionError: "Invalid connection string",
-				dataCacheTestConnectionErrorTitle: "Test connection error message",
-				dataCacheConfigMode: "Cache mode",
-				dataCacheConfigConnString: "Connection string",
-				dataCacheConfigDefaultConnString: "Connection string",
-				dataCacheConfigConnStringValidation: "Connection string is empty",
-				dataCacheConfigTestConn: "Test Connection",
-				dataCacheConfigCacheSize: "Current cache size",
-				dataCacheConfigMaxCacheSize: "Maximum cache size",
-				dataCacheConfigFlushCache: "Clear Cache",
-				dataCacheConfigRefreshTime: "Display refresh time",
-				dataCacheConfigSuccessMessage: "Settings has been updated successfully.",
-				clearCacheButtonText: "Clear",
                 refreshScheduleText: "Refresh Schedule",
                 authentication: "Authentication",
                 promptText: "Prompt",
                 noneText: "None",
                 dataBaseText: "Database",
+                dataBaseCollectionText: "Collections",
                 databaseText: "Database (Optional)",
                 useCurrentWindowsUser: "Use current windows user",
                 useThisUserNameAndPassword: "Use this User name and password.",
@@ -1020,6 +1084,13 @@ var Designer = {
                 dynamicConnectionString: "Dynamic Connection String",
                 dynamicConnectionStringTitle: "Dynamic Connection String Configuration",
                 dynamicConnectionStringTooltipInfo: "Know more",
+				applicationClientId: "ApplicationClientId",
+				applicationKey: "ApplicationKey",
+				authority: "Authority",
+				workspaces: "WorkSpaces",
+				apiKey: "ApiKey",
+				regionEndpoint: "RegionEndPoint",
+				type: "Type",
                 enableSSL: "Enable SSL",
                 mode: "Mode",
                 live: "Live",
@@ -1027,10 +1098,10 @@ var Designer = {
                 fileSelectionInfo: "Please select a file",
                 x509authenticationInfo: "x.509 certificate authentication requires a secure TLS/SSL connection.",
                 fileUploadCompleted: "Upload completed.",
-                extractModeMessage: "<b>Note:</b> Initially, data will be extracted based on the Max Rows selected in order to proceed with data model creation. The remaining records (there is no limit) will be extracted during the next refresh.",
-                extractModeMessageMongoDB: "<b>Note:</b> Initially it will extract {0} records. Remaining records will be extracted based on configured refresh settings.",
-                extractModeMessageSqlite: "<b>Note:</b> It will extract {0} records only.",
-                liveWebModeMessage: "<b>Note:</b> For optimum performance in live mode Web API, it is recommended to configure Max Rows as 5000 or less. Use extract mode for more than 5000 records.",
+                extractModeMessage: "Initially, data will be extracted based on the Max Rows selected in order to proceed with data model creation. The remaining records (there is no limit) will be extracted during the next refresh.",
+                extractModeMessageMongoDB: "Initially it will extract {0} records. Remaining records will be extracted based on configured refresh settings.",
+                extractModeMessageSqlite: "It will extract {0} records only.",
+                liveWebModeMessage: "For optimum performance in live mode Web API, it is recommended to configure Max Rows as 5000 or less. Use extract mode for more than 5000 records.",
                 useAsWindowCredential: "Use as Window Credential",
                 impersonateAuthenticatedUserAfterConnecting: "Impersonate the authenticated user after connecting.",
                 promptForCredentials: "Prompt for credentials",
@@ -1044,6 +1115,7 @@ var Designer = {
                 specifyServerName: "Server name cannot be empty.",
                 specifyConnectionTimeout: "Connection Timeout cannot be empty.",
                 specifyDatabaseName: "Database name cannot be empty.",
+				specifyCollectionName: "Collection name cannot be empty.",
                 specifyCatalogName: "Catalog Name cannot be empty",
                 specifyDataSourceName: "Data source name cannot be empty.",
                 specifyUserName: "User name cannot be empty.",
@@ -1093,7 +1165,10 @@ var Designer = {
                 servernametooltipinfo: "To allow the database server to create the data source, white list the IP addresses of Bold BI cloud servers from this ",
 				impersonateInfo: "While using Windows AD login in Bold BI you can impersonate the logged-in user while processing the data from ",
 				enableImpersonate: "Impersonate User",
-				type: "Type",
+				emptyCollection: "No collections in the currently selected DB",
+                invalidSheetsNoteTxt: "Ignore invalid data sheets and continue data extraction by clicking ‘Yes’.",
+                continueButtonText: "Yes",
+                closeBtnText: "No",
                 dataSourceType: {
                     file: "File",
                     excel: "Excel",
@@ -1104,13 +1179,13 @@ var Designer = {
 					parquet: "Parquet",
                     odbc: "ODBC",
                     msSql: "Microsoft SQL",
-                    azureSqlDataWarehouse: "Azure SQL Data Warehouse",
+                    azuresynapseanalytics: "Azure Synapse Analytics",
                     ssas: "Microsoft SQL Server Analysis Services",
                     SSAS:"SSAS",
                     mongodb: "MongoDB",
                     mySql: "MySQL",
                     mariadb: "MariaDB",
-                    memsql: "MemSQL",
+                    singlestore: "SingleStore",
                     cdata: "CDATA",
                     presto: "Presto",
                     elasticsearch:"Elastic Search",
@@ -1128,9 +1203,6 @@ var Designer = {
                     sparksql: "SparkSQL",
                     postgres: "PostgreSQL",
                     redshift: "Amazon Redshift",
-					rockSet: "Rockset",
-					bolddatastore : "Bold Data Store",
-					apacheDoris: "Apache Doris",
                     influxdb: "InfluxDB",
                     amazonRDS: "Amazon RDS",
                     amazonRDSSqlServer: "AmazonRDSSqlServer",
@@ -1146,6 +1218,10 @@ var Designer = {
                     sqlite: "SQLite",
                     clickHouse:"ClickHouse",
                     Clickhouse:"Clickhouse",
+					azureDataExplorer: "Azure Data Explorer",
+					rockSet: "Rockset",
+					bolddatastore : "Bold Data Store",
+					apacheDoris: "Apache Doris",
                     redShift:"Redshift",
                     azureSQLDataWarehouse:"AzureSQLDataWarehouse",
                     jira: {
@@ -1275,447 +1351,883 @@ var Designer = {
                     flurry: {
                         name: "Flurry",
                         templates: [
-                            { projects: { name: "", desc: "" } }
-                        ]
+							{
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
+						]
                     },
                     freshdesk: {
                         name: "Freshdesk",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     fusebill: {
                         name: "Fusebill",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+								projects: {
+									name: "",
+									desc: "" 
+								}
+							}
                         ]
                     },
                     nutshell: {
                         name: "Nutshell",
                             templates: [
-                                { projects: { name: "", desc: "" } }
+                                {
+									projects: {
+										name: "",
+										desc: "" 
+									}
+								}
                             ]
                     },
                     squareUp: {
                         name: "Square",
                             templates: [
-                                { projects: { name: "", desc: "" } }
+                                {
+									projects: {
+										name: "",
+										desc: ""
+									} 
+								}
                             ]
                     },
                     goSquared: {
                         name: "GoSquared",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     harvest: {
                         name: "Harvest",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     helpScout: {
                         name: "Help Scout",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     insightly: {
                         name: "Insightly",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     intervals: {
                         name: "Intervals",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { 
+								projects: {
+									name: "",
+									desc: "" 
+								}
+							}
                         ]
                     },
                     keenIo: {
                         name: "Keen",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { 
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     kissMetrics: {
                         name: "Kissmetrics",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { 
+								projects: { 
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
                     wistia: {
                         name: "Wistia",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { 
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
                         ]
                     },
-                    gitlab: {
-                        name: "GitLab",
-                        templates: [
-                            { projects: { name: "", desc: "" } }
-                        ]
-                    },
+					gitlab: {
+						name: "GitLab",
+						templates: [
+							{
+								projects: {
+									name: "",
+									desc: ""
+								}
+							}
+						]
+					},
                     liveAgent: {
                         name: "LiveAgent",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { 
+								projects: {
+									name: "",
+									desc: "" 
+								}
+							}
                         ]
                     },
-                    nicereply: {
-                        name: "Nicereply",
+                nicereply: {
+                    name: "Nicereply",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    pipelineDeals: {
-                        name: "PipelineDeals",
+                },
+                pipelineDeals: {
+                    name: "PipelineDeals",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    pipedrive: {
-                        name: "Pipedrive",
+                },
+                pipedrive: {
+                    name: "Pipedrive",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    prosperWorks: {
-                        name: "Copper",
+                },
+                prosperWorks: {
+                    name: "Copper",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    sendGrid: {
-                        name: "SendGrid",
+                },
+                sendGrid: {
+                    name: "SendGrid",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    newRelic: {
-                        name: "New Relic",
+                },
+                newRelic: {
+                    name: "New Relic",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    mixpanel: {
-                        name: "Mixpanel",
+                },
+                mixpanel: {
+                    name: "Mixpanel",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    stripe: {
-                        name: "Stripe",
+                },
+                stripe: {
+                    name: "Stripe",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    slack: {
-                        name: "Slack",
+                },
+                slack: {
+                    name: "Slack",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    smartSheet: {
-                        name: "Smartsheet",
+                },
+                smartSheet: {
+                    name: "Smartsheet",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    zohocrm: {
-                        name: "Zoho CRM",
+                },
+                zohocrm: {
+                    name: "Zoho CRM",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    zohoinvoice: {
-                        name: "Zoho Invoice",
+                },
+                zohoinvoice: {
+                    name: "Zoho Invoice",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    zendesksunshine: {
-                        name: "Zendesk Sunshine",
+                },
+                zohobooks: {
+                    name: "Zoho Books",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            { 
+						        projects: { 
+						            name: "", 
+						            desc: "" 
+								} 
+							}
                         ]
-                    },
-                    kaizala: {
-                        name: "Microsoft Kaizala",
+                },
+                zendesksunshine: {
+                    name: "Zendesk Sunshine",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    wordPress: {
-                        name: "WordPress",
+                },
+                kaizala: {
+                    name: "Microsoft Kaizala",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    fortytwomatters: {
-                        name: "42matters",
+                },
+                wordPress: {
+                    name: "WordPress",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    odata: {
-                        name: "OData",
+                },
+                fortytwomatters: {
+                    name: "42matters",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    zendesk: {
-                        name: "Zendesk Support",
+                },
+                odata: {
+                    name: "OData",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    alchemer: {
-                        name: "Alchemer",
+                },
+                zendesk: {
+                    name: "Zendesk Support",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    mailchimp: {
-                        name: "Mailchimp",
+                },
+                alchemer: {
+                    name: "Alchemer",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    optimizely: {
-                        name: "Optimizely",
+                },
+                mailchimp: {
+                    name: "Mailchimp",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    azureblob: {
-                        name: "Azure Blob",
+                },
+                optimizely: {
+                    name: "Optimizely",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    basecrm: {
-                        name: "Zendesk Sell",
+                },
+                azureblob: {
+                    name: "Azure Blob",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    sendible: {
-                        name: "Sendible",
+                },
+                basecrm: {
+                    name: "Zendesk Sell",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    chargebee: {
-                        name: "Chargebee",
+                },
+                sendible: {
+                    name: "Sendible",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    github: {
-                        name: "GitHub",
+                },
+                chargebee: {
+                    name: "Chargebee",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    gravityForms: {
-                        name: "Gravity Forms",
+                },
+                github: {
+                    name: "GitHub",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    activeCampaign: {
-                        name: "ActiveCampaign",
+                },
+                gravityForms: {
+                    name: "Gravity Forms",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    bitly: {
-                        name: "Bitly",
+                },
+                activeCampaign: {
+                    name: "ActiveCampaign",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    clubReady: {
-                        name: "ClubReady",
+                },
+                bitly: {
+                    name: "Bitly",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    appFolio: {
-                        name: "AppFolio",
+                },
+                clubReady: {
+                    name: "ClubReady",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    toggl: {
-                        name: "Toggl Track",
+                },
+                appFolio: {
+                    name: "AppFolio",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    basecamp3: {
-                        name: "Basecamp3",
+                },
+                toggl: {
+                    name: "Toggl Track",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    lighthouse: {
-                        name: "Lighthouse",
+                },
+                basecamp3: {
+                    name: "Basecamp3",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    freshworksCrm: {
-                        name: "Freshworks CRM",
+                },
+                lighthouse: {
+                    name: "Lighthouse",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    freshservice: {
-                        name: "Freshservice",
+                },
+                freshworksCrm: {
+                    name: "Freshworks CRM",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    servicenow: {
-                        name: "ServiceNow",
+                },
+                freshservice: {
+                    name: "Freshservice",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    sparkpost: {
-                        name: "SparkPost",
+                },
+                servicenow: {
+                    name: "ServiceNow",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    seomonitor: {
-                        name: "SEOmonitor",
+                },
+                sparkpost: {
+                    name: "SparkPost",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    recurly: {
-                        name: "Recurly",
+                },
+                seomonitor: {
+                    name: "SEOmonitor",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    rssfeeds: {
-                        name: "RSS Feeds",
+                },
+                recurly: {
+                    name: "Recurly",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    appAnnie: {
-                        name: "App Annie",
+                },
+                rssfeeds: {
+                    name: "RSS Feeds",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    azuredevops: {
-                        name: "Azure DevOps",
+                },
+                appAnnie: {
+                    name: "App Annie",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    redcap: {
-                        name: "REDCap",
+                },
+                azuredevops: {
+                    name: "Azure DevOps",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    azureSearch: {
-                        name: "Azure Search",
+                },
+                redcap: {
+                    name: "REDCap",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    prometheus: {
-                        name: "Prometheus",
+                },
+                azureSearch: {
+                    name: "Azure Search",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    proofhub: {
-                        name: "ProofHub",
+                },
+                prometheus: {
+                    name: "Prometheus",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    shopify: {
-                        name: "Shopify",
+                },
+                proofhub: {
+                    name: "ProofHub",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    amazonMWS: {
-                        name: "Amazon MWS",
+                },
+                shopify: {
+                    name: "Shopify",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    commvault: {
-                        name: "Commvault",
+                },
+                amazonMWS: {
+                    name: "Amazon MWS",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    trello: {
-                        name: "Trello",
+                },
+                quickbase: {
+                    name: "Quickbase",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    surveymonkey: {
-                        name: "SurveyMonkey",
+                },
+                commvault: {
+                    name: "Commvault",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    lessonly: {
-                        name: "Lessonly",
+                },
+                trello: {
+                    name: "Trello",
                         templates: [
-                            { projects: { name: "", desc: "" } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-					zuora: {
-                        name: 'Zuora',
+                },
+                surveymonkey: {
+                    name: "SurveyMonkey",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    boldDesk: {
-                        name: 'BoldDesk',
+                },
+                yelp: {
+                    name: "Yelp",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    alma: {
-                        name: 'Alma',
+                },
+                lessonly: {
+                    name: "Lessonly",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    gohighlevel: {
-                        name: 'GoHighLevel',
+                },
+                avochato: {
+                    name: "Avochato",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    tdengine: {
-                        name: 'TDengine',
+                },
+                zuora: {
+                    name: "Zuora",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    },
-                    youScan: {
-                        name: 'YouScan',
+                },
+                boldDesk: {
+                    name: "BoldDesk",
                         templates: [
-                            { projects: { name: '', desc: '' } }
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
                         ]
-                    }
+                },
+                origami: {
+                    name: "Origami",
+                        templates: [
+                            {
+                                projects: {
+                                    name: "",
+                                    desc: ""
+                                }
+                            }
+                        ]
+                },
+                alma: {
+                    name: "Alma",
+                        templates: [
+                            { 
+						        projects: { 
+						            name: "", 
+						            desc: "" 
+								} 
+							}
+				        ]
+                },
+                xeroWorkflowMax: {
+                    name: "XeroWorkflowMax",
+                        templates: [
+                            { 
+						        projects: { 
+						            name: "", 
+						            desc: "" 
+								}
+							}
+                        ]
+                },
+                gohighlevel: {
+                    name: "GoHighLevel",
+                    templates: [
+                        { 
+                            projects: { 
+                                name: "", 
+                                desc: "" 
+                            }
+                        }
+                    ]
+                },
+                tdengine: {
+                    name: "TDengine",
+                    templates: [
+                        { 
+                            projects: { 
+                                name: "", 
+                                desc: "" 
+                            }
+                        }
+                    ]
+                },
+                youScan: {
+                    name: 'YouScan',
+                    templates: [
+                        { 
+							projects: { 
+								name: "", 
+								desc: "" 
+							} 
+						}
+                    ]
+                }
                 },
                 oauthConnectors: {
                     facebook: "Facebook",
@@ -1727,6 +2239,7 @@ var Designer = {
                     googleBigQuery: "Google BigQuery",
                     dropbox: "Dropbox",
                     googleAnalytics: "Google Analytics",
+                    googleAnalytics4: "Google Analytics 4",
                     googleAds: "Google Ads",
                     twitter: "Twitter",
                     googleplus: "Google+",
@@ -1774,7 +2287,7 @@ var Designer = {
                     fitbit: "Fitbit",
                     xeroWorkflowMax: "Xero WorkflowMax",
                     gohighlevel: "GoHighLevel",
-                    helpScout: "Help Scout"
+                    helpScout: "Help Scout",
                 },
                 errorMessageForTotalExpressionContainsRowExpression: "Total expression must not contains any ROW expression.",
                 parameterMustBeAnAggregated: "Parameter must be an aggregated expression.",
@@ -1806,14 +2319,14 @@ var Designer = {
                 dataSetName: "Data source name cannot be empty. Please enter a valid data source name.",
                 dataSetNameExist: "A data source with the same name already exists. Do you want to overwrite?",
                 dataSetNameHasSpecialChar: "Name should not contain spaces and special characters",
-                deleteDataSet: "Delete data source \'",
-                deleteDataField: "Delete field \'",
-                deleteDataSource: "Delete data source \'",
-                deleteEmbeddedImage: "Delete embedded image \'",
-                deleteReportParam: "Delete report parameter \'",
-                questionmark: "\?",
-                expressionText: "The string \'",
-                expressionNotValid: "\" is not a valid ",
+                deleteDataSet: "Delete data source",
+                deleteDataField: "Delete field",
+                deleteDataSource: "Delete data source",
+                deleteEmbeddedImage: "Delete embedded image",
+                deleteReportParam: "Delete report parameter",
+                questionmark: "?",
+                expressionText: "The string",
+                expressionNotValid: "is not a valid ",
                 addDatasourceText: "ADD DATA SOURCE",
                 connectDataSourceBtnText: "Connect Data Source",
                 chooseConnctionTypeText: "Choose the type to connect",
@@ -1857,9 +2370,11 @@ var Designer = {
                     headersText: "Header(s)",
                     methodText: "Method",
                     parametersText: "Parameter(s)",
+                    tableSchema: "Table Schema",
                     replaceText: "Replace ",
                     urlText: "URL",
                     withUserDataText: "with your data",
+					userGuideText: "User Guide",
                     apiDocumentationText: "API documentation",
                     accountKeyText: "Account Key",
                     authenticationTypeText: "SharedKeyAuthentication",
@@ -1974,13 +2489,17 @@ var Designer = {
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
 				exportFailedContent: "Your export request has failed.",
-                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed."
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed.",
+                dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
+                etlDialogHeaderText: "Redirect to Bold ETL",
+                etlContinuebtnText: "Continue with connector",
+                facebookAdsDialogmsgETL:"We are currently renewing Facebook Ads app verification with Meta. As a result, we recommend using Bold ETL to obtain data from Facebook Ads. To initiate this process, click on the 'Redirect to Bold ETL' button."
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
-                fileExistInCategory: "\" already exists in the category",
+                fileExistInCategory: "Already exists in the category",
                 doYouWantToReplace: ". Do you want to replace it?",
-                dashboardNameErrorMsg: "The following characters are not supported:&nbsp&nbsp&nbsp&nbsp\'&nbsp+&nbsp,&nbsp;&nbsp[&nbsp]&nbsp%&nbsp#",
+                dashboardNameErrorMsg: "The following characters are not supported",
                 dashboardNameEmptyErr: "Please enter a name for dashboard",
                 createCategory: "Please create a category to continue",
                 loadCategoryErr: "An error occurred while fetching category information.",
@@ -2021,7 +2540,7 @@ var Designer = {
                 updateButtonText: "Update",
                 resetAllCustomizationText: "This action will reset the customization done. Do you want to continue?",
                 selectWidget: "Select a Widget",
-                masterWidget: "Widget master\'s",
+                masterWidget: "Widget master's",
                 profileNameEditAdd: "Only one item can be edited or added",
                 filterKeyEmpty: "Profile name cannot be empty.",
                 filterKeyExist: "A filter profile with the same name already exists.",
@@ -2034,7 +2553,7 @@ var Designer = {
                 dataSource: "Data Sources",
             },
             tableSelectorWindow: {
-                titleChooseTable: "Choose Table(s)",
+                titleChooseTable: "Extract Data",
                 okButtonText: "OK",
                 cancelButtonText: "Cancel",
                 titleChooseSchema: "Choose Schema(s)",
@@ -2044,7 +2563,15 @@ var Designer = {
                 selectRelationTable: "Select the relation for tables",
                 relationExistsInTable: "Already relation exists between tables",
                 waitingPopupText: "Importing data. This may take some time depending on the size of the data.",
-                reloadButtonText: "Reload"
+                reloadButtonText: "Reload",
+				previewButtonText: "Preview",
+                importQueryText: "ImportQuery",
+                importTableText: "ImportTable",
+				serverNameToolTipInfo: "Max row count is not applicable for stored procedure executions",
+				enterQueryWaterMarkText: "Enter a valid SQL query",
+				closePreviewButtonText: "Close Preview",
+				importTableNameText: "TableName",
+				previewWindowMessage: "Maximum 10 records are shown for preview purpose"
             },
             alertWindowMesages: {
                 draftMessage: "You have unpublished changes in this dashboard from your previous session. Do you want to restore them?",
@@ -2078,7 +2605,7 @@ var Designer = {
                 tableRemoveMessage: "Removing this table will affect the filter/parameters/expression columns referring to it. Do you still want to continue?",
                 createCategoryMessage: "*Please create a category to save the dashboard",
                 differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Otherwise, click on the 'x' icon to close the popup without taking any action.",
-                columnNotExist: "Some of the columns does not exist in new schema and it will affect the dashboard, if removed. Do you want to continue with the schema changes?",
+                columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
                 tableList: "The list of tables to be dropped ",
@@ -2116,10 +2643,10 @@ var Designer = {
                 fileNotFoundError: "The shape data file was not found. Please add the file and try again.",
                 filesNotValid: "The following file has a schema mismatch compared to the initial uploaded file. Do you want to remove and continue?",
 				joinMessageMySQL: "MySQL does not support the FULL OUTER JOIN",
-                joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
+				joinMessageGoogle: "Google Big Query does not support the FULL OUTER JOIN",
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
 				joinMessagePostgreSql: "PostgreSQL does not support the not equal, less than or equal to, or greater than or equal to operators for the FULL OUTER JOIN.",
-                joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
+				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
 				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
             },
             parameterMessages: {
@@ -2137,7 +2664,6 @@ var Designer = {
                 dateNotEmpty: "Start and End date value should not be empty.",
                 relativeDatesExist:"The Relative dates applied for the Value Column section. So, it can not be bound in the Display column section. Please remove Relative dates from the Value section to add the Display column.",
                 displayColumnBinded:"The Display column is configured. So, it can not be added as Relative dates. Remove the bound value from the Display column to add the Relative dates."
-                
             },
             alertDialogTitle: {
                 dataSources: "Data source",
@@ -2167,7 +2693,7 @@ var Designer = {
                 dashboardServer: "Dashboard Server",
                 createCategory: "Add Category",
                 SwitchDataView: "Switch Data View",
-                ResetDataSource: "Reset Data Source",
+                ResetDataSource: "Switch Data Source",
                 SaveDataSource: "Save Data Source",
                 SelectTable: "Select Table",
                 CancelDataSourceCreation: "Cancel Data Connection",
@@ -2210,11 +2736,10 @@ var Designer = {
                 closeButtonText: "Close",
                 continueButtonText: "Continue",
                 signinButtonText: "Connect New Account",
-                organizationWaterMark: "https://company.crm.dynamics.com",
                 accountText: "Account",
                 connectToAccountText: "Connect to ",
                 authorizeText: "Authorize",
-                authorizeRequiredText: "<b>Note:</b> Additional permission is required to connect to this service.",
+                authorizeRequiredText: "Additional permission is required to connect to this service.",
                 chooseAccNameText: "Set a name for the Account",
                 selectAccText: "Select Account",
                 manageAccountsText: "Manage Accounts",
@@ -2224,7 +2749,7 @@ var Designer = {
                 organizationText: "Organization URL",
                 microsoftDynamicsCrm: "Microsoft Dynamics CRM Online Service URL",
                 microsoftDynamicsCrmError: "Please enter the microsoft dynamics crm online service URL",
-                specialCharNotAllowed: "Invalid characters. The following characters are not supported:&nbsp&nbsp*&nbsp,&nbsp|&nbsp[&nbsp]&nbsp\'&nbsp'&nbsp:&nbsp;&nbsp<&nbsp>&nbsp?&nbsp#&nbsp\\&nbsp/&nbsp%&nbsp+"
+                specialCharNotAllowed: "Invalid characters. The following characters are not supported"
             },
             gridPagingContent: {
                 ofContentText: "of",
@@ -2264,7 +2789,6 @@ var Designer = {
                 displayName: "Display Name",
                 showNoDataItem: "Show No Data Items"
             },
-
             fileRowsInfo: {
                 title: "Data Storage",
                 fileRowsSubTextTwo: "of",
@@ -2303,8 +2827,7 @@ var Designer = {
                 back: "Back",
                 configureMessage: "Combine Data Source Configuration",
                 cancelMessage: "Do you want to cancel the combine data source configuration?",
-                dataSourceTitle: "Selected data sources",
-                headerDescription: "{{:siteName}} dashboard designer allows you to create a new data source from existing extracted mode data sources by appending all rows with column mapping.",
+                headerDescription: "dashboard designer allows you to create a new data source from existing extracted mode data sources by appending all rows with column mapping.",
                 invalidDataSourceName: "Invalid data source name.",
                 progressSelectDataSource: "SELECT DATA SOURCES",
                 progressMerge: "COMBINE",
@@ -2336,14 +2859,14 @@ var Designer = {
             },
             measureFilterWindow: {
                 measureFilterTitle: "Measure Filter",
-                columnLabelText: "Column:",
+                columnLabelText: "Column",
                 rangeLabelText: "Ranges",
                 andLabelText: "and",
                 resetBtnText: "Reset",
                 applyBtnText: "Apply",
                 cancelBtnText: "Cancel",
                 runBtnText: "Run",
-                selectedAggText: "Aggregation:",
+                selectedAggText: "Aggregation",
                 greaterOrEqualErrMsgText: "The value should be greater than or equal to the start value.",
                 enterValueWatermarkText: "Enter Value"
             },
@@ -2417,48 +2940,54 @@ var Designer = {
                 getReportScheduleCount: "Report Schedule Count",
                 listOrders: "Orders",
                 listMarketplaceParticipations: "Marketplace Participations",
-                listMatchingProducts:"Matching Products"
+                listMatchingProducts:"Matching Products",
+				applicationClientId: "ApplicationClientId",
+				applicationKey: "ApplicationKey",
+				authority: "Authority",
+				workspaces: "WorkSpaces",
+				apiKey: "ApiKey",
+				regionEndpoint: "RegionEndPoint"
             },
             linkedInCustomUIDataSource: {
                 organizationAccessControl: "Organization Access Control",
                 memberOrganizationAccessControl: "A Member Organization Access Control Information",
                 categoryAcl: "Access Control Information",
-                organizationID: "<:Organization_ID>",
+                organizationID: "Organization_ID",
                 organizationText: "Retrieve an Organization",
                 categoryOrganizations: "Organizations",
-                vanityName: "<:vanity_name>",
+                vanityName: "vanity_name",
                 organizationByVanityName: "Retrieve Organization by Vanity Name",
-                emailDomain: "<:email_domain>",
+                emailDomain: "email_domain",
                 organizationByEmailDomain: "Retrieve Organization by Email Domain",
                 networkSizes: "Retrieve first-degree followers for an Organization",
-                organizationBrandID: "<:Organization_brand_ID>",
+                organizationBrandID: "Organization_brand_ID",
                 organizationBrandText: "Retrieve an Organization Brand",
-                parentOrgID: "<:Parent_Organization_ID>",
+                parentOrgID: "Parent_Organization_ID",
                 parentOrgText: "Retrieve Administered Organization Brands by Parent Organization",
                 orgBrandByVanityName: "Retrieve Organization Brand by Vanity Name",
                 followerStats: "Retrieve Follower Statistics",
                 categoryStatistics: "Statistics",
                 pageStats: "Retrieve Page Statistics",
-                orgBrandID: "<:organization_brand_ID>",
+                orgBrandID: "organization_brand_ID",
                 brandPageStats: "Retrieve Brand Page Statistics",
                 shareStats: "Retrieve Share Statistics",
-                shareID: "<:Share_ID>",
+                shareID: "Share_ID",
                 shareText: "Retrieve a Share",
                 categoryShareSocial: "Shares & Social Stream",
-                socialURN: "<:shareUrn|ugcPostUrn|commentUrn>",
+                socialURN: "shareUrn|ugcPostUrn|commentUrn",
                 summaryText: "Retrieve a Summary of Social Actions",
-                multipleShare: "<:shareID1,:shareID2>",
+                multipleShare: "shareID1,:shareID2",
                 multipleShareText: "Retrieve Multiple Shares",
-                activityID: "<:activity_ID>",
+                activityID: "activity_ID",
                 activityText: "Retrieve an Activity",
                 likesOnShares: "Retrieve Likes on Shares",
                 commentsOnShares: "Retrieve Comments on Shares",
-                commentURN: "<:commentID,:commentID>",
+                commentURN: "commentID,:commentID",
                 commentsOnComments: "Retrieve Comments on Comments",
                 metadataText: "Retrieve a Summary of Social Actions (Metadata)",
                 metadataBatchText: "Retrieve Batch of Summary Social Metadata",
-                metadataBatch: "<:shareUrn|ugcPostUrn|commentUrn,:shareUrn|ugcPostUrn|commentUrn>",
-                assetID: "<:asset_ID>",
+                metadataBatch: "shareUrn|ugcPostUrn|commentUrn,:shareUrn|ugcPostUrn|commentUrn",
+                assetID: "asset_ID",
                 uploadStatusText: "Retrieve status of Upload",
                 endpointText: "Resources",
                 orgUrnText: "URL Inputs",
@@ -2483,7 +3012,38 @@ var Designer = {
                 dataCenterValueAU: "com.au"
             },
             zohoInvoiceDataSource: {
-                endPointsDropdownText: "End Points",
+                endPointsDropdownText: "Resources",
+                allInvoices: "All Invoices",
+                invoicePayments: "Invoice Payments",
+                showInvoice: "Show Invoice",
+                allContacts: "All Contacts",
+                showContact: "Show Contact",
+                allCreditNotes: "All Credit Notes",
+                showCreditNote: "Show Credit Note",
+                allCreditNotesRefunds: "All Credit Notes Refunds",
+                creditNoteRefunds: "CreditNote Refunds",
+                creditNoteInvoices: "CreditNote Invoices",
+                allEstimates: "All Estimates",
+                showEstimate: "Show Estimate",
+                allExpenses: "All Expenses",
+                showExpenses: "Show Expense",
+                allItems: "All Items",
+                showItem: "Show Item",
+                allCustomerPayments: "All Customers Payments",
+                showCustomerPayments: "Show Customer Payments",
+                customerPaymentInvoices: "Customer Payment Invoices",
+                allProjects: "All Projects",
+                showProjects: "Show Projects",
+                allRetainerInvoices: "All Retainer Invoices",
+                retainerInvoices: "Retainer Invoices",
+                showRetainerInvoices: "Show Retainer Invoices",
+                allProjectTasks: "All Project Tasks",
+                showProjectTask: "Show Project Tasks",
+                allTimeEntries: "All Time Entries",
+                showTimeEntries: "Show Time Entries",
+            },
+            zohoBooksDataSource: {
+                bills: "Bills",
                 allInvoices: "All Invoices",
                 invoicePayments: "Invoice Payments",
                 showInvoice: "Show Invoice",
@@ -2671,7 +3231,6 @@ var Designer = {
                 search: "Search",
                 tokens: "Tokens",
                 webhooks: "Webhooks",
-
                 showAction: "Show Action",
                 showSpecificfieldAction: "Show Specific field Action",
                 actionBoard: "Action Board",
@@ -2910,10 +3469,454 @@ var Designer = {
                 allSettlements: "All Settlements",
                 showSettlement: "Show Settlement",
             },
+			zuoraDataSource: {
+				account: "Account",
+				accountingCode: "Accounting Code",
+				invoice: "Invoice",
+				order: "Order",
+				subscription: "Subscription",
+				allAccountingCodes: "All Accounting Codes",
+				showAccountingCode: "Show Accounting Code",
+				accountingPeriods: "Accounting Periods",
+				showAccount: "Show Account",
+				accountSummary: "Account Summary",
+				allOrders: "All Orders",
+				showOrder: "Show Order",
+				subscriptionByAccount: "Subscription By Account",
+				invoiceItems: "Invoice Items",
+				invoicePayments: "Invoice Payments",
+            },
+            boldDeskDataSource: {
+                brands: "Brands",
+                fields: "Fields",
+                fieldDependencies: "Field Dependencies",
+                contacts: "Contacts",
+                contactGroups: "Contact Groups",
+                users: "Users",
+                agents: "Agents",
+                groups: "Groups",
+                tickets: "Tickets",
+                satisfactionSurvey: "Satisfaction Survey",
+                holidays: "Holidays",
+                worklogs: "Worklogs",
+                cannedResponses: "Canned Responses",
+                locals: "Locals",
+                roles: "Roles",
+                sla: "SLA",
+                webhooks: "Webhooks",
+                integrations: "Integrations",
+                allBrands: "All Brands",
+                allUserBrands: "All User Brands",
+                allFieldOptions: "All Field Options",
+                allFieldDependencies: "All Field Dependencies",
+                getFieldDependencyById: "Get Field Dependency By Id",
+                contactByEmail: "Contact By Email",
+                allContacts: "All Contact",
+                getContactById: "Get Contact By Id",
+                allContactFields: "All Contact Fields",
+                getContactFieldById: "Get Contact Field By Id",
+                contactGroupByContactId: "Contact Group By Contact Id",
+                contactNotes: "Contact Notes",
+                allContactGroups: "All Contact Groups",
+                getContactGroupById: "Get Contact Group By Id",
+                contactGroupByName: "Contact Group By Name",
+                contactsByContactGroup: "Contacts By Contact Group",
+                contactGroupDomains: "Contact Group Domains",
+                allContactGroupFields: "All Contact Group Fields",
+                getContactGroupFieldById: "Get Contact Group Field By Id",
+                contactGroupNotesById: "Contact Group Notes By Id",
+                userProfileByEmail: "User Profile By Email",
+                userProfile: "User Profile",
+                contactGroupsByUserId: "Contact Groups By User Id",
+                allUserCollections: "All User Collections",
+                allAgents: "All Agents",
+                getAgentById: "Get Agent By Id",
+                agentByEmail: "Agent By Email",
+                allAgentsCollections: "All Agent Collections",
+                getGroupById: "Get Group By Id",
+                agentCount: "Agent Count",
+                allGroups: "All Groups",
+                allGroupsCollections: "All Groups Collections",
+                membersByGroupId: "Members By Group Id",
+                allTickets: "All Tickets",
+                getTicketById: "Get Ticket By Id",
+                ticketHistories: "Ticket Histories",
+                ticketAttachment: "Ticket Attachment",
+                deletedTickets: "Deleted Tickets",
+                spamTickets: "Spam Tickets",
+                ticketUpdates: "Ticket Updates",
+                ticketNotes: "Ticket Notes",
+                ticketPriorities: "Ticket Priorities",
+                ticketStatus: "Ticket Status",
+                ticketSources: "Ticket Sources",
+                ticketFields: "Ticket Fields",
+                ticketForms: "Ticket Forms",
+                allTicketsUpdates: "All Tickets Updates",
+                ticketWatchers: "Ticket Watchers",
+                allTiceketMetrics: "All Ticket Metrics",
+                ticketMetricsByTicket: "Ticket Metrics By Ticket",
+                tagsByTicket: "Tags By Tickets",
+                webLinksByTicket: "Web Links By Ticket",
+                ticketLinksByTicket: "Ticket Links By Ticket",
+                linksCountByTicket: "Links Count By Ticket",
+                ticketMessages: "Ticket Messages",
+                messageBasedOnTicketAndMessageId: "Message Based On Ticket And Message Id",
+                satisfactionRatings: "Satisfaction Ratings",
+                allHolidays: "All Holidays",
+                getHolidayById: "Get Holiday By Id",
+                allWorklogs: "All Worklogs",
+                worklogsUsingFilters: "Worklogs Using Filters",
+                allCannedResponses: "All Canned Responses",
+                getCannedResponseById: "Get Canned Response By Id",
+                cannedResponseCategories: "Canned Response Categories",
+                timezones: "Timezones",
+                languages: "Languages",
+                allRoles: "All Roles",
+                getRoleById: "Get Role By Id",
+                membersByRoleId: "Members By Role Id",
+                allSLAs: "All SLAs",
+                getSLAById: "Get SLA By Id",
+                allWebhooks: "All Webhooks",
+                getWebhookById: "Get webhook By Id",
+                allLinkedItems: "All Linked Items",
+            },
+            customWebDsDateRange: {
+                none : "None",
+                today : "Today",
+                yesterday :"Yesterday",
+                pastWeek : "Past Week",
+                past2Weeks : "Past 2 Weeks",
+                pastMonth :"Past Month",
+                past2Months : "Past 2 Months",
+                past3Months : "Past 3 Months",
+                currentWeek : "Current Week",
+                currentMonth : "Current Month",
+                lastWeek : "Last Week",
+                lastMonth : "Last Month",
+                custom : "Custom"
+            },
+            youScanDataSource: {
+                topics: "Topics",
+                statistics: "Statistics",
+                mentionStream: "Mention Stream",
+                allTopics: "All Topics",
+                topicHistroy: "Topic Histroy",
+                topictags: "Topic Tags",
+                statisticsSentiments : "Statistics Sentiments",
+                statisticsTags: "Statistics Tags",
+                statisticsWords: "Statistics Words", 
+                statisticsCountries: "Statistics Countries",
+                statisticsCities: "Statistics Cities",
+                statisticsRegionsSentiment: "Statistics Regions Sentiment",
+                statisticsSourcesSentiment: "Statistics Sources Sentiment",
+                statisticsRegionsSourcesSentiment: "Statistics Regions Sources Sentiment",
+                statisticsHistogram: "Statistics Histogram",
+                statisticsGender: "Statistics Gender",
+                statisticsAges: "Statistics Ages",
+                statisticsLink: "Statistics Links",
+                mentions:"Mentions"
+            },
+            almaDataSource: {
+                ping: "Ping",
+                districts: "Districts",
+                school: "School",
+                userRoles: "User Roles",
+                accounts: "Accounts",
+                schoolYear: "School Year",
+                attendanceCodes: "Attendance Codes",
+                gradeLevels: "Grades Level",
+                cohorts: "Cohorts",
+                diplomaTypes: "Diploma Types",
+                graduationPlans: "Graduation Plans",
+                students: "Students",
+                parents: "Parents",
+                contacts: "Contacts",
+                staff: "Staff",
+                houseHolds: "HouseHolds",
+                GPAScale: "GPA Scale",
+                gradingPeriod: "Grading Period",
+                gradingScale: "Grading Scale",
+                subject: "Subject",
+                courses: "Courses",
+                classes: "Classes",
+                assignment: "Assignments",
+                submission: "Submission",
+                tag: "Tag",
+                viewPing: "View Ping",
+                viewDistrict: "View District",
+                allDistrictSchools: "All District Schools",
+                allDistrictAddress: "All District Addresses",
+                allDistrictContact: "All District Contacts",
+                viewSchoolIdentity: "View School Identity",
+                schoolCalendarEventTypes: "School Calendar Event Types",
+                getCalendarEventbyId: "Get Calendar Event Type By Id",
+                schoolCalendarEvents: "School Calendar Events",
+                schoolCalendarEventsbyId: "Get Calendar Events By Id",
+                allSchoolAddresses: "All School Addresses",
+                allSchoolContacts: "All School Contacts",
+                allSchoolCustomFields: "All School Custom Fields",
+                schoolCustomFieldByDefinition: "School Custom Field By Defintion",
+                schoolCustomFieldById: "School Custom Field By Id",
+                allMedicalStatus: "All Medical Status",
+                medicalStatusByCode: "All Medical Status By Code",
+                getUserRolesById: "User Role By Role Id",
+                accountById: "Account By Id",
+                viewSchoolYear: "View School Year",
+                getSchoolYear: "Get School Year",
+                viewAttendanceCodes: "View Attendance Codes",
+                attendanceCodesById: "Attendance Codes By Id",
+                viewGradeLevels: "View Grades Level",
+                gradeLevelsById: "Grades Level By Id",
+                viewCohorts: "View Cohorts",
+                cohortsById: "Cohorts By Id",
+                viewDiplomaTypes: "View Diploma Types",
+                diplomaTypesById: "Diploma Types By Id",
+                viewGraduationPlans: "view Graduation Plans",
+                getGraduationPlansById: "Graduation Plans By Id",
+                viewStudentIdentity: "View Student Identity",
+                getStudentSchool: "Student School",
+                getStudentAddress: "Student Addresses",
+                getStudentMail: "Student Mail",
+                getStudentEmergencyContact: "Student Emergency Contact",
+                getStudentPhone: "Student Phone",
+                getStudentHousehold: "Student Household",
+                allStudentCoursesForm: "All Student Courses Forms",
+                allStudentCourses: "All Student Courses",
+                studentAllCustomFields: "All Student Custom Fields",
+                studentCustomfieldByDefinition: "Student Custom Field By Definition",
+                studentCustomFieldById: "Student Custom Field By Id",
+                diplomaTypesforStudent: "Diploma Types For Student",
+                studentEnrollmentByCode: "Student Enrollment By Code",
+                studentEnrollment: "Student Enrollment",
+                getStudentClasses: "Student Classes",
+                getStudentCohorts: "Student Cohorts",
+                getStudentAttendance: "Student Attendance",
+                getStudentExternalGrade: "Student External Grades",
+                getStudentGradeLevel: "Student Grade Level",
+                getStudentImmunization: "Student Immunization",
+                getStudentImmunizationSummary: "Student Immunization Summary",
+                getStudentMedicalAlerts: "Student Medical Alerts",
+                getStudentMedicalNotes: "Student Medical Notes",
+                getStudentPrograms: "Student Programs",
+                getStudentrelationships: "Student Relationships",
+                getStudentReportGrade: "Student Report Grade",
+                getStudentSubmission: "Student Submission",
+                getStudentSubmissionFiles: "Student Submission Files",
+                getStudentSubmissionNotes: "Student Submission Notes",
+                getStudentGraduationPlans: "Student Graduation Plans",
+                getStudentTags: "Student Tags",
+                viewParents: "View Parents",
+                getParentsById: "Get Parents By Id",
+                listOfSchoolForParents: "List of School For Parents",
+                getParentAddresses: "Parent Addresses",
+                getParentMail: "Parent Mail",
+                getParentPhones: "Parent Phone",
+                getParentsHousehold: "Parent Household",
+                allParentCustomFields: "All Parent Custom Fields",
+                parentCustomfieldByDefinition: "Parent Custom Field By Definition",
+                parentCustomFieldById: "Parent Custom Field By Id",
+                getParentRelatioship: "Parent Relatioship",
+                viewContactIdentity: "View Contact Identity",
+                getContactAddresses: "Contact Addresses",
+                getContactMail: "Contact Mail",
+                getContactPhone: "Contact Phone",
+                getContactHousehold: "Contact Household",
+                viewStaffIdentity: "View Staff Identity",
+                getSchoolByStaffId: "Get School By Staff Id",
+                getStaffAddresses: "Staff Addresses",
+                getStaffMail: "Staff Mail",
+                getStaffPhone: "Staff Phone",
+                getStaffClasses: "Staff Classes",
+                getStaffRoster: "Get Staff Roster",
+                allStaffCustomFields: "All Staff Custom Fields",
+                staffCustomfieldByDefinition: "Staff Custom Field By Definition",
+                staffCustomFieldById: "Staff Custom Field By Id",
+                getStaffByTag: "Get Staff By Tag",
+                viewHouseholds: "View Households",
+                getHouseholdById: "Get Households By Id",
+                getHouseholdaddresses: "Get Households Addresses",
+                householdAllCustomFields: "All Households Custom Fields",
+                householdCustomfieldByDefinition: "Households Custom Field By Definition",
+                householdCustomFieldById: "Households Custom Field By Id",
+                householdSubmission: "Households Submissions",
+                getHouseholdSubmissionFiles: "Households Submission Files",
+                getHouseholdSubmissionNotes: "Households Submission Notes",
+                viewGPAScale: "View GPA Scale",
+                getGradingPeriod: "Get Grading Period",
+                getGradingScale: "Get Grading Scale",
+                getSubjectById: "Get Subject By Id",
+                viewCourse: "View Course",
+                getCourseRequestForms: "Get Courses Request Form",
+                courseCustomFields: "All Course Custom Fields",
+                courseCustomfieldByDefinition: "Course Custom Field By Definition",
+                courseCustomFieldById: "Course Custom Field By Id",
+                viewClasses: "View Class",
+                allClassCustomFields: "All Class Custom Fields",
+                classCustomfieldByDefinition: "Class Custom Field By Definition",
+                classCustomFieldById: "Class Custom Field by Id",
+                viewClassTeacher: "View Class Teachers",
+                getTeachingAssisstant: "Get Teaching Assistant",
+                getClassRoster: "Get Class Roster",
+                getClassAssignment: "Get Class Assignment",
+                viewAssignments: "View Assignments",
+                getAssignmentGrades: "Get Assignment Grades",
+                getAssignmentGradeById: "Get Assignment Grades By Id",
+                getSubmissionById: "Get Submission By Id",
+                getsubmissionByPermission: "Get Submission By Permission",
+                viewTags: "View Tags"
+            },
+            serviceNowDataSource: {
+                table: "Table",
+                serviceCatelog: "Service Catelog",
+                scorecards: "Scorecards",
+                attachment: "Attachment",
+                changes: "Changes",
+                activitySubscriptions: "Activity Subscriptions",
+                viewTable: "View Table",
+                viewTableWithId: "View Table With Id",
+                allTable: "All Table",
+                cart: "Cart",
+                catalogs: "Catalogs",
+                categoriesByCatalogId: "Categories By Catalog Id",
+                viewCatalog: "View Catalog",
+                viewCategoriesById: "View Categories By Id",
+                serviceCatalogItems: "Service Catalog Items",
+                viewItem: "View Item",
+                itemByCartId: "Item By Cart Id",
+                allWishlist: "All Wishlist",
+                wishlistByCartId: "Wishlist By Cart Id",
+                allScorecards: "All Scorecards",
+                allAttachment: "All Attachment",
+                fileById: "File By Id",
+                attachmentById: "Attachment By Id",
+                allChange: "All Change",
+                allActivitySubscriptions: "All Activity Subscriptions",
+            },
+            helpScoutDataSource: {
+                conversation: "Conversation",
+                customer: "Customers",
+                reports: "Reports",
+                team: "Team",
+                others: "Others",
+                conversations: "Conversations",
+                chatthreads: "Chat Threads",
+                customers: "Customers",
+                getcustomer: "Get Customer",
+                customeraddress: "Customer Address",
+                customerchathandles: "Customer Chat Handles",
+                customeremails: "Customer Emails",
+                customerphones: "Customer Phones",
+                customersocialprofiles: "Customer Social Profiles",
+                customerwebsites: "Customer Websites",
+                mailboxes: "Mailboxes",
+                getsatisfactionratingbyid: "Get Satisfaction Rating by ID",
+                companyoverallreport: "Company Overall Report",
+                conversationsoverallreport: "Conversations - Overall Report",
+                allchannelsvolumesbychannel: "All Channels - Volumes by Channel",
+                conversationsbusiesttimeofDay: "Conversations - Busiest Time of Day",
+                conversationsdrilldown: "Conversations - Drilldown",
+                conversationsdrilldownbyfield: "Conversations - Drilldown by Field",
+                conversationsnewconversations: "Conversations - New Conversations",
+                conversationsnewconversationsdrilldown: "Conversations - New Conversations Drilldown",
+                conversationsreceivedmessagesstatistics: "Conversations - Received Messages Statistics",
+                docsoverallreport: "Docs Overall Report",
+                happinessoverallreport: "Happiness Overall Report",
+                happinessratingsreport: "Happiness Ratings Report",
+                productivityoverallreport: "Productivity Overall Report",
+                productivityfirstresponsetime: "Productivity - First Response Time",
+                productivityrepliessent: "Productivity - Replies Sent",
+                productivityresolutiontime: "Productivity - Resolution Time",
+                productivityresolved: "Productivity - Resolved",
+                productivityresponsetime: "Productivity - Response Time",
+                UserorTeamoverallreport: "User/Team Overall Report",
+                userconversationhistory: "User Conversation History",
+                usercustomershelped: "User Customers Helped",
+                userdrilldown: "User Drilldown",
+                userhappiness: "User Happiness",
+                userhappinessdrilldown: "User Happiness drilldown",
+                userreplies: "User Replies",
+                userresolutions: "User Resolutions",
+                chatreport: "Chat Report",
+                emailreport: "Email Report",
+                phonereport: "Phone Report",
+                tags: "Tags",
+                listteammembers: "List Team Members",
+                teams: "Teams",
+                users: "Users",
+                workflows:"Workflows"
+            },
+            twilioDataSource: {
+                calls: "Calls",
+                recordings: "Recordings",
+                phonenumbers: "Phone Numbers",
+                messageservices: "Message Services",
+                availablephonenumbercountries: "Available Phone Number Countries",
+                accounts: "Accounts",
+                accountusagerecords: "Account Usage Records",
+                others: "Others",
+                allcalls: "All Calls",
+                allcallrecordings: "All call Recordings",
+                callnotifications: "Call Notifications",
+                callfeedback: "Call Feedback",
+                allaccountrecordings: "All Account Recordings",
+                allrecordingtranscriptions: "All Recording Transcriptions",
+                alltranscriptions: "All Transcriptions",
+                allconferences: "All Conferences",
+                allqueues: "All Queues",
+                allmessages: "All Messages",
+                alloutgoingcallerids: "All Outgoing Caller Ids",
+                alladdress: "All Address",
+                allavailablephonenumbercountries: "All Available Phone Number Countries",
+                allsmsshortcodes: "All Sms Short Codes",
+                allincomingphonenumbers: "All Incoming Phone Numbers",
+                allincomingphonenumberlocals: "All Incoming Phone Number Locals",
+                allincomingphonenumbermobiles: "All Incoming Phone Number Mobiles",
+                allincomingphonenumbertolltrees: "All Incoming Phone Number Toll Frees",
+                account: "Account",
+                allaccounts: "All Accounts",
+                allusagerecords: "All Usage Records",
+                allusagerecordalltimes: "All Usage Record All Times",
+                allusagerecordthismonths: "All Usage Record This Months"
+            },
+			sendGridDataSource: {
+                campaigns: "Campaigns",
+                others: "Others",
+                campaignsstats: "Campaigns Stats",
+                contacts: "Contacts",
+                allcampaigns: "All Campaigns",
+                senderidentities: "Sender Identities",
+                singlesends: "Single Sends",
+                searchsinglesends: "Search Single Sends",
+                segments: "Segments",
+                categories: "Categories",
+                filtermessages: "Filter Messages",
+                accounts: "Accounts",
+                allglobalsuppression: "All Global suppression",
+                allsuppressiongroups: "All suppression groups associated with user",
+                allsuppression: "All suppressions",
+                allinvalidemails: "All invalid emails",
+                automationstats: "Automation Stats",
+                singlesendstats: "Single Send Stats",
+                emailstats: "Email Stats for Categories",
+                sumofemailstats: "Sums of email stats for Categories",
+                globalemailstats: "Global email stats",
+                emailstatsprovince: "Email stats by State/Province",
+                emailstatsdevice: "Email stats by device",
+                emailstatsclient: "Email stats by client",
+                emailstatsmailbox: "Email stats by mailbox",
+                emailstatsbrowser: "Email stats by browser",
+                allbounces: "All Bounces",
+                allblocks: "All Blocks",
+                allspamreports: "All spam reports",
+                searchcontacts: "Search Contacts",
+                contactlists: "Contact lists",
+                recipients: "Recipients"
+            },
             webCustomDataSource: {
                 emptyUrlValidation: "Url should not be empty.",
                 emptyRawBodyValidation: "Raw body should not be empty",
                 hostNameDisplayText: "Host Name",
+                freshdeskDomainDisplayText: "Freshdesk Domain",
                 apiKeyDisplayText: "API Key",
                 apiTokenDisplayText: "API Token",
                 clubReadyChainIdDisplayText: "Chain Id",
@@ -2933,6 +3936,7 @@ var Designer = {
                 endpointDisplayText: "API Endpoints",
                 rawBodyDisplayText: "Raw Body",
                 customRawBodyDisplayText: "Custom Raw Body",
+                emptyOrganizationsValidation: "Cannot find any Organization for the user",
                 nutshellMethodDisplayText: "Nutshell Method",
                 isCustomUrlDisplayText: "Custom Url",
                 urlDisplayText: "Url",
@@ -2944,14 +3948,19 @@ var Designer = {
                 validApiTokenValidation: "Please enter a valid API Token",
                 validClubReadyChainIdValidation: "Please Enter Valid ChainId",
                 validQuickBooksRealmIdValidation: "Please Enter valid Realm ID",
+				validQuickbaseAppIdValidation: "Please enter a valid App Id",
+                validQuickbaseTableValidation: "Please select a Table",
                 authIdDisplayText: "Auth ID",
                 authSecretDisplayText: "Auth Secret",
                 emptyAuthIdValidation: "Auth ID should not be empty",
                 emptyAuthSecretValidation: "Auth Secret should not be empty",
+                emptyTableValidation: "Cannot find any Table for the User",
+                emptyappIdValidation: "App Id cannot be empty",
+                errorTableValidation: "Please provide the valid table name",
                 almaApplicationText: "Application Key",
                 emptyApplicationnameValidation: "The Application name should not be empty",
                 validApplicationNameValidation: "Please enter a valid Application Key",
-                locationIdDisplayText: "Location Id",
+				locationIdDisplayText: "Location Id",
                 relativeDateDisplayText: "Relative Date",
                 dateRangeDisplayText: "Date Range",
                 isSinceSeqFilterDisplayText:"SinceSeq Filter",
@@ -3171,8 +4180,8 @@ var Designer = {
                 SpecifyEolSeparator: "Please enter a end of line separator",
                 SpecifyFilePath: "Please select a file",
                 fileLimitInfoText: "Max file size: 200 MB",
-                fileNoteForOnpremise: "<b> Note </b> : Larger files will take more time to import",
-                fileSizeAlert: "The selected file size is very large at ",
+                fileNoteForOnpremise: "Larger files will take more time to import",
+                fileSizeAlert:"The selected file size is very large at ",
                 fileUploadBrowseText: "Browse File",
                 fileUploaddragAndDropText: "Drop files here or ",
                 fileuploadEstimatedFileSize: "(up to 200MB)",
@@ -4016,8 +5025,12 @@ var Designer = {
                 graphAPIDisplayText: "Graph API",
                 pagesDisplayText: "Pages",
                 campaignsDisplayText: "Campaigns",
-                emptyPagesValidation: "Error occurred while fetching the Pages",
-                emptyCampaignsValidation: "Error occurred while fetching the Campaigns",
+				emptyPagesValidation: 'No pages were found in your account',
+				emptyCampaignsValidation: 'No campaigns found in your account',
+				emptyAccountValidation: 'No account found',
+				errorPagesValidation: 'Error occurred while fetching the Pages',
+				errorCampaignsValidation: 'Error occurred while fetching the Campaigns',
+				errorAccountValidation: 'Error occured while fetching the account details',
                 nullCampaignValidation: "Cannot find any Campaign for the user",
                 dailyReach: "Daily Reach",
                 demographics: "Demographics",
@@ -4083,7 +5096,6 @@ var Designer = {
                 address: "Address",
                 accounts: "Accounts",
                 ageRange: "Age Range",
-
                 campaigns: "Campagins",
                 activeCampaigns: "Active Campaigns",
                 adsCampaignMetrics: "Ads Campaign Metrics",
@@ -4113,7 +5125,6 @@ var Designer = {
                 audienceCountry: "Audience Country",
                 audienceCity: "Audience City",
                 onlineFollowers: "Online Followers",
-
                 impressions: "Impressions",
                 reach: "Reach",
                 followerCount: "Follower Count",
@@ -4123,7 +5134,6 @@ var Designer = {
                 getDirectionsClicks: "Get Directions Clicks",
                 websiteClicks: "Website Clicks",
                 profileViews: "Profile Views",
-
             },
             shopifyDataSource: {
                 shopDomainDisplayText: "Shop Domain",
@@ -4212,6 +5222,12 @@ var Designer = {
                 themes: "Themes",
                 showTheme: "Show Theme",
             },
+			quickbaseDataSource: {
+				quickbaseRealmHostNameDisplayName: "QB-Realm-Hostname",
+				quickbaseAuthenticationDisplayName: "Authentication",
+				quickbaseAppIdDisplayName: "App Id",
+				quickbaseTableDisplayName: "Table",
+			},
             zendeskSunshineDataSource: {
                 customObjectRecords: "Custom Object Records",
                 objectRecordsByType: "Object Records by Type",
@@ -4296,15 +5312,6 @@ var Designer = {
                 month: "Month",
                 week: "Week"
             },
-						dateSettingsDialog: {
-				columnLabelText:"Column:",
-				cancelButtonText: "Cancel",
-				okButtonText: "OK",
-				format: "Format",				
-				fiscalYearStart:"Fiscal Year Start",
-				customFormat: "Custom Format",
-				infoIcon: "For some formats, filtering is not supported."
-			},
             azureDevOpsDataSource: {
                 accountValidation: "Please enter the account name",
                 projectValidation: "Please enter the project name",
@@ -4480,6 +5487,40 @@ var Designer = {
                 transactions: "Transactions",
                 creditPayments: "Credit Payments",
             },
+            avochatoDataSource: {
+            accounts: "Accounts",
+            allAccounts: "All Accounts",
+            viewAccount: "View Account",
+            broadcasts: "Broadcasts",
+            viewBroadcast: "View Broadcast",
+            campaigns: "Campaigns",
+            allCampaigns: "All Campaigns",
+            contacts: "Contacts",
+            allContacts: "All Contacts",
+            viewContact: "View Contact",
+            events: "Events",
+            showEvent: "Show Event",
+            links: "Links",
+            allLinks: "All Links",
+            showLink: "Show Link",
+            messages: "Messages",
+            allMessages: "All Messages",
+            showMessage: "Show Message",
+            tickets: "Tickets",
+            allTickets: "All Tickets",
+            showTicket: "Show Ticket",
+            users: "Users",
+            allUsers: "All Users",
+            },
+			dateSettingsDialog: {
+				columnLabelText:"Column",
+				cancelButtonText: "Cancel",
+				okButtonText: "OK",
+				format: "Format",				
+				fiscalYearStart:"Fiscal Year Start",
+				customFormat: "Custom Format",
+				infoIcon: "For some formats, filtering is not supported."
+			},
             dialogOptions: {
                 applyButtonText: "Apply",
                 cancelButtonText: "Cancel",
@@ -4494,7 +5535,15 @@ var Designer = {
                 closeButtonText: "Close",
                 configureButtonText: "Configure",
                 updateButtonText: "Update",
-				selectColumnButtonText: "Select Column"
+				selectColumnButtonText: "Select Column",
+				include: "Include",
+				exclude: "Exclude",
+				iterative: "Iterative",
+				single: "Single",
+				trueValue: "True",
+				falseValue: "False",
+				manualType: "Manual",
+				dataSourceType: "Data Source"
             },
             dateRangeFilterDialog: {
                 titleText: "Range Filter",
@@ -4522,11 +5571,13 @@ var Designer = {
                 categoryName: "&nbspcategory name",
                 datasourceName: "&nbspdatasource name",
                 invalid: "Invalid",
-                notSupportedChar: ".The following characters are not supported:&nbsp&nbsp&nbsp&nbsp\'&nbsp+&nbsp,&nbsp;&nbsp[&nbsp]&nbsp%&nbsp#",
+                notSupportedChar: ".The following characters are not supported ",
                 invalidCharText: "Invalid characters in the",
                 invalidDatasourceName: "Invalid datasource name",
-                notSupportedCharDatasourceName: ".The following characters are not supported: \" + , ; [ ] % #",
-                datasourceNameWaterMarkTxt: "Enter data source name"
+                notSupportedCharDatasourceName: ".The following characters are not supported ",
+                datasourceNameWaterMarkTxt: "Enter data source name",
+                organizationIdWaterMarkText: "Organization ID",
+				invalidOrganizationId: "Organization ID can’t be empty"
             },
             queryDesigner: {
                 columnType: {
@@ -4550,14 +5601,15 @@ var Designer = {
                     nov: "Nov",
                     dec: "Dec"
                 },
+                showValueType: 
+                {
+                    capitalizeEachWord: 'Capitalize Each Word',
+                },
                 rename: "Rename",
 				replaceValues: "Replace Values",
                 changeColumnType: "Change Column Type",
                 fiscalYearStart: "Fiscal Year Start",
-                showValueType: {
-                    capitalizeEachWord: 'Capitalize Each Word',
-                },
-                showValueAs: "Show Value As",
+                showValueAs: "Show Value As ",
                 sharedTable: {
                     header: "Shared Tables",
                     info: "The tables listed below are from the data sources that you have permission to access. Any changes to this table done by the owner of the data source will be reflected here.",
@@ -4600,7 +5652,7 @@ var Designer = {
                 layout: "Layout",
                 saving: "Saving...",
                 lastSave: "Last successful save: ",
-                draftError: "There was an error saving the draft.<br/>Last successful save: "
+                draftError: "There was an error saving the draft.<br/>Last successful save "
             },
             refreshWindow: {
                 title: "Refresh Settings",
@@ -4610,10 +5662,12 @@ var Designer = {
                 timeInterval: "Time Interval",
                 removeLoader: "Hide Loading Indicator",
 				commonTimeInterval: "Common Time Interval",
+				differentTimeInterval: "Differed Time Interval",
 				commonTimeErrorMessage: "Common Time Interval cannot be empty",
 				differentTimeErrorMessage: "Differed Time Interval cannot be empty",
-				differentTimeInterval: "Differed Time Interval",
-                removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data"
+                removeLoaderDescription: "Enable this property to remove the loading indicator while refreshing the widget data",
+                refreshAlertContent: "Enabling the data refresh settings allows the retrieval of live data, disregarding the use of the data cache and overriding it. Please disable the data cache and enable refresh settings.",
+                lastRefreshContent: "Last Refreshed at"
             },
             dialogText: {
                 appendText: "Append Text",
@@ -4677,223 +5731,150 @@ var Designer = {
                 expressionHelper: {
                     absDesc: "Returns the absolute value of the given expression.",
                     absEx: "ABS(numeric_expression)",
-
                     acosDesc: "Returns the inverse cosine (also known as arccosine) of the given numeric expression. Value should be between -1 and +1.",
                     acosEx: "ACOS(numeric_expression)",
-
                     asinDesc: "Returns the inverse sine (also known as arcsine) of the given numeric expression. Value should be between - 1 and +1.",
                     asinEx: "ASIN(numeric_expression)",
-
                     atanDesc: "Returns the inverse tangent (also known as arctangent) of the given numeric expression.",
                     atanEx: "ATAN(numeric_expression)",
-
                     cosDesc: "Returns the cosine of the angle specified in radians of the given expression.",
                     cosEx: "COS(numeric_expression)",
-
                     degDesc: "Returns the angle in degrees for the one specified in radians of the given numeric expression.",
                     degEx: "DEGREES(numeric_expression)",
-
                     expDesc: "Returns the exponential value of the given expression.",
                     expEx: "EXP(numeric_expression)",
-
                     logDesc: "Returns the logarithm of the given expression to the specified base.",
                     logEx: "LOG(numeric_expression)",
-
                     piDesc: "Returns the constant value of PI.",
                     piEx: "PI()",
-
                     powerDesc: "Returns the value of the given expression (expression1) to the specified power (expression2).",
                     powerEx: "POWER(numeric_expression, numeric_expression)",
-
                     percentageDesc: "Returns the percentage value for each row from the grand total of the given column.",
                     percentageEx: "TOTALPERCENTAGE(numeric_expression)",
-
                     radDesc: "Returns the angle in radians for the one specified in degrees in the given numeric expression.",
                     radEx: "RADIANS(numeric_expression)",
-
                     roundDesc: "Returns a rounded value.",
                     roundEx: "ROUND(numeric_expression)",
-
                     signDesc: "Returns a value representing the positive (+1), zero(0), or negative (-1) sign of the given numeric expression.",
                     signEx: "SIGN(numeric_expression)",
-
                     sinDesc: "Returns the sine of the angle specified in radians of the given expression.",
                     sinEx: "SIN(numeric_expression)",
-
                     sqrtDesc: "Returns the square root of the given numeric expression.",
                     sqrtEx: "SQRT(numeric_expression)",
-
                     tanDesc: "Returns the tangent of the given numeric expression.",
                     tanEx: "TAN(numeric_expression)",
-
                     ifDesc: "Returns either true part or false part, depending upon the evaluation of the expression.",
                     ifEx: "IF(expression, true_part, false_part)",
-
                     ifNullDesc: "If the expression is numeric/string/date, returns the first expression. If the first expression is NULL, returns the second expression.",
                     ifNullEx: "IFNULL(expression1,expression2)",
-
                     isNotNullDesc: "If the numeric/ string / date_expression is NULL, returns a string representing false, otherwise represents true.",
                     isNotNullEx: "ISNOTNULL(expression)",
-
                     isNullDesc: "If the numeric/string/date_expression is NULL, returns a string representing true, otherwise represents false.",
                     isNullEx: "ISNULL(expression)",
-
                     andDesc: "Returns true if both the expressions evaluates to true.",
                     andEx: "(expression1) AND (expression2)",
-
                     notDesc: "Returns the reversal logical value of the expression being evaluated.",
                     notEx: "NOT(expression)",
-
                     orDesc: "Returns true if any of the expressions evaluates to true.",
                     orEx: "(expression1) OR (expression2)",
-
                     dateAddDesc: "Adds a time/date interval to the specified date.",
                     dateAddEx: "DATEADD(datepart, numeric_expression, date_expression)",
-
                     dateDiffDesc: "Returns the difference between two specified dates.",
                     dateDiffEx: "DATEDIFF(date_part, start_date, end_date)",
-
                     dateNameDesc: "Returns a string representing the specified datepart of the given date expression.",
                     dateNameEx: "DATENAME(datepart, date_expression)",
-
                     datePartDesc: "Returns an integer value representing the specified date part of the given date expression.",
                     datePartEx: "DATEPART(datepart, date_expression)",
-
                     dateSubDesc: "Returns the date subtracted from the specified date.",
                     dateSubEx: "DATESUB(numeric_expression, date_expression)",
-
                     dayDesc: "Returns a numeric value representing the day part of the specified date.",
                     dayEx: "DAY(date_expression)",
-
                     dayDiffDesc: "Returns a numeric value representing the difference between two specified dates.",
                     dayDiffEx: "DAYDIFF(date_expression, date_expression)",
-
                     hourDesc: "Returns the hour of the given date as an integer.",
                     hourEx: "HOUR(date_expression)",
-
                     maxDesc: "Returns the maximum value in the given expression.",
                     maxEx: "MAX(expression)",
-
                     minDesc: "Returns the minimum value in the given expression.",
                     minEx: "MIN(expression)",
-
                     minutesDesc: "Returns a numeric value representing the minute part of the date resulting from specified date expression.",
                     minutesEx: "MINUTE(date_expression)",
-
                     monthDesc: "Returns a numeric value representing the month part of the date resulting from specified date expression.",
                     monthEx: "MONTH(date_expression)",
-
                     nowDesc: "Returns the current date and time.",
                     nowEx: "NOW()",
-
                     todayDesc: "Returns the current date.",
                     todayEx: "TODAY()",
-
                     yearDesc: "Returns a numeric value representing the year part of the date resulting from the specified date expression.",
                     yearEx: "YEAR(date_expression)",
-
                     charDesc: "Converts the given integer ASCII code into a character.",
                     charEx: "CHAR(numeric_expression)",
-
                     concatDesc: "Returns a string value resulting from the concatenation of two or more string values.",
                     concatEx: "CONCAT(expression1, expression2, ...,expressionN)",
-
                     containsDesc: "Returns true if the given string expression contains the specified substring expression.",
                     containsEx: "CONTAINS(string_expression, substring_expression)",
-
                     endsWithDesc: "Returns true if the given string expression ends with the specified substring expression.",
                     endsWithEx: "ENDSWITH(string_expression, substring_expression)",
-
                     initCapDesc: "Converts the first character in each word to uppercase and the remaining characters to lowercase.",
                     initCapEx: "INITCAP(string_expression)",
-
                     leftDesc: "Returns the specified number of characters from start of the given string expression.",
                     leftEx: "LEFT(expression, numeric_expression)",
-
                     lenDesc: "Returns the number of characters in the given string expression.",
                     lenEx: "LEN(string_expression)",
-
                     lowerDesc: "Returns a lower case converted string value from a given string expression.",
                     lowerEx: "LOWER(string_expression)",
-
                     ltrimDesc: "Returns the string value with leading blanks removed from string expression.",
                     ltrimEx: "LTRIM(string_expression)",
-
                     maxStrDesc: "Returns the maximum value in the given expression.",
                     maxStrEx: "MAX(expression)",
-
                     minStrDesc: "Returns the minimum value in the given expression.",
                     minStrEx: "MIN(expression)",
-
                     rightDesc: "Returns the specified number of characters from the end of the given string expression.",
                     rightEx: "RIGHT(expression, numeric_expression)",
-
                     rtrimDesc: "Returns the string without right side trailing spaces in the given string.",
                     rtrimEx: "RTRIM(string_expression)",
-
                     startsWithDesc: "Returns true if the given string expressions starts with the specified substring expression.",
                     startsWithEx: "STARTSWITH(string_expression, substring_expression)",
-
                     substrDesc: "Returns a specific length of string starting from specific index of the given string expression.",
                     substrEx: "SUBSTR(string_expression, starting_index, length_of_the_string)",
-
                     upperDesc: "Returns an upper case converted string value from a given string expression.",
                     upperEx: "UPPER(string_expression)",
-					
 					htmlParseDesc: "Returns a string value with the HTML tags stripped from the specified string expression.",
                     htmlParseEx: "HTML_Parse(string_expression)",
-
                     xmlParseDesc: "Returns a string value with the XML tags stripped from the specified string expression.",
                     xmlParseEx: "XML_Parse(string_expression)",
-
                     string_aggDesc: "Concatenates a list of strings and places a separator between them.",
                     string_aggEx: "STRING_AGG(string_expression, separator)",
-
                     avgDesc: "Returns the average of the values in the given expression.",
                     avgEx: "AVG(numeric_expression)",
-					
 					sumdDesc: "Returns the sum of the Distinct values in the given expression.",
                     sumdEx: "SUMD(numeric_expression)",
-
                     avgdDesc: "Returns the average of the Distinct values in the given expression.",
                     avgdEx: "AVGD(expression)",
-
                     countDesc: "Returns the number of items in the given expression.",
                     countEx: "COUNT(expression)",
-
                     countdDesc: "Returns the distinct number of items in the given expression.",
                     countdEx: "COUNTD(expression)",
-
                     maxAggDesc: "Returns the maximum value in the given expression.",
                     maxAggEx: "MAX(expression)",
-
                     minAggDesc: "Returns the minimum value in the given expression.",
                     minAggEx: "MIN(expression)",
-
                     stdDevDesc: "Returns the standard deviation of values in the given expression.",
                     stdDevEx: "STDEV(numeric_expression)",
-
                     sumDesc: "Returns the sum of values in the given expression.",
                     sumEx: "SUM(numeric_expression)",
-
                     varDesc: "Returns the varience of values in the given expression.",
                     varEx: "VAR(numeric_expression)",
-
                     totalDesc: "Returns the total values in the given expression.",
                     totalEx: "TOTAL(AGG(numeric_expression))",
-
                     runningCountDesc: "Returns Running Count of each Row.",
                     runningCountEx: "RUNNINGCOUNT(aggregate_expression)",
-
                     runningAvgDesc: "Returns Running Average of each Row",
                     runningAvgEx: "RUNNINGAVG(aggregate_expression)",
-
                     runningMaxDesc: "Returns Running Maximum Values of each Row.",
                     runningMaxEx: "RUNNINGMAX(aggregate_expression)",
-
                     runningMinDesc: "Returns Running Minimum Values of each Row.",
                     runningMinEx: "RUNNINGMIN(aggregate_expression)",
-
                     runningSumDesc: "Returns Running Sum Values of each Row.",
                     runningSumEx: "RUNNINGSUM(aggregate_expression)",
                 }
@@ -4912,7 +5893,7 @@ var Designer = {
                 openQueryHelpInfo: "Click here to check the prerequisites of OpenQuery."
             },
             sqlExtactModeLocale: {
-                incrementalRefreshText: "Identify new rows using last modified date column",
+				incrementalRefreshText: "Identify new rows using last modified date column",
                 incrementalRefreshTextViews: "Identify new/existing rows using unique/constraint key column(s)",
                 noParamsText: "The selected stored procedure doesn\'t have any parameters",
                 nodateErrMsg: "* A primary key and timestamp column is required to configure incremental update.",
@@ -5050,7 +6031,16 @@ var Designer = {
                 publishAs: "Publish As"
             },
             saveDraftText: {
-                saveDraft: "Draft auto-saved "
+                saveDraft: "Draft auto-saved ",
+				draftFailedMessageText: "Draft save failed",
+				draftSavingMessageText: "Saving draft...",
+				draftUpdatedJustNowText: "just now",
+				draftUpdatedAMinsAgoText: "a minute ago",
+				draftUpdatedMinutesAgoText: "minutes ago",
+				draftUpdatedAnHourAgoText: "an hour ago",
+				draftUpdatedHoursAgoText: "hours ago",
+				draftUpdatedYesterdayText: "yesterday",
+				draftUpdatedDaysAgoText: "days ago"
             },
             banerPanel: {
                 exportTooltip: "Export",
@@ -5067,6 +6057,7 @@ var Designer = {
                 exportImageDisplayText: "Image",
                 exportPdfDisplayText: "PDF",
                 exportExcelDisplayText: "Excel",
+				exportCsvDisplayText:"CSV",
                 exportRefreshDisplayText: "Refresh",
 				bannerRefreshDisplayText: "Clear cache and refresh",
                 backButtonTooltipText: "Back to designer",
@@ -5172,7 +6163,8 @@ var Designer = {
                 requestConnect: "Request a connector",
                 breadcrumbSelectConnector: "SELECT CONNECTOR",
                 breadcrumbConnect: "CONNECT",
-                apiDocumentationText: "API Documentation"
+                apiDocumentationText: "API Documentation",
+				userGuideText: "User Guide"
             },
             importType: {
                 importType: "Import Type",
@@ -5184,31 +6176,50 @@ var Designer = {
                 files: "File",
                 folder: "Folder"
             },
+            connectorType: {
+                connectorType: "Connector Type",
+                basic: "Basic",
+                advanced: "Advanced"
+            },
+			authenticationType: {
+                authenticationType: "Authentication Type",
+                oauth: "OAuth",
+                oauthText: "OAuth 2.0",
+                service: "Service",
+                serviceText: "Service Account"
+            },
             thousandSeparator: {
                 decimal: "Decimal Symbol",
                 group: "Group Symbol"
             },
             measureFormatting: {
-                autoText: "Auto"
+                autoText: "Auto",
+				onesText: "Ones",
+                thousandsText: "Thousands",
+                lakhsText: "Lakhs",
+                millionsText: "Millions",
+                croresText: "Crores",
+                billionsText: "Billions",
+				enableLkhsAndCrores: "Enable lakhs and crores"
             },
 			widgetConfiguration: {
                 enableAll: "Enable All",
                 noSelectionAlert: "Please select minimum one connection.",
-				uploading: 'Uploading...',
-				uploadFailed: 'Upload Failed.',
-				uploadCompleted: 'Upload Completed',
-				initiatingUpload: 'Initiating Upload...',
-				invalidSession: 'Invalid Session',
-				title: 'Widget configuration',
-				upload: 'Upload',
-				authenticationFailed:'Authentication failed for the request',
-				connectionRefused: 'Failed to connect to the Dashboard Service. Please check your network connection and try again',
-				dataFetchingError: 'An error occurred while fetching data',
-				fileUploadInProgress: 'File upload in progress. Please wait...',
-				invalidSessionForErrorMessage: 'Please make sure that you have logged into the dashboard site and your session is valid',
-				okBtnText: 'OK',
-				noBtnText: 'No',
-				yesBtnText: 'Yes'
+				uploading: "Uploading...",
+				uploadFailed: "Upload Failed.",
+				uploadCompleted: "Upload Completed",
+				initiatingUpload: "Initiating Upload...",
+				invalidSession: "Invalid Session",
+				title: "Widget configuration",
+				upload: "Upload",
+				authenticationFailed:"Authentication failed for the request",
+				connectionRefused: "Failed to connect to the Dashboard Service. Please check your network connection and try again",
+				dataFetchingError: "An error occurred while fetching data",
+				fileUploadInProgress: "File upload in progress. Please wait...",
+				invalidSessionForErrorMessage: "Please make sure that you have logged into the dashboard site and your session is valid",
+				okBtnText: "OK",
+				noBtnText: "No",
+				yesBtnText: "Yes"
             },
             connectionConfiguration: {
                 save: "Save",
@@ -5231,13 +6242,14 @@ var Designer = {
                 searchWaterMarkText: "Search Connector",
                 noSelectionAlert: "Please select minimum one connection.",
                 resetConfiguration: "Reset Configuration",
-				jsonUpload: 'JSON Upload',
-				newConnector: 'Add New Connector',
-				enableCustomConnector: 'Enable Custom Connectors',
-				uploading: 'Uploading...',
-				uploadFailed: 'Upload Failed.',
-				uploadCompleted: 'Upload Completed',
-				initiatingUpload: 'Initiating Upload...'
+				jsonUpload: "JSON Upload",
+				newConnector: "Add New Connector",
+				enableCustomConnector: "Enable Custom Connectors",
+				uploading: "Uploading...",
+				uploadFailed: "Upload Failed.",
+				uploadCompleted: "Upload Completed",
+				initiatingUpload: "Initiating Upload...",
+                dynamicDialog: "Select your flexible data"
             },
             kpiCardImageSettingsReset: {
                 titleText: "Image Settings Reset",
@@ -5248,7 +6260,7 @@ var Designer = {
                 dialogContentText: "Background image has already been configured in the Properties window. Do you want to reset the background image settings and use this column?"
             },
             rtePropertySettings: {
-                rtePropertyPanel: "Properties are handled in editor\'s toolbar. Double click on text for inline toobar or expand widget to enable floating toolbar"
+                rtePropertyPanel: "Properties are handled in editor's toolbar. Double click on text for inline toobar or expand widget to enable floating toolbar"
             },
             CardImageRestrictionInfo: {
                 text: "We cannot show more than one image per card , so this option is disabled."
@@ -5271,6 +6283,7 @@ var Designer = {
                     var: "Var",
                     custom: "Agg",
 					median: "Median",
+                    customagg: "Custom",
                 },
                 fieldView: {
                     MeasureFieldDisplayName: "Measures",
@@ -5370,7 +6383,13 @@ var Designer = {
                 defaultValueText: "default value",
                 showInViewer: "Show in Viewer",
                 dateFormat: "date format",
-                isFirstValue: "Set first value"
+                isFirstValue: "Set first value",
+				listType: "List",
+				literalType: "Literal",
+				date: "Date",
+				stringFormat: "String",
+				boolFormat: "Boolean",
+				numberFormat: "Number"
             },
             viewData: {
                 viewData: "View Underlying Data"
@@ -5379,8 +6398,8 @@ var Designer = {
                 showAllColumns: "Show all columns"
             },
             rowsRetrieved: {
-                rowsRetrieved: "rows retrieved",
-				                of: "of"
+                 rowsRetrieved: "rows retrieved",
+				 of: "of"
             },
             fetchData: {
                 fetchData: "Fetching Data..."
@@ -5402,7 +6421,7 @@ var Designer = {
                 tableFilters: "List of Table Filters",
                 addBtnText: "Add"
             },
-			fieldNameChange: {
+	    fieldNameChange: {
                 dialogTitle: "Update Table Schema",
                 menuItemText: "Configure Field Name",
                 addBtnText: "Add"
@@ -5467,7 +6486,11 @@ var Designer = {
 				mapped:"Mapped",
 				unMapped:"Unmapped",
 				checked:"Checked",
-				unChecked: "Unchecked",
+                unChecked: "Unchecked",
+                includeFutureValueText: "Include items which will be added in future.",
+				manualModeText: "Manual",
+				datasourceModeText: "Data Source",
+				userFilterQueryModeText: "Query",
                 UserFilterNameAlertTitle: "Empty or Name allready exist",
                 UserFilterEmptyName: "Name should not be empty please porvide an valid name",
                 UserFilterNameAllreadyExist:"The userfilter name already exists"
@@ -5475,7 +6498,7 @@ var Designer = {
             dataPreview: {
                 dataPreview: "Data Preview",
                 noDatasourceFound: "No data sources found",
-                noteText: "Note:",
+                noteText: "Note",
                 maximumRecordLimit: "A maximum of",
                 totalRecordCount: "records out of",
                 previewCountDefaultValue: "1000",
@@ -5483,7 +6506,7 @@ var Designer = {
             },
             popNotification: {
                 masterWidgetNoSlaveText: "There are no listener widgets for this period-over-period comparison. Please go to the Filter Configuration window to select listener widgets.",
-                slaveWidgetNoVirtualColumText: "The selected comparison period\'s visualization will be shown in a preview or when published."
+                slaveWidgetNoVirtualColumText: "The selected comparison period's visualization will be shown in a preview or when published."
             },
             gridColumnCustomize: {
                 columnCustomize: "Column Settings",
@@ -5599,7 +6622,8 @@ var Designer = {
                 drillDownDisplayName: "Drill Down",
                 filteringDisplayName: "Filter",
                 linkingDisplayName: "Link",
-                viewDataDisplayName: "View Underlying Data"
+                viewDataDisplayName: "View Underlying Data",
+				widgetLinkingDisplayName: "Widget Link"
             },
         	fitbitDataSource: {
 				activity: "User Activity",
@@ -5663,6 +6687,64 @@ var Designer = {
 				userBadges: "User Badges",
 				userProfile: "User Profile",
 			},
+            yelpDataSource: {
+                business: "Business",
+                events: "Events",
+                categories: "Category",
+                businessSearch: "Business Search",
+                phoneSearch: "Phone Search",
+                transactionSearch: "Transaction Search",
+                viewBusiness: "View Business",
+                businessMatches: "Business Matches",
+                businessReviews: "Business Reviews",
+                autocomplete: "Autocomplete",
+                showEvent: "Show Event",
+                allEvents: "All Event",
+                featuredEvents: "Featured Events",
+                allCategories: "All Categories",
+                showCategories: "Show Category",
+            },
+            gohighlevelDataSource: {
+                businesses: "Businesses",
+                businessesbylocation: "Businesses By Location",
+                calender: "Calendar",
+                calenderEvents: "CalenderEvents",
+                campaigns: "Campaigns",
+                contacts: "Contacts",
+                tasks: "Tasks",
+                appointments: "Appointments",
+                notes: "Notes",
+                search: "Search",
+                conversations: "Conversations",
+                forms: "Forms",
+                triggerLinks: "TriggerLinks",
+                location: "Location",
+                opportunities: "Opportunities",
+                surveys: "Surveys",
+                users: "Users",
+                workFlows: "WorkFlows",
+                allGroups: "All Groups",
+                allCalenders: "All Calenders",
+                allCampaigns: "All Campaigns",
+                allContacts: "All Contacts",
+                allTasks: "All Tasks",
+                allAppointmentsByContact: "All Appointments By Contact",
+                allNotes: "All Notes",
+                allDuplicateContacts: "All Duplicate Contacts",
+                allFormsSubmissions: "All Forms Submissions",
+                allForms: "All Forms",
+                allLinks: "All Links",
+                allTagsByLocation: "All Tags By Location",
+                allCustomFields: "All Custom Fields",
+                allCustomValues: "All Custom Values",
+                allTemplates: "All Templates",
+                searchOpportunities: "Search Opportunities",
+                allPipelines: "All Pipelines",
+                allSubmissions: "All Submissions",
+                allSurveys: "All Surveys",
+                allUsers: "All Users",
+                allWorkFlows: "All Work Flows",
+            },
             xeroDataSource: {
                 accounts: "Accounts",
                 allAccounts: "All Accounts",
@@ -5783,7 +6865,6 @@ var Designer = {
                 supplier: "Supplier",
                 task: "Task",
                 template: "Template",
-
                 allCategories: "All Category",
                 allClients: "All Clients",
                 viewClient: "View Client",
@@ -5925,7 +7006,6 @@ var Designer = {
                 userMeetingReports: "User Meeting Reports",
                 viewMeetingDetailReport: "View Meeting Detail Report",
                 meetingParticipantReports: "Meeting Participant Reports",
-                meetingPolls: "Meeting Polls",
                 webinarReports: "Webinar Reports",
                 webinarParticipantReports: "Webinar Participant Reports",
                 webinarPollsReports: "Webinar Polls Reports",
@@ -6057,501 +7137,6 @@ var Designer = {
                 result: "Result",
                 feeds: "Feeds",
             },
-			zuoraDataSource: {
-				account: 'Account',
-				accountingCode: 'Accounting Code',
-				invoice: 'Invoice',
-				order: 'Order',
-				subscription: 'Subscription',
-
-				allAccountingCodes: 'All Accounting Codes',
-				showAccountingCode: 'Show Accounting Code',
-				accountingPeriods: 'Accounting Periods',
-				showAccount: 'Show Account',
-				accountSummary: 'Account Summary',
-				allOrders: 'All Orders',
-				showOrder: 'Show Order',
-				subscriptionByAccount: 'Subscription By Account',
-				invoiceItems: 'Invoice Items',
-				invoicePayments: 'Invoice Payments',
-            },
-            boldDeskDataSource: {
-                brands: 'Brands',
-                fields: 'Fields',
-                fieldDependencies: 'Field Dependencies',
-                contacts: 'Contacts',
-                contactGroups: 'Contact Groups',
-                users: 'Users',
-                agents: 'Agents',
-                groups: 'Groups',
-                tickets: 'Tickets',
-                satisfactionSurvey: 'Satisfaction Survey',
-                holidays: 'Holidays',
-                worklogs: 'Worklogs',
-                cannedResponses: 'Canned Responses',
-                locals: 'Locals',
-                roles: 'Roles',
-                sla: 'SLA',
-                webhooks: 'Webhooks',
-                integrations: 'Integrations',
-
-
-                allBrands: 'All Brands',
-                allUserBrands: 'All User Brands',
-                allFieldOptions: 'All Field Options',
-                allFieldDependencies: 'All Field Dependencies',
-                getFieldDependencyById: 'Get Field Dependency By Id',
-                contactByEmail: 'Contact By Email',
-                allContacts: 'All Contact',
-                getContactById: 'Get Contact By Id',
-                allContactFields: 'All Contact Fields',
-                getContactFieldById: 'Get Contact Field By Id',
-                contactGroupByContactId: 'Contact Group By Contact Id',
-                contactNotes: 'Contact Notes',
-                allContactGroups: 'All Contact Groups',
-                getContactGroupById: 'Get Contact Group By Id',
-                contactGroupByName: 'Contact Group By Name',
-                contactsByContactGroup: 'Contacts By Contact Group',
-                contactGroupDomains: 'Contact Group Domains',
-                allContactGroupFields: 'All Contact Group Fields',
-                getContactGroupFieldById: 'Get Contact Group Field By Id',
-                contactGroupNotesById: 'Contact Group Notes By Id',
-                userProfileByEmail: 'User Profile By Email',
-                userProfile: 'User Profile',
-                contactGroupsByUserId: 'Contact Groups By User Id',
-                allUserCollections: 'All User Collections',
-                allAgents: 'All Agents',
-                getAgentById: 'Get Agent By Id',
-                agentByEmail: 'Agent By Email',
-                allAgentsCollections: 'All Agent Collections',
-                getGroupById: 'Get Group By Id',
-                agentCount: 'Agent Count',
-                allGroups: 'All Groups',
-                allGroupsCollections: 'All Groups Collections',
-                membersByGroupId: 'Members By Group Id',
-                allTickets: 'All Tickets',
-                getTicketById: 'Get Ticket By Id',
-                ticketHistories: 'Ticket Histories',
-                ticketAttachment: 'Ticket Attachment',
-                deletedTickets: 'Deleted Tickets',
-                spamTickets: 'Spam Tickets',
-                ticketUpdates: 'Ticket Updates',
-                ticketNotes: 'Ticket Notes',
-                ticketPriorities: 'Ticket Priorities',
-                ticketStatus: 'Ticket Status',
-                ticketSources: 'Ticket Sources',
-                ticketFields: 'Ticket Fields',
-                ticketForms: 'Ticket Forms',
-                allTicketsUpdates: 'All Tickets Updates',
-                ticketWatchers: 'Ticket Watchers',
-                allTiceketMetrics: 'All Ticket Metrics',
-                ticketMetricsByTicket: 'Ticket Metrics By Ticket',
-                tagsByTicket: 'Tags By Tickets',
-                webLinksByTicket: 'Web Links By Ticket',
-                ticketLinksByTicket: 'Ticket Links By Ticket',
-                linksCountByTicket: 'Links Count By Ticket',
-                ticketMessages: 'Ticket Messages',
-                messageBasedOnTicketAndMessageId: 'Message Based On Ticket And Message Id',
-                satisfactionRatings: 'Satisfaction Ratings',
-                allHolidays: 'All Holidays',
-                getHolidayById: 'Get Holiday By Id',
-                allWorklogs: 'All Worklogs',
-                worklogsUsingFilters: 'Worklogs Using Filters',
-                allCannedResponses: 'All Canned Responses',
-                getCannedResponseById: 'Get Canned Response By Id',
-                cannedResponseCategories: 'Canned Response Categories',
-                timezones: 'Timezones',
-                languages: 'Languages',
-                allRoles: 'All Roles',
-                getRoleById: 'Get Role By Id',
-                membersByRoleId: 'Members By Role Id',
-                allSLAs: 'All SLAs',
-                getSLAById: 'Get SLA By Id',
-                allWebhooks: 'All Webhooks',
-                getWebhookById: 'Get webhook By Id',
-                allLinkedItems: 'All Linked Items',
-            },
-            gohighlevelDataSource: {
-                businesses: 'Businesses',
-                businessesbylocation: 'Businesses By Location',
-                calender: "Calendar",
-                calenderEvents: "CalenderEvents",
-                campaigns: "Campaigns",
-                contacts: "Contacts",
-                tasks: "Tasks",
-                appointments: "Appointments",
-                notes: "Notes",
-                search: "Search",
-                conversations: "Conversations",
-                forms: "Forms",
-                triggerLinks: "TriggerLinks",
-                location: "Location",
-                opportunities: "Opportunities",
-                surveys: "Surveys",
-                users: "Users",
-                workFlows: "WorkFlows",
-                allGroups: "All Groups",
-                allCalenders: "All Calenders",
-                allCampaigns: "All Campaigns",
-                allContacts: "All Contacts",
-                allTasks: "All Tasks",
-                allAppointmentsByContact: "All Appointments By Contact",
-                allNotes: "All Notes",
-                allDuplicateContacts: "All Duplicate Contacts",
-                allFormsSubmissions: "All Forms Submissions",
-                allForms: "All Forms",
-                allLinks: "All Links",
-                allTagsByLocation: "All Tags By Location",
-                allCustomFields: "All Custom Fields",
-                allCustomValues: "All Custom Values",
-                allTemplates: "All Templates",
-                searchOpportunities: "Search Opportunities",
-                allPipelines: "All Pipelines",
-                allSubmissions: "All Submissions",
-                allSurveys: "All Surveys",
-                allUsers: "All Users",
-                allWorkFlows: "All Work Flows",
-            },
-            customWebDsDateRange  :{
-                none: 'None',
-                today : 'Today',
-                yesterday :'Yesterday',
-                pastWeek : 'Past Week',
-                past2Weeks : 'Past 2 Weeks',
-                pastMonth :'Past Month',
-                past2Months : 'Past 2 Months',
-                past3Months : 'Past 3 Months',
-                currentWeek : 'Current Week',
-                currentMonth : 'Current Month',
-                lastWeek : 'Last Week',
-                lastMonth : 'Last Month',
-                custom : 'Custom'
-            },
-            youScanDataSource: {
-                topics: "Topics",
-                statistics: "Statistics",
-                mentionStream: "Mention Stream",
-
-                allTopics: "All Topics",
-                topicHistroy: "Topic Histroy",
-                topictags: "Topic Tags",
-                statisticsSentiments : "Statistics Sentiments",
-                statisticsTags: "Statistics Tags",
-                statisticsWords: "Statistics Words", 
-                statisticsCountries: "Statistics Countries",
-                statisticsCities: "Statistics Cities",
-                statisticsRegionsSentiment: "Statistics Regions Sentiment",
-                statisticsSourcesSentiment: "Statistics Sources Sentiment",
-                statisticsRegionsSourcesSentiment: "Statistics Regions Sources Sentiment",
-                statisticsHistogram: "Statistics Histogram",
-                statisticsGender: "Statistics Gender",
-                statisticsAges: "Statistics Ages",
-                statisticsLink: "Statistics Links",
-                mentions:"Mentions"
-            },
-            almaDataSource: {
-                ping: "Ping",
-                districts: "Districts",
-                school: "School",
-                userRoles: "User Roles",
-                accounts: "Accounts",
-                schoolYear: "School Year",
-                attendanceCodes: "Attendance Codes",
-                gradeLevels: "Grades Level",
-                cohorts: "Cohorts",
-                diplomaTypes: "Diploma Types",
-                graduationPlans: "Graduation Plans",
-                students: "Students",
-                parents: "Parents",
-                contacts: "Contacts",
-                staff: "Staff",
-                houseHolds: "HouseHolds",
-                GPAScale: "GPA Scale",
-                gradingPeriod: "Grading Period",
-                gradingScale: "Grading Scale",
-                subject: "Subject",
-                courses: "Courses",
-                classes: "Classes",
-                assignment: "Assignments",
-                submission: "Submission",
-                tag: "Tag",
-
-                viewPing: "View Ping",
-                viewDistrict: "View District",
-                allDistrictSchools: "All District Schools",
-                allDistrictAddress: "All District Addresses",
-                allDistrictContact: "All District Contacts",
-                viewSchoolIdentity: "View School Identity",
-                schoolCalendarEventTypes: "School Calendar Event Types",
-                getCalendarEventbyId: "Get Calendar Event Type By Id",
-                schoolCalendarEvents: "School Calendar Events",
-                schoolCalendarEventsbyId: "Get Calendar Events By Id",
-                allSchoolAddresses: "All School Addresses",
-                allSchoolContacts: "All School Contacts",
-                allSchoolCustomFields: "All School Custom Fields",
-                schoolCustomFieldByDefinition: "School Custom Field By Defintion",
-                schoolCustomFieldById: "School Custom Field By Id",
-                allMedicalStatus: "All Medical Status",
-                medicalStatusByCode: "All Medical Status By Code",
-                getUserRolesById: "User Role By Role Id",
-                accountById: "Account By Id",
-                viewSchoolYear: "View School Year",
-                getSchoolYear: "Get School Year",
-                viewAttendanceCodes: "View Attendance Codes",
-                attendanceCodesById: "Attendance Codes By Id",
-                viewGradeLevels: "View Grades Level",
-                gradeLevelsById: "Grades Level By Id",
-                viewCohorts: "View Cohorts",
-                cohortsById: "Cohorts By Id",
-                viewDiplomaTypes: "View Diploma Types",
-                diplomaTypesById: "Diploma Types By Id",
-                viewGraduationPlans: "view Graduation Plans",
-                getGraduationPlansById: "Graduation Plans By Id",
-                viewStudentIdentity: "View Student Identity",
-                getStudentSchool: "Student School",
-                getStudentAddress: "Student Addresses",
-                getStudentMail: "Student Mail",
-                getStudentEmergencyContact: "Student Emergency Contact",
-                getStudentPhone: "Student Phone",
-                getStudentHousehold: "Student Household",
-                allStudentCoursesForm: "All Student Courses Forms",
-                allStudentCourses: "All Student Courses",
-                studentAllCustomFields: "All Student Custom Fields",
-                studentCustomfieldByDefinition: "Student Custom Field By Definition",
-                studentCustomFieldById: "Student Custom Field By Id",
-                diplomaTypesforStudent: "Diploma Types For Student",
-                studentEnrollmentByCode: "Student Enrollment By Code",
-                studentEnrollment: "Student Enrollment",
-                getStudentClasses: "Student Classes",
-                getStudentCohorts: "Student Cohorts",
-                getStudentAttendance: "Student Attendance",
-                getStudentExternalGrade: "Student External Grades",
-                getStudentGradeLevel: "Student Grade Level",
-                getStudentImmunization: "Student Immunization",
-                getStudentImmunizationSummary: "Student Immunization Summary",
-                getStudentMedicalAlerts: "Student Medical Alerts",
-                getStudentMedicalNotes: "Student Medical Notes",
-                getStudentPrograms: "Student Programs",
-                getStudentrelationships: "Student Relationships",
-                getStudentReportGrade: "Student Report Grade",
-                getStudentSubmission: "Student Submission",
-                getStudentSubmissionFiles: "Student Submission Files",
-                getStudentSubmissionNotes: "Student Submission Notes",
-                getStudentGraduationPlans: "Student Graduation Plans",
-                getStudentTags: "Student Tags",
-                viewParents: "View Parents",
-                getParentsById: "Get Parents By Id",
-                listOfSchoolForParents: "List of School For Parents",
-                getParentAddresses: "Parent Addresses",
-                getParentMail: "Parent Mail",
-                getParentPhones: "Parent Phone",
-                getParentsHousehold: "Parent Household",
-                allParentCustomFields: "All Parent Custom Fields",
-                parentCustomfieldByDefinition: "Parent Custom Field By Definition",
-                parentCustomFieldById: "Parent Custom Field By Id",
-                getParentRelatioship: "Parent Relatioship",
-                viewContactIdentity: "View Contact Identity",
-                getContactAddresses: "Contact Addresses",
-                getContactMail: "Contact Mail",
-                getContactPhone: "Contact Phone",
-                getContactHousehold: "Contact Household",
-                viewStaffIdentity: "View Staff Identity",
-                getSchoolByStaffId: "Get School By Staff Id",
-                getStaffAddresses: "Staff Addresses",
-                getStaffMail: "Staff Mail",
-                getStaffPhone: "Staff Phone",
-                getStaffClasses: "Staff Classes",
-                getStaffRoster: "Get Staff Roster",
-                allStaffCustomFields: "All Staff Custom Fields",
-                staffCustomfieldByDefinition: "Staff Custom Field By Definition",
-                staffCustomFieldById: "Staff Custom Field By Id",
-                getStaffByTag: "Get Staff By Tag",
-                viewHouseholds: "View Households",
-                getHouseholdById: "Get Households By Id",
-                getHouseholdaddresses: "Get Households Addresses",
-                householdAllCustomFields: "All Households Custom Fields",
-                householdCustomfieldByDefinition: "Households Custom Field By Definition",
-                householdCustomFieldById: "Households Custom Field By Id",
-                householdSubmission: "Households Submissions",
-                getHouseholdSubmissionFiles: "Households Submission Files",
-                getHouseholdSubmissionNotes: "Households Submission Notes",
-                viewGPAScale: "View GPA Scale",
-                getGradingPeriod: "Get Grading Period",
-                getGradingScale: "Get Grading Scale",
-                getSubjectById: "Get Subject By Id",
-                viewCourse: "View Course",
-                getCourseRequestForms: "Get Courses Request Form",
-                courseCustomField: "All Course Custom Field",
-                courseCustomfieldByDefinition: "Course Custom Field By Definition",
-                courseCustomFieldById: "Course Custom Field By Id",
-                viewClasses: "View Class",
-                allClassCustomFields: "All Class Custom Fields",
-                classCustomfieldByDefinition: "Class Custom Field By Definition",
-                classCustomFieldById: "Class Custom Field by Id",
-                viewClassTeacher: "View Class Teachers",
-                getTeachingAssisstant: "Get Teaching Assistant",
-                getClassRoster: "Get Class Roster",
-                getClassAssignment: "Get Class Assignment",
-                viewAssignments: "View Assignments",
-                getAssignmentGrades: "Get Assignment Grades",
-                getAssignmentGradeById: "Get Assignment Grades By Id",
-                getSubmissionById: "Get Submission By Id",
-                getsubmissionByPermission: "Get Submission By Permission",
-                viewTags: "View Tags"
-            },
-            serviceNowDataSource: {
-                table: "Table",
-                serviceCatelog: "Service Catelog",
-                scorecards: "Scorecards",
-                attachment: "Attachment",
-                changes: "Changes",
-                activitySubscriptions: "Activity Subscriptions",
-        
-                viewTable: "View Table",
-                viewTableWithId: "View Table With Id",
-                allTable: "All Table",
-                cart: "Cart",
-                catalogs: "Catalogs",
-                categoriesByCatalogId: "Categories By Catalog Id",
-                viewCatalog: "View Catalog",
-                viewCategoriesById: "View Categories By Id",
-                serviceCatalogItems: "Service Catalog Items",
-                viewItem: "View Item",
-                itemByCartId: "Item By Cart Id",
-                allWishlist: "All Wishlist",
-                wishlistByCartId: "Wishlist By Cart Id",
-                allScorecards: "All Scorecards",
-                allAttachment: "All Attachment",
-                fileById: "File By Id",
-                attachmentById: "Attachment By Id",
-                allChange: "All Change",
-                allActivitySubscriptions: "All Activity Subscriptions",
-            },
-            helpScoutDataSource: {
-                conversation: "Conversation",
-                customer: "Customers",
-                reports: "Reports",
-                team: "Team",
-                others: "Others",
-
-                conversations: "Conversations",
-                chatthreads: "Chat Threads",
-                customers: "Customers",
-                getcustomer: "Get Customer",
-                customeraddress: "Customer Address",
-                customerchathandles: "Customer Chat Handles",
-                customeremails: "Customer Emails",
-                customerphones: "Customer Phones",
-                customersocialprofiles: "Customer Social Profiles",
-                customerwebsites: "Customer Websites",
-                mailboxes: "Mailboxes",
-                getsatisfactionratingbyid: "Get Satisfaction Rating by ID",
-                companyoverallreport: "Company Overall Report",
-                conversationsoverallreport: "Conversations - Overall Report",
-                allchannelsvolumesbychannel: "All Channels - Volumes by Channel",
-                conversationsbusiesttimeofDay: "Conversations - Busiest Time of Day",
-                conversationsdrilldown: "Conversations - Drilldown",
-                conversationsdrilldownbyfield: "Conversations - Drilldown by Field",
-                conversationsnewconversations: "Conversations - New Conversations",
-                conversationsnewconversationsdrilldown: "Conversations - New Conversations Drilldown",
-                conversationsreceivedmessagesstatistics: "Conversations - Received Messages Statistics",
-                docsoverallreport: "Docs Overall Report",
-                happinessoverallreport: "Happiness Overall Report",
-                happinessratingsreport: "Happiness Ratings Report",
-                productivityoverallreport: "Productivity Overall Report",
-                productivityfirstresponsetime: "Productivity - First Response Time",
-                productivityrepliessent: "Productivity - Replies Sent",
-                productivityresolutiontime: "Productivity - Resolution Time",
-                productivityresolved: "Productivity - Resolved",
-                productivityresponsetime: "Productivity - Response Time",
-                UserorTeamoverallreport: "User/Team Overall Report",
-                userconversationhistory: "User Conversation History",
-                usercustomershelped: "User Customers Helped",
-                userdrilldown: "User Drilldown",
-                userhappiness: "User Happiness",
-                userhappinessdrilldown: "User Happiness drilldown",
-                userreplies: "User Replies",
-                userresolutions: "User Resolutions",
-                chatreport: "Chat Report",
-                emailreport: "Email Report",
-                phonereport: "Phone Report",
-                tags: "Tags",
-                listteammembers: "List Team Members",
-                teams: "Teams",
-                users: "Users",
-                workflows: "Workflows"
-
-
-            },
-            twilioDataSource: {
-                calls: "Calls",
-                recordings: "Recordings",
-                phonenumbers: "Phone Numbers",
-                messageservices: "Message Services",
-                availablephonenumbercountries: "Available Phone Number Countries",
-                accounts: "Accounts",
-                accountusagerecords: "Account Usage Records",
-                others: "Others",
-
-                allcalls: "All Calls",
-                allcallrecordings: "All call Recordings",
-                callnotifications: "Call Notifications",
-                callfeedback: "Call Feedback",
-                allaccountrecordings: "All Account Recordings",
-                allrecordingtranscriptions: "All Recording Transcriptions",
-                alltranscriptions: "All Transcriptions",
-                allconferences: "All Conferences",
-                allqueues: "All Queues",
-                allmessages: "All Messages",
-                alloutgoingcallerids: "All Outgoing Caller Ids",
-                alladdress: "All Address",
-                allavailablephonenumbercountries: "All Available Phone Number Countries",
-                allsmsshortcodes: "All Sms Short Codes",
-                allincomingphonenumbers: "All Incoming Phone Numbers",
-                allincomingphonenumberlocals: "All Incoming Phone Number Locals",
-                allincomingphonenumbermobiles: "All Incoming Phone Number Mobiles",
-                allincomingphonenumbertolltrees: "All Incoming Phone Number Toll Frees",
-                account: "Account",
-                allaccounts: "All Accounts",
-                allusagerecords: "All Usage Records",
-                allusagerecordalltimes: "All Usage Record All Times",
-                allusagerecordthismonths: "All Usage Record This Months"
-            },
-            sendGridDataSource: {
-                campaigns: "Campaigns",
-                others: "Others",
-                campaignsstats: "Campaigns Stats",
-                contacts: "Contacts",
-
-                allcampaigns: "All Campaigns",
-                senderidentities: "Sender Identities",
-                singlesends: "Single Sends",
-                searchsinglesends: "Search Single Sends",
-                segments: "Segments",
-                categories: "Categories",
-                filtermessages: "Filter Messages",
-                accounts: "Accounts",
-                allglobalsuppression: "All Global suppression",
-                allsuppressiongroups: "All suppression groups associated with user",
-                allsuppression: "All suppressions",
-                allinvalidemails: "All invalid emails",
-                automationstats: "Automation Stats",
-                singlesendstats: "Single Send Stats",
-                emailstats: "Email Stats for Categories",
-                sumofemailstats: "Sums of email stats for Categories",
-                globalemailstats: "Global email stats",
-                emailstatsprovince: "Email stats by State/Province",
-                emailstatsdevice: "Email stats by device",
-                emailstatsclient: "Email stats by client",
-                emailstatsmailbox: "Email stats by mailbox",
-                emailstatsbrowser: "Email stats by browser",
-                allbounces: "All Bounces",
-                allblocks: "All Blocks",
-                allspamreports: "All spam reports",
-                searchcontacts: "Search Contacts",
-                contactlists: "Contact lists",
-                recipients: "Recipients"
-            },
             freshdeskDataSource: {
                 allTickets: "All Tickets",
                 viewTicket: "View Ticket",
@@ -6636,7 +7221,7 @@ var Designer = {
                 slaPolicies: "SLA Policies",
                 settings: "Settings",
 				agent: "Agent",
-				allAgent: "All Agent",
+			    allAgent: "All Agent",
                 currentAgent: "Current Agent",
                 viewAgent:"View Agent",
             },            			
@@ -6855,13 +7440,170 @@ var Designer = {
 			userParameter: {
 				fullName: "Current User Full Name",
 				email: "Current User Email",
-                token: 'Current User Token',
-				tenantURL: 'Current Site URL',
-                siteIdentifier: 'Current Site Identifier'
-			},
+                token: "Current User Token",
+				tenantURL: "Current Site URL",
+				siteIdentifier: "Current Site Identifier"
+            },
 			defaultParameter: {
                 browserCulture: 'Current Browser Culture',
             },
+            tabWidget: {
+                deleteTab: "Delete Tab",
+                deleteTabAlertMsg: "Deleting this tab will remove all widgets inside it. Do you want to continue ?",
+                deleteWidget: "Delete Widget",
+                deleteWidgetAlertMsg: "Deleting the widget container will remove all widgets within. Do you want to continue ?",
+                hideTabHeader: "Hide Tab Header",
+                tabOrder: "Tab Order",
+                widgetOrder: "Widget Order"
+			},
+            downloadUpload: {
+                uploadDashboardSecondPage: "Upload Dashboards (2/2)",
+                dashboardListLabelText: "DASHBOARDS LIST",
+                allLabelText: "All ",
+                uploadedLabelText: "Uploaded",
+                pendingLabelText: "Pending",
+                configuredLabelText: "Configured",
+                needAttentionLabelText: "Needs Attention",
+                categoryLabelText: "Category",
+                nameLabelText: "Name",
+                descriptionLabelText: "Description",
+                configureDataSourceLabelText: "CONFIGURE DATA SOURCE",
+                selectDataSource: "Please select a data source to map.",
+				configureDataSource: "Configure the data source",
+                mappedExistingDatasourceText: "Mapped with data source",
+                mappedConfiguredDatasourceText: "Configured with data source",
+                dashboardUploadedText: "Dashboards Uploaded Successfully",
+                dashboardNeedsAttentionText: "Dashboards Needs Attention",
+                configuredDashboardText: "Dashboards ready to be uploaded",
+                dashboardUploadingText: "Uploading dashboard...",
+                uploadButtonLabelText: "Upload",
+                closeButtonLabelText: "Close",
+                mapToExistingDataSource: "Map to an existing data source",
+				dsPermissionInfoMessage: "You do not have permission to create data source. Please contact your System Administrator",
+				schemaValidationMessage: "The new schema differs from the existing one, the data settings in the associated widgets cannot be retained.",
+				dsTypesMisMatch: "The selected data source is of type <b>{0}</b>. You need to choose a data source of type <b>{1}</b> for the mapping to work.",
+				noDashboardAvailable: "No Dashboards are available",
+				configuredDashboard: " Dashboards are configured and ready to upload",
+				dashboardNeedAttention: " Dashboards needs attention",
+				dashboardUploaded: " Dashboards uploaded successfully",
+				uploadedSuccessfully: "Uploaded successfully",
+				configurationCompleted: "Configuration completed",
+				createNewCategory: "Create new Category ",
+                categoryErrorMessage: "There was an error in creating Category",
+				retryMessage: ". Please retry",          
+				uploadDashboardFirstPage: "Upload Dashboards (1/2)",
+				nextButtonLabelText: "Next",
+			    dragAndDropText: "Drag and drop files or ",
+				browseText: "Browse",
+				estimatedFileSize: "Preferred format: bbix or zip (up to 300MB)",
+				uploadedFilesText: "UPLOADED FILES",
+				invalidFileText: "Invalid File",
+				uploadingText: "Uploading...",
+				closeDialogTitle: "Close Upload Dashboards",
+				done: "Done",
+				removeDialogTitle: "Remove Dashboard",
+				dialogCloseButton: "Yes, Close",
+				removeDashboard: "Yes, Remove",
+				closeDialogContent1: "The uploaded files have been added as draft. You can continue uploading from the  ",
+				closeDialogContent2: " page.",
+				closeDialogContentChild: "Are you sure want to close the screen?",
+				removeContent: "The dashboard will not be upload once you remove it. You can upload the dashboard again by visiting the upload drafts page.",
+				removeContentChild: "Are you sure you want to remove?",
+	            uploadDialogCloseContent: "Dashboard upload will be continuing in the background. You can check the status of the upload progress in ",
+				uploadPageDialogCloseContent: "The changes made to to the dashboard is saved as drafts. You can restart the upload process from the ",
+				dashboardUploadFailedText: "Uploading Failed",
+				uploadDraft: "Upload Drafts",
+				failed: "Failed",
+				knowMore: " know more",
+				uploadError: "Upload Error",
+				dashboardUploadFailed: " Dashboards Upload Failed",
+				andText: " and ",
+				preparingDashboard: "Preparing dashboard",
+				preparingDatasource: "Preparing data source (",
+				mappingDsContent1: "The configured data source is used in following dashboards.",
+				mappingDsContent2: "Do you want to apply the configuration done to all the dashboards?",
+				mappingDsDialogTitle: "Configured Data Source",
+				mappingDsBtnText: "Yes, Configure",
+				downloadUpload: "Download Upload",
+				upload: "Upload",
+				errorTextchild: "An error Occured while uploading",
+                mbText: "KB",
+                documentationText: "Documentation",
+				dsErrorDialogTitle: "Error",
+				downUpDsErrorDialogQnText: "Do you want to continue ?",
+				downUpDsErrorForConfigureWidgets: "The new schema differs from the existing one, the data settings in the associated widgets will not be retained.",
+				downUpDsErrorForfilter: "The new schema differs from the existing one, the filter or the parameter configuration cannot be retained.",
+				downUpDsErrorForConfigureAndFilter: "The new schema differs from the existing one, the data settings in the associated widgets and the filter or the parameter configuration cannot be retained.",
+                ofText: " OF ",
+		previewText: "PREVIEW",
+		oauthDriveButtonLable: "Select a file from the drive",
+                oauthDriveButtonText:"Browse",
+				fileUploadFailedText: "Please upload a file to continue",
+				alertDialogContent: "This data source uses the following data sources in its configuration. Please complete the configuration of the below data sources first.",
+				linkedDsContent1: "This data source is used by the following data sources",
+				linkedDsContent2: ". Please complete the configuration of this data source first to prevent errors when configuring the mentioned data sources.",
+				alertDialogue: "alertDialogue",
+				okText: "OK",
+				noText: "No",
+				closeIconText: "Close",
+				backText: "Back",
+				RemoveText: "Remove",
+				yesButtonText: "Yes",
+				replaceDsText: "The {0} data source will replace the {1} data source.",
+				replaceDsDialogHeaderText: "Rename datasource",
+				replaceDsIconTitle: "Edit name and description",
+				replaceDashboardContent: "The {0} dashboard will replace the {1} dashboard.",
+				replaceText: "Replace",
+                existingDashboardContent: "A dashboard with the same name already exists in this category. Please change the dashboard name or choose to replace the existing dashboard.",
+                existingDataSourceContent: "A data source with the same name already exists in the server. Please change the data source name or choose to replace the existing data source.",
+				uploadingProgressText: "Uploading in progress. Please wait for the upload to complete or you can remove the uploading item to continue.",
+                invalidColumnText: "Columns:",
+                differentCategoryText: "{0} different categories",
+                dashboardSelectedText: "selected",
+                dashboards: "Dashboards",
+                deleteDashboardText: "Delete dashboards",
+                removeSelectionText: "Remove selection",
+                deleteDashboardsContent: "Are you sure you want to delete the dashboards? You can upload the dashboards again by visiting the ",
+                deleteDashboardTitleContent: "Delete Dashboard",
+                deleteButtonContent: "Yes, Delete",
+				schemaDsErrorMessage1: "Ignore schema mismatch by accepting below. You can resolve other errors by configuring these datasources individually from the configuration window.",
+				schemaDsErrorMessage2: "Ignore schema mismatch to continue uploading datasource.",
+				schemaDsError1: "Found ",
+				schemaDsError2: " schema mismatch error(s)",
+				schemaDsError3: "other error(s) ",
+				datasourceTextContent: "in the data source:",
+				acceptText: "I accept",
+				uploadAnyWay: "Upload Anyway.",
+				uploadAnyWayBtn: "Upload Anyway",
+				onlySchemaErrorText1: "You can upload despite the schema mismatch by clicking",
+				onlySchemaErrorText2: "Alternatively, you can resolve this by configuring these datasources individually from the configuration window.",
+				otherDsErrorText: "You can resolve other errors by configuring these datasources individually from the configuration window.",
+				schemaDsNoteText: "Note:",
+                renameUpdateText: "Rename/Update",
+                noneText: "None",
+                failedText: "Failed",
+                completedText: "Completed",
+            },
+			qandawidget:{
+				dialogTitle: "Provide Additional Feedback",
+                dialogReasonForDislike: "Notify the Bold BI team about the issue and choose the reason for the downvote:",
+				dialoglistItemFirst: "Irrelevant chart",
+                dialoglistItemSecond: "Inaccurate data",
+				dialoglistItemThird: "Lack of customization",
+				dialoglistItemFourth: "Error",
+				dialoglistItemFifth: "Other",
+				dialogCommentsIfAnyText: "Comments (Optional) :",
+                dialogClickToSubmitDetails: "Clicking Submit shares your question, the column names of the data source involved, and the error logs with the Bold BI support team.",
+                dialogSubmitBtn: "Submit",
+                queryWarning: "Provide a question to start the Q&A with your data.",
+                dataSourceWarning: "Attach a data source to the dashboard to start asking questions.",
+                errorContent1: "The BoldBI AI service cannot provide a solution to your question. Note the limitations in the AI widget listed ",
+                errorContent2: ", and try again by reframing the question. To see the error details, ",
+				feedbackNote: "Note: ",
+				feedbackEmailSettings: "Email settings",
+                feedbackNeedsToConfigure: " need to be configured for sending these details.",
+                descriptionContent: "The Q&A widget, powered by OpenAI, involves sending your data schema and the question for NLP analysis. Your data privacy and security are paramount. Use of the Q&A widget strictly adheres to our Privacy Policy."
+			},
 			replaceValues: { 
 				applyBtnText: "Apply",
 				cancelBtnText: "Cancel",
@@ -6882,7 +7624,19 @@ var Designer = {
 				blanksValueText: "(Blanks)",
 				blanksText: "Blanks",
 				customRuleText: "Custom Rule",
-			}
-        }
+			},
+			parameterInjection: {
+                dialogTitle: "Inject Parameters",
+                defaultParameterText: "Default Parameters",
+                parameterText: "Parameters",
+                custom: "Custom",
+                displayText: "Display Text",
+                customValueText: "Custom Value",
+                itemExist: "{0} parameter already exists.",
+                nameNotEmpty: "The parameter name should not be empty.",
+                valueNotEmpty: "The parameter value should not be empty.",
+                sameValueExists: "A similar parameter exists called {0} with the exact same parameter value."
+            }
+		}
     }
 }

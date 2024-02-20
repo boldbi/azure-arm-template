@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 7.3.8
+*  version : 7.4.11
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -16140,8 +16140,10 @@
 
 
         _setTop: function () {
-            var top = (this.element.height() - this.text.height()) / 2;
-            this.text.css("top", Math.floor(top));
+            if (this.text.height() != 0){
+                var top = (this.element.height() - this.text.height()) / 2;
+                this.text.css("top", Math.floor(top));
+            }
         },
 
 

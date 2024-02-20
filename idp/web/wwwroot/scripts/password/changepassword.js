@@ -267,6 +267,7 @@ function onChangePasswordClick() {
                     } else {
                         hideWaitingPopup('content-area');
                         SuccessAlert(window.Server.App.LocalizationContent.UpdatePassword, window.Server.App.LocalizationContent.PasswordSuccess, 7000);
+                        window.location.reload();
                     }
                 }
                 $(".popover").hide();

@@ -25,14 +25,15 @@
     var windowsADclass = showExternalAuthentication ? "col-xs-6 no-padding " : string.Empty;
     var authSettings = ViewBag.AuthSettings as List<AuthSettings>;
     var showAuthLogin = authSettings != null && authSettings.Count > 0;
-    var authLogoPrefixUrl = new Uri(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp).GetLeftPart(UriPartial.Authority) + (Context.Request.PathBase.ToString().ToLower().Equals("/api") ? string.Empty : Context.Request.PathBase.ToString()) + "/content/images/application/authlogo/";
     string openidLoginUrl = Url.Action("OpenIdLogin", "accounts");
     string oauthLoginUrl = Url.Action("OAuthLogin", "accounts");
     string jwtLoginUrl = Url.Action("JwtLogin", "accounts");
     var azureb2cloginAction = ViewBag.ReturnURL != null ? Url.Action("AzureB2CLogin", "accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("AzureB2CLogin", "accounts");
+    var baseURL = GlobalAppSettings.SystemSettings.BaseUrl;
 }
 @if (showExternalAuthentication || showAuthLogin)
 {
+    <meta name="base_url" content="@baseURL" />
     <div class="external-container">
         <div class="divider-container col-xs-12">
             <hr class="connect-line-left"><div class="content text-body">@T["or"]</div><hr class="connect-line-right">
@@ -80,43 +81,34 @@
 
                         if (auth.AuthProvider == AuthProvider.AzureADB2C)
                         {
-                            <form method="post" action="@azureb2cloginAction" class="external-login-buttons">
-                                <button id="azureb2c-login" class="login-provider auth-login-button link-button button-style login-button-openid" type="submit">
-                                    @Html.Hidden("provider", "Azure AD B2C")
-                                    <input type="hidden" id="azure-email" name="email" />
-                                    @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
-                                    {
-                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
-                                    }
-                                    else
-                                    {
-                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + auth.AzureADB2CSettings.Logo)" alt="@T["AuthLogo"]" />
-                                    }
-                                        <span class="login-provider-name"> Sign in with @auth.AzureADB2CSettings.AzureB2CProviderName</span>
-                                </button>
-                            </form>
+                            if(GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                            {
+                                <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "IsPopUp", true}, { "AuthProvider", auth.AuthProvider } })
+                            }
+                            else
+                            {
+                                <form method="post" action="@azureb2cloginAction" class="external-login-buttons">
+                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                        @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "AuthProvider", auth.AuthProvider } })
+                                </form>
+                            }
                         }
 
                         if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD && auth.AuthProvider != AuthProvider.AzureADB2C)
                         {
-                            <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
-                                <input type="hidden" value="@ViewBag.ReturnURL" id="authReturnUrl" name="authReturnUrl" />
-                                @Html.Hidden("tenantId", auth.TenantId.ToString())
-                                @Html.Hidden("authProviderLocation", auth.AuthProviderLocation.ToString())
-                                <button id="@auth.AuthType.ToString().ToLower()-login" class="login-provider auth-login-button link-button button-style login-button-openid" type="submit">
-
-                                    @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
-                                    {
-                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
-                                    }
-                                    else
-                                    {
-                                        <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="@T["AuthLogo"]" />
-                                    }
-
-                                        <span class="login-provider-name">Sign in with @(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
-                                </button>
-                            </form>
+                            if(GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                            {
+                                <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData){ {"IsPopUp", true}, {"AuthProvider", auth.AuthProvider} })
+                            }
+                            else
+                            {
+                                <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
+                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                        @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "AuthProvider", auth.AuthProvider } })
+                                </form>
+                            }
                         }
                     }
                 }

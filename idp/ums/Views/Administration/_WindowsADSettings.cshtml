@@ -8,7 +8,7 @@
             <input type="hidden" name="windowsAuthenticationProvider" value="@ViewBag.WindowsAdSettings.AuthProvider">
             <div class="col-xs-12 no-padding margin-bottom">
                 <div class="material-switch inline-align">
-                    <input type="checkbox" id="enable-windows-ad" ng-model="windowsAdEnabled" />
+                    <input type="checkbox" id="enable-windows-ad" ng-model="windowsAdEnabled" ng_change="hideValidationMessage(IsEnabled, 'windowsad')" />
                     <label for="enable-windows-ad" class="label-primary"></label>
                 </div>
                 <div class="app-textbox-label inline-align">
@@ -23,6 +23,7 @@
                     </div>
                     <div ng-class="(windowsadSettingsForm.windowsadSettingsDomain.$dirty && windowsadSettingsForm.windowsadSettingsDomain.$invalid) ? 'has-error' : ''">
                         <input type="text" class="form-control no-margin" ng-model="windowsadSettingsDomain" ng-init="windowsadSettingsDomain='@domain'" ng-pattern="@WindowsADRegEx" name="windowsadSettingsDomain" placeholder="@T["Active Directory Domain"]" id="windowsad-Settings-Domain" data-ng-disabled="!windowsAdEnabled" required/>
+                        <span class="validation-message top-padding" ng-show="windowsadSettingsForm.windowsadSettingsDomain.$error.required  && windowsadSettingsForm.windowsadSettingsDomain.$dirty && windowsAdEnabled">@T["Please enter domain."]</span>
                         <span class="validation-message top-padding" ng-show="windowsadSettingsForm.windowsadSettingsDomain.$error.pattern && windowsadSettingsForm.windowsadSettingsDomain.$dirty && windowsAdEnabled">@T["Please enter a valid domain."]</span>
                     </div>
                     <div class="info-message domain no-padding">@T["The active directory server domain name."]</div>

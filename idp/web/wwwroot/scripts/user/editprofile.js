@@ -296,6 +296,7 @@ $(document).on("click", "#avatar-button-click", function () {
     $(".image-validation-message").text("");
     document.getElementById("avatar-upload-box").ej2_instances[0].show();
     document.getElementById("avatar-upload-box").ej2_instances[0].refresh();
+    $("#image-preview-text").show();
 
     $("#cancel-avatar-popup").on("click", function () {
         $("#image-preview-text").show();

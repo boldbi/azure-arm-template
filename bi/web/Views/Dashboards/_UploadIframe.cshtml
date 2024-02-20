@@ -8,6 +8,7 @@
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var itemAddPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
     var canCreateCategory = itemAddPermissions[ItemType.Category];
+    var appFontStyle = globalAppSettings != null && globalAppSettings.SystemSettings != null && !globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? globalAppSettings.SystemSettings.FontPreference : ServerAppConfig.FontFamily;
     var enableManualOverWrite = ViewData["EnableManualOverWrite"] != null ? Convert.ToBoolean(ViewData["EnableManualOverWrite"]) : false;
 }
 <head>
@@ -73,10 +74,10 @@
     @if (isSelfHosted)
     {
         <environment include="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl)" />
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(_globalAppSettings?.SystemSettings?.FontPreference, dashboardServerResourceUrl)" />
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl)" />
         </environment>
     }
     <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>

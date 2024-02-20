@@ -163,9 +163,11 @@
                     numberCardDataReq: "1 value and 0 or 1 image/sparkline.",
                     richTextEditorDataReq: "Text",
                     popDataReq: "1 column.",
-                    customWidgetOne: "1",
-                    customWidgetOneOrMore: "1 or more",
-                    customWidgetAnd: "and",
+                    customWidgetOne: " 1 ",
+                    customWidgetOneOrMore: " 1 or more ",
+                    customWidgetAnd: " and ",
+					customWidgetRequiresAtleast: " requires atleast ",
+                    customWidgetToRender: " to render.",
                     combineWidgetDataReq: "Any widgets",
                     lineDataReq: "None",
                     dateBucketDataReq: "None"
@@ -7602,7 +7604,7 @@
                 feedbackNeedsToConfigure: " need to be configured for sending these details.",
                 descriptionContent: "The Q&A widget, powered by OpenAI, involves sending your data schema and the question for NLP analysis. Your data privacy and security are paramount. Use of the Q&A widget strictly adheres to our Privacy Policy."
 			},
-		    replaceValues: { 
+			replaceValues: { 
 				applyBtnText: "Apply",
 				cancelBtnText: "Cancel",
 				updateBtnText: "Update",
@@ -7622,7 +7624,19 @@
 				blanksValueText: "(Blanks)",
 				blanksText: "Blanks",
 				customRuleText: "Custom Rule",
-			}
+			},
+			parameterInjection: {
+                dialogTitle: "Inject Parameters",
+                defaultParameterText: "Default Parameters",
+                parameterText: "Parameters",
+                custom: "Custom",
+                displayText: "Display Text",
+                customValueText: "Custom Value",
+                itemExist: "{0} parameter already exists.",
+                nameNotEmpty: "The parameter name should not be empty.",
+                valueNotEmpty: "The parameter value should not be empty.",
+                sameValueExists: "A similar parameter exists called {0} with the exact same parameter value."
+            }
 		}
     }
 }

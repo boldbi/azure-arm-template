@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 7.3.8
+*  version : 7.4.11
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -20363,6 +20363,8 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
 
             popupShown: null,
 
+            clearFilterText: null,
+
             beforePopupShown: null,
 
             beforePopupHide: null,
@@ -21563,6 +21565,7 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
         },
 
         _refreshSearch: function () {
+            this._trigger("clearFilterText", {action: "clearFilter"});
             this._resetSearch();
             this._refreshPopup();
         },
@@ -36700,7 +36703,9 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
         _windowResize: function () {
             if (this.isOpen) {
                 this._makePopupPositionDecision();
-                this.cancelClick();
+                if(!(/Android/i.test(navigator.userAgent))){
+                    this.cancelClick();
+                }
             }
         },
         _destroy: function() {

@@ -1,6 +1,5 @@
 ﻿
 $(document).ready(function () {
-    enableMasterCheckOption();
     createWaitingPopup("master-site-change");
 
     String.prototype.format = function () {
@@ -29,7 +28,7 @@ $(document).ready(function () {
     $("#change-master").change(function () {
         var checkBox = $("#change-master").is(':checked');
         if (checkBox) {
-            tenantType = document.getElementById("tenant-type").value;
+            tenantType = document.getElementById("tenant-type").ej2_instances[0].value;
             tenantType = tenantType == "BoldBIOnPremise" ? 3 : 4;
             getMasterSite(tenantType);
         }
@@ -114,14 +113,4 @@ function onMasterDialog() {
 function onMasterDialogClose() {
     $(".make-master-checkbox").attr("checked", false);
     onCloseMasterDialog();
-}
-
-$(document).on("change", "#tenant-type_hidden", function () {
-    enableMasterCheckOption();
-});
-
-function enableMasterCheckOption() {
-    if ($("#tenant-type_hidden").val() == "BoldReportsOnPremise") {
-        $(".make-master-checkbox").css("display", "none");
-    }
 }

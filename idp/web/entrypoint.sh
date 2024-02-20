@@ -5,8 +5,16 @@ puppeteer_location="$app_data_location/bi/dataservice/puppeteer"
 product_json_path="$app_data_location/configuration/product.json"
 config_xml_path="$app_data_location/configuration/config.xml"
 
+if [ -d "$app_data_location/configuration" ]; then
+  echo "Configuration directory exists"
+else
+  mkdir -p "$app_data_location/configuration" && chmod 777 "$app_data_location/configuration"
+fi
+
+echo "Running installutilty..."
 dotnet appdatafiles/installutils/installutils.dll
 
+echo "Preparing and organizing upgrade logs for the current version..."
 upgrade_log() {
     if [ -f $config_xml_path ]; then
 
@@ -32,6 +40,7 @@ upgrade_log() {
 }
 upgrade_log
 
+echo "Starting Puppeteer package installation process..."
 if [ -d "$app_data_location" ]; then
 	if [ ! -d "$puppeteer_location/Linux-901912" ]; then
 		[ ! -d "$app_data_location/bi" ] && mkdir -p "$app_data_location/bi"
@@ -47,4 +56,5 @@ if [ -d "$app_data_location" ]; then
 	fi
 fi
 
+echo "Executing ID-Web service..."
 dotnet Syncfusion.Server.IdentityProvider.Core.dll
