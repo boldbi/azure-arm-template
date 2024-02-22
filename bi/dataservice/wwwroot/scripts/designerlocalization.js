@@ -2647,7 +2647,8 @@ var Designer = {
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
 				joinMessagePostgreSql: "PostgreSQL does not support the not equal, less than or equal to, or greater than or equal to operators for the FULL OUTER JOIN.",
 				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
-				combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode."
+                combineDsWithCustomQueryAlertMessage: "The combine data sources feature did not support data sources in code view mode.",
+                firstAndLastMessage: "The First and Last option is not supported for aggregate expressions."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -2729,7 +2730,8 @@ var Designer = {
                 LargeFileSizeAlert: "Confirm File Import",
                 JoinAlert: "Join Alert",
                 relativeDatesAlert: "Relative Dates Alert",
-                fileNotFound: "File Not Found"
+                fileNotFound: "File Not Found",
+                firstAndLast: "Aggregate expressions not supported"
             },
             linkedAccountsWindow: {
                 title: "Accounts",
