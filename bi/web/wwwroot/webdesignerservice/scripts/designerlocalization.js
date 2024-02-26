@@ -2495,6 +2495,11 @@ var Designer = {
                 etlContinuebtnText: "Continue with connector",
                 facebookAdsDialogmsgETL:"We are currently renewing Facebook Ads app verification with Meta. As a result, we recommend using Bold ETL to obtain data from Facebook Ads. To initiate this process, click on the 'Redirect to Bold ETL' button."
             },
+            errorCodes: {
+                deserializingError: 'An error ​occurred while deserializing the request payload.',
+                fetchingError: 'An error occurred while fetching data from the data source',
+                formattingError:'An error occurred while formatting the widget data',
+            },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
                 fileExistInCategory: "Already exists in the category",
