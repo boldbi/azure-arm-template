@@ -2492,13 +2492,24 @@ var Designer = {
                 exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed.",
                 dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
                 etlDialogHeaderText: "Redirect to Bold ETL",
-                etlContinuebtnText: "Continue with connector",
-                facebookAdsDialogmsgETL:"We are currently renewing Facebook Ads app verification with Meta. As a result, we recommend using Bold ETL to obtain data from Facebook Ads. To initiate this process, click on the 'Redirect to Bold ETL' button."
+                etlContinuebtnText: "Continue with connector"
             },
             errorCodes: {
                 deserializingError: 'An error ​occurred while deserializing the request payload.',
                 fetchingError: 'An error occurred while fetching data from the data source',
                 formattingError:'An error occurred while formatting the widget data',
+				KeyNotConfigured : 'OpenAI key or model name not configured.',
+				InvalidAPIKey : 'Invalid OpenAI API key. Please ensure that the provided API key is accurate and has not expired.',
+				IncorrectModelName : 'An error has occurred while connecting to the AI service. Please double-check the configured model name and attempt the operation again.',
+				InvalidQuestion : 'The provided question lacks details necessary for widget generation. Kindly revise the question and try again.',
+				InvalidAIResponse : 'BoldBI AI failed to bring required properties for the question. Kindly rephrase the question and report to BoldBI support if issue not resolved.',
+				FieldInfoEmpty : 'The provided question lacks details necessary for widget generation. Kindly revise the question and try again.',
+				UnsupportedWidgetType : 'The requested widget is not supported. Rephrase questions with different charts.',
+				InvalidSummaryType : 'Cannot apply function to the given field. Kindly rephrase the question and report to BoldBI support if issue not resolved.',
+				InvalidDataForColumn : 'The specified column does not contain the values needed to answer the question. Please verify and provide the exact values for fetching the relevant data.',
+				IncorrectValueFormatInFilter : 'The value of the given field did not have any matching values.',
+				InvalidColumnName:'BoldBI AI failed to find the required field for the question. Kindly rephrase the question and report to BoldBI support if issue not resolved.',
+				InvalidValues : 'BoldBI AI failed to generate required properties for the question. Kindly rephrase the question and report to BoldBI support if issue not resolved.',
             },
             browseDialogMessages: {
                 selectCategory: "Please select a category",
