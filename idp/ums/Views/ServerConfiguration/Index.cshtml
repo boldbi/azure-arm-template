@@ -13,6 +13,7 @@
     var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
     var postgresSQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQL_Connection_Parameters);
     var mySQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MySQL_Connection_Parameters);
+    var nonce = Context.Items["ScriptNonce"];
 }
 <!DOCTYPE html>
 <html>
@@ -20,6 +21,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+
     <meta name="has-drm-configuration" content="@hasDRMConfiguration">
     <meta name="IdStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdStorageConfiguration)" />
     <meta name="AdminCreation" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation)" />
@@ -34,11 +36,11 @@
     @await Html.PartialAsync("../Shared/_ThemeReference")
 
     <link rel="stylesheet" href="~/bundles/css/system-configuration.css" asp-append-version="true" />
-    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/system-configuration.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/system-configuration.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
 
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]">
         var idStorageConfiguration = $('meta[name="IdStorageConfiguration"]').attr("content");
         var adminCreation = $('meta[name="AdminCreation"]').attr("content");
         var serverStorageConfiguration = $('meta[name="ServerStorageConfiguration"]').attr("content");
@@ -69,7 +71,7 @@
         var isBoldReports = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldReports.DisplayName)".toLowerCase() == "true";
         var connectionType = "@connectionType";
         var storageAccountName = "@storageAccountName";
-        var accessKey = "@Html.Raw(accessKey)";
+        var accessKey = "@accessKey";
         var blobServiceEndpoint = "@blobServiceEndpoint";
         var containerName = "@containerName";
         var hasDRMConfiguration = "@ViewBag.HasDRMConfiguration";
@@ -82,7 +84,6 @@
         var actionType = "";
         var biProductname = "@AppBranding.Bold.ProductName";
         var reportsProductname = "@AppBranding.BoldReports.ProductName";
-
         $(document).ready(function () {
             $(document).click(function (e) {
                 if (e.target.id != "info-icon") {
@@ -193,8 +194,8 @@
                                 </div>
                             </div>
                             <div class="col-xs-12 upload-footer btn-holder">
-                                <input id="return-startup-home" type="button" value="@T["Back"]" onclick="returnStartupHome()" class="col-xs-6 remove-margin-left secondary-button">
-                                <input disabled id="confirm-license" type="button" value="@T["Next"]" onclick="confirmLicenseUpdate()" class="col-xs-6 proceed-button">
+                                <input id="return-startup-home" type="button" value="@T["Back"]"  class="col-xs-6 remove-margin-left secondary-button">
+                                <input disabled id="confirm-license" type="button" value="@T["Next"]"  class="col-xs-6 proceed-button">
                             </div>
                         </div>
                     </div>

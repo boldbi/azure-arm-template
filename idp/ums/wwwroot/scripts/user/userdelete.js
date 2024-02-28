@@ -29,4 +29,6 @@ function deleteSingleUser(userId) {
         $("#userprofile-delete-confirmation").ejDialog("close");
     });
 }
-
+$(document).on("click", "#user-delete-dialog-close,#delete-dialog-close", function () {
+    onDeleteDialogClose()();
+});

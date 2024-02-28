@@ -3,6 +3,7 @@
     var currentUserEmail = (Context.User.Identity).Name;
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var absoluteUrl = @Url.Action("logout", "accounts") + "?returnUrl=" + @WebUtility.UrlEncode(requestUrl.AbsoluteUri);
+    var loginLogoSrc = Url.Content("~/logos?type=login");
 
 }
 <!DOCTYPE html>
@@ -17,11 +18,19 @@
     <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
 </head>
 <body>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        $(document).ready(function () {
+            var loginLogoElement = $('.login-logo');
+            loginLogoElement.on("error", function () {
+                $(this).attr('src', '@loginLogoSrc');
+            });
+        });
+    </script>
     <div class="base-container-bg">
         <div class="base-conatiner" id="base-conatiner">
             <div id="main-div">
                 <div class="app-logo">
-                    <img alt="@T["Login Logo"]" src="@Url.Content("~/logos?type=login")" onerror="this.onerror=null;this.src='@Url.Content("~/content/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.LoginLogo)';" />
+                    <img alt="@T["Login Logo"]" src="@loginLogoSrc" class="login-logo">
                 </div>
                 <div class="secondary-div">
                     <div class="page-title">

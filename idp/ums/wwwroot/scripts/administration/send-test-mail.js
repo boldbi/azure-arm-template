@@ -176,3 +176,7 @@ function showTestMailBox() {
     $("#test-mail-dialog .e-footer-content").find("button").last().hide();
     $(".test-mail-info, #test-mail-form, #test-mail-box").show();
 }
+
+$(document).on("click", "#test-mail-button", function () {
+    testMailTrigger();
+});

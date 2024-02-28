@@ -27,17 +27,18 @@
 </head>
 
 <body>
-    <script src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/homepage.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp - append - version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+       <script nonce="@Context.Items["ScriptNonce"]">
         var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
-        var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();
+        var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
+           var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
     </script>
     <div id="site-down-alert"></div>
     @await Html.PartialAsync("_SiteDownAlert")
     <div id="header-container">
-        <img class="boldbi-logo" src="@Url.Content("~/logos?type=login")" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)';" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
+        <img id ="boldbi-logo" class="boldbi-logo" src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
         <div class="logout-container">
             <a class="logout" href="@Url.Action("logout", "accounts")?returnUrl=@currentUrlPath">@T["Sign out"]</a>
         </div>
@@ -77,7 +78,7 @@
                         <a class="dns-link site-row-container" rel="alternate" hreflang="en" href="@Model[i].SiteUrl" target="_blank">
                             <div class="user-dns">
                                 <div class="image-div site-logo-container">
-                                    <div class="lazyload img-loader" data-class="site-logo" data-id="homepagelogo" data-src="@(Model[i].UseCustomBranding ? GlobalAppSettings.SystemSettings.LoginLogo : Url.Content(Model[i].SiteUrl + "/get-client-logo"))" data-alt="boldbi" data-width="110px" data-height="25px" data-default="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)';"></div>
+                                    <div class="lazyload img-loader" data-class="site-logo" data-id="homepagelogo" data-src="@(Model[i].UseCustomBranding ? GlobalAppSettings.SystemSettings.LoginLogo : Url.Content(Model[i].SiteUrl + "/get-client-logo"))" data-alt="boldbi" data-width="110px" data-height="25px" data-default="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)"></div>
                                 </div>
                                 <div class="dns-org-name site-name" title="@Model[i].TenantName" data-toggle="tooltip">
                                     @Model[i].TenantName
@@ -105,23 +106,32 @@
         </div>
     </div>
 
-    <script>
-        $(window).load(function () {
-            $('.lazyload').each(function () {
-                img = document.createElement('img');
-                img.onload = imageOnLoad;
-                img.src = $(this).attr("data-src");
-                img.alt = $(this).attr("data-alt");
-                img.id = $(this).attr("data-id");
-                $(img).attr("onerror", $(this).attr("data-default"));
-                $(img).addClass($(this).attr("data-class"));
-                img.style = "display: none";
-                $(this).parent().append(img);
-                refreshLoginFooter();
-            });
+       <script nonce="@Context.Items["ScriptNonce"]">
+       $(window).on('load', function() {
+    $('.lazyload').each(function() {
+        var img = $('<img>')
+            .on('load', imageOnLoad)
+            .attr({
+                src: $(this).attr("data-src"),
+                alt: $(this).attr("data-alt"),
+                id: $(this).attr("data-id"),
+            })
+            .on('error', function() {
+                        $(this).attr('src', defaultErrorImageSrc);
+            })
+            .addClass($(this).attr("data-class"))
+            .css('display', 'none');
 
-            refreshLoginFooter();
+        // Handling case where src becomes undefined
+        img.on('error', function() {
+                    $(this).attr('src', defaultErrorImageSrc);
         });
+
+        $(this).parent().append(img);
+    });
+
+    refreshLoginFooter();
+});
 
         function imageOnLoad() {
             $(this).show().parent().find("div.lazyload").remove();

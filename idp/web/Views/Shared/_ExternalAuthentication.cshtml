@@ -31,6 +31,29 @@
     var azureb2cloginAction = ViewBag.ReturnURL != null ? Url.Action("AzureB2CLogin", "accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("AzureB2CLogin", "accounts");
     var baseURL = GlobalAppSettings.SystemSettings.BaseUrl;
 }
+<script nonce="@Context.Items["ScriptNonce"]">
+    var defaultErrorImageSrcFroAzure = "@Url.Content("~/images/common/application/azuread.png")";
+    document.addEventListener("DOMContentLoaded", function () {
+        var logoimageForAzure = document.getElementById("azuread-error-image");
+        if (logoimageForAzure) {
+            logoimageForAzure.onerror = function () {
+                this.onerror = null;
+                this.src = defaultErrorImageSrcFroAzure;
+            };
+        }
+       
+    });
+        var defaultErrorImageSrcForWindows = "@Url.Content("~/images/common/application/windows-ad.svg")";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimageForWindows = document.getElementById("windows-ad-error-image");
+        if (logoimageForWindows) {
+            logoimageForWindows.onerror = function () {
+                this.onerror = null;
+                this.src = defaultErrorImageSrcForWindows;
+            };
+        }
+    });
+</script>
 @if (showExternalAuthentication || showAuthLogin)
 {
     <meta name="base_url" content="@baseURL" />
@@ -55,7 +78,7 @@
                                 @Html.AntiForgeryToken()
                                 @Html.Hidden("provider", item.DisplayName)
                                 <input type="hidden" id="azure-email" name="email" />
-                                <img class="external-provider" alt="Azure AD" src="@microsoftLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/azuread.png")') this.src = '@Url.Content("~/images/common/application/azuread.png")';" />
+                                <img id="azuread-error-image" class="external-provider" alt="Azure AD" src="@microsoftLogoLink" />
                                 <span id="adfs-login-text" class="login-provider-name">@T["Sign in with Microsoft"]</span>
                                 <div id="validate-azure-user" class="error-message validation-holder">
                                 </div>
@@ -72,7 +95,7 @@
                         {
                             <form id="login-button-windows" class="external-login-buttons">
                                 <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
-                                        <img class="external-provider" alt="Windows AD" src="@windowsADLogoLink" onerror="if (this.src != '@Url.Content("~/images/common/application/windows-ad.svg")') this.src = '@Url.Content("~/images/common/application/windows-ad.svg")';" />
+                                        <img id="windows-ad-error-image" class="external-provider" alt="Windows AD" src="@windowsADLogoLink" />
                                     <span class="windows-ad-login-text">@T["Sign in with Windows AD"]</span>
                                     <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
                                 </button>

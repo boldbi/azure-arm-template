@@ -46,3 +46,11 @@ function fnCopyClientCredentials(inputId, buttonId) {
         $(buttonId).tooltip();
     }, 3000);
 }
+
+$(document).on("click", "#api-copy-client-id", function () {
+    copyToClipboard('#myApiId', '#api-copy-client-id');
+});
+
+$(document).on("click", "#api-copy-client-secret", function () {
+    copyToClipboard('#my-api-secret', '#api-copy-client-secret');
+});

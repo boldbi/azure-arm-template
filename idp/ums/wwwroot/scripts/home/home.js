@@ -23,6 +23,13 @@
             $("#site-down-alert-content").show();
         }
     }
+
+
+    $('#boldbi-logo')
+        .on("error", function () {
+            $(this).attr("src", defaultErrorImageSrc);
+        });
+
 });
 
 $('body').on('click', 'a', function () {

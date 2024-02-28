@@ -11,13 +11,25 @@
         <head>
             <meta name="viewport" content="width=device-width" />
             <link rel="stylesheet" href="~/bundles/css/error-page-layout.css" asp-append-version="true" />
+        <script nonce="@Context.Items["ScriptNonce"]">
+            var defaultErrorImageSrc = "@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)";
+            document.addEventListener("DOMContentLoaded", function () {
+                var logoimage = document.getElementById("sitenotfoundimage");
+                if (logoimage) {
+                    logoimage.onerror = function () {
+                        this.onerror = null;
+                        this.src = defaultErrorImageSrc;
+                    };
+                }
+            });
+        </script>
         </head>
     <body >
         <div class="error-layout">
             <div class="error-display">
                 <div class="error-innerdisplay">
                     <div class="error-headerlogo">
-                        <img src="@Url.Content("~/logos?type=login")" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';">
+                        <img id="sitenotfoundimage" src="@Url.Content("~/logos?type=login")">
                     </div>
                     <div>
                         <img src="@imageHelper.SiteNotFoundImage()" class="error-logo">

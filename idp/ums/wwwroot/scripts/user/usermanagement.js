@@ -11,6 +11,8 @@ var userAccessName = "";
 var role = "";
 
 $(document).ready(function () {
+    $("#grant-user-button").on("click", onAddTenantsDialogOpen);
+    $("#assign-user-role-button").on("click", onMakeMultipleAdminDialogOpen);
     var isFirstRequest = false;
     addPlacehoder("#search-area");
     createWaitingPopup('user_grid');
@@ -1146,3 +1148,9 @@ function resetFilter() {
     userGrid.refresh();
     hideWaitingPopup("user_grid");
 }
+
+$(document).on("click", "#user-delete-dialog-close,#delete-dialog-close", function () {
+    onDeleteDialogClose()();
+});
+
+$(document).on("click", "#import-button", SaveUserListFromCSV);

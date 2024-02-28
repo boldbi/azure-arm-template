@@ -485,7 +485,10 @@ $(document).ready(function () {
         }
         else {
             if (this.id === 'update-oauth-settings' || this.id === 'update-openid-settings') {
-                updateSetting(authPrefix);
+                var isValidGroupImportDetails = validateTextBoxes(authPrefix);
+                if (isValidGroupImportDetails) {
+                    updateSetting(authPrefix);
+                }
             }
             else if (this.id === 'update-jwt-settings') {
                 updateJwtSetting();
@@ -956,6 +959,22 @@ function getDefaultAuthDisplayName(provider) {
     }
 }
 
+function validateTextBoxes(authPrefix) {
+    var isValid = true;
+    var authElement = authPrefix == "oauth" ? $('#oauth-group-import .input-field-margin input[type="text"]') : $('#openid-group-import .input-field-margin input[type="text"]')
+    authElement.each(function () {
+        if ($(this).closest('.input-field-margin').is(':visible') && $(this).val() === '') {
+            $(this).siblings('.validation-message').removeClass('display-none');
+            $(this).closest(".input-field-margin").addClass("has-error");
+            isValid = false;
+        } else {
+            $(this).siblings('.validation-message').addClass('display-none');
+            $(this).closest(".input-field-margin").removeClass("has-error");
+        }
+    });
+    return isValid;
+}
+
 function fnCopySigningKey(inputId, buttonId) {
     if ($("#enable-jwt").is(":checked")) {
         if (typeof (navigator.clipboard) != 'undefined') {
@@ -1077,3 +1096,27 @@ function ongroupImportchange(args) {
             break;
     }
 }
+
+$(document).on("click", "#generate-signing-key", function () {
+    onRegenerateSigningKeyDialogOpen();
+});
+
+$(document).on("click", "#copy-signing-key", function () {
+    fnCopySigningKey('#jwt-signing-key', '#copy-signing-key');
+});
+
+$(document).on("click", "#openid-mobile-callback-link-copy", function () {
+    copyToClipboard('#openid-mobile-callback-link', '#openid-mobile-callback-link-copy');
+});
+
+$(document).on("click", "#openid-callback-link-copy", function () {
+    copyToClipboard('#openid-callback-link', '#openid-callback-link-copy');
+});
+
+$(document).on("click", "#oauth-mobile-callback-link-copy", function () {
+    copyToClipboard('#oauth-mobile-callback-link', '#oauth-mobile-callback-link-copy');
+});
+
+$(document).on("click", "#oauth-callback-link-copy", function () {
+    copyToClipboard('#oauth-callback-link', '#oauth-callback-link-copy');
+});

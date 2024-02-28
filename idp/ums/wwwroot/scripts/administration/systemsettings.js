@@ -1038,3 +1038,10 @@ function addFooterSeparator() {
 function getSslValue() {
     return document.getElementById("enable-ssl").ej2_instances[0].value;
 }
+
+$(document).ready(function () {
+    $("#display-login-logo,#mainscreen_logo_img,#favicon_logo_img,#email_logo_img,#display-powered-logo").on("error", function () {
+        $(this).off("error"); // Remove the error event handler to prevent an infinite loop
+        $(this).attr("src", '@Url.Content("~/images/boldid/application/" + IconFileNames.DefaultErrorSquareImage)');
+    });
+});

@@ -1,7 +1,7 @@
 ﻿var isKeyUp = false;
 $(document).ready(function () {
+    $(document).on("click", "#change-password-save", onChangePasswordClick);
     if (isShow2FA) {
-
         if ($("#security-setting-container").is(":visible")) {
             if (location.href.match(/2fa/)) {
                 $("#2fa").tab("show");
@@ -521,3 +521,10 @@ function validateVerificationCode(verificationCode) {
         $(".verification-ok-button").attr("disabled", true);
     }
 }
+$(document).on("click", "#user-id-copy", function () {
+    copyToClipboard('#user-id', '#user-id-copy');
+});
+
+$(document).on("click", "#recovery-code-copy", function () {
+    copyToClipboard('#copy-recovery', '#recovery-code-copy');
+});

@@ -29,14 +29,31 @@
     var userId = Context.User.GetUserId();
     var isAdmin = await new UserManagement().IsAdmin(userId);
     var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+    var applicationLogoSrc = $"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=header";
 }
 
 <aside class="menu-bar" id="app-navigation">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript" >
+        document.addEventListener("DOMContentLoaded", function () {
+            var applicationLogo = document.getElementById("application-logo");
+            var defaultErrorImg = '@GlobalAppSettings.CdnDomain/images/boldid/application/@IconFileNames.MainLogo';
+            if (applicationLogo) {
+                applicationLogo.addEventListener("error", function () {
+                    this.src = defaultErrorImg;
+                });
+            }
+            if (applicationLogo && applicationLogo.src !== '@applicationLogoSrc') {
+                applicationLogo.src = '@applicationLogoSrc';
+            }
+        });
+
+    </script>
+
     <nav id="main-nav">
         <ul id="items-menu">
             <li>
                 <a href="@imageUrl" class="home-link" style="background-color:transparent;" title=@GlobalAppSettings.SystemSettings.OrganizationName>
-                    <img alt="@T["Application Logo"]" id="application-logo" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=header")" onerror="this.onerror=null;this.src='@GlobalAppSettings.CdnDomain/images/boldid/application/@IconFileNames.MainLogo';" />
+                    <img alt="@T["Application Logo"]" id="application-logo" src="@applicationLogoSrc" />
                 </a>
             </li>
             @if (isAdmin)

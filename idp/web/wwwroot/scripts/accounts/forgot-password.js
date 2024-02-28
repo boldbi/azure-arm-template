@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-    
+
     var outlineEmail = new ejs.inputs.TextBox({
         cssClass: 'e-outline e-custom e-account',
         floatLabelType: 'Auto',
@@ -47,3 +47,10 @@ function ForgotValidate() {
     isValidForm ? showWaitingPopup('body') : hideWaitingPopup('body');
     return isValidForm;
 }
+$(document).ready(function () {
+    $("#forgot-password-form").on("submit", function (event) {
+        if (!ForgotValidate()) {
+            event.preventDefault(); // Prevent the form from submitting if validation fails
+        }
+    });
+});

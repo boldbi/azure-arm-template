@@ -13,9 +13,9 @@
     <link rel="stylesheet" href="~/bundles/css/embed-settings.css" asp-append-version="true" />
 }
 @section scripts{
-    <script src="~/bundles/js/embed-settings.js" asp-append-version="true"></script>
-    <script>
-        var embedEnabled = @Html.Raw(Json.Serialize(embedEnabled));
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/embed-settings.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">    
+        var embedEnabled = @Json.Serialize(embedEnabled);
         var embedSecretCode = "@embedSecretCode";
         var isResetEmbedSecretUrl = "@Url.Action("ResetEmbedSecret", "Administration")";
         var updateSystemSettingsValueUrl = "@Url.Action("UpdateSystemSettingValue", "Administration")";
@@ -63,14 +63,14 @@
                     </div>
                 </div>
 
-                <form action="@Url.Action("PostEmbedSettings", "Administration")" method="post" onsubmit="" enctype="multipart/form-data">
+                <form action="@Url.Action("PostEmbedSettings", "Administration")" method="post" enctype="multipart/form-data">
                     <div class="col-xs-12 no-padding import-file">
                         <label class="app-textbox-label activation embed-enabled">
                             @T["Embed Configuration"]
                         </label>
                         <div class="no-padding">
                             <div class="upload-box">
-                                <input type="text" class="form-control col-md-6 no-margin @(embedEnabled ? string.Empty : "disabled")" onfocus="this.blur()" id="filename" value="@(embedEnabled ? fileName : T["Browse file path (.json)"].Value)">
+                                <input type="text" class="form-control col-md-6 no-margin @(embedEnabled ? string.Empty : "disabled")" id="filename" value="@(embedEnabled ? fileName : T["Browse file path (.json)"].Value)">
                                 <span id="trigger-file" class="input-group-addon btn popup no-left-border @(embedEnabled ? string.Empty : "disabled")">
                                     ...
                                 </span>
@@ -103,10 +103,10 @@
                     </label>
                     <div class="secret-code-container">
                         <div id="secret-code-link">
-                            <input type="text" id="secret-code" name="" class="form-control" placeholder="@T["Embed secret"]" autocomplete="off" disabled="disabled" onClick="this.setSelectionRange(0, this.value.length)" readonly>
+                            <input type="text" id="secret-code" name="" class="form-control" placeholder="@T["Embed secret"]" autocomplete="off" disabled="disabled" readonly>
                             <div class="form-control su su-copy text focus" id="secret-code-copy" disabled="disabled" data-original-title="@T["Click to copy"]"></div>
                         </div>
-                        <button type="button" title="" id="get-embed-code" onclick="getEmbedSecret();" class="primary-button" @(embedEnabled ? string.Empty : "disabled")>
+                        <button type="button" title="" id="get-embed-code" class="primary-button" @(embedEnabled ? string.Empty : "disabled")>
                             @if (string.IsNullOrWhiteSpace(embedSecretCode))
                             {
                                 @generateSecret;

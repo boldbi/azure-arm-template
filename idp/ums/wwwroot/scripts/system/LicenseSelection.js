@@ -315,3 +315,11 @@ function preFillUser(obj) {
     document.getElementById("txt-firstname").ej2_instances[0].value = userInfo.first_name;
     document.getElementById("txt-lastname").ej2_instances[0].value = userInfo.last_name;
 }
+
+$(document).on("click", "#confirm-license", function () {
+    confirmLicenseUpdate();
+});
+$(document).on("click", "#return-startup-home", function () {
+    returnStartupHome();
+});
+

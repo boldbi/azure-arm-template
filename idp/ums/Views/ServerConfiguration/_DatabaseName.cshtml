@@ -3,9 +3,15 @@
     var dbnameHelp = ViewBag.TenantType == TenantType.BoldBIOnPremise ? T["This is where we store the BI tenants, dashboard resources, and data store configuration."] : T["This is where we store the Bold Reports tenants, reports resources and their access permissions."];
     var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
 }
+
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+$(document).on("keyup", "#txt-dbname,#server-dbname,#imdbname", function () {
+   forceToLower(this);
+});
+</script>
 <div id="simple_tab_db_name">
     <div class="txt-holder database-name center-align">
-        <input type="text" id="txt-dbname" name="dbname" class="" onkeyup="return forceToLower(this);" placeholder="@T["Database name"]" />
+        <input type="text" id="txt-dbname" name="dbname" class="" placeholder="@T["Database name"]" />
         <span class="startup-validation validation-txt-errors"></span>
             <div class="info-content txt-box-info db-name-info">@dbnameHelp</div>
     </div>
@@ -20,7 +26,7 @@
 
 <div id="advanced_tab_db_name">
     <div class="txt-holder database-name center-align">
-        <input type="text" id="server-dbname" name="serverdbname" class="" onkeyup="return forceToLower(this);" placeholder="@T["Server database name"]" />
+        <input type="text" id="server-dbname" name="serverdbname" class="" placeholder="@T["Server database name"]" />
         <span class="startup-validation validation-txt-errors"></span>
         <div class="info-content txt-box-info server-db-info">@Html.Raw(string.Format(T["This is where we store the {0}{1}{2}, users, and their resource access permissions."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
         </div>
@@ -34,7 +40,7 @@
         </div>
     </div>
     <div class="txt-holder database-name center-align data-store-hide">
-        <input type="text" id="imdbname" name="designerdbname" class="" onkeyup="return forceToLower(this);" placeholder="@T["Datastore database name"]" />
+        <input type="text" id="imdbname" name="designerdbname" class="" placeholder="@T["Datastore database name"]" />
         <span class="startup-validation validation-txt-errors"></span>
         <div class="info-content txt-box-info imdb-info">@T["This is where we store the authentication information and data extracted from REST data sources."]</div>
     </div>

@@ -4,6 +4,19 @@
     var separatorparagraphClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion && GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
     var separatorFooterClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion || GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
 }
+ 
+<script nonce="@Context.Items["ScriptNonce"]">
+    document.addEventListener("DOMContentLoaded", function () {
+        var poweredByImage = document.getElementById("poweredByImage");
+        var defaultErrorImg = '@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)';
+        if (poweredByImage) {
+            poweredByImage.addEventListener("error", function () {
+                this.src = defaultErrorImg;
+            });
+        }
+    });
+</script>
+
 
 <div id="base-footer-div">
     <footer>
@@ -19,7 +32,9 @@
                     {
                     <p class="no-margin pull-right pow @poweredbyClass" id="poweredbysyncfusion">
                         @T["Powered by"]
-                        <img src="@Url.Content("~/logos?type=poweredby")" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)';" alt="Syncfusion" width="110" height="25">
+                        
+                        <img id="poweredByImage" src="@Url.Content("~/logos?type=poweredby")" alt="Syncfusion" width="110" height="25">
+
                     </p>
                     }
                 </div>

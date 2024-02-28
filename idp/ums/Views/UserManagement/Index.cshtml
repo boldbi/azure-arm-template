@@ -10,9 +10,10 @@
 }
 
 @section scripts{
-    <script src="~/bundles/js/user-management.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/user-management.js" asp-append-version="true"></script>
 
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var baseRootUrl = "@Url.Content("~/")";
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
         var postactionUrl = "@Url.Action("postaction", "UserManagement")";
         var isPresentUserNameAndEmailId = "@Url.Action("isPresentUserNameAndEmailId", "UserManagement")";
@@ -28,13 +29,7 @@
         var removeAdminUrl = "@Url.Action("RemoveRole", "UserManagement")";
         var getUserSUrl = "@Url.Action("GetAllUserList", "TenantsManagement")";
         var unlockUserUrl = "@Url.Action("UnlockUser", "UserManagement")";
-    </script>
-    <script>
-        window.data = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.users)));
-                var baseRootUrl = "@Url.Content("~/")";
 
-    </script>
-    <script type="text/javascript">
         function selectItems(e) {
             var parentRow = $(e.event.currentTarget.parentNode).parents(".user-row-details");
             $(parentRow).hasClass('user-table-row-selected')
@@ -47,7 +42,7 @@
 
     </script>
 
-    <script type="text/x-jsrender" id="user-profile-template">
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-profile-template">
         ${if (Email != "")}
         <a class="item-name grid-content" title="${DisplayName}" data-toggle="tooltip" href="@Url.Action("ViewProfile", "UserManagement")?userid=${UserId}&email=${Email}">${DisplayName}</a>
         ${else}
@@ -69,51 +64,51 @@
         <span class="su su-azure-b2c grid-directory-icon"> </span>
         ${/if}
     </script>
-    <script type="text/x-jsrender" id="user-username-template">
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-username-template">
         <span class="grid-content" title="${Username}" data-toggle="tooltip">${Username}</span>
     </script>
-    <script type="text/x-jsrender" id="user-email-template">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-email-template">
         <span class="grid-content" title="${Email}" data-toggle="tooltip">${Email}</span>
     </script>
-    <script type="text/x-jsrender" id="email-verification-template">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="email-verification-template">
         ${if (EmailVerified)}
         @T["Completed"]
         ${else}
         @T["Pending"]
         ${/if}
     </script>
-    <script type="text/x-jsrender" id="status-description-template">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="status-description-template">
         ${UserStatus}
     </script>
-    <script type="text/x-jsrender" id="filter-template">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="filter-template">
         <span>
             <a class="e-filtericon e-icon e-filterset" href="">
             </a>
         </span>
     </script>
-    <script type="text/x-jsrender" id="role-template">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="role-template">
         ${Role}
     </script>
-    <script type="text/x-jsrender" id="itemname-header">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="itemname-header">
         <div class="item-name">@T["Name"]</div>
     </script>
-    <script type="text/x-jsrender" id="username-header">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="username-header">
         <div class="item-header">@T["Username"]</div>
     </script>
-    <script type="text/x-jsrender" id="email-header">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="email-header">
         <div class="item-header">@T["Email Address"]</div>
     </script>
-    <script type="text/x-jsrender" id="status-header">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="status-header">
         <div class="item-header">@T["Status"]</div>
     </script>
-    <script type="text/x-jsrender" id="email-verification-header">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="email-verification-header">
         <div class="item-header">@T["Email Verification"]</div>
     </script>
-    <script type="text/x-jsrender" id="role-header">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="role-header">
         <div class="item-header">@T["Role"]</div>
     </script>
 
-    <script type="text/x-jsrender" id="options">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="options">
         <div class="dropdown">
             <span class="dropdown-toggle option-icon" data-toggle="dropdown" data-placement="top" data-content="${UserName}">
                 <span class="su su-options"> </span>
@@ -169,7 +164,7 @@
         </div>
     </script>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(function() {
             $("#search-users").val("");
             var data = new ejs.data.DataManager({
@@ -307,19 +302,19 @@
                 <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
                     @if (DeviceDetection.IsMobile)
                     {
-                        <button class="primary-button pull-right" id="new-user-dropdown" title="@T["Add new user"]" data-toggle="tooltip" onclick="onUserAddDialogOpen()">
+                        <button class="primary-button pull-right" id="new-user-dropdown" title="@T["Add new user"]" data-toggle="tooltip">
                             @T["New User"]
-                        </button>
+                        </button>                       
                     }
                     else
                     {
-                        <button class="dropdown-toggle primary-button pull-right" data-toggle="dropdown" data-placement="top" id="new-user-dropdown" title="@T["Add new user"]">
+                        <button class="dropdown-toggle primary-button pull-right" data-toggle="dropdown" data-placement="top"  title="@T["Add new user"]">
                             <span>@T["New User"] </span>
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu add-user-dropdown multi-level pull-right" role="menu" id="dropdown-options">
-                            <li id="create-user" title="@T["Add new user"]" onclick="onUserAddDialogOpen()">
-                                <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
+                            <li id="create-user" title="@T["Add new user"]">
+                                <a href="#" title="@T["Add user"]" data-toggle="tooltip" id="new-user-dropdown" data-placement="top">
                                     <i class="su su-user-add"> </i>
                                     <span>@T["Add User"]</span>
                                 </a>
@@ -332,10 +327,10 @@
                             </li>
                         </ul>
                     }
-                    <button class="primary-button pull-right" id="assign-user-role-button" onclick="onMakeMultipleAdminDialogOpen()" disabled>
+                    <button class="primary-button pull-right" id="assign-user-role-button"  disabled>
                         @T["Make Admin"]
                     </button>
-                    <button class="secondary-button pull-right" id="grant-user-button" onclick="onAddTenantsDialogOpen()" disabled>
+                    <button class="secondary-button pull-right" id="grant-user-button" disabled>
                         @T["Grant Site Access"]
                     </button>
                 </div>

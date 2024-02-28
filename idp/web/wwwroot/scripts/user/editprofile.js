@@ -592,3 +592,18 @@ function SetCookie() {
         }
     );
 }
+
+$(document).ready(function () {
+    var userEmailInput = $("#user-email");
+
+    if (userEmailInput.length) {
+        userEmailInput.on("focus", function () {
+            $(this).blur();
+        });
+    }
+});
+var saveButtonId = "#save-button";
+
+if ($(saveButtonId).length) {
+    $(saveButtonId).on("click", SaveProfile);
+}

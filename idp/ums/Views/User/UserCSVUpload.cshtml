@@ -1,17 +1,23 @@
-﻿<script>
+﻿  <script nonce="@Context.Items["ScriptNonce"]">    
     function CloseGroup() {
         parent.$(".modal,.modal-backdrop").remove();
     }
+    $(document).on("click", "#group-Close-button", function () {
+        CloseGroup();
+    });
     function ValidateCSVFile() {
         var csvfile = document.getElementById("csvfile");
         return false;
     }
+    $("form").on("submit", function () {
+        return ValidateCSVFile();
+    });
 </script>
 <link href="~/Content/Styles/Bootstrap.css" rel="stylesheet" />
 <link href="~/Content/Styles/Style.css" rel="stylesheet" />
-<form action="@Url.Action("UploadFileFormAction", "User")" target="_parent" method="post" onsubmit="return ValidateCSVFile();" enctype="multipart/form-data">
+<form action="@Url.Action("UploadFileFormAction", "User")" target="_parent" method="post" enctype="multipart/form-data">
     <div class="modal-header dialog-header-confirm">
-        <button onclick="CloseGroup()" class="close" id="group-Close-button" type="button">
+        <button  class="close" id="group-Close-button" type="button">
             ×
         </button><h4 class="modal-title">Add users by uploading CSV file</h4>
     </div>
