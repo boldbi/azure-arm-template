@@ -1065,7 +1065,9 @@ CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
    haserror BOOLEAN,
    chartType TEXT,
    uservote TEXT,
-   isreported BOOLEAN)
+   isreported BOOLEAN,
+   search_date TIMESTAMP,
+   widgetid VARCHAR(255))
 ;
 
 -- -- PASTE INSERT Queries below this section --------

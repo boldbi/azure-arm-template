@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 7.5.6
+*  version : 7.5.7
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -10071,6 +10071,16 @@
 						rowIndex = bbdesigner$(document.getElementsByName(pageto * pageSize)[rowIndex % pageSize]).index();
 				}
             }
+		
+	    if(BoldBIDashboard.isNullOrUndefined(Data) && rowIndex >= this._currentJsonData.length && trIndex > -1){
+                Data = this._currentJsonData[trIndex];
+            }
+		
+            var pagesLoaded = this.virtualLoadedPages.length;
+            if (((pagesLoaded * pageSize) - rowIndex) > pageSize && ((pagesLoaded * pageSize) - pageSize) > rowIndex){
+                Data = this._loadedJsonData[this._loadedJsonData.length - 1].data[trIndex];
+            }
+		
             args = { rowIndex: bbdesigner$rowIndex, row: bbdesigner$gridRows.eq(rowIndex), data: Data, target: target,  prevRow: bbdesigner$prevRow, prevRowIndex: bbdesigner$prevIndex, parentTarget: e  };
             if (this._trigger("rowSelecting", args))
                 return;

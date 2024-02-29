@@ -984,7 +984,9 @@ CREATE TABLE [BoldBI_ai_qnawidgethistory] (
    haserror BIT,
    chartType TEXT,
    uservote TEXT,
-   isreported BIT)
+   isreported BIT,
+   search_date DATETIME,
+   widgetid NVARCHAR(255))
 ;
 
 ---- PASTE INSERT Queries below this section --------

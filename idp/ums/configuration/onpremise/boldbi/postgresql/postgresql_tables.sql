@@ -977,7 +977,9 @@ CREATE TABLE SyncDS_ai_qnawidgethistory (
    haserror BOOLEAN,
    chartType TEXT,
    uservote TEXT,
-   isreported BOOLEAN)
+   isreported BOOLEAN,
+   search_date timestamp without time zone,
+   widgetid TEXT)
 ;
 
 ---- PASTE INSERT Queries below this section --------
