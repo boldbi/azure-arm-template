@@ -1097,6 +1097,8 @@ INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'PPT', 1)
 ;
 INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'CSV', 1)
 ;
+INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'DashboardCache', 1)
+;
 
 INSERT into [BOLDBI_RecurrenceType] (Name,IsActive) VALUES (N'Daily', 1)
 ;

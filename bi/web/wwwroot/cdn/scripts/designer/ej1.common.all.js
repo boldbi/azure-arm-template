@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 7.5.7
+*  version : 7.5.8
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -36678,6 +36678,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             this._on(this.container, "focus", ".e-input-mini", this._onFocusIn);
             this._on(this.container, "mouseover", ".e-dashboarddatepicker-ranges ul li", this._showTooltip);
             this._on(this.container, "mouseout", ".e-dashboarddatepicker-ranges ul li", this._hideTooltip);
+            this._on(BoldBIDashboard.getScrollableParents(this.element), "scroll", this.hidePopup);
         },
         _unwireEvents: function () {
             this._off(bbdesigner$(window), "resize", this._windowResize);
@@ -36699,6 +36700,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             this._off(this.container, "focus", ".e-input-mini", this._onFocusIn);
             this._off(this.container, "mouseover", ".e-dashboarddatepicker-ranges ul li", this._showTooltip);
             this._off(this.container, "mouseout", ".e-dashboarddatepicker-ranges ul li", this._hideTooltip);
+            this._off(BoldBIDashboard.getScrollableParents(this.element), "scroll", this.hidePopup);
         },
         _windowResize: function () {
             if (this.isOpen) {
@@ -37484,6 +37486,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                     this.selectedStartDateValue = null;
                     this.selectedEndDateValue = null;
                 }
+                this._off(BoldBIDashboard.getScrollableParents(this.element), "scroll", this.hidePopup);
             }
         },
         toggle: function () {
@@ -37570,6 +37573,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                     }
                 }
                 this._makePopupPositionDecision();
+                this._on(BoldBIDashboard.getScrollableParents(this.element), "scroll", this.hidePopup);
             } else {
                 if (this.model.datePickerType === "range") {
                     this._removeStartDateFocus();

@@ -1098,6 +1098,8 @@ INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'PPT', 1)
 ;
 INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'CSV', 1)
 ;
+INSERT INTO SyncDS_ExportType (Name,  IsActive) VALUES (N'DashboardCache',1)
+;
 
 INSERT into SyncDS_RecurrenceType (Name,IsActive) VALUES (N'Daily', 1)
 ;
