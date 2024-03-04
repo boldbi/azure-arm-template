@@ -369,13 +369,6 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                 }
                 else {
                     hideWaitingPopup('startup-waiting-element');
-                    var id = "#txt-dbname";
-                    if (isNewDatabaseTab) {
-                        id = result.Data.connectionResponse.IsServerDatabaseError ? "#txt-dbname" : result.Data.connectionResponse.IsTenantServerDatabaseError ? "#server-dbname" : result.Data.connectionResponse.IsIntermediateServerDatabaseError ? "#imdbname" : id;
-                    }
-                    else {
-                        id = result.Data.connectionResponse.IsServerDatabaseError ? "#database-name" : result.Data.connectionResponse.IsTenantServerDatabaseError ? "#server-existing-dbname" : result.Data.connectionResponse.IsIntermediateServerDatabaseError ? "#imdb-existing-dbname" : id;
-                    }
                     if (isNewDatabaseTab) {
                         $("#db-config-submit").show().prop("disabled", false);
                     }
@@ -384,8 +377,8 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
                     }
 
                     errorContent = result.Data.value;
-                    $(id).closest('div').addClass("e-error");
-                    $(id).closest(".e-outline").siblings(".startup-validation").html(databaseValidationMessage).show();
+                    $("#additional-parameter").closest('div').addClass("e-error");
+                    $("#additional-parameter").closest(".e-outline").siblings(".startup-validation").html(databaseValidationMessage).show();
                 }
             }
         );
