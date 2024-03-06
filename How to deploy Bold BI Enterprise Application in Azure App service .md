@@ -43,8 +43,31 @@ Please follow the below step to create the Bold BI Azure web app using the ARM t
     Click the agreement checkbox and click on the purchase to deploy the Bold BI web app.
     ![](custodeployment-credentials.jpg)
 
-9.	Bold BI Azure App service(web app) deployment gets started.
-10.	We have created an app service plan for the web app which will be in “Basic – B1” by default. Learn more about App service plans [here](https://docs.microsoft.com/en-us/azure/app-service/azure-web-sites-web-hosting-plans-in-depth-overview). Bold BI web app does not support Free or Shared app service plans.
+9.	The deployment of the Bold BI Azure App service (web app) will begin, and you can track the progress of the deployment by looking for a green check mark at each successful stage.
+
+    ![Deployment status check](images/deployment-status-check.png)
+
+10. If the deployment of Bold BI is successfully completed, proceed to Step 12.
+
+11. If deployment fails, check the error details and select the **Redeploy** option to deploy Bold BI again (refer to Step 8 to fill in the details). Ensure successful deployment with Step 9.
+
+    ![Deployment failed](images/deployment-failed.png)
+
+    ![Redeploying on failure](images/redeploying-on-failure.png)
+
+    >**NOTE:** <br>1. When redeploying, ensure that you provide a unique Web App name and Storage Account name. <br> 2. If the failed App Service/Storage account/App Service Plan is still present in the resource group, please remove it before proceeding with redeployment.
+
+12. Click on **Go to resource group**. Then, select **App Service**.
+
+    ![Select resource page](images/select-resource-page.png)
+
+    ![App service hosting](images/app-service-hosting.png)
+
+13. On the overview page, copy the **Default Domain** and paste the URL into your browser. Wait for some time for it to load completely before proceeding with the Bold BI application startup.
+
+    ![Default domain URL](images/default-domain-url.png)
+
+14.	We have created an app service plan for the web app which will be in “Basic – B1” by default. Learn more about App service plans [here](https://docs.microsoft.com/en-us/azure/app-service/azure-web-sites-web-hosting-plans-in-depth-overview). Bold BI web app does not support Free or Shared app service plans.
 Bold BI supports Basic, Standard, and Premium App Service plans in the Azure. The minimum recommended App Service plan to run the application is the Basic plan.
 To get better performance, can scale up the App Service plan from Basic to Standard or Premium plans. Please find the below documentation links on how to scale up and scale out the App Service plan.
 
