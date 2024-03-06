@@ -1,6 +1,16 @@
 ﻿<!DOCTYPE html>
 <head>
-    <script>
+       <script nonce="@Context.Items["ScriptNonce"]">
+
+        $(document).on("click", "#edit-site-attribute", function () {
+            editCustomAttribute(this);
+        });
+
+
+        $(document).on("click", "#remove-site-attribute", function () {
+            removeSiteAttribute();
+        });
+
         $(document).ready(function () {
             var tooltip = new ej.popups.Tooltip({
                 target: ".grid-content",
@@ -34,14 +44,14 @@
             }
         });
     </script>
-    <script type="text/x-jsrender" id="site-attribute-name-template">
-        <span class="grid-content" title="${Name}" data-toggle="tooltip">${Name}</span>
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="site-attribute-name-template">
+        <span class="grid-content" title="${Name}">${Name}</span>
     </script>
-    <script type="text/x-jsrender" id="site-attribute-value-template">
+      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="site-attribute-value-template">
         ${if (CanEncrypt)}
-        <span class="grid-content" title="*****" data-toggle="tooltip">*****</span>
+        <span class="grid-content" title="*****">*****</span>
         ${else}
-        <span class="grid-content" title="${Value}" data-toggle="tooltip">${Value}</span>
+        <span class="grid-content" title="${Value}">${Value}</span>
         ${/if}
     </script>
 </head>
@@ -57,7 +67,7 @@
                 }
             </div>
             <div class="col-xs-12 no-padding">
-                <div class="material-switch inline-align" onclick="enableIsolationCode()">
+                <div class="material-switch inline-align" id="enable-isolation-code-material">
                     <input type="checkbox" id="isolation-enable-switch" />
                     <label for="isolation-enable-switch" class="label-primary"></label>
                 </div>
@@ -76,7 +86,7 @@
         </div>
         <div class="col-xs-12 attribute-header no-padding">
             <h5>@T["Attributes"]</h5>
-            <span class="su-add add-site-attribute" onclick="openCustomAttributeDialog(null,'addtenant')">@T["ADD"]</span>
+            <span class="su-add add-site-attribute" id = "add-tenant-site">@T["ADD"]</span>
         </div>
         <div class="col-xs-12 data-security-description no-padding">
             <div class="attribute-part-bi @(ViewBag.IsBoldBIMultiTenant ? "" : "hide")">
@@ -103,12 +113,12 @@
                 <div id="AddSiteAttributesGrid"></div>
             </div>
         </div>
-        <script type="text/x-jsrender" id="actions">
+          <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="actions">
             <div class="user-hover-options">
-                <a href="javascript:void(0);" id="edit-site-attribute" title="@T["Edit"]" name="addtenant"  data-toggle="tooltip" onclick="editCustomAttribute(this)">
+                <a href="#" id="edit-site-attribute" title="@T["Edit"]" name="addtenant"  data-toggle="tooltip" >
                     <i class="su su-edit"></i>
                 </a>
-                <a class="delete-class" href="javascript:void(0);" id="remove-site-attribute" title="@T["Remove"]" data-toggle="tooltip" onclick="removeSiteAttribute()">
+                <a class="delete-class" href="#" id="remove-site-attribute" title="@T["Remove"]" data-toggle="tooltip" >
                     <i class="su su-delete"></i>
                 </a>
             </div>

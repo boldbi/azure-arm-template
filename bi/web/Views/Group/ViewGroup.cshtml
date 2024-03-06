@@ -232,28 +232,28 @@
     </script>
     <script type="text/x-jsrender" id="actionstemplate">
         {{if @ViewBag.groupId !=1}}
-        {{if @((int)groupDetails.DirectoryType) == @((int)DirectoryType.Local) || @((int)groupDetails.DirectoryType) != DirectoryType }}
+        {{if @((int)groupDetails.DirectoryType) != DirectoryType || (@((int)groupDetails.DirectoryType) == DirectoryType && !CanSync) }}        
         @if (showGroupModule)
         {
             <div>
-                <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
             </div>
         }
         {{/if}}
         {{else UserId != @ViewBag.CurrentUserId}}
         @if (showGroupModule)
         {
-                <div>
-                    <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
-                </div>
+            <div>
+            <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            </div>
         }
         else if (canShowForAdminGroup)
         {
-                 <div>
-                     <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
-                 </div>
+            <div>
+            <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            </div>
         }
-        {{/if}}
+            {{/if}}
     </script>
     <script>
         var checkGroupnameUrl = "@Url.Action("CheckGroupname", "group")";
@@ -294,7 +294,7 @@
                                     }
                                 </feature>
                                 <feature name=@FeatureManagement.EnableGroupOwnerSupport negate="true">
-                                    @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]) && ViewBag.IsLocalDirectory)
+                                    @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                                     {
                                         <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
                                             <a href="javascript:void(0)" title="@T["Add user"]" data-toggle="tooltip" data-placement="top">
@@ -450,8 +450,8 @@
                                     {
                                         <div id="user-list-container">
                                         <select class="selectpicker" multiple autofocus="" data-size="8" data-none-results-text="@T["No results match"]" data-live-search="true" data-actions-box="true" title='@T["Select user(s)"]' id="user-list" style="float: right;">
-                                            <option ng-repeat="user in allUsers | orderBy:'DisplayName'" ng-class="{ 'disabled-icon-color': allGroupDetails.DirectoryType == user.DirectoryType && allGroupDetails.DirectoryType != @((int)DirectoryType.Local) }" ng-disabled="allGroupDetails.DirectoryType == user.DirectoryType && allGroupDetails.DirectoryType != @((int)DirectoryType.Local)" value="{{user.UserId}}" title="{{user.DisplayName}}">
-                                                {{user.DisplayName}}
+                                                <option ng-repeat="user in allUsers | orderBy:'DisplayName'" ng-class="{ 'disabled-icon-color': user.CanSync && allGroupDetails.DirectoryType == user.DirectoryType && allGroupDetails.DirectoryType != @((int)DirectoryType.Local) }" ng-disabled="user.CanSync && allGroupDetails.DirectoryType == user.DirectoryType && allGroupDetails.DirectoryType != @((int)DirectoryType.Local)" value="{{user.UserId}}" title="{{user.DisplayName}}">
+                                                    {{user.DisplayName}}
                                             </option>
                                         </select>
                                     </div>

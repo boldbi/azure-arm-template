@@ -11,6 +11,18 @@
     @await Html.PartialAsync("../Shared/_FontReference")
     @await Html.PartialAsync("../Shared/_ThemeReference")
     <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var defaultErrorImageSrc = "@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimage = document.getElementById("permissiondenied");
+            if (logoimage) {
+                logoimage.onerror = function () {
+                    this.onerror = null;
+                    this.src = defaultErrorImageSrc;
+                };
+            }
+        });
+    </script>
 </head>
 @if (!CloudAppConfig.IsSelfHosted)
 {
@@ -29,7 +41,7 @@ else
             <div class="error-page-content">
                 <div class="error-inside">
                     <div class="error-image-center-1">
-                        <img src="@Url.Content("~/logos?type=login")" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" class="error-image-1">
+                        <img id="permissiondenied" src="@Url.Content("~/logos?type=login")" class="error-image-1">
                     </div>
                     <div class="error-image-center-2">
                         <img src="@imageHelper.AccessDeniedImage()" class="error-image-2">

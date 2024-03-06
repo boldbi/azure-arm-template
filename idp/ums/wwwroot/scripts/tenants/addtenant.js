@@ -1036,11 +1036,17 @@ $(document).on("keydown", "#site-isolation-code", function (e) {
     clearTimeout(validateTimer);
 });
 
+$(document).on("focusout", "#site-isolation-code", function (e) {
+    validateCode();
+});
+
 function validateCode() {
     ValidateIsolationCode($("#site-isolation-code").val(), "#site-isolation-code");
 }
-
-$(window).load(function () {
+$(window).on('load', function () {
     Resize();
     ResizeHeightForDOM();
+});
+$(document).on("click", "#enable-isolation-code-material", function () {
+    enableIsolationCode();
 });

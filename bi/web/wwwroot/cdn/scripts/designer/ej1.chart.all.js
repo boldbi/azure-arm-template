@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 7.4.11
+*  version : 7.5.13
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -11569,7 +11569,7 @@ BoldBIDashboard.EjLegendRender.prototype =
             }
 
             index = (BoldBIDashboard.util.isNullOrUndefined(pointIndex)) ? seriesIndex : pointIndex;
-            chart.gLegendItemEle = chartSvgRender.createGroup({ 'id': svgObject.id + '_Legend' + index, 'cursor': 'pointer' });
+            chart.gLegendItemEle = chartSvgRender.createGroup({ 'id': svgObject.id + '_Legend' + index, 'cursor': legend.toggleSeriesVisibility ? 'pointer' : 'default' });
             legendItem.CommonEventArgs.data.gLegendItemEle = chart.gLegendItemEle;
             data = bbdesigner$.extend(true, {}, legendItem.CommonEventArgs.data);
             data.model = chart.model;

@@ -1065,7 +1065,9 @@ CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
    haserror BOOLEAN,
    chartType TEXT,
    uservote TEXT,
-   isreported BOOLEAN)
+   isreported BOOLEAN,
+   search_date TIMESTAMP,
+   widgetid VARCHAR(255))
 ;
 
 -- -- PASTE INSERT Queries below this section --------
@@ -1185,6 +1187,8 @@ INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('Refresh',
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('PPT', 1)
 ;
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('CSV', 1)
+;
+INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('DashboardCache', 1)
 ;
 
 INSERT into {database_name}.BOLDBI_RecurrenceType (Name,IsActive) VALUES ('Daily', 1)

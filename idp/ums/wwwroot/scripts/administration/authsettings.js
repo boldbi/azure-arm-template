@@ -330,6 +330,8 @@ $(document).ready(function () {
                 scope.oauthSettingsForm.$setUntouched();
                 scope.oauthSettingsForm.$setPristine();
                 $("#oauth-image-upload-box").siblings(".validation-message").html("");
+                $("#oauth-group-import .validation-message").addClass("display-none");
+                $("#oauth-group-import .input-field-margin").removeClass("has-error");
                 if ($("#oauth-provider-name").val() != "" && $("#oauth-authorization-endpoint").val() != "" && $("#oauth-token-endpoint").val() != "" && $("#oauth-userinfo-endpoint").val() != "" && $("#oauth-client-id").val() != "" && $("#oauth-scopes").val() != "" && $("#user-info-email").val() != "") {
                     updateAuthSettingsButton.prop("disabled", false);
                 }
@@ -338,6 +340,8 @@ $(document).ready(function () {
                 scope.openidSettingsForm.$setUntouched();
                 scope.openidSettingsForm.$setPristine();
                 $("#openid-image-upload-box").siblings(".validation-message").html("");
+                $("#openid-group-import .validation-message").addClass("display-none");
+                $("#openid-group-import .input-field-margin").removeClass("has-error");
                 if ($("#openid-provider-name").val() != "" && $("#openid-authority").val() != "" && $("#openid-client-id").val() != "" && $("#openid-identifier").val() != "") {
                     updateAuthSettingsButton.prop("disabled", false);
                 }
@@ -391,7 +395,6 @@ $(document).ready(function () {
             document.getElementById("user-info-method-type").ej2_instances[0].enabled = $("#" + name + "IsEnabled").is(":checked");
         }
 
-        $("span.validation-message").addClass("ng-hide");
     };
 
     $(document).on("focusout", "#oauth-provider-name, #oauth-authorization-endpoint", function (e) {
@@ -485,7 +488,15 @@ $(document).ready(function () {
         }
         else {
             if (this.id === 'update-oauth-settings' || this.id === 'update-openid-settings') {
-                updateSetting(authPrefix);
+                if ($("#" + authPrefix + "IsEnabled").is(":checked")) {
+                    var isValidGroupImportDetails = validateTextBoxes(authPrefix);
+                    if (isValidGroupImportDetails) {
+                        updateSetting(authPrefix);
+                    }
+                }
+                else {
+                    updateSetting(authPrefix);
+                }
             }
             else if (this.id === 'update-jwt-settings') {
                 updateJwtSetting();
@@ -956,6 +967,35 @@ function getDefaultAuthDisplayName(provider) {
     }
 }
 
+function validateTextBoxes(authPrefix) {
+    var isValid = true;
+    var authElement = authPrefix == "oauth" ? $('#oauth-group-import .input-field-margin input[type="text"]') : $('#openid-group-import .input-field-margin input[type="text"]')
+    authElement.each(function () {
+        if ($(this).closest('.input-field-margin').is(':visible') && $(this).val() === '') {
+            $(this).siblings('.validation-message').removeClass('display-none');
+            $(this).closest(".input-field-margin").addClass("has-error");
+            isValid = false;
+        } else {
+            $(this).siblings('.validation-message').addClass('display-none');
+            $(this).closest(".input-field-margin").removeClass("has-error");
+        }
+    });
+    return isValid;
+}
+
+$('#oauth-group-import input[type="text"], #openid-group-import input[type="text"]').on('keyup keydown', function () {
+    var errorMessage = $(this).siblings('.validation-message');
+    var inputFieldMargin = $(this).closest('.input-field-margin');
+
+    if ($(this).val().trim() === '') {
+        errorMessage.removeClass('display-none');
+        inputFieldMargin.addClass('has-error');
+    } else {
+        errorMessage.addClass('display-none');
+        inputFieldMargin.removeClass('has-error');
+    }
+});
+
 function fnCopySigningKey(inputId, buttonId) {
     if ($("#enable-jwt").is(":checked")) {
         if (typeof (navigator.clipboard) != 'undefined') {
@@ -1077,3 +1117,27 @@ function ongroupImportchange(args) {
             break;
     }
 }
+
+$(document).on("click", "#generate-signing-key", function () {
+    onRegenerateSigningKeyDialogOpen();
+});
+
+$(document).on("click", "#copy-signing-key", function () {
+    fnCopySigningKey('#jwt-signing-key', '#copy-signing-key');
+});
+
+$(document).on("click", "#openid-mobile-callback-link-copy", function () {
+    copyToClipboard('#openid-mobile-callback-link', '#openid-mobile-callback-link-copy');
+});
+
+$(document).on("click", "#openid-callback-link-copy", function () {
+    copyToClipboard('#openid-callback-link', '#openid-callback-link-copy');
+});
+
+$(document).on("click", "#oauth-mobile-callback-link-copy", function () {
+    copyToClipboard('#oauth-mobile-callback-link', '#oauth-mobile-callback-link-copy');
+});
+
+$(document).on("click", "#oauth-callback-link-copy", function () {
+    copyToClipboard('#oauth-callback-link', '#oauth-callback-link-copy');
+});

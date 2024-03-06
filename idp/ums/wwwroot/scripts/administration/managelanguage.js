@@ -477,3 +477,16 @@ $("#search-languages").on("keyup keydown", function () {
     $("#delete-language").hide();
     count = 0;
 });
+
+
+$(document).on("click", "#add-language", function () {
+    uploadDialogOpen();
+});
+
+$(document).on("click", "#delete-language", function () {
+    languageDeleteDialogOpen();
+});
+
+$(document).on("click", "#manage", function () {
+    onLocalizationDialogOpen();
+});

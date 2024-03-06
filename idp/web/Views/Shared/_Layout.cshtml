@@ -2,7 +2,8 @@
 @using Syncfusion.Server.Base.Middlewares;
 @using Microsoft.AspNetCore.Http.Extensions;
 @using System.Security.Claims;
-@using Newtonsoft.Json
+@using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Html
 @{
     var reqUrl = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = reqUrl.AbsolutePath.ToLower();
@@ -18,6 +19,7 @@
     var headerTitle = ViewBag.HeaderTitle != null ? ViewBag.HeaderTitle : GlobalAppSettings.SystemSettings.OrganizationName;
     var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
     var cookieValue = string.IsNullOrWhiteSpace(Context.Request.Cookies["boldservice.client.locale"]) ? string.Empty : Context.Request.Cookies["boldservice.client.locale"];
+    var encodedCookieValue = new HtmlString(cookieValue);
 }
 
 <!DOCTYPE html>
@@ -34,11 +36,11 @@
     @await Html.PartialAsync("_Favicon")
     <link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl.TrimEnd('/')/bundles/css/cssloader.css" asp-append-version="true" />
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]">
         var rootUrl = "";
         var baseurl = "";
         var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
-        var cookieValue = @Html.Raw(JsonConvert.SerializeObject(@cookieValue));
+        var cookieValue = JSON.stringify(@encodedCookieValue);
         var value = {
             Locale: navigator.language,
             TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -57,8 +59,8 @@
     <link rel="stylesheet" href="~/bundles/css/layout.css" asp-append-version="true" />
     @RenderSection("styles", false)
 
-    <script src="~/bundles/js/layout.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/layout.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
 </head>
 <body ng-app="serverApp" class="clearfix" id="body">
     <div class="loader-blue loader-icon" id="layout-body-loader-icon">
@@ -174,7 +176,7 @@
 
     @if (DeviceDetection.IsMobile)
     {
-        <script type="text/javascript">
+        <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(document).ready(function () {
                 function nextEvent() {
                     $(this).on('touchend', function (e) {
@@ -206,7 +208,7 @@
     }
     @if (includeMessageBox)
     {
-        <script>
+        <script nonce="@Context.Items["ScriptNonce"]">
             $(document).ready(function () {
 
                 var messageBoxDialog = new ej.popups.Dialog({

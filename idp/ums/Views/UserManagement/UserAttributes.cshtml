@@ -8,8 +8,16 @@
 }
 
 @section scripts{
-    <script src="~/bundles/js/user-management-profile.js" asp-append-version="true"></script>
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/user-management-profile.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        $(document).on("click", "#edit-user-attribute", function () {
+            editCustomAttribute(this);
+        });
+
+        $(document).on("click", "#remove-user-attribute", function () {
+            deleteConfirmation(this);
+        });
+
         var userAttributesUrl = "@Url.Action("GetUserAttributes", "CustomAttribute")";
         var userId = "@userDetail.UserId";
         var userAttributesPageUrl = "@Url.Action("UserAttributes", "UserManagement")?userId=@userDetail.UserId";
@@ -19,17 +27,17 @@
         var isUserCustomAttributeNameExistUrl = "@Url.Action("IsUserAttributeNameExists", "CustomAttribute")";
     </script>
 
-    <script type="text/x-jsrender" id="attribute-name-template">
-        <span class="grid-content" title="${Name}" data-toggle="tooltip">${Name}</span>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-name-template">
+        <span class="grid-content" title="${Name}">${Name}</span>
     </script>
-    <script type="text/x-jsrender" id="attribute-description-template">
-        <span class="grid-content" title="${Description}" data-toggle="tooltip">${Description}</span>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-description-template">
+        <span class="grid-content" title="${Description}">${Description}</span>
     </script>
-    <script type="text/x-jsrender" id="attribute-value-template">
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-value-template">
         ${if (CanEncrypt)}
-        <span class="grid-content" title="*****" data-toggle="tooltip">*****</span>
+        <span class="grid-content" title="*****">*****</span>
         ${else}
-        <span class="grid-content" title="${Value}" data-toggle="tooltip">${Value}</span>
+        <span class="grid-content" title="${Value}">${Value}</span>
         ${/if}
     </script>
 }
@@ -46,7 +54,7 @@
                     <hgroup class="col-xs-12 header-group">
                         <h1 class="page-title" id="display-name">@T["Attributes"]</h1>
                     </hgroup>
-                </div> 
+                </div>
             </div>
             <div class="col-xs-4 top-nav-sec no-padding">
                 @await Html.PartialAsync("../Shared/_TopMenu")
@@ -55,7 +63,7 @@
         <div class="col-md-12 import-area bi-page-header admin-page-icon">
             <div class="col-xs-12 no-padding">
                 <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
-                    <button type="button" class="primary-button pull-right" id="add-custom-attribute" title="" onclick="openCustomAttributeDialog()">
+                    <button type="button" class="primary-button pull-right" id="add-custom-attribute" title="">
                         @T["Add Attribute"]
                     </button>
                 </div>
@@ -71,16 +79,17 @@
                             <div id="UsersAttributesGrid"></div>
                         </div>
                     </div>
-                    <script type="text/x-jsrender" id="options">
+                    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="options">
                         <div class="user-hover-options">
-                            <a href="javascript:void(0);" id="edit-user-attribute" title="@T["Edit"]" data-toggle="tooltip" data-id="${Id}" onclick="editCustomAttribute(this)">
+                            <a href="#" id="edit-user-attribute" title="@T["Edit"]" data-toggle="tooltip" data-id="${Id}" >
                                 <i class="su su-edit"></i>
                             </a>
-                            <a class="delete-class" href="javascript:void(0);" id="remove-user-attribute" title="@T["Remove"]" data-toggle="tooltip" data-id="${Id}" onclick="deleteConfirmation(this)">
+                            <a class="delete-class" href="#" id="remove-user-attribute" title="@T["Remove"]" data-toggle="tooltip" data-id="${Id}">
                                 <i class="su su-delete"></i>
                             </a>
                         </div>
                     </script>
+
                 </div>
             </div>
         </div>

@@ -3,6 +3,18 @@
     var appBranding = GlobalAppSettings.Branding;
     var storageType = ViewBag.StorageType != null ? ViewBag.StorageType : 0;
 }
+
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+$(document).on("click", "#reportstorage", function () {
+    validate_report_storage();
+});
+$(document).on("click", "#tenantstorage", function () {
+    validate_storage_type();
+});
+$(document).on("submit", "#blob-storage-form", function () {
+    validate_storage_type();
+});
+</script>
     <div class="system-settings-page-container" id="system-settings-filestorage-container">
         <div class="database-types">
             <div class="center-storage-types col-xs-12 radio-padding">
@@ -77,7 +89,7 @@
             <div class="azure-validation display-none">
                 <span class="blob-error-message validation-txt-errors">@T["Invalid Azure Blob storage"]</span>
             </div>
-            <form id="blob-storage-form" onsubmit="return validate_storage_type();" autocomplete="off">
+            <form id="blob-storage-form" autocomplete="off">
                 <div>
                     <div class="form-div form-group">
                         <input type="text" tabindex="1" id="txt-accountname" name="accountname" value="@ViewBag.AccountName" class="" placeholder="@T["Storage account name"]" />
@@ -116,10 +128,10 @@
                 </div>
             </form>
             <div class="file-storage-button btn-holder center-align" id="tenant-storage">
-                <input type="button" tabindex="7" onclick="validate_storage_type()" class="proceed-button " value="@T["Next"]" />
+                <input type="button" tabindex="7" id="tenantstorage" class="proceed-button " value="@T["Next"]" />
             </div>
             <div class="file-storage-button btn-holder center-align" id="report-storage">
-                <input type="button" tabindex="7" onclick="validate_report_storage()" class="proceed-button" value="@T["Next"]" />
+                <input type="button" tabindex="7" id="reportstorage" class="proceed-button" value="@T["Next"]" />
             </div>
 
             @if (appBranding == AppBranding.Bold.Identifier)

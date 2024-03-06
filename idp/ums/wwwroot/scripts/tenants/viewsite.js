@@ -35,6 +35,13 @@ $(document).ready(function () {
     createWaitingPopup('add-tenant-popup');
     createWaitingPopup('grant-users-access-dialog');
 
+    var isolationSwitchContainer = $("#isolation-switch-container");
+    if (isolationSwitchContainer.length) {
+        isolationSwitchContainer.on("click", function () {
+            enableIsolationCode();
+        });
+    }
+
     var grantUserAccessDialog = new ej.popups.Dialog({
         header: window.Server.App.LocalizationContent.GrantAccessToUsers + " - " + tenantName,
         content: document.getElementById("grant-users-access-dialog-content"),
@@ -772,7 +779,8 @@ function provideAccesstoUsers() {
 }
 
 ////Remove user Access
-$(document).on("click", ".delete-permission", function () {
+$(document).on("click", ".delete-permission", function (e) {
+    e.preventDefault();
     singleUserSelectedId = $(this).attr("data-user-id");
     document.getElementById("user-remove-confirmation-dialog").ej2_instances[0].show();
     singleUserRemove = true;
@@ -1123,5 +1131,19 @@ function onChangeGlobalSettings(args) {
 $(document).on("click", "#new-user-button", function () {
     var usersgrid = document.getElementById('users_grid').ej2_instances[0];
     usersgrid.clearSelection();
+});
+
+$(document).on("click", "#edit-site-attribute", function () {
+    event.preventDefault();
+    editCustomAttribute(this);
+});
+
+$(document).on("click", "#remove-site-attribute", function () {
+    event.preventDefault();
+    deleteConfirmation(this);
+});
+
+$(document).on("click", "#add-custom-attribute", function () {
+    openCustomAttributeDialog();
 });
 

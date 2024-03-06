@@ -2,6 +2,41 @@
 const specialChar = /^[a-zA-Z0-9-_\s]*$/;
 
 $(document).ready(function () {
+    $(document).on("click", "#uploadFontLink", onUploadFontDialogOpen);
+    $(document).on("click", "#cancel-font-upload", onUploadFontDialogClose);
+    $(document).on("click", "#cancel-applicationtheme-upload", onUploadApplicationThemeDialogClose);
+    $(document).on("click", "#woff-upload", onUploadApplicationThemeDialogOpen);
+    $(document).on("click", "#woff-dashboard-upload", onUploadDashboardThemeDialogOpen);
+    $(document).on("click", "#cancel-dashboardtheme-upload", onUploadDashboardThemeDialogClose);
+    var uploadApplicationFile = $("#Upload-application-fileform");
+
+    if (uploadApplicationFile.length) {
+        uploadApplicationFile.on('submit', function (event) {
+            if (!uploadformValidation()) {
+                event.preventDefault(); 
+            }
+        });
+    }
+
+    var uploadDashboardFile = $("#upload-dashboard-fileform");
+
+    if (uploadDashboardFile.length) {
+        uploadDashboardFile.on('submit', function (event) {
+            if (!uploadformValidation()) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    var uploadFontFile = $("#upload-font-fileform");
+
+    if (uploadFontFile.length) {
+        uploadFontFile.on('submit', function (event) {
+            if (!uploadformValidation()) {
+                event.preventDefault(); 
+            }
+        });
+    }
     addPlacehoder("#font-upload-dialog");
     var fontUploadDialog = new ejs.popups.Dialog({
         header: window.Server.App.LocalizationContent.UploadFont,

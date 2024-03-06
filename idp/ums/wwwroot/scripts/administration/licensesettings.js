@@ -174,3 +174,11 @@ function licenseWindow(element, windowHeight, windowWidth) {
     windowRef = window.open(element.attr("license-service-url") + "&origin=" + window.location.origin, "", "height=" + windowHeight, "width=" + windowWidth);
     timer = setInterval($.proxy(checkWindowRef, 500, addButtonObj));
 }
+
+$(document).on("click", "#subscription-copy-bi", function () {
+    copyToClipboard('#subscription-id-bi', '#subscription-copy-bi');
+});
+
+$(document).on("click", "#subscription-copy-reports", function () {
+    ccopyToClipboard('#subscription-id-reports', '#subscription-copy-reports');
+});

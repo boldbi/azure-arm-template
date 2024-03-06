@@ -5,7 +5,7 @@ $(document).ready(function () {
     dropDownListInitialization('#model-language', window.Server.App.LocalizationContent.DataLanguage);
     document.getElementById("language").ej2_instances[0].value = selectedApplicationLanguageValue;
     document.getElementById("language").ej2_instances[0].text = selectedApplicationLanguageText;
-
+    $(document).on("click", "#language-save-button", SaveUserPreference);
     if (document.getElementById("model-language") != null) {
         document.getElementById("model-language").ej2_instances[0].value = selectedDataLanguageValue;
         document.getElementById("model-language").ej2_instances[0].text = selectedDataLanguageText;

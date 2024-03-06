@@ -49,6 +49,26 @@ var excludedSearchKeys = [
 ];
 
 $(document).ready(function () {
+
+    var copyClientSecret = $("#copy-client-secret");
+    if (copyClientSecret.length) {
+        copyClientSecret.on("click", function () {
+            copyToClipboard('#mySecret', '#copy-client-secret');
+        });
+    }
+
+    var copyClientId = $("#copy-client-id");
+    if (copyClientId.length) {
+        copyClientId.on("click", function () {
+            copyToClipboard('#myId', '#copy-client-id');
+        });
+    }
+    var userIdCopy = $("#user-id-copy");
+    if (userIdCopy.length) {
+        userIdCopy.on("click", function () {
+            copyToClipboard('#user-id','#user-id-copy');
+        });
+    }
     createWaitingPopup('body');
     createWaitingPopup('server-app-container');
     createWaitingPopup('content-area');
@@ -129,42 +149,32 @@ $(document).ready(function () {
     }
 
     $('.lazyload').each(function () {
-        if ($(this).attr("data-id") === "footerlogo") {
-            img = document.createElement('img');
+        if ($(this).parent().find("img").length === 0) {
+            var img = document.createElement('img');
             img.onload = imageOnLoad;
             img.src = $(this).attr("data-src");
             img.alt = $(this).attr("data-alt");
             img.id = $(this).attr("data-id");
-            $(img).attr("onerror", $(this).attr("data-default"));
-            img.style = "display: none";
-            $(this).parent().find("p#poweredbysyncfusion").append(img);
-        }
-        else if ($(this).attr("data-id") === "profilelogo" || $(this).attr("data-id") === "profile-logo-sub" || $(this).attr("data-id") === "user-profile-picture") {
-            img = document.createElement('img');
-            img.onload = imageOnLoad;
-            img.src = $(this).attr("data-src-value");
-            img.alt = $(this).attr("data-alt");
-            img.id = $(this).attr("data-id");
-            $(img).attr("onerror", $(this).attr("data-default"));
-            img.style = "display: none";
-            $(this).parent().append(img);
-        }
-        else {
-            img = document.createElement('img');
-            img.onload = imageOnLoad;
-            img.src = $(this).attr("data-src");
-            img.alt = $(this).attr("data-alt");
-            img.id = $(this).attr("data-id");
-            $(img).attr("onerror", $(this).attr("data-default"));
-            img.style = "display: none";
-            $(this).parent().append(img);
-
-            if ($(this).attr("data-id") === "application-logo") {
-                var appLogoSrc = $(this).attr("data-src");
-                if (appLogoSrc !== undefined && appLogoSrc !== '' && appLogoSrc.length > 3) {
-                    var logoFormat = appLogoSrc.substr(appLogoSrc.length - 3, appLogoSrc.length);
-                    if (logoFormat.toLowerCase() === "svg") {
-                        $("#application-logo").addClass("application-logo-svg");
+            var defaultSrc = $(this).attr("data-default");
+            if (defaultSrc) {
+                img.onerror = function () {
+                    this.src = defaultSrc;
+                };
+            }
+            img.style.display = "none";
+            if ($(this).attr("data-id") === "footerlogo") {
+                $(this).parent().find("p#poweredbysyncfusion").append(img);
+            } else if ($(this).attr("data-id") === "profilelogo" || $(this).attr("data-id") === "profile-logo-sub" || $(this).attr("data-id") === "user-profile-picture") {
+                $(this).parent().append(img);
+            } else {
+                $(this).parent().append(img);
+                if ($(this).attr("data-id") === "application-logo") {
+                    var appLogoSrc = $(this).attr("data-src");
+                    if (appLogoSrc !== undefined && appLogoSrc !== '' && appLogoSrc.length > 3) {
+                        var logoFormat = appLogoSrc.substr(appLogoSrc.length - 3, appLogoSrc.length);
+                        if (logoFormat.toLowerCase() === "svg") {
+                            $("#application-logo").addClass("application-logo-svg");
+                        }
                     }
                 }
             }
@@ -318,6 +328,18 @@ $(document).on("keyup", "#search-users, #search-tenants, #search-app-users, #add
         }
     }
 });
+
+$(document).on("click", "#close-button,#close-info-dialog", function () {
+    closeWarningToastDialog();
+});
+
+$(document).ready(function () {
+    $("#application-logo").on("error", function () {
+        $(this).attr("href", 'Url.Content("~/images/${GlobalAppSettings.Branding}/application/${IconFileNames.DefaultErrorSquareImage}")');
+});
+});
+
+
 
 $(document).on("click", "#clear-search,.clear-search,#add-user-clear-search,#add-tenant-clear-search", function () {
     var currentElement = $(this).prevAll("input");
@@ -1233,3 +1255,4 @@ $('body').on('click', 'a', function () {
         $(this).attr("target", "_self");
     }
 });
+

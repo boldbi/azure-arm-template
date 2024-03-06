@@ -12,6 +12,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var defaultErrorImg = '@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)';
+        document.addEventListener("DOMContentLoaded", function () {
+            var loginLogo = document.getElementById("loginLogo");
+            if (loginLogo) {
+                loginLogo.addEventListener("error", function () {                  
+                    this.src = defaultErrorImg;
+                });
+            }
+        });
+    </script>
+
     @await Html.PartialAsync("~/Views/Shared/_OGPContent.cshtml")
     @await Html.PartialAsync("_PasswordPolicyRules")
     @RenderSection("meta", false)
@@ -34,7 +46,7 @@
                 background-image: url(@imageUrl) !important;
                 background-size: cover;
                 background-repeat: no-repeat;
-                background-color:var(--surface);
+                background-color: var(--surface);
             }
 
             .account-parent {
@@ -61,17 +73,17 @@
         <div class="account-child">
             <div class="account-bg">
                 <div class="account-header">
-                    <img alt="Login Logo" src="@headerLogo" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)';" />
+                    <img id="loginLogo" alt="Login Logo" src="@headerLogo" />
                 </div>
                 @RenderSection("MainSection", true)
             </div>
         </div>
     </div>
     @await Html.PartialAsync("../Shared/_FooterOnPremise")
-    <script src="~/bundles/js/accounts.js" asp-append-version="true"></script>
-    <script src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
     @RenderSection("scripts", false)
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]">
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
             $('[data-toggle="popover"]').popover();

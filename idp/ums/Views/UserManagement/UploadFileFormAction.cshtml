@@ -6,9 +6,12 @@
     <link rel="stylesheet" href="~/bundles/css/user-management-module.css" asp-append-version="true" />
 }
 @section scripts{
-    <script src="~/bundles/js/user-management.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/user-management.js" asp-append-version="true"></script>
     
-    <script>
+       <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        document.getElementById("filename").addEventListener("focus", function () {
+            this.blur();
+        });
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
         var postactionUrl = "@Url.Action("postaction", "UserManagement")";
         var isPresentEmailId = "@Url.Action("IsPresentEmailId", "UserManagement")";
@@ -20,17 +23,7 @@
         var deleteSingleFromUserListUrl = "@Url.Action("DeleteSingleFromUserList", "UserManagement")";
         var isAutomaticActivation = @Json.Serialize(GlobalAppSettings.SystemSettings.ActivationType == ActivationType.AutomaticActivation);
         var isEmailRequired = @Json.Serialize(GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.Required);
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $("a").click(function () {
-                return checkUserImported(this);
-            });
-        });
-    </script>
-    <script type="text/javascript">
-        var data1 = @Html.Raw(ViewBag.user);
+        var data1 = @Json.Serialize(ViewBag.user);
         var csvImportGridColumn = [
             { field: "Username", customAttributes: { class: 'user-name' }, headerText: "@T["Username"]", width: 50 },
             { field: "Fullname", headerText: "@T["Name"]", width: 50 }
@@ -61,6 +54,9 @@
                 userImportGrid.appendTo("#user_import_grid");
             });
 
+            $("a").click(function () {
+                return checkUserImported(this);
+            });
         });
         function onComplete(args) {
             $('[data-toggle="tooltip"]').tooltip(
@@ -100,7 +96,7 @@
         <div class="col-md-12 import-area bi-page-header admin-page-icon">
             <div class="col-xs-12 no-padding">
                 <div class="col-xs-6 no-padding admin-header-btn pull-right" id="user-management-options">
-                    <input type="button" value="@T["Import Users"]" title="@T["Import users from the list below"]" onclick="SaveUserListFromCSV()" id="import-button" class="primary-button pull-right" disabled />
+                    <input type="button" value="@T["Import Users"]" title="@T["Import users from the list below"]"  id="import-button" class="primary-button pull-right" disabled />
                 </div>
             </div>
         </div>
@@ -110,11 +106,11 @@
     <div class="admin-page-content-container full-page-container">
         <div class="admin-page-content col-md-12 no-padding">
             <div class="admin-page-body col-xs-12">
-                <form action="@Url.Action("UploadFileFormAction", "UserManagement")" method="post" onsubmit="" enctype="multipart/form-data">
+                <form action="@Url.Action("UploadFileFormAction", "UserManagement")" method="post" enctype="multipart/form-data">
                     <div class="col-md-12 import-file no-padding">
                         <div class="no-padding">
                             <div class="upload-box no-margin">
-                                <input type="text" class="form-control col-md-6 no-margin" onfocus="this.blur()" id="filename" value="@T["Browse file path (.csv)"]" readonly>
+                                <input type="text" class="form-control col-md-6 no-margin"  id="filename" value="@T["Browse file path (.csv)"]" readonly>
                                 <span id="trigger-file" class="input-group-addon btn popup no-left-border">
                                     ...
                                 </span>

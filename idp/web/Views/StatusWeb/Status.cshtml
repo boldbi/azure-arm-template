@@ -16,11 +16,23 @@
     @await Html.PartialAsync("../Shared/_FontReference")
     @await Html.PartialAsync("../Shared/_ThemeReference")
     <link rel="stylesheet" href="~/bundles/css/statushealthcheck.css" asp-append-version="true" />
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var defaultErrorImageSrc = "@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimage = document.getElementById("status-image");
+            if (logoimage) {
+                logoimage.onerror = function () {
+                    this.onerror = null;
+                    this.src = defaultErrorImageSrc;
+                };
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <div class="image">
-            <img alt="@T["Login Logo"]" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" onerror="if (this.src != '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)') this.src = '@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)';" />
+            <img id="status-image" alt="@T["Login Logo"]" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" />
         </div>
         @if (Model.Count != 0)
         {

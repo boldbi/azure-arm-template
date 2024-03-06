@@ -16,9 +16,9 @@
     <link rel="stylesheet" href="~/bundles/css/auth-settings-page.css" asp-append-version="true" />
 }
 @section scripts{
-    <script src="~/bundles/js/auth-settings-page.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/auth-settings-page.js" asp-append-version="true"></script>
     
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var authSettingsUrl = "@Url.Action("AuthenticationSettings", "Administration")";
         var updatesamlsettingsUrl = "@Url.Action("UpdateSAMLSettings", "Administration")";
         var refreshSigningKeyUrl = "@Url.Action("RegenerateSigningKey", "Administration")";
@@ -30,21 +30,21 @@
         if (baseRootUrl.toLowerCase() === "/")
             baseRootUrl = "";
 
-        var isEnabled = @Html.Raw(Json.Serialize(ViewBag.AzureAdSettings.IsEnabled));
-        var isB2CEnabled = @Html.Raw(Json.Serialize(ViewBag.AzureADB2CSettings.IsEnabled));
-        var isSloEnabled = @Html.Raw(Json.Serialize(isAzureAdSloEnabled));
-        var isB2CSloEnabled = @Html.Raw(Json.Serialize(isAzureAdB2CSloEnabled));
-        var oAuthEnabled = @Html.Raw(Json.Serialize(ViewBag.OAuthSettings.IsEnabled));
-        var openIdEnabled = @Html.Raw(Json.Serialize(ViewBag.OpenIDSettings.IsEnabled));
-        var oAuthUserCreationEnabled = @Html.Raw(Json.Serialize(ViewBag.OAuthSettings.OAuthAuthSettings.CanCreateAccount));
-        var openIdUserCreationEnabled = @Html.Raw(Json.Serialize(ViewBag.OpenIDSettings.OIDCAuthSettings.CanCreateAccount));
-        var jwtIsEnabled = @Html.Raw(Json.Serialize(ViewBag.JwtSettings.IsEnabled));
-        var windowsAdEnabled = @Html.Raw(Json.Serialize(ViewBag.WindowsAdSettings.IsEnabled));
+        var isEnabled = @Json.Serialize(ViewBag.AzureAdSettings.IsEnabled);
+        var isB2CEnabled = @Json.Serialize(ViewBag.AzureADB2CSettings.IsEnabled);
+        var isSloEnabled = @Json.Serialize(isAzureAdSloEnabled);
+        var isB2CSloEnabled = @Json.Serialize(isAzureAdB2CSloEnabled);
+        var oAuthEnabled = @Json.Serialize(ViewBag.OAuthSettings.IsEnabled);
+        var openIdEnabled = @Json.Serialize(ViewBag.OpenIDSettings.IsEnabled);
+        var oAuthUserCreationEnabled = @Json.Serialize(ViewBag.OAuthSettings.OAuthAuthSettings.CanCreateAccount);
+        var openIdUserCreationEnabled = @Json.Serialize(ViewBag.OpenIDSettings.OIDCAuthSettings.CanCreateAccount);
+        var jwtIsEnabled = @Json.Serialize(ViewBag.JwtSettings.IsEnabled);
+        var windowsAdEnabled = @Json.Serialize(ViewBag.WindowsAdSettings.IsEnabled);
         if (providerNameCount != 0) {
             var selectedDefaultAuthText = "@selectedDefaultAuthenticationText";
             var selectedDefaultAuthValue = "@selectedDefaultAuthenticationValue";
         }
-        var defaultAuthEnabled = @Html.Raw(Json.Serialize(ViewBag.DefaultAuthenticationSettings.IsDefaultAuthenticationEnabled));
+        var defaultAuthEnabled = @Json.Serialize(ViewBag.DefaultAuthenticationSettings.IsDefaultAuthenticationEnabled);
         serverApp.controller("adSettingsController", ["$scope", function ($scope) {
             $scope.IsEnabled = isEnabled;
             $scope.isB2CEnabled = isB2CEnabled;

@@ -1,5 +1,12 @@
 $(document).ready(function () {
-
+    var loginForm = $("#login-form");
+    if (loginForm.length) {
+        loginForm.on("submit", function (event) {
+            if (!FormValidate()) {
+                event.preventDefault();
+            }
+        });
+    }
     var loginEmail = new ejs.inputs.TextBox({
         cssClass: 'e-outline e-custom e-account',
         floatLabelType: 'Always',

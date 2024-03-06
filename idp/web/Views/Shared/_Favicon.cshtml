@@ -1,4 +1,18 @@
 ﻿@{
     var favicon = (ViewBag.Favicon != null) ? ViewBag.Favicon : Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=favicon"); ;
 }
-<link rel="icon" href="@favicon" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.Favicon)';" />
+
+<link id="favicon" rel="icon" href="@favicon" />
+
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        var errorLink = '@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.Favicon)';
+        var faviconLink = document.getElementById("favicon");
+
+        if (faviconLink) {
+            faviconLink.addEventListener("error", function () {               
+                this.href = errorLink;
+            });
+        }
+    });
+</script>

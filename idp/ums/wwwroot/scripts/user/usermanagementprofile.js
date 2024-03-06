@@ -9,6 +9,10 @@ $(document).ready(function () {
     var ruleName;
     var rules;
     addPlacehoder("body");
+    var saveChangePassword = $("#save-changed-password");
+    if (saveChangePassword.length) {
+        saveChangePassword.on("click", onUserChangePasswordClick);
+    }
 
     // Yet to convert from EJ1 to EJ2
     //$("#avatar-upload-box").ejDialog({

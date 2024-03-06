@@ -1,13 +1,28 @@
 ﻿@using Syncfusion.Server.Base
 @using Syncfusion.Server.Base.DataClasses
 @{
+    var poweredByImageSrc = $"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=poweredby";
     var poweredbyClass = GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion ? "show" : "hide";
     var copyrightClass = GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "show" : "hide";
     var separatorparagraphClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion && GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
     var separatorFooterClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion || GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
-}
+}   
 
 <div id="base-footer-div">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var defaultErrorImg = '@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)';
+        document.addEventListener("DOMContentLoaded", function () {
+            var poweredByImage = document.getElementById("poweredByImage");
+
+            if (poweredByImage) {
+                poweredByImage.addEventListener("error", function () {                  
+                    this.src = defaultErrorImg;
+                });
+            }
+        });
+
+
+    </script>
     <footer>
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 no-padding layout-footer no-margin">
             <div class="copyright-poweredby">
@@ -21,7 +36,8 @@
                     {
                         <p class="no-margin pull-right pow @poweredbyClass" id="poweredbysyncfusion">
                             @T["Powered by"]
-                            <img src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=poweredby")" onerror="this.onerror=null;this.src='@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)';" alt="Syncfusion" width="110" height="25">
+                            <img id="poweredByImage" alt="Syncfusion" width="110" height="25" src="@poweredByImageSrc">
+
                         </p>
                     }
                 </div>

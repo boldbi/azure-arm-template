@@ -4,14 +4,20 @@
     var activeTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "general") ? "active" : string.Empty;
 }
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="@Context.Items["ScriptNonce"]">
     var refreshclientsecretUrl = "@Url.Action("RegenerateClientSecret", "TenantsManagement")";
+    var showSecretButton = document.getElementById("show-secret");
+    if (showSecretButton) {
+        showSecretButton.addEventListener("focus", function () {
+            this.blur();
+        });
+    }
 </script>
 
 <div role="tabpanel" class="tab-pane col-xs-12 no-padding @activeTab" id="application-tab">
     <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="img-view-holder col-lg-2 col-md-2 col-sm-12 col-xs-12 no-padding">
-            <div data-id="application-logo" class="lazyload img-loader" data-src="@(Model.UseCustomBranding ? GlobalAppSettings.SystemSettings.LoginLogo : Url.Content(Model.Tenant.SiteUrl + "/get-client-logo"))" data-alt="boldbilogo" data-default="this.onerror=null;this.src='@Url.Content("~/images/" + tenantImageType + "/application/" + IconFileNames.DefaultErrorSquareImage)';" data-width="110px" data-height="25px"></div>
+            <div data-id="application-logo" class="lazyload img-loader" data-src="@(Model.UseCustomBranding ? GlobalAppSettings.SystemSettings.LoginLogo : Url.Content(Model.Tenant.SiteUrl + "/get-client-logo"))" data-alt="boldbilogo" data-default="@Url.Content("~/images/" + tenantImageType + "/application/" + IconFileNames.DefaultErrorSquareImage)" data-width="110px" data-height="25px"></div>
         </div>
         <div id="edit-application-form-div" class="col-lg-10 col-md-10 col-sm-12 col-xs-12 no-padding">
             <form class="row admin-page-form" autocomplete="off">
@@ -25,14 +31,14 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group ">
                     @Html.Label("application-url", T["Site URL"].Value, new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-xs-4" })
                     <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-xs-8 application-url active ">
-                        <a title=@Html.Raw(Model.Tenant.SiteUrl) data-toggle="tooltip"  target="_blank" href=@Html.Raw(Model.Tenant.SiteUrl)>@Html.Raw(Model.Tenant.SiteUrl) </a>
+                        <a title=@Html.Raw(Model.Tenant.SiteUrl) data-toggle="tooltip" target="_blank" href=@Html.Raw(Model.Tenant.SiteUrl)>@Html.Raw(Model.Tenant.SiteUrl) </a>
                     </div>
                 </div>
                 <div class="col-md-12 form-group">
                     @Html.Label("client-id", T["Client Id"].Value, new { @class = "app-textbox-label col-md-2" })
                     <div class="form-input-field  col-md-10 id">
                         <input type="text" class="col-md-8 client-values form-control" id="myId" readonly="" value="@Html.DisplayFor(tenantInfo => tenantInfo.TenantInfoId)" />
-                        <button class="col-md-2 su su-copy form-control" id="copy-client-id" onclick="copyToClipboard('#myId','#copy-client-id')" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></button>
+                        <button class="col-md-2 su su-copy form-control" id="copy-client-id" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></button>
                     </div>
 
                 </div>
@@ -40,8 +46,8 @@
                     @Html.Label("client-secret", T["Client Secret"].Value, new { @class = "app-textbox-label col-md-2" })
                     <div class="form-input-field col-md-10 secret">
                         <input type="password" id="mySecret" readonly="" class="col-md-6 client-values my-secret form-control" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@Model.ClientSecret.ToString()" />
-                        <button class="col-md-2 su su-show show-client-secret form-control" onfocus="this.blur()" id="show-secret" data-toggle="tooltip" data-original-title="@T["Click to view"]"></button>
-                        <button class="col-md-2 su su-copy form-control" id="copy-client-secret" onclick="copyToClipboard('#mySecret','#copy-client-secret')" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></button>
+                        <button class="col-md-2 su su-show show-client-secret form-control" id="show-secret" data-toggle="tooltip" data-original-title="@T["Click to view"]"></button>
+                        <button class="col-md-2 su su-copy form-control" id="copy-client-secret" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></button>
                         @*<button class="su su-sync text focus" id="generate-client-secret" onclick="onRegenerateClientSecretDialogOpen()" data-toggle="tooltip" data-original-title="Click to Regenerate"></button>*@
                     </div>
                 </div>

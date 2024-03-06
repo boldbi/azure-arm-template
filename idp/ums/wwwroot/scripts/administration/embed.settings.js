@@ -168,3 +168,15 @@ $(document).on("change", "#csfile", function (e) {
         $('#csfile').attr('title', value);
     }
 });
+
+$(document).on("click", "#get-embed-code", function () {
+    getEmbedSecret();
+});
+
+$(document).on("click", "#secret-code", function () {
+    this.setSelectionRange(0, this.value.length);
+});
+
+$(document).on("focus", "#filename", function () {
+    this.blur()
+});

@@ -12,7 +12,18 @@
     <title>@T["Page Not Found"] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
     @await Html.PartialAsync("../Shared/_Favicon")
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var defaultErrorImageSrc = "@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimage = document.getElementById("page-not-found-image");
+            if (logoimage) {
+                logoimage.onerror = function () {
+                    this.onerror = null;
+                    this.src = defaultErrorImageSrc;
+                };
+            }
+        });
+    </script>
     <style>
         body {
             background: #F9F9F9;
@@ -47,7 +58,7 @@
     <header class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
         <div class="container">
             <a class="navbar-brand mr-0 mr-md-2" href="/" aria-label="Syncfusion">
-                <img class="page-not-found-logo" alt="syncfusion" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" onerror="if (this.src != '@Url.Content("~/content/images/" + GlobalAppSettings.Branding + "/application/" + GlobalAppSettings.Branding + ".svg")') this.src = '@Url.Content("~/Content/images/" + GlobalAppSettings.Branding + "/application/"+ GlobalAppSettings.Branding + ".svg")';" />
+                <img id ="page-not-found-image" class="page-not-found-logo" alt="syncfusion" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=login")" />
             </a>
         </div>
     </header>
