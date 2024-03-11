@@ -2338,6 +2338,7 @@ var Designer = {
                 InValidParameter: "Data type mismatched. Please select a valid data type parameter.",
                 failedToParseExp: "DashboardDesigner failed to parse the specified expression",
                 emptyName: "Name should not be empty.",
+                emptyRangeValue:"Range value should not be empty.",
                 emptyExpName: "Expression name cannot be empty. Please enter a valid name.",
                 emptyExp: "Expression should not be empty.",
                 expNameExist: "An expression with the same name already exists.",
