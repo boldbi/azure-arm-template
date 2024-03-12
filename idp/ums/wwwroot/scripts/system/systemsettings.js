@@ -773,3 +773,22 @@ function ResizeHeightForDOM() {
     $(".dialog-body-div").css("height", "auto");
     gridHeight = height;
 }
+
+// Returns true if startup is already completed.
+function validateStartup() {
+    $.ajax({
+        type: "GET",
+        url: validateStartupUrl,
+        success: function (data) {
+            if (data.Data) {
+                messageBox("su-login-error", window.Server.App.LocalizationContent.ConfigurationError, window.Server.App.LocalizationContent.ConfigurationErrorMessage, "success", function () {
+                    onCloseMessageBox();
+                });
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    });
+}

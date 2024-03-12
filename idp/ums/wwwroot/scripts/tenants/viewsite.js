@@ -959,12 +959,7 @@ function updateTenantStatus(actionUrl, tenantId, action) {
                 }
             }
             else {
-                if (data.IsMasterSite) {
-                    WarningAlert(actionName + " " + window.Server.App.LocalizationContent.SiteLetter, window.Server.App.LocalizationContent.SuspendOrDeleteSiteFailed.format(action), data.Message, 7000);
-                }
-                else {
-                    WarningAlert(actionName + " " + window.Server.App.LocalizationContent.SiteLetter, window.Server.App.LocalizationContent.InternalServerErrorTryAgain, data.Message, 7000);
-                }
+                WarningAlert(actionName + " " + window.Server.App.LocalizationContent.SiteLetter, window.Server.App.LocalizationContent.SuspendOrDeleteSiteFailed.format(action), data.Message, 7000);
             }
             var tenantGridObj = document.getElementById('tenants_grid').ej2_instances[0];
             tenantGridObj.refresh();

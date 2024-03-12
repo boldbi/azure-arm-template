@@ -258,14 +258,31 @@ $(document).on("click", "#know-more-error", function () {
 
 
 $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function () {
-    var databaseValidationMessage = window.Server.App.LocalizationContent.OneOrMoreErrors.format("<a id='know-more-error'>", "</a>");
-    var isNewDatabaseTab = $(this).attr("id") == "db-config-submit";
     removeError();
+    var clickedButton = $(this);
+    if (!isSiteCreation) {
+        if (validateStartup()) {
+            messageBox("su-login-error", window.Server.App.LocalizationContent.ConfigurationError, window.Server.App.LocalizationContent.ConfigurationErrorMessage, "success", function () {
+                onCloseMessageBox();
+            });
+        }
+        else {
+            databaseConfiguration(clickedButton);
+        }
+    }
+    else {
+        databaseConfiguration(clickedButton);
+    }
+});
+
+function databaseConfiguration(clickedButton) {
+    var databaseValidationMessage = window.Server.App.LocalizationContent.OneOrMoreErrors.format("<a id='know-more-error'>", "</a>");
+    var isNewDatabaseTab = clickedButton.attr("id") == "db-config-submit";
     var canProceed = $("#db-content-holder").valid();
     if (canProceed) {
         showWaitingPopup('startup-waiting-element');
         $("#startup-waiting-element").find(".e-spinner-pane").css("height", $("#startup-waiting-element").height())
-        $(this).prop("disabled", true);
+        clickedButton.prop("disabled", true);
         window.serverName = $("#txt-servername").val();
         window.portNumber = $("#txt-portnumber").val();
         window.maintenanceDb = $('#maintenance-db').val();
@@ -383,7 +400,7 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
             }
         );
     }
-});
+}
 
 function registerApplication(isSimpleMode) {
     getFormData();
