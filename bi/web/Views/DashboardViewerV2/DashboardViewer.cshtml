@@ -54,6 +54,7 @@
     var isInvalidComment = (ViewBag.InValidCommentId != null && ViewBag.InValidCommentId) ? true : false;
     var dashboardCutomTheme = string.Empty;
     var embedThemeEnabled = false;
+    var applyURLFilterAlone = ViewBag.ApplyURLFilterAlone != null;
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
@@ -194,6 +195,7 @@
         var cdnPath = "@dashboardDesignerResourceUrl/cdn/scripts/designer/";
         var sharedDataSources = @Html.Raw(ViewBag.SharedDatasources);
         var viewDetails = @Html.Raw(Json.Serialize(ViewBag.ViewDetails));
+        var applyURLFilterAlone = @Json.Serialize(applyURLFilterAlone);
         var isUserAuthenticatedInCurrentTenant = @Json.Serialize(isUserAuthenticatedInCurrentTenant);
         var autosaveFilter = @Json.Serialize(globalAppSettings.SystemSettings.IsEnableAutosaveFilter);
         var theming = @(!ServerAppConfig.IsSelfHosted ? "false" : themeInViewer ? Json.Serialize(globalAppSettings.SystemSettings.Theming) : "false");
