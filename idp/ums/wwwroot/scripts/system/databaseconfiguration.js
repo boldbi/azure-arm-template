@@ -261,14 +261,16 @@ $(document).on("click", "#db-config-submit, #sql-existing-db-submit", function (
     removeError();
     var clickedButton = $(this);
     if (!isSiteCreation) {
-        if (validateStartup()) {
-            messageBox("su-login-error", window.Server.App.LocalizationContent.ConfigurationError, window.Server.App.LocalizationContent.ConfigurationErrorMessage, "success", function () {
-                onCloseMessageBox();
-            });
-        }
-        else {
-            databaseConfiguration(clickedButton);
-        }
+        validateStartup(function (result) {
+            if (result) {
+                messageBox("su-login-error", window.Server.App.LocalizationContent.ConfigurationError, window.Server.App.LocalizationContent.ConfigurationErrorMessage, "success", function () {
+                    onCloseMessageBox();
+                });
+            }
+            else {
+                databaseConfiguration(clickedButton);
+            }
+        });
     }
     else {
         databaseConfiguration(clickedButton);

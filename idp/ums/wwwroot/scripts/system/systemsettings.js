@@ -775,19 +775,15 @@ function ResizeHeightForDOM() {
 }
 
 // Returns true if startup is already completed.
-function validateStartup() {
+function validateStartup(result) {
     $.ajax({
         type: "GET",
         url: validateStartupUrl,
         success: function (data) {
             if (data.Data) {
-                messageBox("su-login-error", window.Server.App.LocalizationContent.ConfigurationError, window.Server.App.LocalizationContent.ConfigurationErrorMessage, "success", function () {
-                    onCloseMessageBox();
-                });
-                return true;
-            }
-            else {
-                return false;
+                result(true);
+            } else {
+                result(false);
             }
         }
     });

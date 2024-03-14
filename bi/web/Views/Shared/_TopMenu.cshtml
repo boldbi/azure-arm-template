@@ -209,12 +209,24 @@
 }
 
 <script>
-    var userProfileName = $(".sub-menu-profile-hover").find(".sub-menu-user-name-style");
-    var userProfileEmail = $(".sub-menu-profile-hover").find(".sub-menu-user-email-style");
-    if (userProfileName.text().length > 35 || userProfileEmail.text().length > 35) {
-        $(".sub-menu-profile-hover").attr("title", "<span class='tooltip-row'>@displayName</span><span class='tooltip-row'>@userEmailAddress</span>");
-        $(".sub-menu-profile-hover").tooltip({
-            html: true,
-        });
-    }
+    $(document).ready(function () {
+        var displayName = "@displayName";
+        var userEmailAddress = "@userEmailAddress";
+        var requestUrl = "@requestUrl";
+        if (displayName.length > 35 || userEmailAddress.length > 35) {
+            var isDashboardSettings = requestUrl.indexOf("/administration/dashboard-settings") !== -1;
+            $(".sub-menu-profile-hover").each(function () {
+                if ((isDashboardSettings && !$(this).hasClass("profile-tooltip-added")) || !isDashboardSettings) {
+                    $(this).attr("title", "<span class='tooltip-row'>" + displayName + "</span><span class='tooltip-row'>" + userEmailAddress + "</span>");
+                    if (isDashboardSettings) {
+                        $(this).addClass("profile-tooltip-added");
+                    }
+
+                    $(this).tooltip({
+                        html: true
+                    });
+                }
+            });
+        }
+    });
 </script>
