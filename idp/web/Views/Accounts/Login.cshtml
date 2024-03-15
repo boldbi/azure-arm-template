@@ -13,11 +13,10 @@
     var showBoldSignUp = ViewBag.IsBoldSign ?? false;
     var isAzureResetPassword = TempData["AzureResetPassword"];
     var customCssPath = System.IO.Path.GetFullPath(AppEnvironment.GetAppDataFolderPath() + "/idp/content/styles/login.css");
-    string returnUrlWithHost = ViewBag.ReturnUrlWithHost;
 }
 
 @section styles{
-    <link rel="stylesheet" href="~/bundles/css/accounts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/bundles/css/accounts.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/accounts.css")" crossorigin="anonymous"asp-append-version="true" />
 
     @if (File.Exists(customCssPath))
     {
@@ -45,11 +44,10 @@
         var mfaVerificationPageUrl = "@Url.Action("LoginMfaVerificationCodeValidation", "Accounts")";
     </script>
 
-      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts-login.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts-login.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/accounts-login.js")" crossorigin="anonymous"asp-append-version="true"></script>
 }
 
 @section MainSection{
-    <meta name="return_url" content="@returnUrlWithHost" />
     <div class="login-wrapper">
         <div class="login-body">
             @await Html.PartialAsync("~/Views/Shared/_LoginForm.cshtml")
