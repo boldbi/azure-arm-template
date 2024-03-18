@@ -2639,7 +2639,8 @@
 				enterQueryWaterMarkText: "Enter a valid SQL query",
 				closePreviewButtonText: "Close Preview",
 				importTableNameText: "TableName",
-				previewWindowMessage: "Maximum 10 records are shown for preview purpose"
+				previewWindowMessage: "Maximum 10 records are shown for preview purpose",
+				previewNestedErrorBannerText: "Its recommended to choose only the required nodes from schema when using large number of nested arrays."
             },
             alertWindowMesages: {
                 draftMessage: "You have unpublished changes in this dashboard from your previous session. Do you want to restore them?",
