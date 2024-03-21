@@ -773,3 +773,18 @@ function ResizeHeightForDOM() {
     $(".dialog-body-div").css("height", "auto");
     gridHeight = height;
 }
+
+// Returns true if startup is already completed.
+function validateStartup(result) {
+    $.ajax({
+        type: "GET",
+        url: validateStartupUrl,
+        success: function (data) {
+            if (data.Data) {
+                result(true);
+            } else {
+                result(false);
+            }
+        }
+    });
+}

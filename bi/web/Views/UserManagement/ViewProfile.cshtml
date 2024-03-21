@@ -238,7 +238,7 @@
                             </div>
                             <div class="col-xs-8 no-padding account-edit">
                                 <label id="display-name-field" class="display-name">@userDetail.DisplayName</label>
-                                @if ((userDetail.DirectoryType == DirectoryType.Local || isOAuthorOpenIdUser) && (isAdmin || (!isAdmin && !userDetail.IsAdmin)))
+                                @if ((userDetail.DirectoryType == DirectoryType.Local || isOAuthorOpenIdUser) && (isAdmin || (!isAdmin && !userDetail.IsAdmin)) && ServerAppConfig.IsSelfHosted)
                                 {
                                     <label id="edit-button">
                                         <span class="bg-info" id="id-account-link">
@@ -264,6 +264,12 @@
                         {
                             <div id="admin-user-info" class="col-xs-12 no-padding profile-note-sec">
                                 <label>@T["You do not have the privilege to edit the admin user’s profile."]</label>
+                            </div>
+                        }
+                        @if (!ServerAppConfig.IsSelfHosted && (userDetail.DirectoryType == DirectoryType.Local || isOAuthorOpenIdUser))
+                        {
+                            <div id="profile-cannot-edit" class="col-xs-12 no-padding profile-note-sec">
+                                <label>@T["Modifying another user's profile is not currently permitted. If you would like to update your profile, please navigate to the 'My Profile' section and make the necessary changes."]</label>
                             </div>
                         }
                         <div id="edit-user-profile-form-div" class="col-xs-12 col-sm-7 col-md-7 col-lg-7 no-padding">

@@ -227,12 +227,16 @@ $(document).on("change", "#font-file", function (e) {
 function onChangeTheme(defaultTheme) {
     document.getElementById("application-theme").ej2_instances[0].text = "Default";
     var appearanceTheme = "lighttheme.css";
-    if (defaultTheme === "dark") {
-        appearanceTheme = "darktheme.css";
-    }
     var themeElements = document.getElementsByClassName("theme-ref");
-    themeElements[0].href = baseRootUrl + "bundles/css/" + appearanceTheme;
+    var intergrity = lightThemeIntergrity;
+    if (defaultTheme === "dark") {
+        appearanceTheme = "darktheme.css";       
+        intergrity = darkThemeIntergrity;
+    }
 
+    themeElements[0].integrity = intergrity;
+    themeElements[0].href = baseRootUrl + "bundles/css/" + appearanceTheme;
+    
     var applicationElements = document.getElementsByClassName("application-theme-ref");
     applicationElements[0].href = applicationThemeReferenceUrl + "?theme=" + defaultTheme;
 }

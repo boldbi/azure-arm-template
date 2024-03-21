@@ -984,7 +984,7 @@ function WarningAlert(header, content, error, duration) {
     $("#container #text-error-area").val(error);
     parent.$("#warning-alert").css("display", "table");
 
-    if (error != null) {
+    if (error != null && error != "") {
         $("#view").show();
     }
 

@@ -317,8 +317,18 @@ function preFillUser(obj) {
 }
 
 $(document).on("click", "#confirm-license", function () {
-    confirmLicenseUpdate();
+    validateStartup(function (result) {
+        if (result) {
+            messageBox("su-login-error", window.Server.App.LocalizationContent.ConfigurationError, window.Server.App.LocalizationContent.ConfigurationErrorMessage, "success", function () {
+                onCloseMessageBox();
+            });
+        }
+        else {
+            confirmLicenseUpdate();
+        }
+    });
 });
+
 $(document).on("click", "#return-startup-home", function () {
     returnStartupHome();
 });
