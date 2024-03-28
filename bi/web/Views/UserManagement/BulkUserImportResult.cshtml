@@ -8,8 +8,9 @@
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups];
     ViewBag.Title = T["Bulk user import Result"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     ViewBag.PageHeader = T["Bulk Import Result"];
-    ViewBag.PageDescription = T["Shows details about bulk user import jobs."];
-    ViewBag.BackIconRedirectionUrl = Url.Action("BulkImportResult", "UserManagement");
+    ViewBag.PageDescription = ViewBag.IsGroupImport != null && ViewBag.IsGroupImport ? T["Shows details about bulk group import jobs."] : T["Shows details about bulk user import jobs."];
+    ViewBag.BackIconRedirectionUrl = ViewBag.IsGroupImport != null && ViewBag.IsGroupImport ? Url.Action("BulkImportResult", "Group") : Url.Action("BulkImportResult", "UserManagement");
+    var isGroupBasedImport = ViewBag.jobDetails.BulkImportDetails.IsGroupImport;
 };
 @section scripts{
     <environment include="Development,CloudDevelopment">
@@ -23,24 +24,61 @@
     <script type="text/javascript">
         var importedUsersListUrl = "@Url.Action("GetAllImportedUsers", "UserManagement")";
         var failedUsersListUrl = "@Url.Action("GetAllFailedUsers", "UserManagement")";
-    </script>
 
-    <script type="text/x-jsrender" id="display-name-template">
-        <span class="grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
+        var isGroupImport = @Html.Raw(Json.Serialize(isGroupBasedImport));
     </script>
     <script type="text/x-jsrender" id="user-name-template">
         <span class="grid-content" title="{{:Username}}" data-toggle="tooltip">{{:Username}}</span>
     </script>
-    <script type="text/x-jsrender" id="email-template">
-        <span class="grid-content" title="{{:Email}}" data-toggle="tooltip">{{:Email}}</span>
-    </script>
-    <script type="text/x-jsrender" id="status-template">
-        {{if IsActive}}
-        <span class="grid-content inprogress-or-completed-job" title="@T["Active"]" data-toggle="tooltip">@T["Active"]</span>
-        {{else}}
-        <span class="grid-content suspended-job" title="@T["Inactive"]" data-toggle="tooltip">@T["Inactive"]</span>
-        {{/if}}
-    </script>
+    @if (isGroupBasedImport)
+    {
+        <script type="text/x-jsrender" id="email-template">
+            <span class="grid-content" title="{{:ImportedUserCount}}" data-toggle="tooltip">{{:ImportedUserCount}}</span>
+        </script>
+        <script type="text/x-jsrender" id="failed-user-template">
+            <span class="grid-content" title="{{:FailedUserCount}}" data-toggle="tooltip">{{:FailedUserCount}}</span>
+        </script>
+        <script type="text/x-jsrender" id="display-name-template">
+            {{if ChildJobId != 0}}
+            <a class="grid-content" target="_blank" href="@Url.Action("BulkUserImportResult", "UserManagement")?id={{:ChildJobId}}" title="{{:UserCount}}" data-toggle="tooltip">{{:UserCount}}</a>
+            {{else}}
+            <span class="grid-content" title="{{:UserCount}}" data-toggle="tooltip">{{:UserCount}}</span>
+            {{/if}}
+        </script>
+        <script type="text/x-jsrender" id="status-template">
+             {{if ChildJobStatus == "Completed"}}
+            <span class="grid-content inprogress-or-completed-job" title="@T["Completed"]" data-toggle="tooltip">@T["Completed"]</span>
+            {{else ChildJobStatus == "In progress"}}
+            <span class="grid-content inprogress-or-completed-job" title="@T["In progress"]" data-toggle="tooltip">@T["In progress"]</span>
+            {{else ChildJobStatus == "Suspended"}}
+            <span class="grid-content suspended-job" title=">@T["Suspended"]" data-toggle="tooltip">@T["Suspended"]</span>
+            {{else ChildJobStatus == "Yet to start"}}
+            <span class="grid-content yet-to-start-job" title="@T["Yet to start"]" data-toggle="tooltip">@T["Yet to start"]</span>
+            {{else}}
+            <span class="grid-content inprogress-or-completed-job" title="@T["Completed"]" data-toggle="tooltip">@T["Completed"]</span>
+            {{/if}}
+        </script>
+    }
+    else
+    {
+        <script type="text/x-jsrender" id="email-template">
+            <span class="grid-content" title="{{:Email}}" data-toggle="tooltip">{{:Email}}</span>
+        </script>
+        <script type="text/x-jsrender" id="user-name-template">
+            <span class="grid-content" title="{{:Username}}" data-toggle="tooltip">{{:Username}}</span>
+        </script>
+        <script type="text/x-jsrender" id="display-name-template">
+            <span class="grid-content" title="{{:DisplayName}}" data-toggle="tooltip">{{:DisplayName}}</span>
+        </script>
+        <script type="text/x-jsrender" id="status-template">
+            {{if IsActive}}
+            <span class="grid-content inprogress-or-completed-job" title="@T["Active"]" data-toggle="tooltip">@T["Active"]</span>
+            {{else}}
+            <span class="grid-content suspended-job" title="@T["Inactive"]" data-toggle="tooltip">@T["Inactive"]</span>
+            {{/if}}
+        </script>
+    }
+
     <script type="text/x-jsrender" id="failed-user-name-template">
         <span class="grid-content" title="{{:Username}}" data-toggle="tooltip">{{:Username}}</span>
     </script>
@@ -64,15 +102,22 @@
             <div class="@(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport) ? "import-user-message" : string.Empty)" style="display:none">
                 <span class="su su-info"></span>
                 <div class="message-tag">
-                    @if (ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart")
+                @if (ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart")
+                {
+                    @T["The importing process will begin either within 3 minutes of the job creation time or after the completion of other import tasks already in the queue."]
+                }
+                else if (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)
+                {
+                    if (isGroupBasedImport)
                     {
-                        @T["The importing process will begin either within 3 minutes of the job creation time or after the completion of other import tasks already in the queue."]
+                        @T["The group import status will be marked as completed after all the users in the groups have been imported successfully."]
                     }
-                    else if (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)
+                    else
                     {
                         @T["The bulk user import status will be marked as completed within 3 minutes after all the users have been imported successfully."]
-                    }
-                </div>
+                    }                    
+                }
+            </div>
             </div>
             <div id="bulk-import-body" class="col-xs-12 bi-page-body job-details-container @(ViewBag.jobDetails.BulkImportDetails.Status == "YetToStart" || (ViewBag.jobDetails.BulkImportDetails.Status == "InProgress" && (ViewBag.jobDetails.BulkImportDetails.TotalUser == ViewBag.jobDetails.BulkImportDetails.ImportedUser + ViewBag.jobDetails.BulkImportDetails.FailedImport)) ? "job-info-container" : string.Empty)">
                 <div id="job-info-container" class="col-xs-12 no-padding job-info-margin">
@@ -85,13 +130,27 @@
                         </div>
                         <div class="form-element-label">
                             <div class="show input-field">
-                                <label>@T["Total User Count"]:</label>
+                                @if (ViewBag.jobDetails.BulkImportDetails.IsGroupImport)
+                                {
+                                    <label>@T["Total Group Count"]:</label>
+                                }
+                                else
+                                {
+                                    <label>@T["Total User Count"]:</label>
+                                }
                                 <span value="@ViewBag.jobDetails.BulkImportDetails.TotalUser)">@ViewBag.jobDetails.BulkImportDetails.TotalUser</span>
                             </div>
                         </div>
                         <div class="form-element-label">
                             <div class="show input-field">
-                                <label>@T["Imported Users"]:</label>
+                                @if (ViewBag.jobDetails.BulkImportDetails.IsGroupImport)
+                                {
+                                    <label>@T["Imported Groups"]:</label>
+                                }
+                                else
+                                {
+                                    <label>@T["Imported Users"]:</label>
+                                }
                                 <span value="@ViewBag.jobDetails.BulkImportDetails.ImportedUser)">@ViewBag.jobDetails.BulkImportDetails.ImportedUser</span>
                             </div>
                         </div>
@@ -103,7 +162,14 @@
                         </div>
                         <div class="form-element-label">
                             <div class="show input-field">
-                                <label>@T["Failed User"]:</label>
+                                @if (ViewBag.jobDetails.BulkImportDetails.IsGroupImport)
+                                {
+                                    <label>@T["Failed Groups"]:</label>
+                                }
+                                else
+                                {
+                                    <label>@T["Failed User"]:</label>
+                                }
                                 <span value="@ViewBag.jobDetails.BulkImportDetails.FailedImport)">@ViewBag.jobDetails.BulkImportDetails.FailedImport</span>
                             </div>
                         </div>
@@ -168,7 +234,14 @@
                 <div class="col-xs-12 no-padding bi-page-nav-bar">
                     <ul id="bulk-import-tab-nav" class="nav nav-tabs" role="tablist">
                         <li role="presentation" class="import-tab @isImportedUserTab">
-                            <a href="#imported-users" id="imported-users-tab" aria-controls="imported-users-tab" role="tab" data-toggle="tab">@T["Imported Users"]</a>
+                            @if (ViewBag.jobDetails.BulkImportDetails.IsGroupImport)
+                            {
+                                <a href="#imported-users" id="imported-users-tab" aria-controls="imported-users-tab" role="tab" data-toggle="tab">@T["Imported Groups"]</a>
+                            }
+                            else
+                            {
+                                <a href="#imported-users" id="imported-users-tab" aria-controls="imported-users-tab" role="tab" data-toggle="tab">@T["Imported Users"]</a>
+                            }
                         </li>
                         <li role="presentation" class="import-tab @isFailedUserTab">
                             <a href="#failed-users" id="failed-users-tab" aria-controls="failed-users-tab" role="tab" data-toggle="tab">@T["Failed Import"]</a>
@@ -202,7 +275,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>        
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
     </div>
 }

@@ -6,8 +6,8 @@
     var scopeList = ServerAppConfig.SettingsScopesList;
     var canShowAdminMenu = _identityResponse.IsAdmin || model[SettingsScopes.All] || model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() > 1 || (model.Select(x => x).Where(x => scopeList.Contains(x.Key.ToString()) && x.Value == true).Count() == 1 && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])) || model[PermissionEntity.UsersandGroups]; 
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.BulkImportResult);
-    ViewBag.BackIconRedirectionUrl = Url.Action("User", "UserManagement");
-    var pageDescription = T["Shows a list of all bulk user import jobs."];
+    ViewBag.BackIconRedirectionUrl = ViewBag.IsGroupImport != null && ViewBag.IsGroupImport ? Url.Action("Group", "Group") : Url.Action("User", "UserManagement");
+    var pageDescription = ViewBag.IsGroupImport != null && ViewBag.IsGroupImport ? T["Shows a list of all bulk group import jobs."] : T["Shows a list of all bulk user import jobs."];
 }
 
 
@@ -72,14 +72,25 @@
                 <span class="su su-options"> </span>
             </span>
             <ul class="dropdown-menu" role="menu">
-
+        @if (ViewBag.IsGroupImport)
+        {
                 <li class="menu-group">
-                    <a href="@Url.Action("BulkUserImportResult", "UserManagement")?id={{:JobId}}" title="@T["View"]" data-toggle="tooltip">
-                        <i class="su su-eye"></i>
-                        <span class="menu-text">@T["View"]</span>
-                    </a>
-                </li>
-                {{if ImportJobStatus == "Yet to start" || ImportJobStatus == "In progress"}}
+                        <a href="@Url.Action("BulkGroupImportResult" , "Group")?id={{:JobId}}" title="@T["View"]" data-toggle="tooltip">
+                            <i class="su su-eye"></i>
+                            <span class="menu-text">@T["View"]</span>
+                        </a>
+            </li>
+        }
+        else
+        {
+                <li class="menu-group">
+                        <a href="@Url.Action("BulkUserImportResult" , "UserManagement")?id={{:JobId}}" title="@T["View"]" data-toggle="tooltip">
+                            <i class="su su-eye"></i>
+                            <span class="menu-text">@T["View"]</span>
+                        </a>
+                    </li>
+        }
+        {{if ImportJobStatus == "Yet to start" || ImportJobStatus == "In progress"}}
                 <li class="menu-group">
                     <a href="javascript:void(0);" class="suspend-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Suspend"]" data-toggle="tooltip">
                         <i class="su su-disable"></i>

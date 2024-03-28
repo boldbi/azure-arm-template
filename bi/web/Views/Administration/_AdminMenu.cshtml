@@ -22,6 +22,8 @@
     var credentialsUrl = Url.Action("Credentials", "Administration");
     var dashboardServerResourceUrl = _globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var groupPageUrl = Url.Action("group", "group");
+    var bulkImportUrlForGroup = Url.Action("BulkImportResult", "Group");
+    var bulkImportUrlForUser = Url.Action("BulkImportResult", "UserManagement");
     var webhookSettingsPageUrl = Url.Action("WebhookSettings", "Administration");
     var editWebhookSettingsPageUrl = Url.Action("EditWebhook", "Administration");
     var lookAndFeelSettingsPageUrl = Url.Action("LookAndFeel", "Administration");
@@ -152,7 +154,7 @@
         <ul class="admin-menu-category" id="admin-menu-category-UserandAuthentication">
             @if (isAdmin || (model != null && model[PermissionEntity.UsersandGroups]) || (await _featureManager.IsEnabledAsync(@FeatureManagement.AllUsersPermissionEntity) && model[PermissionEntity.AllUsers]))
             {
-                <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("users") || currentUrl.Contains("bulk-import-result") || currentUrl.IndexOf(userPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("users") || currentUrl.IndexOf(bulkImportUrlForUser, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(userPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                     <a id="license-settings-link" class="" href="@userPageUrl">
                         <i class="su su-user-1"></i>
                         <span>@T["Users"]</span>
@@ -161,7 +163,7 @@
             }
             @if (isAdmin || (model != null && (model[PermissionEntity.UsersandGroups] || model[PermissionEntity.SpecificGroup] || model[PermissionEntity.AllGroups])))
             {
-                <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("groups") || currentUrl.IndexOf(groupPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <li class="mobile-hidden admin-menu-item @(currentUrl.Contains("groups") || currentUrl.IndexOf(bulkImportUrlForGroup, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(groupPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                     <a id="license-settings-link" class="" href="@groupPageUrl">
                         <i class="su su-group-1"></i>
                         <span>@T["Groups"]</span>
