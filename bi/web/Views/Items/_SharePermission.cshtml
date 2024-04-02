@@ -19,6 +19,8 @@
     var specificGroupEntity = (int)PermissionEntity.SpecificGroup;
     var currentuserId = _identityResponse.User.UserId;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var downloadPermissionAccess = GlobalAppSettings.GetDescription(PermissionAccess.Download).ToLower();
+    var downloadPermissionAccessId = (int)PermissionAccess.Download;
     var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
 }
 
@@ -39,6 +41,8 @@
     var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
     var getDashboardEmbedCode = @Json.Serialize(getDashboardEmbedCode);
     window.currentUserId = "@currentUserId";
+    window.downloadPermissionAccess = "@downloadPermissionAccess";
+    window.downloadPermissionAccessId = "@downloadPermissionAccessId";
     window.sharedUserGroupList = @Html.Raw(Json.Serialize(@data));
     window.accessModeList = @Html.Raw(Json.Serialize(@data));
     var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
@@ -162,9 +166,17 @@
                                                 <span>@T["It's You"]</span>
                                             </div>
                                         </div>
-                                        <div class="col-xs-12 no-padding action-for-delete-container" ng-show="{{(people.TargetUserId != currentUserId) && (people.CanRemove)}}">
+                                        <div class="col-xs-12 no-padding action-for-delete-container" ng-show="{{(people.TargetUserId != currentUserId) && (people.CanRemove) && (people.PermissionAccessDescription.toLowerCase() != downloadPermissionAccess)}}">
                                             <div class="col-xs-10 no-padding change-access-mode-select">
-                                                <select class="change-access-mode-selection selectpicker-sharedialog" title="" data-original-title="" id="select_{{$index}}" name="accessMode" ng-change="updateValue(people.PermissionAccess, '{{$index}}')" ng-model="people.PermissionAccess" ng-options="parseInt(p.Key) as p.Value for p in accessModes" ng-show="currentItemType != @itemViewType"></select>
+                                                <select class="change-access-mode-selection selectpicker-sharedialog" title="" data-original-title="" id="select_{{$index}}" name="accessMode" ng-change="updateValue(people.PermissionAccess, '{{$index}}')" ng-model="people.PermissionAccess" ng-options="parseInt(p.Key) as p.Value for p in accessModes | filter:{ Key: '!' + downloadPermissionAccessId }" ng-show="currentItemType != @itemViewType"></select>
+                                            </div>
+                                            <div class="col-xs-2 no-padding shared-user-group-delete-access-container">
+                                                <i class="su su-close mark-for-deletion-icon" ng-show="{{(people.IsUserPermission && people.CanRemove) || (people.CanRemove && people.TargetGroupId > 0)}}" ng-click="MarkForDeletion($event, people.PermissionAccess, $index)"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 no-padding action-for-delete-container" ng-show="{{(people.TargetUserId != currentUserId) && (people.CanRemove) && (people.PermissionAccessDescription.toLowerCase() == downloadPermissionAccess)}}">
+                                            <div class="col-xs-10 no-padding change-access-mode-selected">
+                                                <span class="change-access-mode">{{people.PermissionAccessDescription}}</span>
                                             </div>
                                             <div class="col-xs-2 no-padding shared-user-group-delete-access-container">
                                                 <i class="su su-close mark-for-deletion-icon" ng-show="{{(people.IsUserPermission && people.CanRemove) || (people.CanRemove && people.TargetGroupId > 0)}}" ng-click="MarkForDeletion($event, people.PermissionAccess, $index)"></i>
