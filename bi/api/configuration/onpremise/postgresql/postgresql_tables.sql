@@ -926,7 +926,8 @@ CREATE TABLE SyncDS_BackgroundJobs (
 	ResourceInfo text NULL,
 	CanIncludeSensitiveInfo smallint NULL,
 	IsSampleData smallint NULL,
-	IsActive smallint NOT NULL)
+	IsActive smallint NOT NULL,
+	ParentJobId int NULL)
 ;
 
 CREATE TABLE SyncDS_UploadDataSourceMapping (

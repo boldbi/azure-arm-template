@@ -1012,6 +1012,7 @@ CREATE TABLE {database_name}.BOLDBI_BackgroundJobs(
 	CanIncludeSensitiveInfo tinyint NULL,
 	IsSampleData tinyint NULL,
     IsActive tinyint NOT NULL,
+	ParentJobId int NULL,
     PRIMARY KEY (Id))
 ;
 

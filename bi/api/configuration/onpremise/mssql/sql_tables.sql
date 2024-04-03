@@ -934,7 +934,8 @@ CREATE TABLE [BOLDBI_BackgroundJobs](
 	[ResourceInfo] [nvarchar](max) NULL,
 	[CanIncludeSensitiveInfo] [bit] NULL,
 	[IsSampleData] [bit] NULL,
-    [IsActive] [bit] NOT NULL)
+    [IsActive] [bit] NOT NULL,
+	[ParentJobId] [int] NULL)
 ;
 
 CREATE TABLE [BOLDBI_UploadDataSourceMapping](

@@ -29,6 +29,10 @@
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/group-active-directory.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/group-active-directory.min.js"></script>
     </environment>
+    <script>
+        var checkCurrentJobStatusUrl = "@Url.Action("CheckCurrentJobStatus", "group")";
+        var viewCurrentImportUrl = "@Url.Action("BulkGroupImportResult", "group")";
+    </script>
     @if (ViewBag.AdImportGroup)
     {
         <script>
@@ -74,11 +78,6 @@
         <label for="row-check{{:GroupId}}"> </label>
         {{/if}}
     </script>
-    <script type="text/x-jsrender" id="checkbox-header-template">
-        @Html.CheckBox("checkbox-header", new { @class = "material-checkbox" })
-        @Html.Label("checkbox-header", " ", new { @class = "checkbox-header-label" })
-    </script>
-
     <script type="text/x-jsrender" id="name-header">
         <div class="item-header">@T["Name"]</div>
     </script>
@@ -166,7 +165,8 @@
         <div class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
             <div class="col-xs-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">
-                    <input type="button" disabled="" value="@T["Import groups"]" title="@T["Import the selected groups from the list"]" onclick="SaveActiveDirectoryGroups()" id="import-button" class="primary-button app-btn-primary pull-right pull-right" />
+                    <input type="button" disabled="" value="@T["Import Selected Groups"]" title="@T["Import the selected groups from the list"]" onclick="SaveActiveDirectoryGroups()" id="import-button" class="primary-button app-btn-primary pull-right pull-right" />
+                    <input type="button" value="@T["Import All Groups"]" title="@T["Import all the groups from the list"]" id="import-all" class="primary-button app-btn-primary pull-right import-button bi-header-btn"/>
                 </div>
                 <div id="search-area" class="pull-left col-xs-4">
                     <input type="text" id="ad-group-import" class="pull-left no-margin" placeholder="@T["Search groups"]" autocomplete="off" />
