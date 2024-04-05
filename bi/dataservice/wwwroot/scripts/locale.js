@@ -2335,6 +2335,7 @@
                 dsnDriversNotAvailable: "DSN Drivers are not available",
                 saveExpression: "Expression is not saved. Do you want to save and continue?",
 				unnestExresssion: "UNNEST restricted in the expression",
+				countDistinctExpression: "COUNT(DISTINCT()) restricted in the Expression. Instead, use COUNTD().",
                 invalidExpSyntax: "Incorrect Syntax near Open/Close bracket(s).",
                 saveParameter: "The parameter is not saved. Do you want to save and continue?",
                 InValidParameter: "Data type mismatched. Please select a valid data type parameter.",

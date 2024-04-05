@@ -32,6 +32,7 @@
     var isProfileDetailsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "profile-details") ? "active" : string.Empty;
     var isProfileSettingsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-settings") ? "active" : string.Empty;
     var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-notifications") ? "active" : string.Empty;
+    var isTokenGenerateTab = (Context.Request.Query["tab"].ToString().ToLower() == "personal-token-generate") ? "active" : string.Empty;
     List<string> groupName = new List<string>();
     var isUserLanguagePreferenceDisabled = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference;
     var pageDescription = T["Manage your profile settings and privacy controls"];
@@ -67,6 +68,7 @@
         var userPreferencesuccessMessage = "@isUserPreferenceSuccess";
         var userPreferenceFailureMessage = "@isUserPreferenceFailure";
         var profileSettingsUrl = "@Url.Action("UpdateProfileSettings", "User")";
+        var personalTokenGenerateUrl = "@Url.Action("GetToken", "User")";
         $(document).ready(function () {
 
             if ("@ViewBag.IsDefaultHomepage" == "True") {
@@ -129,6 +131,9 @@
                 </li>
                 <li role="presentation" class="@isProfileNotificationsTab">
                     <a href="#profile-notifications" id="profile-notifications-tab" aria-controls="profile-notifications-tab-control" role="tab" data-toggle="tab">@T["NOTIFICATIONS"]</a>
+                </li>
+                <li role="presentation" class="@isTokenGenerateTab">
+                    <a href="#personal-token-generate" id="profile-notifications-tab" aria-controls="token-generate-tab-control" role="tab" data-toggle="tab">@T["PERSONAL ACCESS TOKEN"]</a>
                 </li>
             </ul>
         </div>
@@ -327,6 +332,35 @@
                     </div>
                 </div>
                 @await Html.PartialAsync("_UserNotificationPreference")
+                <div role="tabpanel" id="personal-token-generate" class="profile-section col-xs-12 tab-pane bi-page-body @isTokenGenerateTab">
+                    <div id="generate-token-container">
+                        <div class="personal-access-token-description">@T["A personal access token serves the same purpose as an OAuth access token. It enables secure embedding of the dashboard viewer and designer within your application. Additionally, this token grants access to all our REST API endpoints."]</div>
+                        <div id="get-access-token" class="input-field-wrapper col-xs-12 no-padding">
+                            <label class="token-expiration-label no-margin">
+                                @T["Token Expiration"]
+                            </label>
+                        </div>
+                        <div class="col-xs-6 no-padding">
+                            <div class="form-input-field col-md-2 no-padding">
+                                @Html.DropDownList("expiry", ViewBag.ExpirationDays as IEnumerable<SelectListItem>, new { @class = "selectpicker form-control", id = "expiration-days" })
+                            </div>
+                            <div class="col-md-7 access-token-container">
+                                <button type="button" title="" id="generate-token" class="primary-button app-btn-primary">
+                                    @T["Generate Token"]
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-7 access-token-container no-padding">
+                            <div id="access-token-link" class="col-xs-5" style="display:none">
+                                <input type="text" id="access-token" name="" class="form-control" placeholder="@T["Authentication token"]" disabled="disabled" autocomplete="off" onClick="this.setSelectionRange(0, this.value.length)">
+                                <div class="form-control su su-copy text focus" id="access-token-copy" disabled="disabled" data-original-title="@T["Click to copy"]"></div>
+                            </div>
+                            <div class="col-lg-5 bg-warning no-margin access-token-notification">
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
