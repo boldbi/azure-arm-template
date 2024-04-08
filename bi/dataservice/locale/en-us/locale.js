@@ -7713,7 +7713,24 @@
                 nameNotEmpty: "The parameter name should not be empty.",
                 valueNotEmpty: "The parameter value should not be empty.",
                 sameValueExists: "A similar parameter exists called {0} with the exact same parameter value."
-            }
+            },
+			advancedSorting:{
+				advancedSortingTitle:"Advanced Sorting Options",
+				sortByText:"Sort By",
+				sortOrderText:"Sort Order",
+				alphabeticSortText:"Alphabetic",
+				dataSourceSortText:"Data Source Order",
+				fieldSortText:"Field",
+				manualSortText:"Manual",
+				sortAscendingText:"Ascending",
+				sortDescendingText:"Descending",
+				moveToTop: "Move to Top",
+				moveToBottom: "Move to Bottom",
+				moveUp: "Move Up",
+				moveDown: "Move Down",
+				resetManual: "Reset",
+				manualSortDescriptionText:"Drag and drop or use controls to arrange values, with a limit of 50 items.",				
+			}
 		}
     }
 }
