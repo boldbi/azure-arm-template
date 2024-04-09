@@ -4,15 +4,21 @@
     ViewBag.MessageBox = false;
 
     var dbDetails = ViewBag.DBConfig as DatabaseConfiguration;
-    ViewBag.dbType = dbDetails.ServerType == DatabaseType.MSSQL ? "MSSQL" : dbDetails.ServerType == DatabaseType.PostgreSQL ? "PostgreSQL" : dbDetails.ServerType == DatabaseType.MySQL ? "MySQL" : "SQLite";
+    ViewBag.dbType = dbDetails.ServerType == DatabaseType.MSSQL ? "MSSQL" :
+                    dbDetails.ServerType == DatabaseType.PostgreSQL ? "PostgreSQL" :
+                    dbDetails.ServerType == DatabaseType.MySQL ? "MySQL" :
+                    dbDetails.ServerType == DatabaseType.Oracle ? "Oracle" :
+                    "SQLite";
     ViewBag.authorizationType = !string.IsNullOrEmpty(dbDetails.UserName) ? "SQL" : "windows";
     ViewBag.serverName = !string.IsNullOrEmpty(dbDetails.ServerName) ? dbDetails.ServerName : string.Empty;
     ViewBag.postgrePortNumber = !string.IsNullOrEmpty(dbDetails.Port) && dbDetails.ServerType == DatabaseType.PostgreSQL ? dbDetails.Port : "5432";
     ViewBag.mysqlPortNumber = !string.IsNullOrEmpty(dbDetails.Port) && dbDetails.ServerType == DatabaseType.MySQL ? dbDetails.Port : "3306";
+    ViewBag.oraclePortNumber = !string.IsNullOrEmpty(dbDetails.Port) && dbDetails.ServerType == DatabaseType.Oracle ? dbDetails.Port : "1521";
     ViewBag.databaseName = !string.IsNullOrEmpty(dbDetails.DatabaseName) ? dbDetails.DatabaseName : string.Empty;
     ViewBag.additionalParameter = !string.IsNullOrEmpty(dbDetails.ImDbAdditionalParameters) ? dbDetails.ImDbAdditionalParameters : string.Empty;
     ViewBag.username = !string.IsNullOrEmpty(dbDetails.UserName) ? dbDetails.UserName : string.Empty;
     ViewBag.maintenanceDatabase = !string.IsNullOrEmpty(dbDetails.MaintenanceDatabase) ? dbDetails.MaintenanceDatabase : "postgres";
+    ViewBag.serviceInstanceName = !string.IsNullOrEmpty(dbDetails.ServiceInstance) ? dbDetails.ServiceInstance : string.Empty;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DataStoreSettings);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
@@ -21,7 +27,8 @@
     var mssqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MSSQLConnectionParameters);
     var mysqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.MySQLConnectionParameters);
     var postgresqlConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQLConnectionParameters);
-    var dbConnectionParameterHelpLink = ViewBag.dbType == "MSSQL" ? mssqlConnectionParameterHelpLink : ViewBag.dbType == "PostgreSQL" ? postgresqlConnectionParameterHelpLink : mysqlConnectionParameterHelpLink;
+    var oracleConnectionParameterHelpLink = (ServerAppConfig.AllowCustomHelpLink ? string.Empty : helpSiteBaseUrl) + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.OracleConnectionParameters);
+    var dbConnectionParameterHelpLink = ViewBag.dbType == "MSSQL" ? mssqlConnectionParameterHelpLink : ViewBag.dbType == "PostgreSQL" ? postgresqlConnectionParameterHelpLink : ViewBag.dbType == "Oracle" ? oracleConnectionParameterHelpLink : mysqlConnectionParameterHelpLink;
 
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
@@ -77,9 +84,11 @@
         var maintenanceDb = "@ViewBag.maintenanceDatabase";
         var postgrePortNumber = "@ViewBag.postgrePortNumber";
         var mysqlPortNumber = "@ViewBag.mysqlPortNumber";
+        var oraclePortNumber = "@ViewBag.oraclePortNumber";
         var mssqlConnectionParameterHelpLink = "@mssqlConnectionParameterHelpLink";
         var mysqlConnectionParameterHelpLink =  "@mysqlConnectionParameterHelpLink";
         var postgresqlConnectionParameterHelpLink = "@postgresqlConnectionParameterHelpLink";
+        var oracleConnectionParameterHelpLink = "@oracleConnectionParameterHelpLink";
         var datacachePagePermissionUrl = "@Url.Action("CheckAdminPagePermission", "Administration")";
         var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
         var appVersion = "@ServerAppConfig.ProductVersion";
@@ -152,6 +161,7 @@
                                                     <option class="no-margin-dropdown-ul" value="MSSQL" selected="@(ViewBag.dbType == "MSSQL")">SQL Server</option>
                                                     <option class="no-margin-dropdown-ul" value="PostgreSQL" selected="@(ViewBag.dbType == "PostgreSQL")">Postgre SQL</option>
                                                     <option class="no-margin-dropdown-ul" value="MySQL" selected="@(ViewBag.dbType == "MySQL")">MySQL</option>
+                                                    <option class="no-margin-dropdown-ul" value="Oracle" selected="@(ViewBag.dbType == "Oracle")">Oracle</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -200,7 +210,7 @@
                                                 <span id="password-field" class="validation-txt-errors"></span>
                                             </div>
                                         </div>
-                                        <div class="col-xs-12 no-padding settings-page-fields">
+                                        <div id="database-selection-field" class="col-xs-12 no-padding settings-page-fields" @(ViewBag.dbType != "Oracle" ? string.Empty : "display-none")>
                                             <div class="new-db select-database">
                                                 <input type="radio" id="new-db" class="css-radio" name="databaseType" value="0" @(ViewBag.databaseName != string.Empty ? string.Empty : "checked")>
                                                 <label for="new-db" class="radio-btn-label app-textbox-label"><span class="text">@T["New Database"]</span></label>
@@ -219,10 +229,17 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div id="existing-db-form" class="col-xs-12 no-padding settings-page-fields @(ViewBag.databaseName != string.Empty ? string.Empty : " display-none" )">
+                                        <div id="existing-db-form" class="col-xs-12 no-padding settings-page-fields @(ViewBag.databaseName != string.Empty ? string.Empty : " display-none") @(ViewBag.dbType == "Oracle" ? "form-fields-top-margin" : string.Empty)">
                                             @Html.Label("intermediate-db", T["Database Name"].Value, new { @class = "app-textbox-label" })
                                             <div class="sql-server-existing-db">
                                                 <input type="text" id="database-name" name="dbname" data-text-value="@ViewBag.databaseName" class="form-control validation-padding txt-holder" value="@ViewBag.databaseName" placeholder="@T["Existing Database name"]" autocomplete="off">
+                                                <span class="startup-validation validation-txt-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div id="service-instance-form" class="col-xs-12 no-padding form-fields-top-margin settings-page-fields @(ViewBag.dbType == "Oracle" && ViewBag.serviceInstanceName != string.Empty ? string.Empty : "display-none")">
+                                            @Html.Label("intermediate-db", T["Service Name"].Value, new { @class = "app-textbox-label" })
+                                            <div class="service-instance-name">
+                                                <input type="text" id="service-instance-name" name="serviceinstance" data-text-value="@ViewBag.serviceInstanceName" class="form-control validation-padding txt-holder" value="@ViewBag.serviceInstanceName" placeholder="@T["Service name"]" autocomplete="off">
                                                 <span class="startup-validation validation-txt-errors"></span>
                                             </div>
                                         </div>

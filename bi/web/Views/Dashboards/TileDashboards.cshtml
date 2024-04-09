@@ -37,6 +37,7 @@
     var canCreateCategory = itemAddPermissions[ItemType.Category];
     var hacCreateDataSourcePermission = itemAddPermissions.ContainsKey(ItemType.Datasource) && itemAddPermissions[ItemType.Datasource];
     var itemsPartialScript = string.Empty;
+    var isOracleDB = _globalAppSettings.DBSupport == DatabaseType.Oracle;
 }
 
 <environment include="Development,CloudDevelopment">
@@ -201,10 +202,13 @@
                                 <span class="category-bar-header">@T["Upload Drafts"]</span>
                                 <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
                             </li>
-                            <li class="category-item ng-hide" ng-show="usageAnalytics && (isAdmin || hasDashboardSettingsPermission)" ng-class="{active : activeMenu === @((int)DisplayCategory.UsageAnalytics)}" ng-click="setActive(@((int)DisplayCategory.UsageAnalytics), '@T["Usage Analytics"]', $event)">
-                                <span class="category-icon su su-nav-dashboard"></span>
-                                <span class="category-bar-header">@T["Usage Analytics"]</span>
-                            </li>
+                            @if (!isOracleDB)
+                            {
+                                <li class="category-item ng-hide" ng-show="usageAnalytics && (isAdmin || hasDashboardSettingsPermission)" ng-class="{active : activeMenu === @((int)DisplayCategory.UsageAnalytics)}" ng-click="setActive(@((int)DisplayCategory.UsageAnalytics), '@T["Usage Analytics"]', $event)">
+                                    <span class="category-icon su su-nav-dashboard"></span>
+                                    <span class="category-bar-header">@T["Usage Analytics"]</span>
+                                </li>
+                            }
                             <li class="category-list">
                                 <div class="col-xs-12 no-padding" ng-click="expandCategoryList()">
                                     <span class="category-icon su su-categoried-dashboard"></span>
@@ -360,10 +364,13 @@
                             <span class="category-bar-header">@T["Upload Drafts"]</span>
                             <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
                         </li>
+                                                  @if (!isOracleDB)
+                            {
                         <li class="category-item ng-hide" ng-show="usageAnalytics && (isAdmin || hasDashboardSettingsPermission)" ng-class="{active : activeMenu === @((int)DisplayCategory.UsageAnalytics)}" ng-click="setActive(@((int)DisplayCategory.UsageAnalytics), '@T["Usage Analytics"]', $event)">
                             <span class="category-icon su su-nav-dashboard"></span>
                             <span class="category-bar-header">@T["Usage Analytics"]</span>
                         </li>
+                            }
                         <li class="category-list">
                             <div class="col-xs-12 no-padding" ng-click="expandCategoryList()">
                                 <span class="category-icon su su-categoried-dashboard"></span>
