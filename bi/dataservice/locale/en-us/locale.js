@@ -368,7 +368,8 @@
                 rteBasicSettings: {
                     autofitContent: "Autofit Content",
                     contentPadding: "Content Padding",
-                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
+                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,.",
+                    scrollbar: "Show Scrollbar"
                 },
                 containerApperance: {
                     containerTitleAlignText: "Title Alignment",
