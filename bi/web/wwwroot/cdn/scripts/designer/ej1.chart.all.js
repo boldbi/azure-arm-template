@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 7.8.4
+*  version : 7.8.5
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -21835,6 +21835,7 @@ var Gradient = function (colors) {
         var params = {};
 		params.axes = {};		
 		this._drawBackInterior();
+        this.model.marker = BoldBIDashboard.util.isNullOrUndefined(this.model.marker) ? [] : this.model.marker;
         this.model.chartRegions = [];         
 		this.model.outsideDataRegionPoints = [];
 		this.model.regionCount = null;
@@ -21869,6 +21870,17 @@ var Gradient = function (colors) {
             series = this.model.series[i];
             seriesType = series.type.toLowerCase();
             series._isTransposed = (seriesType.indexOf("bar") == -1) ? series.isTransposed : !series.isTransposed;
+            // 421892 - Fix for displaying tooltip without marker			
+			this.model.marker.push(bbdesigner$.extend(true, {}, series.marker));
+			if(!series.marker.visible){
+				series.marker.visible = true;
+				series.marker.fill = "transparent";
+				series.marker.border.color = "transparent";
+			}
+			else{
+				series.marker.fill = this.model.marker[i].fill;
+				series.marker.border.color = this.model.marker[i].border.color;
+			}
             trendlines = series.trendlines;
 			len = trendlines.length;
 			for(var j = 0; j< len ;j++){
@@ -27709,14 +27721,13 @@ var Gradient = function (colors) {
                 pointIndex = i;
                 closestX = null;
                 closestY = null;
-                if (!isCanvas && evt) {
-                    if ((this.svgObject.id + "_Series" + series.seriesIndex + "_Point" + i + '_symbol') == evt.target.id) {
-                        var markerSize = document.getElementById(evt.target.id).getBoundingClientRect();
+                if (!isCanvas && evt && (this.svgObject.id + "_Series" + series.seriesIndex + "_Point" + i + '_symbol') == evt.target.id) {
+
+                    var markerSize = document.getElementById(evt.target.id).getBoundingClientRect();
                         chartPoint.height = markerSize.height;
                         chartPoint.width = markerSize.width;
                         closestPoint = chartPoint;
                         ptIndex = i;
-                    }
                 }
                 else if (location) {
                     if (x > location.X + valX - (size.width / 2) && x < location.X + valX + (size.width / 2)) {
@@ -29713,7 +29724,7 @@ var Gradient = function (colors) {
                     if (closestXyPoint.point) {
                         location = BoldBIDashboard.EjSvgRender.utils._getPoint(closestXyPoint.point, chartSeries);
                         var commonPointEventArgs = bbdesigner$.extend({}, BoldBIDashboard.EjSvgRender.commonChartEventArgs);
-                        commonPointEventArgs.data = { location: { x: this.mousemoveX, y: this.mousemoveX }, region: { SeriesIndex: i, Region: { PointIndex: closestXyPoint.index } } };
+                        commonPointEventArgs.data = { location: { x: this.mousemoveX, y: this.mousemoveY }, region: { SeriesIndex: i, Region: { PointIndex: closestXyPoint.index } } };
                         chart._trigger("pointRegionMouseMove", commonPointEventArgs);
                     }
                     var pointData = this.model.prevPoint;
