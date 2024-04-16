@@ -562,7 +562,8 @@ var Designer = {
 					headerFontSizeText: "Header Font Size",
 					activeTabText: "Active  Tab",
                     apiType:"API Type",
-                    listBoxShowAll:"Show All"
+                    listBoxShowAll:"Show All",
+                    tabLoaderText: "Enable Tab loader"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -7531,7 +7532,8 @@ var Designer = {
                 deleteWidgetAlertMsg: "Deleting the widget container will remove all widgets within. Do you want to continue ?",
                 hideTabHeader: "Hide Tab Header",
                 tabOrder: "Tab Order",
-                widgetOrder: "Widget Order"
+                widgetOrder: "Widget Order",
+                tabLoader: "Enable Tab loader"
 			},
             downloadUpload: {
                 uploadDashboardSecondPage: "Upload Dashboards (2/2)",
