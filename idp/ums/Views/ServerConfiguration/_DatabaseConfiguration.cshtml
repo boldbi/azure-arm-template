@@ -7,7 +7,6 @@
 
     <div class="system-settings-db-selection-field">
         @await Html.PartialAsync("~/Views/ServerConfiguration/_StartupTab.cshtml")
-        <input type="hidden" name="Ums_table_prefix" id="tenant-table-prefix" value="@DbTablePrefixes.TenantManagement" />
         @if (ViewBag.AppConfigure == "true")
         {
             <div class="text-info bg-info client-config-info">@Html.Raw(string.Format(T["To configure {0}{1}{2} you need to configure TenantServer first."].Value, "<b>", ViewBag.AppName, "</b>"))
@@ -96,6 +95,13 @@
                     <div class="info-content radio-info">
                         @Html.Raw(string.Format(T["Use the existing database to deploy the site and make sure it was created using the {0}{1}{2} {3}supported collation{4}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>", "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DefaultCollation, ViewBag.TenantType) + "'>", "</a>"))
                     </div>
+                </div>
+            </div>
+            <div class="txt-holder  center-alaign  additonal-parameters schema-prefix-hide database-schema-prefix-hide" id="input-schema">
+                <input type="text" id="schema-name" name="schemaName" class="" value="" placeholder="@T["Database schema"]" />
+                <span class="startup-validation validation-txt-errors"></span>
+                <div class="info-content txt-box-info db-schema-info">
+                    @Html.Raw(string.Format(T["The tables of database was created with the above schema name."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
                 </div>
             </div>
             @await Html.PartialAsync("~/Views/ServerConfiguration/_DatabaseName.cshtml")

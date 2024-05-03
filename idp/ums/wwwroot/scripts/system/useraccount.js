@@ -154,6 +154,10 @@
                     prefillDbNames();
                     if (!isBoldBI) {
                         hideDataStore();
+                        $(".schema-prefix-hide").removeClass("hidden").addClass("show");
+                    }
+                    else {
+                        $(".schema-prefix-hide").removeClass("show").addClass("hidden");
                     }
                 }
                 $('.popover').hide();

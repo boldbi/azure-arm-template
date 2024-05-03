@@ -3,12 +3,14 @@
     var globalAppSettings = _globalAppSettings;
     var idPAvatarUrl = globalAppSettings.SystemSettings.IDPUrl + "/User/Avatar";
     var displayNameElement = "<span class='notification-display-name'>{{item.DoneByFullName}}</span>";
+    var downloadedResourcesUrl = Url.Action("GetPublishedItems", "publish") + "?tab=offline-files";
 }
 
 <script>
     var userSystemnotificationUrl = "@Url.Action("getnotificationsonrequest", "notification")";
     var viewUrl = "@Url.Action("Dashboards", "Dashboards")";
     var viewWidgetUrl = "@Url.Action("widgets", "widgets")";
+    var commentNotificationSource = "@NotificationSource.Comment";
 </script>
 
 <div id="user-notification-container" ng-app="serverApp" ng-controller="UserNotificationController" class="col-xs-12 no-padding" style="display:none">
@@ -25,6 +27,14 @@
                     <div class="notification-tile-div1">
                         <div class="profile-pic-tag" data-id={{item.DoneByIdPId}} data-type="user" data-display-name={{item.DoneByFullName}} data-image-size="24" data-toggle="tooltip" title={{item.DoneByFullName}} data-placement="top"></div>
                         <span ng-switch="item.LogTypeId" class="notification-display-content">
+                            <span ng-if="item.NotificationSource=='@NotificationSource.Download'">
+                                <span ng-if="item.JobStatus == '@DownloadandUploadJobStatus.Success'">
+                                    @Html.Raw(string.Format(T["Your dashboard resource file is ready for download. Please click {0} to go to the downloads page."].Value, "<a target='_blank' href='" + downloadedResourcesUrl + "'>here</a>"))
+                                </span>
+                                <span ng-if="item.JobStatus == '@DownloadandUploadJobStatus.Failed'">
+                                    @Html.Raw(string.Format(T["An error occurred while processing your dashboard download request. Please click {0} to know more."].Value, "<a target='_blank' href='" + downloadedResourcesUrl + "'>here</a>"))
+                                </span>
+                            </span>
                             <span ng-switch-when="@((int) ItemCommentLogType.Added)">
                                 <span ng-if="item.DoneById == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard) ">@T["You have commented on the dashboard"]</span>
                                 <span ng-if="item.DoneById == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget) ">@T["You have commented on the widget"]</span>
@@ -72,8 +82,11 @@
                         </span>
                     </div>
                     <div class="notification-link">
-                        <span class="notification-type-icon">
+                        <span ng-if="item.NotificationSource =='@NotificationSource.Comment' || item.NotificationSource ==null" class="notification-type-icon">
                             <span class="su su-without-comment"></span>
+                        </span>
+                        <span ng-if="item.NotificationSource =='@NotificationSource.Download'" class="notification-type-icon">
+                            <span class="su su-download"></span>
                         </span>
                         <span ng-switch="item.ItemTypeId" class="notification-link-content">
                             <span ng-switch-when="@((int) ItemType.Dashboard)">

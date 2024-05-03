@@ -332,6 +332,10 @@ function changeTenantType(args) {
                 $(".attribute-part-report").removeClass("hide");
             }
             $(".data-security-note").html(window.Server.App.LocalizationContent.BoldReportsDataSecurityNote);
+            document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+            document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+            document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+            document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
         }
         else {
             item = "dashboards";
@@ -364,6 +368,10 @@ function changeTenantType(args) {
                 $(".attribute-part-report").addClass("hide");
             }
             $(".data-security-note").html(window.Server.App.LocalizationContent.BoldBIDataSecurityNote);
+            document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+            document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+            document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+            document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
         }
     }
 }

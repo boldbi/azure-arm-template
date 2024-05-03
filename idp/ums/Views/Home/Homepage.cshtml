@@ -13,90 +13,158 @@
     var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
     var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
     var currentUrlPath = requestUrl.PathAndQuery.ToLower();
+    var isAllSitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "all-sites") ? "active" : string.Empty;
+    var isFavoriteTab = (Context.Request.Query["view"] == "favorites") ? "active" : string.Empty;
+    var isMobile = DeviceDetection.IsMobile;   
 }
 
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     <title>@T["Home"] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
     @await Html.PartialAsync("../Shared/_Favicon")
     @await Html.PartialAsync("../Shared/_FontReference")
     @await Html.PartialAsync("../Shared/_ThemeReference")
 
-    <link rel="stylesheet" href="~/bundles/css/homepage.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/homepage.css")" crossorigin="anonymous" asp-append-version="true" />
+   <link rel="stylesheet" href="~/bundles/css/homepage.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/homepage.css")" crossorigin="anonymous" asp-append-version="true" />
+
 </head>
 
 <body>
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/homepage.js")" crossorigin="anonymous" asp-append-version="true"></script>
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/ej2.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp - append - version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
        <script nonce="@Context.Items["ScriptNonce"]">
-        var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
-        var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
-           var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
-    </script>
+            var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
+            var allsites = @Html.Raw(JsonConvert.SerializeObject(Model));
+            var userId = "@userId";
+            var TenantFavoriteListurl = "@Url.Action("TenantFavoriteList", "TenantsManagement")";
+            var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
+            var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
+            var isMobile = @isMobile.ToString().ToLower();
+            var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
+            var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
+       </script>
+        <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-tenant-template">
+            ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                <span>@AppBranding.Bold.ProductName</span>
+            ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                <span>@AppBranding.BoldReports.ProductName</span>
+            ${/if}
+        </script>
+         <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
+            ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                 <div class="tenant-name"> ${TenantName}</div> <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+            ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                  <div class="tenant-name"> ${TenantName}</div> <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+            ${/if}
+        </script>
+       
     <div id="site-down-alert"></div>
     @await Html.PartialAsync("_SiteDownAlert")
     <div id="header-container">
         <img id ="boldbi-logo" class="boldbi-logo" src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
-        <div class="logout-container">
-            <a class="logout" href="@Url.Action("logout", "accounts")?returnUrl=@currentUrlPath">@T["Sign out"]</a>
-        </div>
-        @if (adminType == AdminType.SuperAdmin)
-        {
-            if (ViewBag.IsMultiTenant)
-            {
-                <a class="create-site primary-button" href="@createSiteUrl">@T["Create new site"]</a>
-            }
 
-            <a class="manage-sites secondary-button" href="@Url.Action("Sites", "TenantsManagement")">@T["Manage sites"]</a>
-        }
-    </div>
+        <div class="side-header">
 
-    <div id="body-container">
-        <div class="user-image-container">
-            @if (!string.IsNullOrWhiteSpace(ViewBag.UserDetails.Picture))
+            @if (adminType == AdminType.SuperAdmin)
             {
-                <img class="user-image" rel="alternate" hreflang="en" href="" src="@profilePicture" alt="@T["User's Display Name"]">
-            }
-            else
-            {
-                <div class="profile-pic-tag" data-id="@userId" data-type="user" data-display-name="@displayName" data-image-size="100" data-toggle="tooltip" title="@displayName" data-placement="top" data-url="@imageUrl" style="border-radius:50%;margin:auto"></div>
-            }
-        </div>
-        <div class="user-name">@T["Hello, "]@displayName</div>
-        <div class="welcome-note">@T["Welcome back!"]</div>
-        <div class="line"></div>
-        <div class="choose-site">@T["Choose site to enter"]</div>
-
-        <div id="site-container">
-            <div class="row">
-                @if (Model != null)
+                if (ViewBag.IsMultiTenant)
                 {
-                    for (var i = 0; i < Model.Count; i++)
-                    {
-                        <a class="dns-link site-row-container" rel="alternate" hreflang="en" href="@Model[i].SiteUrl" target="_blank">
-                            <div class="user-dns">
-                                <div class="image-div site-logo-container">
-                                    <div class="lazyload img-loader" data-class="site-logo" data-id="homepagelogo" data-src="@(Model[i].UseCustomBranding ? GlobalAppSettings.SystemSettings.LoginLogo : Url.Content(Model[i].SiteUrl + "/get-client-logo"))" data-alt="boldbi" data-width="110px" data-height="25px" data-default="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)"></div>
-                                </div>
-                                <div class="dns-org-name site-name" title="@Model[i].TenantName" data-toggle="tooltip">
-                                    @Model[i].TenantName
-                                </div>
-                                <div class="site-url-container">
-                                    <div class="dns-name site-url" title="@Model[i].SiteUrl" data-toggle="tooltip">
-                                        @Model[i].SiteUrl
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    }
-                }
+                    <a class="create-site primary-button" href="@createSiteUrl">
+                        <div class="create-button">
+                            <span class="su su-add manage-icon"></span>
+                            <span class="new-site">@T["Create new site"]</span>
+                        </div>
+                    </a>
+                }  
+            }
+
+            <div class="col-xs-2 top-nav-sec">
+                @await Html.PartialAsync("Profile")
             </div>
         </div>
     </div>
 
-    <div id="footer-container" class="displaynone">
+    <div id="body-container">
+       <div class="admin-home">
+            <span title="@displayName" class=" user-name"> @T["Welcome "]@displayName  </span>
+            <span class="grid-icon su su-wave-emoji wave-icon">
+                <img src="/ums/images/wave-icon.svg" alt="@T["wave Logo"]" class="wave-icon">
+            </span>
+        </div>
+        <div class="col-xs-12 no-padding allsites-page-nav-bar">
+            <ul id="all-sites-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isAllSitesTab">
+                    <a href="#all-sites" id="all-sites-tab" aria-controls="all-sites-tab" role="tab" data-toggle="tab">@T["All Sites"]</a>
+                </li>
+                <li role="presentation" class="@isFavoriteTab">
+                    <a href="#favorites" id="favorite-sites-tab" aria-controls="favorite-sites-log-tab" role="tab" data-toggle="tab">@T["Favorite"]</a>
+                </li> 
+                <li role="presentation" id="sorting-sites" class="pull-right">
+                    <div class="dropdown">
+                        <button id="sort-site-button" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="su su-sort" aria-hidden="true"></i>
+                        </button>
+                        <div id="sorting-options-sites" class="dropdown-menu" aria-labelledby="sorting-sites" style="">
+                            <span class="dropdown-section-title order-by">@T["Sort by"]</span>
+                            <input type="radio" id="sort-by-alphabetical" name="sort-by-sites" class="css-radio" value="alphabetical" checked="">
+                            <label for="sort-by-alphabetical" class="app-textbox-label radio-btn-label notransition alphabetical">@T["Alphabetical"]</label>
+                            <span class="sf-top-menu-separator"></span>
+                            <span class="dropdown-section-title order-by">@T["Order by"]</span>
+                            <input type="radio" id="order-ascending" name="order-by-sites" class="css-radio" value="ascending" checked>
+                            <label for="order-ascending" class="app-textbox-label radio-btn-label notransition asc" >@T["Ascending"]</label>
+                            <input type="radio" id="order-descending" name="order-by-sites" class="css-radio" value="descending">
+                            <label for="order-descending" class="app-textbox-label radio-btn-label notransition desc">@T["Descending"]</label>
+
+                        </div>
+                    </div>
+                </li>
+              
+                <li role="presentation" id="sorting-favorites" class="pull-right" >
+                    <div class="dropdown">
+                        <button id="sort-favorite-button" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            <i class="su su-sort" aria-hidden="true"></i>
+                        </button>
+                        <div id="sorting-options-favorites" class="dropdown-menu" aria-labelledby="sorting-sites" >
+                            <span class="dropdown-section-title order-by">@T["Sort by"]</span>
+                            <input type="radio" id="site-alphabetical" name="sort-by-favorite" class="css-radio" value="alphabetical" checked="">
+                            <label for="site-alphabetical" class="app-textbox-label radio-btn-label notransition alphabetical">@T["Alphabetical"]</label>
+                            <span class="sf-top-menu-separator"></span>
+                            <span class="dropdown-section-title order-by">@T["Order by"]</span>
+                            <input type="radio" id="favorite-ascending" name="order-by-favorite" class="css-radio" value="ascending" checked>
+                            <label for="favorite-ascending" class="app-textbox-label radio-btn-label notransition asc" >@T["Ascending"]</label>
+                            <input type="radio" id="favorite-descending" name="order-by-favorite" class="css-radio" value="descending">
+                            <label for="favorite-descending" class="app-textbox-label radio-btn-label notransition desc">@T["Descending"]</label>
+
+                        </div>
+                    </div>
+                </li>
+             
+                <li role="presentation" id="search-area-sites" class="pull-right searchAll-sites search-bar">
+                    <input type="text" class="pull-right search-text" id="search-tenants-allsites" placeholder="@T["Search sites"]" />
+                    <span class="su su-inner-close close-icon pull-right" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-allsites add-class search-icon pull-right" title="@T["Search"]"></span>
+                </li>
+                <li role="presentation" id="search-area" class="pull-right searchFavorite-sites search-bar">
+                        <input type="text" class="pull-right search-text" id="search-tenants-favorite" placeholder="@T["Search sites"]" />
+                        <span class="su su-inner-close close-icon close-favorite pull-right" id="clear-search" title="@T["Clear search"]"></span>
+                        <span class="su su-search search-favorite add-class search-icon pull-right" title="@T["Search"]"></span>
+                  </li>
+
+            </ul>
+        </div>
+        <div id="all-sites-container" class="col-md-12 col-lg-12 col-sm-12 admin-page-content-container admin-page-container-with-tab" role="tabpanel" aria-labelledby="all-sites">
+            <div class="admin-page-content col-xs-12 no-padding">
+                <div class="tab-content col-xs-12 no-padding">
+                    @await Html.PartialAsync("_AllSites")
+                    @await Html.PartialAsync("_FavoriteSites")
+                </div>
+            </div>
+        </div>      
+   </div>   
+   <div id="footer-container" class="displaynone">
         <div class="copyright-container" style="display:@copyrightClass">
             <div class="copyright">@Html.Raw(GlobalAppSettings.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
         </div>
@@ -104,64 +172,6 @@
             <div class="powered-by">@T["Powered by"]</div>
             <img class="footer-logo" src="@Url.Content("~/logos?type=poweredby")" alt="@T["Footer Logo"]">
         </div>
-    </div>
-
-       <script nonce="@Context.Items["ScriptNonce"]">
-       $(window).on('load', function() {
-    $('.lazyload').each(function() {
-        var img = $('<img>')
-            .on('load', imageOnLoad)
-            .attr({
-                src: $(this).attr("data-src"),
-                alt: $(this).attr("data-alt"),
-                id: $(this).attr("data-id"),
-            })
-            .on('error', function() {
-                        $(this).attr('src', defaultErrorImageSrc);
-            })
-            .addClass($(this).attr("data-class"))
-            .css('display', 'none');
-
-        // Handling case where src becomes undefined
-        img.on('error', function() {
-                    $(this).attr('src', defaultErrorImageSrc);
-        });
-
-        $(this).parent().append(img);
-    });
-
-    refreshLoginFooter();
-});
-
-        function imageOnLoad() {
-            $(this).show().parent().find("div.lazyload").remove();
-        }
-
-        $(document).ready(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-
-        $(window).resize(function () {
-            refreshLoginFooter();
-        });
-
-        function refreshLoginFooter() {
-            var windowHeight = window.innerHeight;
-            var loginContainerTop = $("#header-container").innerHeight();
-            var contentHeight = $("#body-container").innerHeight();
-
-            var footerOuterHeight = $('#footer-container').outerHeight();
-            var total = loginContainerTop + contentHeight + 16 + footerOuterHeight;
-            var remainingHeight = windowHeight - total;
-            if (total < windowHeight) {
-                $('#footer-container').css("margin-top", remainingHeight + "px");
-            }
-            else {
-                $("#footer-container").css("margin-top", "16px");
-            }
-            $("#footer-container").removeClass("displaynone");
-        }
-
-    </script>
+   </div>
 </body>
 </html>

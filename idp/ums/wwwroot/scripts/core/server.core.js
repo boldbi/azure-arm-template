@@ -299,7 +299,7 @@ $(document).on("focus", ".placeholder", function () {
     $(this).prev("input").focus();
 });
 
-$(document).on("keyup", "#search-users, #search-tenants, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-languages", function (e) {
+$(document).on("keyup", "#search-users, #search-tenants, #search-tenants-allsites, #search-tenants-favorite,#search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-languages", function (e) {
     var element = "#" + this.id;
     if ($(element).val() != "") {
         if (element == "#search-home-page" || element == "#search-tenant-users") {
@@ -316,6 +316,8 @@ $(document).on("keyup", "#search-users, #search-tenants, #search-app-users, #add
             $(element).siblings("span.search-schedule").css("display", "none");
             $(element).siblings("span.search").css("display", "none");
             $(element).siblings("span.search-application").css("display", "none");
+            $(element).siblings("span.search-allsites").css("display", "none");
+            $(element).siblings("span.search-favorite").css("display", "none");
         }
     } else {
         if (element == "#search-home-page" || element == "#search-tenant-users") {
@@ -404,7 +406,7 @@ $(document).on("click", "#clear-search,.clear-search,#add-user-clear-search,#add
     }
 });
 
-$(document).on("keydown", "#search-users, #search-tenants, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-languages", function (e) {
+$(document).on("keydown", "#search-users, #search-tenants, #search-tenants-allsites, #search-tenants-favorite, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-languages", function (e) {
     $.xhrPool.abortAll();
     var currentKeyCode = parseInt(e.which);
     var element = "#" + this.id;
@@ -436,6 +438,16 @@ function PerformSearch(currentId) {
     }
     else if (currentId == "#search-tenants") {
         gridObj = document.getElementById('tenants_grid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId == "#search-tenants-allsites") {
+        gridObj = document.getElementById('AllSitesGrid').ej2_instances[0];
+        gridObj.pageSettings.currentPage = 1;
+        gridObj.refresh();
+    }
+    else if (currentId == "#search-tenants-favorite") {
+        gridObj = document.getElementById('FavoriteGrid').ej2_instances[0];
         gridObj.pageSettings.currentPage = 1;
         gridObj.refresh();
     }

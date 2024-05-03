@@ -302,6 +302,7 @@ CREATE TABLE [BOLDTC_TenantUser] (
 	Id uniqueidentifier NOT NULL,
 	UserId uniqueidentifier NOT NULL,
 	TenantInfoId uniqueidentifier NOT NULL,
+	IsFavorite bit NOT NULL DEFAULT '0',
 	IsActive bit NOT NULL,
   CONSTRAINT [PK_BOLDTC_TENANTUSER] PRIMARY KEY CLUSTERED
   (
@@ -453,6 +454,8 @@ CREATE TABLE [BOLDTC_TenantInfo] (
 	DatabaseType int Default 0,
 	BlobConnectionString nvarchar(max),
 	ConnectionString nvarchar(max),
+	SchemaName nvarchar(max),
+	Prefix nvarchar(max),
 	AdditionalParameters nvarchar(max),
 	MaintenanceDatabase nvarchar(255) NULL,
 	TenantSQLServerId int,
@@ -651,7 +654,7 @@ CREATE TABLE [BOLDTC_SqlServerType] (
   ) WITH (IGNORE_DUP_KEY = OFF)
 )
 ;
-CREATE TABLE [dbo].[BOLDTC_OAuthToken](
+CREATE TABLE [BOLDTC_OAuthToken](
     [Id] int IDENTITY(1,1) NOT NULL,
 	[Token] [nvarchar](max) NULL,
 	[Ticket] [nvarchar](max) NULL,
@@ -660,7 +663,7 @@ CREATE TABLE [dbo].[BOLDTC_OAuthToken](
 	  (  [Id] ASC  ) WITH (IGNORE_DUP_KEY = OFF)
 )
 ;
-CREATE TABLE [dbo].[BOLDTC_InternalApps](
+CREATE TABLE [BOLDTC_InternalApps](
 	[Id] int IDENTITY(1,1) NOT NULL,
 	[ClientId] uniqueidentifier NOT NULL UNIQUE,
 	[ClientSecret] nvarchar(max) NOT NULL,
@@ -702,7 +705,7 @@ CREATE TABLE [BOLDTC_RegistrationFormVersion] (
 
 )
 ;
-CREATE TABLE BOLDTC_TERMSOFUSEVERSION (
+CREATE TABLE [BOLDTC_TermsOfUseVersion] (
 	Id int IDENTITY(1,1) NOT NULL,
 	Name nvarchar(255) NOT NULL,
 	Location nvarchar(255) NOT NULL,
@@ -710,7 +713,7 @@ CREATE TABLE BOLDTC_TERMSOFUSEVERSION (
 	ModifiedDate datetime NOT NULL,
 	IsLatest bit NOT NULL,
 	IsActive bit NOT NULL,
-  CONSTRAINT [PK_BOLDTC_TERMSOFUSEVERSION] PRIMARY KEY CLUSTERED
+  CONSTRAINT [PK_BOLDTC_TermsOfUseVersion] PRIMARY KEY CLUSTERED
   (
   [Id] ASC
   ) WITH (IGNORE_DUP_KEY = OFF)
@@ -1125,36 +1128,36 @@ CREATE TABLE [BOLDTC_UserAttributes](
 	[IsActive] [bit] NOT NULL)
 ;
 
-INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'Registration', 1)
-INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'StatusUpdated', 1)
-INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'PaymentUpdated', 1)
-INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'SubscriptionUpdated', 1)
-INSERT [dbo].[BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'BillingAddressUpdated', 1)
+INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'Registration', 1)
+INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'StatusUpdated', 1)
+INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'PaymentUpdated', 1)
+INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'SubscriptionUpdated', 1)
+INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'BillingAddressUpdated', 1)
 
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'AccountActivationPending', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'PaymentPending', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionCreationInProgress', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionCreationFailed', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DeploymentPending', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DBDeploymentInProgress', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DBDeploymentFailed', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'StorageDeploymentInProgress', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'StorageDeploymentFailed', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'ServerDeploymentInProgress', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'ServerDeploymentFailed', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DeploymentFailed', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Active', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionCancelled', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'MarkedForSuspension', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Suspended', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'MarkedForDeletion', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Expired', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionDeleted', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DBDeleted', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'StorageDeleted', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Deleted', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Trial', 1)
-INSERT [dbo].[BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'ActivePaymentRequired', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'AccountActivationPending', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'PaymentPending', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionCreationInProgress', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionCreationFailed', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DeploymentPending', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DBDeploymentInProgress', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DBDeploymentFailed', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'StorageDeploymentInProgress', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'StorageDeploymentFailed', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'ServerDeploymentInProgress', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'ServerDeploymentFailed', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DeploymentFailed', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Active', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionCancelled', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'MarkedForSuspension', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Suspended', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'MarkedForDeletion', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Expired', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'SubscriptionDeleted', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'DBDeleted', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'StorageDeleted', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Deleted', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'Trial', 1)
+INSERT [BOLDTC_TenantStatus] ([Name], [IsActive]) VALUES (N'ActivePaymentRequired', 1)
 
 INSERT into [BOLDTC_ScheduleStatus] (Name,IsActive) VALUES (N'Success', 1)
 INSERT into [BOLDTC_ScheduleStatus] (Name,IsActive) VALUES (N'Failure', 1)
@@ -1227,8 +1230,8 @@ INSERT into [BOLDTC_TenantType] ([Type],IsActive) VALUES (N'BoldReports',1)
 INSERT into [BOLDTC_TenantType] ([Type],IsActive) VALUES (N'BoldBIOn-Premise',1)
 INSERT into [BOLDTC_TenantType] ([Type],IsActive) VALUES (N'BoldReportsOn-Premise',1)
 
-INSERT [dbo].[BOLDTC_Addon] ([Name], [StripePlanId], [PlanSchema], [ModifiedDate], [IsActive]) VALUES (N'AdditionalDataStorage', N'additional_data_storage', '', GETUTCDATE(), N'True')
-INSERT [dbo].[BOLDTC_Addon] ([Name], [StripePlanId], [PlanSchema], [ModifiedDate], [IsActive]) VALUES (N'CustomDomain', N'custom_domain', '', GETUTCDATE(), N'True')
+INSERT [BOLDTC_Addon] ([Name], [StripePlanId], [PlanSchema], [ModifiedDate], [IsActive]) VALUES (N'AdditionalDataStorage', N'additional_data_storage', '', GETUTCDATE(), N'True')
+INSERT [BOLDTC_Addon] ([Name], [StripePlanId], [PlanSchema], [ModifiedDate], [IsActive]) VALUES (N'CustomDomain', N'custom_domain', '', GETUTCDATE(), N'True')
 
 INSERT INTO [BOLDTC_SqlServerEdition] VALUES('V12', 4000, 'East US', 1, 1)
 ;

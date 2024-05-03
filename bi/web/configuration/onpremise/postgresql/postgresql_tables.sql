@@ -983,6 +983,20 @@ CREATE TABLE SyncDS_ai_qnawidgethistory (
    widgetid TEXT)
 ;
 
+CREATE TABLE SyncDS_Notification (
+    Id SERIAL primary key NOT NULL,
+    CurrentUserId int NOT NULL,
+    ClubId varchar(100) NOT NULL,
+    CommentId int NULL,
+    ItemId uuid NULL,
+    NotificationSource varchar(100) NULL,
+    NotifictionDetails varchar(4000) NULL,
+    NotificationTo int NULL,    
+    ModifiedDate timestamp NOT NULL,
+    IsRead smallint NOT NULL,
+    IsActive smallint NOT NULL)
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT INTO SyncDS_PublishType (Name, IsActive) Values (N'Publish',1)
@@ -1498,6 +1512,10 @@ INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) V
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'IsEnablePoweredBySyncfusion',N'SiteSettings.ShowPoweredBySyncfusion',now() at time zone 'utc',1)
 ;
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'CopyrightInformation',N'SiteSettings.CopyrightInformation',now() at time zone 'utc',1)
+;
+INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'ResourceType',N'SiteSettings.ResourceType',now() at time zone 'utc',1)
+;
+INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'ResourceOrder',N'SiteSettings.ResourceOrder',now() at time zone 'utc',1)
 ;
 
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForDashboardOwner',N'UserNotificationSettings.UserSystemNotificationSettings.EnableNotificationForDashboardOwner',now() at time zone 'utc',1)

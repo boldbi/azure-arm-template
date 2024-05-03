@@ -368,7 +368,8 @@
                 rteBasicSettings: {
                     autofitContent: "Autofit Content",
                     contentPadding: "Content Padding",
-                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,."
+                    content: "\u2022 Enabling the Autofit Content will automatically adjust the font size to fit within the boundaries or constraints.\n\u2022 Complex structured text not be suitable for Autofit Content funtionalities such as Bulleted List, Table, Numbered List etc..,.",
+                    scrollbar: "Show Scrollbar"
                 },
                 containerApperance: {
                     containerTitleAlignText: "Title Alignment",
@@ -561,7 +562,8 @@
 					headerFontSizeText: "Header Font Size",
 					activeTabText: "Active  Tab",
                     apiType:"API Type",
-                    listBoxShowAll:"Show All"
+                    listBoxShowAll:"Show All",
+                    tabLoaderText: "Enable Tab loader"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -1046,6 +1048,7 @@
                 appendDsFilesNeedsAttention: "file(s) needs attention",
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
+                commandTimeoutMessage: "Max command timeout upto 550 sec",
                 enableSSH: "Enable SSH",
                 sshServerNameText: "SSH Server name",
                 sshPort: "SSH Port",
@@ -2676,6 +2679,7 @@
                 createCategoryMessage: "*Please create a category to save the dashboard",
                 differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Otherwise, click on the 'x' icon to close the popup without taking any action.",
                 columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
+				dataTypeMismatch: "Changing the data type may result in data loss and this affects the dashboard. Do you want to continue?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
                 tableList: "The list of tables to be dropped ",
@@ -2772,6 +2776,7 @@
                 DeleteDataSource: "Delete Data Source",
                 SaveExpression: "Save Expression",
                 SchemaMismatch: "Schema Mismatch",
+				dataTypeMismatch: "DataType Mismatch",
                 DuplicateDataSource: "Duplicate Data Source",
                 AutoRecover: "Auto Recover",
                 DashboardSaved: "Confirm Publish Dashboard",
@@ -6564,7 +6569,7 @@
 				manualModeText: "Manual",
 				datasourceModeText: "Data Source",
 				userFilterQueryModeText: "Query",
-                UserFilterNameAlertTitle: "Empty or Name allready exist",
+                UserFilterNameAlertTitle: "Empty or Name already exist",
                 UserFilterEmptyName: "Name should not be empty please porvide an valid name",
                 UserFilterNameAllreadyExist:"The userfilter name already exists"
             },
@@ -7529,7 +7534,8 @@
                 deleteWidgetAlertMsg: "Deleting the widget container will remove all widgets within. Do you want to continue ?",
                 hideTabHeader: "Hide Tab Header",
                 tabOrder: "Tab Order",
-                widgetOrder: "Widget Order"
+                widgetOrder: "Widget Order",
+                tabLoader: "Enable Tab loader"
 			},
             downloadUpload: {
                 uploadDashboardSecondPage: "Upload Dashboards (2/2)",
@@ -7713,7 +7719,53 @@
                 nameNotEmpty: "The parameter name should not be empty.",
                 valueNotEmpty: "The parameter value should not be empty.",
                 sameValueExists: "A similar parameter exists called {0} with the exact same parameter value."
-            }
+            },
+			advancedSorting:{
+				advancedSortingTitle:"Advanced Sorting Options",
+				sortByText:"Sort By",
+				sortOrderText:"Sort Order",
+				alphabeticSortText:"Alphabetic",
+				dataSourceSortText:"Data Source Order",
+				fieldSortText:"Field",
+				manualSortText:"Manual",
+				sortAscendingText:"Ascending",
+				sortDescendingText:"Descending",
+				moveToTop: "Move to Top",
+				moveToBottom: "Move to Bottom",
+				moveUp: "Move Up",
+				moveDown: "Move Down",
+				resetManual: "Reset",
+				manualSortDescriptionText:"Drag and drop or use controls to arrange values, with a limit of 50 items."
+            },
+			buttonWidget:{
+				basicSettings: "Basic Settings",
+				background: "Background",
+				tooltip: "Tooltip",
+				transparency: "Transparency",
+				border: "Border",
+				enable: "Enable",
+				borderColor: "Border Color",
+				borderThickness: "Border Thickness",
+				borderType: "Border Type",
+				text: "Text",
+				icon: "Icon",
+				image: "Image",
+				icons: "Icons",
+				iconSize: "Icon Size",
+				iconPlacement: "Icon Placement",
+				color: "Color",
+				dashboard: "Dashboard",
+				fontSize: "Font Size",
+				horizontalAlignment: "Horizontal Alignment",
+				verticalAlignment: "Vertical Alignment",
+				paddingTop: "Padding Top",
+				paddingBottom: "Padding Bottom",
+				paddingRight: "Padding Right",
+				paddingLeft: "Padding Left",
+				title: "Title",
+				height: "Height",
+				width: "Width"
+			}
 		}
     }
 }

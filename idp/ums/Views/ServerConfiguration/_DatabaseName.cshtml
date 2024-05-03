@@ -4,16 +4,49 @@
     var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
 }
 
+
 <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
 $(document).on("keyup", "#txt-dbname,#server-dbname,#imdbname", function () {
    forceToLower(this);
 });
+
+    var defaultValues = {
+        PostgreSQLPort: "@DefaultValue.PostgreSQLPort",
+        MySQLPort: "@DefaultValue.MySQLPort",
+        PostgreSQLMaintenanceDatabase: "@DefaultValue.PostgreSQLMaintenaceDatabase",
+        DefaultDatabaseName: "@DefaultValue.DefaultDatabaseName",
+        DefaultServerDatabaseName: "@DefaultValue.DefaultServerDatabaseName",
+        DefaultDatastoreDatabaseName: "@DefaultValue.DefaultDatastoreDatabaseName",
+        DefaultSchemaForMSSQL: "@DefaultValue.DefaultSchemaForMSSQL",
+        DefaultSchemaForPostgres: "@DefaultValue.DefaultSchemaForPostgres",
+        DefaultPrefixForUMS: "@DefaultValue.DefaultPrefixForUMS",
+        DefaultPrefixForBI: "@DefaultValue.DefaultPrefixForBI",
+        DefaultPrefixForReports: "@DefaultValue.DefaultPrefixForReports"
+    };
+
+    var IsDefaultSchemaUms = ("@ViewBag.IsDefaultSchemaUms".toLowerCase() === "true");
+    var IsDefaultPrefixUms = ("@ViewBag.IsDefaultPrefixUms".toLowerCase() === "true");
 </script>
+
 <div id="simple_tab_db_name">
     <div class="txt-holder database-name center-align">
         <input type="text" id="txt-dbname" name="dbname" class="" placeholder="@T["Database name"]" />
         <span class="startup-validation validation-txt-errors"></span>
             <div class="info-content txt-box-info db-name-info">@dbnameHelp</div>
+    </div>
+    <div class="txt-holder database-name center-align schema-prefix-hide simple-id-schema-prefix-hide" id="table-prefix-ums">
+        <input type="text" id="txt-ums-prefix" name="umsPrefix" class="" placeholder="@T["ID tables prefix"]" />
+        <span class="startup-validation validation-txt-errors"></span>
+        <div class="info-content txt-box-info">
+            @Html.Raw(string.Format(T["Customizable prefix for ID tables."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
+        </div>
+    </div>
+    <div class="txt-holder database-name center-align schema-prefix-hide server-schema-prefix-hide" id="simple-server-prefix">
+        <input type="text" id="txt-server-prefix" name="serverPrefix" class="" placeholder="@T["Server tables prefix"]" />
+        <span class="startup-validation validation-txt-errors"></span>
+        <div class="info-content txt-box-info db-prefix-info">
+            @Html.Raw(string.Format(T["Customizable prefix for server tables."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
+        </div>
     </div>
     <div class="sql-server-existing-db center-align">
         <div class="txt-holder databse-dropdown text-wrap database-dropdown-margin center-align">
@@ -21,6 +54,21 @@ $(document).on("keyup", "#txt-dbname,#server-dbname,#imdbname", function () {
             <span class="startup-validation validation-txt-errors"></span>
                 <div class="info-content txt-box-info db-name-info">@dbnameHelp</div>
         </div>
+        <div class="txt-holder databse-dropdown text-wrap database-dropdown-margin center-align schema-prefix-hide id-schema-prefix-hide" id="table-prefix-name">
+            <input type="text" id="ums-table-prefix" name="tablePrefix" class="" placeholder="@T["ID tables prefix"]" />
+            <span class="startup-validation validation-txt-errors"></span>
+            <div class="info-content txt-box-info">
+                @Html.Raw(string.Format(T["Customizable prefix for ID tables."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
+            </div>
+        </div>
+        <div class="txt-holder databse-dropdown text-wrap database-dropdown-margin center-align schema-prefix-hide simple-exist-schema-prefix-hide" id="simple-tenant-prefix">
+            <input type="text" id="tenant-table-prefix" name="tenantTablePrefix" class="" placeholder="@T["Server tables prefix"]" />
+        <span class="startup-validation validation-txt-errors"></span>
+            <div class="info-content txt-box-info db-prefix-info">
+                @Html.Raw(string.Format(T["Customizable prefix for server tables."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
+        </div>
+        </div>
+        
     </div>
 </div>
 
@@ -31,11 +79,25 @@ $(document).on("keyup", "#txt-dbname,#server-dbname,#imdbname", function () {
         <div class="info-content txt-box-info server-db-info">@Html.Raw(string.Format(T["This is where we store the {0}{1}{2}, users, and their resource access permissions."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
         </div>
     </div>
+    <div class="txt-holder database-name center-align schema-prefix-hide advance-schema-prefix-hide">
+        <input type="text" id="server-prefix-name" name="serverPrefixName" class="" placeholder="@T["Server tables prefix"]" />
+        <span class="startup-validation validation-txt-errors"></span>
+        <div class="info-content txt-box-info db-prefix-info">
+            @Html.Raw(string.Format(T["Customizable prefix for server tables."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
+        </div>
+    </div>
     <div class="sql-server-existing-db center-align">
         <div class="txt-holder  text-wrap database-dropdown-margin center-align">
             <input type="text" id="server-existing-dbname" name="serverexistingdbname" class="" placeholder="@T["Server database name"]" />
             <span class="startup-validation validation-txt-errors"></span>
             <div class="info-content txt-box-info server-db-info">@Html.Raw(string.Format(T["This is where we store the {0}{1}{2}, users, and their resource access permissions."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
+            </div>
+        </div>
+        <div class="txt-holder  text-wrap database-dropdown-margin center-align schema-prefix-hide adv-exist-schema-prefix-hide">
+            <input type="text" id="server-table-prefix" name="serverTablePrefix" class="" placeholder="@T["Server tables prefix"]" />
+            <span class="startup-validation validation-txt-errors"></span>
+            <div class="info-content txt-box-info db-prefix-info">
+                @Html.Raw(string.Format(T["Customizable prefix for server tables."].Value, "<span class='tenant-content'>", helpLinkData, "</span>"))
             </div>
         </div>
     </div>

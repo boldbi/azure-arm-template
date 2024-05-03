@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 7.7.9
+*  version : 7.8.18
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -37472,21 +37472,26 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             }
         },
         // Public Methods
-        hidePopup: function () {
+        hidePopup: function (args) {
             if (this.container && this.isOpen) {
-                this.isOpen = false;
-                this.container.hide();
-                this._removeDatePickerWrongFormat();
-                this._removeDatePickerFocus();
-                if (this.model.datePickerType === "range") {
-                    this._removeStartDateFocus();
-                    this._removeStartDateWrongFormat();
-                    this._removeEndDateFocus();
-                    this._removeEndDateWrongFormat();
-                    this.selectedStartDateValue = null;
-                    this.selectedEndDateValue = null;
+                if (args !== undefined && args !== null && args.type === "scroll") {
+                    this.container.show();
+                    this._makePopupPositionDecision();
+                } else {
+                    this.isOpen = false;
+                    this.container.hide();
+                    this._removeDatePickerWrongFormat();
+                    this._removeDatePickerFocus();
+                    if (this.model.datePickerType === "range") {
+                        this._removeStartDateFocus();
+                        this._removeStartDateWrongFormat();
+                        this._removeEndDateFocus();
+                        this._removeEndDateWrongFormat();
+                        this.selectedStartDateValue = null;
+                        this.selectedEndDateValue = null;
+                    }
+                    this._off(BoldBIDashboard.getScrollableParents(this.element), "scroll", this.hidePopup); 
                 }
-                this._off(BoldBIDashboard.getScrollableParents(this.element), "scroll", this.hidePopup);
             }
         },
         toggle: function () {

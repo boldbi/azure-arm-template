@@ -26,8 +26,8 @@
     var hideDescription = iscustomUIProfile ? customUI.Profiles[0].Dashboards.HideDescription : false;
     var hideModifiedDate = iscustomUIProfile ? customUI.Profiles[0].Dashboards.HideModifiedDate : false;
     var customSortOption = customUI?.Profiles != null && !string.IsNullOrWhiteSpace(customUI.Profiles[0].ItemSorting) ? customUI.Profiles[0].ItemSorting : null;
-    var customSortName = customSortOption != null && (customSortOption.ToLower() == "itemnameascending" || customSortOption.ToLower() == "itemnamedescending") ? "Name" : "ModifiedDate";
-    var customSortDirection = customSortOption != null && customSortOption.ToLower() == "itemnameascending" ? "ascending" : "descending";
+    var customSortName = customSortOption != null && (customSortOption.ToLower() == "itemnameascending" || customSortOption.ToLower() == "itemnamedescending") ? "Name" : globalAppSettings.SystemSettings.ResourceType;
+    var customSortDirection = customSortOption != null && customSortOption.ToLower() == "itemnameascending" ? "ascending" : globalAppSettings.SystemSettings.ResourceOrder.ToLower();
     var usageAnalytics = globalAppSettings.SystemSettings.UsageAnalytics;
     var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
     bool hideDashboardInfoSection = samePagePreview ? hideAuthorName && hideCategoryName : hideAuthorName && hideCategoryName && hideModifiedDate;
@@ -37,6 +37,7 @@
     var canCreateCategory = itemAddPermissions[ItemType.Category];
     var hacCreateDataSourcePermission = itemAddPermissions.ContainsKey(ItemType.Datasource) && itemAddPermissions[ItemType.Datasource];
     var itemsPartialScript = string.Empty;
+    var isOracleDB = _globalAppSettings.DBSupport == DatabaseType.Oracle;
 }
 
 <environment include="Development,CloudDevelopment">
@@ -108,6 +109,8 @@
         var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
         var viewSchedulesUrl = "@Url.Action("Schedules", "Scheduler")";
         var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
+        var movemultitabIframeUrl = "@Url.Action("movemultitabviewitem", "items")";
+        var copyMultiTabDashboardUrl = "@Url.Action("copymultiviewitem", "items")";
         var moveIframeUrl = "@Url.Action("moveviewitem", "items")";
         var getdashboarddetailsUrl = "@Url.Action("getdashboarddetails", "dashboards")";
         var getDataSourceDetailsUrl = "@Url.Action("getdatasources", "dashboards")";
@@ -201,10 +204,13 @@
                                 <span class="category-bar-header">@T["Upload Drafts"]</span>
                                 <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
                             </li>
-                            <li class="category-item ng-hide" ng-show="usageAnalytics && (isAdmin || hasDashboardSettingsPermission)" ng-class="{active : activeMenu === @((int)DisplayCategory.UsageAnalytics)}" ng-click="setActive(@((int)DisplayCategory.UsageAnalytics), '@T["Usage Analytics"]', $event)">
-                                <span class="category-icon su su-nav-dashboard"></span>
-                                <span class="category-bar-header">@T["Usage Analytics"]</span>
-                            </li>
+                            @if (!isOracleDB)
+                            {
+                                <li class="category-item ng-hide" ng-show="usageAnalytics && (isAdmin || hasDashboardSettingsPermission)" ng-class="{active : activeMenu === @((int)DisplayCategory.UsageAnalytics)}" ng-click="setActive(@((int)DisplayCategory.UsageAnalytics), '@T["Usage Analytics"]', $event)">
+                                    <span class="category-icon su su-nav-dashboard"></span>
+                                    <span class="category-bar-header">@T["Usage Analytics"]</span>
+                                </li>
+                            }
                             <li class="category-list">
                                 <div class="col-xs-12 no-padding" ng-click="expandCategoryList()">
                                     <span class="category-icon su su-categoried-dashboard"></span>
@@ -278,24 +284,30 @@
                                     </span>
                                 </button>
                                 <ul class="dropdown-menu dashboard-sort-filter-menu">
-                                    <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'descending')">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'Name', 'descending')">
+                                            <a class="dashboard-sort-options" href="javascript:void(0);">
                                             <i class="su su-tick"></i>
-                                            <span class="search-option">@T["Recently Updated"]</span>
-                                        </a>
-                                    </li>
-                                    <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'Name', 'ascending')">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                <span class="search-option">@T["Name - Descending"]</span>
+                                            </a>
+                                        </li>
+                                        <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'Name', 'ascending')">
+                                            <a class="dashboard-sort-options" href="javascript:void(0);">
                                             <i class="su su-tick"></i>
-                                            <span class="search-option">@T["Dashboard Name (A-Z)"]</span>
-                                        </a>
-                                    </li>
-                                    <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'Name', 'descending')">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                <span class="search-option">@T["Name - Ascending"]</span>
+                                            </a>
+                                        </li>
+                                        <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'descending')">
+                                            <a class="dashboard-sort-options" href="javascript:void(0);">
                                             <i class="su su-tick"></i>
-                                            <span class="search-option">@T["Dashboard Name (Z-A)"]</span>
-                                        </a>
-                                    </li>
+                                                <span class="search-option">@T["Modified - Descending"]</span>
+                                            </a>
+                                        </li>
+                                        <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'ascending')">
+                                            <a class="dashboard-sort-options" href="javascript:void(0);">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Modified - Ascending"]</span>
+                                            </a>
+                                        </li>
                                 </ul>
                             </div>
                         </div>
@@ -360,10 +372,13 @@
                             <span class="category-bar-header">@T["Upload Drafts"]</span>
                             <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
                         </li>
+                                                  @if (!isOracleDB)
+                            {
                         <li class="category-item ng-hide" ng-show="usageAnalytics && (isAdmin || hasDashboardSettingsPermission)" ng-class="{active : activeMenu === @((int)DisplayCategory.UsageAnalytics)}" ng-click="setActive(@((int)DisplayCategory.UsageAnalytics), '@T["Usage Analytics"]', $event)">
                             <span class="category-icon su su-nav-dashboard"></span>
                             <span class="category-bar-header">@T["Usage Analytics"]</span>
                         </li>
+                            }
                         <li class="category-list">
                             <div class="col-xs-12 no-padding" ng-click="expandCategoryList()">
                                 <span class="category-icon su su-categoried-dashboard"></span>
@@ -507,24 +522,30 @@
                                             </button>
 
                                             <ul class="dropdown-menu dashboard-sort-filter-menu">
-                                                <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'descending')">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
-                                                        <i class="su su-tick"></i>
-                                                        <span class="search-option">@T["Recently Updated"]</span>
-                                                    </a>
-                                                </li>
-                                                <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'Name', 'ascending')">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
-                                                        <i class="su su-tick"></i>
-                                                        <span class="search-option">@T["Dashboard Name (A-Z)"]</span>
-                                                    </a>
-                                                </li>
-                                                <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'Name', 'descending')">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
-                                                        <i class="su su-tick"></i>
-                                                        <span class="search-option">@T["Dashboard Name (Z-A)"]</span>
-                                                    </a>
-                                                </li>
+                                            <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'Name', 'descending')">
+                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Name - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'Name', 'ascending')">
+                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Name - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                            <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'descending')">
+                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Modified - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'ascending')">
+                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Modified - Ascending"]</span>
+                                                </a>
+                                            </li>
                                                 @*<li ng-class="{selected : selectedSort === 'CreatedByDisplayName' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'CreatedByDisplayName', 'ascending')">
                                         <a class="dashboard-sort-options" href="javascript:void(0);">
                                         <i class="su su-tick"></i>
@@ -744,14 +765,14 @@
                                                                     </span>
                                                                 </li>
                                                                 <li ng-if="(dashboardItem.CanMove || dashboardItem.CanCopy || dashboardItem.CanClone) && !isTablet && !dashboardItem.IsLocked" role="separator" class="divider" ng-hide="schemesDetails != null && !schemesDetails.Move"></li>
-                                                                <li ng-if="dashboardItem.CanMove && dashboardItem.CanDelete && !isTablet && !dashboardItem.IsMultiDashboard && !dashboardItem.IsLocked" ng-hide="schemesDetails != null && !schemesDetails.Move">
-                                                                    <span title="" class="moveItem option-click" data-action="Move" ng-click="moveDashboard()">
+                                                                <li ng-if="dashboardItem.CanMove && dashboardItem.CanDelete && !isTablet && !dashboardItem.IsLocked" ng-hide="schemesDetails != null && !schemesDetails.Move">
+                                                                    <span title="" class="moveItem option-click" data-action="Move" ng-click="moveDashboard(dashboardItem)">
                                                                         <i class="su su-move"></i>
                                                                         <span>@T["Move"]</span>
                                                                     </span>
                                                                 </li>
-                                                                <li ng-if="(dashboardItem.CanCopy && !isTablet && !dashboardItem.IsMultiDashboard && !dashboardItem.IsLocked) || (isAdmin && usageAnalytics && !dashboardItem.IsMultiDashboard)" ng-hide="schemesDetails != null && !schemesDetails.Copy">
-                                                                    <span title="" class="copyItem option-click" data-action="Copy" ng-click="copyDashboard()">
+                                                                <li ng-if="(dashboardItem.CanCopy && !isTablet && !dashboardItem.IsLocked) || (isAdmin && usageAnalytics )" ng-hide="schemesDetails != null && !schemesDetails.Copy">
+                                                                    <span title="" class="copyItem option-click" data-action="Copy" ng-click="copyDashboard(dashboardItem)">
                                                                         <i class="su su-copy"></i>
                                                                         <span>@T["Copy"]</span>
                                                                     </span>
@@ -1015,7 +1036,7 @@
                                 <span class="dashboard-empty-message" ng-show="dashboardSearchQuery == ''">@T["No upload drafts available to display."]</span>
                                 <span class="dashboard-empty-message" ng-show="dashboardSearchQuery != ''">@T["No upload drafts were found that match your search. Try modifying your search."]</span>
                             </div>
-                            <div ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics) && activeMenu !== @((int)DisplayCategory.UploadDrafts) && selectedFilter !== @((int)DisplayCategory.SharedWithMe)" class="create-buttton">
+                            <div ng-show="(activeMenu !== @((int)DisplayCategory.UsageAnalytics) && activeMenu !== @((int)DisplayCategory.UploadDrafts) && activeMenu !== @((int)DisplayCategory.DraftItems) && selectedFilter !== @((int)DisplayCategory.SharedWithMe)) || (activeMenu === @((int)DisplayCategory.DraftItems))" class="create-buttton">
                                 <button data-action="create-items" ng-show="canCreateDashboard && !isTablet" class="primary-button app-btn-primary">@T["Create Dashboard"]</button>
                             </div>
                             <div ng-show="activeMenu === @((int)DisplayCategory.UploadDrafts)" class="create-buttton">
