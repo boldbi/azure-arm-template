@@ -293,6 +293,8 @@ $(document).ready(function () {
 function changeTenantType(args) {
     if (actionType != null && actionType != undefined && actionType.toLowerCase() != "edit") {
         $("#change-master").prop("checked", false);
+        var obj = document.getElementById("database-type");
+        var itemsList = obj.ej2_instances[0].list.querySelectorAll('.e-list-item');
         if (isBoldReportsTenantType()) {
             item = "reports";
             $("#enable-ssl").val(reportScheme);
@@ -312,7 +314,7 @@ function changeTenantType(args) {
             $(".reports-branding").css("display", "inline");
             $(".bi-branding").css("display", "none");
             $(".select-storage").html(window.Server.App.LocalizationContent.SelectStorage);
-            $("#header-description").html(window.Server.App.LocalizationContent.BoldReportsMultiTenancy);
+            $("#header-description").html(window.Server.App.LocalizationContent.BoldReportsMultiTenancy.format(reportsProductname));
             $("#master-site-description").html(window.Server.App.LocalizationContent.MasterSiteDescription.format("reports", "reports"));
             if (useSiteIdentifierEnable) {
                 $(".site-default-text").html("").html(boldReportsUrl);
@@ -336,6 +338,12 @@ function changeTenantType(args) {
             document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
             document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
             document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+            if (IsOracleSupportReports) {
+                itemsList[3].style.display = "";
+            }
+            else {
+                itemsList[3].style.display = "none";
+            }
         }
         else {
             item = "dashboards";
@@ -348,7 +356,7 @@ function changeTenantType(args) {
             $(".bi-branding").css("display", "inline");
             $(".select-intermediate-database").html(window.Server.App.LocalizationContent.SiteDataStore);
             $(".select-storage").html(window.Server.App.LocalizationContent.SelectStorage);
-            $("#header-description").html(window.Server.App.LocalizationContent.BoldBiMultiTenancy);
+            $("#header-description").html(window.Server.App.LocalizationContent.BoldBiMultiTenancy.format(biProductname));
             $("#master-site-description").html(window.Server.App.LocalizationContent.MasterSiteDescription.format("reports", "reports"));
             if (useSiteIdentifierEnable) {
                 $(".site-default-text").html("").html(boldBIUrl);
@@ -372,6 +380,7 @@ function changeTenantType(args) {
             document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
             document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
             document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+            itemsList[3].style.display = "";
         }
     }
 }

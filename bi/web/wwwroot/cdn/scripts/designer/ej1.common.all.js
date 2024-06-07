@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 7.8.18
+*  version : 7.9.27
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -36173,6 +36173,8 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             fixedCalendarSelection: false,
             limitDate: true,
             specialDates: null,
+			defaultDate: "none",
+            dashboardMode: null,
             firstDayOfWeek: 0,
             dataSource: [],
             width: "",
@@ -36227,6 +36229,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             ranges: "data",
             locale: "data",
             datePickerType: "string",
+            defaultDate: "string",
             showDropDowns: "boolean",
             showWeekNumbers: "boolean",
             dataSource: "data",
@@ -36269,11 +36272,31 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                         case "enableRTL":
                             this._setRTL(this.controlWrapper);
                             break;
+						case "DefaultDate":
+							this._defaultToday();
+							break;
                         default:
                             break;
                     }
                 }
             }
+        },
+		_defaultToday: function(){
+			if (this.model.defaultDate === BoldBIDashboard.DashboardDatePicker.DefaultDate.Today) {
+                var todaysDate = new Date();
+				var year = todaysDate.getFullYear();
+                var month = todaysDate.getMonth();
+                var day = todaysDate.getDate();
+                var date = new Date(year, month, day);
+				var parsedDate = BoldBIDashboard.globalize.format(date, this.format, this.model.locale.culture);
+				this.element.val(parsedDate);
+				this.selectedDate = { date: date };
+                this.prevDate = this.selectedDate.date;
+                if (!BoldBIDashboard.isNullOrUndefined(this.container)) {
+                    this._selectDate();
+                }
+                this._trigger("selected", { datePickerType: BoldBIDashboard.DashboardDatePicker.Type.Single, selectedRange: "Today Day(s)", dateFormat: this.format, value: parsedDate });
+			}
         },
         _showTooltip: function (evt) {
             var five = 5,
@@ -36351,7 +36374,17 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             return bounds;
         },
         _setWaterMarkText: function () {
-            if (this.model.datePickerType === BoldBIDashboard.DashboardDatePicker.Type.Single) {
+            if(this.model.defaultDate === BoldBIDashboard.DashboardDatePicker.DefaultDate.Today){
+                var todaysDate = new Date();
+                var year = todaysDate.getFullYear();
+                var month = todaysDate.getMonth();
+                var day = todaysDate.getDate();
+                var date = new Date(year, month, day);
+                var parsedDate = BoldBIDashboard.globalize.format(date, this.format, this.model.locale.culture);
+                this.element.val(parsedDate);
+                this.selectedDate = { date: date };
+                this.prevDate = this.selectedDate.date;
+            } else if (this.model.datePickerType === BoldBIDashboard.DashboardDatePicker.Type.Single) {
                 bbdesigner$(this.element).attr("placeholder", this.model.watermarkText);
             } else {
                 bbdesigner$(this.element).attr("placeholder", this.model.watermarkText);
@@ -37620,6 +37653,10 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
         dateClicked: function (evt) {
             var one = 1;
             var selectedItem = bbdesigner$(evt.currentTarget);
+            if (this.model.defaultDate !== BoldBIDashboard.DashboardDatePicker.DefaultDate.None && this.model.dashboardMode === 'design') {
+                this.hidePopup();
+                return;
+            }
             if (this.model.datePickerType === BoldBIDashboard.DashboardDatePicker.Type.Single) {
                 this.selectedDate = this._setSelectedDate(selectedItem);
                 if (this.selectedDate === null || this.selectedDate.date < (!this.model.limitDate ? this.minDate : this.startDate) || this.selectedDate.date > (!this.model.limitDate ? this.maxDate : this.endDate)) {
@@ -37919,6 +37956,12 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
     BoldBIDashboard.DashboardDatePicker.Type = {
         Single: "single",
         Range: "range"
+    };
+    BoldBIDashboard.DashboardDatePicker.DefaultDate = {
+        None: "none",
+        Today: "today",
+        Yesterday: "yesterday",
+        Tomorrow: "tomorrow"
     };
 })(bbdesigner$, SyncfusionBoldBIDashboard);
 ;

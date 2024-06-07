@@ -6,8 +6,20 @@
     var demoUsername = demoAccount != null && !string.IsNullOrWhiteSpace(demoAccount.Username) ? demoAccount.Username : string.Empty;
     var demoPassword = demoAccount != null && !string.IsNullOrWhiteSpace(demoAccount.Password) ? demoAccount.Password : string.Empty;
     var showDemoAccount = demoAccount != null && demoAccount.IsEnabled ? "block" : "none";
+    var loginDisclaimer = ViewBag.LoginDisclaimer != null ? ViewBag.LoginDisclaimer : string.Empty;
+    var consentContent = ViewBag.LoginDisclaimer == null ? string.Empty : loginDisclaimer.ConsentContent;
+    var isDefaultConsentContent = false;
+    if (loginDisclaimer != null && consentContent != null && consentContent.ToString().Contains("login disclaimer"))
+    {
+        isDefaultConsentContent = true;
+        consentContent = consentContent.Replace("login disclaimer", "<a href=\"#\" id=\"open-login-disclaimer\">login disclaimer</a>");
+    }
 }
-
+<script nonce="@Context.Items["ScriptNonce"]">
+    var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimer));
+    var loginConsentContent = "@consentContent";
+    var isDefaultConsentContent = @Html.Raw(isDefaultConsentContent.ToString().ToLower());
+</script>
 <div id="alert-notification"></div>
 <form method="post" id="login-form" name="loginForm" class="login-form" action="@ViewBag.PostAction">
     <span id="message" class="text-center col-xs-12 validation-holder">
@@ -48,6 +60,58 @@
                 @Html.Label("remember", T["Remember me"].Value, new { @class = "disable-text-select", @id = "remember-label" })
             </div>
         </div>
+        @if (ViewBag.LoginDisclaimer != null)
+        {
+            if (ViewBag.LoginDisclaimer.IsEnabled)
+            {
+                if (ViewBag.LoginDisclaimer.IsConsentCheckboxEnabled)
+                {
+                    if (isDefaultConsentContent)
+                    {
+                        <div id="disclaimer-content-check-default">
+                            @Html.CheckBox("content-default", new { @class = "material-checkbox pull-left", @id = "content-check" })
+                            @Html.Hidden("content-check")
+                            <label for="content-check" class="disclaimer">
+                                @Html.Raw(consentContent)
+                            </label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="disclaimer-content-check">
+                            @Html.CheckBox("content-check", new { @class = "material-checkbox pull-left", @id = "content-check" })
+                            @Html.Hidden("content-check")
+                            <label for="content-check" class="disable-text-select" id="content-label-check">
+                                @ViewBag.LoginDisclaimer.ConsentContent
+                                <a href="#" id="open-login-disclaimer"><i class="su su-info" id="disclaimer-info"></i></a>
+                            </label>
+                        </div>
+
+                    }
+                }
+                else
+                {
+                    if (isDefaultConsentContent)
+                    {
+                        <div id="disclaimer-content-default">
+                            <label class="disclaimer">
+                                @Html.Raw(consentContent)
+                            </label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="disclaimer-content">
+                            <label for="content-check" class="disable-text-select" id="content-label-check">
+                                @ViewBag.LoginDisclaimer.ConsentContent <a href="#" id="open-login-disclaimer">
+                                    <i class="su su-info" id="disclaimer-info"></i>
+                                </a>
+                            </label>
+                        </div>
+                    }
+                }
+            }
+        }
         <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
         <button class="login-button proceed-button" ng-click="dsAuth()" type="submit" name="Submit" id="login-button" asp-route="PostLogin">
             @T["Continue"]

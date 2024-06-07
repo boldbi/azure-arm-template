@@ -171,8 +171,6 @@ function sendData(data, url) {
                             }
                         }
 
-                        document.getElementById("offline-license-update-dialog").ej2_instances[0].position.X = (window.innerWidth - 422) / 2;
-                        document.getElementById("offline-license-update-dialog").ej2_instances[0].position.Y = (window.innerHeight - 494) / 2;
                         $("#license-details").slideDown("slow");
                         $("#confirm-license").prop('disabled', false);
                         $(".upload-license-button").attr("disabled", false);
@@ -209,7 +207,6 @@ function uploadLicenseDialogClose() {
     licenseKey = "";
     licenseToken = "";
     $("#tenant-type").val("");
-    document.getElementById("offline-license-update-dialog").ej2_instances[0].refresh();
     document.getElementById("offline-license-update-dialog").ej2_instances[0].hide();
 }
 

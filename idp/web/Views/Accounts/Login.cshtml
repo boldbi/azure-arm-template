@@ -45,6 +45,7 @@
     </script>
 
       <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts-login.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/accounts-login.js")" crossorigin="anonymous"asp-append-version="true"></script>
+        <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/ej2.js")" crossorigin="anonymous" asp-append-version="true"></script>
 }
 
 @section MainSection{
@@ -52,7 +53,10 @@
         <div class="login-body">
             @await Html.PartialAsync("~/Views/Shared/_LoginForm.cshtml")
             @await Html.PartialAsync("~/Views/Shared/_ExternalAuthentication.cshtml")
-
+            @if(ViewBag.LoginDisclaimer != null)
+            {
+                @await Html.PartialAsync("~/Views/Shared/_LoginDisclaimer.cshtml")
+            }
             <div id="azure-b2c-password-reset" class="error-message validation-holder bg-danger">
                 <span class="auth-error-text">
                     @Html.Raw(string.Format(T["We are unable to process password reset request. Please refer to {0} this documentation {1} and enable self-service password reset."].Value, $"<a target='_blank' href={await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Azure_B2C_Self_Reset_password)}>", "</a>"))

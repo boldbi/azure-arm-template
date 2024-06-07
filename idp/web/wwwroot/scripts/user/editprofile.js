@@ -548,7 +548,12 @@ function uploadImage() {
                     }
                 },
                 error: function (result) {
-                    WarningAlert(window.Server.App.LocalizationContent.ChangeProfilepicture, window.Server.App.LocalizationContent.ProfilePictureSaveFailed, result.Message, 7000);
+                    if (result.status === 500 || result.status === 401 || result.status === undefined) {
+                        location.reload();
+                    }
+                    else {
+                        WarningAlert(window.Server.App.LocalizationContent.ChangeProfilepicture, window.Server.App.LocalizationContent.ProfilePictureSaveFailed, result.Message, 7000);
+                    }
                 }
             });
         }
@@ -574,7 +579,12 @@ function deleteUserAvatar() {
             }
         },
         error: function (result) {
-            WarningAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarError, result.Message, 7000);
+            if (result.status === 500 || result.status === 401 || result.status === undefined) {
+                location.reload();
+            }
+            else {
+                WarningAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarError, result.Message, 7000);
+            }
         }
     });
     hideWaitingPopup('content-area');

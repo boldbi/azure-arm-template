@@ -6,6 +6,7 @@
     var imageHelper = new ImageHelper();
     var errormessage = Context.Items["ErrorMessage"] as string;
     var errorstacktrace = Context.Items["ErrorStackTrace"] as string;
+    var errorcode = Context.Items["ErrorCode"] as string;
     var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
 }
 <!DOCTYPE html>
@@ -48,15 +49,17 @@
                     @if (GlobalAppSettings.SystemSettings.ShowStackTrace || isAdmin)
                     {
                         <div id="deploy-error-container">
-                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@errormessage
-                                @T["ErrorStacktrace"]:@errorstacktrace</textarea>
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorCode"]:@errorcode 
+@T["ErrorMessage"]:@errormessage 
+@T["ErrorStacktrace"]:@errorstacktrace</textarea>
                             <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
                         </div>
                     }
                     else
                     {
                         <div id="deploy-error-container">
-                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorMessage"]:@errormessage</textarea>
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorCode"]:@errorcode 
+@T["ErrorMessage"]:@errormessage</textarea>
                             <span class="su su-copy text focus" id="deploy-error-copy" data-toggle="tooltip" title="@T["Click to copy"]"></span>
                         </div>
                     }

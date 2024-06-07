@@ -3,17 +3,25 @@
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
-    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/'); ;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/'); 
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
+    var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var url = new Uri(Context.Request.GetDisplayUrl());
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var dns = url.GetLeftPart(UriPartial.Authority);
-    var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
-    var widgetName = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetName != null ? @T[ViewBag.WidgetName].Value : string.Empty;
-    var widgetId = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetId != null ? @ViewBag.WidgetId : string.Empty;
-    bool IsWidgetDeleted = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsWidgetDeleted != null ? ViewBag.IsWidgetDeleted : false;
-    var widgetInformation = enableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetInformation != null ? ViewBag.WidgetInformation : new WidgetInformation(); ;
+    var disableWidgetScheduleExport = ViewBag.DisableWidgetScheduleExport != null ? ViewBag.DisableWidgetScheduleExport : false;
+    var widgetName = disableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetName != null ? @T[ViewBag.WidgetName].Value : string.Empty;
+    var widgetId = disableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetId != null ? @ViewBag.WidgetId : string.Empty;
+    var viewName = ViewBag.ViewName != null ? @T[ViewBag.ViewName].Value : string.Empty;
+    var viewId = ViewBag.ViewId != null ? @ViewBag.ViewId : string.Empty;
+    bool IsWidgetDeleted = disableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsWidgetDeleted != null ? ViewBag.IsWidgetDeleted : false;
+    var widgetInformation = disableWidgetScheduleExport && Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.WidgetInformation != null ? ViewBag.WidgetInformation : new WidgetInformation();
+    bool canDisableDashboardChange = ViewBag.CanDisableDashboardChange != null ? ViewBag.CanDisableDashboardChange : false;
+    bool canDisableCategoryChange = ViewBag.CanDisableCategoryChange != null ? ViewBag.CanDisableCategoryChange : false;
+    bool canDisableViewChange = ViewBag.CanDisableViewChange != null ? ViewBag.CanDisableViewChange : false;
+    bool canShowViewDropDown = ViewBag.CanShowViewDropDown != null ? ViewBag.CanShowViewDropDown : false;
+    bool IsViewDeleted = Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsViewDeleted != null ? ViewBag.IsViewDeleted : false;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -188,7 +196,7 @@
                                     </div>
                                 </div>*@
                         </div>
-                        @if (enableWidgetScheduleExport)
+                        @if (disableWidgetScheduleExport)
                         {
                             <div class="col-sm-12 col-xs-12 no-padding">
                                 <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Widget "]</label></div>
@@ -197,6 +205,10 @@
                                         @if (Context.Request.Query["actionType"].ToString().ToLower() == "create")
                                         {
                                             <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select widget"]</option>
+                                        }
+                                        else if (IsWidgetDeleted && Context.Request.Query["actionType"].ToString().ToLower() == "edit")
+                                        {
+                                            <option value="@widgetId" selected="selected">@Context.Request.Query["WidgetItemName"].ToString()</option>
                                         }
                                         else
                                         {
@@ -210,6 +222,31 @@
                                             }
                                         }
                                     </select>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-sm-12 col-xs-12 no-padding">
+                        @if (canShowViewDropDown)
+                        {
+                            <div class="col-sm-12 col-xs-12 no-padding">
+                                <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["View"]</label></div>
+                                <div id="views-dropdown" class="views-dropdown col-sm-4 col-xs-4">
+                                    <select id="selected_view" data-live-search="true" title='@T["Select view"]' name="viewId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
+                                        @if (IsViewDeleted && Context.Request.Query["actionType"].ToString().ToLower() == "edit")
+                                        {
+                                            <option value="@viewId" selected="selected">@Context.Request.Query["ViewItemName"].ToString()</option>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(viewId.ToString()) && !string.IsNullOrWhiteSpace(viewName.ToString()))
+                                        {
+                                            <option value="@viewId" selected="selected">@viewName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select view"]</option>
+                                        }
+                                    </select>
+                                    <input type="hidden" id="dashboard_change_validation" name="isDashboardChanged" value="false" />
+                                    <span id="dashboard-message" class="ErrorMessage validate-error">@T["Please select the dashboard"]</span>
                                 </div>
                             </div>
                         }
@@ -293,7 +330,7 @@
 </environment>
 
 <script>
-    var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+   var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
    var actionType = "@Context.Request.Query["actionType"].ToString()";
     var itemId = "@Context.Request.Query["itemId"].ToString()";
     var itemName = "@Context.Request.Query["itemName"].ToString()";
@@ -304,7 +341,7 @@
     var getDashboardUrl = "@Url.Action("GetItems", "dashboards")";
     var getScheduleInfoUrl = "@Url.Action("GetScheduleInfo", "scheduler")";
     var getChildDashboardUrl = "@Url.Action("GetChildDashboards", "scheduler")";
-    var checkScheduleNameExistUrl = "@Url.Action("CheckScheduleNameExist", "scheduler")";
+    var checkScheduleNameExistUrl = { "web": "@Url.Action("CheckScheduleNameExist", "scheduler")", "api": "/internal/items/is-name-exists" };
     var recurrenceType = "@Url.Action("ScheduleRecurrenceType", "scheduler")";
     var scheduleRecipients = "@Url.Action("RecipientsList", "scheduler")";
     var emailEditor = "@Url.Action("EmailEditor", "scheduler")";
@@ -313,7 +350,7 @@
     var getCategoryUrl = "@Url.Action("GetCategories", "scheduler")";
     var getTenantStatusUrl = "@Url.Action("GetTenantStatus", "PartialView")";
     var getNotificationCountUrl = "@Url.Action("GetNotificationCount", "PartialView")";
-    var dataAlertUrl = "@Url.Action("DataAlert", "scheduler")";
+    var dataAlertUrl = { "web": "@Url.Action("DataAlert", "scheduler")", "api": "/internal/schedules/data-alert" };
     var dataLanguage = "@ViewBag.DataLanguage";
     var currentDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
     var currentTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
@@ -324,10 +361,18 @@
     var cdnLink = "@cdnLink";
     var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
     var appVersion = "@ServerAppConfig.ProductVersion";
-    var enableWidgetScheduleExport = @Json.Serialize(enableWidgetScheduleExport);
+    var disableWidgetScheduleExport = @Json.Serialize(disableWidgetScheduleExport);
     var isWidgetDeleted = @Json.Serialize(IsWidgetDeleted);
+    var isViewDeleted = @Json.Serialize(IsViewDeleted);
+    var canDisableDashboardChange = @Json.Serialize(canDisableDashboardChange);
+    var canDisableCategoryChange = @Json.Serialize(canDisableCategoryChange);
+    var canDisableViewChange = @Json.Serialize(canDisableViewChange);
+    var canShowViewDropDown = @Json.Serialize(canShowViewDropDown);
     var widgetName = "@widgetName";
+    var viewName = "@viewName";
     var getwidgetsDetailUrl = "@Url.Action("GetWidgetsDetails", "scheduler")";
+    var getViewsByItemIdUrl = "@Url.Action("GetViewsByItemId","Items")";
+    var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
 
     $("#selected_dashboard,#selected_category").selectpicker();
     $("#selected_childdashboard").attr("disabled", true);
@@ -340,7 +385,7 @@
         createSchedule(itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName);
     }
     else {
-        editSchedule(scheduleId, itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName, isScheduledItemDeleted, isWidgetDeleted);
+        editSchedule(scheduleId, itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName, isScheduledItemDeleted, isWidgetDeleted, isViewDeleted);
     }
     if (($(parent.window).width()) > 1400) {
         $(".schedule-dialog").addClass("lg-schedule-flexible");

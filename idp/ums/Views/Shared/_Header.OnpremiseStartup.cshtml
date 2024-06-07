@@ -1,8 +1,15 @@
-﻿<header class="startup-header">
+﻿@{
+    var isBoldBI = GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName;
+}
+
+<header class="startup-header">
     <div class="startup-header-container">
-        <img class="boldbi-logo" src="@Url.Content("~/images/"+GlobalAppSettings.Branding+"/application/registration_header_logo.svg")" />
-        <div class="footer-logo-container">
-            <span>@T["Powered by"]</span><img class="boldbi-footer-logo" src="@Url.Content( "~/images/" + GlobalAppSettings.Branding + "/application/footer_logo_black.svg")" />
-        </div>
+        <img class="boldbi-logo" src="@Url.Content("~/images/"+GlobalAppSettings.Branding+"/application/"+(isBoldBI ? CloudAppConfig.Branding.ProductSpecificBranding.StartupHeaderImageBI : CloudAppConfig.Branding.ProductSpecificBranding.StartupHeaderImageReport))" />
+        @if (CloudAppConfig.Branding.ProductSpecificBranding.ShowPoweredByLogoInStartUp)
+        {
+            <div class="footer-logo-container">
+                <span>@T["Powered by"]</span><img class="boldbi-footer-logo" src="@Url.Content( "~/images/" + GlobalAppSettings.Branding + "/application/" + (isBoldBI ? CloudAppConfig.Branding.ProductSpecificBranding.StartupPoweredByLogoBI : CloudAppConfig.Branding.ProductSpecificBranding.StartupPoweredByLogoReport))" />
+            </div>
+        }
     </div>
 </header>

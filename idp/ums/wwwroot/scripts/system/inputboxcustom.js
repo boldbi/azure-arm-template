@@ -25,6 +25,8 @@ $(document).ready(function () {
     }
 
     inputBoxInitialization("#txt-dbname");
+    inputBoxInitialization("#txt-dbname-for-oracle");
+    inputBoxInitialization("#txt-servicename");
     inputBoxInitialization("#server-dbname");
     inputBoxInitialization("#imdbname");
     inputBoxInitialization("#txt-portnumber");

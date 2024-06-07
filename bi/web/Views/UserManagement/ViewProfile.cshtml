@@ -58,6 +58,7 @@
         var getUserAttributesUrl = "@Url.Action("GetUserAttributes", "CustomAttribute")";
         var isPresentEmailId = "@Url.Action("IsPresentEmailId", "UserManagement")";
         var isUsernameExistsUrl = "@Url.Action("IsUsernameExists", "UserManagement")";
+        var userId = @ViewBag.UserDetail.UserId;
         var showDropdown = "@showDropdown";
         var isEmailRequired = @Json.Serialize(globalAppSettings.SystemSettings.IsEmailRequired);
         var isOAuthorOpenIdUser = @Json.Serialize(isOAuthorOpenIdUser);
@@ -521,34 +522,15 @@
                 </div>
             }*@
     </div>
-    <div id="userprofile-delete-confirmation" class="no-padding">
-        <div class="col-lg-12 no-padding modal-content" id="popup-container">
-            <div class="col-md-12 modal-header">
-                <div class="col-xs-8 no-padding">
-                    <span class="su su-delete head-icon"></span>
-                    <span class="modal-title">@T["Remove User"]</span>
-                </div>
-                <div class="col-xs-4 no-padding">
-                    <a href="javascript:void(0);" onclick="onDeleteDialogClose()" class="popup-close pull-right">
-                        <span class="su su-close"></span>
-                    </a>
-                    <div id="folder-setting-arrow" class="downArrow" style="left: 37px;"></div>
-                </div>
-            </div>
-            <div class="modal-body col-xs-12 no-padding">
-                <div class="col-xs-12 no-left-padding no-bottom-padding no-right-padding">
+    <div class="no-padding" id="userprofile-delete-confirmation" tabindex="-1" role="dialog" style="display:none">
+        <div class="col-lg-12 no-padding" role="document">
+            <div class="col-lg-12 no-padding" autocomplete="off">
+                <div class="no-left-padding no-bottom-padding no-right-padding">
                     <div class="delete-msg">@T["Are you sure you want to remove the user from this site?"]</div>
-                </div>
-            </div>
-            <div class="col-xs-12 modal-footer">
-                <div class="col-xs-12 no-padding margin-top pull-right">
-                    <input type="button" id="delete-item" onclick="deleteSingleUser(@ViewBag.UserDetail.UserId)" class="critical-action-button app-btn-danger margin-right" value="@T["Yes"]" tabindex="1" autofocus />
-                    <input type="button" onclick="onDeleteDialogClose()" class="secondary-button app-btn-secondary popup-close" value="@T["No"]" tabindex="2" />
                 </div>
             </div>
         </div>
     </div>
-
     <span id="baseurl" data-url="@Url.Content("~/")"></span>
     @await Html.PartialAsync("_ProfilePictureUploadBox", globalAppSettings.SystemSettings.CDNLink)
 

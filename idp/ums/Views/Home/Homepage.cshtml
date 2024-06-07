@@ -1,4 +1,5 @@
-﻿@model List<TenantDetail>
+﻿@using System.Web;
+@model List<TenantDetail>
 @{
     Layout = null;
     var tenantIdentifierPrefix = CloudAppConfig.TenantIdentifierPrefix;
@@ -13,9 +14,10 @@
     var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
     var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
     var currentUrlPath = requestUrl.PathAndQuery.ToLower();
+    var copyrightInformation = HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
     var isAllSitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "all-sites") ? "active" : string.Empty;
     var isFavoriteTab = (Context.Request.Query["view"] == "favorites") ? "active" : string.Empty;
-    var isMobile = DeviceDetection.IsMobile;   
+    var isMobile = DeviceDetection.IsMobile; 
 }
 
 <html>
@@ -32,7 +34,7 @@
 </head>
 
 <body>
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp - append - version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
       <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
       <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
        <script nonce="@Context.Items["ScriptNonce"]">
@@ -91,7 +93,7 @@
        <div class="admin-home">
             <span title="@displayName" class=" user-name"> @T["Welcome "]@displayName  </span>
             <span class="grid-icon su su-wave-emoji wave-icon">
-                <img src="/ums/images/wave-icon.svg" alt="@T["wave Logo"]" class="wave-icon">
+                <img src="@Url.Content("~/images/wave-icon.svg")" alt="@T["wave Logo"]" class="wave-icon">
             </span>
         </div>
         <div class="col-xs-12 no-padding allsites-page-nav-bar">
@@ -166,7 +168,7 @@
    </div>   
    <div id="footer-container" class="displaynone">
         <div class="copyright-container" style="display:@copyrightClass">
-            <div class="copyright">@Html.Raw(GlobalAppSettings.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
+            <div class="copyright">@(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
         </div>
         <div class="footer-logo-container" style="display:@poweredbyClass">
             <div class="powered-by">@T["Powered by"]</div>

@@ -19,8 +19,5 @@ CREATE TABLE SyncDS_DSMetrics (
    RefreshException VARCHAR(255))
 ;
 
-INSERT into SyncDS_Source (Name,IsActive) VALUES ( N'Embed',1)
-;
-
 ALTER TABLE SyncDS_PublishedItem ADD COLUMN ExternalSiteId int not null DEFAULT 0
 ;

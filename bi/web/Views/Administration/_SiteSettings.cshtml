@@ -284,99 +284,95 @@
                 </div>
             </div>
 
-            @if (!ServerAppConfig.IsSelfHosted)
-            {
-        <div class="login-disclaimer-section site-settings-page-section col-xs-12 no-padding">
-            <div id="login-disclaimer" class="col-xs-12 no-padding" ng-controller="LoginDisclaimerInfoCtrl">
-                <div class="hidden">
-                    <textarea id="temp" class="hidden"></textarea>
-                    <div id="toRemoveCulture"></div>
-                </div>
-                <h3 class="title col-xs-12 login-disclaimer sub-section-heading blur-whitelable-content">@T["Login Disclaimer"]</h3>
-                <div class="form-group blur-whitelable-content">
-                    <div class="enable-login-disclaimer">
-                        @Html.CheckBox("enablelogindisclaimer", ViewBag.SystemSettings.LoginDisclaimer.IsEnabled, new { @class = "material-checkbox", ng_click = "enableLoginDisclaimer()" })
-                        @Html.Hidden("enablelogindisclaimer")
-                        <label for="enablelogindisclaimer">
-                            <span>
-                                @T["Enable login disclaimer"]
-                            </span>
-                        </label>
+            <div class="login-disclaimer-section site-settings-page-section col-xs-12 no-padding">
+                <div id="login-disclaimer" class="col-xs-12 no-padding" ng-controller="LoginDisclaimerInfoCtrl">
+                    <div class="hidden">
+                        <textarea id="temp" class="hidden"></textarea>
+                        <div id="toRemoveCulture"></div>
                     </div>
-                    <div>
-                        @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = "!loginDisclaimerEnabled" })
-                        @Html.Hidden("enablecheckboxconsent")
-                        <label for="enablecheckboxconsent">
-                            <span>
-                                @T["Users must consent every time"]
-                            </span>
-                        </label>
+                    <h3 class="title col-xs-12 login-disclaimer sub-section-heading blur-whitelable-content">@T["Login Disclaimer"]</h3>
+                    <div class="form-group blur-whitelable-content">
+                        <div class="enable-login-disclaimer">
+                            @Html.CheckBox("enablelogindisclaimer", ViewBag.SystemSettings.LoginDisclaimer.IsEnabled, new { @class = "material-checkbox", ng_click = "enableLoginDisclaimer()" })
+                            @Html.Hidden("enablelogindisclaimer")
+                            <label for="enablelogindisclaimer">
+                                <span>
+                                    @T["Enable login disclaimer"]
+                                </span>
+                            </label>
+                        </div>
+                        <div>
+                            @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = "!loginDisclaimerEnabled" })
+                            @Html.Hidden("enablecheckboxconsent")
+                            <label for="enablecheckboxconsent">
+                                <span>
+                                    @T["Users must consent every time"]
+                                </span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-                @*<div class="form-group blur-whitelable-content">
-                @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = !ViewBag.SystemSettings.LoginDisclaimer.IsEnabled })
-                @Html.Hidden("enablecheckboxconsent")
-                <label for="enablecheckboxconsent">
+                    @*<div class="form-group blur-whitelable-content">
+                    @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = !ViewBag.SystemSettings.LoginDisclaimer.IsEnabled })
+                    @Html.Hidden("enablecheckboxconsent")
+                    <label for="enablecheckboxconsent">
                     <span>
-                        @T["Enable login disclaimer"]
+                    @T["Enable login disclaimer"]
                     </span>
-                </label>
-            </div>*@
-                <div id="consent-preview-container" class="col-xs-6 no-margin no-padding blur-whitelable-content">
-                    <div class="form-group blur-whitelable-content">
-                        <label class="app-textbox-label col-xs-12 no-padding">@T["Consent content"]</label>
-                        <div class="col-xs-8 no-margin form-input-field no-padding">
-                            <input type="text" class="form-control" placeholder="@T["Enter the consent content"]" id="consent-content" name="consent-content" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") maxlength="100" value="@(ViewBag.SystemSettings.LoginDisclaimer.ConsentContent != string.Empty ? ViewBag.SystemSettings.LoginDisclaimer.ConsentContent : (ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? @T["I have read and accept the login disclaimer."] : @T["By logging in you accept our login disclaimer."]))" ng-model="consentContent" ng-change="consentContentSplit()" />
-                            <span class="validation-errors"></span>
+                    </label>
+                    </div>*@
+                    <div id="consent-preview-container" class="col-xs-6 no-margin no-padding blur-whitelable-content">
+                        <div class="form-group blur-whitelable-content">
+                            <label class="app-textbox-label col-xs-12 no-padding">@T["Consent content"]</label>
+                            <div class="col-xs-8 no-margin form-input-field no-padding">
+                                <input type="text" class="form-control" placeholder="@T["Enter the consent content"]" id="consent-content" name="consent-content" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") maxlength="100" value="@(ViewBag.SystemSettings.LoginDisclaimer.ConsentContent != string.Empty ? ViewBag.SystemSettings.LoginDisclaimer.ConsentContent : (ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? @T["I have read and accept the login disclaimer."] : @T["By logging in you accept our login disclaimer."]))" ng-model="consentContent" ng-change="consentContentSplit()" />
+                                <span class="validation-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group blur-whitelable-content">
+                            <label class="app-textbox-label col-xs-12 no-padding">@T["Title"]</label>
+                            <div class="col-xs-8 no-margin form-input-field no-padding">
+                                <input type="text" class="form-control" placeholder="@T["Enter the login disclaimer title"]" id="login-disclaimer-title" name="login-disclaimer-title" value="@(ViewBag.SystemSettings.LoginDisclaimer.Title)" maxlength="100" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") ng-model="consentTitle" />
+                                <span class="validation-errors"></span>
+                            </div>
+                        </div>
+                        <div class="form-group blur-whitelable-content">
+                            <label class="app-textbox-label col-xs-12 no-padding">@T["Message"]</label>
+                            <div class="col-xs-8 no-margin form-input-field no-padding" id="login-temp-container">
+                                <textarea id="login-disclaimer-temp" name="login-disclaimer-temp" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") onclick="EnableDisclaimerMessage()">@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
+                                <span class="validation-errors"></span>
+                            </div>
+                            <div class="col-xs-8 no-margin form-input-field no-padding" id="login-disclaimer-container" style="display: none">
+                                <textarea id="login-disclaimer-message" name="login-disclaimer-message" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled")>@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
+                                <span class="validation-errors"></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group blur-whitelable-content">
-                        <label class="app-textbox-label col-xs-12 no-padding">@T["Title"]</label>
-                        <div class="col-xs-8 no-margin form-input-field no-padding">
-                            <input type="text" class="form-control" placeholder="@T["Enter the login disclaimer title"]" id="login-disclaimer-title" name="login-disclaimer-title" value="@(ViewBag.SystemSettings.LoginDisclaimer.Title)" maxlength="100" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") ng-model="consentTitle" />
-                            <span class="validation-errors"></span>
+                    <div class="col-xs-6 text-center blur-whitelable-content" ng-if="loginDisclaimerEnabled">
+                        <div id="image-container" class="center-img disclaimer-content-container">
+                            @Html.CheckBox("content-disclaimer-checkbox", true, new { @class = "material-checkbox" })
+                            @Html.Hidden("content-disclaimer-checkbox")
+                            <label class="content-disclaimer-name"></label>
                         </div>
                     </div>
-                    <div class="form-group blur-whitelable-content">
-                        <label class="app-textbox-label col-xs-12 no-padding">@T["Message"]</label>
-                        <div class="col-xs-8 no-margin form-input-field no-padding" id="login-temp-container">
-                            <textarea id="login-disclaimer-temp" name="login-disclaimer-temp" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") onclick="EnableDisclaimerMessage()">@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
-                            <span class="validation-errors"></span>
+                    <div id="consent-content-dialog" style="display: none">
+                        <div class="fluent-popup-header col-xs-12 no-padding">
+                            <h4 class="popup-title">
+                                <span id="info-dialog-header">{{consentTitle}}</span>
+                                <button id="close-info-dialog" type="button" title="@T["Close"]" data-toggle="tool-tip" data-container="body" class="close popup-close" ng-click="closeConsentContentInfo()" aria-label="Close">
+                                    <span class="su su-close"></span>
+                                </button>
+                            </h4>
                         </div>
-                        <div class="col-xs-8 no-margin form-input-field no-padding" id="login-disclaimer-container" style="display: none">
-                            <textarea id="login-disclaimer-message" name="login-disclaimer-message" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled")>@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
-                            <span class="validation-errors"></span>
+                        <div class="fluent-item-popup-body col-xs-12">
+                            <div class="col-xs-12 no-padding" id="consent-message">
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-xs-6 text-center blur-whitelable-content" ng-if="loginDisclaimerEnabled">
-                    <div id="image-container" class="center-img disclaimer-content-container">
-                        @Html.CheckBox("content-disclaimer-checkbox", true, new { @class = "material-checkbox" })
-                        @Html.Hidden("content-disclaimer-checkbox")
-                        <label class="content-disclaimer-name"></label>
-                    </div>
-                </div>
-                <div id="consent-content-dialog" style="display: none">
-                    <div class="fluent-popup-header col-xs-12 no-padding">
-                        <h4 class="popup-title">
-                            <span id="info-dialog-header">{{consentTitle}}</span>
-                            <button id="close-info-dialog" type="button" title="@T["Close"]" data-toggle="tool-tip" data-container="body" class="close popup-close" ng-click="closeConsentContentInfo()" aria-label="Close">
-                                <span class="su su-close"></span>
-                            </button>
-                        </h4>
-                    </div>
-                    <div class="fluent-item-popup-body col-xs-12">
-                        <div class="col-xs-12 no-padding" id="consent-message">
+                        <div class="fluent-popup-footer text-center no-padding col-xs-12">
+                            <button class="app-button app-secondary-button app-btn-secondary" ng-click="closeConsentContentInfo()" title="Close">@T["Close"]</button>
                         </div>
-                    </div>
-                    <div class="fluent-popup-footer text-center no-padding col-xs-12">
-                        <button class="app-button app-secondary-button app-btn-secondary" ng-click="closeConsentContentInfo()" title="Close">@T["Close"]</button>
                     </div>
                 </div>
             </div>
-        </div>
-
-            }
             </form>
     </div>
     @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })

@@ -447,6 +447,8 @@ var Designer = {
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
+                    allowResizingText: "Allow Resizing",
+					allowResizingInfo: "Resizing will not take place when the width is set in Column Alignment",
                     allowResizeToFit: "Fit To Content",
                     valuesInRow: "Show Values In Row",
                     horizontalGridLine: "Horizontal Grid Lines",
@@ -495,6 +497,8 @@ var Designer = {
                     rangeSelection: "Range Selection",
                     orientation: "Orientation",
                     range: "Range",
+					chooseDefault: "Select Today as Default",
+					defaultDateInfo: "Selecting this option will automatically set today's date as the default value for the Date Picker widget. This is useful for filtering the dashboard based on the current day. Once enabled, you won't be able to choose another date as the default selection.",
                     limitDates: "Limit Dates",
                     highlightAvailableDates: "Highlight Available Dates",
                     showLatestDate: "Show Latest Date",
@@ -2337,8 +2341,9 @@ var Designer = {
                 dsnNotAvailable: "DSN is not available",
                 dsnDriversNotAvailable: "DSN Drivers are not available",
                 saveExpression: "Expression is not saved. Do you want to save and continue?",
-				unnestExresssion: "UNNEST restricted in the expression",
-				countDistinctExpression: "COUNT(DISTINCT()) restricted in the Expression. Instead, use COUNTD().",
+		unnestExresssion: "UNNEST restricted in the expression",
+		filterWhereExpression: "Filter where the keyword is restricted in the expression",
+		countDistinctExpression: "COUNT(DISTINCT()) restricted in the Expression. Instead, use COUNTD().",
                 invalidExpSyntax: "Incorrect Syntax near Open/Close bracket(s).",
                 saveParameter: "The parameter is not saved. Do you want to save and continue?",
                 InValidParameter: "Data type mismatched. Please select a valid data type parameter.",
@@ -2535,7 +2540,7 @@ var Designer = {
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
 				exportFailedContent: "Your export request has failed.",
-                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed.",
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it is completed.",
                 dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
                 etlDialogHeaderText: "Redirect to Bold ETL",
                 etlContinuebtnText: "Continue with connector"
@@ -4043,6 +4048,7 @@ var Designer = {
                 dateRangeDisplayText: "Date Range",
                 isSinceSeqFilterDisplayText:"SinceSeq Filter",
                 enableIncrementalRefreshDisplayText: "Incremental Refresh",
+				errorOrganizationsValidation: "Error occurred while fetching the Organizations",
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
@@ -5705,6 +5711,7 @@ var Designer = {
                 record: "record",
                 tryConnectButton: "Try Again",
                 schemaLoadErrorMsg: "Error occurred while fetching the schema",
+                selectedAllValuesInComboBox: "All",
                 selectedMultipleValuesInComboBox: "Multiple Values",
                 updateButton: "Update",
                 liveDataPreviewEnableToolTipText: "Enable auto update",
@@ -6140,6 +6147,7 @@ var Designer = {
 				bannerRefreshDisplayText: "Clear cache and refresh",
                 backButtonTooltipText: "Back to designer",
                 mobileViewInfoText: "Info",
+				mobileViewExportStatusText:"Export Status",
                 themeText: "Theme",
                 themePreview: "(preview)",
                 themeLight: "Light",
@@ -6195,8 +6203,10 @@ var Designer = {
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
 				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
 				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets.",
-				pagewiseOption: "Only export current view",
-				pagewiseExportInfo: "If this option is disabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export."
+				pagewiseOption: "Enable pagewise exporting",
+				pagewiseExportInfo: "If this option is enabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export.",
+				exportLimitation: "{0} export has a default limit of {1} rows. This limit can be modified by the administrator through the config settings.",
+				exportListingSuccessMsg: "Export was completed successfully. If the download does not begin, please click the button below to download manually."
             },
             maximize: {
                 maximize: "Maximize",
@@ -6327,7 +6337,8 @@ var Designer = {
 				uploadFailed: "Upload Failed.",
 				uploadCompleted: "Upload Completed",
 				initiatingUpload: "Initiating Upload...",
-                dynamicDialog: "Select your flexible data"
+                dynamicDialog: "Select your flexible data",
+                dsTooltipText:"To enable or disable tooltips for the data source description."
             },
             kpiCardImageSettingsReset: {
                 titleText: "Image Settings Reset",
@@ -6494,8 +6505,8 @@ var Designer = {
 				done: "Done"
             },
             initialFilter: {
-                dialogTitle: "Query Filters",
-                menuItemText: "Configure Query Filters",
+                dialogTitle: "Data Filters",
+                menuItemText: "Configure Data Filters",
                 tableFilters: "List of Table Filters",
                 addBtnText: "Add"
             },
@@ -7765,7 +7776,17 @@ var Designer = {
 				title: "Title",
 				height: "Height",
 				width: "Width"
-			}
+            },
+            exportListing: {
+                title: "Export",
+                clear: "Clear",
+                close: "Close",
+                noItems: "There are no items.",
+                exportMessag: "Export {0} from {1}",
+                exportMessagTooltip: "Export {0} from {1}",
+                remove: "Remove",
+                download: "Download"
+            }
 		}
     }
 }

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 7.8.18
+*  version : 7.9.27
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -20689,7 +20689,7 @@ BoldBIDashboard.ejCandleSeries = ejExtendClass(BoldBIDashboard.EjSeriesRender, {
              visiblePoints = this._calculateVisiblePoints(currentseries).visiblePoints,
              visiblePointslength = visiblePoints.length,
              internalRegion = [],
-			 dataLabel = currentseries.marker,
+			 dataLabel = currentseries.marker.dataLabel,
              legendWidth = legend.border.width,
              translate = [],
              textSize = 0,
@@ -24496,7 +24496,7 @@ var Gradient = function (colors) {
 	        if (series.marker.visible) {
 	            for (c = 0; c < series._visiblePoints.length; c++) {
 	                currentPoint = series._visiblePoints[c];
-					location = currentPoint.location;
+					location = currentPoint.location ? currentPoint.location: currentPoint.symbolLocation;
 	                this.model.markerRegion[this.model.markerRegion.length] = { seriesIndex: d, xPos: location.X + this.canvasX, yPos: location.Y + this.canvasY, width: markerWidth, height: markerHeight };
 	            }
 	        }
@@ -26926,6 +26926,7 @@ var Gradient = function (colors) {
 				else if(data)
 					this._doClick(evt);
 			}
+            evt.preventDefault(); // 883174 - to prevent mousemove event after pointclick in device mode
         }
     },
     _pointerTouchEnd: function (e) {
