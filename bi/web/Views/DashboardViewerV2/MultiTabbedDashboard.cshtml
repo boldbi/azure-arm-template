@@ -37,6 +37,7 @@
     var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
+    var canHideCommentIcon = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -172,6 +173,7 @@
             var isPublic = @Html.Raw(Json.Serialize(isPublic));
             var embedThemeEnabled = @Json.Serialize(embedThemeEnabled);
             var isAuthenticated = @Html.Raw(Json.Serialize(isAuthenticated));
+            var canHideCommentIcon = @Json.Serialize(canHideCommentIcon);
             var applyURLFilterAlone = @Json.Serialize(applyURLFilterAlone);
     </script>
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")

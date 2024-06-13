@@ -37,6 +37,7 @@
     var canCreateCategory = itemAddPermissions[ItemType.Category];
     var hacCreateDataSourcePermission = itemAddPermissions.ContainsKey(ItemType.Datasource) && itemAddPermissions[ItemType.Datasource];
     var itemsPartialScript = string.Empty;
+    var isSharePublishAllowed = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var isOracleDB = _globalAppSettings.DBSupport == DatabaseType.Oracle;
 }
 
@@ -131,6 +132,7 @@
         var isMarkItemsPublic = @Json.Serialize(globalAppSettings.SystemSettings.IsMarkItemsPublic);
         var isAdmin = @Json.Serialize(Convert.ToBoolean(Context.Session.GetString("IsAdmin")));
         var samePagePreview = @Json.Serialize(samePagePreview);
+        var isSharePublishAllowed = @Json.Serialize(isSharePublishAllowed);
         var hideAuthorName = @Json.Serialize(hideAuthorName);
         var hideMultitabText = @Json.Serialize(hideMultitabText);
         var hideSortOption = @Json.Serialize(hideSortOption);
@@ -239,7 +241,7 @@
                                                                     <span class="cat-settings dropdown-toggle no-margin no-padding su su-settings-1" title="@T["Actions"]" data-placement="top">
                                                                     </span>
                                                                     <ul class="dropdown-menu" role="menu">
-                                                                        <li ng-if="categoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission">
+                                                                        <li ng-if="!isSharePublishAllowed && (categoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
                                                                             <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission()">
                                                                                 <i class="su su-manage-permission"></i>
                                                                                 <span>@T["Sharing Permissions"]</span>
@@ -407,7 +409,7 @@
                                                                 <span class="dropdown-toggle no-margin no-padding su su-settings-1" title="@T["Actions"]" data-placement="top" data-toggle="dropdown">
                                                                 </span>
                                                                 <ul class="dropdown-menu" role="menu">
-                                                                    <li ng-if="categoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission">
+                                                                    <li ng-if="!isSharePublishAllowed && (categoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
                                                                         <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission()">
                                                                             <i class="su su-manage-permission"></i>
                                                                             <span>@T["Sharing Permissions"]</span>
@@ -702,13 +704,13 @@
                                                                         <span>@T["Edit"]</span>
                                                                     </span>
                                                                 </li>
-                                                                <li ng-if="(dashboardItem.CreatedById == currentUserId || isAdmin || hasDashboardSharePermission) && !dashboardItem.IsPublic" ng-hide="schemesDetails != null && !schemesDetails.MakePublic || activeMenu === @((int)DisplayCategory.UsageAnalytics)">
+                                                                <li ng-if="(dashboardItem.CreatedById == currentUserId || isAdmin || hasDashboardSharePermission) && !dashboardItem.IsPublic" ng-hide="isSharePublishAllowed || (schemesDetails != null && !schemesDetails.MakePublic || activeMenu === @((int)DisplayCategory.UsageAnalytics))">
                                                                     <span title="" class="make-public option-click" ng-click="makePublic()">
                                                                         <i class="su su-public"></i>
                                                                         <span>@T["Make Public"]</span>
                                                                     </span>
                                                                 </li>
-                                                                <li ng-if="(dashboardItem.CreatedById == currentUserId || isAdmin || hasDashboardSharePermission) && dashboardItem.IsPublic" ng-hide="schemesDetails != null && !schemesDetails.MakePrivate">
+                                                                <li ng-if="(dashboardItem.CreatedById == currentUserId || isAdmin || hasDashboardSharePermission) && dashboardItem.IsPublic" ng-hide="isSharePublishAllowed || (schemesDetails != null && !schemesDetails.MakePrivate)">
                                                                     <span title="" class="remove-public option-click" ng-click="makePrivate()">
                                                                         <i class="su su-remove-public"><span class="su-remove-public path1"></span><span class="su-remove-public path2"></span><span class="su-remove-public path3"></span></i>
                                                                         <span>@T["Make Private"]</span>
@@ -739,7 +741,7 @@
                                                                         </li>
                                                                     </ul>
                                                                 </li>
-                                                                <li ng-if="!isTablet && !dashboardItem.IsMultiDashboard" ng-hide="(isUserBasedMenu  && (!hasScheduleCreatePermission && !scheduleItemExist )) || (schemesDetails != null && !schemesDetails.ViewSchedules) || activeMenu === @((int)DisplayCategory.UsageAnalytics)">
+                                                                <li ng-if="!isTablet && !dashboardItem.IsMultiDashboard" ng-hide="(isSharePublishAllowed || (isUserBasedMenu  && (!hasScheduleCreatePermission && !scheduleItemExist )) || (schemesDetails != null && !schemesDetails.ViewSchedules) || activeMenu === @((int)DisplayCategory.UsageAnalytics))">
                                                                     <span class="view-schedule option-click" ng-click="viewSchedules()">
                                                                         <i class="su su-nav-schedule"></i>
                                                                         <span>@T["View Schedules"]</span>
@@ -783,7 +785,7 @@
                                                                         <span>@T["Clone"]</span>
                                                                     </span>
                                                                 </li>
-                                                                <li ng-if="(dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="schemesDetails != null && !schemesDetails.Publish || activeMenu === @((int)DisplayCategory.UsageAnalytics)">
+                                                                <li ng-if="(dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="isSharePublishAllowed || (schemesDetails != null && !schemesDetails.Publish || activeMenu === @((int)DisplayCategory.UsageAnalytics))">
                                                                     <span title="" class="option-click" data-action="Publish" ng-click="getPublishSiteDetailDialog($event)">
                                                                         <i class="su su-publish"></i>
                                                                         <span>@T["Publish"]</span>
@@ -830,7 +832,7 @@
                                                                 </li>
                                                             </ul>
                                                         </div>
-                                                        <div class="dashboard-share ng-scope" ng-if="(dashboardItem.CreatedById==currentUserId || hasDashboardSharePermission) && !isTablet && !samePagePreview" ng-hide="schemesDetails != null && !schemesDetails.Share || activeMenu === 12" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
+                                                        <div class="dashboard-share ng-scope" ng-if="(dashboardItem.CreatedById==currentUserId || hasDashboardSharePermission) && !isTablet && !samePagePreview" ng-hide="isSharePublishAllowed || (schemesDetails != null && !schemesDetails.Share || activeMenu === 12)" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
                                                             <span class="item-permissions primary-menu no-margin" title="" ng-click="shareDashboardPermission()">
                                                                 <i class="su su-share"></i>
                                                             </span>

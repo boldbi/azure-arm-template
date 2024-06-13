@@ -8,6 +8,7 @@
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
     var pageHeader = T["PUBLISHED RESOURCES"];
     var pageDescription = T["You can manage the resources published to other sites online and request to download them for offline migration."];
+    var canHidePublishTab = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
 }
 @section MainSection{
     <environment include="Development,CloudDevelopment">
@@ -31,13 +32,16 @@
 
     @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @pageHeader }, { "PageDescription", @pageDescription } })
     <div class="bi-page-header col-xs-12 top-nav-btn-secton top-nav-search-secton">
-        <div id="publish-items-search-container" class="col-xs-12 no-padding no-margin">
-            <div id="search-area" class="col-xs-4 pull-left">
-                <input type="text" class="pull-left" id="search-published-items" placeholder="@T["Search resources"]" />
-                <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
-                <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+        @if (!canHidePublishTab)
+        {
+            <div id="publish-items-search-container" class="col-xs-12 no-padding no-margin">
+                <div id="search-area" class="col-xs-4 pull-left">
+                    <input type="text" class="pull-left" id="search-published-items" placeholder="@T["Search resources"]" />
+                    <span class="su su-inner-close close-icon pull-left" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-user pull-left" title="@T["Search"]"></span>
+                </div>
             </div>
-        </div>
+        }
         <div id="download-items-search-container" class="col-xs-12 no-padding no-margin">
             <div id="search-area" class="col-xs-4 pull-left">
                 <input type="text" class="pull-left" id="search-downloaded-items" placeholder="@T["Search resources"]" />
@@ -47,21 +51,26 @@
         </div>
     </div>
 
-    <div class="col-xs-12 no-padding bi-page-nav-bar">
-        <ul id="migration-tab-nav" class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="@isPublishedItemsTab">
-                <a href="#online-publish" id="online-publish-tab" aria-controls="online-publish-tab" role="tab" data-toggle="tab">@T["Published Online "]</a>
-            </li>
-            <li role="presentation" class="@isDownloadItemsTab">
-                <a href="#offline-files" id="offline-files-tab" aria-controls="offline-files-tab" role="tab" data-toggle="tab">@T["Offline Files"]</a>
-            </li>
-        </ul>
-    </div>
+    @if (!canHidePublishTab)
+    {
+        <div class="col-xs-12 no-padding bi-page-nav-bar">
+            <ul id="migration-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isPublishedItemsTab">
+                    <a href="#online-publish" id="online-publish-tab" aria-controls="online-publish-tab" role="tab" data-toggle="tab">@T["Published Online "]</a>
+                </li>
+                <li role="presentation" class="@isDownloadItemsTab">
+                    <a href="#offline-files" id="offline-files-tab" aria-controls="offline-files-tab" role="tab" data-toggle="tab">@T["Offline Files"]</a>
+                </li>
+            </ul>
+        </div>
+    }
 
     <div id="base-container" class="col-xs-12 bi-page-container grid-page-container bi-page-container-with-tab">
         <div class="bi-page-content col-md-12 no-padding">
             <div class="tab-content col-xs-12 no-padding" id="published-resources">
-                <div role="tabpanel" id="online-publish" class="tab-pane list col-xs-12 bi-page-body @isPublishedItemsTab">
+                @if (!canHidePublishTab)
+                {
+                    <div role="tabpanel" id="online-publish" class="tab-pane list col-xs-12 bi-page-body @isPublishedItemsTab">
                     @if (ViewBag.IsShowSyncIgnoredWarning)
                     {
                         <div class="col-xs-9 site-deleted-warning">
@@ -212,6 +221,7 @@
                         </div>
                     </div>
                 </div>
+                }
                 <div role="tabpanel" class="tab-pane list col-xs-12 bi-page-body @isDownloadItemsTab" id="offline-files">
                     @await Html.PartialAsync("_DownloadedItems")
                 </div>
