@@ -251,6 +251,8 @@ var Designer = {
                 widgetName: "Name",
                 subHeaderText: "Subtitle",
                 descriptionText: "Description",
+				widgetTypeText: "Widget Type",
+				uniqueNameText: "Unique Name",
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
                 exportName: "Export Settings",
@@ -416,7 +418,8 @@ var Designer = {
 						autoPadding: "Auto Padding",
 						paddingText: "Padding"
 					},
-					showShadowText: "Show Shadow"
+					showShadowText: "Show Shadow",
+					enableWidgetTransparency: "Enable Widget Transparency"
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -567,7 +570,8 @@ var Designer = {
 					activeTabText: "Active  Tab",
                     apiType:"API Type",
                     listBoxShowAll:"Show All",
-                    tabLoaderText: "Enable Tab loader"
+                    tabLoaderText: "Enable Tab loader",
+                    mapValueType: "Value Type"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -678,7 +682,7 @@ var Designer = {
                 },
                 seriesPaletteSettings: {
                     useDefaultPalette: "Use Default Palette",
-                    advancedSetting: "Advanced Setting",
+                    advancedSetting: "Advanced Settings",
 					colorMappingTypeText: "Color Mapping Type"
                 },
 				kpiBasicSettings: {
@@ -707,7 +711,7 @@ var Designer = {
                     colorSettings: {
                         valueLabelText: "Value",
                         barlabelText: "Bar",
-                        advancedSettingText: "Advanced Setting"
+                        advancedSettingText: "Advanced Settings"
                     }
                 },
                 sparkLineSettings: {
@@ -910,7 +914,9 @@ var Designer = {
                     showDefaultIcon: "Show Default Image",
                     text: "Text",
                     textColor: "Text Color",
-                    transparency: "Transparency"
+                    transparency: "Transparency",
+					showNoDataHeader: "Show Header",
+					showHeaderInfo: "This option allows the header to be shown in cases where no data is available for display."
 				},
 				interWidgetLinking:{
 					defaultInterWidgetLinking: "Configure how linking should behave with the tab widget. When default action is configured, the tab will be switched based on the index values in the current widget. This gives you the flexibility to switch between the tabs based on the value selected in the current widget. Custom action allows you to switch to a specific tab index so that any value selected in the current widget will switch the tab to the configured tab."
@@ -1417,8 +1423,8 @@ var Designer = {
 							}
                         ]
                     },
-                    fusebill: {
-                        name: "Fusebill",
+                    staxbill: {
+                        name: "Staxbill",
                         templates: [
                             {
 								projects: {
@@ -2506,6 +2512,7 @@ var Designer = {
                 missedFeaturesErr: "Some features used in the dashboard are currently not supported by the web designer.",
                 serverLoginErr: "ReportServer failed to login with specified credentials.",
                 failedToOpenDashboard: "Dashboard Designer failed to open the dashboard.",
+				invalidWidgetId: "The widget item details not found.",
                 notSupportedDashboard: "This version of Dashboard is not supported by Web Designer.",
                 failedToCreateDataSet: "DashboardDesigner failed to create a shared Data Source.",
                 errorOnSaveDashboard: "An error occured while trying to save the Dashboard.",
@@ -2760,7 +2767,7 @@ var Designer = {
                 queryParameter: "Query Parameter",
                 StoredProcedure: "Stored Procedure Parameter",
                 queryJoiner: "Query Joiner",
-                dashboardDesigner: "Dashboard Designer",
+                dashboardDesigner: "Dashboard",
                 relativeDateOptions: "Add Relative Date Range",
                 loginWindow: "Login Window",
                 dataSourceAdvancePanel: "Data Source AdvancePanel",
@@ -5962,6 +5969,8 @@ var Designer = {
                     runningMinEx: "RUNNINGMIN(aggregate_expression)",
                     runningSumDesc: "Returns Running Sum Values of each Row.",
                     runningSumEx: "RUNNINGSUM(aggregate_expression)",
+					quantileExactDesc: "Exactly computes the quantile of a numeric data sequence.",
+					quantileExactEx: "QUANTILEEXACT(level, expression)"
                 }
             },
             queryJoiner: {
@@ -6080,7 +6089,7 @@ var Designer = {
                 flagText: "Flag",
             },
             advancedColorCustomizationLocale: {
-                advanceSettingsTitle: "Conditional Formatting",
+                advanceSettingsTitle: "Advanced Settings",
                 colorType: "Color Type",
                 basedOn: "Based On",
                 summaryType: "Summary Type",

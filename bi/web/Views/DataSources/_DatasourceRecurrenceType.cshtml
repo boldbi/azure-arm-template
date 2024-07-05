@@ -19,6 +19,7 @@
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/datasourcerecurrencedependency.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerrecurrence.css" />
@@ -40,15 +41,23 @@
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.min.js"></script>
     </environment>
     <script>
+        var getActiveandInactiveUserWebUrl = "@Url.Action("getallactivegroupsandusers", "scheduler")";
         var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceTypeForDatasourceSchedule", "DataSources")";
         var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "Scheduler")";
         var updateScheduleInfoUrl = "@Url.Action("UpdateDataSourceRefreshSettings", "DataSources")";
         var dateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+        var scheduleRecipients = "@Url.Action("RecipientsList", "DataSources")";
+        var getActiveandInactiveUserUrl = { "web": "@Url.Action("getallactiveusers", "scheduler")", "api": "/internal/items/getallactiveusers" };
+        var getActiveInactiveGroupUrl = { "web": "@Url.Action("getallactivegroups", "scheduler")", "api": "/internal/items/getallactivegroups" };
         var timeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
         var isServer = @Json.Serialize(ViewBag.IsServer);
         var actionType = "@ViewBag.ActionType";
         var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
         var editScheduleItem = "@isEdit.ToString().ToLower()" == "true" ? @Html.Raw(Json.Serialize(ViewBag.ScheduleItem)) : "";
+        var userList = @Html.Raw(Json.Serialize(ViewBag.UserList));
+        var groupList = @Html.Raw(Json.Serialize(ViewBag.GroupList));
+        var ExternalRecipient = @Html.Raw(Json.Serialize(ViewBag.ExternalRecipient));
+        var GroupNameList = @Html.Raw(Json.Serialize(ViewBag.GroupName));
         var itemName = "@itemName";
         var createdItemId = "@ViewBag.DatasourceId";
         var isAdmin = @Json.Serialize(isAdmin);
@@ -60,21 +69,23 @@
 </head>
 <body class="recurrence-view">
     <div id="recurrence-module" style="display:none;">
-        <div id="time-intervals-div" class="datasource-dialog-padding">
+        <div class="modal-header no-margin col-sm-12">
             <div id="datasource-header">
-                 <span><i class="su su-nav-schedule"></i></span>
-                        @if (!string.IsNullOrWhiteSpace(itemName))
-                        {
-                            @string.Concat(itemName," — ",T["Refresh Settings"].Value)
-                            <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
-                        }
-                        else
-                        {
-                            <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
-                            @T["Refresh Settings"]    
-                        }   
-           </div>
-            <div id="datasource-description">@T["Choose the recurrence interval to schedule a data refresh."]</div>
+                <span><i class="su su-nav-schedule"></i></span>
+                @if (!string.IsNullOrWhiteSpace(itemName))
+                {
+                    @string.Concat(itemName, " — ", T["Refresh Settings"].Value)
+                    <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
+                }
+                else
+                {
+                    <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
+                    @T["Refresh Settings"]
+                }
+                <div id="datasource-description"></div>
+            </div>
+        </div>
+        <div id="time-intervals-div" class="datasource-dialog-padding">
             <div class="col-sm-12 col-xs-12 no-padding recurrence-field-row">
                 <div class="col-sm-1 col-xs-1 no-padding type-label align-center margin-issue"><label>@T["Type"]</label></div>
                 <div id="recurrence-type-container" class="col-sm-4 col-xs-4 no-margin i-search-fields">
@@ -378,6 +389,17 @@
                         @Html.CheckBox("enable-notification-to-owner", new { @class = "material-checkbox pull-left", @id = "enable-notification-to-owner" })
                         @Html.Label("enable-notification-to-owner", T["Send failure notification to data source owner"].Value)
                     </div>
+                    <div id="enable-checkbox" class="pad-enable">
+                        @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox ", @id = "enable-notification-to-recipient", onchange = "showDialog(this)" })
+                        @Html.Label("enable-notification-to-recipient", T["Send failure notification to other application and external users"].Value)
+                    </div>
+                </div>
+                <div id="show-shared-user-group-container" class="col-sm-12 col-xs-12 no-margin" style="display:none">
+                    <a class="show-shared-user-group-section">
+                        <div class="show-shared-user-group-label">@T["Notification to :"] </div>
+                        <div class="shared-user-group-name-section" style="display: inline;"></div>
+                        <span class="shared-user-group-count"></span>
+                    </a>
                 </div>
                 <div id="note-message" class="col-sm-12 col-xs-12 note no-margin">
                     <b>@T["Note: "]</b>
@@ -393,12 +415,50 @@
                 <input id="schedule-submit" title="@T["Schedule"]" type="button" value="@T["Schedule"]" tabindex="4" class="primary-button app-btn-primary pull-right button-right">
             </div>
         </div>
-        <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.js"></script>
-        </environment>
-        <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.min.js"></script>
-        </environment>        
+        <div class="col-sm-12 col-xs-12 no-padding subscribe-popup-body" id="subscribers-panel" style=" display :none">
+            <div class="col-sm-12 col-xs-12 bottom-margin no-padding">
+                <div id="user-search-container" class="col-sm-4 col-xs-4 bottom-margin no-padding no-margin i-search-fields"
+                     data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? T["You cannot add users to the recipients before configuring the email settings."] : "")">
+                    <div class="users-dropdown">
+                        <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title='@T["Select Users"]' data-hide-disabled="true" multiple="" data-actions-box="true" @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="group-search-container" class="col-sm-4 col-xs-4 bottom-margin no-padding no-margin i-search-fields"
+                     data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? T["You cannot add groups to the recipients before configuring the email settings."] : "")">
+                    <div class="groups-dropdown">
+                        <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Groups"]" data-hide-disabled="true" multiple="" data-actions-box="true" @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
+                        </select>
+                    </div>
+                </div>
+                <form id="email-form" class="col-sm-4 col-xs-4 no-margin">
+                    <div class="inner-addon right-addon has-feedback"
+                         data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? T["You cannot add External User to the recipients before configuring the email settings."] : "")">
+                        <input id="external-email"
+                        @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled='disabled'" : "")
+                               type="text" class="form-control" placeholder="@T["External Recipients (Email address)"]">
+                        <span id="external-submit" class="su-add form-control-feedback" title="@T["Add external recipients"]"></span>
+                    </div>
+                    <span id="external-email-validation" class="alertMessages"></span>
+                </form>
+            </div>
+            <div class="col-xs-12 col-sm-12 no-padding" id="selected-users-container">
+                <div class="col-xs-8 col-sm-8 selected-recipients" id="selected-users"></div>
+                <div id="selected-users-info" class="col-xs-4 col-sm-4 no-margin i-search-fields"></div>
+            </div>
+            <div id="selected-users-validation">@T["Select a user, group, or type an email address in the external recipient to schedule"]</div>
+            <div id="update-container" class="col-sm-12 col-xs-4 no-margin">
+                <input id="update-cancel" title="@T["Cancel"]" type="button" value="@T["Cancel"]" tabindex="5" class="secondary-button app-btn-secondary leftmargin pull-right button-right">
+                <input id="update-submit" title="@T["Update"]" type="button" value="@T["Update"]" tabindex="4" class="primary-button app-btn-primary pull-right button-right">
+            </div>
+        </div>
+     </div>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.min.js"></script>
+    </environment>
 </body>
 </html>
-

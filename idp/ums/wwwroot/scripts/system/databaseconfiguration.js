@@ -1181,6 +1181,10 @@ function onDatbaseChange(args) {
         if (!IsBiPrefixSchema) {
             $(".schema-prefix-hide").removeClass("show").addClass("hide");
         }
+
+        if (IsReportsPrefixSchema && !isBoldBI) {
+            $(".schema-prefix-hide").removeClass("hide").addClass("show");
+        }
     }
 
     addPlacehoder("#system-settings-db-selection-container");
@@ -1336,6 +1340,10 @@ function onDbSelectChange() {
     else {
         if (!IsBiPrefixSchema) {
             $(".schema-prefix-hide").removeClass("show").addClass("hide");
+        }
+
+        if (IsReportsPrefixSchema && !isBoldBI) {
+            $(".schema-prefix-hide").removeClass("hide").addClass("show");
         }
     }
 }

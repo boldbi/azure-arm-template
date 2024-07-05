@@ -176,7 +176,7 @@ $(document).ready(function () {
             type: "POST",
             url: tenantIdentifierValidationUrl,
             async: false,
-            data: { domain: domain, tenantIdentifier: tenantIdentifier, tenantName: tenantName },
+            data: { domain: domain, tenantIdentifier: tenantIdentifier, tenantName: tenantName, tenantType: getDropDownValue("tenant-type") },
             success: function (data) {
                 if (data.Data) {
                     if (data.SiteIdentityError) {

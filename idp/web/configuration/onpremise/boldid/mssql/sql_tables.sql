@@ -304,6 +304,7 @@ CREATE TABLE [BOLDTC_TenantUser] (
 	TenantInfoId uniqueidentifier NOT NULL,
 	IsFavorite bit NOT NULL DEFAULT '0',
 	IsActive bit NOT NULL,
+    LastAccessedDate datetime NULL,
   CONSTRAINT [PK_BOLDTC_TENANTUSER] PRIMARY KEY CLUSTERED
   (
   [Id] ASC

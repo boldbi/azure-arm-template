@@ -1,1 +1,1 @@
-ALTER TABLE [BOLDTC_TenantUser] ADD [IsFavorite] bit Not NULL Default 0;
+ALTER TABLE [BOLDTC_TenantUser] ADD [LastAccessedDate] datetime NULL;

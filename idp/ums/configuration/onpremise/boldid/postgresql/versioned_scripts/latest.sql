@@ -1,1 +1,1 @@
-ALTER TABLE BOLDTC_TenantUser ADD IsFavorite smallint NOT NULL DEFAULT 0;
+ALTER TABLE BOLDTC_TenantUser ADD LastAccessedDate timestamp NULL;

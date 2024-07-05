@@ -92,6 +92,7 @@
         var oAuthCustomMailContent = @Html.Raw(Json.Serialize(oAuthCustomMailContent));
         var IsAuthAddOnEnabled = @Json.Serialize(ViewBag.IsAuthAddOnEnabled);
         var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
+        var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
     </script>
     <script type="text/javascript">
 
@@ -449,6 +450,8 @@
                                                 <input class="form-control" onClick="this.setSelectionRange(0, this.value.length)" id="oauth-callback-link" value="@(_globalAppSettings.SystemSettings.IDPUrl + AuthenticationConfig.OAuthCallabckUrl)" readonly />
                                                 <div class="form-control su su-copy text focus" id="oauth-callback-link-copy" readonly="" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></div>
                                             </div>
+                                            <div class="info-message col-xs-12 no-padding">
+                                            @T["This URI is used to receive the response from the authorization server. When setting up your OAuth 2.0 application, it's essential to register the redirect URI using only lowercase characters."]</div>
                                         </div>
                                         <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory negate="true">
                                             <div class="col-md-12 auth-fields-margin no-padding">
@@ -661,6 +664,18 @@
                                             </div>
                                             <div class="col-md-12 form-fields-top-margin no-padding">
                                                 <div class="col-md-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Response Type"]</label>
+                                                </div>
+                                                <div class="response-type-width no-padding">
+                                                    <select id="response-type-dropdown" class="selectpicker no=padding" data-ng-disabled="!openidIsEnabled">
+                                                        <option class="no-margin-dropdown-ul" value="id_token" selected="@(ViewBag.OpenIDSettings.OIDCAuthSettings.ResponseType  == "id_token")">@T["id_token"]</option>
+                                                        <option class="no-margin-dropdown-ul" value="code" selected="@(ViewBag.OpenIDSettings.OIDCAuthSettings.ResponseType  == "code")">@T["code"]</option>
+                                                    </select>
+                                                </div>
+                                                <div class="info-message col-md-12 no-padding">@T["Select the response type for OpenID authentication. The default type is id_token."] </div>
+                                            </div>
+                                            <div class="col-md-12 form-fields-top-margin no-padding">
+                                                <div class="col-md-12 no-padding">
                                                     <label class="app-textbox-label">@T["Logout Endpoint"]</label>
                                                 </div>
                                                 <div class="col-md-12 no-padding" ng-class="(openidSettingsForm.openidLogoutUrl.$dirty && openidSettingsForm.openidLogoutUrl.$invalid) ? 'has-error' : ''">
@@ -675,6 +690,7 @@
                                                     <input onClick="this.setSelectionRange(0, this.value.length)" id="openid-callback-link" value="@(_globalAppSettings.SystemSettings.IDPUrl + AuthenticationConfig.OidcCallabckUrl)" class="form-control" readonly />
                                                     <div class="form-control su su-copy text focus" id="openid-callback-link-copy" readonly="" data-toggle="tooltip" data-original-title="@T["Click to copy"]"></div>
                                                 </div>
+                                                <div class="info-message col-xs-12 no-padding">@T["This URI is used to receive the response from the authorization server. When setting up your OpenID Connect application, it's essential to register the redirect URI using only lowercase characters."]</div>
                                             </div>
                                             <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory negate="true">
                                                 <div class="col-md-12 auth-fields-margin no-padding">

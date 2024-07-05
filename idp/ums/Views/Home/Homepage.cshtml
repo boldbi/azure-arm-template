@@ -1,4 +1,5 @@
 ﻿@using System.Web;
+@using Microsoft.AspNetCore.Html
 @model List<TenantDetail>
 @{
     Layout = null;
@@ -18,6 +19,8 @@
     var isAllSitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "all-sites") ? "active" : string.Empty;
     var isFavoriteTab = (Context.Request.Query["view"] == "favorites") ? "active" : string.Empty;
     var isMobile = DeviceDetection.IsMobile; 
+    var cardviewCookie= string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
+    var encodedCookieValue = new HtmlString(cardviewCookie);
 }
 
 <html>
@@ -28,39 +31,63 @@
     @await Html.PartialAsync("../Shared/_Favicon")
     @await Html.PartialAsync("../Shared/_FontReference")
     @await Html.PartialAsync("../Shared/_ThemeReference")
-
-   <link rel="stylesheet" href="~/bundles/css/homepage.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/homepage.css")" crossorigin="anonymous" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/bundles/css/homepage.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/homepage.css")" crossorigin="anonymous" asp-append-version="true" />
 </head>
-
 <body>
     <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
       <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
       <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
-       <script nonce="@Context.Items["ScriptNonce"]">
+<script nonce="@Context.Items["ScriptNonce"]">
             var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
             var allsites = @Html.Raw(JsonConvert.SerializeObject(Model));
             var userId = "@userId";
+            var viewCookie="@cardviewCookie";
+            var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
             var TenantFavoriteListurl = "@Url.Action("TenantFavoriteList", "TenantsManagement")";
             var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
             var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
             var isMobile = @isMobile.ToString().ToLower();
+            var theme = "@GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower()";
             var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
             var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
+            var brokenImageForTiles = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorSquareImage)";
        </script>
-        <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-tenant-template">
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-tenant-template">
             ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
                 <span>@AppBranding.Bold.ProductName</span>
             ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
                 <span>@AppBranding.BoldReports.ProductName</span>
             ${/if}
         </script>
-         <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
-            ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
-                 <div class="tenant-name"> ${TenantName}</div> <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
-            ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
-                  <div class="tenant-name"> ${TenantName}</div> <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
+            ${if (UseCustomBranding)}
+            <div class="lazyload img-loader site-logo-container">
+                <img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo" ]">
+                <div class="tenant-name-container">
+                    <div class="tenant-name"> ${TenantName}  </div>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+                    ${/if}
+                </div>
+            </div>
+            ${else}
+            <div class="lazyload img-loader site-logo-container">
+                <img id="icon-logo" class="icon-logo sites-logo"  loading="lazy" src="${SiteUrl}/get-client-logo?logotype=headerlogo&theme=@Html.Raw(GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower())" ]">
+                <div class="tenant-name-container">
+                    <div class="tenant-name"> ${TenantName}  </div>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+                    ${/if}
+                </div>
+             </div>
             ${/if}
+</script>
+        <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-url-template">
+            <a class="grid-content" title="${SiteUrl}"  href="${SiteUrl}" target="_blank">${SiteUrl}</a>
         </script>
        
     <div id="site-down-alert"></div>
@@ -91,7 +118,7 @@
 
     <div id="body-container">
        <div class="admin-home">
-            <span title="@displayName" class=" user-name"> @T["Welcome "]@displayName  </span>
+            <span title="@displayName" class=" user-name"> @string.Format(T["Welcome, {0} "].Value,displayName)  </span>
             <span class="grid-icon su su-wave-emoji wave-icon">
                 <img src="@Url.Content("~/images/wave-icon.svg")" alt="@T["wave Logo"]" class="wave-icon">
             </span>
@@ -102,8 +129,18 @@
                     <a href="#all-sites" id="all-sites-tab" aria-controls="all-sites-tab" role="tab" data-toggle="tab">@T["All Sites"]</a>
                 </li>
                 <li role="presentation" class="@isFavoriteTab">
-                    <a href="#favorites" id="favorite-sites-tab" aria-controls="favorite-sites-log-tab" role="tab" data-toggle="tab">@T["Favorite"]</a>
-                </li> 
+                    <a href="#favorites" id="favorite-sites-tab" aria-controls="favorite-sites-log-tab" role="tab" data-toggle="tab">@T["Favorites"]</a>
+                </li>
+                <li role="presentation" id="card-view" class="pull-right">
+                    <button id="card-view-button" class="btn btn-default" type="button">
+                        <i class="su su-card-view" aria-hidden="true"></i>
+                    </button>
+                </li>
+                <li role="presentation" id="grid-view" class="pull-right">
+                    <button id="grid-view-button" class="btn btn-default" type="button">
+                        <i class="su su-list-view" aria-hidden="true"></i>
+                    </button>
+                </li>
                 <li role="presentation" id="sorting-sites" class="pull-right">
                     <div class="dropdown">
                         <button id="sort-site-button" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -143,36 +180,50 @@
                         </div>
                     </div>
                 </li>
+               
              
                 <li role="presentation" id="search-area-sites" class="pull-right searchAll-sites search-bar">
                     <input type="text" class="pull-right search-text" id="search-tenants-allsites" placeholder="@T["Search sites"]" />
-                    <span class="su su-inner-close close-icon pull-right" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-inner-close close-icon close-allSites pull-right" id="clear-search" title="@T["Clear search"]"></span>
                     <span class="su su-search search-allsites add-class search-icon pull-right" title="@T["Search"]"></span>
                 </li>
+
                 <li role="presentation" id="search-area" class="pull-right searchFavorite-sites search-bar">
-                        <input type="text" class="pull-right search-text" id="search-tenants-favorite" placeholder="@T["Search sites"]" />
-                        <span class="su su-inner-close close-icon close-favorite pull-right" id="clear-search" title="@T["Clear search"]"></span>
-                        <span class="su su-search search-favorite add-class search-icon pull-right" title="@T["Search"]"></span>
-                  </li>
+                    <input type="text" class="pull-right search-text" id="search-tenants-favorite" placeholder="@T["Search sites"]" />
+                    <span class="su su-inner-close close-icon close-favorite pull-right" id="clear-search" title="@T["Clear search"]"></span>
+                    <span class="su su-search search-favorite add-class search-icon pull-right" title="@T["Search"]"></span>
+                </li>
+               
 
             </ul>
         </div>
         <div id="all-sites-container" class="col-md-12 col-lg-12 col-sm-12 admin-page-content-container admin-page-container-with-tab" role="tabpanel" aria-labelledby="all-sites">
             <div class="admin-page-content col-xs-12 no-padding">
                 <div class="tab-content col-xs-12 no-padding">
+                    <div id="card-loading" class="skeleton-wrapper">
+                        <div class="skeleton-card">
+                            <div class="skeleton img"></div>
+                            <div class="skeleton text">
+                                <div class="line"></div>
+                                <div class="line short"></div>
+                                <div class="line"></div>
+                                <div class="line short"></div>
+                            </div>
+                        </div>
+                    </div>
                     @await Html.PartialAsync("_AllSites")
                     @await Html.PartialAsync("_FavoriteSites")
                 </div>
             </div>
-        </div>      
-   </div>   
-   <div id="footer-container" class="displaynone">
-        <div class="copyright-container" style="display:@copyrightClass">
-            <div class="copyright">@(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
         </div>
-        <div class="footer-logo-container" style="display:@poweredbyClass">
-            <div class="powered-by">@T["Powered by"]</div>
-            <img class="footer-logo" src="@Url.Content("~/logos?type=poweredby")" alt="@T["Footer Logo"]">
+        <div id="footer-container" class="displaynone">
+            <div class="copyright-container" style="display:@copyrightClass">
+                <div class="copyright">@(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
+            </div>
+            <div class="footer-logo-container" style="display:@poweredbyClass">
+                <div class="powered-by">@T["Powered by"]</div>
+                <img class="footer-logo" src="@Url.Content("~/logos?type=poweredby")" alt="@T["Footer Logo"]">
+            </div>
         </div>
    </div>
 </body>

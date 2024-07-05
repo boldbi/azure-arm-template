@@ -231,6 +231,10 @@ $(document).ready(function () {
             if (!IsBiPrefixSchema) {
                 $(".schema-prefix-hide").removeClass("show").addClass("hide");
             }
+
+            if (IsReportsPrefixSchema && !isBoldBI) {
+                $(".schema-prefix-hide").removeClass("hide").addClass("show");
+            }
         }
     });
 

@@ -87,7 +87,8 @@ $(document).ready(function () {
     dropDownListInitialization("#user-info-method-type", '');
     groupImportDropDownListInitialization("#group-import-provider-oauth", window.Server.App.LocalizationContent.Provider, "Oauth");
     groupImportDropDownListInitialization("#group-import-provider-openid", window.Server.App.LocalizationContent.Provider, "OpenId");
-
+    dropDownListInitialization("#response-type-dropdown", '');
+    
     if (providerNameCount != 0) {
         document.getElementById("login-provider-type").ej2_instances[0].value = selectedDefaultAuthValue;
         document.getElementById("login-provider-type").ej2_instances[0].text = selectedDefaultAuthText;
@@ -393,6 +394,10 @@ $(document).ready(function () {
             document.getElementById("group-import-provider-" + name).ej2_instances[0].enabled = $("#" + name + "IsEnabled").is(":checked");
             document.getElementById("token-method-type").ej2_instances[0].enabled = $("#" + name + "IsEnabled").is(":checked");
             document.getElementById("user-info-method-type").ej2_instances[0].enabled = $("#" + name + "IsEnabled").is(":checked");
+        }
+
+        if (name === "openid") {
+            document.getElementById("response-type-dropdown").ej2_instances[0].enabled = $("#" + name + "IsEnabled").is(":checked");
         }
 
     };
@@ -760,7 +765,8 @@ $(document).ready(function () {
                         Logo: $("input[name='openidLogo']").val().trim(),
                         LogoutUrl: $("input[name='openidLogoutUrl']").val().trim(),
                         GroupImportSettings: getGroupImportSettings("openid"),
-                        CanCreateAccount: $("#enable-openid-account-creation").is(":checked")
+                        CanCreateAccount: $("#enable-openid-account-creation").is(":checked"),
+                        ResponseType: document.getElementById("response-type-dropdown").ej2_instances[0].value
                     }
                 };
             }

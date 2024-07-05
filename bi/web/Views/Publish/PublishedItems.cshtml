@@ -3,12 +3,12 @@
     ViewBag.Title = T["Published Resources"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
-    var isDownloadItemsTab = (Context.Request.Query["tab"].ToString().ToLower() == "offline-files") ? "active" : string.Empty;
+    var canHidePublishTab = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var isDownloadItemsTab = canHidePublishTab || (Context.Request.Query["tab"].ToString().ToLower() == "offline-files") ? "active" : string.Empty; 
     var isPublishedItemsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "online-publish") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isDownloadItemsTab)) ? "active" : string.Empty;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards);
     var pageHeader = T["PUBLISHED RESOURCES"];
     var pageDescription = T["You can manage the resources published to other sites online and request to download them for offline migration."];
-    var canHidePublishTab = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
 }
 @section MainSection{
     <environment include="Development,CloudDevelopment">

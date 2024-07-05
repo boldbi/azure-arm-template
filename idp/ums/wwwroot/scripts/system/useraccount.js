@@ -161,6 +161,10 @@
                         $(".schema-prefix-hide").removeClass("show").addClass("hide");
                     }
 
+                    if (IsReportsPrefixSchema && !isBoldBI) {
+                        $(".schema-prefix-hide").removeClass("hide").addClass("show");
+                    }
+
                     var obj = document.getElementById("database-type");
                     var itemsList = obj.ej2_instances[0].list.querySelectorAll('.e-list-item');
                     if (isBoldReports && !IsOracleSupportReports) {
