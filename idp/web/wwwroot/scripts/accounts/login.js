@@ -1,4 +1,20 @@
 $(document).ready(function () {
+    if (typeof loginDisclaimer !== 'undefined' && loginDisclaimer != null && loginDisclaimer.IsEnabled == true && loginDisclaimer.IsConsentCheckboxEnabled == true) {
+        $("#login-button").attr("disabled", true);
+        $(".link-button").attr("disabled", true);
+    }
+
+    var showDisclaimerDialog = new ej.popups.Dialog({
+        width: "500px",
+        height: "auto",
+        isModal: true,
+        visible: false,
+        showHeader: false,
+        animationSettings: { effect: 'Zoom' },
+        close: LoginDisclaimerDialogClose
+    });
+    showDisclaimerDialog.appendTo("#login-disclaimer-dialog");
+
     var loginForm = $("#login-form");
     if (loginForm.length) {
         loginForm.on("submit", function (event) {
@@ -98,8 +114,7 @@ $(document).ready(function () {
 
 $(document).on("click", "#login-button-windows", function () {
     showWaitingPopup('body');
-    if (window.location.href.search("authorization") === -1)
-    {
+    if (window.location.href.search("authorization") === -1) {
         var returnUrl = getParameterByName("ReturnUrl");
     }
     else {
@@ -136,12 +151,11 @@ $(document).on("click", "#login-button-windows", function () {
             },
             200: function (result) {
                 hideWaitingPopup('body');
-                if (result.status && result.data)
-                {
+                if (result.status && result.data) {
                     window.location.href = mfaVerificationPageUrl;
                 }
 
-                if (result.status && result.data == "" ) {
+                if (result.status && result.data == "") {
                     if (window.location.href.search("authorization") === -1) {
                         window.location.href = getParameterByName("ReturnUrl");
                     } else {
@@ -295,3 +309,38 @@ function getParameterByName(name) {
     return urlValue;
 }
 
+$("#open-login-disclaimer").click(function () {
+    LoginDisclaimerDialogOpen();
+});
+function LoginDisclaimerDialogOpen() {
+    document.getElementById("login-disclaimer-dialog").ej2_instances[0].show();
+    var contentCheckElement = document.getElementById("content-check");
+    if (contentCheckElement) {
+        contentCheckElement.disabled = true;
+    }
+}
+
+$(document).on("click", "#close-info-dialog, #close-button", function() {
+    LoginDisclaimerDialogClose();
+});
+
+function LoginDisclaimerDialogClose() {
+    document.getElementById("login-disclaimer-dialog").ej2_instances[0].hide();
+    var contentCheckElement = document.getElementById("content-check");
+    if (contentCheckElement) {
+        contentCheckElement.disabled = false;
+    }
+}
+
+$(document).on('change', "#content-check", function () {
+
+    if ($("#content-check").is(":checked")) {
+        LoginDisclaimerDialogOpen();
+        $(".link-button").removeAttr("disabled");
+        $("#login-button").removeAttr("disabled");
+    }
+    else {
+        $(".link-button").attr("disabled", true);
+        $("#login-button").attr("disabled", true);
+    }
+});

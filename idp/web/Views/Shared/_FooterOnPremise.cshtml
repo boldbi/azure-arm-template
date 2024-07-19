@@ -1,4 +1,5 @@
-﻿@using Syncfusion.Server.Base
+﻿@using System.Web;
+@using Syncfusion.Server.Base
 @using Syncfusion.Server.Base.DataClasses
 @{
     var poweredByImageSrc = $"{CloudAppConfig.TenantManagementUrl.TrimEnd('/')}/logos?type=poweredby";
@@ -6,6 +7,7 @@
     var copyrightClass = GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "show" : "hide";
     var separatorparagraphClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion && GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
     var separatorFooterClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion || GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "show" : "hide";
+    var copyrightInformation = HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
 }   
 
 <div id="base-footer-div">
@@ -28,7 +30,7 @@
             <div class="copyright-poweredby">
                 <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 dropup no-padding language-area pull-left no-padding ">
                     <div class="col-xs-12 col-lg-12 no-padding pull-left" id="lang_menu">
-                        <p class="pull-left @copyrightClass" id="copyrightinfo"> @Html.Raw(GlobalAppSettings.SystemSettings.CopyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</p>
+                        <p class="pull-left @copyrightClass" id="copyrightinfo"> @(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</p>
                     </div>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 no-padding pull-right" id="enablefooter">

@@ -4,6 +4,7 @@
     List<SelectListItem> values = ViewBag.EditableFiles;
     var content = ViewBag.FileData;
     bool? isValidFile = ViewBag.ValidFile;
+    bool? isValidSite = ViewBag.IsValidSiteName;
 }
 @section styles{
     <link rel="stylesheet" href="~/bundles/css/additional-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/additional-settings.css")" crossorigin="anonymous" asp-append-version="true" />
@@ -26,15 +27,19 @@
            <script nonce="@Context.Items["ScriptNonce"]">
             var isRequestSuccess = "@updateConfigValues.Value";
             var isValidFile = "@isValidFile";
+            var isValidSiteName = "@isValidSite"
             var selectedPath = "@ViewBag.FilePath";
             $(document).ready(function () {
 
-                if (isRequestSuccess.toLowerCase() === "true" && isValidFile.toLowerCase() === "true") {
+                if (isRequestSuccess.toLowerCase() === "true" && isValidFile.toLowerCase() === "true" && isValidSiteName.toLowerCase() === "true") {
                     SuccessAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.ConfigurationUpdated, 7000);
                 }
                 else if (isValidFile.toLowerCase() === "false")
                 {
                     WarningAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.InvalidConfiguration, null, 7000);
+                }
+                else if (isValidSiteName.toLowerCase() === "false") {
+                    WarningAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.InvalidConfigSiteName, null, 7000);
                 }
                 else
                 {

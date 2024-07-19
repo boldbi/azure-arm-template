@@ -660,7 +660,7 @@ function IsValidUsername(username) {
 }
 
 function IsValidUsernameLength(username) {
-    var filter = /^.{3,254}$/;
+    var filter = /^.{2,254}$/;
     if (filter.test(username)) {
         return true;
     }

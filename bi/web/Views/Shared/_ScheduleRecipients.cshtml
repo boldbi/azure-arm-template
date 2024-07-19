@@ -3,8 +3,9 @@
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardExportScheduleFailure);
-    var enableWidgetScheduleExport = await _featureManager.IsEnabledAsync(FeatureManagement.EnableWidgetScheduleSupport);
+    var disableWidgetScheduleExport = ViewBag.DisableWidgetScheduleExport != null ? ViewBag.DisableWidgetScheduleExport : false;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -14,15 +15,20 @@
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
     <script>
-        var getActiveandInactiveUserUrl = "@Url.Action("getallactivegroupsandusers", "accounts")";
+        var getActiveandInactiveUserWebUrl = "@Url.Action("getallactivegroupsandusers", "scheduler")";
+        var getActiveandInactiveUserUrl = { "web": "@Url.Action("getallactiveusers", "scheduler")", "api": "/internal/items/getallactiveusers" };
+        var getActiveInactiveGroupUrl = { "web": "@Url.Action("getallactivegroups","scheduler")", "api": "/internal/items/getallactivegroups" };
         var updateScheduleUrl = "@Url.Action("UpdateSchedule", "scheduler")";
         var getWebhooksUrl = "@Url.Action("GetWebhooks", "scheduler")";
+        var getWebhookApi = { "api": "/internal/schedules/get-webhooks" };
+        var getWebhookDetailsByIdUrlApi = { "api": "/internal/schedules/get-webhooks-details" };
         var getWebhookDetailsByIdUrl = "@Url.Action("GetWebhookDetailsById", "scheduler")";
-        var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
+        var addScheduleUrl = { "web": "@Url.Action("AddSchedule", "scheduler")", "api": "/internal/dashboards/schedules" };
         var canExport = @Html.Raw(Json.Serialize(ViewBag.CanExport));
         var webhookevent = @Html.Raw(Json.Serialize(ViewBag.webhookEvent));
-        var validateFTPCredentials = "@Url.Action("ValidateFTPCredentials", "scheduler")";
-        var enableWidgetScheduleExport = @Json.Serialize(enableWidgetScheduleExport);
+        var validateFTPCredentials = { "web": "@Url.Action("ValidateFTPCredentials", "scheduler")", "api": "/internal/schedules/check-ftp-exist" };
+        var disableWidgetScheduleExport = @Json.Serialize(disableWidgetScheduleExport);
+        var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
     </script>
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerrecipients.js"></script>
@@ -35,18 +41,22 @@
     <div class="col-sm-12 col-xs-12 no-padding subscribe-popup-body" id="subscribers-panel">
 
         <div class="col-sm-12 col-xs-12 bottom-margin no-padding">
-            <div id="user-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields"
+            <div id="user-search-container" class="col-sm-4 col-xs-4 bottom-margin no-padding no-margin i-search-fields"
                  data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? T["You cannot add users to the recipients before configuring the email settings."] : "")">
-                <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Users"]" data-hide-disabled="true" multiple="" data-actions-box="true" @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
-                </select>
+                <div class="users-dropdown">
+                    <select id="user-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title='@T["Select Users"]' data-hide-disabled="true" multiple="" data-actions-box="true" @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
+                    </select>
+                </div>
             </div>
 
-            <div id="group-search-container" class="col-sm-4 col-xs-4 no-padding no-margin i-search-fields"
+            <div id="group-search-container" class="col-sm-4 col-xs-4 bottom-margin no-padding no-margin i-search-fields"
                  data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? T["You cannot add groups to the recipients before configuring the email settings."] : "")">
-                <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Groups"]" data-hide-disabled="true" multiple="" data-actions-box="true"
-                @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
-                </select>
+                <div class="groups-dropdown">
+                    <select id="group-search" class="selectpicker" data-size="5" data-live-search="true" data-none-results-text="@T["No results match"]" data-live-search-placeholder="@T["Search"]" title="@T["Select Groups"]" data-hide-disabled="true" multiple="" data-actions-box="true" @(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted ? "disabled" : "")>
+                   </select>
+                </div>
             </div>
+
             <form id="email-form" class="col-sm-4 col-xs-4 no-margin">
                 <div class="inner-addon right-addon has-feedback"
                      data-toggle="tooltip" data-placement="top" title="@(string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.MailSettings.MailSettingsAddress) && isSelfHosted  ? T["You cannot add External User to the recipients before configuring the email settings."] : "")">

@@ -117,7 +117,12 @@
                                 }
 
                                 showOrHideGridPager("#scheduleGrid");
-                                $("#scheduleGrid").ejWaitingPopup("hide");
+                                if (typeof (BoldBIDashboard) != "undefined") {
+                                    $("#scheduleGrid").BoldBIDashboardWaitingPopup("hide");
+                                }
+                                else{
+                                    $("#scheduleGrid").ejWaitingPopup("hide");
+                                }
                             },
                             rowDataBound: function() {
                                 var height = $(".e-gridcontent").height();
@@ -260,17 +265,33 @@
                 </div>
             </script>
             <script type="text/x-jsrender" id="dashboard-template">
-                <div class="item-dashboard grid-content" title="{{:ItemName}}" data-toggle="tooltip" data-placement="top">
-                    {{if IsScheduledItemDeleted || (IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
-                    <span class="schedule-deleted-name">{{:DeletedItemName}}</span><span class="badge badge-secondary1 badge-secondary2">@T["Deleted"]</span>
+                <div class="item-dashboard grid-content item-name-dashboard"data-toggle="tooltip"data-placement="top"data-container="body"
+                title="{{if IsScheduledItemDeleted}}@Html.Raw($"<span class='label'><span class='title-label'>{T["Scheduled Dashboard is "].Value}</span><span>&quot;Deleted&quot;</span></span>"){{else}}<span class='dashboard-list-tooltip'><span class='tooltip-row'><span><span class='tooltip-label'><i class='su su-nav-dashboard'></i> @T["Dashboard name"].Value: </span><span class='tooltip-description'>{{:ItemName}}</span></span>{{if ViewItemName}}{{if IsViewDeleted}}<span class='tooltip-row'><span class='tooltip-label'><i class='su su-view'></i> @T["View name"].Value: </span><span class='tooltip-description'>{{:ViewItemName}}</span></span>{{else}}<span class='tooltip-row'><span class='tooltip-label'><i class='su su-view'></i> @T["View name"].Value: </span><span class='tooltip-description'>{{:ViewItemName}}</span></span>{{/if}}{{/if}}{{if WidgetItemName}}{{if IsWidgetDeleted}}<span class='tooltip-row'><span class='tooltip-label'><i class='su su-widgets'></i> @T["Widget name"].Value: </span><span class='tooltip-description'>{{:WidgetItemName}}</span></span>{{else}}<span class='tooltip-row'><span class='tooltip-label'><i class='su su-widgets'></i> @T["Widget name"].Value: </span><span class='tooltip-description'>{{:WidgetItemName}}</span></span>{{/if}}{{/if}}{{if IsDataChanges}}<span class='tooltip-row'><span class='tooltip-label'><i class='su su-data-alert'></i> @T["Data alert"].Value: </span><span class='tooltip-description'>ON</span></span>{{else}}<span class='tooltip-row'><span class='tooltip-label'><i class='su su-data-alert'></i> @T["Data alert"].Value: </span><span class='tooltip-description'>OFF</span></span>{{/if}}</span>{{/if}}"
+                   data-html="true">
+                    {{if IsScheduledItemDeleted}}
+                        <span><a class="grid-content item-name-isdeleted" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:DeletedItemName}}</a></span>
                     {{else MultiDashboardName}}
-                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                        <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                    {{else DashboardWidgetId != "@Guid.Empty" && DashboardViewId != "@Guid.Empty"}}
+                        <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}&viewid={{:DashboardViewId}}" target="_blank">{{:ItemName}}</a></span>
                     {{else DashboardWidgetId != "@Guid.Empty"}}
-                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}" target="_blank">{{:ItemName}}</a></span>
+                        <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}" target="_blank">{{:ItemName}}</a></span>
+                    {{else DashboardViewId != "@Guid.Empty"}}
+                        <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?viewid={{:DashboardViewId}}" target="_blank">{{:ItemName}}</a></span>
                     {{else}}
-                    <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
+                        <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
                     {{/if}}
                 </div>
+                {{if IsViewDeleted || IsScheduledItemDeleted}}
+                    <span class="su su-view views is-view-deleted disabled-icon-color"></span>
+                {{else DashboardViewId != "@Guid.Empty"}}
+                    <span class="su su-view views is-view-active"></span>
+                {{/if}}
+                {{if IsWidgetDeleted || IsScheduledItemDeleted}}
+                    <i class="su su-widgets widgets widget-icon-isdeleted disabled-icon-color"><span class="widget-name-isdeleted">{{:DeletedWidgetName}}</span></i>
+                {{else DashboardWidgetId != "@Guid.Empty"}}
+                    <i class="su su-widgets widgets"> <span class="widget-name-isactive">{{:WidgetItemName}}</span></i>
+                {{/if}}
             </script>
             <script type="text/x-jsrender" id="status-template">
                 {{if Status=="Active"}}
@@ -286,7 +307,10 @@
             </script>
             <script type="text/x-jsrender" id="schedule-template">
                 <div class="item-name grid-content">
-                    <span title="{{:Name}}" data-toggle="tooltip" data-placement="top">{{:Name}}</span>
+                    <span class="data-alert-name" title="{{:Name}}" data-toggle="tooltip" data-placement="top">{{:Name}}</span>
+                    {{if IsDataChanges}}
+                    <span class="su su-data-alert alerts"></span>
+                  {{/if}}
                 </div>
             </script>
             <script type="text/x-jsrender" id="item-name-header">
@@ -304,7 +328,7 @@
                         <span class="su su-options"> </span>
                     </span>
                     <ul class="dropdown-menu" role="menu">
-                        {{if !IsScheduledItemDeleted  && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                        {{if !IsScheduledItemDeleted  && !(IsWidgetDeleted && DashboardWidgetId != "@Guid.Empty") && !(IsViewDeleted && DashboardViewId != "@Guid.Empty")}}
                         <li class="menu-group @(schemes != null && !schemes.RunNow ? "hide" : string.Empty)">
                             <a href="javascript:void(0);" title="@T["Run now"]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
                                 <i class="su su-play" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
@@ -329,7 +353,7 @@
                         {{if CanWrite}}
                         <li class="divider @(schemes != null && !schemes.Info ? "hide" : string.Empty)"></li>
                         {{if Status=="Active"}}
-                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != "@Guid.Empty") && !(IsViewDeleted && DashboardViewId != "@Guid.Empty")}}
                         <li class="menu-group @(schemes != null && !schemes.Disable ? "hide" : string.Empty)">
                             <a href="javascript:void(0);" title="@T["Disable"]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
                                 <i class="su su-disable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
@@ -339,7 +363,7 @@
                         {{/if}}
 
                         {{else Status=="Inactive"}}
-                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != @Guid.Empty)}}
+                        {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != "@Guid.Empty") && !(IsViewDeleted && DashboardViewId != "@Guid.Empty")}}
                         <li class="menu-group @(schemes != null && !schemes.Enable ? "hide" : string.Empty)">
                             <a href="javascript:void(0);" title="@T["Enable"]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
                                 <i class="su su-enable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>

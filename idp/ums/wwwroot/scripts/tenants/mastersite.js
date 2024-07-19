@@ -106,11 +106,11 @@ function onCloseMasterDialog() {
 }
 
 function onMasterDialog() {
-    $(".make-master-checkbox").attr("checked", true);
+    $(".make-master-checkbox").prop("checked", true);
     onCloseMasterDialog();
 }
 
 function onMasterDialogClose() {
-    $(".make-master-checkbox").attr("checked", false);
+    $(".make-master-checkbox").prop("checked", false);
     onCloseMasterDialog();
 }

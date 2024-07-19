@@ -234,6 +234,7 @@ CREATE TABLE [BOLDBI_ScheduleDetail](
 	[ScheduleId] [uniqueidentifier] NOT NULL UNIQUE,
 	[ItemId] [uniqueidentifier] NOT NULL,
 	[DashboardWidgetId] [uniqueidentifier] NULL,
+	[DashboardViewId] [uniqueidentifier] NULL,
 	[Name] [nvarchar](150) NOT NULL,
 	[RecurrenceTypeId] [int] NULL,
 	[RecurrenceInfo] [nvarchar](4000) NULL,
@@ -968,7 +969,7 @@ CREATE TABLE [BoldBI_DSMetrics]  (
    TableDetails VARCHAR(255),
    RowsUpdated INTEGER,
    TotalRows INTEGER,
-   CustomQuery VARCHAR(700),
+   CustomQuery VARCHAR(max),
    SourceConnectionDetails VARCHAR(255),
    IncrementalRefreshDetails VARCHAR(255),
    ExtractType VARCHAR(255),
@@ -1512,6 +1513,10 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'IsEnablePoweredBySyncfusion',N'SiteSettings.ShowPoweredBySyncfusion',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'CopyrightInformation',N'SiteSettings.CopyrightInformation',GETDATE(),1)
+;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'ResourceType',N'SiteSettings.ResourceType',GETDATE(),1)
+;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'ResourceOrder',N'SiteSettings.ResourceOrder',GETDATE(),1)
 ;
 
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForDashboardOwner',N'UserNotificationSettings.UserSystemNotificationSettings.EnableNotificationForDashboardOwner',GETDATE(),1)

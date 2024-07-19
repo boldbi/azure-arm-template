@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS BOLDTC_TenantSettings (
 	ModifiedDate timestamp NOT NULL,
 	IsActive smallint NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTSETTINGS PRIMARY KEY (Id),
-  CONSTRAINT  BOLDTC_TenantSettings_fk0  FOREIGN KEY ( TenantInfoId ) REFERENCES  BOLDTC_TenantInfo ( Id )
+  CONSTRAINT BOLDTC_TenantSettings_fk0  FOREIGN KEY ( TenantInfoId ) REFERENCES  BOLDTC_TenantInfo ( Id )
 )
 ;
 

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 7.8.6
+*  version : 7.11.9
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -20689,7 +20689,7 @@ BoldBIDashboard.ejCandleSeries = ejExtendClass(BoldBIDashboard.EjSeriesRender, {
              visiblePoints = this._calculateVisiblePoints(currentseries).visiblePoints,
              visiblePointslength = visiblePoints.length,
              internalRegion = [],
-			 dataLabel = currentseries.marker,
+			 dataLabel = currentseries.marker.dataLabel,
              legendWidth = legend.border.width,
              translate = [],
              textSize = 0,
@@ -21835,7 +21835,6 @@ var Gradient = function (colors) {
         var params = {};
 		params.axes = {};		
 		this._drawBackInterior();
-        this.model.marker = BoldBIDashboard.util.isNullOrUndefined(this.model.marker) ? [] : this.model.marker;
         this.model.chartRegions = [];         
 		this.model.outsideDataRegionPoints = [];
 		this.model.regionCount = null;
@@ -21870,17 +21869,6 @@ var Gradient = function (colors) {
             series = this.model.series[i];
             seriesType = series.type.toLowerCase();
             series._isTransposed = (seriesType.indexOf("bar") == -1) ? series.isTransposed : !series.isTransposed;
-            // 421892 - Fix for displaying tooltip without marker			
-			this.model.marker.push(bbdesigner$.extend(true, {}, series.marker));
-			if(!series.marker.visible){
-				series.marker.visible = true;
-				series.marker.fill = "transparent";
-				series.marker.border.color = "transparent";
-			}
-			else{
-				series.marker.fill = this.model.marker[i].fill;
-				series.marker.border.color = this.model.marker[i].border.color;
-			}
             trendlines = series.trendlines;
 			len = trendlines.length;
 			for(var j = 0; j< len ;j++){
@@ -24508,7 +24496,7 @@ var Gradient = function (colors) {
 	        if (series.marker.visible) {
 	            for (c = 0; c < series._visiblePoints.length; c++) {
 	                currentPoint = series._visiblePoints[c];
-					location = currentPoint.location;
+					location = currentPoint.location ? currentPoint.location: currentPoint.symbolLocation;
 	                this.model.markerRegion[this.model.markerRegion.length] = { seriesIndex: d, xPos: location.X + this.canvasX, yPos: location.Y + this.canvasY, width: markerWidth, height: markerHeight };
 	            }
 	        }
@@ -26938,6 +26926,7 @@ var Gradient = function (colors) {
 				else if(data)
 					this._doClick(evt);
 			}
+            evt.preventDefault(); // 883174 - to prevent mousemove event after pointclick in device mode
         }
     },
     _pointerTouchEnd: function (e) {
@@ -27721,13 +27710,14 @@ var Gradient = function (colors) {
                 pointIndex = i;
                 closestX = null;
                 closestY = null;
-                if (!isCanvas && evt && (this.svgObject.id + "_Series" + series.seriesIndex + "_Point" + i + '_symbol') == evt.target.id) {
-
-                    var markerSize = document.getElementById(evt.target.id).getBoundingClientRect();
+                if (!isCanvas && evt) {
+                    if ((this.svgObject.id + "_Series" + series.seriesIndex + "_Point" + i + '_symbol') == evt.target.id) {
+                        var markerSize = document.getElementById(evt.target.id).getBoundingClientRect();
                         chartPoint.height = markerSize.height;
                         chartPoint.width = markerSize.width;
                         closestPoint = chartPoint;
                         ptIndex = i;
+                    }
                 }
                 else if (location) {
                     if (x > location.X + valX - (size.width / 2) && x < location.X + valX + (size.width / 2)) {
@@ -29724,7 +29714,7 @@ var Gradient = function (colors) {
                     if (closestXyPoint.point) {
                         location = BoldBIDashboard.EjSvgRender.utils._getPoint(closestXyPoint.point, chartSeries);
                         var commonPointEventArgs = bbdesigner$.extend({}, BoldBIDashboard.EjSvgRender.commonChartEventArgs);
-                        commonPointEventArgs.data = { location: { x: this.mousemoveX, y: this.mousemoveY }, region: { SeriesIndex: i, Region: { PointIndex: closestXyPoint.index } } };
+                        commonPointEventArgs.data = { location: { x: this.mousemoveX, y: this.mousemoveX }, region: { SeriesIndex: i, Region: { PointIndex: closestXyPoint.index } } };
                         chart._trigger("pointRegionMouseMove", commonPointEventArgs);
                     }
                     var pointData = this.model.prevPoint;
@@ -33057,17 +33047,18 @@ var Gradient = function (colors) {
             chartModel = chart.model,
             legend = chartModel.legend,
             word, textCollection = [], currentWidth,nextWidth,
-            text = data.legendItem.Text.toString(),
-            legendTextCollection = text.split(' '),
+            legendMode = legend.mode.toLowerCase(),		   
+			text = data.legendItem.Text.toString(),
+            legendTextCollection = typeof data.legendItem.Text == "object" ? data.legendItem.Text : text.split(' '),
             textMaxWidth=textmaxwidth,
             font=data.legendItem.LegendStyle.Font,
             textOverflow=legend.textOverflow.toLowerCase(),
             legendTextLength = legendTextCollection.length;
       
         for (var i = 0; i < legendTextLength; i++) {
-            word = legendTextCollection[i];
+            word = legendTextCollection[i].toString();
             currentWidth = BoldBIDashboard.EjSvgRender.utils._measureText(word, null, font).width;
-            if (currentWidth <= textMaxWidth) {
+            if (legendMode != "range" && currentWidth <= textMaxWidth) {
                 while (i < legendTextLength) {
                     currentWidth = BoldBIDashboard.EjSvgRender.utils._measureText(word, null, font).width;
                     nextWidth = (legendTextCollection[i + 1]) ? BoldBIDashboard.EjSvgRender.utils._measureText(legendTextCollection[i + 1], null, font).width : 0;
@@ -33082,7 +33073,7 @@ var Gradient = function (colors) {
                 textCollection.push(word);
             }
             else{
-                if (textOverflow == "wrapandtrim") {
+                if (legendMode != "range" && textOverflow == "wrapandtrim") {
                     word = BoldBIDashboard.EjSvgRender.utils._trimText(word, textMaxWidth, font);
                     textCollection.push(word);
                     this.model._legendMaxWidth = textMaxWidth;
@@ -33451,8 +33442,8 @@ var Gradient = function (colors) {
                 currentLegend = legendSeries[j];
                 shapeWidth = currentLegend.CommonEventArgs.data.style.ShapeSize.width;
                 legendsize = chart._getLegendSize(currentLegend);
-                legendItemWidth = max(chartModel._legendMaxWidth > 0 ? (chartModel._legendMaxWidth + itemPadding + shapeWidth) : legendsize.Width, legendItemWidth);
-                legendItemHeight = max((textOverflow == "wrap" || textOverflow == "wrapandtrim") ? legendsize.Height * chartModel._legendMaxHeight : legendsize.Height, legendItemHeight);
+                legendItemWidth = max(chartModel._legendMaxWidth > 0 && legendMode != "range" ? (chartModel._legendMaxWidth + itemPadding + shapeWidth) : legendsize.Width, legendItemWidth);
+                legendItemHeight = max(((textOverflow == "wrap" || textOverflow == "wrapandtrim") && legendMode != "range" ) ? legendsize.Height * chartModel._legendMaxHeight : legendsize.Height, legendItemHeight);
             }
             legendHeight = legendItemHeight + elementSpacing * 2;
             legendWidth = legendItemWidth;

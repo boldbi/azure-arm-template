@@ -11,6 +11,7 @@
     var isMultiTab = ViewBag.MultiTabId != null && ViewBag.MultiTabId.ToString() != string.Empty;
     var isPinWidget = ViewBag.PinWidget;
     var isBingMapRequired = (ViewBag.IsBingMapRequired != null && ViewBag.IsBingMapRequired) ? true : false;
+    var canHideCommentIcon = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
 }
 
 @if (isPinWidget)
@@ -113,7 +114,9 @@ else
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
 
 }
-
+@if (!isSelfHosted && canHideCommentIcon) { 
+    @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
+}
 @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
 
 @if (isMobile)

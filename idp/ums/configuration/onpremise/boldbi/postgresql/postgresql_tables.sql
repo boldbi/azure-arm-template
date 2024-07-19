@@ -227,6 +227,7 @@ CREATE TABLE SyncDS_ScheduleDetail(
 	ScheduleId uuid NOT NULL UNIQUE,
 	ItemId uuid NOT NULL,
 	DashboardWidgetId uuid NULL,
+	DashboardViewId uuid NULL,
 	Name varchar(150) NOT NULL,
 	RecurrenceTypeId int NULL,
 	RecurrenceInfo varchar(4000) NULL,
@@ -961,7 +962,7 @@ CREATE TABLE SyncDS_DSMetrics (
    TableDetails VARCHAR(255),
    RowsUpdated INTEGER,
    TotalRows INTEGER,
-   CustomQuery VARCHAR(700),
+   CustomQuery Text,
    SourceConnectionDetails VARCHAR(255),
    IncrementalRefreshDetails VARCHAR(255),
    ExtractType VARCHAR(255),
@@ -1512,6 +1513,10 @@ INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) V
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'IsEnablePoweredBySyncfusion',N'SiteSettings.ShowPoweredBySyncfusion',now() at time zone 'utc',1)
 ;
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'CopyrightInformation',N'SiteSettings.CopyrightInformation',now() at time zone 'utc',1)
+;
+INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'ResourceType',N'SiteSettings.ResourceType',now() at time zone 'utc',1)
+;
+INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (1,N'ResourceOrder',N'SiteSettings.ResourceOrder',now() at time zone 'utc',1)
 ;
 
 INSERT into SyncDS_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForDashboardOwner',N'UserNotificationSettings.UserSystemNotificationSettings.EnableNotificationForDashboardOwner',now() at time zone 'utc',1)

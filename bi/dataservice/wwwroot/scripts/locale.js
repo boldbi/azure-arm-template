@@ -251,6 +251,8 @@
                 widgetName: "Name",
                 subHeaderText: "Subtitle",
                 descriptionText: "Description",
+				widgetTypeText: "Widget Type",
+				uniqueNameText: "Unique Name",
                 containerAppearanceText: "Container Appearance",
                 containerActionsText: "Container Actions",
                 exportName: "Export Settings",
@@ -416,7 +418,8 @@
 						autoPadding: "Auto Padding",
 						paddingText: "Padding"
 					},
-					showShadowText: "Show Shadow"
+					showShadowText: "Show Shadow",
+					enableWidgetTransparency: "Enable Widget Transparency"
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -447,6 +450,8 @@
                 },
                 basicSettings: {
                     allowSortingText: "Allow Sorting",
+                    allowResizingText: "Allow Resizing",
+					allowResizingInfo: "Resizing will not take place when the width is set in Column Alignment",
                     allowResizeToFit: "Fit To Content",
                     valuesInRow: "Show Values In Row",
                     horizontalGridLine: "Horizontal Grid Lines",
@@ -495,6 +500,8 @@
                     rangeSelection: "Range Selection",
                     orientation: "Orientation",
                     range: "Range",
+					chooseDefault: "Select Today as Default",
+					defaultDateInfo: "Selecting this option will automatically set today's date as the default value for the Date Picker widget. This is useful for filtering the dashboard based on the current day. Once enabled, you won't be able to choose another date as the default selection.",
                     limitDates: "Limit Dates",
                     highlightAvailableDates: "Highlight Available Dates",
                     showLatestDate: "Show Latest Date",
@@ -563,7 +570,8 @@
 					activeTabText: "Active  Tab",
                     apiType:"API Type",
                     listBoxShowAll:"Show All",
-                    tabLoaderText: "Enable Tab loader"
+                    tabLoaderText: "Enable Tab loader",
+                    mapValueType: "Value Type"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -674,7 +682,7 @@
                 },
                 seriesPaletteSettings: {
                     useDefaultPalette: "Use Default Palette",
-                    advancedSetting: "Advanced Setting",
+                    advancedSetting: "Advanced Settings",
 					colorMappingTypeText: "Color Mapping Type"
                 },
 				kpiBasicSettings: {
@@ -703,7 +711,7 @@
                     colorSettings: {
                         valueLabelText: "Value",
                         barlabelText: "Bar",
-                        advancedSettingText: "Advanced Setting"
+                        advancedSettingText: "Advanced Settings"
                     }
                 },
                 sparkLineSettings: {
@@ -906,7 +914,9 @@
                     showDefaultIcon: "Show Default Image",
                     text: "Text",
                     textColor: "Text Color",
-                    transparency: "Transparency"
+                    transparency: "Transparency",
+					showNoDataHeader: "Show Header",
+					showHeaderInfo: "This option allows the header to be shown in cases where no data is available for display."
 				},
 				interWidgetLinking:{
 					defaultInterWidgetLinking: "Configure how linking should behave with the tab widget. When default action is configured, the tab will be switched based on the index values in the current widget. This gives you the flexibility to switch between the tabs based on the value selected in the current widget. Custom action allows you to switch to a specific tab index so that any value selected in the current widget will switch the tab to the configured tab."
@@ -1048,6 +1058,7 @@
                 appendDsFilesNeedsAttention: "file(s) needs attention",
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
+                commandTimeoutMessage: "Max command timeout upto 550 sec",
                 enableSSH: "Enable SSH",
                 sshServerNameText: "SSH Server name",
                 sshPort: "SSH Port",
@@ -1412,8 +1423,8 @@
 							}
                         ]
                     },
-                    fusebill: {
-                        name: "Fusebill",
+                    staxbill: {
+                        name: "Staxbill",
                         templates: [
                             {
 								projects: {
@@ -2336,8 +2347,9 @@
                 dsnNotAvailable: "DSN is not available",
                 dsnDriversNotAvailable: "DSN Drivers are not available",
                 saveExpression: "Expression is not saved. Do you want to save and continue?",
-				unnestExresssion: "UNNEST restricted in the expression",
-				countDistinctExpression: "COUNT(DISTINCT()) restricted in the Expression. Instead, use COUNTD().",
+		unnestExresssion: "UNNEST restricted in the expression",
+		filterWhereExpression: "Filter where the keyword is restricted in the expression",
+		countDistinctExpression: "COUNT(DISTINCT()) restricted in the Expression. Instead, use COUNTD().",
                 invalidExpSyntax: "Incorrect Syntax near Open/Close bracket(s).",
                 saveParameter: "The parameter is not saved. Do you want to save and continue?",
                 InValidParameter: "Data type mismatched. Please select a valid data type parameter.",
@@ -2500,6 +2512,7 @@
                 missedFeaturesErr: "Some features used in the dashboard are currently not supported by the web designer.",
                 serverLoginErr: "ReportServer failed to login with specified credentials.",
                 failedToOpenDashboard: "Dashboard Designer failed to open the dashboard.",
+				invalidWidgetId: "The widget item details not found.",
                 notSupportedDashboard: "This version of Dashboard is not supported by Web Designer.",
                 failedToCreateDataSet: "DashboardDesigner failed to create a shared Data Source.",
                 errorOnSaveDashboard: "An error occured while trying to save the Dashboard.",
@@ -2534,7 +2547,7 @@
                 invalidCustomAttributeError: "Custom attribute is not valid.",
 				exportFail: "Exporting failed",
 				exportFailedContent: "Your export request has failed.",
-                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it completed.",
+                exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it is completed.",
                 dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
                 etlDialogHeaderText: "Redirect to Bold ETL",
                 etlContinuebtnText: "Continue with connector"
@@ -2584,7 +2597,6 @@
                 retryText: "Retry",
                 isPublic: "Mark as public",
                 dashboardDescExceedsMaxLength: "*1024 characters maximum",
-                commandTimeoutMessage: "Max command timeout upto 550 sec",
                 ok: "OK",
                 publishDashboard: "Publish As Dashboard",
                 selectDashboard: "Select Dashboard",
@@ -2679,6 +2691,7 @@
                 createCategoryMessage: "*Please create a category to save the dashboard",
                 differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Otherwise, click on the 'x' icon to close the popup without taking any action.",
                 columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
+				dataTypeMismatch: "Changing the data type may result in data loss and this affects the dashboard. Do you want to continue?",
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
                 tableList: "The list of tables to be dropped ",
@@ -2754,7 +2767,7 @@
                 queryParameter: "Query Parameter",
                 StoredProcedure: "Stored Procedure Parameter",
                 queryJoiner: "Query Joiner",
-                dashboardDesigner: "Dashboard Designer",
+                dashboardDesigner: "Dashboard",
                 relativeDateOptions: "Add Relative Date Range",
                 loginWindow: "Login Window",
                 dataSourceAdvancePanel: "Data Source AdvancePanel",
@@ -2775,6 +2788,7 @@
                 DeleteDataSource: "Delete Data Source",
                 SaveExpression: "Save Expression",
                 SchemaMismatch: "Schema Mismatch",
+				dataTypeMismatch: "DataType Mismatch",
                 DuplicateDataSource: "Duplicate Data Source",
                 AutoRecover: "Auto Recover",
                 DashboardSaved: "Confirm Publish Dashboard",
@@ -4041,6 +4055,7 @@
                 dateRangeDisplayText: "Date Range",
                 isSinceSeqFilterDisplayText:"SinceSeq Filter",
                 enableIncrementalRefreshDisplayText: "Incremental Refresh",
+				errorOrganizationsValidation: "Error occurred while fetching the Organizations",
             },
             asanaWebDataSource: {
                 showAttachment: "Show Attachment",
@@ -5703,6 +5718,7 @@
                 record: "record",
                 tryConnectButton: "Try Again",
                 schemaLoadErrorMsg: "Error occurred while fetching the schema",
+                selectedAllValuesInComboBox: "All",
                 selectedMultipleValuesInComboBox: "Multiple Values",
                 updateButton: "Update",
                 liveDataPreviewEnableToolTipText: "Enable auto update",
@@ -5953,6 +5969,8 @@
                     runningMinEx: "RUNNINGMIN(aggregate_expression)",
                     runningSumDesc: "Returns Running Sum Values of each Row.",
                     runningSumEx: "RUNNINGSUM(aggregate_expression)",
+					quantileExactDesc: "Exactly computes the quantile of a numeric data sequence.",
+					quantileExactEx: "QUANTILEEXACT(level, expression)"
                 }
             },
             queryJoiner: {
@@ -6071,7 +6089,7 @@
                 flagText: "Flag",
             },
             advancedColorCustomizationLocale: {
-                advanceSettingsTitle: "Conditional Formatting",
+                advanceSettingsTitle: "Advanced Settings",
                 colorType: "Color Type",
                 basedOn: "Based On",
                 summaryType: "Summary Type",
@@ -6138,6 +6156,7 @@
 				bannerRefreshDisplayText: "Clear cache and refresh",
                 backButtonTooltipText: "Back to designer",
                 mobileViewInfoText: "Info",
+				mobileViewExportStatusText:"Export Status",
                 themeText: "Theme",
                 themePreview: "(preview)",
                 themeLight: "Light",
@@ -6193,8 +6212,10 @@
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
 				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
 				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets.",
-				pagewiseOption: "Only export current view",
-				pagewiseExportInfo: "If this option is disabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export."
+				pagewiseOption: "Enable pagewise exporting",
+				pagewiseExportInfo: "If this option is enabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export.",
+				exportLimitation: "{0} export has a default limit of {1} rows. This limit can be modified by the administrator through the config settings.",
+				exportListingSuccessMsg: "Export was completed successfully. If the download does not begin, please click the button below to download manually."
             },
             maximize: {
                 maximize: "Maximize",
@@ -6325,7 +6346,8 @@
 				uploadFailed: "Upload Failed.",
 				uploadCompleted: "Upload Completed",
 				initiatingUpload: "Initiating Upload...",
-                dynamicDialog: "Select your flexible data"
+                dynamicDialog: "Select your flexible data",
+                dsTooltipText:"To enable or disable tooltips for the data source description."
             },
             kpiCardImageSettingsReset: {
                 titleText: "Image Settings Reset",
@@ -6492,8 +6514,8 @@
 				done: "Done"
             },
             initialFilter: {
-                dialogTitle: "Query Filters",
-                menuItemText: "Configure Query Filters",
+                dialogTitle: "Data Filters",
+                menuItemText: "Configure Data Filters",
                 tableFilters: "List of Table Filters",
                 addBtnText: "Add"
             },
@@ -6567,7 +6589,7 @@
 				manualModeText: "Manual",
 				datasourceModeText: "Data Source",
 				userFilterQueryModeText: "Query",
-                UserFilterNameAlertTitle: "Empty or Name allready exist",
+                UserFilterNameAlertTitle: "Empty or Name already exist",
                 UserFilterEmptyName: "Name should not be empty please porvide an valid name",
                 UserFilterNameAllreadyExist:"The userfilter name already exists"
             },
@@ -7763,7 +7785,17 @@
 				title: "Title",
 				height: "Height",
 				width: "Width"
-			}
+            },
+            exportListing: {
+                title: "Export",
+                clear: "Clear",
+                close: "Close",
+                noItems: "There are no items.",
+                exportMessag: "Export {0} from {1}",
+                exportMessagTooltip: "Export {0} from {1}",
+                remove: "Remove",
+                download: "Download"
+            }
 		}
     }
 }

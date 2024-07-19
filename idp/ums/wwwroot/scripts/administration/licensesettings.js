@@ -180,5 +180,5 @@ $(document).on("click", "#subscription-copy-bi", function () {
 });
 
 $(document).on("click", "#subscription-copy-reports", function () {
-    ccopyToClipboard('#subscription-id-reports', '#subscription-copy-reports');
+    copyToClipboard('#subscription-id-reports', '#subscription-copy-reports');
 });

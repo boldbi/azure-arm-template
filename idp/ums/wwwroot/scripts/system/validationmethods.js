@@ -37,7 +37,7 @@
 
     //database validation methods
 
-    $.validator.addMethod("isValidPrefix", function (value, element) {
+    $.validator.addMethod("isWhitespaceOrNumeric", function (value, element) {
         if (/^[a-zA-Z\_]+$/g.test(value) || value === "") {
             return true;
         } else {

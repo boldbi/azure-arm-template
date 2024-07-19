@@ -13,6 +13,9 @@
     var isAzureApplication = string.IsNullOrEmpty(GlobalAppSettings.Configuration.GetSection("AppSettings")["IsAzureApplication"]) ? false : Convert.ToBoolean(GlobalAppSettings.Configuration.GetSection("AppSettings")["IsAzureApplication"]);
     var licenseExpired = await LicenseManagement.ValidateBoldLicense();
     var environment = EnvironmentHelper.GetEnvironment();
+    var boldBiInstalled = Model?.BuildInfo?.Any(x => x.Name == TenantType.BoldBI.ToString()) ?? false;
+    var boldReportsInstalled = Model?.BuildInfo?.Any(x => x.Name == TenantType.BoldReports.ToString()) ?? false;
+    var subcriptionContent = CloudAppConfig.Branding.IsWhiteLabelling ? @T["Subscription"] : @T["Plan & Subscription"];
 }
 
 @section styles{
@@ -53,12 +56,31 @@
         {
             <div class="col-xs-12 no-padding lic-page-nav-bar">
                 <ul id="license-tab-nav" class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active">
-                        <a href="#bold-bi-tab" id="bold-bi" aria-controls="bold-bi-tab" role="tab" data-toggle="tab">@AppBranding.Bold.ProductName</a>
-                    </li>
-                    <li role="presentation">
-                        <a href="#bold-reports-tab" id="bold-reports" aria-controls="bold-reports-tab" role="tab" data-toggle="tab">@AppBranding.BoldReports.ProductName</a>
-                    </li>
+                    @if (!CloudAppConfig.Branding.ManageLicenseBranding.ShowInstalledProduct)
+                    {
+                        <li role="presentation" class="active">
+                            <a href="#bold-bi-tab" id="bold-bi" aria-controls="bold-bi-tab" role="tab" data-toggle="tab">@CloudAppConfig.Branding.ProductSpecificBranding.BrandingBIName</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#bold-reports-tab" id="bold-reports" aria-controls="bold-reports-tab" role="tab" data-toggle="tab">@CloudAppConfig.Branding.ProductSpecificBranding.BrandingReportsName</a>
+                        </li>
+                    }
+                    else
+                    {
+                        @if (boldBiInstalled)
+                        {
+                            <li role="presentation" class="active">
+                                <a href="#bold-bi-tab" id="bold-bi" aria-controls="bold-bi-tab" role="tab" data-toggle="tab">@CloudAppConfig.Branding.ProductSpecificBranding.BrandingBIName</a>
+                            </li>
+                        }
+
+                        @if (boldReportsInstalled)
+                        {
+                            <li role="presentation">
+                                <a href="#bold-reports-tab" id="bold-reports" aria-controls="bold-reports-tab" role="tab" data-toggle="tab">@CloudAppConfig.Branding.ProductSpecificBranding.BrandingReportsName</a>
+                            </li>
+                        }
+                    }
                 </ul>
             </div>
         }
@@ -90,9 +112,12 @@
                                         <div class="col-xs-6 no-margin no-padding" id="subscription-information">
                                             <table class="table active-subscription-table-section">
                                                 <tr>
-                                                    <td class="heading">@T["Plan & Subscription"]</td>
+                                                    <td class="heading">@subcriptionContent</td>
                                                     <td class="title">
-                                                        <p class="plan">@boldBiLicense.SubscriptionInfo.Plan.PlanName</p>
+                                                        @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+                                                        {
+                                                            <p class="plan">@boldBiLicense.SubscriptionInfo.Plan.PlanName</p>
+                                                        }
                                                         <p class="display-none">@boldBiLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-bi"><a class="subscription-link" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldBiLicense.SubscriptionInfo.TenantId)" target="_blank">@boldBiLicense.SubscriptionInfo.TenantId</a></p>
                                                         <button data-toggle="tooltip" class="pull-right secondary-button" data-original-title="@T["Click to copy"]" id="subscription-copy-bi">@T["Copy"]</button>
@@ -125,9 +150,12 @@
                                         <span class="second-content">
                                             @T["See Clearly. Act Boldly."]
                                         </span>
-                                        <div class="btn-holder">
-                                            <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
-                                        </div>
+                                        @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOnlineActivation)
+                                        {
+                                            <div class="btn-holder">
+                                                <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
+                                            </div>
+                                        }
                                         <div class="col-xs-12 align-center">
                                             <span class="link-header">@T["Behind Firewall?"] <a class="offline-license-acion" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Upload license file"]</a></span>
                                         </div>
@@ -172,9 +200,12 @@
                                         <div class="col-xs-7 no-margin no-padding" id="subscription-information">
                                             <table class="table active-subscription-table-section">
                                                 <tr>
-                                                    <td class="heading">@T["Plan & Subscription"]</td>
+                                                    <td class="heading">@subcriptionContent</td>
                                                     <td class="title">
-                                                        <p class="plan">@boldReportsLicense.SubscriptionInfo.Plan.PlanName</p>
+                                                        @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+                                                        {
+                                                            <p class="plan">@boldReportsLicense.SubscriptionInfo.Plan.PlanName</p>
+                                                        }
                                                         <p class="display-none">@boldReportsLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-reports"><a class="subscription-link" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldReportsLicense.SubscriptionInfo.TenantId)" target="_blank">@boldReportsLicense.SubscriptionInfo.TenantId</a></p>
                                                         <button data-toggle="tooltip" class="pull-right secondary-button" data-original-title="@T["Click to copy"]" id="subscription-copy-reports">@T["Copy"]</button>
@@ -207,9 +238,12 @@
                                         <span class="second-content">
                                             @T["See Clearly. Act Boldly."]
                                         </span>
-                                        <div class="btn-holder">
-                                            <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
-                                        </div>
+                                        @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOnlineActivation)
+                                        {
+                                            <div class="btn-holder">
+                                                <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrl}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
+                                            </div>
+                                        }
                                         <div class="col-xs-12 align-center">
                                             <span class="link-header">@T["Behind Firewall?"] <a class="offline-license-acion" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Upload license file"]</a></span>
                                         </div>
@@ -247,17 +281,30 @@
     </div>
     <div id="change-subscription-content" class="custom-template"></div>
     <div id="change-subscription-dialog" class="change-subscription-dialog-content" style="visibility: hidden">
-        <div class="col-xs-6 no-margin online-change-subscription-content">
-            <h3 class="title col-xs-12">@T["From Online"]</h3>
-            <p class="col-xs-12 no-margin">@T["Log into your account portal to change the subscription."]</p>
-            <button id="online-license-bi" license-service-url="" class="link-button online-change-subscription col-xs-12 no-padding">@T["Sign in"]</button>
-        </div>
-        <div class="seperator"></div>
+        @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOnlineActivation)
+        {
+            <div class="col-xs-6 no-margin online-change-subscription-content">
+                <h3 class="title col-xs-12">@T["From Online"]</h3>
+                <p class="col-xs-12 no-margin">@T["Log into your account portal to change the subscription."]</p>
+                <button id="online-license-bi" license-service-url="" class="link-button online-change-subscription col-xs-12 no-padding">@T["Sign in"]</button>
+            </div>
+            <div class="seperator"></div>
+        }
         <div class="offline-change-subscription-content col-xs-6 no-margin">
             <h3 class="title col-xs-12">@T["From License File"]</h3>
-            <p class="col-xs-12 no-margin">@T["If you’re behind a firewall, please upload the offline license file."] </p>
+            @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOfflineActivation)
+            {
+                <p class="col-xs-12 no-margin">@T["If you’re behind a firewall, please upload the offline license file."] </p>
+            }
+            else
+            {
+                <p class="col-xs-12 no-margin">@T["Use the offline license file to update the license information."] </p>
+            }
             <button id="offline-update-bi" data-offlinelicense-url="" data-tenant-type="" class="link-button offline-change-subscription col-xs-12 no-padding">@T["Upload"]</button>
-            <div class="col-xs-12 no-margin help-container">If you don’t have the license file, download it <a id="change-subscription-help" target="_blank" href="">@T["here"]</a>.</div>
+            @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+            {
+                <div class="col-xs-12 no-margin help-container">If you don’t have the license file, download it <a id="change-subscription-help" target="_blank" href="">@T["here"]</a>.</div>
+            }
         </div>
     </div>
     @await Html.PartialAsync("_offlinelicenseupdate")

@@ -672,8 +672,12 @@ $(document).ready(function () {
             success: function (result) {
                 if (isReloadPage) {
                     if (isUrlChange) {
-                        var currentURL = window.location.pathname;
-                        window.location.href = getSslValue() + "://" + siteURL + currentURL.substring(currentURL.indexOf("/ums/administration"));
+                        var restartLinkHtml = "<a href='" + restartLink + "' target='_blank'>click here.</a>";
+                        messageBox("", window.Server.App.LocalizationContent.RestartApplication, window.Server.App.LocalizationContent.RestartApplicationLink + restartLinkHtml, "success", function () {
+                            parent.onCloseMessageBox();
+                            var currentURL = window.location.pathname;
+                            window.location.href = getSslValue() + "://" + siteURL + currentURL.substring(currentURL.indexOf("/ums/administration"));
+                        });
                     }
                     else {
                         window.location.href = getSslValue() + "://" + location.host + location.pathname;
