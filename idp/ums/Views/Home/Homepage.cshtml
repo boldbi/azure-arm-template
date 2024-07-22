@@ -9,7 +9,7 @@
     var profilePicture = idPUrl + "/User/Avatar?id=" + ViewBag.UserId + "&ImageSize=64";
     var displayName = ViewBag.UserDetails.DisplayName;
     var createSiteUrl = @Url.Action("Sites", "TenantsManagement") + "?action=create-new-site";
-    var adminType = (AdminType)Enum.Parse(typeof(AdminType), GlobalAppSettings.HttpContextAccessor.HttpContext.Session.GetString("AdminType"));
+    var adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
     var poweredbyClass = GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion ? "block" : "none";
     var copyrightClass = GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "block" : "none";
     var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
@@ -18,7 +18,7 @@
     var copyrightInformation = HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
     var isAllSitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "all-sites") ? "active" : string.Empty;
     var isFavoriteTab = (Context.Request.Query["view"] == "favorites") ? "active" : string.Empty;
-    var isMobile = DeviceDetection.IsMobile; 
+    var isMobile = DeviceDetection.IsMobile(Context); 
     var cardviewCookie= string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
     var encodedCookieValue = new HtmlString(cardviewCookie);
 }

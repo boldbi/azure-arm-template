@@ -9,7 +9,7 @@
     var requestUrl = reqUrl.AbsolutePath.ToLower();
 
     //To show or hide menu for mobile devices
-    var menuClass = DeviceDetection.IsMobile ? "collapse width" : "collapse in";
+    var menuClass = DeviceDetection.IsMobile(Context) ? "collapse width" : "collapse in";
 
     var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
 
@@ -20,6 +20,7 @@
     var dateFormat = string.IsNullOrWhiteSpace(_clientDateTimeInfo.ClientDateTime.DateFormat) ? GlobalAppSettings.SystemSettings.DateFormat : _clientDateTimeInfo.ClientDateTime.DateFormat;
     var cookieValue = string.IsNullOrWhiteSpace(Context.Request.Cookies["boldservice.client.locale"]) ? string.Empty : Context.Request.Cookies["boldservice.client.locale"];
     var encodedCookieValue = new HtmlString(cookieValue);
+    var isMobile = DeviceDetection.IsMobile(Context);
 }
 
 <!DOCTYPE html>
@@ -34,7 +35,7 @@
         @ViewBag.Title
     </title>
     @await Html.PartialAsync("_Favicon")
-    <link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl.TrimEnd('/')/bundles/css/cssloader.css" asp-append-version="true" />
+    <link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')/bundles/css/cssloader.css" asp-append-version="true" />
 
     <script nonce="@Context.Items["ScriptNonce"]">
         var rootUrl = "";
@@ -92,7 +93,7 @@
         </section>
         <section id="menu-area" class="collapse">
 
-            @if (DeviceDetection.IsMobile)
+            @if (isMobile)
             {
                 if (requestUrl == "/user/profile" || requestUrl == "/profile/change-password")
                 {
@@ -174,7 +175,7 @@
 
     @RenderSection("scripts", false)
 
-    @if (DeviceDetection.IsMobile)
+    @if (isMobile)
     {
         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(document).ready(function () {

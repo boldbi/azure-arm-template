@@ -50,6 +50,8 @@
     </script>
     <script>
         var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        var scheduleRangeDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+        var scheduleRangeTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
         var enableScheduleUrl = "@Url.Action("EnableSchedule", "scheduler")";
         var disableScheduleUrl = "@Url.Action("DisableSchedule", "scheduler")";
         var ondemandScheduleUrl = "@Url.Action("OnDemandSchedule", "scheduler")";
@@ -57,6 +59,7 @@
         var removeScheduleUrl = "@Url.Action("RemoveSchedule", "scheduler")";
         var getSchedulesUrl = "@Url.Action("getschedules", "scheduler")";
         var addScheduleUrl = "@Url.Action("AddSchedule", "scheduler")";
+        var filterSchedulesUrl = "@Url.Action("GetFilteredSchedules", "scheduler")";
         var scheduleHistory = "@ViewBag.SchedleHistory";
         var scheduleHistoryScheduleId = "@ViewBag.ScheduleId";
         var scheduleHistoryScheduleName = "@ViewBag.ScheduleName";
@@ -79,6 +82,23 @@
             $(document)
                 .ready(function () {
                     $("#search-schedules").val("");
+                    DateRangeLocalization();
+                    $("#datePicker").ejDateRangePicker({
+                        dateFormat: scheduleRangeDateFormat,
+                        locale: "en-US",
+                        buttonText: { apply: window.Server.App.Localization.Apply, cancel: window.Server.App.Localization.CancelButton, reset: window.Server.App.Localization.Reset },
+                        ranges: [
+                            { label: window.Server.App.Localization.Today, range: [new Date(), new Date()] },
+                            { label: window.Server.App.Localization.Yesterday, range: [new Date(new Date().setDate(new Date().getDate() - 1)), new Date(new Date().setDate(new Date().getDate() - 1))] },
+                            { label: window.Server.App.Localization.LastDays.format("7"), range: [new Date(new Date().setDate(new Date().getDate() - 7)), new Date()] },
+                            { label: window.Server.App.Localization.LastDays.format("15"), range: [new Date(new Date().setDate(new Date().getDate() - 14)), new Date()] },
+                            { label: window.Server.App.Localization.LastDays.format("30"), range: [new Date(new Date().setMonth(new Date().getMonth() - 1)), new Date()] },
+                            { label: window.Server.App.Localization.LastDays.format("60"), range: [new Date(new Date().setMonth(new Date().getMonth() - 2)), new Date()] },
+                            { label: window.Server.App.Localization.ThisWeek, range: [new Date(new Date().setDate(new Date().getDate() - new Date().getDay())), new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 6))] },
+                            { label: window.Server.App.Localization.ThisMonth, range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)] }
+                        ],
+                    });
+
                     $.views.helpers({
                         checkMobile: function() {
                             return ("@isMobile.ToString().ToLower()" == "false" &&
@@ -159,7 +179,6 @@
                                     headerText: "@T["Last Run"]",
                                     visible: !(window.innerWidth < 1200),
                                     width: 70,
-                                    allowSorting: false,
                                     allowFiltering: false
                                 },
                                 {
@@ -417,6 +436,15 @@
             </div>
             <div id="item-grid-container" data-grid-name="schedules" class="bi-page-container col-xs-12 schedule-listing grid-page-container">
                 <div class="bi-page-content col-md-12 no-padding">
+                    <div class="filter-section">
+                        <div class="col-sm-3 col-xs-3 date-picker no-padding">
+                            <input type="text" name="schedule-filter-date-range" class="form-control full-width" id="datePicker">
+                        </div>
+                        <div class="dropdown schedule-filter-drop-down col-xs-12">
+                            @Html.DropDownList("Scheduleevent", ViewBag.ScheduleEvent as IEnumerable<SelectListItem>, new { id = "Schedule-event", @class = "selectpicker form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["Select Field"].Value, data_live_search = "true", data_live_search_placeholder = T["Search"].Value })
+                        </div>
+                        <button type="button" id="schedule-filter-apply-button" class="btn apply-button disable-schedule-apply" disabled>@T["Apply"]</button>
+                     </div>
                     <div id="schedules-grid-container" class="col-xs-12 bi-page-body  @(isMobile ? "mobile" : "desktop")">
                         <div id="scheduleGrid" class="schedule-grid">
                         </div>
