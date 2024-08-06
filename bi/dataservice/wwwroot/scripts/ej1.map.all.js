@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.map.all.js
-*  version : 7.11.11
+*  version : 7.11.22
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing

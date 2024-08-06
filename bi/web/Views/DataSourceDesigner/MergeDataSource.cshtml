@@ -11,6 +11,9 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var isAdmin = _identityResponse.IsAdmin;
+    var isDataSourceCreateDenied = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var dataSourceCreateLimitCount = !ServerAppConfig.IsSelfHosted && !string.IsNullOrWhiteSpace(ServerAppConfig.AppSettings.DataSourceCreateLimitCount) ? ServerAppConfig.AppSettings.DataSourceCreateLimitCount : string.Empty;
 }
 <!DOCTYPE html>
 <html style="height:100%;width:100% ; overflow:hidden;">
@@ -52,6 +55,7 @@
             var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
             var dataSourcesPageUrl = "@Url.Action("DataSources", "DataSources")";
             var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
+            var validateDataSourceCountUrl = "@Url.Action("ValidateDataSourceCreateLimit", "Items")";
             var modelLanguage = "@ViewBag.ModelLanguage";
             var firstDayOfWeek = "@ViewBag.FirstDayOfWeek";
             var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
@@ -62,6 +66,9 @@
             var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
             var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
             var appVersion = "@ServerAppConfig.ProductVersion";
+            var isAdmin = @Json.Serialize(isAdmin);
+            var isDataSourceCreateDenied = @Json.Serialize(isDataSourceCreateDenied);
+            var dataSourceCreateLimitCount = "@dataSourceCreateLimitCount";
     </script>
 </head>
 <body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
