@@ -10,6 +10,7 @@
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
 }
 <!DOCTYPE html>
 
@@ -48,6 +49,9 @@
                 --designer-font: var(--font-family) !important;
             }
         </style>
+    }
+    @if (!isSelfHosted && isUrlInDnsList) {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
     }
     <script>
         var isSelfHosted = @Json.Serialize(isSelfHosted);

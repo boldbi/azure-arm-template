@@ -12,6 +12,7 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
     var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     var dataSourcePageUrl = Url.Action("DataSources", "DataSources");
@@ -72,6 +73,7 @@
     var userGroupSuggestion = string.Empty;
     var itemActionScript = string.Empty;
     var dashboardCreateLimitCount = !ServerAppConfig.IsSelfHosted && !string.IsNullOrWhiteSpace(ServerAppConfig.AppSettings.DashboardCreateLimitCount) ? ServerAppConfig.AppSettings.DashboardCreateLimitCount : string.Empty;
+    var dataSourceCreateLimitCount = !isSelfHosted && !string.IsNullOrWhiteSpace(ServerAppConfig.AppSettings.DataSourceCreateLimitCount) ? ServerAppConfig.AppSettings.DataSourceCreateLimitCount : string.Empty;
 }
 @{
     var preloadScriptsFiles = new string[]
@@ -193,7 +195,9 @@
         </style>
     }
     @*<link href="https://fonts.googleapis.com/css?family=Heebo:400,500,700" rel="stylesheet">*@
-
+    @if (!isSelfHosted && isUrlInDnsList) {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
+    }
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
     <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
@@ -327,6 +331,7 @@
         var etlHelpLink = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ETL)";
         var charactersNotAllowedInFileName = @Json.Serialize(ServerAppConfig.CharactersNotAllowedInFileName);
         var dashboardCreateLimitCount = "@dashboardCreateLimitCount";
+        var dataSourceCreateLimitCount = "@dataSourceCreateLimitCount";
 
         var value = {
             Locale: navigator.language,

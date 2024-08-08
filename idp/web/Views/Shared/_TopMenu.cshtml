@@ -21,12 +21,12 @@
     var profilePageUrl = $"{idPUrl}/user/profile";
 
     var isAdmin = await new UserManagement().IsAdmin(Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value));
-    var tenantSitesUrl = CloudAppConfig.TenantManagementUrl + "/sites";
-    var tenantUsersUrl = CloudAppConfig.TenantManagementUrl + "/administration/user-management/users";
-    var tenantSettingsUrl = CloudAppConfig.TenantManagementUrl + "/administration";
-    AdminType adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
+    var tenantSitesUrl = CloudAppConfig.TenantManagementUrl(Context) + "/sites";
+    var tenantUsersUrl = CloudAppConfig.TenantManagementUrl(Context) + "/administration/user-management/users";
+    var tenantSettingsUrl = CloudAppConfig.TenantManagementUrl(Context) + "/administration";
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
     var username = Context.Session.GetString("username") != null ? Context.Session.GetString("username").ToString() : string.Empty;
+    AdminType adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
     var userId = Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
     var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
 }

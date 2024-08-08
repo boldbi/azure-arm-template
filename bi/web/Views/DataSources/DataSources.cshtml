@@ -10,6 +10,10 @@
     var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
     var pageDescription = T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."];
     var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Datasource;
+    var isAdmin = _identityResponse.IsAdmin;
+    var isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isDataSourceCreateDenied = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var dataSourceCreateLimitCount = !isSelfHosted && !string.IsNullOrWhiteSpace(ServerAppConfig.AppSettings.DataSourceCreateLimitCount) ? ServerAppConfig.AppSettings.DataSourceCreateLimitCount : string.Empty;
 }
 
 @model List<ItemDetail>
@@ -91,6 +95,11 @@
         var mergeDatasourceIframeUrl = "@Url.Action("MergeDataSource", "DataSourceDesigner")";
         var refreshData = "@Url.Action("RefreshData", "DataSources")";
         var isUpdateDataSource = @Json.Serialize(ViewBag.IsUpdateDataSource);
+        var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+        var isAdmin = @Json.Serialize(isAdmin);
+        var isDataSourceCreateDenied = @Json.Serialize(isDataSourceCreateDenied);
+        var dataSourceCreateLimitCount = "@dataSourceCreateLimitCount";
+        var validateDataSourceCountUrl = "@Url.Action("ValidateDataSourceCreateLimit", "Items")";
 
         $(document).ready(function () {
             $("#search-items").val("");

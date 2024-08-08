@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 7.10.16
+*  version : 7.11.24
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -5294,7 +5294,9 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
         contains: "contains",
         startsWith: "startswith",
         endsWith: "endswith",
-        notEqual: "notequal"
+        notEqual: "notequal",
+        in: "in",
+        notcontains: "notcontains"
     };
 
     BoldBIDashboard.data = {};
@@ -5308,7 +5310,9 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
         "!=": "notequal",
         "*=": "contains",
         "$=": "endswith",
-        "^=": "startswith"
+        "^=": "startswith",
+        "!=": "notcontains",
+        "==": "in"
     };
 
     BoldBIDashboard.data.odBiOperator = {
@@ -5392,6 +5396,15 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
                 return actual && expected && toLowerCase(actual).endsWith(toLowerCase(expected));
 
             return actual && expected && actual.endsWith(expected);
+        },
+        notcontains: function (actual, expected, ignoreCase) {
+            return !BoldBIDashboard.data.fnOperators.equal(actual, expected, ignoreCase);
+        },
+        in: function (actual, expected, ignoreCase) {
+            if (ignoreCase)
+                return toLowerCase(actual) == toLowerCase(expected);
+
+            return actual == expected;
         },
 
         processSymbols: function (operator) {
@@ -31826,6 +31839,8 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
             endDate: null,
             enableTimePicker: false,
             ranges: null,
+			selectedRange: null,
+            previouseRange: null,
             locale: "en-US",
             separator: "-",
             watermarkText: "Select Range",
@@ -32303,7 +32318,16 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
     };
     BoldBIDashboardDateRangePicker.prototype._updateRangesList = function () {
         bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-active").removeClass("e-active");
-        bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-custompic").addClass("e-active");
+		if (this.model.selectedRange != null) {
+            selectedElement = bbdesigner$(".e-dateranges-ul").find('.rangeItem[title="' + this.model.selectedRange + '"]');
+            if (selectedElement.length > 0) {
+                selectedElement.addClass('e-active');
+            } else{
+                bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-custompic").addClass("e-active")
+            }
+        } else {
+            bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-custompic").addClass("e-active");
+        }
     }
     BoldBIDashboardDateRangePicker.prototype._updateValues = function () {
         this._updateRangesList();
@@ -32355,6 +32379,9 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
         this._on(bbdesigner$(this._buttonDiv.find("div.e-drp-apply")), "click", function (e) {
             if (bbdesigner$this._buttonDiv.find(".e-drp-apply").hasClass("e-disable")) {
                 return;
+            }
+            if(this.model.previouseRange != null){
+                this.model.selectedRange = this.model.previouseRange;
             }
             bbdesigner$this._isPopScroll = false;
             bbdesigner$this._updateInput();
@@ -32612,6 +32639,7 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
             this._renderPopup();
             this._updateValues();
         }
+        this._updateRangesList();
         if (!this.model.enabled)
             return false;
         if (this._popupOpen)
@@ -32752,7 +32780,8 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
         }
     };
     BoldBIDashboardDateRangePicker.prototype._dateEleClicked = function (e) {
-        this._updateRangesList();
+        bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-active").removeClass("e-active");
+        bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-custompic").addClass("e-active");
         this._activeItem = bbdesigner$(e.currentTarget);
         if (this._activeItem.hasClass("e-hidedate")) {
             e.stopPropagation();
@@ -32917,14 +32946,20 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
         }
     };
     BoldBIDashboardDateRangePicker.prototype.setRange = function (range) {
-        var startDate, endDate, ranges;
+        var startDate, endDate, ranges, selectedElement;
         this._clearRanges();
+	    bbdesigner$(".e-dateranges-ul").find(".rangeItem.e-active").removeClass("e-active");
         if (typeof range == "string") {
+			this.model.selectedRange = range;
             for (var i = 0; i < this.model.ranges.length; i++) {
                 ranges = this.model.ranges[i];
                 if (ranges.label == range) {
                     this.model.startDate = ranges.range[0];
                     this.model.endDate = ranges.range[1];
+		            selectedElement = bbdesigner$(".e-dateranges-ul").find('.rangeItem[title="' + range + '"]');
+                    if (selectedElement.length) {
+                        selectedElement.addClass('e-active');
+                    }
                     this._updatePreRanges();
                     return;
                 }
@@ -33048,7 +33083,9 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
             this.model.endDate = null;
             this._clearRanges();
         }
+        this._customRangePicker.find(".e-active").removeClass("e-active");
         bbdesigner$(e.currentTarget).addClass("e-active");
+        this.model.previouseRange = bbdesigner$(e.currentTarget).text();
     };
     BoldBIDashboardDateRangePicker.prototype._setWaterMark = function () {
         if (this.element != null && this.element.hasClass("e-input")) {
@@ -33149,6 +33186,7 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
         e.stopImmediatePropagation();
     };
     BoldBIDashboardDateRangePicker.prototype._cancelButton = function () {
+        this.model.previouseRange = null;
         this._prevValue = null, this._isPopScroll = false;
         this._clearRanges();
         this._onMainFocusOut();

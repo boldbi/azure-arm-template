@@ -472,7 +472,7 @@ function databaseConfiguration(clickedButton) {
                                 } else if (!result.Data.key && items.length <= 0) {
                                     doAjaxPost("POST", generateSQLTablesUrl,
                                         {
-                                            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: false, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TenantPrefix: window.tenantPrefix })
+                                            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, IsNewDatabase: false, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TenantPrefix: window.tenantPrefix, additionalParameters: window.additionalParameters })
                                         },
                                         function (result) {
                                             hideWaitingPopup('startup-waiting-element');

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 7.10.16
+*  version : 7.11.24
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -1330,7 +1330,7 @@
                 bbdesigner$(this._editForm).find(".e-numerictextbox").ejNumericTextbox("destroy");
             }
             if (this._dataSource() instanceof BoldBIDashboard.DataManager && !this._isRemoteSaveAdaptor && args.requestType != BoldBIDashboard.Grid.Actions.BeginEdit && args.requestType != BoldBIDashboard.Grid.Actions.Cancel && args.requestType != BoldBIDashboard.Grid.Actions.Add) {
-                if (this.model.scrollSettings.allowVirtualScrolling && !this.model.scrollSettings.enableVirtualization && this.model.pageSettings.totalPages == this.model.pageSettings.currentPage && this.virtualLoadedPages.indexOf(((this.model.pageSettings.currentPage - 2) * (this.model.pageSettings.pageSize))) == -1) {
+                if (this.model.scrollSettings.allowVirtualScrolling && !this.model.scrollSettings.enableVirtualization && this.model.pageSettings.totalPages == this.model.pageSettings.currentPage && !BoldBIDashboard.isNullOrUndefined(this.virtualLoadedPages) && this.virtualLoadedPages.indexOf(((this.model.pageSettings.currentPage - 2) * (this.model.pageSettings.pageSize))) == -1) {
                     var pageQuery = BoldBIDashboard.pvt.filterQueries(this.model.query.queries, "onPage");
                     this.model.query.queries.splice(bbdesigner$.inArray(pageQuery[0], this.model.query.queries), 1);
                     this.model.query.page(this._currentPage() - 1, this.model.pageSettings.pageSize);
@@ -1340,6 +1340,15 @@
                 }
                 if (this._virtualSelectedRows && this._virtualSelectedRows.length > 0) {
                     this.model.query.addParams('virtualSelectRecords', this._virtualSelectedRows)
+                }
+                if (this._isExcelFilter) {
+                    for (var i = 0; i < this.model.query.queries.length; i++) {
+                        var queries = this.model.query.queries;
+                        if (queries[i].fn === 'onWhere') {
+                            this.model.query.queries[i].e.predicates = [args.predicated];
+                            break;
+                        }
+                    }
                 }
                 var queryPromise = this._queryPromise = this._dataSource().executeQuery(this.model.query);
                 var waitingPopup = this.element.BoldBIDashboardWaitingPopup("instance");
@@ -2677,6 +2686,7 @@
 				if(this.model.filterSettings.filterType == "menu" || this.model.filterSettings.filterType == "excel")
 					this.getHeaderTable().find(".e-filtericon").removeClass("e-filteredicon e-filternone");
 			}
+            this._closeFDialog();
 		},
 		_clearFilter: function (field) {
 		    var filterType = this.model.filterSettings.filterType;
@@ -2702,11 +2712,12 @@
 						else
 							bbdesigner$(id).find(".e-value input").val("");					
 					if (this._excelFilterRendered || this._isExcelFilter)
-					    delete this._excelFilter._predicates[0][field];
-					this._bbdesigner$curFieldName = field;						
+					    delete (!BoldBIDashboard.isNullOrUndefined(this._excelFilter) && this._excelFilter._predicates.length > 0) ? this._excelFilter._predicates[0][field] : field;
+					this._bbdesigner$curFieldName = field;
+                    this._closeFilterDlg();
 					break;
 				case BoldBIDashboard.Grid.FilterType.Excel:
-					delete this._excelFilter._predicates[0][field];						
+					delete this._excelFilter._predicates.length > 0 ? this._excelFilter._predicates[0][field] : field;						
 					this._excelFilter.closeXFDialog();
 					this._bbdesigner$curFieldName = field;
 					break;
@@ -4482,7 +4493,7 @@
                                     var columnName = columnHeader.eq(i).find(".e-headercelldiv").attr("ej-mappingname");
 									if(!BoldBIDashboard.isNullOrUndefined(columnName)){
 										var column = this.getColumnByField(columnName);
-										if (!BoldBIDashboard.isNullOrUndefined(column) && (BoldBIDashboard.isNullOrUndefined(column.allowFiltering) || column.allowFiltering))
+										if (!BoldBIDashboard.isNullOrUndefined(column) && !(this.model.filterSettings.filterType == BoldBIDashboard.Grid.FilterType.Excel && column.IsMeasure) && column.dateFormat == "None" && (BoldBIDashboard.isNullOrUndefined(column.allowFiltering) || column.allowFiltering))
 											columnHeader.eq(i).addClass("e-headercellfilter").append(BoldBIDashboard.buildTag('div.e-filtericon e-icon e-filterset'));
 									}
 								}                               
@@ -4496,7 +4507,8 @@
                                 }
                                 this._renderFilterDialogs();
                                 this.model.filterSettings.filteredColumns = [];
-                                this.refreshContent();
+                                if (this.model.scrollSettings.allowVirtualScrolling)
+                                    this.refreshContent();
                             }
                             this._enableFilterEvents();
                         }
@@ -4586,6 +4598,18 @@
                         }
 						if(!this.model.scrollSettings.enableVirtualization || this._gridRows.length < this._virtualRowCount)
 							this._addLastRow();
+                        break;
+                    case "filterDialogSwitch":
+                        this._closeFDialog();
+                        if (this.model.filterSettings.filterType == "menu" || this.model.filterSettings.filterType == "excel") {
+                            if(this.model.filterSettings.filterType == "menu"){
+                                this._isExcelFilter = false;
+                            } else{
+                                this._isExcelFilter = true;
+                            }
+                            this._renderFilterDialogs();
+                        
+                        }
                         break;
                     case "selectedRowIndex":
                         if (this._selectedRow() != -1 && bbdesigner$.inArray(this._selectedRow(), this.selectedRowsIndexes) == -1){
@@ -8065,7 +8089,7 @@
             this.refreshContent();
         },
         
-        sortColumn: function (columnName, columnSortDirection) {
+        sortColumn: function (columnName, columnSortDirection, predicated) {
             if (!this.model.allowSorting || bbdesigner$.inArray(columnName, this._disabledSortableColumns) != -1 || (columnName != null && columnName.length == 0))
                 return;
             var args = {};
@@ -8078,6 +8102,7 @@
                 });
             }
             args.requestType = BoldBIDashboard.Grid.Actions.Sorting;
+            args.predicated = predicated;
             this._cSortedColumn = args.columnName = columnName;
             this._cSortedDirection = args.columnSortDirection = BoldBIDashboard.isNullOrUndefined(columnSortDirection) ? BoldBIDashboard.sortOrder.Ascending : columnSortDirection.toLowerCase();
             if (this._cSortedColumn !== null) {
@@ -8111,6 +8136,1494 @@
     };
 })(bbdesigner$, SyncfusionBoldBIDashboard);
 ;
+(function (bbdesigner$, BoldBIDashboard, undefined) {
+
+    BoldBIDashboard.ExcelFilter = BoldBIDashboard.ExcelFilter || {};
+    BoldBIDashboard.excelFilter = function (options) {
+		BoldBIDashboard.loadLocale("ejExcelFilter");
+        this._ctrlInstance = options["instance"];
+        this.id = this._ctrlInstance._id;
+        this._dialogContainer = null;
+        this._showSort = options["showSortOptions"] || false;
+        this._interDeterminateState = options["interDeterminateState"] || false;
+        this._maxCount = BoldBIDashboard.isNullOrUndefined(options["maxFilterLimit"]) ? 1000 : options["maxFilterLimit"];
+        this._formatFiltering = true;
+        this._locale = this._ctrlInstance.model.locale || "en-US";
+        this.localizedLabels = this._getLocalizedLabel();
+        this._filterHandler = options["filterHandler"] || null;
+        this._searchHandler = this._ctrlInstance.model.searchSettings || null
+		this._cancelHandler = options["cancelHandler"] || null;
+		this._customFilterHandler = options["customFilterHandler"] || null;
+        this._cssClass = options["cssClass"] || null;
+        this._matchCase = options["allowCaseSensitive"] || false;
+	    this._accent = options["allowAccent"] || false;
+        this._title = options["title"] || this.localizedLabels.title;
+        this._complexBlankCriteria = options["enableComplexBlankFilter"];
+        this._blankValue = options["blankValue"];
+        this.fName = options["initFilterCol"] || null;
+        this._spliter = options["valueDelimiter"] || BoldBIDashboard.ExcelFilter.valueDelimiter;
+        this._initialFName = this.fName;
+        this._displayName = null;
+        this._dataSource = null;
+        this._isUrlAdaptor = false;
+		this._bbdesigner$tableID = null;
+        this._bbdesigner$blankVal = null;
+        this._bbdesigner$selectedColors = [];
+        this._bbdesigner$enableColor = false;
+        this._bbdesigner$filteredByColor = "";
+        this._bbdesigner$colType = null;
+        this._bbdesigner$key = 0;
+        this.filteredColumn = null;
+        this.sortedColumns = null;        
+        this._chkList = null;
+        this._listsWrap = null;
+        this._menuWrap = null;
+        this._localJSON = null;
+        this._actualCount = 0;
+        this._totalRcrd = 0;
+        this._enableResponsiveRow=false;
+        this._searchCount = 0;
+        this._currentData = null;
+        this._openedFltr = null;
+        this._predicates = [];
+        this.cFilteredCols = this.fName!=null ? [this.fName] : [];
+        this._columnsFiltered = [];
+        this.guid = BoldBIDashboard.getGuid("excelfilter");
+        this._noDlg = [];
+        this._sepAftr = ["sortDesc","notcontains", "between", "top10","endswith","contains"];
+        this._posType = ["number", "date", "datetime", "string", "boolean","guid"];
+        this._empties = !this._complexBlankCriteria ? [this.guid] : ["null", "undefined", ""];
+        this._reqInProgess = false;
+        this._isFiltered = false;
+        this._onActionBegin = options["actionBegin"] || null;
+        this._onActionComplete = options["actionComplete"] || null;
+        this.maxItemOnQuery = 0; /*To prevent OData URI queryString length*/
+        this.enableNormalize = true; /*To clean up redundant values after formatting */
+        this.enableSelect = false;
+        this._onDemandSearch = false;
+        this._maxFilterCount = false;
+        this._clearSearchValue = false;
+		this._islargeData = false;
+        this._checkedValue = [];
+        this._searchRequest = false;
+        this._isIndeterminate = false;
+        this._selectAll = "<div class='e-ftrchk'><input type='checkbox' class='e-selectall' value='selectall' class='e-ftrchk' /><label class='e-ftrchk'>(" + this.localizedLabels.SelectAll + ")</label></div>";
+        this._blanks = "<div class='e-ftrchk'><input type='checkbox' id='blanks' class='e-ftrchk' value='" + this._empties.join(this._spliter) + "' @@/><label class='e-ftrchk' for='blanks' value=''>(" + this.localizedLabels.Blanks + ")</label></div>";
+        this._blank = undefined;
+        this._addAtLast = false;
+        this._addToFilter = "<div class='e-ftrchk'><input type='checkbox' class='e-addtofilter'/><label class='e-ftrchk'>" + this.localizedLabels.AddToFilter + "</label></div>";
+        this._preChkList = [];
+        this._checked = null;
+        this._add = null;
+        this.guidMenuOpt = [
+              { id: 1, text: this.localizedLabels.SortNoSmaller, sprite: "e-sortasc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortAsc" } },
+              { id: 2, text: this.localizedLabels.SortNoLarger, sprite: "e-sortdesc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortDesc" } },
+              { id: 3, text: this.localizedLabels.SortByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 4, text: this.localizedLabels.ClearFilter, sprite: "e-filternone e-icon", htmlAttribute: { "ejfnrole": "clearfilter" } },
+              { id: 5, text: this.localizedLabels.FilterByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 6, text: this.localizedLabels.GuidFilter, htmlAttribute: { "ejfnrole": "filterpopup" }, child: this.localizedLabels.GuidMenuOptions }];
+        this.numberMenuOpt = this.booleanMenuOpt = [
+              { id: 1, text: this.localizedLabels.SortNoSmaller, sprite: "e-sortasc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortAsc" } },
+              { id: 2, text: this.localizedLabels.SortNoLarger, sprite: "e-sortdesc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortDesc" } },
+              { id: 3, text: this.localizedLabels.SortByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 4, text: this.localizedLabels.ClearFilter, sprite: "e-filternone e-icon", htmlAttribute: { "ejfnrole": "clearfilter" } },
+              { id: 5, text: this.localizedLabels.FilterByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 6, text: this.localizedLabels.NumberFilter, htmlAttribute: { "ejfnrole": "filterpopup" }, child: this.localizedLabels.NumberMenuOptions }];
+        this.stringMenuOpt = [
+              { id: 1, text: this.localizedLabels.SortTextAscending, sprite: "e-sortasc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortAsc" } },
+              { id: 2, text: this.localizedLabels.SortTextDescending, sprite: "e-sortdesc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortDesc" } },
+              { id: 3, text: this.localizedLabels.SortByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 4, text: this.localizedLabels.ClearFilter, sprite: "e-filternone e-icon", htmlAttribute: { "ejfnrole": "clearfilter" } },
+              { id: 5, text: this.localizedLabels.FilterByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] }];
+        this.dateMenuOpt = [
+              { id: 1, text: this.localizedLabels.SortDateOldest, sprite: "e-sortasc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortAsc" } },
+              { id: 2, text: this.localizedLabels.SortDateNewest, sprite: "e-sortdesc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortDesc" } },
+              { id: 3, text: this.localizedLabels.SortByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 4, text: this.localizedLabels.ClearFilter, sprite: "e-filternone e-icon", htmlAttribute: { "ejfnrole": "clearfilter" } },
+              { id: 5, text: this.localizedLabels.FilterByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 6, text: this.localizedLabels.DateFilter, htmlAttribute: { "ejfnrole": "filterpopup" }, child: this.localizedLabels.DateMenuOptions }];
+        this.datetimeMenuOpt = [
+              { id: 1, text: this.localizedLabels.SortDateOldest, sprite: "e-sortasc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortAsc" } },
+              { id: 2, text: this.localizedLabels.SortDateNewest, sprite: "e-sortdesc e-icon e-fnsort", htmlAttribute: { "ejfnrole": "sortDesc" } },
+              { id: 3, text: this.localizedLabels.SortByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 4, text: this.localizedLabels.ClearFilter, sprite: "e-filternone e-icon", htmlAttribute: { "ejfnrole": "clearfilter" } },
+              { id: 5, text: this.localizedLabels.FilterByColor, htmlAttribute: { "ejfnrole": "popup" }, child: [] },
+              { id: 6, text: this.localizedLabels.DateTimeFilter, htmlAttribute: { "ejfnrole": "filterpopup" }, child: this.localizedLabels.DatetimeMenuOptions }];
+        return this;
+    };
+    BoldBIDashboard.excelFilter.prototype = {
+        //Helpers to handle (Blanks) value.
+        isNotBlank: function (key, global) {
+            var e = BoldBIDashboard.isNullOrUndefined(key) || (key === ""||key===null);
+
+            if (!global && (key === ""||key===null))/* Handle special case - since "" string sorted before all */
+                this._addAtLast = true;
+
+            return !e;
+        },   
+        _checkBlank: function (key) {         
+
+            if (this.isNotBlank(key))
+                return true;
+            /*Ensure Blank value added only once */
+            var ret = this._blank == undefined && !this._addAtLast;
+
+            if (ret) this._blank = true;            
+
+            return ret;
+        },
+        _getValueData: function (key, data) {
+            var arr = this._empties;
+
+            if (this.isNotBlank(key, true)){
+               arr = BoldBIDashboard.distinct(data, this._bbdesigner$foreignKey || this.fName, false);
+			   if(!(BoldBIDashboard.browserInfo().name == "msie" && BoldBIDashboard.browserInfo().version == "8.0")){
+				for(var dat = 0; dat < arr.length; dat++){
+					if((arr[dat] instanceof Date)){
+						var temp = {dateString : arr[dat]};
+						arr[dat] = JSON.parse(JSON.stringify(temp)).dateString;
+						}
+					}
+			   }
+			}
+
+            return arr.join(this._spliter); /*Return value will be set to input element value attr*/
+        },
+        //Collection to predicate processing
+        getPredicate: function (cols, field, updateModel) {
+            this._isUrlAdaptor = this._ctrlInstance._dataSource() instanceof BoldBIDashboard.DataManager && (this._ctrlInstance._dataSource().adaptor instanceof BoldBIDashboard.UrlAdaptor || this._ctrlInstance._dataSource().adaptor instanceof BoldBIDashboard.WebMethodAdaptor);
+            var c, dis = field != undefined ? [field] : BoldBIDashboard.distinct(cols, "field", false), collection, pred = {};
+            for (var f = 0, flen = dis.length; f < flen; f++) {
+                collection = new BoldBIDashboard.DataManager(cols).executeLocal(new BoldBIDashboard.Query().where("field", "in", dis[f]));
+                pred[dis[f]] = this.generatePredicate(collection);
+                if (updateModel) {
+                    this._predicates[this._bbdesigner$key] = this._predicates[this._bbdesigner$key] || {};
+                    this._predicates[this._bbdesigner$key][dis[f]] = pred[dis[f]];
+                }
+
+            }
+            return pred;
+        },
+
+        generatePredicate: function (cols) {
+            var len = cols ? cols.length : 0, predicate, first;
+            if (!len) return;
+            first = this._updateDateFilter(cols[0]);
+            if(this._isUrlAdaptor && (first.type == "date" || first.type == "datetime"))
+                predicate = this._getDatePredicate(first);
+            else
+                predicate = first.ejpredicate ? first.ejpredicate : BoldBIDashboard.Predicate(first.field, first.operator, first.value, first.ignoreCase || !first.matchcase, first.ignoreAccent || !first.accent);
+            for (var p = 1; p < len; p++) {
+                cols[p] = this._updateDateFilter(cols[p]);
+                if (this._isUrlAdaptor && len > 2 && p > 1 && cols[p].predicate == "or"){
+                    if (cols[p].type == "date" || cols[p].type == "datetime")                        
+                        predicate.predicates.push(this._getDatePredicate(cols[p]));             
+                    else
+                        predicate.predicates.push(BoldBIDashboard.Predicate(cols[p].field, cols[p].operator, cols[p].value, cols[p].ignoreCase || !cols[p].matchcase, cols[p].ignoreAccent || !cols[p].accent));
+                }
+                else{
+                    if (this._isUrlAdaptor && (cols[p].type == "date" || cols[p].type == "datetime"))
+                        predicate = predicate[cols[p].predicate](this._getDatePredicate(cols[p]));
+                    else
+                        predicate = cols[p].ejpredicate ? predicate[cols[p].predicate](cols[p].ejpredicate) : predicate[cols[p].predicate](cols[p].field, cols[p].operator, cols[p].value, cols[p].ignoreCase || !cols[p].matchcase, cols[p].ignoreAccent || !cols[p].accent);
+                }
+            }
+            return predicate || null;
+        },
+        _getDatePredicate: function(predicate){
+            return BoldBIDashboard.Predicate(predicate.field, predicate.operator, predicate.value, predicate.ignoreCase || !predicate.matchcase, predicate.ignoreAccent || !predicate.accent);           
+        },
+        getFilterFrom: function (dm, data) {
+            var data = BoldBIDashboard.distinct(data, this.fName, false);
+                        
+            if (this.maxItemOnQuery > 0) data = data.slice(0, this.maxItemOnQuery);
+			
+			if (data.length == 1) {
+				var optr = this._bbdesigner$foreignKeyType == "string" ? "startswith" : "in";
+				var _isCase = this._bbdesigner$foreignKeyType == "string" ? this._matchCase : true;
+	            var _isAccent = this._bbdesigner$foreignKeyType == "string" ? this._accent : true;
+				return BoldBIDashboard.Predicate(this.fName, optr, data[0], _isCase, _isAccent);
+			}
+                        
+            return BoldBIDashboard.UrlAdaptor.prototype.getFiltersFrom(data, new BoldBIDashboard.Query().foreignKey(this._bbdesigner$foreignKey)); /*get [or] conditioned ejPredicate*/
+        },
+        /*Main Dialog*/
+        renderDialog: function (type) {
+            this._bbdesigner$colType = type;
+            var dlgId = this.id + type + "_excelDlg";           
+            //if (bbdesigner$("#" + dlgId).length != 0)
+            //    return;
+            var bbdesigner$dlg = BoldBIDashboard.buildTag("div#" + dlgId + ".e-excelfilter e-js e-dlgcontainer e-shadow");
+            var bbdesigner$ul = BoldBIDashboard.buildTag("ul#" + this.id + type + "_MenuItem");
+            var menuData = this._getMenuData(type);
+            bbdesigner$ul = this._createLiTag(bbdesigner$ul, menuData, false);
+            var bbdesigner$searchBox = BoldBIDashboard.buildTag("span.e-searchbox e-fields").append(BoldBIDashboard.buildTag("input#" + this.id + type + "_SearchBox.e-ejinputtext e-searchinput", {}, {}, { "type": "text", "placeholder": this.localizedLabels.Search })).append(BoldBIDashboard.buildTag("span.e-search e-icon"))
+            var bbdesigner$lbox = BoldBIDashboard.buildTag("div#" + this.id + type + "_CheckBoxList.e-checkboxlist e-fields").append(BoldBIDashboard.buildTag("div"));
+            var bbdesigner$btns = this._createBtn();
+            var bbdesigner$sBox = BoldBIDashboard.buildTag("div.e-searchcontainer");            
+            var bbdesigner$status = BoldBIDashboard.buildTag("div.e-status e-fields e-hide", this.localizedLabels.CheckBoxStatusMsg);
+            bbdesigner$dlg.append(bbdesigner$ul);            
+            bbdesigner$sBox.append(bbdesigner$searchBox);
+            bbdesigner$sBox.append(bbdesigner$status);
+            bbdesigner$sBox.append(bbdesigner$lbox);
+            bbdesigner$sBox.append(bbdesigner$btns);
+            bbdesigner$dlg.append(bbdesigner$sBox);
+            bbdesigner$dlg.appendTo(this._ctrlInstance.element);
+            bbdesigner$dlg.css("display", "none");
+            this._renderCustomFDlg(type);
+            this._dialogContainer = bbdesigner$dlg;
+            if(this._cssClass!=null)
+                bbdesigner$dlg.addClass(this._cssClass);
+            if (!this._showSort) {
+                bbdesigner$ul.find(".e-fnsort").closest("li").css("display", "none");
+                bbdesigner$ul.find("li.e-separator:first").css("display", "none");
+            }
+            this._lsitBoxTemplate();
+            this._renderSubCtrls(type);
+            if (BoldBIDashboard.browserInfo().name == "msie" && BoldBIDashboard.browserInfo().version < 10)
+                BoldBIDashboard.ieClearRemover(bbdesigner$searchBox.find("input")[0]);
+            this._wireEvents();
+        },
+        _getDeprecatedLocalizedLabel: function (key) {
+            if (["Ok", "OK"].indexOf(key) != -1)
+                return this.localizedLabels.Ok || this.localizedLabels.OK;
+        },
+        _renderSubCtrls: function (type) {
+            bbdesigner$("#" + this.id + type + "_MenuItem").BoldBIDashboardMenu({ orientation: "vertical", width: 266, container: "#" + this.id, click: BoldBIDashboard.proxy(this._menuHandler, this), enableRTL: this._ctrlInstance.model.enableRTL, enableSeparator: false });
+            bbdesigner$("#" + this.id + type + "_OkBtn").BoldBIDashboardButton({ text: this._getDeprecatedLocalizedLabel("OK"), showRoundedCorner: true, width: 60, click: BoldBIDashboard.proxy(this._fltrBtnHandler, this), enabled: true });
+            bbdesigner$("#" + this.id + type + "_CancelBtn").BoldBIDashboardButton({ text: this.localizedLabels.Cancel, showRoundedCorner: true, width: 60, click: BoldBIDashboard.proxy(this.closeXFDialog, this) });
+            bbdesigner$("#" + this.id + type + "_CheckBoxList").BoldBIDashboardScroller({ height: 130, width: 234, scroll: BoldBIDashboard.proxy(this._virtualize,this) });
+            bbdesigner$("#" + this.id + type + "_CheckBoxList").BoldBIDashboardWaitingPopup({ showOnInit: false });
+        },
+        openXFDialog: function (options) {
+			var obj;
+            this.fName = options["field"];
+            this._dataSource = options["dataSource"];
+            this._bbdesigner$colType = options["type"] || "string";
+            this._bbdesigner$format = options["format"] || "";
+            this._enableResponsiveRow=options["enableResponsiveRow"];
+            this.filteredColumn = options["filteredColumns"] || this._ctrlInstance.model.filterSettings.filteredColumns;
+            this.sortedColumns = options["sortedColumns"] || this._ctrlInstance.model.sortSettings.sortedColumns;
+            this._displayName = options["displayName"];
+            this.query = options["query"] || new BoldBIDashboard.Query();
+            this._bbdesigner$key = options["key"] || 0;
+			this._bbdesigner$tableID = options["tableID"];
+			this._bbdesigner$blankVal = BoldBIDashboard.isNullOrUndefined(this._bbdesigner$tableID) ? this._bbdesigner$blankVal : options["blank"];
+            this._bbdesigner$selectedColors = options["selectedColors"] || [];
+            this._bbdesigner$enableColor = options["enableColor"] || false;
+            this._bbdesigner$filteredByColor = options["filteredByColor"] || this._bbdesigner$filteredByColor;
+			this._bbdesigner$foreignField = options["foreignKeyValue"];
+			this._bbdesigner$foreignData = options["foreignDataSource"];
+			this._bbdesigner$foreignKey = options["foreignKey"];
+			this._bbdesigner$foreignKeyType = options["foreignKeyType"];
+			if (this._bbdesigner$foreignData instanceof BoldBIDashboard.DataManager && (this._bbdesigner$foreignData.adaptor instanceof BoldBIDashboard.ODataAdaptor || this._bbdesigner$foreignData.adaptor instanceof BoldBIDashboard.ODataV4Adaptor || this._bbdesigner$foreignData.adaptor instanceof BoldBIDashboard.WebApiAdaptor))
+			    this.maxItemOnQuery = 50;
+			bbdesigner$.extend(this.localizedLabels, options["localizedStrings"] || {});
+            var args = { requestType : "filterbeforeopen", filterModel : this, columnName:this.fName, columnType: this._bbdesigner$colType };
+            if (this._ctrlInstance._trigger(this._onActionBegin, args))
+                return;
+            if (this._openedFltr == null || !this._openedFltr.is(bbdesigner$("#" + this.id + this._bbdesigner$colType + "_excelDlg"))) {
+                this.closeXFDialog();
+                this._openedFltr = bbdesigner$("#" + this.id + this._bbdesigner$colType + "_excelDlg");
+            }
+            this._listsWrap = bbdesigner$("#" + this.id + this._bbdesigner$colType + "_CheckBoxList");
+            this._menuWrap = bbdesigner$("#" + this.id + this._bbdesigner$colType + "_MenuItem");
+            this._searchBox = this._openedFltr.find(".e-searchbox input");
+            this._setPosition(this._openedFltr, options["position"]);
+            this._openedFltr.addClass(options["cssClass"]);
+            this._openedFltr.fadeIn(300, function () {
+            });
+			var bbdesigner$popups = bbdesigner$("#" + this.id + this._bbdesigner$colType + "_MenuItem").find("li[ejfnrole='popup']");
+            if (this._bbdesigner$enableColor) {
+                this._createDivTag(bbdesigner$popups.eq(0).find(".e-shadow"), this._bbdesigner$selectedColors, false, "sort");
+                (this._bbdesigner$filteredByColor == -1 || (this._bbdesigner$filteredByColor.length < 1 || this._bbdesigner$filteredByColor === this.fName)) ? this._createDivTag(bbdesigner$popups.eq(1).find(".e-shadow"),this._bbdesigner$selectedColors, false, "filter") : bbdesigner$popups.eq(1).addClass("e-disable-item");
+            }    
+            else 
+                bbdesigner$popups.hide();
+            this._isFiltered = this._predicates[this._bbdesigner$key] != undefined && this._predicates[this._bbdesigner$key][this.fName] != undefined;
+            this._isFiltered = options["isFiltered"] || this._isFiltered;
+            if ((this._bbdesigner$colType == "date" || this._bbdesigner$colType == "datetime") && this._bbdesigner$format == "")
+                this._bbdesigner$format = this._bbdesigner$colType == "date" ? "{0:MM/dd/yyyy}" : "{0:MM/dd/yyyy hh:mm:ss}";
+            this._processListData();
+			obj = this._listsWrap.data("BoldBIDashboardScroller");
+            
+                        
+            this._setDisable();
+            var args = { requestType: "filterafteropen", filterModel: this, columnName: this.fName, columnType: this._bbdesigner$colType };
+            if (this._ctrlInstance._trigger(this._onActionComplete, args))
+                return;
+        },
+        closeXFDialog: function (e) {
+            if (e != null) {
+                var bbdesigner$target = bbdesigner$(e.target);
+                if (!(bbdesigner$target.closest("#" + this.id + this._bbdesigner$colType + "_CustomFDlg").length > 0 || bbdesigner$target.closest("#" + this.id + this._bbdesigner$colType + "_excelDlg").length > 0))
+                    return;
+            }            
+            if (this._openedFltr) {
+                if (!this._openedFltr.hasClass("e-dlgcustom")) {
+                    this._openedFltr.fadeOut(300, function () {
+                    });
+                    this._listsWrap.BoldBIDashboardWaitingPopup("hide");
+                }
+                else {
+                    this._openedFltr.BoldBIDashboardDialog("close");
+                }
+                !BoldBIDashboard.isNullOrUndefined(this._cancelHandler) && this._cancelHandler();
+                this.resetFilterModel();/*Reset private properties after filter closed*/
+                this._ctrlInstance._bbdesigner$fDlgIsOpen = false;
+            }
+        },
+        _setPosition: function (ele, pos) {
+            ele.css("position", "absolute");
+            ele.css("left", pos["X"]).css("top", pos["Y"]);                      
+        },
+        _setDisable: function () {
+            var bbdesigner$clr = this._menuWrap.find("li[ejfnrole='clearfilter']"), bbdesigner$fltr = this._menuWrap.find("li[ejfnrole='filterpopup']");
+            var bbdesigner$sort = this._menuWrap.find("li[ejfnrole *= 'sort']"), bbdesigner$checked = this._listsWrap.find("input").filter(":checked:not(.e-selectall)").length;
+            !this._isFiltered ? bbdesigner$clr.addClass("e-disable-item") : bbdesigner$clr.removeClass("e-disable-item");
+            if (this._showSort) {
+                var sQM = BoldBIDashboard.DataManager(this.sortedColumns).executeLocal(new BoldBIDashboard.Query().where("field", "in", this.fName));
+                ( sQM.length && sQM[0]["direction"] == "ascending") ? bbdesigner$sort.filter("[ejfnrole='sortAsc']").addClass("e-disable-item") : bbdesigner$sort.filter("[ejfnrole='sortAsc']").removeClass("e-disable-item");
+                (sQM.length && sQM[0]["direction"] == "descending") ? bbdesigner$sort.filter("[ejfnrole='sortDesc']").addClass("e-disable-item") : bbdesigner$sort.filter("[ejfnrole ='sortDesc']").removeClass("e-disable-item");
+            }
+            var bbdesigner$flteredList = bbdesigner$fltr.find(".aschild");
+            if (this.cFilteredCols.length != 0 && bbdesigner$.inArray(this.fName,this.cFilteredCols) != -1) {
+                for (var f = 0; f < this.filteredColumn.length; f++) {
+                    if (this.filteredColumn[f].field == this.fName) {
+                        if (bbdesigner$flteredList.find("#ejFiltercheck").length == 0) {
+                            bbdesigner$flteredList.append("<input type='checkbox' id='ejFiltercheck' />");
+                            bbdesigner$flteredList.find("#ejFiltercheck").BoldBIDashboardCheckBox({ checked: true });
+                            bbdesigner$flteredList.find("#ejFiltercheck").BoldBIDashboardCheckBox("disable");
+                        }
+                        if (bbdesigner$fltr.find(".e-shadow .e-exceltick").length > 0)
+                            bbdesigner$fltr.find(".e-shadow .e-exceltick").remove();
+                        if (this.filteredColumn[f].field == this.fName && !BoldBIDashboard.isNullOrUndefined(this.filteredColumn[f + 1]) && this.filteredColumn[f + 1].field == this.fName && (this._bbdesigner$foreignField && this.filteredColumn[f + 1].customFilter || !this._bbdesigner$foreignField)) {
+                            if (this.filteredColumn[f].operator == "greaterthanorequal" && this.filteredColumn[f + 1].operator == "lessthanorequal")
+                                bbdesigner$fltr.find(".e-shadow .e-list[ejvalue=between]").find("a").append("<span class='e-exceltick e-icon' />");
+                            else
+                                bbdesigner$fltr.find(".e-shadow .e-list[ejvalue=customfilter]").find("a").append("<span class='e-exceltick e-icon' />");
+                        }
+                        else if (this._bbdesigner$foreignField)
+                            bbdesigner$fltr.find(".e-shadow .e-list[ejvalue=" + this.filteredColumn[f].actualFilterOperator + "]").find("a").append("<span class='e-exceltick e-icon' />");
+                        else
+                            bbdesigner$fltr.find(".e-shadow .e-list[ejvalue=" + this.filteredColumn[f].operator + "]").find("a").append("<span class='e-exceltick e-icon' />");
+                        break;
+                    }
+                }
+            }
+            else {
+                for (var f = 0; f < this.filteredColumn.length; f++) {
+                    if (this.filteredColumn[f].field == this.fName) {
+                        this._removeTick(bbdesigner$fltr,bbdesigner$flteredList);
+                        break;
+                    }
+                }
+            }
+            if (!this._isFiltered && bbdesigner$flteredList.find("#ejFiltercheck").length != 0) {
+                 this._removeTick(bbdesigner$fltr,bbdesigner$flteredList);
+            }
+            if (this._bbdesigner$colType == "boolean")
+                this._menuWrap.find("li[aria-haspopup=true]").addClass("e-hide");            
+            this._searchBox.val(""); this._searchBox.siblings().addClass("e-search").removeClass("e-cancel");
+        },
+        _removeTick: function(bbdesigner$fltr,bbdesigner$flteredList){
+            bbdesigner$flteredList.find("#ejFiltercheck").BoldBIDashboardCheckBox("destroy");
+            bbdesigner$fltr.find(".aschild #ejFiltercheck").remove();
+            bbdesigner$fltr.find(".e-shadow .e-exceltick.e-icon").remove();
+        },
+        _createBtn: function (isCDlg) {
+            var id = isCDlg ? this.id + this._bbdesigner$colType + "Custom" : this.id + this._bbdesigner$colType;
+            var bbdesigner$divCon = BoldBIDashboard.buildTag("div.e-btncontainer e-fields");
+            var bbdesigner$div = BoldBIDashboard.buildTag("div");
+            bbdesigner$div.append(BoldBIDashboard.buildTag("input#" + id + "_OkBtn.e-fltrbtn e-btnsub e-flat bbi-dbrd-btn-small bbi-dbrd-btn-primary", {}, {}, { type: "button" })).append(BoldBIDashboard.buildTag("input#" + id + "_CancelBtn.e-fltrbtn e-btncan e-flat bbi-dbrd-btn-small bbi-dbrd-btn-secondary", {}, {}, { type: "button" }));
+            return bbdesigner$divCon.append(bbdesigner$div);
+        },
+        _menuHandler: function (args) {
+            var bbdesigner$ele = bbdesigner$(args.element);
+            var role = bbdesigner$ele.attr("ejfnrole");
+            var arg = {};
+            if (role === "filterbgcolor" || role === "filterfgcolor") {
+                var fDetails = { field: this.fName, operation: role, color: bbdesigner$(args.element).css('background-color')};
+			    arg = { originalEvent: args.event, action: "filterbycolor", filterDetails: fDetails, tableID: this._bbdesigner$tableID }; 
+                this._isFiltered = false;
+            }
+            else if (role == "clearfilter") {
+                var ftrDetails = { field: this.fName, operator: "", value: "", predicate: "or" };
+                arg = { originalEvent: args.event, fieldName: this.fName, action: "clearfiltering", filterDetails: ftrDetails, tableID: this._bbdesigner$tableID };
+                var indx = bbdesigner$.inArray(this.fName, this.cFilteredCols);
+                indx!=-1 && this.cFilteredCols.splice(indx, 1);
+				var bbdesigner$cIndx = bbdesigner$.inArray(this.fName, this._columnsFiltered);
+                bbdesigner$cIndx!=-1 && this._columnsFiltered.splice(bbdesigner$cIndx, 1);
+                if (this._initialFName == this.fName)
+                    this._initialFName = null;
+            }
+            else if(role == "popup" || role == "filterpopup") {
+                return;
+            }
+            else if (role == "operator") {
+                this._openCustomFilter(bbdesigner$ele.attr("ejvalue"));
+            }
+			else{
+                var sOrder, sDetails;
+				if(role == "sortAsc" || role == "sortDesc"){
+					sOrder = role == "sortAsc" ? "ascending" : "descending";
+					sDetails = { field: this.fName, direction: sOrder };
+					arg = { originalEvent: args.event, action: "sorting", sortDetails: sDetails, tableID: this._bbdesigner$tableID };
+				}
+				else{
+					sDetails = { field: this.fName, direction: sOrder, operation: role, color: bbdesigner$(args.element).css('background-color')};
+					arg = { originalEvent: args.event, action: "sortbycolor", sortDetails: sDetails, tableID: this._bbdesigner$tableID }; 
+				}
+            }
+            if (role != "operator") {
+                this._filterHandler(arg);
+                this.closeXFDialog();
+            }
+        },
+        _searchBoxFocus: function (e) {
+            var bbdesigner$target = bbdesigner$(e.target);
+            if (bbdesigner$target.hasClass("e-cancel")) {
+                bbdesigner$target.prev().val("");
+                bbdesigner$target.next().addClass("e-cancel")
+                bbdesigner$target.addClass("e-search");
+                bbdesigner$target.prev().trigger("keyup");
+            }
+            if (e.type == "focusin") {
+                bbdesigner$target.next().addClass("e-cancel");
+                bbdesigner$target.next().removeClass("e-search");
+            }
+        },
+        _search: function (e) {
+            var enterText = e.target.value, args = {}, parsed, operator, bbdesigner$target = bbdesigner$(e.target);
+            parsed = (this.getType() != "string" && parseFloat(enterText)) ? parseFloat(enterText) : enterText;
+            operator ="contains" ;
+            parsed = (parsed == "" || parsed == undefined) ? undefined : parsed;
+            if (this._bbdesigner$colType == "boolean") {
+                if (parsed != undefined && this.localizedLabels.True.toLocaleLowerCase().indexOf(parsed.toLowerCase()) != -1)
+                    parsed = "true";
+                else if (parsed != undefined && this.localizedLabels.False.toLocaleLowerCase().indexOf(parsed.toLowerCase()) != -1)
+                    parsed = "false";
+            }
+            if (this._bbdesigner$colType == "date" || this._bbdesigner$colType == "datetime") {
+                parsed = BoldBIDashboard.parseDate(enterText, this.replacer(this._bbdesigner$format, /{0:|}/g, ""));
+                operator = "in";
+                if (this._previousValue == null && parsed == null)
+                    return;
+            }
+            this._previousValue = parsed;
+            delay = this._dataSource instanceof BoldBIDashboard.DataManager && (this._ctrlInstance._gridRecordsCount > this._ctrlInstance.model.filterSettings.maxFilterChoices) ? 1500 : 0;
+            sender = { type: "filterchoicesearch", value: parsed, operator: operator, matchcase: ["date", "datetime"].indexOf(this._bbdesigner$colType) != -1 ? false : this._matchCase, accent: this._accent }
+            this._processSearch(sender, delay);
+            if (bbdesigner$target.val() == "") {
+                bbdesigner$target.next().addClass("e-search");
+                bbdesigner$target.next().removeClass("e-cancel");
+            } else {
+                bbdesigner$target.next().addClass("e-cancel");
+                bbdesigner$target.next().removeClass("e-search");
+            }
+        },
+        _processSearch: function (sender, delay) {
+            if (!this._alreadySearchProcessed) {
+                this._alreadySearchProcessed = true;
+                this._startTimer(sender, delay);
+            } else {
+                this._stopTimer();
+                this._startTimer(sender, delay);
+            }
+        },
+        _startTimer: function (sender, delay) {
+			proxy = this;
+            this._timer = window.setTimeout(
+                function () {
+                    proxy._processListData(sender);
+                }, delay)
+        },
+        _stopTimer: function () {
+            if (this._timer != null)
+                window.clearTimeout(this._timer);
+        },
+        _getLocalizedLabel: function (property) {
+            return BoldBIDashboard.getLocalizedConstants("BoldBIDashboard.ExcelFilter", this._locale);
+        },
+        _getMenuData: function (type) {
+            return type != undefined ? this[type + "MenuOpt"] : [];
+        },
+		_checkHtmlEncode: function(key){
+           var isEncode = !BoldBIDashboard.isNullOrUndefined(this._ctrlInstance.getColumnByField) ? this._ctrlInstance.getColumnByField(this.fName).disableHtmlEncode : false;
+           var bool = !BoldBIDashboard.isNullOrUndefined(isEncode) && isEncode  ? true : false;
+           return bool;
+        },
+        /*CheckBox list*/
+        _lsitBoxTemplate: function () {
+            var helper = {}, temp = {};            
+            helper[this.id + "isNotBlank"] = BoldBIDashboard.proxy(this.isNotBlank, this);
+            helper[this.id + "checkBlank"] = BoldBIDashboard.proxy(this._checkBlank, this);
+            helper[this.id + "_getValueData"] = BoldBIDashboard.proxy(this._getValueData, this);            
+            helper[this.id + "_checkBoxState"] = BoldBIDashboard.proxy(this._setCheckState, this);          
+            helper[this.id + "_htmlEncode"] = BoldBIDashboard.proxy(this._checkHtmlEncode, this);    
+            helper[this.id + "_genId"] = this._genCheckID;
+            bbdesigner$.views.helpers(helper); 			
+            var genID = this.id + this._bbdesigner$colType + "{{:~" + this.id + "_genId()}}";
+            temp[this.id + this._bbdesigner$colType + "_listBox_Template"] = "{{if ~" + this.id + "checkBlank(key)}}<div class='e-ftrchk'><input type='checkbox' id='" + genID + "' value='{{html:~" + this.id + "_getValueData(key, items)}}' class='e-ftrchk' {{:~" + this.id + "_checkBoxState(~" + this.id + "_getValueData(key, items))}}/><label class='e-ftrchk' for='" + genID + "'>{{if ~" + this.id + "isNotBlank(key,'true')}} {{if ~" + this.id + "_htmlEncode(key)}} {{>key}} {{else}} {{:key}} {{/if}} {{else}} (Blanks) {{/if}}</label></div>{{/if}}";
+            bbdesigner$.templates(temp);
+        },
+      
+        _processListData: function (params) {
+            var result, promise, args = {}, query = new BoldBIDashboard.Query(), searchQuery = new BoldBIDashboard.Query().requiresCount(), evtArgs = {}; this._searchCount = 0;
+            var predicates = this._predicates[this._bbdesigner$key], pred;
+			if(proxy.query._expands.length)
+                query._expands = proxy.query._expands;
+			var data = null, columnName = null, localJSON = null, result = null;
+			if(BoldBIDashboard.isNullOrUndefined(this._bbdesigner$foreignField && this._bbdesigner$foreignData)){
+				data = this._dataSource; 
+				columnName =  this.fName;
+				localJSON = this._localJSON;
+			}
+			else{
+				data = localJSON = this._bbdesigner$foreignData; 
+				if(this._dataSource instanceof BoldBIDashboard.DataManager && !(data instanceof BoldBIDashboard.DataManager))
+                    data = BoldBIDashboard.DataManager(data);
+				columnName = this._bbdesigner$foreignField;
+			}
+            for (var prop in predicates) {
+                if (prop == this.fName)
+                    continue;
+                var obj = predicates[prop], from = obj["from"];
+                if (from)
+                    query.skip(from == "top" ? 0 : data.length - (data.length - obj["take"])).take(obj["take"]);
+                else
+                    pred = pred != undefined ? pred["and"](obj) : obj;
+            }
+            args.columnName = columnName;           
+            query.requiresCount();
+            if (this._dataSource instanceof BoldBIDashboard.DataManager && !this._dataSource.dataSource.offline && this._ctrlInstance._gridRecordsCount > this._ctrlInstance.model.filterSettings.maxFilterChoices) {
+                query.take(this.maxFilterChoices);
+                this._onDemandSearch = true;
+            }
+		    pred && query.where(pred);
+            BoldBIDashboard.merge(query.queries, this.query.queries) || BoldBIDashboard.merge(query._params, this.query._params)
+            evtArgs.requestType = params ? params.type : "filterchoicerequest",evtArgs.filterModel = this, evtArgs.query = query, evtArgs.dataSource = data;
+            if(evtArgs.requestType == "filterchoicesearch")
+				evtArgs.queryParams = params;
+			if (this._ctrlInstance._trigger(this._onActionBegin, evtArgs))
+                return;
+            if (!BoldBIDashboard.isNullOrUndefined(this._searchHandler) && this._searchHandler.key.length) {
+                var searchDetails = this._searchHandler;
+                query.search(searchDetails.key, searchDetails.fields, searchDetails.operator || "contains", searchDetails.ignoreCase || true, searchDetails.ignoreAccent || true);
+            }
+            if (this.enableSelect)
+                query.select(this.fName);
+            if (params && params.type == "filterchoicesearch") {
+                this._clearSearchValue = BoldBIDashboard.isNullOrUndefined(params.value) ? true : false;
+                args.type = params.type;
+                args.value = params.value;
+                if (this._bbdesigner$foreignField) query = searchQuery;
+                params.value && query.where(columnName, params.operator, params.value, !params.matchcase, params.accent);
+                if (this._dataSource instanceof BoldBIDashboard.DataManager && this._ctrlInstance._gridRecordsCount > this._ctrlInstance.model.filterSettings.maxFilterChoices) {
+                    this._searchRequest = true;
+					var type = this._bbdesigner$colType;
+                    var dlgId = this.id + type + "_excelDlg";   
+                    if(bbdesigner$("#" + dlgId).is(":visible"))
+                     //this._listsWrap.BoldBIDashboardWaitingPopup("show");
+                    if (this._bbdesigner$foreignField) {
+                        var frKeyData = this._bbdesigner$foreignData instanceof BoldBIDashboard.DataManager ? this._bbdesigner$foreignData : BoldBIDashboard.DataManager(this._bbdesigner$foreignData);
+                        this._dataProcessing(frKeyData, query, args);
+                    }
+                    else
+                        this._dataProcessing(this._dataSource, query, args);
+                }
+                else
+                    this._dataProcessing(BoldBIDashboard.DataManager(this._localJSON), query, args);
+            }
+            else if (!(this._dataSource instanceof BoldBIDashboard.DataManager)) {
+				var result = [];
+                promise = BoldBIDashboard.DataManager(this._dataSource).executeLocal(query);
+                args.type = "filterchoicerequest";
+                if (this._bbdesigner$foreignField)
+                    this._filterForeignData(promise, args);
+                else {
+                    result = promise.result;
+                    args.data = this._localJSON = this._currentData = result;
+                    this._totalRcrd = promise.count;
+                    this._setCheckBoxList(args);
+                }
+            }
+            else {
+                proxy = this; args.type = "filterchoicerequest";
+                //this._listsWrap.BoldBIDashboardWaitingPopup("show");
+                if (!this._reqInProgess) {
+                    this._reqInProgess = true;
+					if(this._bbdesigner$foreignField)
+                        data = this._dataSource;
+                    promise = data.executeQuery(query);
+                    promise.done(function (e) {
+                        if (proxy._bbdesigner$foreignField)
+                            proxy._filterForeignData(e, args);
+                        else {
+                            result = e.result;
+                            args.data = proxy._localJSON = proxy._currentData = result;
+                            proxy._totalRcrd = e.count;
+                            proxy._listsWrap.BoldBIDashboardWaitingPopup("hide");
+                            proxy._setCheckBoxList(args);;
+                            proxy._reqInProgess = false;
+                        }
+                    });
+                }
+            }           
+        },
+        _dataProcessing: function (dataSource, query, args) {
+            var result, promise;
+            promise = dataSource.executeQuery(query);
+            promise.done(function (e) {
+                args.data = proxy._currentData = e.result;
+                proxy._totalRcrd = proxy._searchCount = e.result.length;
+                proxy._setCheckBoxList(args);
+            });
+        },
+        _filterForeignData: function (fromPromise, args) {
+            var custom = typeof args === "boolean", key = this._bbdesigner$foreignKey,
+               field = this._bbdesigner$foreignField, type = this._bbdesigner$foreignKeyType,
+                result, count, proxy = this, defaults = {}, pred, tmp, actuals, query = new BoldBIDashboard.Query(),
+                dm = this._bbdesigner$foreignData instanceof BoldBIDashboard.DataManager ? this._bbdesigner$foreignData : BoldBIDashboard.DataManager(this._bbdesigner$foreignData);
+            if (!custom) {
+                result = fromPromise.result, count = fromPromise.count;
+                if (!!count)
+                    query.where(this.getFilterFrom(this._bbdesigner$foreignData, result));
+                if (!this._listsWrap.BoldBIDashboardWaitingPopup("model.showOnInit"))
+                    this._listsWrap.BoldBIDashboardWaitingPopup("show");
+            }
+            else {
+                tmp = fromPromise[0], defaults = fromPromise[0], actuals = fromPromise.slice();
+                if (!!tmp)
+                    this.closeXFDialog();
+                pred = new BoldBIDashboard.Predicate(field, tmp.operator, tmp.value, !tmp.matchcase, !tmp.accent);
+                for (var i = 1, tmp, len = fromPromise.length; i < len; i++) {
+                    tmp = fromPromise[i], pred = pred[tmp.predicate](field, tmp.operator, tmp.value, !tmp.matchcase, !tmp.accent);
+                }
+                query.where(pred);
+            }
+            query.select([key, field]);
+            dm.executeQuery(query).done(function (e) {
+                if (!custom) {
+                    args.data = proxy._localJSON = proxy._currentData = e.result;
+                    proxy._totalRcrd = count;
+                    proxy._listsWrap.BoldBIDashboardWaitingPopup("hide");
+                    proxy._setCheckBoxList(args);
+                    proxy._reqInProgess = false;
+                } else {
+                    var dst = BoldBIDashboard.distinct(e.result, key, true), dst = 0 in dst ? dst : [{}];
+                    var coll = dst.map(function (val, ind) {
+                        return bbdesigner$.extend({}, defaults, { value: val[key], operator: "in", actuals: actuals, type: type });
+                    });
+                    proxy.initiateFilter(coll);
+                }
+            });
+        },
+        _setCheckBoxList: function (args) {
+            var evtArgs = {}, _blank ="", sortedData, flag, blank = this._blanks, bbdesigner$checked;
+            evtArgs.requestType = args.type, evtArgs.dataSource = this._dataSource, evtArgs.filterModel = this;
+            if (this._currentData.length != 0) {                
+                sortedData = this.getDistinct(args.data, args.columnName, true, !!this._bbdesigner$foreignKey);
+                flag = this._isFiltered;                
+                this._actualCount = sortedData.length; sortedData.length = this._maxCount > this._actualCount ? this._actualCount : this._maxCount;               
+                (this._onDemandSearch && this._actualCount == 1000) || this._actualCount >= this._maxCount ? this._openedFltr.find("div.e-status").removeClass("e-hide") : this._openedFltr.find("div.e-status").addClass("e-hide");
+                this._islargeData = this._maxCount < this._actualCount ? true : false;
+				this._filterdCol = BoldBIDashboard.DataManager(this.filteredColumn).executeLocal(BoldBIDashboard.Query().where("field", "in", this.fName));               
+				if ((args.type == "filterchoicesearch") && (!BoldBIDashboard.isNullOrUndefined(args.value)))
+                    this._listsWrap.find("div:first").html([this._selectAll, this._addToFilter, bbdesigner$.render[this.id + this._bbdesigner$colType + "_listBox_Template"](sortedData),  (BoldBIDashboard.isNullOrUndefined(args.value) && this._addAtLast) ? this.replacer(blank, /@@/g, this._setCheckState, this._empties.join(this._spliter)) : ""].join(""));                
+                else 
+                    this._listsWrap.find("div:first").html([this._selectAll, bbdesigner$.render[this.id + this._bbdesigner$colType + "_listBox_Template"](sortedData),  (BoldBIDashboard.isNullOrUndefined(args.value) && this._addAtLast) ? this.replacer(blank, /@@/g, this._setCheckState, this._empties.join(this._spliter)) : ""].join(""));                
+                this._chkList = this._listsWrap.find("input:checkbox").not(".e-selectall,.e-addtofilter"), bbdesigner$inView = this._chkList.slice(0, 20);
+                bbdesigner$inView.BoldBIDashboardCheckBox({ change: BoldBIDashboard.proxy(this._checkHandler, this) });
+                bbdesigner$inView.siblings().height(14).width(14);
+                this._listsWrap.find(".e-addtofilter").BoldBIDashboardCheckBox({ change: BoldBIDashboard.proxy(this._addToFilterHandler, this) });
+                this._listsWrap.find(".e-addtofilter").attr("id", this.id + this._bbdesigner$colType + "AddToFilter");
+                this._listsWrap.find(".e-selectall").BoldBIDashboardCheckBox({ change: BoldBIDashboard.proxy(this._selectAllHandler, this), enableTriState: this._interDeterminateState, beforeChange: this._selectAllBeforeHandler });
+				this._listsWrap.find(".e-selectall").attr("id",this.id + this._bbdesigner$colType + "SelectAll");
+                this._listsWrap.find(".e-selectall,.e-addtofilter").siblings().height(14).width(14);
+				this._listsWrap.find(".e-selectall").closest("span").siblings("label").attr("for", this.id + this._bbdesigner$colType + "SelectAll");
+            }
+            else
+            {
+                this._listsWrap.find("div").first().html(BoldBIDashboard.buildTag("div.e-ftrchk", this.localizedLabels.NoResult, {}, {}));
+                this._chkList = this._listsWrap.find("input:checkbox").not(".e-selectall");
+            }
+            if (!BoldBIDashboard.isNullOrUndefined(this._chkList))
+                bbdesigner$checked = this._chkList.filter(":checked").length;
+            if (this._isFiltered && this._searchRequest && bbdesigner$checked == 0)
+                this._checkIsIndeterminate(args.columnName, this.filteredColumn);
+            if (!this._isFiltered || this._actualCount == bbdesigner$checked)
+                this._listsWrap.find(".e-selectall").BoldBIDashboardCheckBox({ checked: true });
+            else if (bbdesigner$checked > 0 || this._isIndeterminate && this._interDeterminateState)
+                this._listsWrap.find(".e-selectall").BoldBIDashboardCheckBox('model.checkState', 'indeterminate');
+            bbdesigner$("#" + this.id + this._bbdesigner$colType + "_OkBtn").BoldBIDashboardButton({ enabled: bbdesigner$checked != 0 });
+            this._listsWrap.BoldBIDashboardScroller({ scrollTop: 0 }).BoldBIDashboardScroller("refresh");
+             if(this._listsWrap.hasClass('e-waitingpopup'))
+                this._listsWrap.BoldBIDashboardWaitingPopup("hide");
+            if (this._ctrlInstance._trigger(this._onActionComplete, evtArgs))
+                return;
+            this._isIndeterminate = false;
+            this._checkedValue = [];
+            if (args.type == "filterchoicerequest") {
+                this._preChkList = this._chkList;
+                this._checked = this._preChkList.filter(":checked");
+            }
+            if (this._listsWrap.find(".e-addtofilter").length)
+                this._add = this._listsWrap.find(".e-addtofilter");
+            else
+                this._add = null;
+        },
+        _addToFilterHandler: function (args) {
+            bbdesigner$("#" + this.id + this._bbdesigner$colType + "_OkBtn").BoldBIDashboardButton({ enabled: args.isChecked || !!this._chkList.filter(":checked").length });
+        },
+        _checkIsIndeterminate: function (colName, filteredCol) {
+            for (var i = 0 ; i < filteredCol.length; i++) {
+                if (colName == filteredCol[i].field)
+                    this._isIndeterminate = true;
+            }
+        },
+        _createLiTag: function (bbdesigner$ul, menuData, isChild) {
+            proxy = this;
+            bbdesigner$.each(menuData, function (index, obj) {
+                var bbdesigner$li = BoldBIDashboard.buildTag("li", {}, {}, obj["htmlAttribute"] || (isChild && { "ejfnrole": "operator", "ejvalue": obj.value }) || {}), bbdesigner$child;
+                var apd = (isChild && bbdesigner$.inArray(obj.value,proxy._noDlg)==-1) ? "..." : "";
+                var bbdesigner$a = BoldBIDashboard.buildTag("a", obj.text + apd, {}, {});
+                obj["sprite"] != undefined && bbdesigner$a.append(BoldBIDashboard.buildTag("span", {}, {}, { "class": obj["sprite"] }))
+                if (obj["child"] != undefined){
+                    if(obj.id != 3 && obj.id != 5)
+                        bbdesigner$child = proxy._createLiTag(BoldBIDashboard.buildTag("ul.e-shadow"), obj["child"], true);
+                    else if(obj.id === 3 )
+                        bbdesigner$child = proxy._createDivTag(BoldBIDashboard.buildTag("ul.e-shadow"), obj["child"], true, "sort");
+                    else
+                        bbdesigner$child = proxy._createDivTag(BoldBIDashboard.buildTag("ul.e-shadow"), obj["child"], true, "filter");
+				}
+                obj["child"] == undefined ? bbdesigner$ul.append(bbdesigner$li.append(bbdesigner$a)) : bbdesigner$ul.append(bbdesigner$li.append(bbdesigner$a).append(bbdesigner$child))
+                if (bbdesigner$.inArray(obj.value || (obj.htmlAttribute && obj.htmlAttribute.ejfnrole), proxy._sepAftr) != -1)
+                    bbdesigner$ul.append(BoldBIDashboard.buildTag("li.e-separator"));
+            });
+            return bbdesigner$ul;
+        },
+		
+		_createDivTag: function (bbdesigner$ul, menuData, isChild, reqType) {
+            var bbdesigner$li, bbdesigner$a, bbdesigner$div, bgColor = [], fgColor = [], avble = false, cellcolor = "", fontcolor = "", selCellHdr = "", selCellClr = "", selFontHdr = "", selFontClr = "";
+            if (reqType == "sort") {
+                cellcolor = this.localizedLabels.SortByCellColor;
+                fontcolor = this.localizedLabels.SortByFontColor;
+            }
+            else{
+                cellcolor = this.localizedLabels.FilterByCellColor;
+                fontcolor = this.localizedLabels.FilterByFontColor;
+            }
+			selCellHdr = reqType + "colorhdr";
+            selFontHdr = reqType + "fonthdr";
+            selCellClr = reqType + "bgcolor";
+            selFontClr = reqType + "fgcolor";
+            (bbdesigner$ul.length > 0) && bbdesigner$ul.children().remove();
+            if(menuData.length > 0){
+			    for(var i = 0; i < menuData.length; i++){
+				    for(var j = 0; j < bgColor.length; j++){
+					    if(bgColor[j] == menuData[i].background){
+						    avble = true;
+						    break;
+					    }
+				    }
+				    if(!avble && (!BoldBIDashboard.isNullOrUndefined(menuData[i].background) && !menuData[i].background.startsWith('#6n'))) 
+                        bgColor.push(menuData[i].background);
+				    avble = false;
+				    for(var j = 0; j < fgColor.length; j++){
+					    if(fgColor[j] == menuData[i].foreground){
+						    avble = true;
+						    break;
+					    }
+				    }
+				    if(!avble && (!BoldBIDashboard.isNullOrUndefined(menuData[i].foreground) && !menuData[i].foreground.startsWith('#6n'))) 
+                        fgColor.push(menuData[i].foreground);
+				    avble = false;
+			    }
+                if(bgColor.length > 0){
+                    bbdesigner$li = BoldBIDashboard.buildTag("li.e-list e-bghdrcolor", "", "" , {"ejfnrole": selCellHdr });
+                    bbdesigner$a = BoldBIDashboard.buildTag("a.e-menulink", cellcolor, {});
+                    bbdesigner$li.append(bbdesigner$a);
+                    bbdesigner$ul.append(bbdesigner$li);
+			        for(var i = 0; i < bgColor.length; i++){
+                        bbdesigner$li = BoldBIDashboard.buildTag("li.e-list e-valcolor", {}, {'background-color': bgColor[i]}, {"ejfnrole": selCellClr });
+                        bbdesigner$ul.append(bbdesigner$li);
+			        }
+                }
+                if(fgColor.length > 0){
+			        bbdesigner$li = BoldBIDashboard.buildTag("li.e-list e-fghdrcolor", "", "" , {"ejfnrole": selFontHdr });
+                    bbdesigner$a = BoldBIDashboard.buildTag("a.e-menulink", fontcolor, {});
+                    bbdesigner$li.append(bbdesigner$a);
+                    bbdesigner$ul.append(bbdesigner$li);
+                    for(var i = 0; i < fgColor.length; i++) {
+                        bbdesigner$li = BoldBIDashboard.buildTag("li.e-list e-valcolor", {}, {'background-color': fgColor[i]}, {"ejfnrole": selFontClr });
+                        bbdesigner$ul.append(bbdesigner$li);
+                    }
+                }
+                (bgColor.length < 1 && fgColor.length < 1) ? bbdesigner$ul.parent().addClass("e-disable-item"): bbdesigner$ul.parent().removeClass("e-disable-item");
+            }
+            else {
+                bbdesigner$ul.parent().addClass("e-disable-item");
+            }
+            return bbdesigner$ul;
+        },
+		
+        _setCheckState: function (value) {           
+            var val = value, fobj, splts = value.split(this._spliter), splen = splts.length, flag = false;           
+            if (!this._isFiltered || this._searchCount)
+                return "checked";
+            else {
+               
+                while (splen--) { /*looped for split values*/
+                    val = this.processValue(splts[splen]);
+
+                    //Date and boolean will be checked as iteration due to 
+                    if (this._bbdesigner$colType == "date" || this._bbdesigner$colType == "datetime" || this._bbdesigner$colType == "boolean") {
+                        for (var i = 0, len = this._filterdCol.length; i < len; i++) {
+                            if (this._bbdesigner$colType == "boolean" && val !== this._filterdCol[i].value)
+                                continue;
+                            if (this._bbdesigner$colType == "date" || this._bbdesigner$colType == "datetime") {
+								var filterval = this._filterdCol[i].value;
+                                var firstVal = this._bbdesigner$colType == "date" && val instanceof Date ? this._formatting(this._bbdesigner$format, new Date(val.getFullYear(), val.getMonth(), val.getDate()), this._locale) : this._formatting(this._bbdesigner$format, val, this._locale);
+                                var secondVal = this._bbdesigner$colType == "date" && filterval instanceof Date ? this._formatting(this._bbdesigner$format, new Date(filterval.getFullYear(), filterval.getMonth(), filterval.getDate()), this._locale) : this._formatting(this._bbdesigner$format, filterval, this._locale);
+                                if ((firstVal !== secondVal || this._filterdCol[i].operator != "in") && !this._maxFilterCount)
+                                    continue;
+                                else {
+                                    if (this._maxFilterCount && (this._onDemandSearch || this._islargeData)) {
+                                        if (firstVal == secondVal) {
+                                            this._checkedValue.push(firstVal);
+                                            return ""
+                                        }
+                                        else if (this._checkedValue.indexOf(secondVal) == -1 || this._checkedValue.length == this._filterdCol.length)
+                                            return "checked";
+                                        else
+                                            continue;
+                                    }
+                                }
+                            }
+                            return "checked";
+                        }
+                    }
+                    else {
+                       if (this._bbdesigner$colType == "string" && !BoldBIDashboard.isNullOrUndefined(val) && (typeof val == "string")) {
+                            if (this._filterdCol[0].value == val.toLowerCase())
+                                val = val.toLowerCase();
+                        }
+                        var fQ = BoldBIDashboard.DataManager(this._filterdCol).executeLocal(BoldBIDashboard.Query().where("value", "in", val, this._filterdCol[0].matchcase).where("operator", "in", "in"));
+                        if (fQ.length != 0) {
+                            if (fQ[0].operator == "in" &&(!BoldBIDashboard.isNullOrUndefined(fQ[0].actualFilterOperator) && fQ[0].actualFilterOperator=="in") && fQ[0].isCustom == true && this._ctrlInstance.model.currentViewData.length > 0)
+                                return "checked";
+                            else
+                                return fQ[0]["isCustom"] === true ? "" : "checked";
+                        }
+                        else {
+                            if ((this._onDemandSearch || this._islargeData) && this._maxFilterCount) {
+                                var fltrQury = BoldBIDashboard.DataManager(this._filterdCol).executeLocal(BoldBIDashboard.Query().where("value", "in", val).where("operator", "notcontains", "in"));
+                                if (fltrQury.length == 0)
+                                    return "checked";
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        _genCheckID: function () {
+            return "CheckBox" + this.getIndex();
+        },
+        _formatting: function (format, value, locale) {
+
+            if (this._bbdesigner$colType == "date" && format == "")
+                format = "{0:MM/dd/yyyy hh:mm:ss}";
+
+            if (this._bbdesigner$colType == "boolean")                 
+                return value === "" ? "" : this.localizedLabels[value == true ? "True" : value == false ? "False" : ""];
+           
+            if (this._formatFiltering || this._bbdesigner$colType == "date") {
+                var formatter = this._ctrlInstance.formatting;                
+                return format != "" ? formatter(format, value, locale) : value;
+            } 
+        },
+        _updateDateFilter: function (filter) {
+            if (filter.type != "date" && !(filter.value instanceof Date))
+                return filter;            
+            filter.value = filter.value instanceof Date ? filter.value : BoldBIDashboard.parseJSON({ val: filter.value }).val;
+            return ["in", "notcontains"].indexOf(filter.operator) == -1 ? filter : this._setDateObject(filter);
+        },        
+        _checkHandler: function (args) {
+            bbdesigner$("#" + args.model.id).prop("checked", args.isChecked);
+            var bbdesigner$checkedlist = this._listsWrap.find("input.e-ftrchk").filter(":checked:not(.e-selectall,.e-addtofilter)"), clen = bbdesigner$checkedlist.length;
+            var bbdesigner$selectall = this._listsWrap.find(".e-selectall"), canCheck;
+            if (clen == this._chkList.length) {
+                bbdesigner$selectall.prop("checked", true);
+                canCheck = true;
+            }
+            else if (clen == 0) {
+                bbdesigner$selectall.prop("checked", false);
+                canCheck = false;
+            }
+            else if (args.isInteraction)
+                bbdesigner$selectall.BoldBIDashboardCheckBox('model.checkState', 'indeterminate')
+            bbdesigner$selectall.BoldBIDashboardCheckBox({ checked: canCheck });
+            bbdesigner$("#" + this.id + this._bbdesigner$colType + "_OkBtn").BoldBIDashboardButton({ enabled: (clen != 0) || (!BoldBIDashboard.isNullOrUndefined(this._add) && this._add.prop("checked")) });
+        },
+        _selectAllBeforeHandler: function (args) {
+            if (args.isChecked) {
+                if (this.model.checkState == "indeterminate") {
+                    args.cancel = true;
+                    this.model.checkState = "uncheck";
+                    this.option({ checkState: "check" })
+                }
+                else
+                    this.checkState("uncheck");
+            }
+        },
+        _selectAllHandler: function (args) {
+            
+            if (args.checkState=="check"){
+                this._chkList.filter(":not(:checked)").BoldBIDashboardCheckBox({ checked: args.isChecked, change: BoldBIDashboard.proxy(this._checkHandler, this) });
+                this._chkList.prop("checked", true);
+            }
+            else if (args.checkState == "uncheck") {
+                this._chkList.filter(function () { if (bbdesigner$(this).hasClass("e-checkbox") && bbdesigner$(this).prop("checked")) return this; }).BoldBIDashboardCheckBox({ checked: args.isChecked });
+                this._chkList.prop("checked", false); this._chkList.removeAttr("checked");
+            }
+            bbdesigner$("#" + this.id + this._bbdesigner$colType + "_OkBtn").BoldBIDashboardButton({ enabled: args.isChecked || (!BoldBIDashboard.isNullOrUndefined(this._add )&& this._add.prop("checked")) });
+        },
+        /*Custom Dialog*/
+        _renderCustomFDlg: function (type) {
+            var dlgId = this.id + type + "_CustomFDlg";
+            if (bbdesigner$("#" + dlgId).length)
+                return;
+            var bbdesigner$dlg = BoldBIDashboard.buildTag("div#" + dlgId + ".e-excelfilter e-dlgcustom");
+            bbdesigner$dlg.addClass(this._cssClass);
+            this._renderCDlgContent(bbdesigner$dlg, type);
+            bbdesigner$dlg.BoldBIDashboardDialog({ showOnInit: false, enableResize: false, enableModal: true, allowKeyboardNavigation: false, title: this._title, width: 370, content: "#" + this.id, enableRTL: this._ctrlInstance.model.enableRTL, closeIconTooltip: "Close", cssClass: "e-excelfilter e-customDlg" });
+			bbdesigner$dlg.BoldBIDashboardDialog("refresh");
+        },
+
+        _renderCDlgContent: function (content, type) {
+            var bbdesigner$div1 = BoldBIDashboard.buildTag("div.e-dlgfields",this.localizedLabels.Showrowswhere, {}, {});
+            var bbdesigner$id = this.id + this._bbdesigner$colType;
+            var bbdesigner$fset = BoldBIDashboard.buildTag("fieldset.e-fieldset");
+            var bbdesigner$op1 = BoldBIDashboard.buildTag("tr.e-fields"), bbdesigner$op2 = BoldBIDashboard.buildTag("tr.e-fields"), bbdesigner$op3 = BoldBIDashboard.buildTag("tr.e-fields e-top");
+            var bbdesigner$dp1 = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomDrop1"), bbdesigner$dp2 = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomDrop2"), bbdesigner$dp3 = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomDrop3");
+            var bbdesigner$in1 = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomValue1.e-ejinputtext e-excustmfltr", {}, {}, { "type": "text" }), bbdesigner$in2 = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomValue2.e-ejinputtext e-excustmfltr", {}, {}, { "type": "text" }), bbdesigner$in3 = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomValue3.e-ejinputtext e-excustmfltr", {}, {}, { "type": "text" });
+            var bbdesigner$pred = BoldBIDashboard.buildTag("tr.e-predicate");
+            var radioAnd = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomAndPredicate", {}, {}, { "type": "radio", "name": "predicate" , "value":"and" }), radioOr = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomOrPredicate", {}, {}, { "type": "radio", "name": "predicate", "value":"or" });
+            var matchCase = BoldBIDashboard.buildTag("input#" + bbdesigner$id + "_CustomMatchPredicate", {}, {}, { "type": "checkbox" });
+            content.append(bbdesigner$div1);
+            var table = BoldBIDashboard.buildTag("table.e-optable");
+            bbdesigner$op1.append(BoldBIDashboard.buildTag("td.e-operator").append(bbdesigner$dp1))
+                .append(BoldBIDashboard.buildTag("td.e-value").append(bbdesigner$in1));
+            bbdesigner$pred.append(BoldBIDashboard.buildTag("td", {}, {}, {}).append(radioAnd).append(BoldBIDashboard.buildTag("label.e-caption", this.localizedLabels.PredicateAnd, {}, { "for": bbdesigner$id + "_CustomAndPredicate" }))
+                .append(radioOr).append(BoldBIDashboard.buildTag("label.e-caption", this.localizedLabels.PredicateOr, {}, { "for": bbdesigner$id + "_CustomOrPredicate" })));
+            bbdesigner$op2.append(BoldBIDashboard.buildTag("td.e-operator").append(bbdesigner$dp2))
+                .append(BoldBIDashboard.buildTag("td.e-value").append(bbdesigner$in2));
+            table.append(bbdesigner$op1)
+            .append(bbdesigner$pred)
+            .append(bbdesigner$op2);
+			if(type == "string")
+			    bbdesigner$pred.append(BoldBIDashboard.buildTag("td", {}, {}, {}).append(matchCase).append(BoldBIDashboard.buildTag("label.e-caption", this.localizedLabels.MatchCase, {}, { "for": bbdesigner$id + "_CustomMatchPredicate" })));
+            if (type == "number" || type == "guid") {
+                bbdesigner$op3.append(BoldBIDashboard.buildTag("td.e-operator").append(bbdesigner$dp3))
+                .append(BoldBIDashboard.buildTag("td.e-value").append(bbdesigner$in3));
+                table.append(bbdesigner$op3)
+            }
+            bbdesigner$fset.append(BoldBIDashboard.buildTag("legend"))
+                .append(table)
+            content.append(BoldBIDashboard.buildTag("div.e-dlgfields").append(bbdesigner$fset));
+            content.append(BoldBIDashboard.buildTag("div.e-dlgfields").append(this._createBtn(true)));
+            content.appendTo("body");
+            var uppertype = type.replace(type.charAt(0), type.charAt(0).toUpperCase());
+            bbdesigner$([bbdesigner$dp1, bbdesigner$dp2]).BoldBIDashboardDropDownList({ fields: { text: "text", value: "value" }, height: 27, width: 120, enableRTL: this._ctrlInstance.model.enableRTL });
+            if (type == "number") {
+				bbdesigner$([bbdesigner$dp1, bbdesigner$dp2]).BoldBIDashboardDropDownList({ popupWidth: "170px" });
+                bbdesigner$([bbdesigner$in1, bbdesigner$in2]).ejNumericTextbox({ showSpinButton: false, height: "27px",decimalPlaces : 2, width: "177px", enableRTL: this._ctrlInstance.model.enableRTL,watermarkText: this.localizedLabels.NumericTextboxWaterMark, focusOut: function(args){ if(this.model.decimalPlaces == 0) this.element.prev(".e-input").val(this.model.value); } });
+            }
+			else if (type == "guid") {
+                bbdesigner$([bbdesigner$dp1, bbdesigner$dp2]).BoldBIDashboardDropDownList({ popupWidth: "170px" });
+                bbdesigner$(bbdesigner$in1).css({"height":"22px","width":"175px" });
+                bbdesigner$(bbdesigner$in2).css({"height":"22px","width":"177px" });
+            }
+            else if (type == "date") {
+				bbdesigner$([bbdesigner$dp1, bbdesigner$dp2]).BoldBIDashboardDropDownList({ popupWidth: "170px" });
+				bbdesigner$([bbdesigner$in1, bbdesigner$in2]).BoldBIDashboardDatePicker({ "cssClass": this._ctrlInstance.model.cssClass, height: "27px", width: "177px", "enableRTL": this._ctrlInstance.model.enableRTL, watermarkText: this.localizedLabels.DatePickerWaterMark, locale: this._locale });
+            }
+            else if (type == "datetime") {
+                bbdesigner$([bbdesigner$dp1, bbdesigner$dp2]).BoldBIDashboardDropDownList({ popupWidth: "170px" });
+                bbdesigner$([bbdesigner$in1, bbdesigner$in2]).BoldBIDashboardDateTimePicker({ "cssClass": this._ctrlInstance.model.cssClass, height: "27px", width: "177px", "enableRTL": this._ctrlInstance.model.enableRTL, watermarkText: this.localizedLabels.DateTimePickerWaterMark, locale: this._locale });
+            }
+            else if (type == "string") {
+                bbdesigner$([bbdesigner$in1, bbdesigner$in2]).BoldBIDashboardAutocomplete({ "cssClass": this._ctrlInstance.model.cssClass, "enableRTL": this._ctrlInstance.model.enableRTL, enableDistinct: true, width: "177px", height: "27px", locale: this._locale });
+            }
+            bbdesigner$([radioAnd, radioOr]).BoldBIDashboardRadioButton({ "cssClass": this._ctrlInstance.model.cssClass, "enableRTL": this._ctrlInstance.model.enableRTL });
+            matchCase.BoldBIDashboardCheckBox({ });
+            bbdesigner$("#" + bbdesigner$id + "Custom_OkBtn").BoldBIDashboardButton({ text: this._getDeprecatedLocalizedLabel("OK"), showRoundedCorner: true, width: "23.6%", click: BoldBIDashboard.proxy(this._fltrBtnHandler, this), enabled: true });
+            bbdesigner$("#" + bbdesigner$id + "Custom_CancelBtn").BoldBIDashboardButton({ text: this.localizedLabels.Cancel, showRoundedCorner: true, width: "23.6%", click: BoldBIDashboard.proxy(this.closeXFDialog, this) })
+        },
+                     
+        _openCustomFilter: function (operator) {
+            var oper = operator != "top10" ? this._bbdesigner$colType : operator, emptyOp = { text: "", value: "" }, query = this.query;
+            var type = oper.replace(oper.charAt(0), oper.charAt(0).toUpperCase());
+            var id = this.id + this._bbdesigner$colType;
+            this.closeXFDialog();
+            this._openedFltr = bbdesigner$("#" + id + "_CustomFDlg");
+            var args = { requestType: "filterbeforeopen", filterModel: this, columnName: this.fName, columnType: this._bbdesigner$colType, isCustomFilter: true };
+            if (this._ctrlInstance._trigger(this._onActionBegin, args))
+                return;
+            this._openedFltr.BoldBIDashboardDialog("open");
+            this._openedFltr.BoldBIDashboardDialog({open: function(args){
+				(bbdesigner$("#" + id + "_CustomValue1").hasClass("e-autocomplete") || bbdesigner$("#" + id + "_CustomValue1").hasClass("e-datepicker") || bbdesigner$("#" + id + "_CustomValue1").hasClass("e-datetimepicker")) ? bbdesigner$("#" + id + "_CustomValue1").focus() : bbdesigner$("#" + id + "_CustomValue1").prev().focus();
+			}});
+            this._openedFltr.find("legend").html(this._displayName);            
+            var sl = (["Number","Date"].indexOf(type) != -1) ? 6 : 5;
+            var sliced = this.localizedLabels[type + "MenuOptions"].slice(0,sl); sliced.unshift(emptyOp);
+            bbdesigner$("#" + id + "_CustomDrop1").BoldBIDashboardDropDownList({ dataSource: sliced });
+            bbdesigner$("#" + id + "_CustomDrop2").BoldBIDashboardDropDownList({ dataSource: sliced });
+			if (this._bbdesigner$colType == "number") {
+                if(operator == "top10"){
+                    this._openedFltr.find(".e-optable tr").not(".e-top").addClass("e-hide");   
+                    this._openedFltr.find(".e-optable tr.e-top").removeClass("e-hide");
+                    bbdesigner$("#" + id + "_CustomDrop3").BoldBIDashboardDropDownList({ dataSource: this.localizedLabels[type + "MenuOptions"] });
+                }
+                else{                   
+                    this._openedFltr.find(".e-optable tr.e-top").addClass("e-hide");
+                    this._openedFltr.find(".e-optable tr").not(".e-top").removeClass("e-hide"); 
+                }
+            }
+            else {
+                this._openedFltr.find(".e-optable tr.e-top").addClass("e-hide");
+                this._openedFltr.find(".e-optable tr").not(".e-top").removeClass("e-hide");
+            }
+            if(this._bbdesigner$colType == "string"){
+				var fName = this._bbdesigner$foreignField ? this._bbdesigner$foreignField : this.fName;
+				var data = this._bbdesigner$foreignData && this._bbdesigner$foreignField ? this._bbdesigner$foreignData : this._dataSource;
+                this._openedFltr.find(".e-autocomplete").BoldBIDashboardAutocomplete({
+                    fields: { text: fName }, dataSource: data,query:query, focusIn: function (args) {
+                        var type = this.element.closest("td").siblings().find(".e-dropdownlist").BoldBIDashboardDropDownList("getSelectedValue");
+                        var bbdesigner$matchCase = this.element.closest(".e-dialog-scroller").find(".e-checkbox").prop("checked");
+						 this.model.caseSensitiveSearch = bbdesigner$matchCase;
+						 this.model.filterType = type == "" ? this.model.filterType : type;
+                    }
+                });
+            }
+            if (this._bbdesigner$colType == "date" && this._bbdesigner$format != "")
+                this._openedFltr.find(".e-datepicker").BoldBIDashboardDatePicker({ dateFormat: this._bbdesigner$format.replace(/{0:|}/g, function () { return "" }), enableStrictMode: true });
+            else if (this._bbdesigner$colType == "datetime" && this._bbdesigner$format != "")
+                this._openedFltr.find(".e-datetimepicker").BoldBIDashboardDateTimePicker({ dateTimeFormat: this._bbdesigner$format.replace(/{0:|}/g, function () { return "" }), enableStrictMode: true });
+            this._setFilteredData(id, operator);
+			if(!BoldBIDashboard.isNullOrUndefined(this._customFilterHandler)) 
+				this._customFilterHandler();
+            var args = { requestType: "filterafteropen", filterModel: this, columnName: this.fName, columnType: this._bbdesigner$colType, isCustomFilter: true };
+            
+			if (this._ctrlInstance._trigger(this._onActionComplete, args))
+                return;
+        },
+        
+        _setFilteredData: function (bbdesigner$id, op) {
+            var indx = bbdesigner$.inArray(this.fName, this.cFilteredCols);
+            var fQM = [], optrs = [], fLen;
+            var between = ["greaterthanorequal", "lessthanorequal"];
+            if (op == "top10")
+                return;
+            if (indx != -1)
+                fQM = BoldBIDashboard.DataManager(this.filteredColumn).executeLocal(BoldBIDashboard.Query().where("field", "in", this.fName));
+            if (indx != -1 && this._bbdesigner$foreignField)
+                fQM = fQM[0]["actuals"];
+            if (this._initialFName != null && this._initialFName == this.fName)
+                fQM[0]["isCustom"] = true;
+            fLen = fQM.length;
+            var drops = this._openedFltr.find(".e-dropdownlist"), inputs = this._openedFltr.find(".e-value input.e-ejinputtext.e-input"), bbdesigner$pred = this._openedFltr.find(".e-predicate");            
+            if (indx != -1 && fLen && fQM[0]["from"]!=undefined)
+                optrs = [op, ""];
+			else if(op == "between" && indx != -1 && fLen )
+				optrs = [fQM[0]["operator"], !BoldBIDashboard.isNullOrUndefined(fQM[1]) ? fQM[1]["operator"] : ""];
+            else if (indx != -1 && fLen && fQM[0]["isCustom"])
+                optrs = [(op != "customfilter" && indx != -1) ? op : fQM[0]["operator"], op == "customfilter" && fQM[1] ? fQM[1]["operator"] : ""];
+			else if(indx == -1 && op == "customfilter") 
+                optrs = ["in", ""];
+            else if (op == "between" || op == "customfilter")
+                optrs = op != "customfilter" ? between : ["", ""];           
+            else
+                optrs = [op, ""];
+           
+            for (var i = 0; i < (indx != -1 ? fLen : 2) ; i++) {
+                var opt = /\D*/.exec(optrs[i])[0];
+                bbdesigner$(drops[i]).prop("value", opt);
+                bbdesigner$(drops[i]).BoldBIDashboardDropDownList("setSelectedValue", opt);
+				 bbdesigner$(drops[i]).BoldBIDashboardDropDownList({ change: function(arg){ 
+					this.element.closest(".e-fields").find(".e-autocomplete").val("");
+				 }});
+				var value = (indx != -1 && fLen && fQM[i]["isCustom"] && (opt == (this._bbdesigner$foreignField ? fQM[i]["actualFilterOperator"] : fQM[i]["operator"]) || opt == "customfilter" || opt == "between")) ? this._bbdesigner$foreignField ? opt != "" ? fQM[i]["actualFilterValue"] : "" : fQM[i]["value"] : "";
+                if (bbdesigner$(inputs[i]).hasClass("e-datepicker"))
+                    bbdesigner$("#" + inputs[i].id).BoldBIDashboardDatePicker("model.value", (indx != -1 && fLen && fQM[i]["isCustom"]) ? fQM[i]["value"] : null);
+                else if (bbdesigner$(inputs[i]).hasClass("e-numerictextbox"))
+                    bbdesigner$("#" + inputs[i].id).ejNumericTextbox("model.value", value);
+                else if (bbdesigner$(inputs[i]).hasClass("e-datetimepicker"))
+                    bbdesigner$(inputs[i]).BoldBIDashboardDateTimePicker("model.value", value);
+                else
+                    bbdesigner$(inputs[i]).val(value);
+                var bbdesigner$pre = (indx != -1 && fLen && fQM[i]["isCustom"] && fQM[i]["predicate"] != undefined) ? this._bbdesigner$foreignField ? fQM[i]["actualPredicate"] : fQM[i]["predicate"] : "and";
+				bbdesigner$pred.find("input[value=" + bbdesigner$pre + "]").BoldBIDashboardRadioButton({checked:  true});
+				if(this._bbdesigner$colType == "string"){
+				    var bbdesigner$match = (indx != -1 && fLen && fQM[i]["isCustom"]) ? fQM[i]["matchcase"] : this._matchCase;
+					bbdesigner$pred.find("input.e-js[type='checkbox']").BoldBIDashboardCheckBox({checked: bbdesigner$match});
+				}
+				this._openedFltr.find(".e-value input:visible:eq(0)").select();
+            }            
+        },
+        _setDateObject: function (filterObject) {
+            if (filterObject.value != null) {
+                var bbdesigner$fltrVal = filterObject.value;
+                var bbdesigner$prevObj = bbdesigner$.extend(true, {}, filterObject);
+                var bbdesigner$nextObj = bbdesigner$.extend(true, {}, filterObject);                
+                var bbdesigner$prevDate = new Date(bbdesigner$prevObj.value.setSeconds(bbdesigner$prevObj.value.getSeconds() - 1));
+                var bbdesigner$nextDate = new Date(bbdesigner$nextObj.value.setSeconds(bbdesigner$nextObj.value.getSeconds() + 2));
+                filterObject.value = new Date(filterObject.value.setSeconds(bbdesigner$nextObj.value.getSeconds() - 1));                
+                bbdesigner$prevObj.value = bbdesigner$prevDate;
+                bbdesigner$nextObj.value = bbdesigner$nextDate;
+                if (filterObject.operator == "in") {
+                    bbdesigner$prevObj.operator = "greaterthan";
+                    bbdesigner$prevObj.predicate = "and";
+                    bbdesigner$nextObj.operator = "lessthan";
+                    bbdesigner$nextObj.predicate = "and";
+                } else if (filterObject.operator == "notcontains") {
+                    bbdesigner$prevObj.operator = "lessthanorequal";
+                    bbdesigner$prevObj.predicate = "or";
+                    bbdesigner$nextObj.operator = "greaterthanorequal";
+                    bbdesigner$nextObj.predicate = "or";
+                }
+                var predicate = BoldBIDashboard.Predicate(bbdesigner$prevObj.field, bbdesigner$prevObj.operator, bbdesigner$prevObj.value, false);
+                predicate = predicate[bbdesigner$nextObj.predicate](bbdesigner$nextObj.field, bbdesigner$nextObj.operator, bbdesigner$nextObj.value, false);
+                filterObject.ejpredicate = predicate; filterObject.type = "date";
+                return filterObject;
+            }
+            else
+                return filterObject;
+        },
+        _getCDlgFields: function () {
+            var dropDowns = this._openedFltr.find(".e-dropdownlist"), defaults;
+            var bbdesigner$match = this._openedFltr.find(".e-checkbox"), matchcase = true,valueColl = [];
+            var bbdesigner$inputs = this._openedFltr.find(".e-value input.e-ejinputtext.e-input");
+            var bbdesigner$ginputs = this._openedFltr.find(".e-value input"),
+                bbdesigner$pred = this._openedFltr.find(".e-predicate  div[aria-checked = true]").find("input[type ='radio']").val()
+            bbdesigner$.inArray(this.fName, this.cFilteredCols) == -1 && this.cFilteredCols.push(this.fName);
+
+            for (var i = 0,len = dropDowns.length; i < len; i++) {
+                var dvalue = bbdesigner$(dropDowns[i]).BoldBIDashboardDropDownList("getSelectedValue"), value;
+                if (this._bbdesigner$colType == "number")
+                    value = parseFloat(bbdesigner$inputs.eq(i).ejNumericTextbox("model.value"));
+				if(this._bbdesigner$colType == "guid")
+                    value = bbdesigner$ginputs.eq(i).val();
+                if (this._bbdesigner$colType == "string") {
+                    value = bbdesigner$inputs.eq(i).val();
+                    matchcase = bbdesigner$match.is(":checked");
+                }
+                if (this._bbdesigner$colType == "date") 
+                    value = bbdesigner$inputs.eq(i).BoldBIDashboardDatePicker("model.value");
+                if (this._bbdesigner$colType == "datetime")
+                    value = bbdesigner$inputs.eq(i).BoldBIDashboardDateTimePicker("model.value");
+
+                defaults = { field: this.fName, predicate: i == 1 ? bbdesigner$pred : "or", matchcase: matchcase, isCustom: true };
+                if (dvalue == "top" || dvalue == "bottom") {
+                    valueColl.push(bbdesigner$.extend(true, { value: "", operator: "notcontains", take: value, from: dvalue }, defaults));
+                }
+                else if (dvalue != "") {
+                    if (this._empties.indexOf(value + "") > -1 || (this._bbdesigner$colType == "number" && isNaN(value))) {
+                        var cols = this.iterateAndGetCollection(this._empties.join(this._spliter), bbdesigner$.extend({}, defaults, { predicate: dvalue.toLowerCase() === "notcontains" ? "and" : "or", operator: dvalue.toLowerCase() }));
+                        var pred = this.generatePredicate(cols);
+                        valueColl.push(bbdesigner$.extend({}, defaults, { ejpredicate: pred, operator: dvalue.toLowerCase() }));
+                    }
+                    else {
+                        var filterObj = {}; bbdesigner$.extend(true, filterObj, { value: value, operator: dvalue.toLowerCase(), isCustom: true, actualFilterOperator: dvalue.toLowerCase(), actualFilterValue: value, actualPredicate: defaults.predicate }, defaults);
+                        if (this._bbdesigner$colType == "date")
+                            filterObj.type = "date";
+                        valueColl.push((this._bbdesigner$colType == "date" && ["in", "notcontains"].indexOf(dvalue.toLowerCase()) != -1) ? this._setDateObject(filterObj) : filterObj);
+                    }
+                }
+                else
+                    break;
+            }
+            if (this._bbdesigner$foreignField == undefined)
+                this.initiateFilter(valueColl);
+            else 
+                this._filterForeignData(valueColl, true);            
+        },
+      
+        _fltrBtnHandler: function (args) {
+            var matchcase, valColl = [], arg = {}, predicate, fObj = {}, optr = "", checked = [], unchecked;
+            this._maxFilterCount = false;
+            if (this._clearSearchValue)
+                this._searchCount = 0;
+            if (!this._openedFltr.hasClass("e-dlgcustom")) {
+                if (!this._isFiltered && this._listsWrap.find(".e-selectall").BoldBIDashboardCheckBox("model.checked") && (this._searchCount == 0 || (this._add && this._add.prop("checked"))))
+                    return this.closeXFDialog();                                  
+                if (this._onDemandSearch || this._islargeData) {
+                    if (this._listsWrap.find("input.e-ftrchk").filter(":checked:not(.e-selectall)").length <= this._listsWrap.find("input.e-ftrchk").filter(":not(:checked):not(.e-selectall)").length || this._listsWrap.find(".e-selectall").BoldBIDashboardCheckBox("model.checked")) {
+                        checked = this._listsWrap.find("input.e-ftrchk").filter(":checked:not(.e-selectall)");
+                        optr = "in";
+                    }
+                    else {
+                        checked = this._listsWrap.find("input.e-ftrchk").filter(":not(:checked):not(.e-selectall)");
+                        optr = "notcontains";
+                        this._maxFilterCount = true;
+                    }
+                }
+                else {
+                    var chkdata = this._chkList.filter(":checked"), unchkdata = this._chkList.filter(":not(':checked')");
+                    if ((this._add && this._add.prop("checked"))) {
+                        if (unchkdata.length)
+                            unchecked = unchkdata;
+                        checked = this._checked.length == 0 ? this._preChkList : this._checked;
+                        if (chkdata.length && this._checked.length != 0)
+                            BoldBIDashboard.merge(checked, chkdata);
+                    }
+                    else
+                        checked = this._listsWrap.find("input.e-ftrchk").filter(":checked:not(.e-selectall,.e-addtofilter)");
+                    optr = this._colType == "string" ? "startswith" : "in";
+                }
+                var len = checked.length, cVal, type = this.getType();
+                var _isCase = this._colType == "string" ? this._matchCase : true;
+	            var _isAccent = this._colType == "string" ? this._accent : true;
+                var defaults = this._maxFilterCount ? { field: this.fName, predicate: "and", operator: optr, matchcase: _isCase, accent: _isAccent } : { field: this.fName, predicate: "or", operator: optr, matchcase: _isCase, accent: _isAccent };
+                for (var i = 0; i < len; i++) {
+                    if (!BoldBIDashboard.isNullOrUndefined(unchecked)) {
+                        for (var j = 0; j < unchecked.length; j++) {
+                            var flag = 0;
+                            if (checked[i].value == unchecked[j].value) {
+                                flag = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (flag)
+                        continue;
+                    cVal = checked[i].value;
+                    if (this.enableNormalize && cVal.indexOf(this._spliter) != -1) {
+                        BoldBIDashboard.merge(valColl, this.iterateAndGetCollection(cVal, defaults));
+                        continue;
+                    }
+                    cVal = this.processValue(cVal, type);
+
+                    bbdesigner$.extend(true, fObj, { value: cVal }, defaults);
+                                                            
+                    for (var j = 0; j < valColl.length; j++) {
+                        var count = 0;
+                        if (valColl[j].value == cVal) {
+                            count = 1;
+                            break;
+                        }
+                    }
+                    if (count)
+                        continue;
+
+                    valColl.push(type == "date" ? this._setDateObject(fObj) : fObj);
+
+                    fObj = {};
+                }
+                var cIndex = bbdesigner$.inArray(this.fName, this.cFilteredCols);
+                if(cIndex != -1)
+                    this.cFilteredCols.splice(cIndex, 1);
+                if (this._isFiltered && this._searchRequest) {
+                    this._checkIsIndeterminate(this.fName, this.filteredColumn);
+                    if (this._isIndeterminate) {
+                        BoldBIDashboard.merge(valColl, this.filteredColumn);
+                        valColl = BoldBIDashboard.distinct(valColl, "value", true);
+                        this._searchRequest = false;
+                    }          
+                }
+                this.initiateFilter(valColl);
+            }
+            else {
+                valColl = this._getCDlgFields();
+                bbdesigner$.inArray(this.fName, this.cFilteredCols) == -1 && valColl[0] && this.cFilteredCols.push(this.fName);
+            }
+        },
+        initiateFilter: function (valColl) {
+            var firstVal = valColl[0], predicate;
+            if (!BoldBIDashboard.isNullOrUndefined(firstVal)) {
+                isTake = firstVal["from"];
+                predicate = firstVal["ejpredicate"] ? firstVal["ejpredicate"] : BoldBIDashboard.Predicate(firstVal.field, firstVal.operator, firstVal.value, !firstVal.matchcase, !firstVal.accent);
+                for (var j = 1, jlen = valColl.length; j < jlen; j++) {
+                    predicate.value += ',' + valColl[j].value;
+                }
+                arg = { action: "filtering", filterCollection: valColl, fieldName: this.fName, ejpredicate: predicate, tableID: this._bbdesigner$tableID};
+                if (this._predicates[this._bbdesigner$key] == undefined)
+                    this._predicates[this._bbdesigner$key] = {};
+                this._predicates[this._bbdesigner$key][this.fName] = !isTake ? predicate : { from: firstVal["from"], take: firstVal["take"] };
+                if (!this._openedFltr.hasClass("e-dlgcustom") && this._listsWrap.find(".e-selectall").BoldBIDashboardCheckBox("model.checked") && (!this._searchCount || ((this._add && this._add.prop("checked")) && (this._preChkList.filter(":not(':checked')").length == 0 || this._checked.length == 0)) || (valColl.length == this._preChkList.length)) && bbdesigner$.inArray(this.fName, this._columnsFiltered) != -1)
+                    arg = { action: "clearfiltering", filterDetails: { field: this.fName, operator: "", predicate: "or", value: "" }, fieldName: this.fName, tableID: this._bbdesigner$tableID }
+                if (bbdesigner$.inArray(this.fName, this._columnsFiltered) == -1)
+                    this._columnsFiltered.push(this.fName);                
+                this._filterHandler(arg);
+            }
+            this.closeXFDialog();
+        },        
+		/*Util method to perform formatted group on the inputted json*/
+        getDistinct: function (json, field, fullRecord, redundancy) {
+		    var lookup = {}, len = json.length, result = [], current, value, fd;
+
+		    while (len--) {
+		        current = json[len], value = BoldBIDashboard.getObject(field, current), fd = value;
+            if (!BoldBIDashboard.isNullOrUndefined(current)) {
+		        if (this.enableNormalize)
+		            fd = this._formatting(this._bbdesigner$format, value, this._locale);
+
+		        current["ejvalue"] = fd;
+
+		        if (redundancy || !(value in lookup))
+		            result.push(fullRecord ? current : value);
+
+		        lookup[value] = true;
+		    }
+         }
+
+		    result = BoldBIDashboard.group(BoldBIDashboard.mergeSort(result, field), "ejvalue"); /* sort with field and group with ejvalue */
+
+		    return result;
+		},
+        /*Util method to split string and build filterobject collection */
+		iterateAndGetCollection: function (valuestring, defaults) {
+		    var splts = valuestring.split(this._spliter), len = splts.length, result = [], value, type = this._ctrlInstance._bbdesigner$colType;
+            if (type == "number" || type == "date" || type == "datetime"){
+				var index = splts.indexOf("");
+				if (index > -1) {
+                  splts.splice(index, 1);
+                }
+			}
+		    while (len--) {
+		        value = this.processValue(splts[len]);		       
+
+		        result.push(bbdesigner$.extend(true, { value: value }, defaults));
+		    }
+
+		    return result;
+		},
+        /*Util method to perform type conversion*/
+		processValue: function (val, type/* optional */) {		    
+		     type = type || this.getType(); type = this._empties.indexOf(val) != -1 ? "empty" : type; val = val === this.guid ? this._blankValue + "" : val;
+		    switch (type) {
+		        case "empty":/*Handle blanks*/
+		            val = val == "null" ? null : val == "undefined" ? undefined : "";
+		            break;
+		        case "date":
+		        case "datetime":
+		            val = new Date(val);
+		            break;
+		        case "number":
+		            val = +val;
+		            break;
+		        case "boolean":		           
+		            val = (!isNaN(val) && typeof (val) == "string") ? BoldBIDashboard.parseInt(val) != 0 : val === "true" ? true : false;
+		            break;
+		    }		    		      
+		    return val;
+		},
+		getType: function () {
+		    return !BoldBIDashboard.isNullOrUndefined(this._bbdesigner$foreignField) ? this._bbdesigner$foreignKeyType : this._bbdesigner$colType;
+		},
+		replacer: function (input, pattern, processor, params) {
+		    if (typeof processor == "function")
+		        processor = processor.call(this, params)
+		   return input.replace(pattern, processor);
+		},
+        _virtualize: function (e) {
+            var height = bbdesigner$("#" + this.id + this._bbdesigner$colType + "_CheckBoxList").height();
+            var chks = this._chkList.not(".e-checkbox").filter(function () { if (this.offsetTop > e.scrollTop - this.offsetHeight && e.scrollTop + height+70 > this.offsetTop + this.offsetHeight) return this; });
+            if (chks.length == 0) return;
+            chks.filter(":checked").BoldBIDashboardCheckBox({ checked: true }); chks.filter(":not(:checked)").BoldBIDashboardCheckBox({ checked: false });
+            chks.BoldBIDashboardCheckBox({ change: BoldBIDashboard.proxy(this._checkHandler, this) });
+            var scrollObj = this._listsWrap.BoldBIDashboardScroller('instance');            
+            scrollObj.refresh();
+        },
+        /*Method to reset private properties*/
+        resetFilterModel: function (destroy) {
+            this._blank = undefined;
+            this._addAtLast = false;
+            this._isFiltered = false;
+            this._searchCount = 0;
+        },
+        resetExcelFilter: function (template) {
+            var _i, _type, _id = this.id,_len, _bbdesigner$id;
+            this._predicates = [];          
+            this.cFilteredCols = [];
+            this.resetFilterModel();
+            for (_i = 0, _len = this._posType.length; _i < _len; _i++) {
+                _type = this._posType[_i], _bbdesigner$id = _id + _type;
+                var cDlg = bbdesigner$("#" + _bbdesigner$id + "_CustomFDlg");               
+                if (!cDlg.length) {
+                    bbdesigner$("#" + _bbdesigner$id +"_CustomDrop1_popup_wrapper").remove();
+                    bbdesigner$("#" + _bbdesigner$id +"_CustomDrop2_popup_wrapper").remove();
+                }
+                if (!(bbdesigner$("#" + _bbdesigner$id + "_CheckBoxList").length)) {
+                    bbdesigner$("#" + _bbdesigner$id + "_CheckBoxList_WaitingPopup").remove();
+                }				
+                bbdesigner$("#" + _bbdesigner$id + "_CheckBoxList").BoldBIDashboardWaitingPopup("destroy"); bbdesigner$("#" + _bbdesigner$id + "_excelDlg").remove();
+                cDlg.find(".e-dropdownlist").BoldBIDashboardDropDownList("destroy");
+                cDlg.find(".e-button").BoldBIDashboardButton("destroy");
+                if (_type == "string" || _type == "boolean") cDlg.find(".e-autocomplete").BoldBIDashboardAutocomplete("destroy");
+                if (_type == "number") cDlg.find(".e-numerictextbox").ejNumericTextbox("destroy");
+                if (_type == "date") cDlg.find(".e-datepicker").BoldBIDashboardDatePicker("destroy");
+                cDlg.BoldBIDashboardDialog("destroy");
+                bbdesigner$("#" + _bbdesigner$id + "_CustomFDlg").remove();
+            }
+        },
+        _wireEvents: function () {
+            this._ctrlInstance._on(this._dialogContainer, "focus click", ".e-searchbox", BoldBIDashboard.proxy(this._searchBoxFocus, this));
+            this._ctrlInstance._on(this._dialogContainer, "keyup", ".e-searchbox input", BoldBIDashboard.proxy(this._search, this));
+        }
+    };
+
+    BoldBIDashboard.ExcelFilter.valueDelimiter = "@|@";
+    BoldBIDashboard.ExcelFilter.Locale = BoldBIDashboard.ExcelFilter.Locale || {};
+
+    BoldBIDashboard.ExcelFilter.Locale["default"] = BoldBIDashboard.ExcelFilter.Locale["en-US"] = {
+        SortNoSmaller: "Sort Smallest to Largest",
+        SortNoLarger: "Sort Largest to Smallest",
+        SortTextAscending: "Sort A to Z",
+        SortTextDescending: "Sort Z to A",
+        SortDateOldest: "Sort by Oldest",
+        SortDateNewest:"Sort by Newest",
+		SortByColor: "Sort By Color",
+        SortByCellColor: "Sort by Cell Color",
+        SortByFontColor: "Sort by Font Color",
+        FilterByColor: "Filter By Color",
+		CustomSort: "Custom Sort",
+        FilterByCellColor: "Filter by Cell Color",
+        FilterByFontColor: "Filter by Font Color",
+        ClearFilter: "Clear Filter",
+        NumberFilter: "Number Filters",
+		GuidFilter: "Guid Filters",
+        TextFilter: "Text Filters",
+        DateFilter: "Date Filters",
+        DateTimeFilter: "Date Time Filters",
+        SelectAll: "Select All",
+        Blanks: "Blanks",
+		Search:"Search",
+        Showrowswhere:"Show rows where",
+		NumericTextboxWaterMark:"Enter value",
+        StringMenuOptions: [{ text: "Equal", value: "in" }, { text: "Not Equal", value: "notcontains" }, { text: "Starts With", value: "startswith" }, { text: "Ends With", value: "endswith" }, { text: "Contains", value: "contains" }, { text: "Custom Filter", value: "customfilter" }],
+        NumberMenuOptions: [{ text: "Equal", value: "in" }, { text: "Not Equal", value: "notcontains" }, { text: "Less Than", value: "lessthan" }, { text: "Less Than Or Equal", value: "lessthanorequal" }, { text: "Greater Than", value: "greaterthan" }, { text: "Greater Than Or Equal", value: "greaterthanorequal" }, { text: "Between", value: "between" }, { text: "Custom Filter", value: "customfilter" }],
+        GuidMenuOptions: [{ text: "Equal", value: "in" }, { text: "Not Equal", value: "notcontains" }, { text: "Custom Filter", value: "customfilter" }],
+		DateMenuOptions: [{ text: "Equal", value: "in" }, { text: "Not Equal", value: "notcontains" }, { text: "Less Than", value: "lessthan" }, { text: "Less Than Or Equal", value: "lessthanorequal" }, { text: "Greater Than", value: "greaterthan" }, { text: "Greater Than Or Equal", value: "greaterthanorequal" }, { text: "Between", value: "between" }, { text: "Custom Filter", value: "customfilter" }],
+		DatetimeMenuOptions: [{ text: "Equal", value: "in" }, { text: "Not Equal", value: "notcontains" }, { text: "Less Than", value: "lessthan" }, { text: "Less Than Or Equal", value: "lessthanorequal" }, { text: "Greater Than", value: "greaterthan" }, { text: "Greater Than Or Equal", value: "greaterthanorequal" }, { text: "Between", value: "between" }, { text: "Custom Filter", value: "customfilter" }],
+		Top10MenuOptions: [{ text: "Top", value: "top" }, { text: "Bottom", value: "bottom" }],
+        title:"Custom Filter",
+        PredicateAnd: "AND",
+        PredicateOr: "OR",
+        OK: "OK",
+        MatchCase: "Match Case",
+        Cancel: "Cancel",
+        NoResult: "No Matches Found",
+        CheckBoxStatusMsg: "Not all items showing",
+        DatePickerWaterMark: "Select date",
+        DateTimePickerWaterMark: "Select date time",
+		True: "true",
+        False: "false",
+        AddToFilter: "Add current selection to filter"
+    };
+
+})(jQuery, SyncfusionBoldBIDashboard);;;
 (function (bbdesigner$, BoldBIDashboard, undefined) {
     BoldBIDashboard.gridFeatures = BoldBIDashboard.gridFeatures || {};
     BoldBIDashboard.gridFeatures.filter = {
@@ -8214,12 +9727,12 @@
                     this.model.filterSettings.filteredColumns.reverse().splice(0, filterOperator.length);
                     this.model.filterSettings.filteredColumns.reverse();
                 }
-			if(!BoldBIDashboard.isNullOrUndefined(column.filterBarTemplate)){
+			if(!BoldBIDashboard.isNullOrUndefined(column.filterBarTemplate) && this.model.filterSettings.filterType == "filterbar"){
 					this.filterStatusMsg = "";
 					if(this._oldFilterColumn != column &&  (this.filterColumnCollection.length > 0 && bbdesigner$.inArray(column,this.filterColumnCollection) == -1 ))
 					this.filterColumnCollection.push(column);
 					this._oldFilterColumn = this._currentFilterColumn = column;
-					this._showFilterMsg();
+					//this._showFilterMsg();
 				}
             }
         },
@@ -8395,8 +9908,17 @@
             }
             else if (args.action == "sorting") {
                 var sortObj = args.sortDetails;
+                var valColl = this.model.filterSettings.filteredColumns;
+                var firstVal = valColl[0], predicate;
+                if (!BoldBIDashboard.isNullOrUndefined(firstVal)) {
+                    isTake = firstVal["from"];
+                    predicate = firstVal["ejpredicate"] ? firstVal["ejpredicate"] : BoldBIDashboard.Predicate(firstVal.field, firstVal.operator, firstVal.value, !firstVal.matchcase, !firstVal.accent);
+                    for (var j = 1, jlen = valColl.length; j < jlen; j++) {
+                        predicate.value += ',' + valColl[j].value;
+                    }
+                }
                 if (BoldBIDashboard.gridFeatures.sort)
-                    this.sortColumn(sortObj.field, sortObj.direction);
+                    this.sortColumn(sortObj.field, sortObj.direction, predicate);
                 this._excelFilter.closeXFDialog();
                 return;
             }
@@ -8874,7 +10396,9 @@
         },
         _closeFDialog: function () {
             if (this._isExcelFilter || this._excelFilterRendered)
-                this._excelFilter.closeXFDialog();
+                if (!BoldBIDashboard.isNullOrUndefined(this._excelFilter)) {
+                    this._excelFilter.closeXFDialog();
+                }
             if (this._bbdesigner$menuDlgIsOpen)
                 this._closeFilterDlg();
         },
@@ -8918,8 +10442,8 @@
             var bbdesigner$tchkBox = BoldBIDashboard.buildTag("input", {}, {}, { "type": "checkbox" });
             var filterVal = this.model.enableResponsiveRow ? 'OkButton' : 'Filter';
             var clearVal = this.model.enableResponsiveRow ? 'CancelButton' : 'Clear';
-            var bbdesigner$filter = BoldBIDashboard.buildTag("input.e-filter", {}, {}, { "type": "button", "value":this.localizedLabels[filterVal] });
-            var bbdesigner$clear = BoldBIDashboard.buildTag("input.e-clear", {}, {}, { "type": "button", "value": this.localizedLabels[clearVal] });
+            var bbdesigner$filter = BoldBIDashboard.buildTag("input.e-filter bbi-dbrd-btn-small bbi-dbrd-btn-primary", {}, {}, { "type": "button", "value":this.localizedLabels[filterVal] });
+            var bbdesigner$clear = BoldBIDashboard.buildTag("input.e-clear bbi-dbrd-btn-small bbi-dbrd-btn-secondary", {}, {}, { "type": "button", "value": this.localizedLabels[clearVal] });
             bbdesigner$value.append(BoldBIDashboard.buildTag("span.e-caption").html(this.localizedLabels.FilterMenuCaption + " : "));
             content.append(bbdesigner$predicate);
             if (type == "boolean") {
@@ -10101,6 +11625,7 @@
             if (rowIndexCollection.length > 0) {
                 for (var i = 0; i < rowIndexCollection.length; i++) {
                     this.selectedRowsIndexes.push(rowIndexCollection[i]);
+                    bbdesigner$('input[type="checkbox"]').eq(rowIndexCollection[i]).prop('checked', true);
                 }
 				if( !this.model.scrollSettings.enableVirtualization){
 					var diff = this._virtaulSel[0] - rowIndex;
@@ -10557,6 +12082,13 @@
 						this.selectedRowsIndexes = [];
 						this.model.selectedRecords = [];
 					}
+                    if(bbdesigner$gridRows.length > 0){
+                        bbdesigner$('input[type="checkbox"]').each(function () {
+                            if (bbdesigner$(this).prop('checked')) {
+                                bbdesigner$(this).prop('checked', false);
+                            }
+                        });
+                    }
                 }
                 if (!this.selectedRowsIndexes.length)
                     this._selectedRow(-1);
@@ -10787,7 +12319,8 @@
         _currentPage: BoldBIDashboard.util.valueFunction("pageSettings.currentPage"),
         // default model
         defaults: /** @lends BoldBIDashboardGrid# */ {            
-            allowPaging: false,            
+            allowPaging: false,
+            multiSelectCheckBox: false,            
             showColumnChooser: false,            
             gridLines: "both",            
             allowSorting: false,            
@@ -10979,6 +12512,7 @@
             toolbarClick: null,           
             contextOpen: null,            
             contextClick: null,       
+            filterClick: null,
             columns: [],            
             query: null,
             isEdit: false,            
@@ -11497,7 +13031,7 @@
             }
         },
         _initColumns: function (object) {
-            while (object.items != undefined)
+            while (object != undefined && object.items != undefined)
                 object = object.items[0];
             if (this.model.columns.length == 0 && object) {
                 for (var field in object) {
@@ -12120,7 +13654,9 @@
                 var predicate, firstFilterCondition = this.model.filterSettings.filteredColumns[0];
 				var filteredColumns = this.model.filterSettings.filteredColumns;
                 if (this._isExcelFilter || this._excelFilterRendered) {
-                    this._excelFilter.getPredicate(filteredColumns, null, true);
+                    if (!BoldBIDashboard.isNullOrUndefined(this._excelFilter)) {
+                        this._excelFilter.getPredicate(filteredColumns, null, true);
+                    }
                     var predicates = this._excelFilter._predicates[0];
                     for (var prop in predicates) {
                         var obj = predicates[prop], isTake = obj["from"] != undefined;
@@ -12695,6 +14231,24 @@
                                 else
                                     bbdesigner$tdCell.addClass("e-boolrowcell").html("{{if #data['" + splits.join("']['") + "']=='true'||#data['" + splits.join("']['") + "']==true}} <input type ='checkbox' disabled='disabled' checked='checked'></input>{{else}} <input type ='checkbox' disabled='disabled'></input> {{/if}}");
                                 break;
+                            case "checkbox":
+                                this._enableCheckSelect = true;
+                                this.model.selectionType = "multiple";
+                                if(this.model.editSettings.allowDeleting) this.multiDeleteMode = true;
+                                this.model.selectionSettings.enableToggle = true;
+                                this._isMapSelection = (!BoldBIDashboard.isNullOrUndefined(columns[i].field) && (columns[i].field != ""));
+                                this._selectionMapColumn = columns[i].field;
+                                columns[i]["textAlign"] = "center";
+                                if (!this._isMapSelection)
+                                    this.model.columns[i]["allowGrouping"] = this.model.columns[i]["allowFiltering"] = this.model.columns[i]["allowSorting"] = false;
+                                bbdesigner$tdCell.addClass("e-checkcell").html("<div class = 'e-checkcelldiv'>{{if #data['" + splits.join("']['") + "']}} <input type ='checkbox' checked='checked'></input>{{else}} <input type ='checkbox'></input> {{/if}}</div>");
+                                if (this.getBrowserDetails().browser == 'msie' || this.getBrowserDetails().browser == 'edge') {
+                                    this._on(this.element, 'dblclick', this._checkboxDblClick);
+                                }
+                                this.model.columns[i].editType = BoldBIDashboard.Grid.EditingType.Boolean;
+                                this.model.scrollSettings.frozenColumns > 0 && $tdCell.addClass("e-frozenunbound");
+                                this.model.enableAutoSaveOnSelectionChange = false;
+                                break;
                             default:
                                 if (columns[i].disableHtmlEncode)
                                     bbdesigner$tdCell.html("{{html:" + braces + "#data['" + splits.join("'] || {})['") + "']}}");
@@ -12896,7 +14450,7 @@
                 if (columns[columnCount]["clipMode"] == BoldBIDashboard.Grid.ClipMode.Ellipsis || columns[columnCount]["clipMode"] == BoldBIDashboard.Grid.ClipMode.EllipsisWithTooltip)
                     bbdesigner$headerCellDiv.addClass("e-gridellipsis");
                 bbdesigner$headerCell.append(bbdesigner$headerCellDiv);
-                if (this.model.allowFiltering && (this.model.filterSettings.filterType == "menu" || this.model.filterSettings.filterType == "excel") &&
+                if (this.model.allowFiltering && ((this.model.filterSettings.filterType == "menu" || (this.model.filterSettings.filterType == "excel" && !columns[columnCount].IsMeasure)) && columns[columnCount].dateFormat == "None") &&
                                 (columns[columnCount]["allowFiltering"] == undefined || columns[columnCount]["allowFiltering"] === true) && (!BoldBIDashboard.isNullOrUndefined(columns[columnCount].field) || columns[columnCount].field == "")) {
                         var filtericon = 'e-filterset';
                     if (!this.initialRender && this.model.filterSettings.filteredColumns) {
@@ -14385,14 +15939,22 @@
                 }
                 if (this.model.allowMultiSorting && (e.ctrlKey || this._enableSortMultiTouch))
                     this.multiSortRequest = true;
-                if (e.shiftKey && bbdesigner$.inArray(columnName, this.model.groupSettings.groupedColumns) == -1) {
-                    this._removeSortedColumnFromCollection(columnName);
-                    this.multiSortRequest = true;
-                    columnName = null;
-                    this.sortColumn(columnName, columnSortDirection);
+                if (this._isExcelFilter && !BoldBIDashboard.isNullOrUndefined(columnName)) {
+                    var args = {
+                        action: "sorting",
+                        sortDetails: {field: columnName, direction: columnSortDirection},
+                    }
+                    this._filterHandler(args);
+                } else {
+                    if (e.shiftKey && bbdesigner$.inArray(columnName, this.model.groupSettings.groupedColumns) == -1) {
+                        this._removeSortedColumnFromCollection(columnName);
+                        this.multiSortRequest = true;
+                        columnName = null;
+                        this.sortColumn(columnName, columnSortDirection);
+                    }
+                    if (!BoldBIDashboard.isNullOrUndefined(columnName))
+                        this.sortColumn(columnName, columnSortDirection);
                 }
-                if (!BoldBIDashboard.isNullOrUndefined(columnName))
-                    this.sortColumn(columnName, columnSortDirection);
             } else if (bbdesigner$target.hasClass("e-togglegroupbutton") && this.model.allowGrouping) {
                 var field = bbdesigner$target.parent().attr("ej-mappingname");
                 bbdesigner$target.hasClass("e-togglegroup") && this.groupColumn(field);
@@ -14676,6 +16238,7 @@
                         bbdesigner$(bbdesigner$id).find(".e-numerictextbox").ejNumericTextbox({ width: "100%",decimalPlaces: 2 });
                     this._bbdesigner$prevColType = this._bbdesigner$colType;
                     this._bbdesigner$fDlgIsOpen = true;
+					this._trigger("filterClick", e);
                 }
             }
         },
@@ -14700,7 +16263,24 @@
             if (bbdesigner$target.closest(".e-grid").attr("id") !== this._id) return;
             if (bbdesigner$target.closest("#" + this._id + "EditForm").length)
                 return;
-            if (bbdesigner$target.hasClass("e-rowcell") || bbdesigner$target.closest("td").is(".e-rowcell") || (bbdesigner$target.hasClass("e-headercell") && ((e.clientY - bbdesigner$target.offset().top) < (bbdesigner$target.height() / 4)))) {
+            var isCheckBoxEnabled = this.model.columns.filter(i => i.type === 'checkbox').length > 0 ? bbdesigner$target.is('input') : bbdesigner$target.hasClass("e-rowcell") || bbdesigner$target.closest("td").is(".e-rowcell");
+            if (bbdesigner$target.hasClass("e-linking-hyperlink") || bbdesigner$target.parent().hasClass("e-linking-hyperlink")) {
+                var bbdesigner$rowIndex = this.getIndexByRow(bbdesigner$target.closest('tr')), bbdesigner$prevIndex = this._previousIndex, bbdesigner$prevRow = this.getRowByIndex(this._previousIndex);
+                var Data = this._currentJsonData[BoldBIDashboard.isNullOrUndefined(this.getIndexByRow(bbdesigner$target.closest("tr"))) ? null : this.getIndexByRow(bbdesigner$target.closest('tr'))];
+                Data = this._virtualScrollingSelection ? this._virtualSelRecords : Data;
+                var selectedIndex = this.model.scrollSettings.enableVirtualization ? bbdesigner$rowIndex : this._selectedRow();
+                var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: Data, target: bbdesigner$target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex, parentTarget: e };
+                this._previousIndex = this.selectedRowsIndexes.length ? rowIndex :this._previousIndex;
+                this._trigger("rowSelected", args);
+                return;
+            }
+            if (bbdesigner$target.hasClass("e-rowcell") || bbdesigner$target.closest("td").is(".e-rowcell") || bbdesigner$target.is('input') || (bbdesigner$target.hasClass("e-headercell") && ((e.clientY - bbdesigner$target.offset().top) < (bbdesigner$target.height() / 4)))) {
+                this.multiSelectCtrlRequest = this.model.multiSelectCheckBox;
+                if (!bbdesigner$target.is('input') && bbdesigner$target.parents(".e-row").find("input[type=checkbox]").prop("checked")) {
+                    bbdesigner$target.parents(".e-row").find("input[type=checkbox]").prop("checked", false);
+                } else if (!bbdesigner$target.is('input')) {
+                    bbdesigner$target.parents(".e-row").find("input[type=checkbox]").prop("checked", true);
+                }
                 if (this._bulkEditCellDetails.cancelSave) {
                     this._bulkEditCellDetails.cancelSave = false;
                     return;
@@ -14772,7 +16352,8 @@
                     this.multiSelectShiftRequest = false;
                 }
 
-                fieldName = this.model.columns[this._bulkEditCellDetails.columnIndex]["field"];
+                if (this._bulkEditCellDetails.columnIndex >= 0)
+                    fieldName = this.model.columns[this._bulkEditCellDetails.columnIndex]["field"];
                 if (bbdesigner$target.closest(".e-rowcell").length && fieldName) {
                     this._tabKey = false;
                     this.model.editSettings.allowEditing && this.model.editSettings.editMode == BoldBIDashboard.Grid.EditMode.Batch && this.editCell(bbdesigner$.inArray(bbdesigner$target.closest("tr").get(0), this.getRows()), fieldName);
@@ -14932,7 +16513,7 @@
         ExcelExport: "Excel Export",
         WordExport: "Word Export",
         PdfExport: "PDF Export",
-        StringMenuOptions: [{ text: "StartsWith", value: "StartsWith" }, { text: "EndsWith", value: "EndsWith" }, { text: "Contains", value: "Contains" }, { text: "Equal", value: "Equal" }, { text: "NotEqual", value: "NotEqual" }],
+        StringMenuOptions: [{ text: "StartsWith", value: "StartsWith" }, { text: "EndsWith", value: "EndsWith" }, { text: "Contains", value: "Contains" }, { text: "Equal", value: "In" }, { text: "NotEqual", value: "NotContains" }],
         NumberMenuOptions: [{ text: "LessThan", value: "LessThan" }, { text: "GreaterThan", value: "GreaterThan" }, { text: "LessThanOrEqual", value: "LessThanOrEqual" }, { text: "GreaterThanOrEqual", value: "GreaterThanOrEqual" }, { text: "Equal", value: "Equal" }, { text: "NotEqual", value: "NotEqual" }],
         PredicateAnd: "AND",
         PredicateOr: "OR",

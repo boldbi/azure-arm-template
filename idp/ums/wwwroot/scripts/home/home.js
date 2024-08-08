@@ -251,6 +251,8 @@ $(document).on("click", "#sort-favorite-button", function () {
     $("#sorting-options-favorites").toggle();
 });
 $(document).on("click", ".close-favorite", function () {
+    $(".close-icon").css("display", "none");
+    $(".search-favorite").css("display","block");
     if ($('#card-view-button').hasClass('active')) {
         skipFavorite = 0;
         $("#tenant-cards-container-favorite").empty();
@@ -460,7 +462,6 @@ function showAppropriateTab() {
     }
 }
 function initializeFavoriteGrid() {
-
     if (document.getElementById('FavoriteGrid').ej2_instances == null) {
         var searchQuery = window.location.href.slice(window.location.href.indexOf('?') + 1).split('=');
         if (searchQuery[0] == "searchKey") {
@@ -540,7 +541,7 @@ function loadTenantCards(baseUrl, skip, take) {
                     var useCustomBranding = tenant.UseCustomBranding;
                     var brandingHtml = useCustomBranding
                         ? `<img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
-                        : `<img id="icon-logo" class="icon-logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?theme=${theme}">`; 
+                        : `<img id="icon-logo" class="icon-logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`; 
                     
                     var cardHtml = `<div class="tenant-card card">
                                            <div class="icon-container">${brandingHtml}</div>
@@ -599,7 +600,7 @@ function loadFavoriteCards(baseUrl, skip, take) {
                     var useCustomBranding = tenant.UseCustomBranding;
                     var brandingHtml = useCustomBranding
                         ? `<img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
-                        : `<img id="icon-logo" class="icon-logo"  loading="lazy" src="${tenant.SiteUrl}/get-client-logo?theme=${theme}">`;
+                        : `<img id="icon-logo" class="icon-logo"  loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`;
 
 
                     var cardHtml = `<div class="tenant-card card">

@@ -5,6 +5,7 @@
     Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
     ViewBag.Title = $"{T["Account Recovery"].Value} - {GlobalAppSettings.SystemSettings.OrganizationName}";
     var email = ViewBag.Email;
+    var maskedEmail = new UserManagement().GetMaskedEmailString(email);
 }
 
 @section styles{
@@ -39,7 +40,7 @@
         @if (ViewBag.IsAccountActivation)
         {
             <div class="status-message text-body">
-                @Html.Raw(string.Format(T["An email with instructions on how to verify your account has been sent to {0}."].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>"))
+            @Html.Raw(string.Format(T["An email with instructions on how to verify your account has been sent to {0}."].Value, maskedEmail))
             </div>
             <div class="text-body resend-verification">@T["If you have not received it, please click the following link."]</div>
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=true" value="@T["Resend activation link"]">
@@ -49,7 +50,7 @@
         else
         {
             <div class="status-message text-body">
-                @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}."].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>"))
+                @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}."].Value, maskedEmail))
             </div>
             <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">

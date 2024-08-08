@@ -46,6 +46,7 @@
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var url = new Uri(Context.Request.GetDisplayUrl());
+    var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
@@ -66,6 +67,7 @@
     {
         dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
     }
+    var isSandBox = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
 }
 <!DOCTYPE html>
 
@@ -175,7 +177,11 @@
         var isDataSourceConnection = "@isDataSourceConnection";
         var appVersion = "@ServerAppConfig.ProductVersion";
         var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
+        var isSandBox = "@isSandBox";
     </script>
+    @if (!isSelfHosted && isUrlInDnsList) {
+       @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
+    }
     <script type="text/javascript">
         window.addEventListener("beforeunload", function (e) {
             var confirmationMessage = "@T["Are you sure you want to close? The current progress will be lost if you continue."]";

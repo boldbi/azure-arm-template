@@ -33,6 +33,7 @@
     var issampledata = !string.IsNullOrEmpty(ViewBag.IsSampleData) ? bool.Parse(ViewBag.IsSampleData) : false;
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
 
     var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
@@ -140,7 +141,10 @@
         @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     }
     <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
-
+    @if (!isSelfHosted && isUrlInDnsList) {
+       @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
+    }
+    
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
     @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
