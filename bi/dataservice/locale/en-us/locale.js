@@ -1163,8 +1163,9 @@
                 extractModeMessageMongoDB: "Initially it will extract {0} records. Remaining records will be extracted based on configured refresh settings.",
                 extractModeMessageSqlite: "It will extract {0} records only.",
                 liveWebModeMessage: "For optimum performance in live mode Web API, it is recommended to configure Max Rows as 5000 or less. For more than 5000 records, use the extract mode.",
+                extractWebModeMessage: "Initially, 10 pages of records from the URL and 10 URLs will be extracted in iterative mode. The remaining records, up to the Max Rows limit, will be extracted in the next refresh. This process does not apply to incremental endpoints.",
                 extractModeMessageSandbox: "For Sandbox sites, it will extract only 50,000 records. Additionally, refresh is not supported.",
-                paginationMessage: "For Sandbox sites, Pagination and refresh are not supported.",
+                paginationMessage: "For the Sandbox site, data will be extracted from 10 pages using web extract mode and 10 URLs in iterative mode; however, pagination and refresh are not supported.",
                 useAsWindowCredential: "Use as Window Credential",
                 impersonateAuthenticatedUserAfterConnecting: "Impersonate the authenticated user after connecting.",
                 promptForCredentials: "Prompt for credentials",
@@ -2362,6 +2363,7 @@
 		filterWhereExpression: "Filter where the keyword is restricted in the expression",
 		countDistinctExpression: "COUNT(DISTINCT()) restricted in the Expression. Instead, use COUNTD().",
                 invalidExpSyntax: "Incorrect Syntax near Open/Close bracket(s).",
+				arrayTypeExpression: "Array type expressions are restricted in the expression.",
                 saveParameter: "The parameter is not saved. Do you want to save and continue?",
                 InValidParameter: "Data type mismatched. Please select a valid data type parameter.",
                 failedToParseExp: "DashboardDesigner failed to parse the specified expression",
@@ -2641,6 +2643,18 @@
                 filterKeyExist: "A filter profile with the same name already exists.",
                 widgetsAvailable: "widgets available."
             },
+			translationWindow: {
+				dialogTitle:"Dynamic Language Translator",
+				dropdownPlaceHolder: "Choose Language",	
+				defaultText: " (Default)",
+				cancelText: "Cancel",
+				saveText: "Save",
+				deleteWidgetAlertTitle: "Delete Widget",
+				deleteMsg: "Deleting the widget will remove its associated data from the Dynamic Language Translator window.",
+				closeText:"Close",
+				dropDownWatermarkText: "Select Language",
+				iconLabel: "Localize Dashboard"
+			},
             dataConfigurationPanel: {
                 collapse: "Collapse",
                 expand: "Expand",
@@ -2703,6 +2717,7 @@
                 differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you will lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Alternatively, click the 'x' icon to close the popup without taking any action.",
                 columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
 				dataTypeMismatch: "Changing the data type may result in data loss and this affects the dashboard. Do you want to continue?",
+				invalidSchemaAlertMessage: 'Invalid Fields in Expression - There is an invalid expression in the data source. Please click the \'RUN\' button to resolve the invalid expression. If you click \'YES\', the data source will be saved with the invalid expression. If you choose \'NO\', the Query Designer page will remain open until the expression is resolved.',
                 doYouWant: "will be deleted. Do you want to continue",
                 tableremove: "Some associated tables will be dropped from the data source.",
                 tableList: "The list of tables to be dropped ",
@@ -2744,8 +2759,9 @@
 				joinMessageAzureDataExplorer: "Azure Data Explorer does not support the CROSS JOIN",
 				joinMessagePostgreSql: "PostgreSQL does not support the not equal, less than or equal to, or greater than or equal to operators for the FULL OUTER JOIN.",
 				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
-                combineDsWithCustomQueryAlertMessage: "The combine data sources feature does not support data sources in code view mode.",
-                firstAndLastMessage: "The First and Last option is not supported for aggregate expressions."
+        combineDsWithCustomQueryAlertMessage: "The append data sources feature does not support data sources in code view mode.",
+        firstAndLastMessage: "The First and Last option is not supported for aggregate expressions.",
+				relativeDateFilterValidationMessage: "Please choose or enter a valid date. The date value cannot be empty."
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -2830,7 +2846,8 @@
                 JoinAlert: "Join Alert",
                 relativeDatesAlert: "Relative Dates Alert",
                 fileNotFound: "File Not Found",
-                firstAndLast: "Aggregate expressions not supported"
+                firstAndLast: "Aggregate expressions not supported",
+				relativeDateFilterLinkToSpecificDateAlert: "Link To Specific Date"
             },
             linkedAccountsWindow: {
                 title: "Accounts",
@@ -2920,19 +2937,19 @@
                 refresh: "Refresh"
             },
             mergedDataSource: {
-                title: "Combine Data Source",
+                title: "Append Data Source",
                 nameTitle: "Data source name",
                 descTitle: "Description (Optional)",
                 merge: "Append",
                 dataSourceTitle: "Selected data sources",
                 back: "Back",
-                configureMessage: "Combine Data Source Configuration",
-                cancelMessage: "Do you want to cancel the combine data source configuration?",
+                configureMessage: "Append Data Source Configuration",
+                cancelMessage: "Do you want to cancel the append data source configuration?",
                 headerDescription: "dashboard designer allows you to create a new data source from existing extracted mode data sources by appending all rows with column mapping.",
                 invalidDataSourceName: "Invalid data source name.",
                 progressSelectDataSource: "SELECT DATA SOURCES",
-                progressMerge: "COMBINE",
-                tableAdded: "The table is added into the combined source list successfully.",
+                progressMerge: "APPEND",
+                tableAdded: "The table is added into the appended source list successfully.",
                 addButtonText: "ADD",
                 sourceTable: "Source table",
                 sourceColumn: "Source Column",
@@ -6234,7 +6251,7 @@
 				widgetDataNotConfigured: "The export request cannot be processed because the widgets in the dashboard are not configured.",
 				emptyDashboard: "The export request cannot be processed because the dashboard is empty and does not contain any configured widgets.",
 				pagewiseOption: "Enable pagewise exporting",
-				pagewiseExportInfo: "If this option is enabled, all data will be exported. As a result, if there is more data, it will take longer to finish the PDF export.",
+				pagewiseExportInfo: "If this option is enabled, {0} data will be exported. As a result, if there is more data, it will take longer to finish the PDF export.",
                 exportLimitation: "{0} export has a default limit of {1} rows. This limit can be modified by the administrator through the config settings.",
 				exportListingSuccessMsg: "Export was completed successfully. If the download does not begin, please click the button below to download manually."
             },
@@ -7728,6 +7745,26 @@
                 feedbackNeedsToConfigure: " need to be configured for sending these details.",
                 descriptionContent: "The Q&A widget, powered by OpenAI, involves sending your data schema and the question for NLP analysis. Your data privacy and security are paramount. Use of the Q&A widget strictly adheres to our Privacy Policy."
 			},
+			boldbiaiassistant: {
+                aiTitle: "Bold BI AI Assistant",
+                chatMinimizeTooltip: "Minimize",
+                chatUsageTooltip: "AI Usage",
+                detailedUsageView: "Detailed usage view",
+                chatPlaceholder: "Ask questions about your data",
+                processQuery: "Wait there! We're processing your query...",
+                welcomeMessage: ", Welcome to Bold BI AI Assistant",
+                apologyMessage: "Apologies!!",
+                oopsMessage: "Oops!",
+                widgetMessage: "Here's the widget for your query.",
+                propertyChangeMessage: "The specified widget property has been updated.",
+                selectWidgetMessage: "Please select a widget or provide its name to update it.",
+                conflictSelectedWidgetMessage: "Several widgets have identical names. Please select the one you want to update.",
+                widgetNameQuery: "Please provide the widget name to update the property as requested.",
+                like: 'Like',
+                disLike: 'DisLike',
+                sessionEndMessage: "The session ended due to inactivity. Please enter a query to start a new session.",
+				bannerText: "Try our new AI Assistant"
+            },
 			replaceValues: { 
 				applyBtnText: "Apply",
 				cancelBtnText: "Cancel",

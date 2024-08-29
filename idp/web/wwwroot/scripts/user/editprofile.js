@@ -22,7 +22,7 @@ $(document).ready(function () {
         height: "350px",
         isModal: true,
         visible: false,
-        close: "closeAvatarBox",
+        close: closeAvatarBox,
         animationSettings: { effect: 'Zoom' },
         closeOnEscape: true
     });
@@ -472,6 +472,7 @@ function onPictureCropEnd(coordinates) {
 
 function closeAvatarBox(parameters) {
     document.getElementById("avatar-upload-box").ej2_instances[0].hide();
+    window.location.reload();
 }
 
 function uploadImage() {

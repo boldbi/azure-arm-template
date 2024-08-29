@@ -502,7 +502,6 @@ function initializeFavoriteGrid() {
                 { field: 'IsFavorite', headerText: '', width: 8, template: '<div class="open-link"><a href="${SiteUrl}" target="_blank">Open</a></div>' }
             ]
         });
-
         FavoriteGrids.appendTo("#FavoriteGrid");
     }
 }
@@ -531,11 +530,13 @@ function loadTenantCards(baseUrl, skip, take) {
                 if (skip === 0) {
                     allSitesContainer.empty();
                 }
-
-                if (allTenants.length === 0) {
-                    $(".no-records").show();
-                    return;
+                if ($("#all-sites-tab").parent().hasClass("active")) {
+                    if (allTenants.length === 0) {
+                        $(".no-records").show();
+                        return;
+                    }
                 }
+                
                 $(".no-records").hide();
                 allTenants.forEach(function (tenant) {
                     var useCustomBranding = tenant.UseCustomBranding;
@@ -591,9 +592,11 @@ function loadFavoriteCards(baseUrl, skip, take) {
                 if (skip === 0) {
                     favoriteSitesContainer.empty();
                 }
-                if (allTenants.length === 0) {
-                    $(".no-records").show();
-                    return;
+                if ($("#favorite-sites-tab").parent().hasClass("active")) {
+                    if (allTenants.length === 0) {
+                        $(".no-records").show();
+                        return;
+                    }
                 }
                 $(".no-records").hide();
                 allTenants.forEach(function (tenant) {

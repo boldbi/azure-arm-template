@@ -57,10 +57,13 @@
     var ishideDashboardMenu = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri) && !identityResponse.IsAdmin;
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
     var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
-    if (allItemsCount == null && isUserBasedMenu)
+    var iscustomUIProfile = customUI?.Profiles != null && customUI.Profiles[0].Dashboards != null;
+    var isAdmin = _identityResponse.IsAdmin;
+    var hideMenusAndOptions = iscustomUIProfile ? !isAdmin && customUI.Profiles[0].Dashboards.HideMenusAndOptions : false;
+    if (allItemsCount == null && isUserBasedMenu && hideMenusAndOptions)
     {
         var itemtypeList = new List<ItemType>
-{
+        {
             ItemType.Dashboard,
             ItemType.Datasource,
             ItemType.Schedule,
@@ -390,4 +393,5 @@
     var hasOwnedDashboard = @Json.Serialize(hasOwnedDashboard);
     var isUMSLogoInherited = @Json.Serialize(isUMSLogoInherited);
     var headerLogo = "@globalAppSettings.SystemSettings.MainScreenLogo";
+    var hideMenusAndOptions = @Json.Serialize(hideMenusAndOptions);
 </script>

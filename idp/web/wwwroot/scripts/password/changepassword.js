@@ -312,15 +312,8 @@ function disableMfa() {
         success: function (result) {
             if (result.Data.status && result.Data.recovery != "") {
                 document.getElementById("authenticator-application-box").ej2_instances[0].hide();
-                $.ajax({
-                    type: "POST",
-                    url: disableMfaUrl,
-                    async: false,
-                    success: function (result) {
-                        hideWaitingPopup('content-area');
-                        window.location.reload();
-                    }
-                });
+                hideWaitingPopup('content-area');
+                window.location.reload();
             }
             else {
                 document.getElementById("disable-verification-code").value = "";
