@@ -5,11 +5,11 @@ The Bold BI Enterprise Edition is an end-to-end solution for creating, managing,
 
 Bold BI Enterprise Edition can be installed in the following environments.
 
-* [Windows](https://help.boldbi.com/embedded-bi/setup/deploying-in-windows/)
-* [New Windows VM - Azure Marketplace](https://help.boldbi.com/embedded-bi/setup/deploying-in-azure/)
-* [Linux](https://help.boldbi.com/embedded-bi/setup/deploying-in-linux/)
-* [Kubernetes](https://help.boldbi.com/embedded-bi/setup/deploying-in-kubernetes/)
-* [Docker](https://help.boldbi.com/embedded-bi/setup/deploying-in-docker/)
+* [Windows](https://help.boldbi.com/deploying-bold-bi/deploying-on-windows/?utm_source=github&utm_medium=backlinks)
+* [New Windows VM - Azure Marketplace](https://help.boldbi.com/deploying-bold-bi/deploying-on-azure/?utm_source=github&utm_medium=backlinks)
+* [Linux](https://help.boldbi.com/deploying-bold-bi/deploying-on-linux/?utm_source=github&utm_medium=backlinks)
+* [Kubernetes](https://help.boldbi.com/deploying-bold-bi/deploying-on-kubernetes/?utm_source=github&utm_medium=backlinks)
+* [Docker](https://help.boldbi.com/deploying-bold-bi/deploying-on-docker/?utm_source=github&utm_medium=backlinks)
 
 ## Deploy Bold BI Enterprise Edition in Azure Web App using ARM Template
 
@@ -26,6 +26,6 @@ To deploy both Bold BI and Bold Reports on a single Azure App Service, kindly us
 
 ## Reference Link
 
-* [Documentation](https://help.syncfusion.com/bold-bi/on-premise/setup/application-startup)
+* [Documentation](https://help.boldbi.com/application-startup/?utm_source=github&utm_medium=backlinks)
 
-* [Feature tour](https://www.boldbi.com/embedded/features)
+* [Feature tour](https://www.boldbi.com/embedded-analytics?utm_source=github&utm_medium=backlinks)
