@@ -16,7 +16,7 @@ $(document).ready(function () {
         header: window.Server.App.LocalizationContent.UploadLicense,
         showCloseIcon: true,
         width: '472px',
-        close: "uploadLicenseDialogClose",
+        close: uploadLicenseDialogClose,
         buttons: [
             {
                 'click': function () {
@@ -183,6 +183,7 @@ function sendData(data, url) {
                         $(".validation-error-message").html(data.Message);
                         $(".validation-error-message").removeClass("display-none");
                         $("#confirm-license").prop('disabled', true);
+                        $(".upload-license-button").attr("disabled", true);
                     }
 
                     hideWaitingPopup('offline-license-update-dialog');

@@ -19,11 +19,10 @@
     multiLineInputBoxInitialization("#text-area-content");
     function onDropDownListChange() {
         var fileName = document.getElementById("edit-files").ej2_instances[0].text;
-        var path = document.getElementById("edit-files").ej2_instances[0].value;
         $.ajax({
             type: "POST",
             url: window.loadFileUrl,
-            data: { fileName: fileName, path: path },
+            data: { fileName: fileName },
             beforeSend: showWaitingPopup('server-app-container'),
             success: function (result) {
                 if (result.Result) {

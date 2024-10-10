@@ -2,6 +2,20 @@
 
 $(document).ready(function () {
     $('#enable-ssl').change(function () {
+        if (IsValidIdentifier($(this).val()))
+        {
+            $(".site-id-name").html($(this).val());
+        }
+        else
+        {
+            $(".site-id-name").html("");
+        }
+
+        var inputDomain = ""
+        if (isValidUrl($("#input-domain").val())) {
+            inputDomain = $("#input-domain").val();
+        }
+        
         if (isBoldReportsTenantType()) {
             if ($("#tenant-identifier").val() == "") {
                 $(".site-default-text").html("").html(boldReportsPath);
@@ -9,7 +23,7 @@ $(document).ready(function () {
             else {
                 $(".site-default-text").html("").html(boldReportsUrl + $("#tenant-identifier").val());
             }
-            $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+            $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
             $(".site-id-name").html("");
         }
         else {
@@ -19,7 +33,7 @@ $(document).ready(function () {
             else {
                 $(".site-default-text").html("").html(boldBIUrl + $("#tenant-identifier").val());
             }
-            $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+            $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
             $(".site-id-name").html("");
         }
 
@@ -27,19 +41,37 @@ $(document).ready(function () {
     });
 
     $(document).on("keyup", "#tenant-identifier", function (event) {
+        var inputDomain = ""
+        if (isValidUrl($("#input-domain").val())) {
+            inputDomain = $("#input-domain").val();
+        }
+        
+        if (IsValidIdentifier($(this).val()))
+        {
+            $(".site-id-name").html($(this).val());
+        }
+        else
+        {
+            $(".site-id-name").html("");
+        }
+        
         if (isBoldReportsTenantType()) {
             $(".site-default-text").html("").html(boldReportsUrl);
         }
         else {
             $(".site-default-text").html("").html(boldBIUrl);
         }
-
-        $(".site-id-name").html($(this).val());
-        $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+        
+        $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
         $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text() + $(".site-id-name").text());
     });
 
     $(document).on("change keyup", "#input-domain", function (event) {
+        var inputDomain = ""
+        if (isValidUrl($("#input-domain").val())) {
+            inputDomain = $("#input-domain").val();
+        }
+        
         if (actionType.toLowerCase() == "edit") {
             if (isBoldReportsTenantType()) {
                 if ($("#tenant-identifier").val() == "") {
@@ -59,11 +91,11 @@ $(document).ready(function () {
                 }
                 $(".site-id-name").html("");
             }
-            $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+            $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
             $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text());
         }
         else {
-            $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+            $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
             $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text() + $(".site-id-name").text());
         }
         $("#tenant-identifier-validation-error").css("display", "none");
@@ -76,6 +108,11 @@ $(document).ready(function () {
     });
 
     $(document).on("change", "input[name=identifier]", function () {
+        var inputDomain = ""
+        if (isValidUrl($("#input-domain").val())) {
+            inputDomain = $("#input-domain").val();
+        }
+        
         if ($('input[name="identifier"]').prop("checked")) {
             if (actionType.toLowerCase() == "edit") {
                 if (isBoldReportsTenantType()) {
@@ -84,7 +121,7 @@ $(document).ready(function () {
                 else {
                     $(".site-default-text").html("").html(boldBiPath);
                 }
-                $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+                $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
                 $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text());
             }
             else {
@@ -127,7 +164,7 @@ $(document).ready(function () {
                     else {
                         $(".site-default-text").html("").html(boldBIUrl);
                     }
-                    $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+                    $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
                     $(".site-id-name").html("");
                     $(".site-url").attr("data-content", $(".site-domain").html() + "/" + $(".site-default-text").text() + "/" + $(".site-id-name").html());
                 }
@@ -138,7 +175,7 @@ $(document).ready(function () {
                     else {
                         $(".site-default-text").html("").html(boldBIUrl);
                     }
-                    $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+                    $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
                     $(".site-id-name").html(prevTenantIdentifier);
                     $(".site-url").attr("data-content", $(".site-domain").html() + "/" + $(".site-default-text").text() + "/" + $(".site-id-name").html());
                 }

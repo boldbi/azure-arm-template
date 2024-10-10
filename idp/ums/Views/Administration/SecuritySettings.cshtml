@@ -4,6 +4,7 @@
     var isPasswordPolicyTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "user-account") ? "active" : string.Empty;
     var isCSPTab = (Context.Request.Query["view"] == "csp-settings") ? "active" : string.Empty;
     var isXFrameTab = (Context.Request.Query["view"].ToString() == "x-frame-options") ? "active" : string.Empty;
+    var isNetworkTab = (Context.Request.Query["view"].ToString() == "network-settings") ? "active" : string.Empty;
     var isCookiesTab = (Context.Request.Query["view"].ToString() == "cookie-options") ? "active" : string.Empty;
     var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
     var styleSources = contentSecurityPolicySettings.StyleSource != null ? contentSecurityPolicySettings.StyleSource.Split(',') : contentSecurityPolicySettings.StyleSource;
@@ -13,34 +14,40 @@
     var connectSources = contentSecurityPolicySettings.ConnectSource != null ? contentSecurityPolicySettings.ConnectSource.Split(',') : contentSecurityPolicySettings.ConnectSource;
     var frameAncestor = contentSecurityPolicySettings.FrameAncestor != null ? contentSecurityPolicySettings.FrameAncestor.Split(',') : contentSecurityPolicySettings.FrameAncestor;
     var frameSources = contentSecurityPolicySettings.FrameSource != null ? contentSecurityPolicySettings.FrameSource.Split(',') : contentSecurityPolicySettings.FrameSource;
-
+    var currentUserIPAddress = Context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
 }
 
-@section styles{
-    <link rel="stylesheet" href="~/bundles/css/security-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/security-settings.css")" crossorigin="anonymous" asp-append-version="true" />
+@section styles {
+<link rel="stylesheet" href="~/bundles/css/security-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/security-settings.css")" crossorigin="anonymous" asp-append-version="true" />
 }
 
-@section scripts{
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/security-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/security-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
-       <script nonce="@Context.Items["ScriptNonce"]">
+@section scripts {
+<script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/security-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/security-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
+<script nonce="@Context.Items["ScriptNonce"]">
         var updateSecuritySettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
         var updateXFrameHeaderSettingsUrl = "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
         var updateCSPSettingsUrl = "@Url.Action("UpdateCSPSettings", "Administration")";
         var updateCookieSettingsUrl = "@Url.Action("UpdateCookieSettings", "Administration")";
-        var passwordLength = "@GlobalAppSettings.SystemSettings.PasswordSettings.MinimumLength";
-         var styleSourcesList = @Json.Serialize(styleSources);
+        var updateNetworkSettingsUrl = "@Url.Action("UpdateNetworkSettings", "Administration")";
+        var fetchNetworkSetingsUrl = "@Url.Action("GetNetworkSettings", "Administration")";
+        var passwordLength = "@GlobalAppSettings.SystemSettings.PasswordSettings.MinimumLength";        
+        var styleSourcesList = @Json.Serialize(styleSources);
         var scriptSourcesList = @Json.Serialize(scriptSources);
         var fontSourcesList = @Json.Serialize(fontSources);
         var imgSourcesList = @Json.Serialize(imgSources);
         var connectSourcesList = @Json.Serialize(connectSources);
         var frameSourcesList = @Json.Serialize(frameSources);
         var frameAncestorList = @Json.Serialize(frameAncestor);
-        var loginUrl = "@GlobalAppSettings.SystemSettings.InternalAppUrls.Idp" + "/accounts/logout" + "?returnUrl=" +"@Url.Action("SecuritySettings", "Administration")";
+        var loginUrl = "@GlobalAppSettings.SystemSettings.InternalAppUrls.Idp" + "/accounts/logout" + "?returnUrl=" + "@Url.Action("SecuritySettings", "Administration")";
+        var currentUserIP = "@currentUserIPAddress";
+        var reportsProductname = "@AppBranding.BoldReports.ProductName";
+        var isReportsInstalled = ("@ViewBag.IsReportsInstalled".toLowerCase() === "true");
+
     </script>
 }
 
-@section MainSection{
-    
+@section MainSection {
+
     @await Html.PartialAsync("_AdminMenu")
     <div class="col-xs-12 header-section no-padding no-margin width-alignment">
         <div class="col-md-12 admin-page-header">
@@ -62,6 +69,7 @@
                     <button type="button" title="" id="update-cookie-settings" class="primary-button pull-right">@T["Save"]</button>
                     <button type="button" title="" id="update-csp-settings" class="primary-button pull-right">@T["Save"]</button>
                     <button type="button" title="" id="update-x-frame-options-settings" class="primary-button pull-right">@T["Save"]</button>
+                    <button type="button" title="" id="update-network-settings" class="primary-button pull-right">@T["Save"]</button>
                 </div>
             </div>
         </div>
@@ -80,6 +88,9 @@
                 <li role="presentation" class="@isXFrameTab">
                     <a href="#x-frame-options" id="x-frame-options-tab" aria-controls="x-frame-options-tab" role="tab" data-toggle="tab">@T["X-Frame-Options"]</a>
                 </li>
+                <li role="presentation" class="@isNetworkTab">
+                    <a href="#network-settings" id="network-settings-tab" aria-controls="network-settings-tab" role="tab" data-toggle="tab">@T["IP Whitelisting"]</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -92,11 +103,12 @@
                         @await Html.PartialAsync("_LockAccount")
                     </div>
 
-                    
+
                 </div>
                 @await Html.PartialAsync("_CookieSettings")
                 @await Html.PartialAsync("_CspSettings")
                 @await Html.PartialAsync("_XFrameOptionsSettings")
+                @await Html.PartialAsync("_NetworkSettings")
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_FooterOnPremise")

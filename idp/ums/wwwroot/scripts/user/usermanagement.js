@@ -716,6 +716,9 @@ function onAddTenantsDialogClose() {
     gridObj.clearSelection();
     gridObj.refresh();
     document.getElementById("grant-access-dialog").ej2_instances[0].hide();
+    $("#add-tenant-search").val("");
+    $("#add-user-search-area").find("span.su.su-inner-close.close-icon").css("display", "none");
+    $("#add-user-search-area").find("span.su.su-search.search-icon").css("display", "block");
 }
 
 function provideAccesstoTenants() {
@@ -969,6 +972,7 @@ $(document).on("change", "#csvfile", function (e) {
         $(".upload-box").addClass("e-error");
     } else {
         $("#csv-upload").attr("disabled", false);
+        $("#user-import-validation-msg").css("display", "none");
         $("#filename,#trigger-file").removeClass("validation-message");
         $("#filename").val(value);
         $(".upload-box").removeClass("e-error");

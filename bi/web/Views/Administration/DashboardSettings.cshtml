@@ -23,6 +23,8 @@
     var deploymentDashboard = ViewBag.DeploymentDashboard;
     var isMaster = globalAppSettings.SystemSettings.IsMaster;
     var usageAnalytics = Convert.ToBoolean(ViewBag.UsageAnalytics);
+    var performanceMetrics = Convert.ToBoolean(ViewBag.PerformanceMetrics);
+    var queryMetrics = Convert.ToBoolean(ViewBag.QueryMetrics);
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var dashboardSettingsPageDescription = T["Configuration for the Dashboards."];
@@ -42,6 +44,7 @@
     </environment>
     <script>
         var isSelfHosted =  @Json.Serialize(isSelfHosted);
+        var usageAnalytics= @Json.Serialize(usageAnalytics);
         var dashboardSettingsUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardSiteSettings)";
         var deploymentDashboardUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DeploymentDashboard)";
         var customAttributeUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomAttribute)";
@@ -168,14 +171,35 @@
                     }
 
                     <li class="dashboard-settings-list usage-analytics-list">
-                            @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
-                            <label for="usage-analytics-setting">
-                                <span>@T["Usage analytics"]</span>
-                            </label>
-                            <div class="info-message">
-                                @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
-                            </div>
-                        </li>
+                        @Html.CheckBox("usage-analytics-setting", usageAnalytics, new { @class = "material-checkbox", @autocomplete = "off" })
+                        <label for="usage-analytics-setting">
+                            <span>@T["Usage analytics"]</span>
+                        </label>
+                        <div class="info-message">
+                            @T["This setting allows you to hide or show usage analytics dashboards in the dashboard listing page."]
+                        </div>
+                        <ul class="dashboard-settings-list metrics-list">
+                            <li class="dashboard-settings-list performance-metrics-list">
+                                @Html.CheckBox("performance-metrics-setting", performanceMetrics, new { @class = "material-checkbox", @autocomplete = "off" })
+                                <label for="performance-metrics-setting">
+                                    <span>@T["Performance Metrics"]</span>
+                                </label>
+                                <div class="info-message">
+                                    @T["This setting allows you to hide or show the performance metrics dashboard in the usage analytics page."]
+                                </div>
+                            </li>
+                            <li class="dashboard-settings-list query-metrics-list">
+                                @Html.CheckBox("query-metrics-setting", queryMetrics, new { @class = "material-checkbox", @autocomplete = "off" })
+                                <label for="query-metrics-setting">
+                                    <span>@T["Query Metrics"]</span>
+                                </label>
+                                <div class="info-message">
+                                    @T["This setting allows you to hide or show the query metrics dashboard in the usage analytics page."]
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                   
                     <li class="dashboard-settings-list">
                         @Html.CheckBox("get-emebed-code-dashboard", getDashboardEmbedcode, new { @class = "material-checkbox", @autocomplete = "off" })
                         <label for="get-emebed-code-dashboard">

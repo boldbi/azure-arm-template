@@ -9,36 +9,125 @@
     var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
 }
-<div id="AddCategoryPopup" class="no-padding" style="display:none">
-    <div class="dialog">
-        <form id="addCategoryForm" name="addCategoryForm">
-            <div id="create_category_content" class="col-md-12 dialog-body">
+<div id="AddSubCategoryPopup" style="display:none">
+    <div style="background:white;" class="dialog">
+        <form id="addSubCategoryForm" class="col-md-12 dialog-body">
+            <table>
+                <tbody>
+                    <tr>
+                        <td><div class="margin-bottom sub-category-name">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class ="margin-bottom">
+                                <input type="text" id="sub-category_name" class="popup form-control text-field text" data-maxlength="255" value="" tabindex="1" autofocus name="categoryName">
+                                <span id="validate-name" class="validation-message text"></span>
+                                <div id="plugin_validation" class="validation-message text"></div>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><div class="margin-bottom">@T["Description"]</div></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <textarea class="form-control text-field text" maxlength="1024" id="category_description" tabindex="2"></textarea>
+                            <span class="help-text">
+                                <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="CreateCategoryPopup" style="display:none">
+    <div style="background:white;" class="dialog">
+        <div class="select-create-type">
+            <div class="new-category-select select-database">
+                <input type="radio" id="new-category" class="css-radio" name="categoryType" value="0" checked>
+                <label for="new-category" class="radio-btn-label app-textbox-label"><span class="text">@T["New Category"]</span></label>
+            </div>
+            <div class="new-subcategory-select select-database">
+                <input type="radio" id="new-subcategory" class="css-radio" name="categoryType" value="1">
+                <label for="new-subcategory" class="radio-btn-label app-textbox-label"><span class="text">@T["New Sub Category"]</span></label>
+            </div>
+        </div>
+        <form id="create_newcategory_content" class="col-md-12 dialog-body">
+            <div id="create-category-section">
                 <table>
                     <tbody>
-                        <tr class="bottomPadding5">
-                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                        <tr>
+                            <td><div class="category-name category-add-field">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                        </tr>
+                        <tr>
                             <td>
                                 <span>
-                                    <input type="text" id="add_category_name" autofocus class="popup form-control bottom-margin30 text" name="categoryName" data-maxlength="255" tabindex="1">
+                                    <input type="text" id="add_category_name" class="popup form-control text-field" data-maxlength="255" value="" tabindex="1" autofocus name="categoryName">
                                     <span id="validate-name" class="validation-message text"></span>
                                     <div id="plugin_validation" class="validation-message text"></div>
                                 </span>
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Description"]</div></td>
+                            <td><div class="category-description category-add-field">@T["Description"]</div></td>
+                        </tr>
+                        <tr>
                             <td>
-                                <textarea name="description" class="form-control bottom-margin30 text" maxlength="1024" id="add-category_description" tabindex="2"></textarea>
-                                <span class="notification help-text">
+                                <textarea class="form-control text-field text" maxlength="1024" id="add-category_description" tabindex="2"></textarea>
+                                <span class="help-text">
                                     <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
                                 </span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <input type="submit" class="hide-content" style="display: none" />
             </div>
-            <div class="col-xs-12" id="upload-dashboard-info" style="display: none;">@T["You don't have any categories to upload dashboards. Please create a category."]</div>
+        </form>
+        <form id="create_subcategory_content" class="col-md-12 dialog-body" style="display:none">
+            <div id="create-subcategory-section">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="choose-category category-add-field">@T["Choose Category"]<span class="mandatory">*</span></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>
+                                    <input id="SubCategoryList" style="height:12px;" />
+                                    <div id="categorylist_validation" class="validation-message text"></div>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><div class ="category-name category-add-field">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>
+                                    <input type="text" id="create_subcategory_name" class="form-control text-field sub-category-field" data-maxlength="255" value="" tabindex="1" autofocus name="subcategoryName">
+                                    <span id="validate-name" class="validation-message text"></span>
+                                    <div id="plugin_validation" class="validation-message text"></div>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><div class="category-description category-add-field">@T["Description"]</div></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea class="form-control text-field" maxlength="1024" id="create_subcategory_description" tabindex="2"></textarea>
+                                <span class="help-text">
+                                    <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </form>
     </div>
 </div>

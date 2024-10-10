@@ -1,0 +1,31 @@
+﻿@using Microsoft.CodeAnalysis.FlowAnalysis
+@model TenantInfo
+@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"] == "ai-service") ? "active" : string.Empty;
+    var isAIService = ViewBag.AIServiceEnable == null ? true : ViewBag.AIServiceEnable;
+}
+<script type="text/javascript" nonce="@Context.Items["ScriptNonce"]">
+    var addIsAIServiceKeyEnableUrl = "@Url.Action("EnableOrDisableAiService", "TenantsManagement")";
+</script>
+
+<div role="tabpanel" class="col-xs-12 no-padding tab-pane @activeTab" id="ai-serviceKey-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="aiservice-enabled col-xs-12 no-padding">
+            <div class="material-switch inline-align" id="aiservice-switch-container" >
+                <input type="checkbox" data-tenant-id="@Model.TenantInfoId" id="aiservice-enable-switch" @(isAIService ? "checked" : string.Empty)/>
+                <label for="aiservice-enable-switch" class="label-primary"></label>
+            </div>
+            <div class="app-textbox-label inline-align activation enable-aiservice-code">
+                @T["Enable AI Assistant"]
+            </div>
+        </div>
+    </div>
+    <div class="admin-page-footer col-xs-12">
+        <div class="admin-page-actions col-xs-12 col-md-12">
+            <a href="@Url.Action("Sites", "TenantsManagement")" class="secondary-button pull-right" id="cancel-enable-aiservice" title="">@T["Cancel"]</a>
+            <button type="button" title="" id="update-enable-aiservice" class="primary-button pull-right">
+                @T["Save"]
+            </button>
+        </div>
+    </div>
+</div>

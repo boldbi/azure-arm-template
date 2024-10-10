@@ -552,7 +552,7 @@ $(document).ready(function () {
                 scope.categories = data;
                 if (data.result) {
                     SuccessAlert(window.Server.App.LocalizationContent.SSOSettings, window.Server.App.LocalizationContent.SSOSettingsUpdated, 7000);
-                    window.location.href = window.location.href;
+                    reloadPage();
                 } else {
                     WarningAlert(window.Server.App.LocalizationContent.SSOSettings, window.Server.App.LocalizationContent.SSOSettingsUpdateError, data.Message, 7000);
                 }
@@ -589,7 +589,7 @@ $(document).ready(function () {
                 scope.categories = data;
                 if (data.result) {
                     SuccessAlert(window.Server.App.LocalizationContent.AzureB2CSettings, window.Server.App.LocalizationContent.AzureB2CSettingsUpdated, 7000);
-                    window.location.href = window.location.href;
+                    reloadPage();
                 } else {
                     WarningAlert(window.Server.App.LocalizationContent.AzureB2CSettings, window.Server.App.LocalizationContent.AzureB2CSettingsUpdateError, data.Message, 7000);
                 }
@@ -617,7 +617,7 @@ $(document).ready(function () {
             success: function (result) {
                 hideWaitingPopup('server-app-container');
                 if (result.IsSuccess) {
-                    window.location.href = window.location.href;
+                    reloadPage();
                     SuccessAlert(window.Server.App.LocalizationContent.WindowsAdSettings, window.Server.App.LocalizationContent.WindowsAdSettingsUpdated, 7000);
                 }
                 else {
@@ -652,9 +652,8 @@ $(document).ready(function () {
             success: function (result) {
                 hideWaitingPopup('server-app-container');
                 if (result.IsSuccess) {
-                    window.location.href = window.location.href;
                     SuccessAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdated, 7000);
-
+                    reloadPage();
                 }
                 else {
                     WarningAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdatedError, result.Message, 7000);
@@ -706,7 +705,7 @@ $(document).ready(function () {
                 if (result.IsSuccess) {
                     SuccessAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdated, 7000);
                     authPrefix === 'oauth' ? oauthLogoChanged = false : openidLogoChanged = false;
-                    window.location.href = window.location.href;
+                    reloadPage();
                 }
                 else {
                     WarningAlert(window.Server.App.LocalizationContent.AuthenticationSettings, window.Server.App.LocalizationContent.AuthSettingsUpdatedError, result.Message, 7000);
@@ -1147,3 +1146,9 @@ $(document).on("click", "#oauth-mobile-callback-link-copy", function () {
 $(document).on("click", "#oauth-callback-link-copy", function () {
     copyToClipboard('#oauth-callback-link', '#oauth-callback-link-copy');
 });
+
+function reloadPage(){
+    setTimeout(function() {
+        window.location.href = window.location.href;
+    }, 1000);
+}

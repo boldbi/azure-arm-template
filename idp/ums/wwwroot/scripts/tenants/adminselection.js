@@ -11,6 +11,7 @@ $(document).ready(function () {
 
     $(document).on("keydown", "#search-tenant-users", function (e) {
         $("#validation-user-error").hide();
+        $("#validation-site-error").hide();
         $.xhrPool.abortAll();
         var currentKeyCode = parseInt(e.which);
         var element = "#" + this.id;
@@ -91,6 +92,7 @@ $(document).on("change", ".checkbox-row", function () {
     var index = checkBoxList.index(this);
     var isChecked = $(this).is(":checked")
     $("#validation-user-error").hide();
+    $("#validation-site-error").hide();
     var gridObj = document.getElementById('add_admins_grid').ej2_instances[0];
     var checkboxHeader = $("#admin-checkbox-header");
     $(".modal-dialog").addClass("fixed-pos");
@@ -193,6 +195,7 @@ function refreshTemplateForAdmin() {
 
 function headCheckboxOnChangeForAdmin() {
     $("#validation-user-error").hide();
+    $("#validation-site-error").hide();
     var gridObj = document.getElementById('add_admins_grid').ej2_instances[0];
     if ($("#admin-checkbox-header").prop("checked") == true) {
         $(".checkbox-row").prop("checked", true);
@@ -247,6 +250,7 @@ function onAddAdminsDialogClose() {
 
 $(document).on("click", ".su-search", function () {
     $("#validation-user-error").hide();
+    $("#validation-site-error").hide();
     $("#search-tenant-users").addClass("search-width");
     $(".close-icon").css("display", "block");
     $(".su-search").css("display", "none");
@@ -255,6 +259,7 @@ $(document).on("click", ".su-search", function () {
 
 $(document).on("click", "#clear-search", function () {
     $("#validation-user-error").hide();
+    $("#validation-site-error").hide();
     $("#search-tenant-users").removeClass("search-width");
     $(".close-icon").css("display", "none");
     $(".su-search").css("display", "block");

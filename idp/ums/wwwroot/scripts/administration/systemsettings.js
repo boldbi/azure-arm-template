@@ -265,13 +265,39 @@ $(document).ready(function () {
         return !isEmptyOrWhitespace(value);
     }, window.Server.App.LocalizationContent.EnterName);
 
+    $.validator.addMethod("isValidContent", function (value, element) {
+        return !/^\s/.test(value);
+    }, window.Server.App.LocalizationContent.AvoidTrialingWhiteSpace);
+
     $.validator.addMethod("isValidName", function (value, element) {
-        return IsValidName("name", value);
+        return IsValidName("name", value) && !/^\s/.test(value);
     }, window.Server.App.LocalizationContent.AvoidSpecailCharacters);
 
     $.validator.addMethod("isValidEmail", function (value, element) {
-        return IsEmail(value);
+        return IsEmail(value) && !/^\s/.test(value);
     }, window.Server.App.LocalizationContent.InvalidEmailAddress);
+
+    function validateIPWhitelisted() {
+        var domain = getSslValue() + "://" + $("#site_url").val() ;
+        $.ajax({
+            type: "POST",
+            url: validateIPWhitelistedUrl,
+            async: false,
+            data: { domain: domain },
+            success: function (data) {
+                if (!data.Data) {
+                    $("#site_url").closest("div").addClass("has-error");
+                    $("#site-url-validation").css("display", "block");
+                    $("#site-url-validation").html(window.Server.App.LocalizationContent.InvalidIpDomain);
+                }
+                else {
+                    $("#site_url").closest("div").removeClass("has-error");
+                    $("#site-url-validation").css("display", "none");
+                    $("#site-url-validation").html("");
+                }
+            }
+        });
+    }
 
     $("#look-and-feel-form").validate({
         errorElement: "span",
@@ -360,21 +386,31 @@ $(document).ready(function () {
         },
         rules: {
             "smtp_address": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
                     }
                 }
             },
             "port_number": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
                     }
                 }
             },
             "mail_display_name": {
-                required: {
+                isRequired: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
                     }
@@ -386,7 +422,7 @@ $(document).ready(function () {
                 }
             },
             "mail_user_name": {
-                required: {
+                isRequired: {
                     depends: function () {
                         return (parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0 || parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1);
                     }
@@ -398,35 +434,60 @@ $(document).ready(function () {
                 }
             },
             "mail_password": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
                     }
                 }
             },
             "sender_user_name": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 0;
                     }
                 }
             },
             "tenant_id": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1;
                     }
                 }
             },
             "client_id": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1;
                     }
                 }
             },
             "client_secret": {
-                required: {
+                isRequired: {
+                    depends: function () {
+                        return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1;
+                    }
+                },
+                isValidContent: {
                     depends: function () {
                         return parseInt(document.getElementById("mail-account").ej2_instances[0].value) === 1;
                     }
@@ -445,31 +506,31 @@ $(document).ready(function () {
         },
         messages: {
             "smtp_address": {
-                required: window.Server.App.LocalizationContent.MailSMTPServerValidator
+                isRequired: window.Server.App.LocalizationContent.MailSMTPServerValidator
             },
             "port_number": {
-                required: window.Server.App.LocalizationContent.MailSMTPPortValidator
+                isRequired: window.Server.App.LocalizationContent.MailSMTPPortValidator
             },
             "mail_display_name": {
-                required: window.Server.App.LocalizationContent.SenderNameValidator
+                isRequired: window.Server.App.LocalizationContent.SenderNameValidator
             },
             "mail_user_name": {
-                required: window.Server.App.LocalizationContent.SenderEmailValidator
+                isRequired: window.Server.App.LocalizationContent.SenderEmailValidator
             },
             "mail_password": {
-                required: window.Server.App.LocalizationContent.PasswordValidator
+                isRequired: window.Server.App.LocalizationContent.PasswordValidator
             },
             "sender_user_name": {
-                required: window.Server.App.LocalizationContent.UserNameValidator
+                isRequired: window.Server.App.LocalizationContent.UserNameValidator
             },
             "tenant_id": {
-                required: window.Server.App.LocalizationContent.TenantId
+                isRequired: window.Server.App.LocalizationContent.TenantId
             },
             "client_id": {
-                required: window.Server.App.LocalizationContent.ClientId
+                isRequired: window.Server.App.LocalizationContent.ClientId
             },
             "client_secret": {
-                required: window.Server.App.LocalizationContent.ClientSecret
+                isRequired: window.Server.App.LocalizationContent.ClientSecret
             }
         }
     });
@@ -522,17 +583,17 @@ $(document).ready(function () {
     $(document).on("change", "#enablepoweredbysyncfusion", function () {
         if ($("#enablepoweredbysyncfusion").is(":checked") == false) {
             $("#poweredbysyncfusion").removeClass("show").hide();
-            $("#upload-poweredlogo-image").children().find(".e-uploadinput").attr('disabled', true);
+            $(".powerdby-section").children().find(".upload-link button").attr('disabled', true);
             $(".footer-logo").find(".logo-description h3").addClass('powerdby-logo-disabled');
             $(".footer-logo").find(".logo-description p").addClass('powerdby-logo-disabled');
-            $("#upload-poweredlogo-image").children().find("#upload-poweredlogo-image_SelectButton").addClass('powerdby-logo-link-disabled');
+            $(".powerdby-section").children().find(".upload-link button").addClass("powerdby-logo-disabled");
         }
         else {
             $("#poweredbysyncfusion").removeClass("hide").show();
-            $("#upload-poweredlogo-image").children().find(".e-uploadinput").attr('disabled', false);
+            $(".powerdby-section").children().find(".upload-link button").attr('disabled', false);
             $(".footer-logo").find(".logo-description h3").removeClass('powerdby-logo-disabled');
             $(".footer-logo").find(".logo-description p").removeClass('powerdby-logo-disabled');
-            $("#upload-poweredlogo-image").children().find("#upload-poweredlogo-image_SelectButton").removeClass('powerdby-logo-link-disabled');
+            $(".powerdby-section").children().find(".upload-link button").removeClass("powerdby-logo-disabled");
         }
         addFooterSeparator();
     });
@@ -544,13 +605,25 @@ $(document).ready(function () {
             $("#site-copyright-error").html("");
             $("#site-copyright-error").hide();
             $("#site-copyright").attr("style", "border-color:var(--input-box-border-normal-color) !important");
+            if ($("#site-copyright").val() === '')
+            {
+                document.getElementById("site-copyright").value = copyrightInformation;
+                $("#site-copyright").closest("div").removeClass("has-error");
+            }
         }
         else {
             $("#copyrightinfo").removeClass("hide").show();
             $("#site-copyright").removeAttr('disabled');
             $("#site-copyright-error").show();
-            $("#site-copyright-error").html(window.Server.App.LocalizationContent.CopyRightValidator);
-            $("#site-copyright").attr("style", "border-color:var(--red)!important !important");
+            if ($("#site-copyright").val() === '')
+            {
+                $("#site-copyright-error").html(window.Server.App.LocalizationContent.CopyRightValidator);
+                $("#site-copyright").closest("div").addClass("has-error");
+            }
+            else
+            {
+                $("#site-copyright").closest("div").removeClass("has-error");
+            }
         }
         addFooterSeparator();
     });
@@ -584,152 +657,158 @@ $(document).ready(function () {
     }
 
     $(document).on("click", "#UpdateSystemSettings,#UpdateSystemSettings-bottom,#UpdateDatabaseSettings-bottom,#update-mail-settings", function () {
-        var messageHeader = $(this).hasClass("update-system-settings") ? window.Server.App.LocalizationContent.SiteSettings : window.Server.App.LocalizationContent.EmailSettings;
-        var enableSecureMail = $("#secure-mail-authentication").is(":checked");
-        RemoveUploadBoxError();
-        if (!$("#look-and-feel-form").valid() || !$("#email-setting-form").valid()) {
-            return;
+        if($("#site_url").val().length>0)
+        {
+            validateIPWhitelisted();
         }
+        if (($("#look-and-feel-form").find(".has-error").length == 0 && $("#email-setting-form").find(".has-error").length == 0)) {
+           var messageHeader = $(this).hasClass("update-system-settings") ? window.Server.App.LocalizationContent.SiteSettings : window.Server.App.LocalizationContent.EmailSettings;
+           var enableSecureMail = $("#secure-mail-authentication").is(":checked");
+           RemoveUploadBoxError();
 
-        var isUrlChange = false;
-        if ($("#site_url").attr("data-original-value") != $("#site_url").val()) {
-            isUrlChange = true;
+            if (!$("#look-and-feel-form").valid() || !$("#email-setting-form").valid()) {
+               return;
+           }
+
+           var isUrlChange = false;
+           if ($("#site_url").attr("data-original-value") != $("#site_url").val()) {
+               isUrlChange = true;
+           }
+           var isReloadPage = false;
+           if (getSslValue() != $("#scheme_value").attr("data-value") || $("#site_url").attr("data-original-value") !== $("#site_url").val() || prevLang != $("#language").val()) {
+               isReloadPage = true;
+           }
+           var siteURL = $("#site_url").val();
+           var isMailSettingsChanged = false;
+           var isMailPasswordChanged = false;
+           var mailSettings = new Object;
+           if (parseInt($("#port-number").val()) != window.SystemSettingsProperties.MailSettingsPort
+               || $("#smtp-address").val() != window.SystemSettingsProperties.MailSettingsHost
+               || $("#mail-display-name").val() != window.SystemSettingsProperties.MailSettingsSenderName
+               || $("#mail-user-name").val() != window.SystemSettingsProperties.MailSettingsAddress
+               || enableSecureMail != window.SystemSettingsProperties.MailSettingsIsSecureAuthentication) {
+               isMailSettingsChanged = true;
+
+               mailSettings = {
+                   Address: $("#mail-user-name").val(),
+                   Password: $("#mail_password").val(),
+                   Host: $("#smtp-address").val(),
+                   SenderName: $("#mail-display-name").val(),
+                   Port: parseInt($("#port-number").val()),
+                   IsSecureAuthentication: enableSecureMail
+               };
+           }
+
+           if ($("#mail-password").val() !== "") {
+               isMailPasswordChanged = true;
+           }
+
+           var mailProtocol = document.getElementById("mail-account").ej2_instances[0].value != undefined && !isNullOrWhitespace(document.getElementById("mail-account").ej2_instances[0].value) ? parseInt(document.getElementById("mail-account").ej2_instances[0].value) : 0;
+           var mailSettings = {
+               MailSettingsAddress: $("#mail-user-name").val(),
+               MailSettingsAuthType: mailProtocol == 0 ? parseInt($("input[name='mail-authentication-type']:checked").val()) : $("#oauth-mail-authentication-type").val(),
+               MailSettingsUserName: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#sender-user-name").val() : "",
+               MailSettingsPassword: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#mail-password").val() : "",
+               MailSettingsHost: $("#smtp-address").val(),
+               MailSettingsSenderName: $("#mail-display-name").val(),
+               MailSettingsPort: parseInt($("#port-number").val()) != undefined && !isNullOrWhitespace($("#port-number").val()) ? parseInt($("#port-number").val()) : 0,
+               MailSettingsIsSecureAuthentication: enableSecureMail,
+               MailSettingsAccount: mailProtocol,
+               MailSettingsTenantId: $("#tenant-id").val(),
+               MailSettingsClientId: $("#client-id").val(),
+               MailSettingsClientSecret: $("#client-secret").val(),
+           };
+
+           var systemSettingsData = {
+               OrganizationName: $("#site-orgname").val(),
+               LoginLogo: window.SystemSettingsProperties.LoginLogo,
+               MainScreenLogo: window.SystemSettingsProperties.MainScreenLogo,
+               FavIcon: window.SystemSettingsProperties.FavIcon,
+               EmailLogo: window.SystemSettingsProperties.EmailLogo,
+               PoweredByLogo: window.SystemSettingsProperties.PoweredByLogo,
+               WelcomeNoteText: $("#txt_welcome_note").val(),
+               TimeZone: document.getElementById("time-zone").ej2_instances[0].value,
+               DateFormat: document.getElementById("date-format").ej2_instances[0].value,
+               BaseUrl: getSslValue() + "://" + $("#site_url").val(),
+               EnableDomainChange: $("#domain-change").is(":checked"),
+               IsSecureConnection: getSslValue() === "https",
+               MailSettings: mailSettings,
+               MachineName: $("#machineName").val(),
+               HostDomain: $("#hostDomain").val(),
+               Language: document.getElementById("language").ej2_instances[0].value,
+               IsEnablePoweredBySyncfusion: $("#enablepoweredbysyncfusion").is(":checked"),
+               IsEnableCopyrightInfo: $("#enablecopyrightinfo").is(":checked"),
+               CopyrightInformation: $("#site-copyright").val(),
+               TimeFormat: document.getElementById("time_format").ej2_instances[0].value,
+               IgnoreSslValidation: $("#ssl-certificate").is(":checked")
+           };
+
+           $.ajax({
+               type: "POST",
+               url: window.updateSystemSettingsUrl,
+               data: {systemSettingsData: JSON.stringify(systemSettingsData)},
+               beforeSend: showWaitingPopup('server-app-container'),
+               success: function (result) {
+                   if (isReloadPage) {
+                       if (isUrlChange) {
+                           var restartLinkHtml = "<a href='" + restartLink + "' target='_blank'>click here.</a>";
+                           messageBox("", window.Server.App.LocalizationContent.RestartApplication, window.Server.App.LocalizationContent.RestartApplicationLink + restartLinkHtml, "success", function () {
+                               parent.onCloseMessageBox();
+                               var currentURL = window.location.pathname;
+                               window.location.href = getSslValue() + "://" + siteURL + currentURL.substring(currentURL.indexOf("/ums/administration"));
+                           });
+                       } else {
+                           window.location.href = getSslValue() + "://" + location.host + location.pathname;
+                       }
+                   } else {
+                       if (isMainLogoChange) {
+                           $("#application-logo").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.MainScreenLogo);
+                       }
+
+                       if (isPowerdbyLogoChange) {
+                           $("#poweredbysyncfusion img").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.PoweredByLogo);
+                       }
+
+                       $("#copyrightinfo").html(systemSettingsData.CopyrightInformation);
+                       if (isFavIconChange) {
+                           var link = document.createElement("link");
+                           link.type = "image/x-icon";
+                           link.rel = "shortcut icon";
+                           link.href = window.baseRootUrl + "content/images/application/" + systemSettingsData.FavIcon;
+                           document.getElementsByTagName("head")[0].appendChild(link);
+                       }
+
+                       var pageTitle = document.title.split("-")[0] + " - " + $("#site-orgname").val();
+                       document.title = pageTitle;
+                   }
+
+                   if (result.status) {
+                       if ($("#enablepoweredbysyncfusion").is(":checked")) {
+                           $("#poweredbysyncfusion").removeClass("hide").addClass("show");
+                       } else {
+                           $("#poweredbysyncfusion").removeClass("show").addClass("hide");
+                       }
+                       if ($("#enablecopyrightinfo").is(":checked")) {
+                           $("#copyrightinfo").removeClass("hide").addClass("show");
+                       } else {
+                           $("#copyrightinfo").removeClass("show").addClass("hide");
+                       }
+                       if ($("#enablepoweredbysyncfusion").is(":checked") && $("#enablecopyrightinfo").is(":checked")) {
+                           $("#footer-separator").removeClass("hide").addClass("show");
+                       } else {
+                           $("#footer-separator").removeClass("show").addClass("hide");
+                       }
+                       SuccessAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
+                       SetCookie();
+                   } else {
+                       WarningAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.Message, 7000);
+                       $(".error-message, .success-message").css("display", "none");
+                   }
+                   hideWaitingPopup('server-app-container');
+               }
+           });
         }
-        var isReloadPage = false;
-        if (getSslValue() != $("#scheme_value").attr("data-value") || $("#site_url").attr("data-original-value") !== $("#site_url").val() || prevLang != $("#language").val()) {
-            isReloadPage = true;
-        }
-        var siteURL = $("#site_url").val();
-        var isMailSettingsChanged = false;
-        var isMailPasswordChanged = false;
-        var mailSettings = new Object;
-        if (parseInt($("#port-number").val()) != window.SystemSettingsProperties.MailSettingsPort
-            || $("#smtp-address").val() != window.SystemSettingsProperties.MailSettingsHost
-            || $("#mail-display-name").val() != window.SystemSettingsProperties.MailSettingsSenderName
-            || $("#mail-user-name").val() != window.SystemSettingsProperties.MailSettingsAddress
-            || enableSecureMail != window.SystemSettingsProperties.MailSettingsIsSecureAuthentication) {
-            isMailSettingsChanged = true;
-
-            mailSettings = {
-                Address: $("#mail-user-name").val(),
-                Password: $("#mail_password").val(),
-                Host: $("#smtp-address").val(),
-                SenderName: $("#mail-display-name").val(),
-                Port: parseInt($("#port-number").val()),
-                IsSecureAuthentication: enableSecureMail
-            };
-        }
-
-        if ($("#mail-password").val() !== "") {
-            isMailPasswordChanged = true;
-        }
-
-        var mailProtocol = document.getElementById("mail-account").ej2_instances[0].value != undefined && !isNullOrWhitespace(document.getElementById("mail-account").ej2_instances[0].value) ? parseInt(document.getElementById("mail-account").ej2_instances[0].value) : 0;
-        var mailSettings = {
-            MailSettingsAddress: $("#mail-user-name").val(),
-            MailSettingsAuthType: mailProtocol == 0 ? parseInt($("input[name='mail-authentication-type']:checked").val()) : $("#oauth-mail-authentication-type").val(),
-            MailSettingsUserName: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#sender-user-name").val() : "",
-            MailSettingsPassword: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#mail-password").val() : "",
-            MailSettingsHost: $("#smtp-address").val(),
-            MailSettingsSenderName: $("#mail-display-name").val(),
-            MailSettingsPort: parseInt($("#port-number").val()) != undefined && !isNullOrWhitespace($("#port-number").val()) ? parseInt($("#port-number").val()) : 0,
-            MailSettingsIsSecureAuthentication: enableSecureMail,
-            MailSettingsAccount: mailProtocol,
-            MailSettingsTenantId: $("#tenant-id").val(),
-            MailSettingsClientId: $("#client-id").val(),
-            MailSettingsClientSecret: $("#client-secret").val(),
-        };
-
-        var systemSettingsData = {
-            OrganizationName: $("#site-orgname").val(),
-            LoginLogo: window.SystemSettingsProperties.LoginLogo,
-            MainScreenLogo: window.SystemSettingsProperties.MainScreenLogo,
-            FavIcon: window.SystemSettingsProperties.FavIcon,
-            EmailLogo: window.SystemSettingsProperties.EmailLogo,
-            PoweredByLogo: window.SystemSettingsProperties.PoweredByLogo,
-            WelcomeNoteText: $("#txt_welcome_note").val(),
-            TimeZone: document.getElementById("time-zone").ej2_instances[0].value,
-            DateFormat: document.getElementById("date-format").ej2_instances[0].value,
-            BaseUrl: getSslValue() + "://" + $("#site_url").val(),
-            EnableDomainChange: $("#domain-change").is(":checked"),
-            IsSecureConnection: getSslValue() === "https",
-            MailSettings: mailSettings,
-            MachineName: $("#machineName").val(),
-            HostDomain: $("#hostDomain").val(),
-            Language: document.getElementById("language").ej2_instances[0].value,
-            IsEnablePoweredBySyncfusion: $("#enablepoweredbysyncfusion").is(":checked"),
-            IsEnableCopyrightInfo: $("#enablecopyrightinfo").is(":checked"),
-            CopyrightInformation: $("#site-copyright").val(),
-            TimeFormat: document.getElementById("time_format").ej2_instances[0].value,
-            IgnoreSslValidation: $("#ssl-certificate").is(":checked")
-        };
-
-        $.ajax({
-            type: "POST",
-            url: window.updateSystemSettingsUrl,
-            data: { systemSettingsData: JSON.stringify(systemSettingsData) },
-            beforeSend: showWaitingPopup('server-app-container'),
-            success: function (result) {
-                if (isReloadPage) {
-                    if (isUrlChange) {
-                        var restartLinkHtml = "<a href='" + restartLink + "' target='_blank'>click here.</a>";
-                        messageBox("", window.Server.App.LocalizationContent.RestartApplication, window.Server.App.LocalizationContent.RestartApplicationLink + restartLinkHtml, "success", function () {
-                            parent.onCloseMessageBox();
-                            var currentURL = window.location.pathname;
-                            window.location.href = getSslValue() + "://" + siteURL + currentURL.substring(currentURL.indexOf("/ums/administration"));
-                        });
-                    }
-                    else {
-                        window.location.href = getSslValue() + "://" + location.host + location.pathname;
-                    }
-                } else {
-                    if (isMainLogoChange) {
-                        $("#application-logo").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.MainScreenLogo);
-                    }
-
-                    if (isPowerdbyLogoChange) {
-                        $("#poweredbysyncfusion img").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.PoweredByLogo);
-                    }
-
-                    $("#copyrightinfo").html(systemSettingsData.CopyrightInformation);
-                    if (isFavIconChange) {
-                        var link = document.createElement("link");
-                        link.type = "image/x-icon";
-                        link.rel = "shortcut icon";
-                        link.href = window.baseRootUrl + "content/images/application/" + systemSettingsData.FavIcon;
-                        document.getElementsByTagName("head")[0].appendChild(link);
-                    }
-
-                    var pageTitle = document.title.split("-")[0] + " - " + $("#site-orgname").val();
-                    document.title = pageTitle;
-                }
-
-                if (result.status) {
-                    if ($("#enablepoweredbysyncfusion").is(":checked")) {
-                        $("#poweredbysyncfusion").removeClass("hide").addClass("show");
-                    } else {
-                        $("#poweredbysyncfusion").removeClass("show").addClass("hide");
-                    }
-                    if ($("#enablecopyrightinfo").is(":checked")) {
-                        $("#copyrightinfo").removeClass("hide").addClass("show");
-                    } else {
-                        $("#copyrightinfo").removeClass("show").addClass("hide");
-                    }
-                    if ($("#enablepoweredbysyncfusion").is(":checked") && $("#enablecopyrightinfo").is(":checked")) {
-                        $("#footer-separator").removeClass("hide").addClass("show");
-                    } else {
-                        $("#footer-separator").removeClass("show").addClass("hide");
-                    }
-                    SuccessAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
-                    SetCookie();
-                } else {
-                    WarningAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.Message, 7000);
-                    $(".error-message, .success-message").css("display", "none");
-                }
-                hideWaitingPopup('server-app-container');
-            }
-        });
-    });
+      });
 });
 
 $(document).ready(function () {

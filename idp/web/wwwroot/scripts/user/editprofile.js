@@ -22,7 +22,7 @@ $(document).ready(function () {
         height: "350px",
         isModal: true,
         visible: false,
-        close: "closeAvatarBox",
+        close: closeAvatarBox,
         animationSettings: { effect: 'Zoom' },
         closeOnEscape: true
     });
@@ -444,12 +444,12 @@ function SaveProfile() {
                         $("#profile-name").text(newFirtName + " " + newLastName);
                         $("#profile-email").text(newEmail);
                         SuccessAlert(window.Server.App.LocalizationContent.UpdateProfile, result.Data.value, 7000);
-                        location.reload();
+                        reloadPage();
                     }
                 } else {
                     hideWaitingPopup('content-area');
                     WarningAlert(window.Server.App.LocalizationContent.UpdateProfile, result.Data.value, result.Message, 7000);
-                    location.reload();
+                    reloadPage();
                 }
             }
         );
@@ -472,6 +472,7 @@ function onPictureCropEnd(coordinates) {
 
 function closeAvatarBox(parameters) {
     document.getElementById("avatar-upload-box").ej2_instances[0].hide();
+    reloadPage();
 }
 
 function uploadImage() {
@@ -508,7 +509,7 @@ function uploadImage() {
                         window.location.href = redirectTo;
                     }
                     else {
-                        window.location.reload();
+                        reloadPage();
                     }
                     if (result.Data != null) {
                         SuccessAlert(window.Server.App.LocalizationContent.ChangeProfilepicture, window.Server.App.LocalizationContent.ProfilePictureSaved, 7000);
@@ -549,7 +550,7 @@ function uploadImage() {
                 },
                 error: function (result) {
                     if (result.status === 500 || result.status === 401 || result.status === undefined) {
-                        location.reload();
+                        reloadPage();
                     }
                     else {
                         WarningAlert(window.Server.App.LocalizationContent.ChangeProfilepicture, window.Server.App.LocalizationContent.ProfilePictureSaveFailed, result.Message, 7000);
@@ -569,7 +570,7 @@ function deleteUserAvatar() {
         type: "POST",
         url: deleteavatarUrl,
         success: function (result) {
-            location.reload();
+            reloadPage();
             SuccessAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarSuccess, 7000);
             var isLoggedUser = $("#logged-user").html().toLowerCase();
             $("#user-profile-picture").attr("src", getdefaultavatarUrl);
@@ -580,7 +581,7 @@ function deleteUserAvatar() {
         },
         error: function (result) {
             if (result.status === 500 || result.status === 401 || result.status === undefined) {
-                location.reload();
+                reloadPage();
             }
             else {
                 WarningAlert(window.Server.App.LocalizationContent.DeleteAvatar, window.Server.App.LocalizationContent.DeleteAvatarError, result.Message, 7000);
@@ -616,4 +617,10 @@ var saveButtonId = "#save-button";
 
 if ($(saveButtonId).length) {
     $(saveButtonId).on("click", SaveProfile);
+}
+
+function reloadPage() {
+    setTimeout(function() {
+        location.reload();
+    }, 1000);
 }

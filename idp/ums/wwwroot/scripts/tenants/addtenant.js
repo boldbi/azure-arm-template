@@ -17,6 +17,7 @@ var prevDomain = "";
 var haveTenantIdentifier = true;
 var validateTimer;
 var validateInterval = 1000;
+var tooltip;
 
 $(document).ready(function () {
     if (isCommonLogin) {
@@ -24,37 +25,76 @@ $(document).ready(function () {
     }
 
     $('[data-toggle="popover"]').popover();
+    $('[data-toggle="tooltip"]').tooltip();
 
     var IsDefaultPrefixAndSchema = IsDefaultPrefixUms && IsDefaultSchemaUms;
-    function OpenHandler(args) {
-        var listElemenet = args.popup.element.querySelectorAll('.e-list-item');
-        if (!IsDefaultPrefixAndSchema) {
-            if (!BIUmsPrefixSchema) {
-                if (listElemenet[0].innerText === 'Enterprise BI') {
-                    listElemenet[0].classList.add('e-disabled');
-                    listElemenet[0].style.pointerEvents = 'none';
-                }
-            }
-
-            if (!IsReportsPrefixSchema) {
-                if (listElemenet[1].innerText === 'Enterprise Reporting') {
-                    listElemenet[1].classList.add('e-disabled');
-                    listElemenet[1].style.pointerEvents = 'none';
-                }
-            }
-        }
-    }
+    var tooltipContent = "";
 
     var dropTenantTypeDownList = new ejs.dropdowns.DropDownList({
         index: (isCommonLogin && (IsBiPrefixSchema && !IsReportsPrefixSchema)) ? 0 : (isCommonLogin && (!IsBiPrefixSchema && IsReportsPrefixSchema && !BIUmsPrefixSchema) && (!IsDefaultPrefixUms || !IsDefaultSchemaUms)) ? 1 : 0,
         floatLabelType: "Always",
         placeholder: 'Tenant Type',
         change: changeTenantType,
-        open: OpenHandler,
-        cssClass: 'e-outline e-custom'
+        cssClass: 'e-outline e-custom',
+        open: function () {
+            var popupElement = dropTenantTypeDownList.popupObj.element;
+            var listItems = popupElement.querySelectorAll('.e-list-item');
+            for (var i = 0; i < listItems.length; i++) {
+                var listItem = listItems[i];
+                
+                if (listItems[i].dataset.value === 'BoldReportsOnPremise') {
+                    if (isIPWhiteListingSupportedAndEnabled && isUmsStartupWithOracle) {
+                        listItem.classList.add('e-disabled');
+                        tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateIPWhiteListingAndOracle;
+                    } else if (isIPWhiteListingSupportedAndEnabled) {
+                        listItem.classList.add('e-disabled');
+                        tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateIPWhiteListing;
+                    } else if (isUmsStartupWithOracle) {
+                        listItem.classList.add('e-disabled');
+                        tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateOracle;
+                    }
+                    else if (!IsDefaultPrefixAndSchema && !IsReportsPrefixSchema)
+                    {
+                        listItem.classList.add('e-disabled');
+                        tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateCustomSchemaAndPrefix;
+                    }
+                }
+                else
+                {
+                    if (!IsDefaultPrefixAndSchema && !BIUmsPrefixSchema)
+                    {
+                        listItem.classList.add('e-disabled');
+                        tooltipContent = window.Server.App.LocalizationContent.BISiteCannotCreateCustomSchemaAndPrefix;
+                    }
+                }
+            }
+            
+            if (!tooltip) {
+                tooltip = new ej.popups.Tooltip({
+                    content: tooltipContent,
+                    target: '.e-list-item.e-disabled',
+                    position: 'TopCenter',
+                });
+                tooltip.appendTo(document.body);
+            } else {
+                tooltip.setProperties({ target: '.e-list-item.e-disabled-1' });
+                tooltip.refresh();
+            }
+        },
+        select: (args) => {
+            if (args.item.classList.contains('e-disabled')) {
+                args.cancel = true;
+            }
+        },
+        close: function () {
+            if (tooltip) {
+                tooltip.destroy();
+                tooltip = null;
+            }
+        },
     });
 
-    dropTenantTypeDownList.appendTo('#tenant-type');
+    dropTenantTypeDownList.appendTo('#tenant-type'); 
 
     if (!isCommonLogin && isBoldBIMultiTenant.toLowerCase() == "true") {
         document.getElementById("tenant-type").ej2_instances[0].enabled = false;
@@ -85,6 +125,11 @@ $(document).ready(function () {
     }
 
     if (actionType.toLowerCase() != "edit") {
+        var inputDomain = ""
+        if (isValidUrl($("#input-domain").val())) {
+            inputDomain = $("#input-domain").val();
+        }
+        
         if (useSiteIdentifierEnable) {
             $(".site-url-identifier").removeClass("hide");
         }
@@ -98,7 +143,7 @@ $(document).ready(function () {
         else {
             $(".site-default-text").html("").html(boldBiPath);
         }
-        $(".site-domain").html($("#enable-ssl").val() + "://" + $("#input-domain").val());
+        $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
         $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text());
     }
 
@@ -215,10 +260,26 @@ $(document).ready(function () {
                     $("#domain-validation-error").html(window.Server.App.LocalizationContent.InvalidDomain);
                 }
                 else {
-                    $("#input-domain").closest("div").removeClass("e-error");
-                    $("#domain-validation-error").css("display", "none");
-                    $("#enable-ssl").css("margin-bottom", "5px");
-                    $("#domain-validation-error").html("");
+                    $.ajax({
+                        type: "POST",
+                        url: validateIPWhitelistedUrl,
+                        async: false,
+                        data: { domain: domain },
+                        success: function (ipData) {
+                            if (!ipData.Data) {
+                                $("#input-domain").closest("div").addClass("e-error");
+                                $("#domain-validation-error").css("display", "block");
+                                $("#enable-ssl").css("margin-bottom", "15px");
+                                $("#domain-validation-error").html(window.Server.App.LocalizationContent.InvalidIpDomain)
+                            } else {
+                                $("#input-domain").closest("div").removeClass("e-error");
+                                $("#domain-validation-error").css("display", "none");
+                                $("#enable-ssl").css("margin-bottom", "5px");
+                                $("#domain-validation-error").html("");
+                            }
+                        }
+                    });
+                    
                 }
             } 
         });
@@ -1175,4 +1236,10 @@ $(window).on('load', function () {
 });
 $(document).on("click", "#enable-isolation-code-material", function () {
     enableIsolationCode();
+});
+
+$(document).on("mouseleave", 'input[type="text"], input[type="password"]', function() {
+    if ($(this).val() === "") {
+        $(this).closest('div').removeClass("e-valid-input");
+    }
 });

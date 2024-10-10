@@ -753,7 +753,12 @@ function postSystemSettingsData(systemSettingsDetails, azuredetails, userName, t
     $.ajax({
         type: "POST", url: setSystemSettingsUrl, data: setSystemSettingsData,
         success: function (setSystemSettingsResponse) {
-            if (isAddFromServer != undefined && isAddFromServer) {
+            if (setSystemSettingsResponse.hasError != undefined && setSystemSettingsResponse.hasError) {
+                parent.hideWaitingPopup('add-tenant-popup');
+                $("#validation-site-error").text(setSystemSettingsResponse.errorMessege).show();
+                $(this).removeAttr("disabled");
+            }
+            else if (isAddFromServer != undefined && isAddFromServer) {
                 parent.hideWaitingPopup('add-tenant-popup');
                 $("#provide-admin-access-button").attr("disabled", "disabled");
                 var tenantGridObj = parent.document.getElementById('tenants_grid').ej2_instances[0];

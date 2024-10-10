@@ -1,10 +1,14 @@
 ﻿@using Syncfusion.Server.Base;
 @using Syncfusion.Server.Base.DataClasses;
+@using Syncfusion.Server.Base.Localization;
+@inject LocalizationHandler localization;
 
 @{
     Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
     ViewBag.Title = $"{T["Account Recovery"].Value} - {GlobalAppSettings.SystemSettings.OrganizationName}";
     var email = ViewBag.Email;
+    var accountNotExist = ViewBag.AccountNotExist != null ? ViewBag.AccountNotExist : false;
+    var isMaximumLimitReached = ViewBag.IsMaximumRateLimitReached != null ? ViewBag.IsMaximumRateLimitReached : false;
     var maskedEmail = new UserManagement().GetMaskedEmailString(email);
 }
 
@@ -37,7 +41,13 @@
         <div class="icon-container">
             <div class="su su-tick"></div>
         </div>
-        @if (ViewBag.IsAccountActivation)
+        @if (isMaximumLimitReached)
+        {
+            <div class="status-message text-body">
+                @T["You have attempted to recover your account too many times in a short period of time. Please try again later."]
+            </div>
+        }
+        else if (ViewBag.IsAccountActivation)
         {
             <div class="status-message text-body">
             @Html.Raw(string.Format(T["An email with instructions on how to verify your account has been sent to {0}."].Value, maskedEmail))
@@ -46,6 +56,24 @@
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=true" value="@T["Resend activation link"]">
             <div class="divider-light"></div>
             <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">@T["The verification link expires in 2 days!"]</span></div>
+        }
+        else if (accountNotExist)
+        {
+            <div class="status-message text-body">
+                @if (email.ToString().Contains('@'))
+                {
+                    @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0} {1}"].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>", $"{localization.EmailNotExist}"))
+                }
+                else
+                {
+                    @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}"].Value, string.Format(T[$"{localization.UsernameNotExist}"].Value, $"{email}")))
+                }
+                
+            </div>
+            <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
+            <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">
+            <div class="divider-light"></div>
+            <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">@T["The recovery link expires in two hours!"]</span></div>
         }
         else
         {

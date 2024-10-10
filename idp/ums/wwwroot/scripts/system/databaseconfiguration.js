@@ -43,6 +43,10 @@
         }
     }
 
+    $.validator.addMethod("isWhiteSpace", function (value, element) {
+        return !/^\s/.test(value);
+    }, window.Server.App.LocalizationContent.AvoidTrialingWhiteSpace);
+
     $("#db-content-holder").validate({
         errorElement: "span",
         onkeyup: function (element, event) {
@@ -60,6 +64,9 @@
                 isRequired: true
             },
             portnumber: {
+                isRequired: true
+            },
+            maintenancedatabase: {
                 isRequired: true
             },
             username: {
@@ -117,6 +124,9 @@
             },
             schemaName: {
                 isWhitespaceOrNumeric: true
+            },
+            additionalparameter: {
+                isWhiteSpace: true
             }
         },
         highlight: function (element) {
@@ -145,6 +155,9 @@
             },
             portnumber: {
                 isRequired: window.Server.App.LocalizationContent.PortValidator
+            },
+            maintenancedatabase: {
+                isRequired: window.Server.App.LocalizationContent.MaintenanceDbValidator
             },
             username: {
                 required: window.Server.App.LocalizationContent.UserNameValidator

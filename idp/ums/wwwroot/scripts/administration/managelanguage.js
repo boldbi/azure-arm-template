@@ -10,6 +10,7 @@ var isApplicationLanguage = false;
 var rowchecked;
 var isavailableLanguage = false;
 var isNewLanguageAdded = false;
+var isdeleteLanguages = false;
 $(document).ready(function () {
     createWaitingPopup("localization-container");
     createWaitingPopup("upload-container");
@@ -89,7 +90,8 @@ $(document).ready(function () {
         height: "176px",
         isModal: true,
         animationSettings: { effect: 'Zoom' },
-        visible: false
+        visible: false,
+        close: languageDeleteDialogClose
     });
     languageDeleteDialog.appendTo("#language-delete-dialog");
 
@@ -255,7 +257,7 @@ function closeLocalizationDialog() {
     localizationGrid.refresh();
     document.getElementById("localization-container").ej2_instances[0].hide();
     count = 0;
-    if (isNewLanguageAdded) {
+    if (isNewLanguageAdded || isdeleteLanguages) {
         window.location.reload();
     }
 }
@@ -399,6 +401,17 @@ $(document).on("change", ".localization-checkbox-row", function () {
         count--;
         fileName.pop(currentId);
     }
+
+    if (count >= 1)
+    {
+        $("#add-language").attr("disabled", true);
+        $(".su-add").addClass('su-disable');
+    }
+    else
+    {
+        $("#add-language").attr("disabled", false);
+        $(".su-add").removeClass('su-disable');
+    }
 });
 
 function languageDeleteDialogOpen() {
@@ -436,6 +449,8 @@ function languageDeleteDialogClose() {
     count = 0;
     $("#delete-language").hide();
     $(".selected-language").hide();
+    $("#add-language").attr("disabled", false);
+    $(".su-add").removeClass('su-disable');
     localizationGrid.clearSelection();
     localizationGrid.refresh();
 }
@@ -446,6 +461,7 @@ function deleteLanguages() {
     doAjaxPost("POST", removeLocalizationUrl, "languageName=" + fileName, function (data) {
         if (data.Status) {
             document.getElementById("language-delete-dialog").ej2_instances[0].hide();
+            isdeleteLanguages = true;
             messageBox("", window.Server.App.LocalizationContent.RemoveLanguageHeader, window.Server.App.LocalizationContent.LanguageRemoveSuccessMessage, "success", function () {
                 parent.onCloseMessageBox();
                 if (isApplicationLanguage) {
@@ -469,6 +485,8 @@ function deleteLanguages() {
     count = 0;
     $(".selected-language").hide();
     $("#delete-language").hide();
+    $("#add-language").attr("disabled", false);
+    $(".su-add").removeClass('su-disable');
     hideWaitingPopup("localization-container");
 }
 
@@ -480,7 +498,10 @@ $("#search-languages").on("keyup keydown", function () {
 
 
 $(document).on("click", "#add-language", function () {
-    uploadDialogOpen();
+    if (count < 1)
+    {
+        uploadDialogOpen();
+    }
 });
 
 $(document).on("click", "#delete-language", function () {
