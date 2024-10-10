@@ -97,7 +97,12 @@
             ${if (!IsMaster && TenantStatus == "@((int)TenantStatus.Active)") }
             <li>
                 <a href="#" class="tenant-action tenant-site" data-tenant-name="${TenantName}" data-tenant-id="${Id}" data-dns="${DNS}" data-tenant-type="${TenantType}" data-action="make-master">
-                    <i class="su su-master-site-bi mastersite"></i>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                        <i class="su su-master-site-bi mastersite"></i>
+                    ${/if}
+                    ${if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                        <i class="su su-master-site-reports mastersite"></i>
+                    ${/if}
                     <span class="makemaster">@T["Master Site"]</span>
                 </a>
             </li>
@@ -130,7 +135,6 @@
             adaptor: new ejs.data.UrlAdaptor(),
             crossDomain: true
         });
-
         var tenantsGrid = new ejs.grids.Grid({
             dataSource: data,
             gridLines: 'None',

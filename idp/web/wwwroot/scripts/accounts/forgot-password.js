@@ -25,14 +25,14 @@
             }
         },
         highlight: function (element) {
-            $(element).closest(".forgot-form-input-field").addClass("has-error");
+            $(".forgot-form-input-field").find("div").addClass("has-error");
         },
         unhighlight: function (element) {
-            $(element).closest(".forgot-form-input-field").removeClass("has-error");
-            $(element).parent().find("p.validation-holder").html("");
+            $(".forgot-form-input-field").find("div").removeClass("has-error");
+            $("p.validation-holder").html("");
         },
         errorPlacement: function (error, element) {
-            $(element).parent().find("p.validation-holder").html(error);
+            $("p.validation-holder").html(error);
         },
         messages: {
             "userName": {

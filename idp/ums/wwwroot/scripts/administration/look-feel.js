@@ -210,16 +210,21 @@ $(document).on("change", "#font-file", function (e) {
         $('#upload-font, #font-name').attr("disabled", "disabled");
     }
     else {
-        $('#upload-font, #font-name').attr("disabled", false);
+        $('#upload-font, #font-name').removeAttr("disabled");
+        var isFontExist = false;
         for (var item = 0; item < fontFamilyList.length; item++) {
             if (fontName === fontFamilyList[item].dataset.value.toLowerCase()) {
-                $('.validation').closest('div').addClass("has-error");
-                $(".validation-message").css("display", "block").text(window.Server.App.LocalizationContent.CssFileExist);
-                $('#upload-font, #font-name').attr("disabled", true);
+                isFontExist = true;
+                break;
             }
-            else {
-                keyvalidationfontname();
-            }
+        }
+
+        if (isFontExist) {
+            $('.validation').closest('div').addClass("has-error");
+            $(".validation-message").css("display", "block").text(window.Server.App.LocalizationContent.CssFileExist);
+            $('#upload-font, #font-name').attr("disabled", "disabled");
+        } else {
+            keyvalidationfontname();
         }
     }
 });
@@ -252,7 +257,7 @@ function onUploadFontDialogClose() {
     $('input[type="file"]').val(null);
     $("#font-file-name").val(window.Server.App.LocalizationContent.BrowseFont);
     $(".validation").closest("div").removeClass("has-error");
-    $(".validation-message").css("display", "none");
+    $(".validation-message").html("");
     document.getElementById("font-upload-dialog").ej2_instances[0].hide();
 }
 
@@ -287,7 +292,7 @@ function onUploadDashboardThemeDialogClose() {
     $("#dashboard-theme-file-name").val('');
     $('#dashboardtheme-file').closest('div').removeClass("has-error");
     $(".validation").closest("div").removeClass("has-error");
-    $(".validation-messages").html("");
+    $(".validation-message").html("");
     $('#upload-dashboardtheme, #dashboardtheme-name').attr("disabled", "disabled");
     document.getElementById("dashboard-theme-upload-dialog").ej2_instances[0].hide();
 }

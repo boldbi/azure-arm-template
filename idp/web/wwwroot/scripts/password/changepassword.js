@@ -72,6 +72,11 @@ $(document).ready(function () {
         }
     }, "");
 
+    $.validator.addMethod("notSameAsCurrent", function(value, element) {
+        var currentPassword = $("input[name='current-password']").val();
+        return this.optional(element) || value !== currentPassword;
+    }, window.Server.App.LocalizationContent.PasswordSameAsCurrent);
+
     $('.change-password-form').validate({
         errorElement: 'span',
         onkeyup: function (element, event) {
@@ -94,6 +99,7 @@ $(document).ready(function () {
             },
             "new-password": {
                 required: true,
+                notSameAsCurrent: true,
                 isEditadminPassword: true
             },
             "confirm-password": {
@@ -120,6 +126,7 @@ $(document).ready(function () {
             },
             "new-password": {
                 required: window.Server.App.LocalizationContent.NewPasswordValidator,
+                notSameAsCurrent: window.Server.App.LocalizationContent.PasswordSameAsCurrent,
                 isEditadminPassword: window.Server.App.LocalizationContent.InvalidPasswordValidator
             },
             "confirm-password": {
@@ -312,15 +319,8 @@ function disableMfa() {
         success: function (result) {
             if (result.Data.status && result.Data.recovery != "") {
                 document.getElementById("authenticator-application-box").ej2_instances[0].hide();
-                $.ajax({
-                    type: "POST",
-                    url: disableMfaUrl,
-                    async: false,
-                    success: function (result) {
-                        hideWaitingPopup('content-area');
-                        window.location.reload();
-                    }
-                });
+                hideWaitingPopup('content-area');
+                window.location.reload();
             }
             else {
                 document.getElementById("disable-verification-code").value = "";

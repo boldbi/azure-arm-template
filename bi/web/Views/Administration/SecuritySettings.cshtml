@@ -3,8 +3,9 @@
     ViewBag.Title = T["Security Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isNetworkSettingsTab = (Context.Request.Query["tab"].ToString().ToLower() == "network-settings") ? "active" : string.Empty;
     var isXFrameTab = (Context.Request.Query["tab"].ToString().ToLower() == "x-frame-options") ? "active" : string.Empty;
-    var isCSPTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "csp-settings" || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isXFrameTab))) ? "active" : string.Empty;
+    var isCSPTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "csp-settings" || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isXFrameTab) && string.IsNullOrWhiteSpace(isNetworkSettingsTab))) ? "active" : string.Empty;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
@@ -18,6 +19,7 @@
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var CSPHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy);
     var pageDescription = T["Configure security-related settings for your site."];
+    var currentUserIPAddress = Context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
 }
 
 @section styles{
@@ -39,6 +41,8 @@
     <script>
         var updateCSPSettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
         var updateXFrameHeaderSettingsUrl= "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
+        var updateNetworkSettingsUrl = "@Url.Action("UpdateNetworkSettings", "Administration")";
+        var fetchNetworkSettingsUrl = "@Url.Action("GetNetworkSettings", "Administration")";
         var styleSourcesList = @Html.Raw(Json.Serialize(styleSources));
         var scriptSourcesList = @Html.Raw(Json.Serialize(scriptSources));
         var fontSourcesList = @Html.Raw(Json.Serialize(fontSources));
@@ -49,6 +53,8 @@
         var contentSecurityPolicyUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy)";
         var xFrameOptionUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.XFrameOption)";
         var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
+        var networkSettingsUrl = helpSiteBaseUrl;
+        var currentUserIP = "@currentUserIPAddress";
     </script>
 }
 
@@ -70,6 +76,9 @@
                     <button type="button" title="" id="update-x-frame-options-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
                         @T["Save"]
                     </button>
+                    <button type="button" title="" id="update-network-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary pull-right">
+                        @T["Save"]
+                    </button>
                 </div>
             </div>
         </div>
@@ -80,6 +89,9 @@
                 </li>
                 <li role="presentation" class="@isXFrameTab">
                     <a href="#x-frame-options" id="x-frame-options-tab" aria-controls="x-frame-options-tab" role="tab" data-toggle="tab">X-Frame-Options</a>
+                </li>
+                <li role="presentation" class="@isNetworkSettingsTab">
+                    <a href="#network-settings" id="network-settings-tab" aria-controls="network-settings-tab" role="tab" data-toggle="tab">IP Whitelisting</a>
                 </li>
             </ul>
         </div>
@@ -202,6 +214,9 @@
                 <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isXFrameTab" id="x-frame-options">
                     @await Html.PartialAsync("_XFrameOptionsSettings")
                 </div>
+                <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isNetworkSettingsTab" id="network-settings">
+                    @await Html.PartialAsync("_NetworkSettings")
+                </div>
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
@@ -212,4 +227,5 @@
     <environment exclude="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.min.js"></script>
     </environment>
+
 }

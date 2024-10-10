@@ -64,10 +64,12 @@ $(document).ready(function () {
         rules: {
             "user-name": {
                 isRequired: true,
-                isValidUsernameLength: true,
-                isValidUsername: true
+                isValidUsername: true,
+                isValidUsernameLength: true
+                
             },
             "email-address": {
+                isRequired: true,
                 isValidName: true,
                 isValidEmail: true
             },
@@ -81,7 +83,7 @@ $(document).ready(function () {
                 additionalSpecialCharValidation: true
             },
             "user-password": {
-                required: true,
+                isRequired: true,
                 isUserPasswordValid: true
             },
         },
@@ -102,14 +104,14 @@ $(document).ready(function () {
 			"email-address": {
                 isRequired: window.Server.App.LocalizationContent.EmailValidator
             },
-            "username": {
+            "user-name": {
                 isRequired: window.Server.App.LocalizationContent.UserNameValidator
             },
             "first-name": {
                 isRequired: window.Server.App.LocalizationContent.FirstNameValidator
             },
             "user-password": {
-                isValidPassword: window.Server.App.LocalizationContent.PasswordValidator
+                isRequired: window.Server.App.LocalizationContent.PasswordValidator
             },
         }
     });

@@ -16,6 +16,7 @@
     var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
     var isDashboardCreateDenied = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var absoluteUrl = requestUrl.AbsolutePath.ToString().ToLower();
+    var canHideUploadDashboard = isDashboardCreateDenied && !_identityResponse.IsAdmin;
 }
 <script>
     var isDraftExistUrl = "@Url.Action("IsDraftExist", "items")";
@@ -97,7 +98,7 @@
                             </li>
                         }
                     }
-                    @if (isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard] && isDashboardTab)
+                    @if (isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard] && isDashboardTab && !canHideUploadDashboard)
                     {
                         <li id ="upload-dashboard">
                             <div class="create-item-list-section">

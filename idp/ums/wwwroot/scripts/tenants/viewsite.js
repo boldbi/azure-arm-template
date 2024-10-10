@@ -129,6 +129,9 @@ $(document).ready(function () {
     else if (query.includes("?tab=site-settings") && isActiveSite) {
         $('a[href="#site-settings-tab"]').tab("show");
     }
+    else if (query.includes("?tab=ai-service") && isActiveSite) {
+        $('a[href="#ai-serviceKey-tab"]').tab("show");
+    }
     else {
         isFreshLoad = false;
         $('a[href="#application-tab"]').tab("show");
@@ -148,6 +151,10 @@ $(document).ready(function () {
         else if (tab === "isolation-code" && isActiveSite) {
             $("#data-security a").attr("href", "#data-security-tab");
             $('a[href="#data-security-tab"]').tab('show');
+        }
+        else if (tab === "ai-service" && isActiveSite) {
+            $("#data-security a").attr("href", "#ai-serviceKey-tab");
+            $('a[href="#ai-serviceKey-tab"]').tab('show');
         }
         else if (tab === "attributes" && isActiveSite) {
             $("#custom-attribute a").attr("href", "#custom-attribute-tab");
@@ -267,6 +274,9 @@ $(document).on("shown.bs.tab", 'a[data-toggle="tab"]', function (e) {
         data = "isolation-code";
     }
 
+    else if (target.indexOf("#ai-serviceKey-tab") !== -1) {
+        data = "ai-service";
+    }
     else if (target.indexOf("#custom-attribute-tab") !== -1) {
         data = "attributes";
         if (!isAttributeTabLoaded) {
@@ -295,7 +305,7 @@ function pushUrl(data) {
 
 function fnOnApplicationGridLoad() {
     isFirstRequest = true;
-    var searchValue = $("#search-tenants").val();
+    var searchValue = $("#search-tenants").val().trim();
     if (this.properties.query.params.length > 0) {
         this.properties.query.params = [];
         this.properties.query.params.push({ key: "searchKey", value: searchValue });
@@ -317,7 +327,7 @@ function fnApplicationRecordClick(args) {
 
 function fnOnApplicationGridActionBegin(args) {
     isFirstRequest = true;
-    var searchValue = $("#search-tenants").val();
+    var searchValue = $("#search-tenants").val().trim();
     if (this.properties.query.params.length > 0) {
         this.properties.query.params = [];
         this.properties.query.params.push({ key: "searchKey", value: searchValue });
@@ -998,7 +1008,24 @@ function enableIsolationCode() {
         }
     }
 }
-
+$(document).on("click", "#update-enable-aiservice", function () {
+   var isAiServiceKeyEnabled= $("#aiservice-enable-switch").is(":checked");
+   var tenantInfoId =  $("#aiservice-enable-switch").attr("data-tenant-id");
+    showWaitingPopup("content-area");
+    $.ajax({
+        type: "POST",
+        data: { tenantInfoId: tenantInfoId, isAIServiceEnabled: isAiServiceKeyEnabled },
+        url: addIsAIServiceKeyEnableUrl,
+        success: function (result) {
+            if (result.Status) {
+                SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceEnabledSuccess, 7000);
+            } else {
+                WarningAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceKeyError, 7000);
+            }
+            hideWaitingPopup("content-area");
+        }
+    });
+});
 $(document).on("click", "#update-tenant-settings", function () {
     var globalSettingsOptions = [];
     $(".enable-disable").each(function () {

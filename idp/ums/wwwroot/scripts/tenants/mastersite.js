@@ -54,6 +54,11 @@ function onMasterDialogOpen(tenanatName, tenantType) {
                     masterDialog[0].content = window.Server.App.LocalizationContent.OnStartupMessage.format("<span class='tenant-name'>", result.data, "</span> <span class='conform-message'>", ", <span class='tenant-name'>", tenanatName, "</span> ,", "</span>"),
                     document.getElementById("master-site-change").ej2_instances[0].show();
             }
+            else
+            {
+                onCloseMasterDialog();
+                WarningAlert(window.Server.App.LocalizationContent.Master, window.Server.App.LocalizationContent.ErrorMessageDescription, result.Message, 7000);
+            }
         }
     });
 }
@@ -91,6 +96,7 @@ function getMasterSite(tenantType) {
             }
             else {
                 onMasterDialogClose();
+                WarningAlert(window.Server.App.LocalizationContent.Master, window.Server.App.LocalizationContent.ErrorMessageDescription, result.Message, 7000);
             }
         }
     });

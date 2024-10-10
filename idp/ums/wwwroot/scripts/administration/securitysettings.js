@@ -12,11 +12,17 @@ var isImgSrcChipBinded = false;
 var isConnectSrcChipBinded = false;
 var isFrameSrcChipBinded = false;
 var isFrameAncChipBinded = false;
+var isEditing = false;
+var attributeGrid;
+var exisitingRuleName=null;
+var existsIpAddress = null;
+
 $(document).ready(function () {
+    
     var numericBox = new ejs.inputs.NumericTextBox({
         cssClass: 'e-outline e-custom',
-        min:6,
-        max:64,
+        min: 6,
+        max: 64,
         format: '###.##'
     });
     numericBox.appendTo("#min-len");
@@ -84,8 +90,18 @@ $(document).ready(function () {
             }
         }
     }
+    var isChecked = $("#restrict-ipwhitelist-enabled").is(":checked");
+
+    if (isChecked) {
+        $('#rules-grid').show();
+        $('.whitelisting-info').show();
+    } else {
+        $('#rules-grid').hide();
+        $('.whitelisting-info').hide();
+    }
 
     diableOrEnableCSPSettingsForm()
+
 
     if ($("#lax-cookie").is(":checked")) {
         $(".cookie-notification").html(window.Server.App.LocalizationContent.LaxInformation);
@@ -106,7 +122,9 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-cookie-settings").show();
             $("#update-x-frame-options-settings").hide();
             $("#update-csp-settings").hide();
@@ -122,7 +140,9 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#csp").hide();
             $("#password-policy").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-x-frame-options-settings").show();
             $("#update-csp-settings").hide();
             $("#update-cookie-settings").hide();
@@ -133,11 +153,33 @@ $(document).ready(function () {
                 history.pushState(null, '', '?view=x-frame-options');
             }
         }
+        else if (location.href.match(/network-settings/)) {
+            $("#network-settings").tab("show");
+            $("#cookie-options").hide();
+            $("#csp").hide();
+            $("#password-policy").hide();
+            $("#x-frame-options").hide();
+
+            $("#update-network-settings").show();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-csp-settings").hide();
+            $("#update-cookie-settings").hide();
+            $("#update-password-settings").hide();
+
+            var query = (window.location.search).toString();
+            if (query != "?view=network-settings") {
+                history.pushState(null, '', '?view=network-settings');
+            }
+            
+        }
         else if (location.href.match(/csp/)) {
             $("#csp-tab").tab("show");
             $("#cookie-options").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+            $("#network-settings").hide();
+
+            $("#update-network-settings").hide();
             $("#update-csp-settings").show();
             $("#update-x-frame-options-settings").hide();
             $("#update-cookie-settings").hide();
@@ -152,7 +194,9 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#csp").hide();
             $("#x-frame-options").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-password-settings").show();
             $("#update-x-frame-options-settings").hide();
             $("#update-csp-settings").hide();
@@ -172,7 +216,9 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#cookie-options").hide();
             $("#password-policy").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-x-frame-options-settings").show();
             $("#update-csp-settings").hide();
             $("#update-cookie-settings").hide();
@@ -187,7 +233,9 @@ $(document).ready(function () {
             $("#cookie-options").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-csp-settings").show();
             $("#update-x-frame-options-settings").hide();
             $("#update-cookie-settings").hide();
@@ -197,12 +245,31 @@ $(document).ready(function () {
                 history.pushState(null, '', '?view=csp-settings');
             }
         }
+        else if ($(this).attr("id") == "network-settings-tab") {
+            $("#network-settings").show();
+            $("#csp").hide();
+            $("#cookie-options").hide();
+            $("#x-frame-options").hide();
+            $("#password-policy").hide();
+
+            $("#update-network-settings").show();
+            $("#update-csp-settings").hide();
+            $("#update-x-frame-options-settings").hide();
+            $("#update-cookie-settings").hide();
+            $("#update-password-settings").hide();
+            var query = (window.location.search).toString();
+            if (query != "?view=network-settings") {
+                history.pushState(null, '', '?view=network-settings');
+            }
+        }
         else if ($(this).attr("id") == "cookie-options-tab") {
             $("#cookie-options").show();
             $("#csp").hide();
             $("#x-frame-options").hide();
             $("#password-policy").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-cookie-settings").show();
             $("#update-x-frame-options-settings").hide();
             $("#update-csp-settings").hide();
@@ -217,7 +284,9 @@ $(document).ready(function () {
             $("#csp").hide();
             $("#cookie-options").hide();
             $("#x-frame-options").hide();
+            $("#network-settings").hide();
 
+            $("#update-network-settings").hide();
             $("#update-password-settings").show();
             $("#update-x-frame-options-settings").hide();
             $("#update-csp-settings").hide();
@@ -232,7 +301,7 @@ $(document).ready(function () {
     var sameSiteDialog = new ej.popups.Dialog({
         content: document.getElementById("samesite-dialog-content"),
         buttons: [
-            { click: confirmation, buttonModel: { content: window.Server.App.LocalizationContent.OKButton, isPrimary: true} } 
+            { click: confirmation, buttonModel: { content: window.Server.App.LocalizationContent.OKButton, isPrimary: true } }
         ],
         width: "424px",
         isModal: true,
@@ -314,6 +383,135 @@ $(document).on("click", "#x-frame", function () {
     }
 });
 
+$(document).on("click", "#update-network-settings", function () {
+    var isEnabledCheck = $("#restrict-ipwhitelist-enabled").is(":checked");
+    var isIPAddressExists = dataSourceRule.some(function (rule) {
+        return rule.IPAddress === currentUserIP;
+    });
+    var ruleData = { IsEnabled: isEnabledCheck, IPWhitelistingRules: dataSourceRule };
+    if(isEnabledCheck) {
+        if (!dataSourceRule || dataSourceRule.length === 0) {
+            WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.IpAddressSettingsFailed);
+            return;
+        }
+        if (!isIPAddressExists) {
+            WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.CurrentUserIpAddress);
+            return;
+        }
+    }
+    showWaitingPopup();
+    $.ajax({
+        type: "POST",
+        url: updateNetworkSettingsUrl,
+        data: { networksetting: JSON.stringify(ruleData) },
+        success: function (result) {
+            if (result.Status) {
+                hideWaitingPopup();
+                SuccessAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
+            } else {
+                WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.message, 7000);
+            }
+            
+        }
+    });
+});
+
+$(document).on('click', "#restrict-ipwhitelist-enabled", function () {
+    var isChecked = $(this).is(":checked");
+    if (isChecked) {
+        if (isReportsInstalled)
+        {
+            document.getElementById("restrict-ipwhitelist-enabled").checked = false;
+            WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, window.Server.App.LocalizationContent.IPWhiteListingNotEnable, 7000);
+        }
+        else
+        {
+            $('#rules-grid').show();
+            $('.whitelisting-info').show(); 
+        }
+    } else {
+        $('#rules-grid').hide();
+        $('.whitelisting-info').hide();
+    }
+});
+
+$(document).on('click', "input#add-rule", function () {
+    if (isEditing) {
+        var ruleName = $.trim($("#rulename").val());
+        var ipAddress = $.trim($("#ipaddress").val());
+        var iptype = $('input[name="ipaddress-type"]:checked').val();
+        var isValid = $("#dialog-container").valid();
+        if (isValid) {
+            $(".ruleadd-validation-messages").css("display", "none");
+           var whitelistingRules = { RuleName: ruleName, IPAddress: ipAddress, IPAddressType: iptype };
+            var updatedWhitelistingRulesSettings = dataSourceRule.filter(function (rule) {
+                return rule.RuleName !== exisitingRuleName;
+            });
+            updatedWhitelistingRulesSettings.unshift(whitelistingRules);
+            dataSourceRule = updatedWhitelistingRulesSettings;
+            exisitingRuleName = null;
+            existsIpAddress = null;
+            var gridObj = document.getElementById("rules-grid").ej2_instances[0];
+            gridObj.dataSource = dataSourceRule;
+            gridObj.refresh();
+            onRuleAddDialogClose();
+            
+        }
+        else {
+            $(".ruleadd-validation-messages").css("display", "block");
+        }
+    }
+    else
+    {
+        var ruleName = $.trim($("#rulename").val());
+        var ipAddress = $.trim($("#ipaddress").val());
+        var iptype = $('input[name="ipaddress-type"]:checked').val();
+        var isValid = $("#dialog-container").valid();
+        if (isValid) {
+            $(".ruleadd-validation-messages").css("display", "none");
+            var whitelistingRules = { RuleName: ruleName, IPAddress: ipAddress, IPAddressType: iptype };
+            dataSourceRule.unshift(whitelistingRules);
+            var gridObj = document.getElementById("rules-grid").ej2_instances[0];
+            gridObj.dataSource = dataSourceRule;
+            gridObj.refresh();
+            onRuleAddDialogClose();
+        }
+        else {
+            $(".ruleadd-validation-messages").css("display", "block");
+        }
+    }
+});
+$(document).on('change', 'input[name="ipaddress-type"]', function () {
+    $("#dialog-container").validate().element("#ipaddress");
+});
+$(document).on('click', '.tenant-action[data-action="delete"]', function () {
+    var ruleName = $(this).data('rule-name').toString();
+    var ipAddress = $(this).data('ipaddress');
+    var ipType = $(this).data('ip-type');
+    
+    var updatedWhitelistingRulesSettings = dataSourceRule.filter(function (rule) {
+        return rule.RuleName !== ruleName;
+    });
+    dataSourceRule = updatedWhitelistingRulesSettings;
+    var gridObj = document.getElementById("rules-grid").ej2_instances[0];
+    gridObj.dataSource = dataSourceRule;
+    gridObj.refresh();
+});
+
+$(document).on('click', '.tenant-action[data-action="edit"]', function () {
+    isEditing = true;
+    exisitingRuleName = $(this).data('rule-name').toString();
+    existsIpAddress = $(this).data('ipaddress'); 
+    var existsIpType = $(this).data('ip-type');
+    $('#rules-add-dialog_title').text("Edit Rules");
+    $('#rulename').val(exisitingRuleName);
+    $('#ipaddress').val(existsIpAddress);
+    $('input[name="ipaddress-type"][value="' + existsIpType + '"]').prop('checked', true);
+    $('#add-rule').val('Edit Rule');
+    onRuleAddDialogOpen();
+});
+
+
 $(document).on("click", "#update-x-frame-options-settings", function () {
     var key = "IsXFrameOptionsEnabled"
     var isXFrameOptionsEnabled = $("#x-frame").is(":checked");
@@ -354,7 +552,7 @@ function diableOrEnableCSPSettingsForm() {
         getSrcInstance("connect-src-chip-content");
         getSrcInstance("frame-src-chip-content");
 
-        getSrcInstance("frame-anc-chip-content"); 
+        getSrcInstance("frame-anc-chip-content");
 
         styleSrcChipData = [];
         scriptSrcChipData = [];
@@ -363,7 +561,7 @@ function diableOrEnableCSPSettingsForm() {
         connectSrcChipData = [];
         frameSrcChipData = [];
 
-        frameAncChipData = []; 
+        frameAncChipData = [];
     }
 }
 
@@ -567,122 +765,187 @@ $(document).on("keyup", "#frame-anc-content", function (e) {
         applySrcContainer("#txt-frameanc");
     }
 });
+
 $(document).on("paste", "#txt-stylesrc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "style-src-chip-content") && value != "") {
-                styleSrcChipData.push(value);
-                srcChipConversion(styleSrcChipData, "style-src-chip-content", "#txt-stylesrc");
+    if ($(this).closest('#style-src-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r?\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-stylesrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                } else if (isSrcChipAlreadyExists(value, "style-src-chip-content") && value != "") {
+                    styleSrcChipData.push(value);
+                    srcChipConversion(styleSrcChipData, "style-src-chip-content", "#txt-stylesrc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-stylesrc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-stylesrc").val("");
-        }, 100);
     }
 });
 
 $(document).on("paste", "#txt-scriptsrc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "script-src-chip-content") && value != "") {
-                scriptSrcChipData.push(value);
-                srcChipConversion(scriptSrcChipData, "script-src-chip-content", "#txt-scriptsrc");
+    if ($(this).closest('#script-src-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r?\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-scriptsrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                } else if (isSrcChipAlreadyExists(value, "script-src-chip-content") && value != "") {
+                    scriptSrcChipData.push(value);
+                    srcChipConversion(scriptSrcChipData, "script-src-chip-content", "#txt-scriptsrc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-scriptsrc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-scriptsrc").val("");
-        }, 100);
     }
 });
 
 $(document).on("paste", "#txt-fontsrc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "font-src-chip-content") && value != "") {
-                fontSrcChipData.push(value);
-                srcChipConversion(fontSrcChipData, "font-src-chip-content", "#txt-fontsrc");
+    if ($(this).closest('#font-src-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r?\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-fontsrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                } else if (isSrcChipAlreadyExists(value, "font-src-chip-content") && value != "") {
+                    fontSrcChipData.push(value);
+                    srcChipConversion(fontSrcChipData, "font-src-chip-content", "#txt-fontsrc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-fontsrc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-fontsrc").val("");
-        }, 100);
     }
 });
 
 $(document).on("paste", "#txt-imgsrc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "img-src-chip-content") && value != "") {
-                imgSrcChipData.push(value);
-                srcChipConversion(imgSrcChipData, "img-src-chip-content", "#txt-imgsrc");
+    if ($(this).closest('#img-src-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r?\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-imgsrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                } else if (isSrcChipAlreadyExists(value, "img-src-chip-content") && value != "") {
+                    imgSrcChipData.push(value);
+                    srcChipConversion(imgSrcChipData, "img-src-chip-content", "#txt-imgsrc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-imgsrc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-imgsrc").val("");
-        }, 100);
     }
 });
 
 $(document).on("paste", "#txt-connectsrc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "connect-src-chip-content") && value != "") {
-                connectSrcChipData.push(value);
-                srcChipConversion(connectSrcChipData, "connect-src-chip-content", "#txt-connectsrc");
+    if ($(this).closest('#connect-src-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r?\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-connectsrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                } else if (isSrcChipAlreadyExists(value, "connect-src-chip-content") && value != "") {
+                    connectSrcChipData.push(value);
+                    srcChipConversion(connectSrcChipData, "connect-src-chip-content", "#txt-connectsrc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-connectsrc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-connectsrc").val("");
-        }, 100);
     }
 });
 
 $(document).on("paste", "#txt-framesrc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "frame-src-chip-content") && value != "") {
-                frameSrcChipData.push(value);
-                srcChipConversion(frameSrcChipData, "frame-src-chip-content", "#txt-framesrc");
+    if ($(this).closest('#frame-src-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r?\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-framesrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                } else if (isSrcChipAlreadyExists(value, "frame-src-chip-content") && value != "") {
+                    frameSrcChipData.push(value);
+                    srcChipConversion(frameSrcChipData, "frame-src-chip-content", "#txt-framesrc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-framesrc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-framesrc").val("");
-        }, 100);
     }
 });
 
 $(document).on("paste", "#txt-frameanc", function (e) {
-    var data = e.originalEvent.clipboardData.getData('Text').trim();
-    var content = data.split(/[\s,;\r?\n]+/);
-    if (content.length > 1) {
-        for (var i = 0; i < content.length; i++) {
-            var value = content[i];
-            if (isSrcChipAlreadyExists(value, "frame-anc-chip-content") && value != "") {
-                frameAncChipData.push(value);
-                srcChipConversion(frameAncChipData, "frame-anc-chip-content", "#txt-frameanc");
+    if ($(this).closest('#frame-anc-content').hasClass('src-disabled')) {
+        e.preventDefault();
+    }
+    else {
+        var output = "";
+        var data = e.originalEvent.clipboardData.getData('Text').trim();
+        var content = data.split(/[\s,;\r\n]+/);
+        if (content.length > 1) {
+            for (var i = 0; i < content.length; i++) {
+                var value = content[i];
+                if (!isValidOrigin(value)) {
+                    output = output + value + " ";
+                    $("#txt-framesrc").parent().next().html(window.Server.App.LocalizationContent.ValidationMessage);
+                }
+                else if (isSrcChipAlreadyExists(value, "frame-anc-chip-content") && value != "") {
+                    frameAncChipData.push(value);
+                    srcChipConversion(frameAncChipData, "frame-anc-chip-content", "#txt-frameanc");
+                }
             }
+            setTimeout(function () {
+                $("#txt-frameanc").val(output.trim());
+            }, 100);
         }
-        setTimeout(function () {
-            $("#txt-frameanc").val("");
-        }, 100);
     }
 });
 
@@ -751,7 +1014,7 @@ function objectConvertAsSrcDirectiveChip(inputValue, id) {
     }
     else {
         ClearSettingsFields();
-         }
+    }
 }
 
 function ClearSettingsFields() {
@@ -890,7 +1153,7 @@ function isSrcChipAlreadyExists(obj, chipId) {
 function srcChipConversion(srcChipData, chipId, inputId) {
     if (inputId == "#txt-stylesrc") {
         if (!isStyleSrcChipBinded) {
-            new ej.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onStyleSrcChipDelete}, "#" + chipId);
+            new ej.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onStyleSrcChipDelete }, "#" + chipId);
             isStyleSrcChipBinded = true;
         } else {
             var styleSrcInstance = document.getElementById(chipId).ej2_instances;
@@ -903,7 +1166,7 @@ function srcChipConversion(srcChipData, chipId, inputId) {
 
     else if (inputId == "#txt-scriptsrc") {
         if (!isScriptSrcsChipBinded) {
-            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onScriptSrcChipDelete}, '#script-src-chip-content');
+            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onScriptSrcChipDelete }, '#script-src-chip-content');
             isScriptSrcsChipBinded = true;
         } else {
             var scriptSrcInstance = document.getElementById("script-src-chip-content").ej2_instances;
@@ -916,7 +1179,7 @@ function srcChipConversion(srcChipData, chipId, inputId) {
 
     else if (inputId == "#txt-fontsrc") {
         if (!isFontSrcChipBinded) {
-            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onFontSrcChipDelete}, '#font-src-chip-content');
+            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onFontSrcChipDelete }, '#font-src-chip-content');
             isFontSrcChipBinded = true;
         } else {
             var fontSrcInstance = document.getElementById("font-src-chip-content").ej2_instances;
@@ -929,7 +1192,7 @@ function srcChipConversion(srcChipData, chipId, inputId) {
 
     else if (inputId == "#txt-imgsrc") {
         if (!isImgSrcChipBinded) {
-            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onImgSrcChipDelete}, '#img-src-chip-content');
+            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onImgSrcChipDelete }, '#img-src-chip-content');
             isImgSrcChipBinded = true;
         } else {
             var imgSrcInstance = document.getElementById("img-src-chip-content").ej2_instances;
@@ -942,7 +1205,7 @@ function srcChipConversion(srcChipData, chipId, inputId) {
 
     else if (inputId == "#txt-connectsrc") {
         if (!isConnectSrcChipBinded) {
-            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onConnectSrcChipDelete}, '#connect-src-chip-content');
+            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onConnectSrcChipDelete }, '#connect-src-chip-content');
             isConnectSrcChipBinded = true;
         } else {
             var connectSrcInstance = document.getElementById("connect-src-chip-content").ej2_instances;
@@ -955,7 +1218,7 @@ function srcChipConversion(srcChipData, chipId, inputId) {
 
     else if (inputId == "#txt-framesrc") {
         if (!isFrameSrcChipBinded) {
-            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onFrameSrcChipDelete}, '#frame-src-chip-content');
+            new ejs.buttons.ChipList({ chips: srcChipData, enableDelete: true, delete: onFrameSrcChipDelete }, '#frame-src-chip-content');
             isFrameSrcChipBinded = true
         } else {
             var frameSrcInstance = document.getElementById("frame-src-chip-content").ej2_instances;
@@ -1156,6 +1419,7 @@ function removeSrcContainer(chipId, inputId) {
     $(inputId).css("width", "10%").removeAttr('placeholder').val("");
     $("#" + chipId).css("display", "inline");
 }
+
 
 $(document).on("click", "#update-csp-settings", function () {
     var contentSecurityPolicySettings = "";

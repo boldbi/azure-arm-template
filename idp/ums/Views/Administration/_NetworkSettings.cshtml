@@ -1,0 +1,101 @@
+﻿    @using Syncfusion.Server.Base.DataClasses.Core;
+
+    @{
+        var isNetworkSettingsTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "network-settings") ? "active" : string.Empty;
+        ViewBag.NetworkSettings = GlobalAppSettings.SystemSettings.NetworkSettings;
+        var firewallSettings = ViewBag.NetworkSettings != null ? ViewBag.NetworkSettings : new NetworkSettings();
+        var RuleData = (GlobalAppSettings.SystemSettings.NetworkSettings != null && GlobalAppSettings.SystemSettings.NetworkSettings.IPWhitelistingRules != null) ? GlobalAppSettings.SystemSettings.NetworkSettings.IPWhitelistingRules : new List<IPWhitelistingRules>();
+        var currentUserIP = Context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+    }
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var firewallSettings = @Html.Raw(Json.Serialize(firewallSettings));
+        var dataSourceRule = @(RuleData != null ? Html.Raw(Json.Serialize(RuleData)) : "[]");
+    </script>
+
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-edit">
+        <div class="item-header">
+            <a class="tenant-action tenant-site" data-rule-name="${RuleName}" data-ipaddress="${IPAddress}"  data-ip-type="${IPAddressType}" data-action="edit">
+                <i class="su su-edit"></i>
+                @* <span>@T["Edit"]</span> *@
+            </a>
+        </div>
+    </script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-delete">
+        <div class="item-header">
+            <a class="tenant-action tenant-site" data-rule-name="${RuleName}" data-ipaddress="${IPAddress}"  data-ip-type="${IPAddressType}" data-action="delete">
+                <i class="su su-delete"></i>
+                @* <span>@T["Delete"]</span> *@
+            </a>
+        </div>
+    </script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+            
+
+            var rulesGrid = new ejs.grids.Grid({
+                gridLines: 'Default',
+                dataSource: dataSourceRule,
+                allowSorting: true,
+                allowSearching: false,
+                allowPaging: true,
+                allowFiltering: false,
+                pageSettings: { pageSize: 10 },
+                enableHover: true,
+                enableAltRow: true,
+                columns: [
+
+                    { field: "RuleName", headerText: '@T["Name"]', width: 10, allowSorting: true, allowFiltering: false, clipMode: 'EllipsisWithTooltip' },
+                    { field: 'IPAddress', headerText: '@T["IP Address"]', width: 9 },
+                    { field: 'IPAddressType', headerText: '@T["Type"]', width: 10 },
+                    { width: 1, template: '#application-edit', clipMode: 'Clip' },
+                    { width: 2, template: '#application-delete', clipMode: 'Clip' },
+                ]
+            });
+
+            rulesGrid.appendTo("#rules-grid");
+        });
+    </script>
+<div role="tabpanel" class="tab-pane col-xs-12 col-lg-12 col-md-12 col-sm-12 admin-page-body @isNetworkSettingsTab" id="network-settings">
+    <div id="network-settings-settings-body" class="col-xs-12 no-padding">
+        <div class="col-xs-12 no-padding field-container-dashboard">
+            <div class="embed-authentication col-xs-12 no-padding">
+                <div class="material-switch rule-info inline-align">
+                    <div class="app-textbox-label enable-config inline-align activation">
+                        @T["Enable IP Whitelisting"]
+                    </div>
+                    @if (GlobalAppSettings.SystemSettings.NetworkSettings != null)
+                    {
+                        <input type="checkbox" id="restrict-ipwhitelist-enabled" @(GlobalAppSettings.SystemSettings.NetworkSettings.IsEnabled.HasValue && GlobalAppSettings.SystemSettings.NetworkSettings.IsEnabled.Value ? "checked" : "")/>
+                    }
+                    else
+                    {
+                        <input type="checkbox" id="restrict-ipwhitelist-enabled"/>
+                    }
+                    <label for="restrict-ipwhitelist-enabled" class="label-primary"></label>
+
+                </div>
+
+                <div class="info-message">
+                    <span>@T["Enabling this option will permit requests from whitelisted IP addresses. However, activating this feature won't immediately enforce IP whitelisting. Please specify the necessary IP address to be whitelisted and click on the save option to apply the changes."]</span>
+                </div>
+
+                <div class="whitelisting-info">   
+                    <div class="ipaddress-info pull-left">
+                        <span>@string.Format(T["Please add your current IP address {0} to the whitelisting. Once added all  required IP address please save this changes"].Value,currentUserIP)</span>
+                    </div>
+                    <div id="create-rule" class="pull-right">
+                        <button class="dropdown-toggle primary-button pull-right" data-toggle="tooltip" id="add-rule-btn" data-placement="top" title="@T["Add new Rule"]">
+                        <span>@T["Add IP Address"]</span>
+                        </button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        @await Html.PartialAsync("../Administration/_AddRulesDialog")
+        <div class="col-xs-12 no-padding">
+            <div id="rules-grid">
+            </div>
+        </div>
+    </div>
+</div>

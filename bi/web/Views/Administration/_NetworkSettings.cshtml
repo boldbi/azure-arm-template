@@ -1,0 +1,101 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var networkSettings = ViewBag.NetworkSettings != null ? ViewBag.NetworkSettings : new NetworkSettings();
+    var RuleData = (globalAppSettings.SystemSettings.NetworkSettings != null && globalAppSettings.SystemSettings.NetworkSettings.IPWhitelistingRules != null) ? globalAppSettings.SystemSettings.NetworkSettings.IPWhitelistingRules : new List<IPWhitelistingRules>();
+    var currentUserIP = Context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+
+<script>
+    var networkSettings = @Html.Raw(Json.Serialize(networkSettings));
+    var dataSourceRule = @(RuleData != null ? Html.Raw(Json.Serialize(RuleData)) : "[]");
+</script>
+
+<script type="text/x-jsrender" id="application-edit">
+    <div class="item-header">
+        <a href="#" class="tenant-action grid-content"  data-rule-name="{{:RuleName}}" data-ipaddress="{{:IPAddress}}" data-toggle="tooltip" data-ip-type="{{:IPAddressType}}" data-action="edit">
+            <i class="su su-edit"></i>
+        </a>
+    </div>
+</script>
+<script type="text/x-jsrender" id="application-delete">
+    <div class="item-header">
+        <a href="#" class="tenant-action grid-content"  data-rule-name="{{:RuleName}}" data-ipaddress="{{:IPAddress}}" data-toggle="tooltip" data-ip-type="{{:IPAddressType}}" data-action="delete">
+            <i class="su su-delete"></i>
+        </a>
+    </div>
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#rulesgrid").ejGrid({
+            gridLines: ej.Grid.GridLines.None,
+            dataSource: dataSourceRule,
+            allowSorting: true,
+            allowSearching: false,
+            allowPaging: true,
+            enableAltRow: false,
+            allowFiltering: false,
+            pageSettings: { pageSize: 10 },
+            enableHover: true,
+            rowDataBound: function () {
+                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+            },
+            dataBound: function () {
+                $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+            },
+            columns: [
+                { field: 'RuleName', headerText: '@T["Name"]', width: 90, allowSorting: true, allowFiltering: false },
+                { field: 'IPAddress', headerText: '@T["IP Address"]', width: 70, allowSorting: true, allowFiltering: false },
+                { field: 'IPAddressType', headerText: '@T["Type"]', width: 60, allowSorting: true, allowFiltering: false },
+                { headerText: '', width: 10, template: true, templateID: "#application-edit" },
+                { headerText: '', width: 15, template: true, templateID: "#application-delete" },
+            ]
+        });
+    });
+</script>
+
+<div id="network-settings-body" class="col-xs-12 no-padding">
+    <div class="col-xs-12 no-padding field-container-dashboard">
+        <div class="network-authentication col-xs-12 no-padding">
+            <div class="material-switch rule-info inline-align">
+                <div class="app-textbox-label enable-config inline-align activation">
+                    @T["Enable IP Whitelisting"]
+                </div>
+                @if (globalAppSettings.SystemSettings.NetworkSettings != null)
+                {
+                    <input type="checkbox" id="restrict-ipwhitelist-enabled" @(globalAppSettings.SystemSettings.NetworkSettings.IsEnabled.HasValue && globalAppSettings.SystemSettings.NetworkSettings.IsEnabled.Value ? "checked" : "") />
+                }
+                else
+                {
+                    <input type="checkbox" id="restrict-ipwhitelist-enabled" />
+                }
+                <label for="restrict-ipwhitelist-enabled" class="label-primary"></label>
+
+            </div>
+
+            <div class="info-message">
+                <span>@T["Enabling this option will permit requests from whitelisted IP addresses. However, activating this feature won't immediately enforce IP whitelisting. Please specify the necessary IP address to be whitelisted and click on the save option to apply the changes."]</span>
+            </div>
+
+
+            <div class="whitelisting-info">
+                <div class="ipaddress-info pull-left">
+                    <span>@string.Format(T["Please add your current IP address {0} to the whitelisting. Once added all  required IP address please save this changes"].Value,currentUserIP)</span>
+                </div>
+                <div id="create-rule" class="pull-right">
+                    <button class="dropdown-toggle primary-button app-btn-primary pull-right" data-toggle="tooltip" id="add-rule-btn" data-placement="top" title="@T["Add new Rule"]">
+                        <span>@T["Add IP Address"]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_AddRulesDialog")
+<div class="col-xs-12 no-padding dialog-override">
+    <div id="rulesgrid">
+    </div>
+</div>

@@ -78,11 +78,14 @@
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.calendars.all.min.js"></script>
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.richtexteditor.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dropdowntree.min.js"></script>
 
     <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
         <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
         <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.min.js"></script>
     </environment>
 
@@ -125,17 +128,7 @@
                         <div class="col-sm-12 col-xs-12 no-padding">
                             <div class="col-sm-2 col-xs-2 no-padding align-center"><label>@T["Category "]<span class="mandatory">*</span></label></div>
                             <div class="category-dropdown col-sm-4 col-xs-4">
-                                <select id="selected_category" data-live-search="true" title='@T["Select category"]' name="categoryId" class="selectpicker col-sm-4 col-xs-4" data-size="5">
-                                    @if (ViewBag.CategoryId != null)
-                                    {
-                                        <option value="@ViewBag.CategoryId" selected="selected">@Context.Request.Query["categoryName"].ToString()</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select category"]</option>
-                                    }
-
-                                </select>
+                                <input id="selected_category" title='@T["Select category"]' name="categoryId" class="col-sm-4 col-xs-4" />
                                 <span id="category-message" class="ErrorMessage validate-error">@T["Please select category"]</span>
                                 <input type="hidden" id="category_change_validation" name="isCategoryChanged" value="false" />
                             </div>
@@ -336,6 +329,7 @@
     var itemName = "@Context.Request.Query["itemName"].ToString()";
     var scheduleId = "@Context.Request.Query["scheduleId"].ToString()";
     var multiDashboardName = "@Context.Request.Query["multiDashboardName"].ToString()";
+    var categoryId = "@Context.Request.Query["categoryId"].ToString()";
     var isScheduledItemDeleted = @Json.Serialize(Context.Request.Query["isScheduledItemDeleted"].ToString());
     var categoryName = "@Context.Request.Query["categoryName"].ToString()";
     var getDashboardUrl = "@Url.Action("GetItems", "dashboards")";
@@ -347,7 +341,7 @@
     var emailEditor = "@Url.Action("EmailEditor", "scheduler")";
     var dataChanges = "@Url.Action("DataChanges", "scheduler")";
     var getwidgetUrl = "@Url.Action("GetWidgets", "scheduler")";
-    var getCategoryUrl = "@Url.Action("GetCategories", "scheduler")";
+    var getCategoryUrl = { "web": "@Url.Action("GetCategories", "scheduler")", "api": "/internal/items/get-categories" };
     var getTenantStatusUrl = "@Url.Action("GetTenantStatus", "PartialView")";
     var getNotificationCountUrl = "@Url.Action("GetNotificationCount", "PartialView")";
     var dataAlertUrl = { "web": "@Url.Action("DataAlert", "scheduler")", "api": "/internal/schedules/data-alert" };
@@ -374,7 +368,7 @@
     var getViewsByItemIdUrl = "@Url.Action("GetViewsByItemId","Items")";
     var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
 
-    $("#selected_dashboard,#selected_category").selectpicker();
+    $("#selected_dashboard").selectpicker();
     $("#selected_childdashboard").attr("disabled", true);
 
     function htmlDecode(input) {
@@ -383,9 +377,15 @@
     }
     if (actionType == "Create") {
         createSchedule(itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName);
+        setTimeout(function () {
+            initializeCategoryDropdown();
+        }, 100);
     }
     else {
-        editSchedule(scheduleId, itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName, isScheduledItemDeleted, isWidgetDeleted, isViewDeleted);
+        editSchedule(scheduleId, itemId, htmlDecode(itemName), htmlDecode(categoryName), multiDashboardName, isScheduledItemDeleted, isWidgetDeleted, isViewDeleted, categoryId);
+        setTimeout(function () {
+            initializeCategoryDropdown();
+        }, 100);
     }
     if (($(parent.window).width()) > 1400) {
         $(".schedule-dialog").addClass("lg-schedule-flexible");

@@ -80,6 +80,8 @@
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
+    var isEmbed = (ViewBag.isEmbed != null && ViewBag.isEmbed == "true") ? true : false;
+    var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
     if (isEmbedTrue)
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -175,6 +177,7 @@
         var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
         var licenseSettings =@Html.Raw(JsonConvert.SerializeObject(licenseSettings));
 		var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var isAIFeatureEnabled =  @Json.Serialize(globalAppSettings.SystemSettings.IsAiServiceEnabled);
         var currentUrl = "@currentUrl";
         var organizationName = "@globalAppSettings.SystemSettings.OrganizationName";
         var isDebug = "@isDebug";
@@ -211,6 +214,7 @@
         var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
         var appVersion = "@ServerAppConfig.ProductVersion";
         var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
+        var embedConfig = @Html.Raw(Json.Serialize(embedConfig));
     </script>
     <script type="text/javascript">
         window.addEventListener("beforeunload", function (e) {
@@ -257,9 +261,13 @@
     <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
 
     <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.js"></script>
         <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.min.js"></script>
         <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.min.js"></script>
     </environment>
 
@@ -272,9 +280,12 @@
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.min.js"></script>
     </environment>
 
-    <section id="menu-area" style="display:none" class="custom-bootstrap-styles">
-        @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
-    </section>
+    @if (!isEmbed)
+    {
+        <section id="menu-area" class="custom-bootstrap-styles">
+            @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
+        </section>
+    }
     @*<div id="designer-header" class="custom-bootstrap-styles">
             <div class="dashboard-name">
                 <span class="edit-dashboard">@ViewBag.dashboardName</span>

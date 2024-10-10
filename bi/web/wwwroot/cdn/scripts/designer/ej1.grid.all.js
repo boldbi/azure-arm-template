@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 7.11.24
+*  version : 8.1.41
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -12082,13 +12082,6 @@
 						this.selectedRowsIndexes = [];
 						this.model.selectedRecords = [];
 					}
-                    if(bbdesigner$gridRows.length > 0){
-                        bbdesigner$('input[type="checkbox"]').each(function () {
-                            if (bbdesigner$(this).prop('checked')) {
-                                bbdesigner$(this).prop('checked', false);
-                            }
-                        });
-                    }
                 }
                 if (!this.selectedRowsIndexes.length)
                     this._selectedRow(-1);
@@ -16263,24 +16256,7 @@
             if (bbdesigner$target.closest(".e-grid").attr("id") !== this._id) return;
             if (bbdesigner$target.closest("#" + this._id + "EditForm").length)
                 return;
-            var isCheckBoxEnabled = this.model.columns.filter(i => i.type === 'checkbox').length > 0 ? bbdesigner$target.is('input') : bbdesigner$target.hasClass("e-rowcell") || bbdesigner$target.closest("td").is(".e-rowcell");
-            if (bbdesigner$target.hasClass("e-linking-hyperlink") || bbdesigner$target.parent().hasClass("e-linking-hyperlink")) {
-                var bbdesigner$rowIndex = this.getIndexByRow(bbdesigner$target.closest('tr')), bbdesigner$prevIndex = this._previousIndex, bbdesigner$prevRow = this.getRowByIndex(this._previousIndex);
-                var Data = this._currentJsonData[BoldBIDashboard.isNullOrUndefined(this.getIndexByRow(bbdesigner$target.closest("tr"))) ? null : this.getIndexByRow(bbdesigner$target.closest('tr'))];
-                Data = this._virtualScrollingSelection ? this._virtualSelRecords : Data;
-                var selectedIndex = this.model.scrollSettings.enableVirtualization ? bbdesigner$rowIndex : this._selectedRow();
-                var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: Data, target: bbdesigner$target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex, parentTarget: e };
-                this._previousIndex = this.selectedRowsIndexes.length ? rowIndex :this._previousIndex;
-                this._trigger("rowSelected", args);
-                return;
-            }
-            if (bbdesigner$target.hasClass("e-rowcell") || bbdesigner$target.closest("td").is(".e-rowcell") || bbdesigner$target.is('input') || (bbdesigner$target.hasClass("e-headercell") && ((e.clientY - bbdesigner$target.offset().top) < (bbdesigner$target.height() / 4)))) {
-                this.multiSelectCtrlRequest = this.model.multiSelectCheckBox;
-                if (!bbdesigner$target.is('input') && bbdesigner$target.parents(".e-row").find("input[type=checkbox]").prop("checked")) {
-                    bbdesigner$target.parents(".e-row").find("input[type=checkbox]").prop("checked", false);
-                } else if (!bbdesigner$target.is('input')) {
-                    bbdesigner$target.parents(".e-row").find("input[type=checkbox]").prop("checked", true);
-                }
+            if (bbdesigner$target.hasClass("e-rowcell") || bbdesigner$target.closest("td").is(".e-rowcell") || (bbdesigner$target.hasClass("e-headercell") && ((e.clientY - bbdesigner$target.offset().top) < (bbdesigner$target.height() / 4)))) {
                 if (this._bulkEditCellDetails.cancelSave) {
                     this._bulkEditCellDetails.cancelSave = false;
                     return;

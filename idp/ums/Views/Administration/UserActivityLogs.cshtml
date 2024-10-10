@@ -1,0 +1,109 @@
+@{
+    ViewBag.Title = T["ActivityLogs"].Value + " - "  + GlobalAppSettings.SystemSettings.OrganizationName;
+    var eventTypeList = ViewBag.ActivityLogType;
+    var eventCategoryList = ViewBag.ActivityLogModule;
+}
+
+@section styles{
+<link rel="stylesheet" href="~/bundles/css/user-activity.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/user-activity.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+
+@section scripts
+{
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var filterUserLogsUrl = "@Url.Action("UserActivityLog", "Administration")";
+        var eventType = @Json.Serialize(eventTypeList);
+        var eventCategory = @Json.Serialize(eventCategoryList);
+        var userActivityLogDateFormat = "@GlobalAppSettings.SystemSettings.DateFormat";
+        var userActivityLogTimeFormat = "@GlobalAppSettings.SystemSettings.TimeFormat";
+        var dashboardServer = "@Source.DashboardServerAPI";
+        var identityProvider = "@Source.IdentityProviderAPI";
+        var dashboardJobs = "@Source.DashboardServerJobs";
+        var appSourceBI = "@SiteType.BI";
+        var appSourceUMS = "@SiteType.UMS";
+        var appTypeWeb = "@ApplicationPath.Web";
+        var appTypeApi = "@ApplicationPath.API";
+        var appTypeJobs = "@ApplicationPath.Jobs";
+</script>
+
+<script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/user-activity-log.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/activity-log.js")" crossorigin="anonymous" asp-append-version="true"></script>
+}
+
+@section MainSection
+{
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div class="col-xs-12 header-section no-padding no-margin width-alignment">
+        <div id="activity-setting" class="col-xs-12 admin-page-header header-without-button">
+            <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+                <hgroup class="col-xs-12 header-group">
+                    <h1 class="page-title">
+                        @T["Audit Logs"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Provides details about specific events or operations across the application, including what was changed and who made the changes."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+    </div>
+
+    <div id="activity-log-container" class="col-xs-12 admin-page-content-container">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div class="filter-section">
+                <div class="pull-right filter-alignment">
+                    <div class="col-sm-3 col-xs-3 date-picker no-padding">
+                        <input type="text" name="email-log-filter-date-range" class="form-control full-width" id="datePicker">
+                    </div>
+                    <div class="dropdown activity-settings-drop-down-category  pull-left col-xs-12">
+                        <input id="user-event-category"/>
+                    </div>
+                    <div class="dropdown activity-settings-drop-down-type pull-left col-xs-12">
+                        <input id="user-event-type"/>
+                    </div>
+                    <span>
+                        <button type="button" id="apply-button" class="link-button btn pull-left">@T["Apply"]</button>
+                    </span>
+                    <span id="reset">@T["Clear"]</span>
+                    <span class="separator pull-left"></span>
+                    <span class="su su-sync pull-left" id="refresh"></span>
+                </div>
+            </div>
+            <div id="userActivityLogGrid" class="col-lg-8 no-padding dialog-override">
+            </div>
+            <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-username-template">
+                ${if (InitiatedDisplayName !== "")}
+                    <span class="grid-content" title="${InitiatedDisplayName}">${InitiatedDisplayName}</span>
+                ${else}
+                    ${if (AppType === "@ApplicationPath.API" && AppSource === "@SiteType.BI")}
+                        <span class="grid-content" title="Dashboard Server API">"@GlobalAppSettings.GetDescription(Source.DashboardServerAPI)"</span>
+                    ${else}
+                        ${if (AppType === "@ApplicationPath.API" && AppSource === "@SiteType.UMS")}
+                            <span class="grid-content" title="Identity Provider API">@GlobalAppSettings.GetDescription(Source.IdentityProviderAPI)</span>
+                        ${/if}
+                        ${if (AppType === "@ApplicationPath.Jobs" && AppSource === "@SiteType.BI")}
+                        <span class="grid-content" title="Jobs Server">@GlobalAppSettings.GetDescription(Source.DashboardServerJobs)</span>
+                        ${/if}
+                    ${/if}
+                ${/if}
+                <br />
+                <span class="grid-content" title="${EventDateformat}">${EventDateformat}</span>
+        </script>
+            <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="initiated-display-name">
+            <span class="grid-content initiate-display-name" title="${Summary}">${Summary}</span>
+        </script>
+            <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="activity-user-log-options">
+            <span title="View" data-toggle="dropdown">
+                <a href="#" class="activity-log-info" data-email>
+                    <span>@T["View"]</span>
+                </a>
+            </span>
+        </script>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+    @await Html.PartialAsync("_ActivityLogInfo")
+}

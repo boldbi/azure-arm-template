@@ -5,6 +5,7 @@
     var isGeneralTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "general") ? "active" : string.Empty;
     var isAttributesTab = (Context.Request.Query["tab"] == "attributes") ? "active" : string.Empty;
     var isIsolationCodeTab = (Context.Request.Query["tab"] == "isolation-code") ? "active" : string.Empty;
+    var isAiServiceKeyTab =(Context.Request.Query["tab"] == "ai-service") ? "active" : string.Empty;
     var isUsersTab = (Context.Request.Query["tab"] == "users") ? "active" : string.Empty;
     var isSettingsTab = (Context.Request.Query["tab"] == "settings") ? "active" : string.Empty;
 }
@@ -190,6 +191,12 @@
                             <a href="#data-security-tab" aria-controls="data-security-tab" role="tab" data-toggle="tab">@T["Isolation Code"]</a>
                         </li>
                     }
+                    @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
+                    {
+                        <li role="presentation" class="@isAiServiceKeyTab" id="ai-service">
+                            <a href="#ai-serviceKey-tab" aria-controls="ai-serviceKey-tab" role="tab" data-toggle="tab">@T["AI"]</a>
+                        </li>
+                    }
                     <li role="presentation" class="@isAttributesTab" id="custom-attribute">
                         <a href="#custom-attribute-tab" aria-controls="custom-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
                     </li>
@@ -211,22 +218,21 @@
                     @await Html.PartialAsync("_SiteDetail")
                     @await Html.PartialAsync("_SiteUsers")
                     @await Html.PartialAsync("_SiteDataSecurity")
+                    @await Html.PartialAsync("_SiteAIServiceKey")
                     @await Html.PartialAsync("_SiteCustomAttribute")
                     @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
                     {
                         @await Html.PartialAsync("_GlobalSiteSettings")
                     }
+                    else
+                    {
+                        <div class="admin-page-body">
+                            <p class="no-tenant-detail">
+                                @T["The requested tenant details not found."]
+                            </p>
+                        </div>
+                    }
                 </div>
-
-            }
-            else
-            {
-                <div class="admin-page-body">
-                    <p class="no-tenant-detail">
-                        @T["The requested tenant details not found."]
-                    </p>
-                </div>
-            }
         </div>
         @await Html.PartialAsync("../Shared/_FooterOnPremise")
     </div>

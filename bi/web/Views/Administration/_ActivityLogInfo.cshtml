@@ -1,0 +1,83 @@
+<div id="activitylog-info-popup" class="fluent-popup custom-bootstrap-styles custom-server-style" ng-controller="activityLogInfoCtrl">
+    <div class="fluent-item-popup-body" id="dialog-content">
+        <span class="col-xs-12 activity-log-summary">
+            <label class="activity-log-label">@T["Summary"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.Summary }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-date">
+            <label class="activity-log-label">@T["Date"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.EventDateformat }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-username" ng-if="ActivityLogDetail.InitiatedDisplayName">
+            <label class="activity-log-label">@T["User"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.InitiatedDisplayName }}</span>
+        </span>
+            <span class="col-xs-12 activity-log-username" ng-if="!ActivityLogDetail.InitiatedDisplayName">
+            <label class="activity-log-label">@T["User"]</label>
+            <span class="activity-log-detail">
+                {{ getLogDetails(ActivityLogDetail.AppType, ActivityLogDetail.AppSource) }}
+            </span>
+        </span>
+        <span class="col-xs-12 activity-log-email">
+            <label class="activity-log-label">@T["Email"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.InitiatedUserEmail || '-' }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-ipaddress">
+            <label class="activity-log-label">@T["IPAddress"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.UserLogDetails.IpAddress || '-' }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-event-type">
+            <label class="activity-log-label">@T["EventCategory"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.EventCategoryString || '-' }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-event-category">
+            <label class="activity-log-label">@T["EventType"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.EventTypeString || '-' }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-source" ng-if="(ActivityLogDetail.EventTypeString === '@ActivityLogType.Added.ToString()' || ActivityLogDetail.EventTypeString === '@ActivityLogType.Updated.ToString()') && ActivityLogDetail.UserLogDetails.EventLog.Source != null">
+            <label class="activity-log-label">@T["Source"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.UserLogDetails.EventLog.Source }}</span>
+        </span>
+        <span class="col-xs-12 activity-log-user-agent no-margin no-padding">
+            <label class="activity-log-label">@T["UserAgent"]</label>
+            <span class="activity-log-detail">{{ ActivityLogDetail.UserLogDetails.UserAgent || '-' }}</span>
+        </span>
+        <div ng-if="((ActivityLogDetail.UserLogDetails.EventLog.Source == '@ImportSource.CSV.ToString()' || ActivityLogDetail.UserLogDetails.EventLog.Source == '@DirectoryType.OAuth2.ToString()' || ActivityLogDetail.UserLogDetails.EventLog.Source == '@DirectoryType.OpenIDConnect.ToString()' || ActivityLogDetail.UserLogDetails.EventLog.Source == '@ImportSource.Azure.ToString()' || ActivityLogDetail.UserLogDetails.EventLog.Source == '@ImportSource.Windows.ToString()' || ActivityLogDetail.UserLogDetails.EventLog.Source == '@ImportSource.Database.ToString()' || ActivityLogDetail.UserLogDetails.EventLog.Source == '@DirectoryType.AzureADB2C.ToString()') && ActivityLogDetail.EventCategoryString == '@ActivityLogModule.Permission.ToString()') || (ActivityLogDetail.UserLogDetails.EventLog.Source !== '@ImportSource.CSV.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@DirectoryType.OAuth2.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@DirectoryType.OpenIDConnect.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@DirectoryType.JWTSSO.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@ImportSource.Azure.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@ImportSource.Windows.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@ImportSource.Database.ToString()' && ActivityLogDetail.UserLogDetails.EventLog.Source !== '@DirectoryType.AzureADB2C.ToString()')">
+            <span class="col-xs-12 no-margin no-padding" ng-if="ActivityLogDetail.EventTypeString === '@ActivityLogType.Added.ToString()' || ActivityLogDetail.EventTypeString === '@ActivityLogType.Updated.ToString()'">
+                <span class="col-xs-12 activity-log-details" ng-if="showChangesLogs()">
+                    <span class="col-xs-12 horizontal-line"></span>
+                    <label class="changes-logs-label">@T["ChangesLogs"]</label>
+                    <span ng-if="ActivityLogDetail.EventTypeString === '@ActivityLogType.Added.ToString()'">
+                        <span class="col-xs-12 no-margin no-padding activity-changed-log">
+                            <label class="activity-log-label">@T["ChangeItem"]</label>
+                            <span class="change-item">{{ ActivityLogDetail.EventCategoryString || '-' }}</span>
+                        </span>
+                        <span class="col-xs-12 no-margin no-padding activity-changed-log">
+                            <label class="activity-log-label">@T["Changes"]</label>
+                            <span class="change-item">{{ ActivityLogDetail.Summary || '-' }}</span>
+                        </span>
+                    </span>
+                    <span class="col-xs-12 no-margin no-padding" ng-if="ActivityLogDetail.EventTypeString === '@ActivityLogType.Updated.ToString()'">
+                        <div ng-repeat="change in ActivityLogDetail.UserLogDetails.EventLog.ChangeLogCollection">
+                            <span ng-repeat="log in change.ChangeLog">
+                                <span class="col-xs-12 no-margin no-padding activity-changed-log">
+                                    <label class="activity-log-label">@T["ChangeItem"]</label>
+                                    <span class="change-item">{{ log.ChangedItem || '-' }}</span>
+                                </span>
+                                <span class="col-xs-12 no-margin no-padding activity-changed-log">
+                                    <label class="activity-log-label">@T["From"]</label>
+                                    <span class="change-item">{{ capitalizeFirstLetter(log.From) || '-' }}</span>
+                                </span>
+                                <span class="col-xs-12 no-margin no-padding activity-changed-log">
+                                    <label class="activity-log-label">@T["To"]</label>
+                                    <span class="change-item">{{ capitalizeFirstLetter(log.To) || '-' }}</span>
+                                </span>
+                                <span class="col-xs-12 horizontal-line" ng-if="!$last"></span>
+                            </span>
+                        </div>
+                    </span>
+                </span>
+            </span>
+        </div>
+    </div>
+</div>

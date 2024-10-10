@@ -1,0 +1,157 @@
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Audit Logs"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var pageDescription = T["Provides details about specific events or operations across the application, including what was changed and who made the changes."];
+}
+
+@section styles{
+<environment include="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+</environment>
+}
+
+@section scripts{
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+</environment>
+
+<script type="text/javascript">
+    var filterUserLogsUrl = "@Url.Action("GetUserActivityLogs", "Administration")";
+    var userActivityLogDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+    var userActivityLogTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
+    var appSourceBI = "@SiteType.BI";
+    var appSourceUMS = "@SiteType.UMS";
+    var appTypeWeb = "@ApplicationPath.Web";
+    var appTypeApi = "@ApplicationPath.API";
+    var appTypeJobs = "@ApplicationPath.Jobs";
+</script>
+}
+
+
+@section MainSection
+{
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") top-nav-header-without-btn">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Audit Logs"] }, { "PageDescription", @pageDescription } })
+    </div>
+
+    <div id="activity-settings-container" class="bi-page-container bi-page-container-with-tab @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <div class="col-xs-12 no-padding">
+                <div class="col-md-12 col-xs-12 col-sm-12 bi-page-body activity-page">
+                    <div class="filter-section">
+                        <div class="col-sm-3 col-xs-3 date-picker no-padding">
+                            <input type="text" name="activity-log-filter-date-range" class="form-control full-width" id="datePicker">
+                        </div>
+                        <div class="dropdown activity-settings-drop-down-category pull-left col-xs-12">
+                            @Html.DropDownList("userEvent", ViewBag.ActivityLogModule as IEnumerable<SelectListItem>, new { id = "event-category", @class = "selectpicker form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["Event Category"].Value, data_live_search = "true", data_live_search_placeholder = T["Search"].Value })
+                        </div>
+                        <div class="dropdown activity-settings-drop-down-type pull-left col-xs-12">
+                            @Html.DropDownList("userEvent", ViewBag.ActivityLogType as IEnumerable<SelectListItem>, new { id = "event-type", @class = "selectpicker form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["Event Type"].Value, data_live_search = "true", data_live_search_placeholder = T["Search"].Value })
+                        </div>
+                        <span>
+                            <button type="button" id="activity-log-filter-apply-button" class="btn apply-button btn pull-left">@T["Apply"]</button>
+                        </span>
+                        <span id="reset">@T["Clear"]</span>
+                        <span class="separator pull-left e-banner-verticalsplitline"></span>
+                        <span class="su su-synchronize" id="refresh"></span>
+                    </div>
+
+                    <div id="userActivityLogGrid" class="col-lg-12 no-padding dialog-override">
+                    </div>
+
+                    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-username-template">
+                        <div>
+                            {{if InitiatedDisplayName}}
+                                <span class="grid-content" title="{{:InitiatedDisplayName}}">{{:InitiatedDisplayName}}</span>
+                            {{else}}
+                                {{if AppType === '@ApplicationPath.Jobs' && AppSource === '@SiteType.BI'}}
+                                    <span class="grid-content" title="Dashboard Server Jobs">@T["Dashboard Server Jobs"]</span>
+                                {{/if}}
+                                {{if AppType === '@ApplicationPath.API' && AppSource === '@SiteType.BI'}}
+                                    <span class="grid-content" title="Dashboard Server API">@T["Dashboard Server API"]</span>
+                                {{else AppType === '@ApplicationPath.API' && AppSource === '@SiteType.UMS'}}
+                                    <span class="grid-content" title="Identity Provider API">@T["Identity Provider API"]</span>
+                                {{/if}}
+                            {{/if}}
+                            <br />
+                            <span class="grid-content" title="{{:EventDateformat}}">{{:EventDateformat}}</span>
+                        </div>
+                    </script>
+
+                    
+                    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="initiated-display-name">
+                         <span class="grid-content initiate-display-name" title="{{:Summary}}">{{:Summary}}</span>
+                    </script>
+                    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="activity-user-log-options">
+                        <span title="View" data-toggle="dropdown">
+                            <a href="#" class="activity-log-info" data-email>
+                                <span>@T["View"]</span>
+                            </a>
+                        </span>
+                    </script>
+                    <script>
+                        GridLocalization(window.Server.App.Localization.UserActivityLogsEmpty);
+                        gridObj = $("#userActivityLogGrid").ejGrid({
+                            dataSource: ej.DataManager({ url: "@Url.Action("GetUserActivityLogs", "Administration")", adaptor: "UrlAdaptor" }),
+                            gridLines: ej.Grid.GridLines.None,
+                            allowPaging: true,
+                            pageSettings: { pageSize: 20 },
+                            allowSorting: false,
+                            enableAltRow: false,
+                            allowSearching: true,
+                            allowFiltering: true,
+                            allowSelection: true,
+                            filterSettings: { filterType: "menu" },
+                            toolbarSettings: { showToolbar: false, toolbarItems: [ej.Grid.ToolBarItems.Search] },
+                            columns: [
+                                {
+                                    allowSorting: false,
+                                    headerText: "@T["User/Date"]",
+                                    template: "#user-username-template",
+                                    type: "string",
+                                    width: 25,
+                                    allowFiltering: false,
+                                },
+                                { field: 'EventCategoryString', headerText: "@T["Event Category"]", type: "string", width: 15, allowFiltering: false, allowSorting: false },
+                                { field: 'EventTypeString', headerText: "@T["Event Type"]", type: "string", width: 10, allowFiltering: false, allowSorting: false },
+                                {
+                                    headerText: "@T["Summary"]",
+                                    template: "#initiated-display-name",
+                                    type: "string",
+                                    width: 40,
+                                    allowFiltering: false,
+                                    allowSorting: false
+                                },
+                                {
+                                    allowSorting: false,
+                                    headerText: "@T["Details"]",
+                                    template: "#activity-user-log-options",
+                                    width: 10,
+                                    allowFiltering: false
+                                }
+                            ]
+                        });
+                    </script>
+                    <environment include="Development,CloudDevelopment">
+                        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/userActivityLog.js"></script>
+                    </environment>
+                    <environment exclude="Development,CloudDevelopment">
+                        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/userActivityLog.min.js"></script>
+                    </environment>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    @await Html.PartialAsync("_ActivityLogInfo")
+}
