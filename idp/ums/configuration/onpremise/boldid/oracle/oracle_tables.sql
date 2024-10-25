@@ -364,6 +364,7 @@ CREATE TABLE BOLDTC_TenantInfo (
     IsMaster NUMBER(1) NOT NULL,
     IsolationCode NVARCHAR2(2000),
     IsTenantIsolationCodeEnabled NUMBER(1) DEFAULT 0 NOT NULL,
+    ResourceLimitationSettings CLOB,
     UseCustomBranding NUMBER(1) NOT NULL,
     IsNewImDbDatabase NUMBER(1) NOT NULL,
     IsNewDatabase NUMBER(1) NOT NULL,

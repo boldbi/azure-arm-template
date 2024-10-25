@@ -478,6 +478,7 @@ CREATE TABLE [BOLDTC_TenantInfo] (
 	IsMaster bit NOT NULL,
 	IsolationCode nvarchar(4000),
 	IsTenantIsolationCodeEnabled bit NOT NULL DEFAULT '0',
+    ResourceLimitationSettings nvarchar(max),
 	UseCustomBranding bit NOT NULL,
 	IsNewImDbDatabase bit NOT NULL,
 	IsNewDatabase bit NOT NULL,

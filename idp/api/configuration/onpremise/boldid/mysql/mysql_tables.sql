@@ -378,6 +378,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantInfo (
 	IsMaster tinyint(1) NOT NULL,
 	IsolationCode nvarchar(4000),
 	IsTenantIsolationCodeEnabled tinyint(1) NOT NULL DEFAULT '0',
+    ResourceLimitationSettings longtext,
 	UseCustomBranding tinyint(1) NOT NULL,
 	IsNewImDbDatabase tinyint(1) NOT NULL,
 	IsNewDatabase tinyint(1) NOT NULL,
