@@ -83,6 +83,7 @@ $(document).ready(function () {
 
         $.ajaxSetup({
             beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("CSRF-TOKEN", extractXSRFTokenFromCookie())
                 $.xhrPool.push(jqXHR);
             },
             complete: function (jqXHR) {
@@ -100,13 +101,45 @@ $(document).ready(function () {
             $.xhrPool.length = 0;
         };
         if (typeof ej != "undefined" && typeof ej.UrlAdaptor != "undefined") {
+
             ej.UrlAdaptor.prototype.beforeSend = function (dm, request) {
+                request.setRequestHeader("CSRF-TOKEN", extractXSRFTokenFromCookie());
                 $.xhrPool.push(request);
-            }
+            };
+            
             $.ajaxSetup({
                 complete: function (jqXHR) {
                     var i = $.xhrPool.indexOf(jqXHR);
                     if (i > -1) $.xhrPool.splice(i, 1);
+                }
+            });
+
+            
+        }
+        else if (typeof ejs != "undefined" && typeof ejs.data.UrlAdaptor != "undefined") {
+            // Overriding the beforeSend method for UrlAdaptor globally
+            ejs.data.UrlAdaptor.prototype.beforeSend = function (dm, request) {
+                // Set the CSRF token in the request headers
+                request.setRequestHeader("CSRF-TOKEN", extractXSRFTokenFromCookie());
+
+                // Optional: Add request to the pool if you want to manage active AJAX requests
+                if (typeof $.xhrPool !== "undefined") {
+                    $.xhrPool.push(request);
+                }
+            };
+
+            $.ajaxSetup({
+                beforeSend: function (jqXHR) {
+                    jqXHR.setRequestHeader("CSRF-TOKEN", extractXSRFTokenFromCookie())
+                    $.xhrPool.push(jqXHR);
+                }
+            });
+        }
+        else {
+            $.ajaxSetup({
+                beforeSend: function (jqXHR) {
+                    jqXHR.setRequestHeader("CSRF-TOKEN", extractXSRFTokenFromCookie())
+                    $.xhrPool.push(jqXHR);
                 }
             });
         }
@@ -831,6 +864,14 @@ function WarningAlert(header, content, error, duration) {
     });
 }
 
+function extractXSRFTokenFromCookie() {
+    var xsrfToken = document.cookie.split("; ").find(row => row.startsWith("BOLD-UMS-XSRF-TOKEN="));
+    if (xsrfToken) {
+        return xsrfToken.split("=")[1];
+    }
+    return null;
+}
+
 function isApplicationUrlValid(url) {
     var regexExpression = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!regexExpression.test(url)) {
@@ -913,6 +954,10 @@ function createLoader(element) {
     }
 
     return returnId;
+}
+
+function addHeaders(args) {
+    args.currentRequest.setRequestHeader('CSRF-TOKEN', extractXSRFTokenFromCookie());
 }
 
 function blurServerAppContainer(size) {

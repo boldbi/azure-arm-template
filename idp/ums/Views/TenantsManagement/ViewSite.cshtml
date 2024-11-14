@@ -6,6 +6,7 @@
     var isAttributesTab = (Context.Request.Query["tab"] == "attributes") ? "active" : string.Empty;
     var isIsolationCodeTab = (Context.Request.Query["tab"] == "isolation-code") ? "active" : string.Empty;
     var isAiServiceKeyTab =(Context.Request.Query["tab"] == "ai-service") ? "active" : string.Empty;
+    var isResourceLimitationTab = (Context.Request.Query["tab"] == "resource-limitation") ? "active" : string.Empty;
     var isUsersTab = (Context.Request.Query["tab"] == "users") ? "active" : string.Empty;
     var isSettingsTab = (Context.Request.Query["tab"] == "settings") ? "active" : string.Empty;
 }
@@ -22,10 +23,11 @@
     <meta name="isolation-code" content="@Model.TenantIsolation?.IsolationCode" />
 
     <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/sites.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/sites.js")" crossorigin="anonymous" asp-append-version="true"></script>
-       <script nonce="@Context.Items["ScriptNonce"]">
+    <script nonce="@Context.Items["ScriptNonce"]">
         var tenantInfoId = "@Model.TenantInfoId";
         var isolationCode = $('meta[name="isolation-code"]').attr("content");
         var updateIsolationCodeUrl = "@Url.Action("IsolationCode", "TenantsManagement")";
+        var updateResourceLimitationUrl = "@Url.Action("UpdateResourceLimitation", "TenantsManagement")";
         var siteAttributesUrl = "@Url.Action("GetSiteAttributes", "CustomAttribute")";
         var isActiveSite = "@Model.TenantStatus" == "@TenantStatus.Active";
     </script>
@@ -55,8 +57,15 @@
       <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-username-template">
         <span class="grid-content" title="${Username}" data-toggle="tooltip">${Username}</span>
     </script>
-      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-email-template">
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-email-template">
         <span class="grid-content" title="${Email}" data-toggle="tooltip">${Email}</span>
+    </script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="activation-method-template">
+        ${if (ActivationMethod == null || ActivationMethod == "" || ActivationMethod == " ")}
+          @T["NA"]
+        ${else}
+          ${ActivationMethod}
+        ${/if}
     </script>
       <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-status-template">
         <span class="grid-content">${UserStatus}</span>
@@ -67,8 +76,11 @@
       <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-username-header">
         <div class="item-header">@T["Username"]</div>
     </script>
-      <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="email-header">
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="email-header">
         <div class="item-header">@T["Email Address"]</div>
+    </script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="activation-method-header">
+        <div class="item-header">@T["Activation Method"]</div>
     </script>
       <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="status-header">
         <div class="item-header">@T["Status"]</div>
@@ -197,6 +209,12 @@
                             <a href="#ai-serviceKey-tab" aria-controls="ai-serviceKey-tab" role="tab" data-toggle="tab">@T["AI"]</a>
                         </li>
                     }
+                    @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise && ViewBag.ResourceLimitationEnable)
+                    {
+                        <li role="presentation" class="@isResourceLimitationTab" id="resource-limitation">
+                            <a href="#resource-limitation-tab" aria-controls="resource-limitation-tab" role="tab" data-toggle="tab">@T["Limitations"]</a>
+                        </li>
+                    }
                     <li role="presentation" class="@isAttributesTab" id="custom-attribute">
                         <a href="#custom-attribute-tab" aria-controls="custom-attribute-tab" role="tab" data-toggle="tab">@T["Attributes"]</a>
                     </li>
@@ -219,6 +237,7 @@
                     @await Html.PartialAsync("_SiteUsers")
                     @await Html.PartialAsync("_SiteDataSecurity")
                     @await Html.PartialAsync("_SiteAIServiceKey")
+                    @await Html.PartialAsync("_SiteResourceLimitation")
                     @await Html.PartialAsync("_SiteCustomAttribute")
                     @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise)
                     {

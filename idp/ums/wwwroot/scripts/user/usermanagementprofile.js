@@ -2,6 +2,7 @@
 var userDetails;
 //var browser = ej.browserInfo();
 $(document).ready(function () {
+    var isAdmin = $("#current-password").length > 0;
     var custompath;
     var currentDate = $.now();
     var uploadFileName;
@@ -190,9 +191,13 @@ $(document).ready(function () {
         },
         onfocusout: function (element) { $(element).valid(); $("#success-message").html(""); },
         rules: {
+            "current-password": {
+                required: isAdmin
+            },
             "new-password": {
                 required: true,
-                isValidPassword: true
+                notSameAsCurrent: isAdmin,
+                isValidPassword: true,
             },
             "confirm-password": {
                 required: true,
@@ -213,9 +218,13 @@ $(document).ready(function () {
             $(element).closest('div').find(".validation-message").html(error.html());
         },
         messages: {
+            "current-password": {
+                required: window.Server.App.LocalizationContent.OldPasswordValidator
+            },
             "new-password": {
                 required: window.Server.App.LocalizationContent.NewPasswordValidator,
-                isValidPassword: window.Server.App.LocalizationContent.InvalidPasswordValidator
+                isValidPassword: window.Server.App.LocalizationContent.InvalidPasswordValidator,
+                notSameAsCurrent: window.Server.App.LocalizationContent.PasswordSameAsCurrent,
             },
             "confirm-password": {
                 required: window.Server.App.LocalizationContent.ConfirmPasswordValidator,
@@ -640,13 +649,20 @@ function onUserChangePasswordClick() {
     }
 
     showWaitingPopup('content-area');
-    doAjaxPost('POST', UpdatePasswordUrl, { newpassword: $("#new-password").val(), confirmpassword: $("#confirm-password").val(), userId: $("#user-id").val() },
+    doAjaxPost('POST', UpdatePasswordUrl, { oldpassword: $("#current-password").val(), newpassword: $("#new-password").val(), confirmpassword: $("#confirm-password").val(), userId: $("#user-id").val() },
         function (result) {
+            $("#current-password").val("");
+            $("#current-password").closest("div").removeClass("e-valid-input").addClass("e-input-focus");
             $("input[type='password']").val("");
             hideWaitingPopup('content-area');
             $("#password_policy_rules").remove();
             $("#confirm-password-section").removeAttr("style");
-            if (!result.Data.status) {
+            if (!result.Data.status && result.Data.key == "password") {
+                hideWaitingPopup('content-area');
+                $("#old-password-validate").html(result.Data.value).css("display", "block")
+                $("#current-password").addClass("e-error");
+            }
+            else if (!result.Data.status) {
                 WarningAlert(window.Server.App.LocalizationContent.UpdatePassword, window.Server.App.LocalizationContent.PasswordFailure, result.Data.Message, 7000);
             }
             else {

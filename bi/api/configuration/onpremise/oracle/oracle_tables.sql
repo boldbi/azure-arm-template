@@ -235,6 +235,7 @@ CREATE TABLE BOLDBI_ScheduleDetail (
     DashboardWidgetId  VARCHAR(36) NULL,
     DashboardViewId VARCHAR(36) NULL,
     Name NVARCHAR2(150) NOT NULL,
+	Parameter CLOB,
     RecurrenceTypeId NUMBER,
     RecurrenceInfo CLOB,
     Subject CLOB,

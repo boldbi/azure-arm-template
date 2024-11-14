@@ -4,8 +4,9 @@
 <div role="tabpanel" class="tab-pane active col-xs-12 no-padding" id="oauth-settings-tab">
     <div id="oauth-page-body" class="col-xs-12 col-md-12 col-sm-12 admin-page-body">
         <form id="oauth-setting" name="oauthSettingsForm" class="auth-settings-form col-xs-12 col-md-12 col-sm-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
-            <input type="hidden" name="oauthAuthenticationProvider" value="@ViewBag.OAuthSettings.AuthProvider">
-            <input type="hidden" name="oauthLogo" value="@ViewBag.OAuthSettings.OAuthAuthSettings.Logo">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="oauthAuthenticationProvider" value="@ViewBag.OAuthDetails.AuthProvider">
+            <input type="hidden" name="oauthLogo" value="@ViewBag.OAuthDetails.OAuthAuthSettings.Logo">
             <div class="col-xs-12 separator-margin">
                 <div class="col-md-12 no-padding">
                     <div class="material-switch inline-align">
@@ -21,7 +22,7 @@
                         <label class="app-textbox-label">@T["Provider Name"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.oauthProviderName.$dirty && oauthSettingsForm.oauthProviderName.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="oauthProviderName" ng-init="oauthProviderName='@ViewBag.OAuthSettings.OAuthAuthSettings.ProviderName'" ng-maxlength="20" name="oauthProviderName" placeholder="@T["Provider Name"]" id="oauth-provider-name" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="oauthProviderName" ng-init="oauthProviderName='@ViewBag.OAuthDetails.OAuthAuthSettings.ProviderName'" ng-maxlength="20" name="oauthProviderName" placeholder="@T["Provider Name"]" id="oauth-provider-name" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message top-padding" ng-show="oauthSettingsForm.oauthProviderName.$error.maxlength && oauthSettingsForm.oauthProviderName.$dirty && oauthIsEnabled">@T["Provider name is too long. Must be no more than 20 characters."]</span>
                         <span class="validation-message top-padding" ng-show="oauthSettingsForm.oauthProviderName.$error.required && oauthSettingsForm.oauthProviderName.$dirty && oauthIsEnabled">@T["Please enter the OAuth provider name."]</span>
                     </div>
@@ -38,7 +39,7 @@
                             <div class="upload-options">
                                 <label>
                                     <span>@T["Change logo"]</span>
-                                    <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="oauthLogoUrl" ng-init="oauthLogoUrl='@ViewBag.OAuthSettings.LogoUrl'" name="oauthLogoUrl" data-ng-disabled="!oauthIsEnabled" required />
+                                    <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="oauthLogoUrl" ng-init="oauthLogoUrl='@ViewBag.OAuthDetails.LogoUrl'" name="oauthLogoUrl" data-ng-disabled="!oauthIsEnabled" required />
                                 </label>
                             </div>
                         </div>
@@ -52,7 +53,7 @@
                         <label class="app-textbox-label">@T["Authorization Endpoint"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.oauthAuthorizationEP.$dirty && oauthSettingsForm.oauthAuthorizationEP.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="oauthAuthorizationEP" ng-init="oauthAuthorizationEP='@ViewBag.OAuthSettings.OAuthAuthSettings.AuthorizationEndPoint'" ng-pattern="@oauthRegEx" name="oauthAuthorizationEP" placeholder="@T["Authorization Endpoint"]" id="oauth-authorization-endpoint" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="oauthAuthorizationEP" ng-init="oauthAuthorizationEP='@ViewBag.OAuthDetails.OAuthAuthSettings.AuthorizationEndPoint'" ng-pattern="@oauthRegEx" name="oauthAuthorizationEP" placeholder="@T["Authorization Endpoint"]" id="oauth-authorization-endpoint" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthAuthorizationEP.$error.required && oauthSettingsForm.oauthAuthorizationEP.$dirty && oauthIsEnabled">@T["Please enter the authorization endpoint."]</span>
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthAuthorizationEP.$error.pattern && oauthSettingsForm.oauthAuthorizationEP.$dirty && oauthIsEnabled">@T["Please enter a valid authorization endpoint."]</span>
                     </div>
@@ -65,10 +66,10 @@
                     </div>
                     <div class="col-md-12 no-padding method" ng-class="(oauthSettingsForm.oauthTokenEP.$dirty && oauthSettingsForm.oauthTokenEP.$invalid) ? 'has-error' : ''">
                         <select id="token-method-type" class="method-type" data-ng-disabled="!oauthIsEnabled">
-                            <option class="no-margin-dropdown-ul" value="POST" selected="@(ViewBag.OAuthSettings.OAuthAuthSettings.TokenEndPointMethod == "POST")">@T["POST"]</option>
-                            <option class="no-margin-dropdown-ul" value="GET" selected="@(ViewBag.OAuthSettings.OAuthAuthSettings.TokenEndPointMethod == "GET")">@T["GET"]</option>
+                            <option class="no-margin-dropdown-ul" value="POST" selected="@(ViewBag.OAuthDetails.OAuthAuthSettings.TokenEndPointMethod == "POST")">@T["POST"]</option>
+                            <option class="no-margin-dropdown-ul" value="GET" selected="@(ViewBag.OAuthDetails.OAuthAuthSettings.TokenEndPointMethod == "GET")">@T["GET"]</option>
                         </select>
-                        <input type="text" class="form-control no-margin" ng-model="oauthTokenEP" ng-init="oauthTokenEP='@ViewBag.OAuthSettings.OAuthAuthSettings.TokenEndPoint'" ng-pattern="@oauthRegEx" name="oauthTokenEP" placeholder="@T["Token Endpoint"]" id="oauth-token-endpoint" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="oauthTokenEP" ng-init="oauthTokenEP='@ViewBag.OAuthDetails.OAuthAuthSettings.TokenEndPoint'" ng-pattern="@oauthRegEx" name="oauthTokenEP" placeholder="@T["Token Endpoint"]" id="oauth-token-endpoint" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthTokenEP.$error.required && oauthSettingsForm.oauthTokenEP.$dirty && oauthIsEnabled">@T["Please enter a token endpoint."]</span>
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthTokenEP.$error.pattern && oauthSettingsForm.oauthTokenEP.$dirty && oauthIsEnabled">@T["Please enter a valid token endpoint."]</span>
                     </div>
@@ -81,10 +82,10 @@
                     </div>
                     <div class="col-xs-12 no-padding method" ng-class="(oauthSettingsForm.oauthUserInfoEP.$dirty && oauthSettingsForm.oauthUserInfoEP.$invalid) ? 'has-error' : ''">
                         <select id="user-info-method-type" class="selectpicker method-type" data-ng-disabled="!oauthIsEnabled">
-                            <option class="no-margin-dropdown-ul" value="GET" selected="@(ViewBag.OAuthSettings.OAuthAuthSettings.UserInfoEndPointMethod == "GET")">@T["GET"]</option>
-                            <option class="no-margin-dropdown-ul" value="POST" selected="@(ViewBag.OAuthSettings.OAuthAuthSettings.UserInfoEndPointMethod == "POST")">@T["POST"]</option>
+                            <option class="no-margin-dropdown-ul" value="GET" selected="@(ViewBag.OAuthDetails.OAuthAuthSettings.UserInfoEndPointMethod == "GET")">@T["GET"]</option>
+                            <option class="no-margin-dropdown-ul" value="POST" selected="@(ViewBag.OAuthDetails.OAuthAuthSettings.UserInfoEndPointMethod == "POST")">@T["POST"]</option>
                         </select>
-                        <input type="text" class="form-control no-margin" ng-model="oauthUserInfoEP" ng-init="oauthUserInfoEP='@ViewBag.OAuthSettings.OAuthAuthSettings.UserInfoEndPoint'" ng-pattern="@oauthRegEx" name="oauthUserInfoEP" placeholder="@T["User Information Endpoint"]" id="oauth-userinfo-endpoint" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="oauthUserInfoEP" ng-init="oauthUserInfoEP='@ViewBag.OAuthDetails.OAuthAuthSettings.UserInfoEndPoint'" ng-pattern="@oauthRegEx" name="oauthUserInfoEP" placeholder="@T["User Information Endpoint"]" id="oauth-userinfo-endpoint" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthUserInfoEP.$error.required && oauthSettingsForm.oauthUserInfoEP.$dirty && oauthIsEnabled">@T["Please enter the user information endpoint."]</span>
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthUserInfoEP.$error.pattern && oauthSettingsForm.oauthUserInfoEP.$dirty && oauthIsEnabled">@T["Please enter a valid user information endpoint."]</span>
                     </div>
@@ -97,7 +98,7 @@
                         <label class="app-textbox-label">@T["Client Id"]</label>
                     </div>
                     <div class="col-md-12 no-padding" ng-class="(oauthSettingsForm.oauthClientId.$dirty && oauthSettingsForm.oauthClientId.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="oauthClientId" ng-init="oauthClientId='@ViewBag.OAuthSettings.OAuthAuthSettings.ClientId'" name="oauthClientId" placeholder="@T["Client Id"]" id="oauth-client-id" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="oauthClientId" ng-init="oauthClientId='@ViewBag.OAuthDetails.OAuthAuthSettings.ClientId'" name="oauthClientId" placeholder="@T["Client Id"]" id="oauth-client-id" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthClientId.$error.required && oauthSettingsForm.oauthClientId.$dirty && oauthIsEnabled">@T["Please enter the client ID."]</span>
                     </div>
                 </div>
@@ -118,7 +119,7 @@
                         <label class="app-textbox-label">@T["Scopes"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.oauthScopes.$dirty && oauthSettingsForm.oauthScopes.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control  no-margin" ng-model="oauthScopes" ng-init="oauthScopes='@ViewBag.OAuthSettings.OAuthAuthSettings.Scopes'" name="oauthScopes" placeholder="@T["Comma separated scopes"]" id="oauth-scopes" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control  no-margin" ng-model="oauthScopes" ng-init="oauthScopes='@ViewBag.OAuthDetails.OAuthAuthSettings.Scopes'" name="oauthScopes" placeholder="@T["Comma separated scopes"]" id="oauth-scopes" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthScopes.$error.required && oauthSettingsForm.oauthScopes.$dirty && oauthIsEnabled">@T["Please enter comma separated scopes."]</span>
                     </div>
                     <div class="info-message no-padding">@T["Scope is a mechanism in OAuth 2.0 to limit an application's access to a user's account. An application can request one or more scopes. This information is then presented to the user in the consent screen, and the access token issued to the application will be limited to the scopes granted."]</div>
@@ -129,7 +130,7 @@
                         <label class="app-textbox-label">@T["Logout Endpoint"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.oauthLogoutEndpoint.$dirty && oauthSettingsForm.oauthLogoutEndpoint.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="oauthLogoutEndpoint" ng-init="oauthLogoutEndpoint='@ViewBag.OAuthSettings.OAuthAuthSettings.LogoutEndPoint'" name="oauthLogoutEndpoint" placeholder="@T["Logout Endpoint (Optional)"]" id="oauth-logout-endpoint" ng-pattern="@oauthRegEx" data-ng-disabled="!oauthIsEnabled" />
+                        <input type="text" class="form-control no-margin" ng-model="oauthLogoutEndpoint" ng-init="oauthLogoutEndpoint='@ViewBag.OAuthDetails.OAuthAuthSettings.LogoutEndPoint'" name="oauthLogoutEndpoint" placeholder="@T["Logout Endpoint (Optional)"]" id="oauth-logout-endpoint" ng-pattern="@oauthRegEx" data-ng-disabled="!oauthIsEnabled" />
                         <span class="validation-message" ng-show="oauthSettingsForm.oauthLogoutEndpoint.$error.pattern && oauthSettingsForm.oauthLogoutEndpoint.$dirty && oauthIsEnabled">@T["Please enter a valid logout endpoint."]</span>
                     </div>
                     <div class="info-message no-padding">@T["We support logout endpoints that have static request parameters."]</div>
@@ -183,7 +184,7 @@
                         <label class="app-textbox-label">@T["Email"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.userInfoEmail.$dirty && oauthSettingsForm.userInfoEmail.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="userInfoEmail" ng-init="userInfoEmail='@ViewBag.OAuthSettings.OAuthAuthSettings.UserInfoEmail'" name="userInfoEmail" placeholder="@T["Email"]" id="user-info-email" data-ng-disabled="!oauthIsEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="userInfoEmail" ng-init="userInfoEmail='@ViewBag.OAuthDetails.OAuthAuthSettings.UserInfoEmail'" name="userInfoEmail" placeholder="@T["Email"]" id="user-info-email" data-ng-disabled="!oauthIsEnabled" required />
                         <span class="validation-message" ng-show="oauthSettingsForm.userInfoEmail.$error.required && oauthSettingsForm.userInfoEmail.$dirty && oauthIsEnabled">@T["Please enter the value for email."]</span>
                     </div>
                 </div>
@@ -193,7 +194,7 @@
                         <label class="app-textbox-label">@T["First Name"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.userInfoFirstname.$dirty && oauthSettingsForm.userInfoFirstname.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="userInfoFirstname" ng-init="userInfoFirstname='@ViewBag.OAuthSettings.OAuthAuthSettings.UserInfoFirstname'" name="userInfoFirstname" placeholder="@T["First Name"]" id="user-info-firstname" data-ng-disabled="!oauthIsEnabled" />
+                        <input type="text" class="form-control no-margin" ng-model="userInfoFirstname" ng-init="userInfoFirstname='@ViewBag.OAuthDetails.OAuthAuthSettings.UserInfoFirstname'" name="userInfoFirstname" placeholder="@T["First Name"]" id="user-info-firstname" data-ng-disabled="!oauthIsEnabled" />
                     </div>
 
                 </div>
@@ -202,13 +203,13 @@
                         <label class="app-textbox-label">@T["Last Name"]</label>
                     </div>
                     <div ng-class="(oauthSettingsForm.userInfoLastname.$dirty && oauthSettingsForm.userInfoLastname.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="userInfoLastname" ng-init="userInfoLastname='@ViewBag.OAuthSettings.OAuthAuthSettings.UserInfoLastname'" name="userInfoLastname" placeholder="@T["Last Name"]" id="user-info-lastname" data-ng-disabled="!oauthIsEnabled" />
+                        <input type="text" class="form-control no-margin" ng-model="userInfoLastname" ng-init="userInfoLastname='@ViewBag.OAuthDetails.OAuthAuthSettings.UserInfoLastname'" name="userInfoLastname" placeholder="@T["Last Name"]" id="user-info-lastname" data-ng-disabled="!oauthIsEnabled" />
                     </div>
                 </div>
             </div>
             <div class="col-xs-12 separator-margin">
                 <div id="oauth-group-import" class="group-import">
-                    @await Html.PartialAsync("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OAuthSettings.OAuthAuthSettings.GroupImportSettings, new ViewDataDictionary(ViewData) { { "AuthType", AuthType.OAuth } })
+                    @await Html.PartialAsync("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OAuthDetails.OAuthAuthSettings.GroupImportSettings, new ViewDataDictionary(ViewData) { { "AuthType", AuthType.OAuth } })
                 </div>
             </div>
         </form>

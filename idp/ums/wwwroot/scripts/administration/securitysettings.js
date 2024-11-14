@@ -419,16 +419,8 @@ $(document).on("click", "#update-network-settings", function () {
 $(document).on('click', "#restrict-ipwhitelist-enabled", function () {
     var isChecked = $(this).is(":checked");
     if (isChecked) {
-        if (isReportsInstalled)
-        {
-            document.getElementById("restrict-ipwhitelist-enabled").checked = false;
-            WarningAlert(window.Server.App.LocalizationContent.SecuritySettings, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, window.Server.App.LocalizationContent.IPWhiteListingNotEnable, 7000);
-        }
-        else
-        {
             $('#rules-grid').show();
-            $('.whitelisting-info').show(); 
-        }
+            $('.whitelisting-info').show();
     } else {
         $('#rules-grid').hide();
         $('.whitelisting-info').hide();

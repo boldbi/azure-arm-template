@@ -8,7 +8,18 @@
         change: onDropDownListChange,
         query: new ej.data.Query(),
         allowFiltering: allowFilter,
-        filterType: "Contains"
+        filterType: "Contains",
+        created: function() {
+            if (id === "#response-type-dropdown" && typeof openIdResponseType !== 'undefined') {
+                dropDownList.value = openIdResponseType;
+            }
+            else if (id === "#token-method-type" && typeof oauthTokenMethod !== 'undefined') {
+                dropDownList.value = oauthTokenMethod;
+            }
+            else if (id === "#user-info-method-type" && typeof oauthUserInfoMethod !== 'undefined') {
+                dropDownList.value = oauthUserInfoMethod;
+            }
+        }
     });
 
     dropDownList.appendTo(id);
@@ -32,7 +43,15 @@ function groupImportDropDownListInitialization(id, placeHolder) {
         placeholder: placeHolder,
         change: ongroupImportchange,
         cssClass: 'e-outline e-custom e-non-float',
-        enablePersistence: true
+        enablePersistence: true,
+        created: function() {
+            if (id === "#group-import-provider-oauth" && typeof oauthKnownProviderType !== 'undefined') {
+                dropDownList.value = oauthKnownProviderType.toString();
+            }
+            else if (id === "#group-import-provider-openid" && typeof openIdKnownProviderType !== 'undefined') {
+                dropDownList.value = openIdKnownProviderType.toString();
+            }
+        }
     });
 
     dropDownList.appendTo(id);

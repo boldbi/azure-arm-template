@@ -1071,6 +1071,7 @@ var Designer = {
                 serverNameText: "Server name",
                 commandTimeoutText: "Command Timeout (in seconds)",
                 commandTimeoutMessage: "Max command timeout upto 550 sec",
+				masterDataBaseMessage: "Please manually enter the database name in the dropdown and then reconnect.",
                 enableSSH: "Enable SSH",
                 sshServerNameText: "SSH Server name",
                 sshPort: "SSH Port",
@@ -1233,6 +1234,8 @@ var Designer = {
 				impersonateInfo: "While using Windows AD login in Bold BI you can impersonate the logged-in user while processing the data from ",
 				enableImpersonate: "Impersonate User",
 				emptyCollection: "There are no collections in the currently selected database.",
+				oracleExtractAlertText: "Extract connections are supported only when using MSSQL, PostgresSQL or MySQL as Data Store.",
+                oracleExtractAlertHeaderText: "Data Source",
                 invalidSheetsNoteTxt: "Ignore invalid data sheets and continue data extraction by clicking ‘Yes’.",
                 continueButtonText: "Yes",
                 closeBtnText: "No",
@@ -6205,7 +6208,9 @@ var Designer = {
                 themeDark: "Dark",
                 dashboardParameterTooltip: "Dashboard Parameters",
                 enableCommentDisplayText: "Enable Comment",
-				performanceMetricsPopText:"Metrics"
+				performanceMetricsPopText:"Metrics",
+				enableMetrics: "Enable Metrics",
+				enableMobileView: "Restrict Mobile View On Desktop"
             },
             filterOverviewPopup: {
                 appliedFilters: "Applied Filters",
@@ -7780,7 +7785,7 @@ var Designer = {
                 welcomeTextForChartUpdate: "Ask me to update widget properties in the designer.",
                 activateButton: "Activate",
                 startYourTutorial: "Start your tutorial",
-				licenseWarning1: "The license was not updated to enable AI features. Please refresh the license on the ",
+				licenseWarning1: "To enable AI features, the license must be updated. Please refresh the license on the ",
 				licenseWarning2: " page to apply it to this instance.",
 				activationSuccess1: "Note: Please refresh the license on the ",
 				activationSuccess2: " page to apply it to this instance.",
@@ -7804,6 +7809,8 @@ var Designer = {
 				term1: "I acknowledge the ",
 				term2: " guidelines and the ",
 				privacyPolicy: "privacy policy.",
+				cloudlicenseWarning: "The license must be updated to enable AI features.",
+				cloudActivationSuccess: "Note: Activation has been completed. Click 'Continue' to validate your license.",
             },
 			replaceValues: { 
 				applyBtnText: "Apply",
@@ -7902,6 +7909,7 @@ var Designer = {
                 close: "Close",
                 dashboardProcess:"Parsing Time",
                 dashboardLayoutRender:"Layout Time",
+		datasourceName :"DS Name",
                 wigdetMetricsConatiner:{
                     widgetDatafetch:"Data Fetching",
                     widgetQueryProcess:"- Querying",

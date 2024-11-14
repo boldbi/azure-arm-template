@@ -10,6 +10,11 @@
         selectedDefaultAuthenticationText = ViewBag.DefaultAuthenticationSettings.EnabledProviderName != 0 ? GlobalAppSettings.GetProviderName(ViewBag.DefaultAuthenticationSettings.EnabledProviderName) : GlobalAppSettings.GetProviderName(ViewBag.DefaultAuthenticationSettings.ProviderName[0]);
         selectedDefaultAuthenticationValue = ViewBag.DefaultAuthenticationSettings.EnabledProviderName != 0 ? (int)ViewBag.DefaultAuthenticationSettings.EnabledProviderName : (int)ViewBag.DefaultAuthenticationSettings.ProviderName[0];
     }
+    var tokenMethod = ViewBag.OAuthDetails?.OAuthAuthSettings?.TokenEndPointMethod;
+    var userInfoMethod = ViewBag.OAuthDetails?.OAuthAuthSettings?.UserInfoEndPointMethod;
+    var oauthKnownProvider = ViewBag.OAuthDetails?.OAuthAuthSettings?.GroupImportSettings?.KnownProviderType ?? KnownAuthProviders.None;
+    var openIdKnownProvider = ViewBag.OpenIDSettings?.OIDCAuthSettings?.GroupImportSettings?.KnownProviderType ?? KnownAuthProviders.None;
+    var responseType = ViewBag.OpenIDSettings?.OIDCAuthSettings?.ResponseType ?? "id_token";
 }
 
 @section styles{
@@ -34,9 +39,9 @@
         var isB2CEnabled = @Json.Serialize(ViewBag.AzureADB2CSettings.IsEnabled);
         var isSloEnabled = @Json.Serialize(isAzureAdSloEnabled);
         var isB2CSloEnabled = @Json.Serialize(isAzureAdB2CSloEnabled);
-        var oAuthEnabled = @Json.Serialize(ViewBag.OAuthSettings.IsEnabled);
+        var oAuthEnabled = @Json.Serialize(ViewBag.OAuthDetails.IsEnabled);
         var openIdEnabled = @Json.Serialize(ViewBag.OpenIDSettings.IsEnabled);
-        var oAuthUserCreationEnabled = @Json.Serialize(ViewBag.OAuthSettings.OAuthAuthSettings.CanCreateAccount);
+        var oAuthUserCreationEnabled = @Json.Serialize(ViewBag.OAuthDetails.OAuthAuthSettings.CanCreateAccount);
         var openIdUserCreationEnabled = @Json.Serialize(ViewBag.OpenIDSettings.OIDCAuthSettings.CanCreateAccount);
         var jwtIsEnabled = @Json.Serialize(ViewBag.JwtSettings.IsEnabled);
         var windowsAdEnabled = @Json.Serialize(ViewBag.WindowsAdSettings.IsEnabled);
@@ -59,6 +64,11 @@
             $scope.openIdUserCreationEnabled = openIdUserCreationEnabled;
 
         }]);
+        var oauthKnownProviderType = "@oauthKnownProvider";
+        var openIdKnownProviderType = "@openIdKnownProvider";
+        var openIdResponseType = "@responseType";
+        var oauthTokenMethod = "@tokenMethod";
+        var oauthUserInfoMethod = "@userInfoMethod";
     </script>
 }
 

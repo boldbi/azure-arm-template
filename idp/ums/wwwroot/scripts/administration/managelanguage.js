@@ -99,6 +99,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: window.zipFileUploadUrl,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         maxFileSize: 25000000,

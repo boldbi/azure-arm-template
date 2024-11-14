@@ -43,6 +43,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: window.fileUploadUrl + "?imageType=loginlogo&&timeStamp=" + currentDate,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         multiple: false,
@@ -85,6 +86,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: window.fileUploadUrl + "?imageType=mainlogo&&timeStamp=" + currentDate,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         multiple: false,
@@ -128,6 +130,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: window.fileUploadUrl + "?imageType=favicon&&timeStamp=" + currentDate,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         multiple: false,
@@ -171,6 +174,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: window.fileUploadUrl + "?imageType=emaillogo&&timeStamp=" + currentDate,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         multiple: false,
@@ -213,6 +217,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: window.fileUploadUrl + "?imageType=poweredlogo&&timeStamp=" + currentDate,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         multiple: false,

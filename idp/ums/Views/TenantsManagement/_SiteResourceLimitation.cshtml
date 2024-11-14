@@ -1,0 +1,72 @@
+@using Syncfusion.Server.Base.DataClasses.Core
+@model TenantInfo
+@{
+    var activeTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && Context.Request.Query["tab"] == "resource-limitation") ? "active" : string.Empty;
+    var resourceLimitationDetails = (TenantResourceLimitation)ViewBag.TenantResourceLimitation ?? new TenantResourceLimitation
+    {
+        IsEnabled = false
+    };
+}
+
+<div role="tabpanel" class="col-xs-12 no-padding tab-pane @activeTab" id="resource-limitation-tab">
+    <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="resource-limitation-enabled col-xs-12 no-padding">
+            <div class="material-switch inline-align" id="resource-limitation-container" >
+                <input type="checkbox" data-tenant-id="@Model.TenantInfoId" id="resource-limitation-enable-switch" @(resourceLimitationDetails.IsEnabled ? "checked" : string.Empty)/>
+                <label for="resource-limitation-enable-switch" class="label-primary"></label>
+            </div>
+            <div class="app-textbox-label inline-align activation enable-limitation">
+                @T["Enable Resource Limitation"]
+            </div>
+        </div>
+        <div class="info-message" id="tenant-info-message"></div>
+        <div class="col-xs-12 no-padding input-field-margin">
+            <div class="col-md-12 no-padding">
+                @Html.Label("dashboards-limitation", T["Number of Dashboards"].Value, new { @class = "app-textbox-label col-md-4" })
+            </div>
+            <div class="dashboards-limitation">
+                <div class="dashboards-limitation-value" data-tenant-id="@Model.TenantInfoId"> </div>
+                @Html.TextBox("dashboards-limitation-textbox", resourceLimitationDetails.DashboardsLimitation, new { id = "dashboards-limitation-textbox", placeholder = T["Number of Dashboards"].Value, @class = "form-control content-size" })
+                <span id="dashboards-limitation-validation" class="validation-message"></span>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding input-field-margin">
+            <div class="col-md-12 no-padding">
+                @Html.Label("data-source-limitation", T["Number of Data Sources"].Value, new { @class = "app-textbox-label col-md-4" })
+            </div>
+            <div class="data-source-limitation">
+                <div class="data-source-value" data-tenant-id="@Model.TenantInfoId"> </div>
+                @Html.TextBox("data-source-limitation-textbox", resourceLimitationDetails.DataSourcesLimitation, new { id = "data-source-limitation-textbox", placeholder = T["Number of Data Sources"].Value, @class = "form-control content-size" })
+                <span id="data-source-limitation-validation" class="validation-message"></span>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding input-field-margin">
+            <div class="col-md-12 no-padding">
+                @Html.Label("slideshow-limitation", T["Number of Slideshows"].Value, new { @class = "app-textbox-label col-md-4" })
+            </div>
+            <div class="slideshow-limitation">
+                <div class="slideshow-value" data-tenant-id="@Model.TenantInfoId"> </div>
+                @Html.TextBox("slideshow-limitation-textbox", resourceLimitationDetails.SlideShowLimitation, new { id = "slideshow-limitation-textbox", placeholder = T["Number of Slideshows"].Value, @class = "form-control content-size" })
+                <span id="slideshow-limitation-validation" class="validation-message"></span>
+            </div>
+        </div>
+        <div class="col-xs-12 no-padding input-field-margin">
+            <div class="col-md-12 no-padding">
+                @Html.Label("schedule-limitation", T["Number of Schedules"].Value, new { @class = "app-textbox-label col-md-4" })
+            </div>
+            <div class="schedule-limitation">
+                <div class="schedule-limitation-value" data-tenant-id="@Model.TenantInfoId"> </div>
+                @Html.TextBox("schedule-limitation-textbox", resourceLimitationDetails.ScheduleLimitation, new { id = "schedule-limitation-textbox", placeholder = T["Number of Schedules"].Value, @class = "form-control content-size" })
+                <span id="schedule-limitation-validation" class="validation-message"></span>
+            </div>
+        </div>
+    </div>
+    <div class="admin-page-footer col-xs-12">
+        <div class="admin-page-actions col-xs-12 col-md-12">
+            <a href="@Url.Action("Sites", "TenantsManagement")" class="secondary-button pull-right" id="cancel-resource-limitation" title="">@T["Cancel"]</a>
+            <button type="button" title="" id="update-resource-limitation" class="primary-button pull-right">
+                @T["Save"]
+            </button>
+        </div>
+    </div>
+</div>

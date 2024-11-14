@@ -3,7 +3,7 @@ CREATE TABLE {database_name}.BOLDTC_CouponLogType (
 	Name longtext NOT NULL,
 	IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_COUPONLOGTYPE PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_CouponLog (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -13,7 +13,7 @@ CREATE TABLE {database_name}.BOLDTC_CouponLog (
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_COUPONLOG PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantPaymentSubscription (
 	Id char(38) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantPaymentSubscription (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTPAYMENTSUBSCRIPTION PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantInvoiceDetails (
 	Id char(38) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantInvoiceDetails (
 	ChargeId nvarchar(255) NOT NULL,
 	PaymentDate datetime NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTINVOICEDETIALS PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantPaymentLog (
 	Id char(38) NOT NULL,
@@ -44,12 +44,12 @@ CREATE TABLE {database_name}.BOLDTC_TenantPaymentLog (
 	Status nvarchar(255) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTPAYMENTLOG PRIMARY KEY (id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_ServerVersion(
 	Id int PRIMARY KEY NOT NULL,
 	VersionNumber nvarchar(20) NOT NULL
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SqlServer (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -62,7 +62,7 @@ CREATE TABLE {database_name}.BOLDTC_SqlServer (
 	IsAvailable tinyint(1) NOT NULL DEFAULT '1',
 	IsActive tinyint(1) NOT NULL DEFAULT '1',
   CONSTRAINT PK_BOLDTC_SQLSERVER PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SqlElasticPool (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -74,7 +74,7 @@ CREATE TABLE {database_name}.BOLDTC_SqlElasticPool (
 	IsAvailable tinyint(1) NOT NULL DEFAULT '1',
 	IsActive tinyint(1) NOT NULL DEFAULT '1',
   CONSTRAINT PK_BOLDTC_SQLELASTICPOOL PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_Tenant (
 	Id char(38) NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE {database_name}.BOLDTC_Tenant (
 	IsDeleted tinyint(1) NOT NULL,
 	IsInternal tinyint(1) NOT NULL DEFAULT 0,
   CONSTRAINT PK_BOLDTC_TENANT PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SaaSPlan (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -101,14 +101,14 @@ CREATE TABLE {database_name}.BOLDTC_SaaSPlan (
 	IsInternal tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SAASPLAN PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantLogType (
 	Id int NOT NULL AUTO_INCREMENT,
 	Name nvarchar(100),
 	IsActive tinyint(1),
   CONSTRAINT PK_BOLDTC_TENANTLOGTYPE PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantLog (
 	Id char(38) NOT NULL,
@@ -124,14 +124,14 @@ CREATE TABLE {database_name}.BOLDTC_TenantLog (
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTLOG PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantStatus (
 	Id int NOT NULL AUTO_INCREMENT,
 	Name nvarchar(100) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTSTATUS PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_Coupon (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -145,7 +145,7 @@ CREATE TABLE {database_name}.BOLDTC_Coupon (
 	ModifiedById char(38) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_COUPON PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_UserPreference (
 	Id char(38) NOT NULL,
@@ -159,7 +159,7 @@ CREATE TABLE {database_name}.BOLDTC_UserPreference (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_USERPREFERENCE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_User (
 	Id char(38) NOT NULL,
@@ -184,13 +184,14 @@ CREATE TABLE {database_name}.BOLDTC_User (
 	ExternalProviderId nvarchar(512),
 	DirectoryTypeId int NOT NULL,
 	IsActivated tinyint(1) NOT NULL,
+    ActivationMethod nvarchar(20),
 	IsActive tinyint(1) NOT NULL,
 	IsDeleted tinyint(1) NOT NULL,
 	Status int NULL,
 	IsMfaEnabled tinyint(1) NOT NULL DEFAULT 0,
 	MfaType int NULL,
   CONSTRAINT PK_BOLDTC_USER PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_UserLogin (
@@ -206,7 +207,7 @@ CREATE TABLE {database_name}.BOLDTC_UserLogin (
 	LastActive datetime NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_USERLOGIN PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TMUserGroup (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -215,7 +216,7 @@ CREATE TABLE {database_name}.BOLDTC_TMUserGroup (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TMUSERGROUP PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TMGroup (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -227,7 +228,7 @@ CREATE TABLE {database_name}.BOLDTC_TMGroup (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TMGroup PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantUser (
 	Id char(38) NOT NULL,
@@ -237,21 +238,21 @@ CREATE TABLE {database_name}.BOLDTC_TenantUser (
 	IsActive tinyint(1) NOT NULL,
     LastAccessedDate datetime NULL,
   CONSTRAINT PK_BOLDTC_TENANTUSER PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_DirectoryType (
 	Id int NOT NULL AUTO_INCREMENT,
 	DirectoryName nvarchar(100) NOT NULL UNIQUE,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_DIRECTORYTYPE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_RecurrenceType (
 	Id int NOT NULL AUTO_INCREMENT,
 	Name nvarchar(100) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_RECURRENCETYPE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_Schedule (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -269,14 +270,14 @@ CREATE TABLE {database_name}.BOLDTC_Schedule (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SCHEDULE PRIMARY KEY (id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_ScheduleType (
 	Id int NOT NULL AUTO_INCREMENT,
 	Name nvarchar(100) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SCHEDULETYPE PRIMARY KEY (id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_ScheduleLog (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -286,7 +287,7 @@ CREATE TABLE {database_name}.BOLDTC_ScheduleLog (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SCHEDULELOG PRIMARY KEY (id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_ScheduleStatus (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -294,7 +295,7 @@ CREATE TABLE {database_name}.BOLDTC_ScheduleStatus (
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SCHEDULESTATUS PRIMARY KEY (Id ASC)
 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SAMLSettings (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -309,7 +310,7 @@ CREATE TABLE {database_name}.BOLDTC_SAMLSettings (
   Id ASC
   )
 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SystemSettings (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -322,7 +323,7 @@ CREATE TABLE {database_name}.BOLDTC_SystemSettings (
   Id ASC
   )
 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_AzureADCredential (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -335,14 +336,14 @@ CREATE TABLE {database_name}.BOLDTC_AzureADCredential (
   Id ASC
   )
 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantType (
 	Id int NOT NULL AUTO_INCREMENT,
 	Type nvarchar(255) NOT NULL UNIQUE,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTTYPE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantInfo (
 	Id char(38) NOT NULL,
@@ -378,11 +379,12 @@ CREATE TABLE {database_name}.BOLDTC_TenantInfo (
 	IsMaster tinyint(1) NOT NULL,
 	IsolationCode nvarchar(4000),
 	IsTenantIsolationCodeEnabled tinyint(1) NOT NULL DEFAULT '0',
+    ResourceLimitationSettings longtext,
 	UseCustomBranding tinyint(1) NOT NULL,
 	IsNewImDbDatabase tinyint(1) NOT NULL,
 	IsNewDatabase tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTINFO PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_UserBillingAddress (
 	Id char(38) NOT NULL,
@@ -393,7 +395,7 @@ CREATE TABLE {database_name}.BOLDTC_UserBillingAddress (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_USERBILLINGADDRESS PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_AccountDeleteRequest (
 	Id char(38) NOT NULL,
@@ -406,7 +408,7 @@ CREATE TABLE {database_name}.BOLDTC_AccountDeleteRequest (
 	IsDeleted tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_ACCOUNTDELETEREQUEST PRIMARY KEY (Id ASC )
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_Addon (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -416,7 +418,7 @@ CREATE TABLE {database_name}.BOLDTC_Addon (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_ADDON PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantAddon (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -428,7 +430,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantAddon (
 	LastPaymentDate datetime NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTADDON PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_CustomPlan (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -442,14 +444,14 @@ CREATE TABLE {database_name}.BOLDTC_CustomPlan (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_CUSTOMPLAN PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_Country (
   Id int PRIMARY KEY NOT NULL AUTO_INCREMENT,
   Name nvarchar(100) NOT NULL,
   CountryCode nvarchar(2) NOT NULL,
   IsActive tinyint(1) NOT NULL
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_ExternalIdP (
 	Id char(38) NOT NULL,
@@ -459,14 +461,14 @@ CREATE TABLE {database_name}.BOLDTC_ExternalIdP (
 	CredentialTypeId int NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_EXTERNALIDP PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_IdPCredentialType (
 	Id int NOT NULL AUTO_INCREMENT,
 	CredentialType nvarchar(255) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_IDPCREDENTIALTYPE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SqlElasticPoolEdition (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -480,7 +482,7 @@ CREATE TABLE {database_name}.BOLDTC_SqlElasticPoolEdition (
 	IsCurrent tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_ELASTICPOOLEDITION PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SqlServerEdition (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -490,7 +492,7 @@ CREATE TABLE {database_name}.BOLDTC_SqlServerEdition (
 	IsCurrent tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SQLSERVEREDITION PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TMUser (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -498,7 +500,7 @@ CREATE TABLE {database_name}.BOLDTC_TMUser (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TMUSER PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SqlServerType (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -506,7 +508,7 @@ CREATE TABLE {database_name}.BOLDTC_SqlServerType (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SQLSERVERTYPE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_OAuthToken(
     Id int NOT NULL AUTO_INCREMENT,
@@ -514,7 +516,7 @@ CREATE TABLE {database_name}.BOLDTC_OAuthToken(
 	Ticket longtext NULL,
 	ModifiedDate datetime NULL,
 	CONSTRAINT PK_BOLDTC_OAUTHTOKEN PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_InternalApps(
 	Id int NOT NULL AUTO_INCREMENT,
@@ -525,7 +527,7 @@ CREATE TABLE {database_name}.BOLDTC_InternalApps(
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
 	CONSTRAINT PK_BOLDTC_INTERNALAPPS PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_FormType (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -535,7 +537,7 @@ CREATE TABLE {database_name}.BOLDTC_FormType (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_FORMTYPE PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_RegistrationFormVersion (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -547,7 +549,7 @@ CREATE TABLE {database_name}.BOLDTC_RegistrationFormVersion (
 	IsLatest tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_REGISTRATIONFORMVERSION PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TermsOfUseVersion (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -558,7 +560,7 @@ CREATE TABLE {database_name}.BOLDTC_TermsOfUseVersion (
 	IsLatest tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TermsOfUseVersion PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_PrivacyPolicyVersion (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -569,7 +571,7 @@ CREATE TABLE {database_name}.BOLDTC_PrivacyPolicyVersion (
 	IsLatest tinyint(1) NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_PRIVACYPOLICYVERSION PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_PrivacyAcceptance (
 	Id char(38) NOT NULL,
@@ -584,7 +586,7 @@ CREATE TABLE {database_name}.BOLDTC_PrivacyAcceptance (
 	DateTime datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_PRIVACYACCEPTANCE PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_FeedBack (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -600,7 +602,7 @@ CREATE TABLE {database_name}.BOLDTC_FeedBack (
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_FEEDBACK PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_Support (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -612,7 +614,7 @@ CREATE TABLE {database_name}.BOLDTC_Support (
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_Support PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_TenantActivity (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -628,7 +630,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantActivity (
 	LoggedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TenantActivity PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_PreviewFeatures (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -639,7 +641,7 @@ CREATE TABLE {database_name}.BOLDTC_PreviewFeatures (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_PreviewFeatures PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_KcTenants(
     Id char(38) NOT NULL,
@@ -650,7 +652,7 @@ CREATE TABLE {database_name}.BOLDTC_KcTenants(
     ModifiedDate datetime NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT BOLDTC_KcTenants_PK PRIMARY KEY (Id ASC) 	
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SSLCertificate(
     Id char(38) NOT NULL,
@@ -663,7 +665,7 @@ CREATE TABLE {database_name}.BOLDTC_SSLCertificate(
     ModifiedDate datetime NOT NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT BOLDTC_SSLCertificate_PK PRIMARY KEY  (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SSLMapping(
     Id int NOT NULL AUTO_INCREMENT,
@@ -673,7 +675,7 @@ CREATE TABLE {database_name}.BOLDTC_SSLMapping(
     CreatedDate datetime NOT NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT BOLDTC_SSLMapping_PK PRIMARY KEY  (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SalesRequest (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -682,7 +684,7 @@ CREATE TABLE {database_name}.BOLDTC_SalesRequest (
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
 	CONSTRAINT PK_BOLDTC_SALESREQUESTS PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_IntranetProductType(
     Id int NOT NULL AUTO_INCREMENT,
@@ -690,7 +692,7 @@ CREATE TABLE {database_name}.BOLDTC_IntranetProductType(
 	ProductName nvarchar(1024) NOT NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT BOLDTC_IntranetProductType_PK PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_SourceType (
 	Id int NOT NULL AUTO_INCREMENT,
@@ -699,7 +701,7 @@ CREATE TABLE {database_name}.BOLDTC_SourceType (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_SOURCETYPE PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_AuthType (
     Id int NOT NULL AUTO_INCREMENT,
@@ -707,7 +709,7 @@ CREATE TABLE {database_name}.BOLDTC_AuthType (
     ModifiedDate DateTime NOT NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_AuthType PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_AuthProvider (
     Id int NOT NULL AUTO_INCREMENT,
@@ -716,7 +718,7 @@ CREATE TABLE {database_name}.BOLDTC_AuthProvider (
     ModifiedDate DateTime NOT NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_AuthProvider PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_GlobalAuthControl (
     Id int NOT NULL AUTO_INCREMENT,  
@@ -729,7 +731,7 @@ CREATE TABLE {database_name}.BOLDTC_GlobalAuthControl (
     ModifiedDate datetime NOT NULL,
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_GlobalAuthControl PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_AuthSettings (
     Id int NOT NULL AUTO_INCREMENT,  
@@ -744,7 +746,7 @@ CREATE TABLE {database_name}.BOLDTC_AuthSettings (
 	IsDefaultAuthentication tinyint(1) NOT NULL Default '0',
     IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_AuthSettings PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_UserLog (
@@ -760,7 +762,7 @@ CREATE TABLE {database_name}.BOLDTC_UserLog (
 	AdditionalData longtext NULL,
 	Source int NULL,
   CONSTRAINT PK_BOLDTC_USERLOG PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_AzureBlob (
@@ -776,7 +778,7 @@ CREATE TABLE {database_name}.BOLDTC_AzureBlob (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_AZUREBLOB PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_UserStatus (
@@ -787,7 +789,7 @@ CREATE TABLE {database_name}.BOLDTC_UserStatus (
         ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_USERSTATUS PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_UserToken (
@@ -799,7 +801,7 @@ CREATE TABLE {database_name}.BOLDTC_UserToken (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_UserToken PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_MfaType (
@@ -810,7 +812,7 @@ CREATE TABLE {database_name}.BOLDTC_MfaType (
         ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_MFATYPE PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_Source (
@@ -821,7 +823,7 @@ CREATE TABLE {database_name}.BOLDTC_Source (
         ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_SOURCE PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_EmailActivityLog (
@@ -839,7 +841,7 @@ CREATE TABLE {database_name}.BOLDTC_EmailActivityLog (
 	StatusMessage nvarchar(1024) NULL,
 	IsActive tinyint(1) NOT NULL,
 	CONSTRAINT PK_BOLDTC_EMAILACTIVITYLOG PRIMARY KEY (Id ASC) 
-	)
+	) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_ActivityLog
@@ -859,7 +861,7 @@ CREATE TABLE {database_name}.BOLDTC_ActivityLog
     IsActive tinyint(1) NOT NULL,
     CanDelete tinyint(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_ACTIVITYLOG PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_QueryMetrics ( 
@@ -883,7 +885,7 @@ CREATE TABLE {database_name}.BOLDTC_QueryMetrics (
     DataSourceID varchar(100), 
     DataSourceName varchar(100),
     CONSTRAINT PK_BOLDTC_QUERYMETRICS PRIMARY KEY (Id ASC) 
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_TenantSettings (
@@ -894,7 +896,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantSettings (
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTSETTINGS PRIMARY KEY (Id ASC)
-)
+) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDTC_UserAttributes(
@@ -909,7 +911,7 @@ CREATE TABLE {database_name}.BOLDTC_UserAttributes(
     CreatedDate datetime NOT NULL,
     ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'Registration', 1);

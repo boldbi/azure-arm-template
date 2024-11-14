@@ -69,7 +69,11 @@ $(document).ready(function () {
                 
             },
             "email-address": {
-                isRequired: true,
+                isRequired: {
+                    depends: function () {
+                        return (isEmailRequired === true);
+                    }
+                },
                 isValidName: true,
                 isValidEmail: true
             },

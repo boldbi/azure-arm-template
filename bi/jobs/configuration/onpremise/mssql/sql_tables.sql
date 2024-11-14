@@ -236,6 +236,7 @@ CREATE TABLE [BOLDBI_ScheduleDetail](
 	[DashboardWidgetId] [uniqueidentifier] NULL,
 	[DashboardViewId] [uniqueidentifier] NULL,
 	[Name] [nvarchar](150) NOT NULL,
+	[Parameter] [nvarchar](max) NULL,
 	[RecurrenceTypeId] [int] NULL,
 	[RecurrenceInfo] [nvarchar](4000) NULL,
 	[Subject] [nvarchar](4000) NULL,

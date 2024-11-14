@@ -4,12 +4,13 @@
 <div role="tabpanel" class="tab-pane col-xs-12 no-padding" id="azure-ad-b2c-settings-tab">
     <div id="azure-ad-b2c-page-body" class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
         <form id="saml-b2c-setting" name="ssoSettingsb2cForm" class="saml-form auth-settings-form col-lg-12 col-md-12 col-sm-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="azureADB2CAuthenticationProvider" value="@ViewBag.AzureADB2CSettings.AuthProvider">
             <input type="hidden" name="azureB2CLogo" value="@ViewBag.AzureADB2CSettings.AzureADB2CSettings.Logo">
             <div class="col-xs-12 separator-margin">
                 <div class="col-xs-12 no-padding">
                     <div class="material-switch inline-align">
-                        <input type="checkbox" id="enable-sso-b2c" ng-model="isB2CEnabled" ng_change="hideValidationMessage(isB2CEnabled, 'azureadb2c')" />
+                        <input type="checkbox" id="enable-sso-b2c" ng-model="isB2CEnabled" ng_change="hideValidationMessage(isB2CEnabled, 'azureadb2c')"/>
                         <label for="enable-sso-b2c" class="label-primary"></label>
                     </div>
                     <div class="app-textbox-label inline-align">
@@ -21,7 +22,7 @@
                         <label class="app-textbox-label">@T["Organization Name"]</label>
                     </div>
                     <div ng-class="(ssoSettingsb2cForm.AzureB2CProviderName.$dirty && ssoSettingsb2cForm.AzureB2CProviderName.$invalid) ? 'has-error' : ''">
-                        <input type="text" class="form-control no-margin" ng-model="AzureB2CProviderName" ng-init="AzureB2CProviderName='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.AzureB2CProviderName'" ng-maxlength="20" name="AzureB2CProviderName" placeholder="@T["Organization Name"]" id="azure-b2c-provider-name" data-ng-disabled="!isB2CEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="AzureB2CProviderName" ng-init="AzureB2CProviderName='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.AzureB2CProviderName'" ng-maxlength="20" name="AzureB2CProviderName" placeholder="@T["Organization Name"]" id="azure-b2c-provider-name" data-ng-disabled="!isB2CEnabled" required/>
                         <span class="validation-message top-padding" ng-show="ssoSettingsb2cForm.AzureB2CProviderName.$error.maxlength && ssoSettingsb2cForm.AzureB2CProviderName.$dirty && isB2CEnabled">@T["Organization name is too long. Must be no more than 20 characters."]</span>
                         <span class="validation-message top-padding" ng-show="ssoSettingsb2cForm.AzureB2CProviderName.$error.required && ssoSettingsb2cForm.AzureB2CProviderName.$dirty && isB2CEnabled">@T["Please enter your organization name."]</span>
                     </div>
@@ -37,7 +38,7 @@
                             <div class="upload-options">
                                 <label>
                                     <span>@T["Change logo"]</span>
-                                    <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="azureB2CLogoUrl" ng-init="azureB2CLogoUrl='@ViewBag.AzureADB2CSettings.LogoUrl'" name="azureB2CLogoUrl" data-ng-disabled="!isB2CEnabled" required />
+                                    <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="azureB2CLogoUrl" ng-init="azureB2CLogoUrl='@ViewBag.AzureADB2CSettings.LogoUrl'" name="azureB2CLogoUrl" data-ng-disabled="!isB2CEnabled" required/>
                                 </label>
                             </div>
                         </div>
@@ -50,7 +51,7 @@
                         <label class="app-textbox-label">@T["Application Id"]</label>
                     </div>
                     <div>
-                        <input type="text" class="form-control no-margin" ng-model="ApplicationIdB2C" ng-init="ApplicationIdB2C='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.ApplicationId'" name="ApplicationIdB2C" placeholder="@T["Application Id"]" id="application-id-b2c" data-ng-disabled="!isB2CEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="ApplicationIdB2C" ng-init="ApplicationIdB2C='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.ApplicationId'" name="ApplicationIdB2C" placeholder="@T["Application Id"]" id="application-id-b2c" data-ng-disabled="!isB2CEnabled" required/>
                         <span class="validation-message top-padding" ng-show="ssoSettingsb2cForm.ApplicationIdB2C.$error.required && ssoSettingsb2cForm.ApplicationIdB2C.$dirty ">@T["Please enter the application id."]</span>
                     </div>
                     @if (appBranding == AppBranding.Bold.Identifier)
@@ -71,7 +72,7 @@
                         <label class="app-textbox-label">@T["Tenant Name"]</label>
                     </div>
                     <div>
-                        <input type="text" class="form-control no-margin" ng-model="TenantNameB2C" ng-init="TenantNameB2C='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.TenantName'" name="TenantNameB2C" placeholder="@T["Tenant Name"]" id="tenant-name-b2c" data-ng-disabled="!isB2CEnabled" ng-pattern="tenantRegex" required />
+                        <input type="text" class="form-control no-margin" ng-model="TenantNameB2C" ng-init="TenantNameB2C='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.TenantName'" name="TenantNameB2C" placeholder="@T["Tenant Name"]" id="tenant-name-b2c" data-ng-disabled="!isB2CEnabled" ng-pattern="tenantRegex" required/>
                         <span class="validation-message top-padding" ng-show="ssoSettingsb2cForm.TenantNameB2C.$error.required && ssoSettingsb2cForm.TenantNameB2C.$dirty">@T["Please enter tenant name."]</span>
                         <span class="validation-message top-padding" ng-show="ssoSettingsb2cForm.TenantNameB2C.$error.pattern ">@T["Please enter valid tenant name."]</span>
                     </div>
@@ -83,7 +84,7 @@
                         <label class="app-textbox-label">@T["Sign in Policy"]</label>
                     </div>
                     <div>
-                        <input type="text" class="form-control no-margin" ng-model="PolicyB2C" ng-init="PolicyB2C='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.SigninPolicy'" name="PolicyB2C" placeholder="@T["Sign in Policy"]" id="policy-b2c" data-ng-disabled="!isB2CEnabled" required />
+                        <input type="text" class="form-control no-margin" ng-model="PolicyB2C" ng-init="PolicyB2C='@ViewBag.AzureADB2CSettings.AzureADB2CSettings.SigninPolicy'" name="PolicyB2C" placeholder="@T["Sign in Policy"]" id="policy-b2c" data-ng-disabled="!isB2CEnabled" required/>
                         <span class="validation-message top-padding" ng-show="ssoSettingsb2cForm.PolicyB2C.$error.required && ssoSettingsb2cForm.PolicyB2C.$dirty">@T["Please enter the policy name."]</span>
                     </div>
                     <div class="info-message no-padding">@T["The name of the Sign in/Sign up user flow created in Azure AD B2C."]</div>
@@ -98,7 +99,7 @@
                     </div>*@
                 <div class="col-xs-12 no-padding input-field-margin">
                     <div class="material-switch inline-align">
-                        <input type="checkbox" id="enable-slo-b2c" ng-model="IsB2CSloEnabled" data-ng-disabled="!isB2CEnabled" />
+                        <input type="checkbox" id="enable-slo-b2c" ng-model="IsB2CSloEnabled" data-ng-disabled="!isB2CEnabled"/>
                         <label for="enable-slo-b2c" class="label-primary"></label>
                     </div>
                     <div class="app-textbox-label inline-align">
