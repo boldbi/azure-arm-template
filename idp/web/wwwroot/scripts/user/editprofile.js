@@ -117,6 +117,7 @@ $(document).ready(function () {
         asyncSettings: {
             saveUrl: fileUploadUrl + "?imageType=profileimage&&userName=" + $("#user-name").val() + "&&timeStamp=" + currentDate,
         },
+        uploading: addHeaders,
         autoUpload: true,
         showFileList: false,
         multiple: false,

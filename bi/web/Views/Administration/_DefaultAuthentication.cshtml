@@ -14,6 +14,9 @@
         case AuthProvider.WindowsAD:
             defaultAuthenticationsample = "windows ad";
             break;
+        case AuthProvider.JWTSSO:
+            defaultAuthenticationsample = "jwt sso";
+            break;
     }
 }
 
@@ -21,7 +24,7 @@
     <div id="defaultauthentication-page-body" class="col-xs-12 col-xs-12 col-sm-12 bi-page-body">
         <form id="default-setting" name="defaultsettingsForm" class="auth-settings-form form-top-margin col-xs-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
             <div class="col-xs-12 enable-default-checkbox no-padding">
-                @Html.CheckBox("enable-defaultauthentication", ((bool)ViewBag.OpenIDSettings.IsDefaultAuthentication || (bool)ViewBag.OAuthSettings.IsDefaultAuthentication || (bool)ViewBag.WindowsADSettings.IsDefaultAuthentication || (bool)ViewBag.AzureADSettings.IsDefaultAuthentication), new { @class = "material-checkbox" })
+                @Html.CheckBox("enable-defaultauthentication", ((bool)ViewBag.OpenIDSettings.IsDefaultAuthentication || (bool)ViewBag.OAuthSettings.IsDefaultAuthentication || (bool)ViewBag.JwtSettings.IsDefaultAuthentication || (bool)ViewBag.WindowsADSettings.IsDefaultAuthentication || (bool)ViewBag.AzureADSettings.IsDefaultAuthentication), new { @class = "material-checkbox" })
                 @Html.Hidden("enable-defaultauthentication")
                 <label for="enable-defaultauthentication">
                     <span>
@@ -44,6 +47,10 @@
                         {
                             <option class="no-margin-dropdown-ul" value="OAuth 2.0" selected="@(defaultAuthenticationsample == "oauth 2.0")">OAuth 2.0</option>
                         }
+                        @if ((bool)ViewBag.JwtSettings.IsEnabled)
+                        {
+                        <option class="no-margin-dropdown-ul" value="OAuth 2.0" selected="@(defaultAuthenticationsample == "jwt sso")">JWT SSO</option>
+                        }
                         @if ((bool)ViewBag.WindowsADSettings.IsEnabled)
                         {
                             <option class="no-margin-dropdown-ul" value="Windows AD" selected="@(defaultAuthenticationsample == "windows ad")">Windows Active Directory</option>
@@ -52,7 +59,7 @@
                         {
                             <option class="no-margin-dropdown-ul" value="Azure AD" selected="@(defaultAuthenticationsample == "azure ad")">Azure Active Directory</option>
                         }
-                        @if (!(bool)ViewBag.OAuthSettings.IsEnabled && !(bool)ViewBag.OpenIDSettings.IsEnabled && !(bool)ViewBag.WindowsADSettings.IsEnabled && !(bool)ViewBag.AzureADSettings.IsEnabled)
+                        @if (!(bool)ViewBag.OAuthSettings.IsEnabled && !(bool)ViewBag.OpenIDSettings.IsEnabled && !(bool)ViewBag.JwtSettings.IsEnabled && !(bool)ViewBag.WindowsADSettings.IsEnabled && !(bool)ViewBag.AzureADSettings.IsEnabled)
                         {
                             <option class="no-margin-dropdown-ul" id="none-default">@T["No default Authentication Available"]</option>
                         }

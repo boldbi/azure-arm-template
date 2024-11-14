@@ -34,6 +34,8 @@ $(document).ready(function () {
     createWaitingPopup('user-remove-confirmation-dialog');
     createWaitingPopup('add-tenant-popup');
     createWaitingPopup('grant-users-access-dialog');
+    toggleInputFields();
+    updateInfoMessage();
 
     var isolationSwitchContainer = $("#isolation-switch-container");
     if (isolationSwitchContainer.length) {
@@ -132,6 +134,9 @@ $(document).ready(function () {
     else if (query.includes("?tab=ai-service") && isActiveSite) {
         $('a[href="#ai-serviceKey-tab"]').tab("show");
     }
+    else if (query.includes("?tab=resource-limitation") && isActiveSite) {
+        $('a[href="#resource-limitation-tab"]').tab("show");
+    }
     else {
         isFreshLoad = false;
         $('a[href="#application-tab"]').tab("show");
@@ -155,6 +160,10 @@ $(document).ready(function () {
         else if (tab === "ai-service" && isActiveSite) {
             $("#data-security a").attr("href", "#ai-serviceKey-tab");
             $('a[href="#ai-serviceKey-tab"]').tab('show');
+        }
+        else if (tab === "resource-limitation" && isActiveSite) {
+            $("#data-security a").attr("href", "#resource-limitation-tab");
+            $('a[href="#resource-limitation-tab"]').tab('show');
         }
         else if (tab === "attributes" && isActiveSite) {
             $("#custom-attribute a").attr("href", "#custom-attribute-tab");
@@ -276,6 +285,9 @@ $(document).on("shown.bs.tab", 'a[data-toggle="tab"]', function (e) {
 
     else if (target.indexOf("#ai-serviceKey-tab") !== -1) {
         data = "ai-service";
+    }
+    else if (target.indexOf("#resource-limitation-tab") !== -1) {
+        data = "resource-limitation";
     }
     else if (target.indexOf("#custom-attribute-tab") !== -1) {
         data = "attributes";
@@ -488,6 +500,14 @@ function getAppUsers() {
                 allowFiltering: false,
                 template: "#user-email-template",
                 headerTemplate: "#email-header",
+                type: "string",
+                width: 135
+            },
+            {
+                field: "Activation Method",
+                allowFiltering: false,
+                template: "#activation-method-template",
+                headerTemplate: "#activation-method-header",
                 type: "string",
                 width: 135
             },
@@ -1008,6 +1028,106 @@ function enableIsolationCode() {
         }
     }
 }
+
+var inputFields = [
+    "#dashboards-limitation-textbox",
+    "#schedule-limitation-textbox",
+    "#data-source-limitation-textbox",
+    "#slideshow-limitation-textbox"
+];
+function validateIntegerInput(inputElement, validationMessageElement) {
+    var value = $(inputElement).val().trim();
+    var isValid = value === '' || value === null || /^\d+$/.test(value);
+
+    if (!isValid) {
+        $(validationMessageElement).html(window.Server.App.LocalizationContent.ResourceLimitationValidator).show();
+        $("#update-resource-limitation").prop("disabled", true);
+        $(inputElement).addClass("has-error");
+        return false;
+    } else {
+        $(validationMessageElement).html("").hide();
+        $(inputElement).removeClass("has-error");
+        $("#update-resource-limitation").prop("disabled", false);
+        return true;
+    }
+}
+
+function toggleInputFields() {
+    var isEnabled = $("#resource-limitation-enable-switch").is(":checked");
+
+    inputFields.forEach(function (field) {
+        var value = $(field).val();
+        var limitationValue = value ? value.trim() : '';
+        if (isEnabled) {
+            $(field).removeAttr("disabled");
+        } else {
+            $(field).attr("disabled", "disabled").val("");
+            $(field).removeClass("has-error");
+            $(field).siblings(".validation-message").html("").hide();
+            $(field).val(limitationValue);
+        }
+    });
+}
+
+$("input[type='text']").on("input", function () {
+    var validationMessageElement = $(this).siblings(".validation-message");
+    validateIntegerInput(this, validationMessageElement);
+});
+
+$("#resource-limitation-enable-switch").change(function () {
+    toggleInputFields();
+    updateInfoMessage();
+});
+
+$("#update-resource-limitation").on("click", function () {
+    var isValid = true;
+    var isEnabled = $("#resource-limitation-enable-switch").is(":checked");
+    var tenantInfoId =  $("#resource-limitation-enable-switch").attr("data-tenant-id");
+    if (isEnabled){
+        isValid = false;
+        inputFields.forEach(function (field) {
+            var validationMessageElement = $(field).siblings(".validation-message");
+            isValid = validateIntegerInput(field, validationMessageElement);
+        });
+    }
+    
+    if (isValid){
+        var resourceLimitationSettings = {
+            isEnabled: isEnabled,
+            dashboardsLimitation: $("#dashboards-limitation-textbox").val() ? $("#dashboards-limitation-textbox").val().trim() : "",
+            scheduleLimitation: $("#schedule-limitation-textbox").val() ? $("#schedule-limitation-textbox").val().trim() : "",
+            dataSourcesLimitation: $("#data-source-limitation-textbox").val() ? $("#data-source-limitation-textbox").val().trim() : "",
+            slideShowLimitation: $("#slideshow-limitation-textbox").val() ? $("#slideshow-limitation-textbox").val().trim() : "",
+        };
+        showWaitingPopup("content-area");
+        $.ajax({
+            type: "POST",
+            data: { tenantInfoId: tenantInfoId, resourceLimitationSettings: JSON.stringify(resourceLimitationSettings)},
+            url: updateResourceLimitationUrl,
+            success: function (result) {
+                if (result.Status) {
+                    SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.ResourceLimitationSuccess, 7000);
+                } else {
+                    WarningAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.ResourceLimitationFailed, 7000);
+                }
+                hideWaitingPopup("content-area");
+            }
+        });
+    }
+});
+
+function updateInfoMessage() {
+    var isEnabled = $("#resource-limitation-enable-switch").is(":checked");
+    var infoMessage = document.getElementById('tenant-info-message');
+    if (infoMessage != null){
+        if (isEnabled) {
+            infoMessage.textContent = window.Server.App.LocalizationContent.ResourceEnabledInfoMessage;
+        } else {
+            infoMessage.textContent = window.Server.App.LocalizationContent.ResourceDisabledInfoMessage;
+        }
+    }
+}
+    
 $(document).on("click", "#update-enable-aiservice", function () {
    var isAiServiceKeyEnabled= $("#aiservice-enable-switch").is(":checked");
    var tenantInfoId =  $("#aiservice-enable-switch").attr("data-tenant-id");
@@ -1018,9 +1138,23 @@ $(document).on("click", "#update-enable-aiservice", function () {
         url: addIsAIServiceKeyEnableUrl,
         success: function (result) {
             if (result.Status) {
-                SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceEnabledSuccess, 7000);
+                if(isAiServiceKeyEnabled)
+                {
+                    SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceEnabledSuccess, 7000);
+                }
+                else
+                {
+                    SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceDisabledSuccess, 7000);
+                }
             } else {
-                WarningAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceKeyError, 7000);
+                if(isAiServiceKeyEnabled)
+                {
+                    WarningAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceKeyError, 7000);
+                }
+                else
+                {
+                    WarningAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.AiServiceDisableError, 7000);
+                }
             }
             hideWaitingPopup("content-area");
         }

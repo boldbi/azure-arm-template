@@ -139,7 +139,7 @@ $(document).ready(function () {
                 return false;
             }
             return dataSourceRule.some(function (rule) {
-                return rule.RuleName.toString() === ruleName.toString();
+                return rule.RuleName.toLowerCase().toString() === ruleName.toLowerCase().toString();
             });
         }else{
             return dataSourceRule.some(function (rule) {

@@ -19,7 +19,7 @@
 	IsActive tinyint NOT NULL,
 	IsActivated tinyint NOT NULL,
 	IsDeleted tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Group(
@@ -32,7 +32,7 @@ CREATE TABLE {database_name}.BOLDBI_Group(
 	DirectoryTypeId int NOT NULL DEFAULT 0,
 	ExternalProviderId varchar(100) NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserGroup(
@@ -42,14 +42,14 @@ CREATE TABLE {database_name}.BOLDBI_UserGroup(
 	ModifiedDate datetime NOT NULL,
 	ExternalProviderId varchar(100) NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserLogType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserLog(
@@ -65,7 +65,7 @@ CREATE TABLE {database_name}.BOLDBI_UserLog(
 	LogStatusId int NOT NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserLogin(
@@ -75,7 +75,7 @@ CREATE TABLE {database_name}.BOLDBI_UserLogin(
 	IpAddress varchar(50) NOT NULL,
 	LoggedInTime datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserPreference(
@@ -91,14 +91,14 @@ CREATE TABLE {database_name}.BOLDBI_UserPreference(
 	IsolationCode text NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL UNIQUE,
 	IsActive tinyint NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Item(
@@ -121,7 +121,7 @@ CREATE TABLE {database_name}.BOLDBI_Item(
 	IsActive tinyint NULL,
 	IsUnlisted tinyint(1) NOT NULL DEFAULT 0,
 	IsUploadDraft tinyint(1) NOT NULL DEFAULT 0,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemView(
@@ -132,14 +132,14 @@ CREATE TABLE {database_name}.BOLDBI_ItemView(
 	QueryString varchar(4000) NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemLogType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NULL UNIQUE,
 	IsActive tinyint NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 
@@ -149,7 +149,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemTrash(
 	TrashedById int NOT NULL,
 	TrashedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemTrashDeleted(
@@ -159,7 +159,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemTrashDeleted(
 	DeletedById int NOT NULL,
 	DeletedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemVersion(
@@ -174,7 +174,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemVersion(
 	CreatedById int NOT NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemLog(
@@ -190,7 +190,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemLog(
 	UpdatedUserId int NOT NULL,	
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PermissionEntity(
@@ -199,7 +199,7 @@ CREATE TABLE {database_name}.BOLDBI_PermissionEntity(
 	EntityType int NOT NULL,
 	ItemTypeId int NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserPermission(
@@ -212,7 +212,7 @@ CREATE TABLE {database_name}.BOLDBI_UserPermission(
 	ScopeGroupId int NULl,
 	ItemTypeId int NULl,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_GroupPermission(
@@ -225,21 +225,21 @@ CREATE TABLE {database_name}.BOLDBI_GroupPermission(
 	ScopeGroupId int NULl,
 	ItemTypeId int NULl,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_RecurrenceType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(30) NOT NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ExportType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(20) NOT NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleDetail(
@@ -249,6 +249,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleDetail(
 	DashboardWidgetId Char(38) NULL,
 	DashboardViewId Char(38) NULL,
 	Name varchar(150) NOT NULL,
+	Parameter text NULL,
 	RecurrenceTypeId int NULL,
 	RecurrenceInfo varchar(4000) NULL,
 	Subject varchar(4000) NULL,
@@ -267,7 +268,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleDetail(
 	ModifiedDate datetime NOT NULL,
 	ScheduleExportInfo text NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SubscribedUser(
@@ -278,7 +279,7 @@ CREATE TABLE {database_name}.BOLDBI_SubscribedUser(
 	SubscribedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SubscribedGroup(
@@ -289,7 +290,7 @@ CREATE TABLE {database_name}.BOLDBI_SubscribedGroup(
 	SubscribedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SubscrExtnRecpt(
@@ -300,14 +301,14 @@ CREATE TABLE {database_name}.BOLDBI_SubscrExtnRecpt(
 	SubscribedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 	
 CREATE TABLE {database_name}.BOLDBI_ScheduleStatus(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleLogUser(
@@ -318,7 +319,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleLogUser(
 	DeliveredDate datetime NOT NULL,
 	IsOnDemand tinyint NOT NULL,	
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleLogGroup(
@@ -330,7 +331,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleLogGroup(
 	DeliveredDate datetime NOT NULL,
 	IsOnDemand tinyint NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SchdLogExtnRecpt(
@@ -341,7 +342,7 @@ CREATE TABLE {database_name}.BOLDBI_SchdLogExtnRecpt(
 	DeliveredDate datetime NOT NULL,
 	IsOnDemand tinyint NOT NULL,	
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleLog(
@@ -355,7 +356,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleLog(
 	IsActive tinyint NOT NULL,
 	RequestId Char(38) NULL,
 	LogExist tinyint NOT NULL DEFAULT 0,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BoldBI_ScheduleMissingLogs(
@@ -365,7 +366,7 @@ CREATE TABLE {database_name}.BoldBI_ScheduleMissingLogs(
 	StartDate datetime NOT NULL,
 	EndDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SystemSettings(
@@ -375,13 +376,13 @@ CREATE TABLE {database_name}.BOLDBI_SystemSettings(
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
 	CONSTRAINT UK_BOLDBI_SystemSettings_Key UNIQUE(`Key`),
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ServerVersion(
 	Id int NOT NULL,
 	VersionNumber varchar(20) NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Comment(
@@ -395,7 +396,7 @@ CREATE TABLE {database_name}.BOLDBI_Comment(
     ModifiedDate datetime NOT NULL,
     ModifiedById int NOT NULL,
     IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemWatch(
@@ -406,14 +407,14 @@ CREATE TABLE {database_name}.BOLDBI_ItemWatch(
 	ModifiedDate datetime NOT NULL,
 	IsWatched tinyint NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemCommentLogType(
     Id int NOT NULL AUTO_INCREMENT,
     Name varchar(100) NULL UNIQUE,
     IsActive tinyint NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemCommentLog(
@@ -430,7 +431,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemCommentLog(
     ModifiedDate datetime NOT NULL,
     IsRead tinyint NOT NULL,
     IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_FavoriteItem(
@@ -438,7 +439,7 @@ CREATE TABLE {database_name}.BOLDBI_FavoriteItem(
 	UserId int NOT NULL,
 	ItemId Char(38) NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_DashboardWidget (
@@ -449,7 +450,7 @@ CREATE TABLE {database_name}.BOLDBI_DashboardWidget (
 	WidgetInfo text,
 	ModifiedDate datetime NOT NULL,	
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_AzureADCredential(
@@ -459,7 +460,7 @@ CREATE TABLE {database_name}.BOLDBI_AzureADCredential(
 	ClientSecret varchar(100),
 	IsActive tinyint NOT NULL,
 	EnableGroupUserImport tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ADCredential(
@@ -472,7 +473,7 @@ CREATE TABLE {database_name}.BOLDBI_ADCredential(
 	PortNo int NOT NULL,
 	IsActive tinyint NOT NULL,
 	EnableGroupUserImport tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SAMLSettings(
@@ -483,13 +484,13 @@ CREATE TABLE {database_name}.BOLDBI_SAMLSettings(
 	TenantName varchar(100), 
 	MobileAppId varchar(100),
 	IsEnabled tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserType(
 	Id int NOT NULL AUTO_INCREMENT, 
 	Type varchar(100) UNIQUE,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_DashboardDataSource(
@@ -500,7 +501,7 @@ CREATE TABLE {database_name}.BOLDBI_DashboardDataSource(
 	VersionNumber int NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Homepage(
@@ -513,7 +514,7 @@ CREATE TABLE {database_name}.BOLDBI_Homepage(
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_HomepageItemFilter(
@@ -523,7 +524,7 @@ CREATE TABLE {database_name}.BOLDBI_HomepageItemFilter(
 	QueryString varchar(4000) NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_DBCredential(
@@ -552,7 +553,7 @@ CREATE TABLE {database_name}.BOLDBI_DBCredential(
     LastNameRelationId int NULL,
     IsActiveRelationId int NULL,
     IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_TableRelation(
@@ -568,7 +569,7 @@ CREATE TABLE {database_name}.BOLDBI_TableRelation(
     RightTableCondition  varchar(255) NOT NULL,
     RightTableName  varchar(255) NOT NULL,
     RightTableSchema varchar(255) NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_MultiTabDashboard(
@@ -580,7 +581,7 @@ CREATE TABLE {database_name}.BOLDBI_MultiTabDashboard(
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
 	TabName varchar(255) NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_DataNotification(
@@ -590,14 +591,14 @@ CREATE TABLE {database_name}.BOLDBI_DataNotification(
 	DaJsonString text NOT NULL,
 	FilterData text NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ConditionCategory(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(255) NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_CustomExpression(
@@ -610,14 +611,14 @@ CREATE TABLE {database_name}.BOLDBI_CustomExpression(
 	Expression varchar(4000) NOT NULL,
 	ColumnInfo varchar(4000) NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Source(
     Id int NOT NULL AUTO_INCREMENT,
     Name varchar(100) NULL UNIQUE,
     IsActive tinyint NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SlideshowInfo(
@@ -626,7 +627,7 @@ CREATE TABLE {database_name}.BOLDBI_SlideshowInfo(
 	ItemInfo text NOT NULL,
 	loopInterval int NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PermissionAccess(
@@ -634,7 +635,7 @@ CREATE TABLE {database_name}.BOLDBI_PermissionAccess(
 	Name varchar(100) UNIQUE NOT NULL,
 	AccessId int UNIQUE NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PermissionAccEntity(
@@ -642,14 +643,14 @@ CREATE TABLE {database_name}.BOLDBI_PermissionAccEntity(
 	PermissionEntityId int NOT NULL,
 	PermissionAccessId int NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PermissionLogType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserPermissionLog(
@@ -660,7 +661,7 @@ CREATE TABLE {database_name}.BOLDBI_UserPermissionLog(
 	LogTypeId int NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_GroupPermissionLog(
@@ -671,21 +672,21 @@ CREATE TABLE {database_name}.BOLDBI_GroupPermissionLog(
 	LogTypeId int NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SystemLogType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_LogStatus(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SystemLog(
@@ -698,7 +699,7 @@ CREATE TABLE {database_name}.BOLDBI_SystemLog(
 	UpdatedUserId int NOT NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_LogModule(
@@ -706,7 +707,7 @@ CREATE TABLE {database_name}.BOLDBI_LogModule(
 	Name text NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_LogField(
@@ -716,14 +717,14 @@ CREATE TABLE {database_name}.BOLDBI_LogField(
 	Description text NOT NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_GroupLogType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL UNIQUE,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_GroupLog(
@@ -739,7 +740,7 @@ CREATE TABLE {database_name}.BOLDBI_GroupLog(
 	LogStatusId int NOT NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemSettings(
@@ -748,7 +749,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemSettings(
 	ItemConfig varchar(4000) NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ItemUserPreference(
@@ -759,7 +760,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemUserPreference(
 	DefaultViewId Char(38) NULL,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PublishedItem(
@@ -778,7 +779,7 @@ CREATE TABLE {database_name}.BOLDBI_PublishedItem(
 	ModifiedDate datetime NOT NULL,
     IsActive tinyint NOT NULL,
 	ExternalSiteId int NOT NULL DEFAULT 0,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PublishJobs(
@@ -791,14 +792,14 @@ CREATE TABLE {database_name}.BOLDBI_PublishJobs(
     Status varchar(255) NOT NULL,
     IsActive tinyint NOT NULL,
 	Type int NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_PublishType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_DeploymentDashboards(
@@ -814,7 +815,7 @@ CREATE TABLE {database_name}.BOLDBI_DeploymentDashboards(
     CreatedDate datetime NOT NULL,
     ModifiedDate datetime NOT NULL,
     IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserAttributes(
@@ -829,7 +830,7 @@ CREATE TABLE {database_name}.BOLDBI_UserAttributes(
     CreatedDate datetime NOT NULL,
     ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_GroupAttributes(
@@ -844,7 +845,7 @@ CREATE TABLE {database_name}.BOLDBI_GroupAttributes(
     CreatedDate datetime NOT NULL,
     ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SiteAttributes(
@@ -858,7 +859,7 @@ CREATE TABLE {database_name}.BOLDBI_SiteAttributes(
     CreatedDate datetime NOT NULL,
     ModifiedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserDataNotification(
@@ -867,7 +868,7 @@ CREATE TABLE {database_name}.BOLDBI_UserDataNotification(
 	UserId int NOT NULL,
 	FilterData text NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ExternalSites(
@@ -882,14 +883,14 @@ CREATE TABLE {database_name}.BOLDBI_ExternalSites(
 	ModifiedDate datetime NULL,
 	SiteType int NOT NULL DEFAULT 0,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_SettingsType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL UNIQUE,
 	IsActive tinyint NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_EmailActivityLog(
@@ -910,7 +911,7 @@ CREATE TABLE {database_name}.BOLDBI_EmailActivityLog(
 	Status int NOT NULL,
 	StatusMessage text NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Webhook(
@@ -931,7 +932,7 @@ CREATE TABLE {database_name}.BOLDBI_Webhook(
 	ModifiedDate datetime NOT NULL,
 	IsEnable tinyint NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_NotificationTrigger(
@@ -946,7 +947,7 @@ CREATE TABLE {database_name}.BOLDBI_NotificationTrigger(
 	CreatedDate timestamp NOT NULL,
 	ModifiedDate timestamp NULL,
 	ReferenceId varchar(255) NULL,
-	IsActive smallint NOT NULL)
+	IsActive smallint NOT NULL) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_WebhookLog(
@@ -960,21 +961,21 @@ CREATE TABLE {database_name}.BOLDBI_WebhookLog(
 	ResponseStatusCode varchar(512) NOT NULL,
 	CreatedDate datetime NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_NotificationEvents(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) UNIQUE NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_EventPayloads(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) UNIQUE NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_EventPayloadsMapping(
@@ -982,7 +983,7 @@ CREATE TABLE {database_name}.BOLDBI_EventPayloadsMapping(
 	EventType int NOT NULL,
 	PayloadType int NOT NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UserSession(
@@ -995,7 +996,7 @@ CREATE TABLE {database_name}.BOLDBI_UserSession(
 	LoggedInTime datetime NOT NULL,
 	LastActive datetime NULL,
 	IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 
@@ -1014,7 +1015,7 @@ CREATE TABLE {database_name}.BOLDBI_BackgroundJobs(
 	IsSampleData tinyint NULL,
     IsActive tinyint NOT NULL,
 	ParentJobId int NULL,
-    PRIMARY KEY (Id))
+    PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
@@ -1024,7 +1025,7 @@ CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
 	UploadedItemId char(38) NOT NULL,
 	UploadedDate datetime  NULL,
 	IsActive tinyint(1) NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleRunHistory(
@@ -1037,7 +1038,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleRunHistory(
 	IsOnDemand tinyint NOT NULL DEFAULT 0,
 	IsActive tinyint NOT NULL,
 	LogExist tinyint NOT NULL DEFAULT 0,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_DSMetrics (
@@ -1055,7 +1056,7 @@ CREATE TABLE {database_name}.BOLDBI_DSMetrics (
    IncrementalRefreshDetails VARCHAR(255),
    ExtractType VARCHAR(255),
    RefreshStatus VARCHAR(255),
-   RefreshException VARCHAR(255))
+   RefreshException VARCHAR(255)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
@@ -1069,7 +1070,7 @@ CREATE TABLE {database_name}.BOLDBI_ai_qnawidgethistory (
    uservote TEXT,
    isreported BOOLEAN,
    search_date TIMESTAMP,
-   widgetid VARCHAR(255))
+   widgetid VARCHAR(255)) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_Notification (
@@ -1084,7 +1085,7 @@ CREATE TABLE {database_name}.BOLDBI_Notification (
     ModifiedDate datetime NOT NULL,
     IsRead tinyint NOT NULL,
     IsActive tinyint NOT NULL,
-	PRIMARY KEY (Id))
+	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
 -- -- PASTE INSERT Queries below this section --------

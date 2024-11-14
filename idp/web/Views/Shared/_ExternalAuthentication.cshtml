@@ -94,8 +94,9 @@
                         if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication)
                         {
                             <form id="login-button-windows" class="external-login-buttons">
+                                @Html.AntiForgeryToken()
                                 <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
-                                        <img id="windows-ad-error-image" class="external-provider" alt="Windows AD" src="@windowsADLogoLink" />
+                                    <img id="windows-ad-error-image" class="external-provider" alt="Windows AD" src="@windowsADLogoLink"/>
                                     <span class="windows-ad-login-text">@T["Sign in with Windows AD"]</span>
                                     <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
                                 </button>
@@ -112,8 +113,9 @@
                             else
                             {
                                 <form method="post" action="@azureb2cloginAction" class="external-login-buttons">
-                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
-                                        @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider"/>
+                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
                                 </form>
                             }
                         }
@@ -128,6 +130,7 @@
                             else
                             {
                                 <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
                                         @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
                                 </form>

@@ -72,6 +72,11 @@ function passwordBoxUnhightlight(element) {
     $(element).closest('div').find(".password-validate-holder").html("");
 }
 
+$.validator.addMethod("notSameAsCurrent", function(value, element) {
+    var currentPassword = $("input[name='current-password']").val();
+    return this.optional(element) || value !== currentPassword;
+}, window.Server.App.LocalizationContent.PasswordSameAsCurrent);
+
 $.validator.addMethod("isValidPassword", function (value, element) {
     var validateMethods = new Array();
     validateMethods.push(validateUserpassword.p_policy_uppercase);

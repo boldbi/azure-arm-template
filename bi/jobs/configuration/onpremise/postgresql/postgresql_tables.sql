@@ -229,6 +229,7 @@ CREATE TABLE SyncDS_ScheduleDetail(
 	DashboardWidgetId uuid NULL,
 	DashboardViewId uuid NULL,
 	Name varchar(150) NOT NULL,
+    Parameter text NULL,
 	RecurrenceTypeId int NULL,
 	RecurrenceInfo varchar(4000) NULL,
 	Subject varchar(4000) NULL,

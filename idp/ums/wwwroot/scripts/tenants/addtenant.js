@@ -43,13 +43,7 @@ $(document).ready(function () {
                 var listItem = listItems[i];
                 
                 if (listItems[i].dataset.value === 'BoldReportsOnPremise') {
-                    if (isIPWhiteListingSupportedAndEnabled && isUmsStartupWithOracle) {
-                        listItem.classList.add('e-disabled');
-                        tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateIPWhiteListingAndOracle;
-                    } else if (isIPWhiteListingSupportedAndEnabled) {
-                        listItem.classList.add('e-disabled');
-                        tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateIPWhiteListing;
-                    } else if (isUmsStartupWithOracle) {
+                     if (isUmsStartupWithOracle) {
                         listItem.classList.add('e-disabled');
                         tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateOracle;
                     }
@@ -308,17 +302,19 @@ $(document).ready(function () {
                     $(this).removeAttr("disabled");
                 }
 
-                if (isBoldReportsTenantType()) {
-                    document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
-                    document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
-                    document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
-                    document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
-                }
-                else {
-                    document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
-                    document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
-                    document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
-                    document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+                if (actionType.toLowerCase() != "edit") {
+                    if (isBoldReportsTenantType()) {
+                        document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+                        document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+                        document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+                        document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
+                    }
+                    else {
+                        document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+                        document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+                        document.getElementById("server-prefix-name").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+                        document.getElementById("server-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForBI;
+                    }
                 }
 
                 if (!isBoldReportsTenantType() && (!IsBiPrefixSchema)) {
