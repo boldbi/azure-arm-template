@@ -10,6 +10,7 @@
     var authenticationSettingsUrl = Url.Action("administration", "administration") + "/authentication-settings";
     var adSettingsUrl = Url.Action("administration", "administration") + "/user-directory-settings";
     var emailSettingsUrl = Url.Action("administration", "administration") == null ? string.Empty : Url.Action("administration", "administration") + "/e-mail-settings";
+    var emailConfigureUrl = Url.Action("administration", "administration") == null ? string.Empty : Url.Action("administration", "administration") + "/e-mail-template";
     var notificationSettingsUrl = Url.Action("NotificationSettings", "administration");
     var userSettingsUrl = Url.Action("administration", "administration") + "/user-settings";
     var manageLicenseUrl = Url.Action("LicenseSettings", "Administration") ?? string.Empty;
@@ -26,6 +27,7 @@
     var bulkImportUrlForGroup = Url.Action("BulkImportResult", "Group");
     var bulkImportUrlForUser = Url.Action("BulkImportResult", "UserManagement");
     var webhookSettingsPageUrl = Url.Action("WebhookSettings", "Administration");
+    var apiKeySettingsPageUrl = Url.Action("ApiKeySettings", "Administration");
     var editWebhookSettingsPageUrl = Url.Action("EditWebhook", "Administration");
     var lookAndFeelSettingsPageUrl = Url.Action("LookAndFeel", "Administration");
     var userPageUrl = Url.Action("User", "UserManagement");
@@ -47,7 +49,7 @@
 <nav id="bi-side-nav-bar" class="no-margin admin-nav-bar">
     <h2 class="header">@T["Settings"]</h2>
 
-    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.SiteSettings] || model[SettingsScopes.DashboardSettings] || model[SettingsScopes.EmbedSettings] || model[SettingsScopes.LookAndFeel] || model[SettingsScopes.SiteCredentials] || (model.ContainsKey(SettingsScopes.SupportSettings) && model[SettingsScopes.SupportSettings]))))
+    @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.SiteSettings] || model[SettingsScopes.ApiKey] || model[SettingsScopes.DashboardSettings] || model[SettingsScopes.EmbedSettings] || model[SettingsScopes.LookAndFeel] || model[SettingsScopes.SiteCredentials] || (model.ContainsKey(SettingsScopes.SupportSettings) && model[SettingsScopes.SupportSettings]))))
     {
         <label for="admin-menu-category-general">@T["General"]</label>
         <ul class="admin-menu-category" id="admin-menu-category-general">
@@ -94,6 +96,16 @@
                     <a id="credential-link" class="" href="@credentialsUrl">
                         <i class="su su-credentials"></i>
                         <span>@T["Site Credentials"]</span>
+                    </a>
+                </li>
+            }
+
+            @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.ApiKey])))
+            {
+                <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(apiKeySettingsPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="webhook-settings-link" href="@apiKeySettingsPageUrl">
+                        <i class="su su-api-key"></i>
+                        <span>@T["API Key"]</span>
                     </a>
                 </li>
             }
@@ -211,7 +223,7 @@
             {
                 @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.Email])))
                 {
-                    <li class="admin-menu-item @(currentUrl.IndexOf(emailSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <li class="admin-menu-item @(currentUrl.IndexOf(emailSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(emailConfigureUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                         <a id="email-settings-link" href="@emailSettingsUrl">
                             <i class="su su-e-mail"></i>
                             <span>@T["Email"]</span>

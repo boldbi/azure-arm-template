@@ -1270,13 +1270,17 @@ function onChangeGlobalSettings(args) {
     document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
     if (this.element.id == "all-settings" && args.checked) {
         $(".enable-disable").each(function () {
-            document.getElementById(this.id).ej2_instances[0].checked = true;
+            if (this.id !== "email" || (this.id === "email" && !canDisableEmailSettingsOption)) {
+                document.getElementById(this.id).ej2_instances[0].checked = true;
+            }
         });
     }
     else if (this.element.id == "all-settings" && !args.checked) {
         document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
         $(".enable-disable").each(function () {
-            document.getElementById(this.id).ej2_instances[0].checked = false;
+            if (this.id !== "email" || (this.id === "email" && !canDisableEmailSettingsOption)) {
+                document.getElementById(this.id).ej2_instances[0].checked = false;
+            }
         });
     }
     else {

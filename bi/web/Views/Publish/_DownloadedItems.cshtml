@@ -9,6 +9,7 @@
         var downloadedItemDetails = @Html.Raw(Json.Serialize(ViewBag.DownloadedItemDeatils));
         var bulkDownloadUrl = "@Url.Action("BulkDownloadDashboardFile", "Items")";
         var downloadItemUrl = "@Url.Action("DownloadDashboardFile", "Items")"
+        var deleteDownloadDashboardUrl = "@Url.Action("DeleteDownloadedDashboardView", "Items")"
     </script>
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.js"></script>
@@ -115,6 +116,11 @@
                 </div>
                 {{/if}}
             </script>
+            <script type="text/x-jsrender" id="actionstemplate">
+                <div>
+                <span><a href="javascript:void(0);" class="delete-download-dashboard" title="" data-itemName="{{:ItemName}}" data-jobId ="{{:JobId}}" data-itemId="{{:ItemId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            </div>
+            </script>
             <div id="DownloadItemGrid"></div>
             <div id="DownlodDashboardStatus"></div>
             <div id="ProgressStages" class="display-none">
@@ -168,6 +174,14 @@
             {
                 headerText: window.Server.App.Localization.Action, templateID: '#download-template', width: 40, allowFiltering: false, allowSorting: false, allowGrouping: false
             },
+            {
+
+                template: true,
+                templateID: "#actionstemplate",
+                allowSorting: false,
+                width: 50,
+                allowFiltering: false
+            }
         ]
     });
 </script>

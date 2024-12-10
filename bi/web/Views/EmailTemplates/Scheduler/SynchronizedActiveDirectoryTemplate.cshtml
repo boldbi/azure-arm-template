@@ -1,6 +1,7 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
 }
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -11,6 +12,10 @@
         /* yahoo, hotmail */
         .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
             line-height: 100%;
+        }
+
+        .im {
+            color: #000000 !important;
         }
 
         /* outlook */
@@ -73,6 +78,11 @@
             padding: 0;
             width: 100% !important;
         }
+
+        li{
+            line-height: 24px;
+        }
+
     </style>
 </head>
 <body style='margin: 0;padding: 0;background-color: #f7f8f9;color: #919191;' alink='#cccccc' bgcolor='#f7f8f9' text='#919191' vlink='#cccccc'>
@@ -87,6 +97,49 @@
                             <tr>
                                 <td align='center' valign='top'>
                             <![endif]-->
+
+                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
+                                                        <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                            @if (Model.CustomEmailTemplateEnabled)
+                                                            {
+                                                                <span data-id="hidden">
+                                                                    @{
+                                                                        var limits = @Model.IsUserLimitExceed ? "incomplete" : "successful";
+                                                                    }
+                                                                    @Model.HeaderContent.Replace("{:Status}", @limits)
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span data-id="hidden">
+                                                                    @{
+                                                                        var sync = ((@Model.DirectoryType).ToString().ToLower() == "azuread") ? "Azure" : "Windows";
+                                                                    }
+                                                                    @sync
+
+                                                                    Active Directory Synchronization
+                                                                    @{
+                                                                        var limits = @Model.IsUserLimitExceed ? "incomplete" : "successful";
+                                                                    }
+                                                                    @limits
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <table style='width:100%' border='0' cellpadding='0' cellspacing='0'>
                             <tbody>
                                 <tr>
@@ -155,73 +208,37 @@
                             </tbody>
                         </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
-                                                        <span data-id="hidden">
-                                                            @{
-                                                                var sync = ((@Model.DirectoryType).ToString().ToLower() == "azuread") ? "Azure" : "Windows";
-                                                            }
-                                                            @sync
-
-                                                            Active Directory Synchronization
-                                                            @{
-                                                                var limits = @Model.IsUserLimitExceed ? "incomplete" : "successful";
-                                                            }
-                                                            @limits
-                                                        </span>
-
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
-                                                        <span>
-                                                            Hello @Model.DisplayName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
+                                                            <span>
+                                                                Hello @Model.DisplayName,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
@@ -241,13 +258,30 @@
                                             <tbody>
                                                 <tr>
                                                     <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;'>
-                                                        <span>
-                                                            Users and groups have been successfully synchronized with your
-                                                            @{
+                                                        @if (Model.CustomEmailTemplateEnabled)
+                                                        {
+                                                            <span>
+                                                                @Html.Raw(Model.MailHeaderContent
+                                                            .Replace("{:Synchronization.User.Modified.Count}", Model.ModifiedUser.ToString())
+                                                            .Replace("{:Synchronization.User.Deleted.Count}", Model.DeletedUser.ToString())
+                                                            .Replace("{:Synchronization.User.Duplication.Count}", Model.DuplicatedUser.ToString())
+                                                            .Replace("{:Synchronization.User.Invalid.Count}", Model.InValidUser.ToString())
+                                                            .Replace("{:Synchronization.User.Failed.Count}", Model.FailedUsers.ToString())
+                                                            .Replace("{:Synchronization.Group.Modified.Count}", Model.ModifiedGroup.ToString())
+                                                            .Replace("{:Synchronization.Group.Deleted.Count}", Model.DeletedGroup.ToString())
+                                                            .Replace("{:Synchronization.Group.Duplicate.Count}", Model.DuplicatedGroup.ToString()))
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                 Users and groups have been successfully synchronized with your
+                                                                @{
                                                                 var desc = ((@Model.DirectoryType).ToString().ToLower() == "azuread") ? "azure active directory." : "active directory. ";
-                                                            }
-                                                            @desc<br />
-                                                        </span>
+                                                                }
+                                                                @desc<br />
+                                                            </span>
+                                                        }
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -258,6 +292,15 @@
                         </table>
 
 
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='20'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
                             <tbody>
@@ -272,76 +315,101 @@
                                 <tr>
                                     <td>
                                         <table style='max-width:510px; width:100%' align='left' border='0' cellspacing='0' cellpadding='0' width='510'>
-                                            <tr>
-                                                <td style="padding-left: 20px;">
-                                                    <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style='font-size: 14px;font-family: Arial, Helvetica, sans-serif;color: #000000;text-align: left;max-width: 100%;'>
-                                                                    <span>Users</span>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style='text-align: left;font-size: 13px;font-family: Arial, Helvetica, sans-serif;color: #000000;height: 100px;max-width: 100%;' class='long-text links-color' align='left'>
-                                                                    <ul style='line-height: 24px;'>
-                                                                        <li>@Model.ModifiedUser user details were modified</li>
-                                                                        <li>@Model.DeletedUser user(s) were deleted</li>
-                                                                        <li>@Model.DuplicatedUser duplicate user(s) exists (Email already exists)</li>
-                                                                        <li>@Model.InValidUser invalid user(s) exists (Email is Invalid)</li>
-                                                                        <li>@Model.FailedUsers user(s) were not added.</li>
-                                                                    </ul>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <table style='width:100%' border='0' cellpadding='0' cellspacing='0'>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style='font-size: 1px;' height='10'>&nbsp;</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style='font-size: 14px;font-family: Arial, Helvetica, sans-serif;color: #000000;text-align: left;height: 28px;max-width: 100%;'>
-                                                                    <span>Groups</span>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style='text-align: left;font-size: 13px;font-family: Arial, Helvetica, sans-serif;color: #000000;height: 100px;max-width: 100%;' class='long-text links-color' align='left'>
-                                                                    <ul style='line-height: 24px;'>
-                                                                        <li>@Model.ModifiedGroup Group Details were modified</li>
-                                                                        <li>@Model.DeletedGroup Group(s) were deleted </li>
-                                                                        <li>@Model.DuplicatedGroup duplicate group(s) exists (Group name already exists)</li>
-                                                                    </ul>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-
+                                        <tr>
+                                            <td style="padding-left: 20px;">
+                                                <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td style='font-size: 14px;font-family: Arial, Helvetica, sans-serif;color: #000000;text-align: left;max-width: 100%;'>
+                                                            <span>Users</span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td style='text-align: left;font-size: 13px;font-family: Arial, Helvetica, sans-serif;color: #000000;height: 100px;max-width: 100%;' class='long-text links-color' align='left'>
+                                                            <ul style='line-height: 24px;'>
+                                                                <li>@Model.ModifiedUser user details were modified</li>
+                                                                <li>@Model.DeletedUser user(s) were deleted</li>
+                                                                <li>@Model.DuplicatedUser duplicate user(s) exists (Email already exists)</li>
+                                                                <li>@Model.InValidUser invalid user(s) exists (Email is Invalid)</li>
+                                                                <li>@Model.FailedUsers user(s) were added.</li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table style='width:100%' border='0' cellpadding='0' cellspacing='0'>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td style='font-size: 1px;' height='10'>&nbsp;</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td style='font-size: 14px;font-family: Arial, Helvetica, sans-serif;color: #000000;text-align: left;height: 28px;max-width: 100%;'>
+                                                            <span>Groups</span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table width='250' cellspacing='0' cellpadding='0' align='left' style='max-width:100%; width: 100%;' class='vb-content'>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td style='text-align: left;font-size: 13px;font-family: Arial, Helvetica, sans-serif;color: #000000;height: 100px;max-width: 100%;' class='long-text links-color' align='left'>
+                                                            <ul style='line-height: 24px;'>
+                                                                <li>@Model.ModifiedGroup Group Details were modified</li>
+                                                                <li>@Model.DeletedGroup Group(s) were deleted </li>
+                                                                <li>@Model.DuplicatedGroup duplicate group(s) exists (Group name already exists)</li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
                                         </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        @if (Model.IsUserLimitExceed)
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+                        
+        @if (!Model.CustomEmailTemplateEnabled)
         {
+            @if (Model.IsUserLimitExceed)
+            {
+                <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                    <tbody>
+                        <tr>
+                            <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                    <tbody>
+                                        <tr>
+                                            <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;'>
+                                                <span>
+                                                    Note: New users could not be added since there are no remaining license(s) available.<br />
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
             <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
                 <tbody>
                     <tr>
@@ -356,9 +424,9 @@
                             <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
                                 <tbody>
                                     <tr>
-                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;'>
+                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;'>
                                             <span>
-                                                Note: New users could not be added since there are no remaining license(s) available.<br />
+                                                Regards,<br />
                                             </span>
                                         </td>
                                     </tr>
@@ -368,46 +436,19 @@
                     </tr>
                 </tbody>
             </table>
-        }
-        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-            <tbody>
-                <tr>
-                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                </tr>
-            </tbody>
-        </table>
-        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-            <tbody>
-                <tr>
-                    <td>
-                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;'>
-                                        <span>
-                                            Regards,<br />
-                                        </span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
 
 
-        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-            <tbody>
-                <tr>
-                    <td style='font-size: 1px;' height='10'>&nbsp;</td>
-                </tr>
-            </tbody>
-        </table>
+            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                <tbody>
+                    <tr>
+                        <td style='font-size: 1px;' height='10'>&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
 
 
-        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-            <tbody>
+            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                <tbody>
                 <tr>
                     <td>
                         <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
@@ -425,6 +466,7 @@
                 </tr>
             </tbody>
         </table>
+        }
 
         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
             <tbody>
@@ -477,7 +519,7 @@
                                 <tr>
                                     <td style=' line-height:20px; padding-left:20px;padding-right:20px; font-size: 12px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;'>
                                         <span data-id="hidden">
-                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                            @disclaimerContent
                                         </span>
                                     </td>
                                 </tr>
@@ -569,11 +611,10 @@
               </tr>
           </table>
         <![endif]-->
-        </td>
-        </tr>
-        </tbody>
+                    </td>
+                </tr>
+            </tbody>
         </table>
-
     </center>
 
 </body>

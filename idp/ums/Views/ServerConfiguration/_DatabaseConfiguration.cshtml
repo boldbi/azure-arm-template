@@ -76,7 +76,7 @@
             <div class="txt-holder center-align windows-disabled">
                 <input type="text" id="txt-login" name="username" class="" placeholder="@T["Username"]" />
                 <span class="startup-validation validation-txt-errors"></span>
-                @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+                @if (!CloudAppConfig.Branding.IsWhiteLabelling && !CloudAppConfig.IsHideHelpLink)
                 {
                     <div class="info-content txt-box-info">
                         @Html.Raw(string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2}{3}{4} to connect and use the database."].Value, "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DatabasePermissions, ViewBag.TenantType) + "'>", "</a>", "<span class='tenant-product-name'>", helpLinkData, "</span>"))
@@ -101,9 +101,13 @@
                     <div class="existing-db col-xs-6 radio-padding">
                         <input type="radio" id="existing-db" class="radio-button" name="databaseType" />
                         <div class="info-content radio-info">
-                            @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+                            @if (!CloudAppConfig.Branding.IsWhiteLabelling && !CloudAppConfig.IsHideHelpLink)
                             {
                                 @Html.Raw(string.Format(T["Use the existing database to deploy the site and make sure it was created using the {0}{1}{2} {3}supported collation{4}."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>", "<a target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.DefaultCollation, ViewBag.TenantType) + "'>", "</a>"))
+                            }
+                            else if (!CloudAppConfig.Branding.IsWhiteLabelling && CloudAppConfig.IsHideHelpLink)
+                            {
+                                @Html.Raw(string.Format(T["Use the existing database to deploy the site and make sure it was created using the {0}{1}{2} supported collation."].Value, "<span class='tenant-product-name'>", helpLinkData, "</span>"))
                             }
                             else
                             {

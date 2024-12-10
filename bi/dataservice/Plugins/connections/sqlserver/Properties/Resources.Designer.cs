@@ -1715,6 +1715,7 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlFetch", resourceCulture);
             }
         }
+        
         /// <summary>
         ///   Looks up a localized string similar to  OFFSET {0} ROWS .
         /// </summary>
@@ -1723,6 +1724,28 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
             get
             {
                 return ResourceManager.GetString("SqlOffset", resourceCulture);
+            }
+        }
+        
+        // <summary>
+        ///   Looks up a localized string similar to  TOTALPERCENTAGE.
+        /// </summary>
+        internal static string SqlTotalPercentage
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlTotalPercentage", resourceCulture);
+            }
+        }
+
+        // <summary>
+        ///   Looks up a localized string similar to  STRING_AGG.
+        /// </summary>
+        internal static string SqlStringAgg
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlStringAgg", resourceCulture);
             }
         }
     }

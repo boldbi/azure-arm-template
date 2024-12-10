@@ -1,6 +1,8 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
+    var headerContent = @Model.CustomEmailTemplateEnabled ? @Model.HeaderContent : "Mentioned you in the comment";
 }
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -11,6 +13,10 @@
         /* yahoo, hotmail */
         .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
             line-height: 100%;
+        }
+
+        .im {
+            color: #000000 !important;
         }
 
         /* outlook */
@@ -73,6 +79,36 @@
             padding: 0;
             width: 100% !important;
         }
+
+        .sendername {
+            text-align: left;
+            font-size: 13px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        .datetime {
+            text-align: left;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #6d6d6d;
+            padding-top: 10px;
+        }
+
+         a{
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .comment {
+            text-align: left;
+            font-size: 13px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000000;
+            line-height: 20px;
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body style='margin: 0;padding: 0;background-color: #f7f8f9;color: #919191;' alink='#cccccc' bgcolor='#f7f8f9' text='#919191' vlink='#cccccc'>
@@ -87,6 +123,27 @@
                             <tr>
                                 <td align='center' valign='top'>
                             <![endif]-->
+                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
+                                                        <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                            <span data-id="hidden">
+                                                                @headerContent
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <table style='width:100%' border='0' cellpadding='0' cellspacing='0'>
                             <tbody>
                                 <tr>
@@ -155,63 +212,38 @@
                             </tbody>
                         </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
-                                                        <span data-id="hidden">
-                                                            Mentioned you in the comment
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
-                                                        <span>
-                                                            Hello @Model.DisplayName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
+                                                            <span>
+                                                                Hello @Model.Username,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
@@ -232,7 +264,19 @@
                                                 <tr>
                                                     <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;'>
                                                         <span>
-                                                            @Html.Raw(Model.MailHeaderContent)<br />
+                                                            @if (Model.CustomEmailTemplateEnabled)
+                                                            {
+                                                                @Html.Raw(Model.MailHeaderContent.Replace("{:Comments.addeduser}", "<span class='sendername'>" + Model.CommentedUserName + "</span>")
+                                                                         .Replace("{:Comment}", "<span class='comment'>" + Model.NewComment + "</span>")
+                                                            .Replace("{:comments.CommentedDateTime}", "<span class='datetime'>" + Model.CommentTime + "- (" + Model.TimeZone + ") </span>"))
+                                                            }
+                                                            else
+                                                            {
+                                                                @Html.Raw(Model.MailHeaderContent)
+
+                                                                <br />
+                                                            }
+
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -243,120 +287,145 @@
                             </tbody>
                         </table>
 
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='20'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <table width="550" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" class="vb-row fullpad" style="width: 100%; max-width: 550px; background-color: #fff;">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 0;padding-left: 20px;padding-right: 20px;" align="center" valign="top">
-                                        <div style="display: inline-block; max-width: 510px; vertical-align: top; width: 100%;">
-                                            <table width="510" cellspacing="0" cellpadding="0" style="width: 100%; max-width:510px; border:1px solid #e0e0e0;" class="vb-content">
+                            <table width="550" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" class="vb-row fullpad" style="width: 100%; max-width: 550px; background-color: #fff;">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 0;padding-left: 20px;padding-right: 20px;" align="center" valign="top">
+                                            <div style="display: inline-block; max-width: 510px; vertical-align: top; width: 100%;">
+                                                <table width="510" cellspacing="0" cellpadding="0" style="width: 100%; max-width:510px; border:1px solid #e0e0e0;" class="vb-content">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <div>
+                                                                    <table width="510" cellspacing="0" cellpadding="0" style="width: 100%; max-width:510px;" class="vb-content">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000;background-color: #fafafa;border: 0px;font-weight: 600;padding-left: 20px;padding-top: 15px;padding-right: 20px;">
+                                                                                    <span>@Model.CommentedUserName</span><br />
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td style="text-align: left; font-size: 11px; font-family: Arial, Helvetica, sans-serif; color: #6d6d6d;background-color: #fafafa;border: 0px;padding-left: 20px;padding-top: 10px;padding-right: 20px;">
+                                                                                    <span>@Model.CommentTime - (@Model.TimeZone)</span><br />
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000;background-color: #fafafa;border: 0px;line-height: 20px;padding-left: 20px;padding-top: 20px;padding-right: 20px;">
+                                                                                    <span>@Html.Raw(Model.NewComment)</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
                                                 <tbody>
                                                     <tr>
-                                                        <td>
-                                                            <div>
-                                                                <table width="510" cellspacing="0" cellpadding="0" style="width: 100%; max-width:510px;" class="vb-content">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000;background-color: #fafafa;border: 0px;font-weight: 600;padding-left: 20px;padding-top: 15px;padding-right: 20px;">
-                                                                                <span>@Model.CommentedUserName</span><br />
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td style="text-align: left; font-size: 11px; font-family: Arial, Helvetica, sans-serif; color: #6d6d6d;background-color: #fafafa;border: 0px;padding-left: 20px;padding-top: 10px;padding-right: 20px;">
-                                                                                <span>@Model.CommentTime - (@Model.TimeZone)</span><br />
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000;background-color: #fafafa;border: 0px;line-height: 20px;padding-left: 20px;padding-top: 20px;padding-right: 20px;">
-                                                                                <span>@Html.Raw(Model.NewComment)</span>
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #4a90e2;background-color: #fafafa;border: 0px;padding-left: 20px;padding-top: 20px;padding-bottom: 15px;padding-right: 20px;">
-                                                                                <span data-id="hidden">
-                                                                                    <a href="@Model.ReplyUrl" target='' style="text-decoration: none; color: #4a90e2; font-weight: normal;">Reply to the comment</a>
-                                                                                </span>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
+                                                        <td style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; background-color: #fff;border: 0px;padding-left: 20px;padding-top: 20px;padding-bottom: 15px;padding-right: 20px;">
+                                                            <span data-id="hidden">
+                                                                To respond to this comment, kindly click
+                                                                <a href="@Model.ReplyUrl" target='' style="text-decoration: none; color: #4a90e2; font-weight: normal;">here</a>.
+                                                            </span>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;'>
-                                                        <span>
-                                                            Regards,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='10'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;'>
+                                                            <span>
+                                                                Regards,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style='padding-left:20px;padding-right:20px;font-size: 14px;color: #3f3f3f;font-weight: normal;font-family:Arial, Helvetica, sans-serif;'>
-                                                        <span>
-                                                            @Model.OrganizationName
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='10'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style='padding-left:20px;padding-right:20px;font-size: 14px;color: #3f3f3f;font-weight: normal;font-family:Arial, Helvetica, sans-serif;'>
+                                                            <span>
+                                                                @Model.OrganizationName
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
@@ -410,7 +479,7 @@
                                                 <tr>
                                                     <td style=' line-height:20px; padding-left:20px;padding-right:20px; font-size: 12px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;'>
                                                         <span data-id="hidden">
-                                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                                            @disclaimerContent
                                                         </span>
                                                     </td>
                                                 </tr>

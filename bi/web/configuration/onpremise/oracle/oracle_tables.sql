@@ -1006,6 +1006,19 @@ CREATE TABLE BOLDBI_Notification (
     IsActive NUMBER(1,0) NOT NULL
 );
 
+CREATE TABLE BOLDBI_ApiKeyDetails (
+    Id VARCHAR(36) PRIMARY KEY,
+    Name NVARCHAR2(255) NOT NULL,
+    ModifiedDate TIMESTAMP NOT NULL,
+    CreatedDate TIMESTAMP NOT NULL,
+    LastUsedDate TIMESTAMP NULL,
+    ModifiedBy NUMBER NOT NULL,
+    CreatedBy NUMBER NOT NULL
+    ApiKey NVARCHAR2(100) NULL,
+    TokenValidity TIMESTAMP NULL,
+    IsActive NUMBER(1,0) NOT NULL
+;
+
 ---- PASTE INSERT Queries below this section --------
 
 INSERT INTO BOLDBI_ItemType (Name, IsActive) VALUES ('Category', 1)

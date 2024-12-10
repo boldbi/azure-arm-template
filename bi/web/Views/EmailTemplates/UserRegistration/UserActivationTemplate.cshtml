@@ -1,6 +1,40 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
+    var activationUrl = $@"
+    <table style=""width:100%;max-width:550px;background-color:#fff;"" width=""550"" bgcolor=""#ffffff"" border=""0"" cellpadding=""0"" cellspacing=""0"">
+        <tbody>
+            <tr>
+                <td style=""font-size:1px;"" height=""30"">&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+    <table style=""border-collapse:separate;border-spacing:0px;width:100%;max-width:550px;background-color:#fff;"" bgcolor=""#ffffff"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""550"">
+        <tbody>
+            <tr>
+                <td style=""padding-right:20px;background-color:#ffffff;"" align=""left"" bgcolor=""#ffffff"" valign=""top"">
+                    <table class=""mobile-full"" style=""padding-top:4px;"" align=""left"" border=""0"" cellpadding=""0"" cellspacing=""0"">
+                        <tbody>
+                            <tr>
+                                <td style=""font-size:14px;font-family:Arial,Helvetica,sans-serif;text-align:center;color:#ffffff;font-weight:normal;padding-left:18px;padding-right:18px;padding-top:3px;padding-bottom:3px;background-color:#2196F3;border-radius:4px;"" align=""center"" bgcolor=""#bfbfbf"" height=""26"" valign=""middle"" width=""auto"">
+                                    <span data-id=""hidden""><a href=""{@Model.ActivationUrl}"" target=""_new"" style=""text-decoration:none;color:#ffffff;font-weight:bold;"">ACTIVATE</a></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table style=""text-align:left;width:100%;max-width:550px;background-color:#fff;"" width=""550"" bgcolor=""#ffffff"" border=""0"" cellpadding=""0"" cellspacing=""0"">
+        <tbody>
+            <tr>
+                <td style=""font-size:1px;"" height=""30"">&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>";
+
 }
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office'>
@@ -15,6 +49,10 @@
         /* outlook */
         #outlook a {
             padding: 0;
+        }
+
+        .im {
+            color: #000000 !important;
         }
 
         table {
@@ -94,6 +132,27 @@
                            <tr>
                               <td align="center" valign="top">
                                  <![endif]-->
+                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
+                                                        <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                            <span data-id="hidden">
+                                                                @Model.HeaderContent
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
                                 <tr>
@@ -150,39 +209,43 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;">
-                                                        <span>
-                                                            Hi @Model.DisplayName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+
+                            <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;">
+                                                            <span>
+                                                                Hi @Model.DisplayName,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
                                 <tr>
@@ -198,146 +261,158 @@
                                             <tbody>
                                                 <tr>
                                                     <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                        @if (Model.CustomEmailTemplateEnabled)
+                                                        {
+                                                            <span>
+                                                                @Html.Raw(Model.WelcomeNote.Replace("{:General.ActivationLink}", activationUrl))
+                                                            </span>
+                                                        }
+                                                        else{
                                                         <span>
                                                             @Model.WelcomeNote<br />
                                                         </span>
+                                                        }
                                                     </td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
-                                                        <span>
-                                                            Please confirm your account information and start accessing dashboards by logging in.<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="border-collapse: separate;border-spacing: 0px;width: 100%;max-width: 550px;background-color: #fff;" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" width="550">
-                            <tbody>
-                                <tr>
-                                    <td style=" padding-left:20px;padding-right:20px;background-color: #ffffff;" align="left" bgcolor="#ffffff" valign="top">
-                                        <table class="mobile-full" style="padding-top: 4px;" align="left" border="0" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style="font-size: 14px; font-family: Arial, Helvetica, sans-serif; text-align: center; color: #ffffff; font-weight: normal; padding-left: 18px; padding-right: 18px; padding-top: 3px;padding-bottom: 3px;background-color: #2196F3; border-radius: 4px;" align="center" bgcolor="#bfbfbf" height="26" valign="middle" width="auto">
-                                                        <span data-id="hidden"><a href="@Model.ActivationUrl" target='_new' style="text-decoration: none; color: #ffffff; font-weight: bold;">ACTIVATE</a></span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style="line-height:20px;padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:Arial, Helvetica, sans-serif">
-                                                        <span data-id="hidden">
-                                                            This link will only be valid until @Model.ActivationExpirationDate.
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:Arial, Helvetica, sans-serif;">
-                                                        <span>
-                                                            Thanks,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="10">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style="padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f;font-family:Arial, Helvetica, sans-serif">
-                                                        <span>
-                                                            @Model.OrganizationName.
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                            <span>
+                                                                Please confirm your account information and start accessing dashboards by logging in.<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="border-collapse: separate;border-spacing: 0px;width: 100%;max-width: 550px;background-color: #fff;" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" width="550">
+                                <tbody>
+                                    <tr>
+                                        <td style=" padding-left:20px;padding-right:20px;background-color: #ffffff;" align="left" bgcolor="#ffffff" valign="top">
+                                            <table class="mobile-full" style="padding-top: 4px;" align="left" border="0" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="font-size: 14px; font-family: Arial, Helvetica, sans-serif; text-align: center; color: #ffffff; font-weight: normal; padding-left: 18px; padding-right: 18px; padding-top: 3px;padding-bottom: 3px;background-color: #2196F3; border-radius: 4px;" align="center" bgcolor="#bfbfbf" height="26" valign="middle" width="auto">
+                                                            <span data-id="hidden"><a href="@Model.ActivationUrl" target='_new' style="text-decoration: none; color: #ffffff; font-weight: bold;">ACTIVATE</a></span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="line-height:20px;padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:Arial, Helvetica, sans-serif">
+                                                            <span data-id="hidden">
+                                                                This link will only be valid until @Model.ActivationExpirationDate.
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:Arial, Helvetica, sans-serif;">
+                                                            <span>
+                                                                Thanks,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="10">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f;font-family:Arial, Helvetica, sans-serif">
+                                                            <span>
+                                                                @Model.OrganizationName.
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
                                 <tr>
@@ -386,7 +461,7 @@
                                                 <tr>
                                                     <td style=" line-height:20px; padding-left:20px;padding-right:20px;font-size: 12px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;">
                                                         <span data-id="hidden">
-                                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                                            @disclaimerContent
                                                         </span>
                                                     </td>
                                                 </tr>

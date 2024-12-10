@@ -1,7 +1,302 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
+    var lastName = (string.IsNullOrWhiteSpace(Model.LastName) ? string.Empty : Model.LastName);
+    var previousLastName = string.IsNullOrWhiteSpace(Model.PreviousLastName) ? string.Empty : Model.PreviousLastName;
+    var previousEmail = string.IsNullOrWhiteSpace(Model.PreviousMail) ? string.Empty : Model.PreviousMail;
+    var previousMobile = string.IsNullOrWhiteSpace(Model.PreviousMobile) ? string.Empty : Model.PreviousMobile;
+    var mobile = string.IsNullOrWhiteSpace(Model.Mobile) ? string.Empty : Model.Mobile;
+    var headerContent = Model.CustomEmailTemplateEnabled && string.IsNullOrWhiteSpace(Model.Admin) ? Model.MailHeaderContent.Replace("by", "") : Model.MailHeaderContent; 
+    var userNameHtml = string.IsNullOrEmpty(Model.Username) ? string.Empty : $@"
+    <table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; padding-bottom:20px; background-color: #fafafa;'>
+        <tbody>
+            <tr>
+                <td style='font-size: 0; padding-top: 5px;' align='left' valign='top' width='508'>
+                    <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+                    <div style='display: inline-block; max-width: 111px; vertical-align: top; width: 100%;'>
+                        <table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px;'>
+                                        <span>Username:</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--[if (gte mso 9)|(lte ie 8)]></td>
+                    <td align='left' valign='top' width='375'>
+                    <![endif]-->
+                    
+                    <div style='display: inline-block; max-width: 397px; vertical-align: top; width: 100%;'>
+                        <table cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px; padding-right: 10px;'>
+                                        <span>Changed from <span style='font-weight:bold;'>{Model.PreviousUsername}</span>
+                                        to <span style='font-weight:bold;'>{Model.Username}<br /></span></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                    <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+";
+
+var firstNameHtml = string.IsNullOrEmpty(Model.FirstName) ? string.Empty : $@"
+    <table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; padding-bottom:20px; background-color: #fafafa;'>
+        <tbody>
+            <tr>
+                <td style='font-size: 0; padding-top: 5px;' align='left' valign='top' width='508'>
+                    <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+                    <div style='display: inline-block; max-width: 111px; vertical-align: top; width: 100%;'>
+                        <table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px;'>
+                                        <span>First name:</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--[if (gte mso 9)|(lte ie 8)]></td>
+                    <td align='left' valign='top' width='375'>
+                    <![endif]-->
+                    
+                    <div style='display: inline-block; max-width: 397px; vertical-align: top; width: 100%;'>
+                        <table cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px; padding-right: 10px;'>
+                                        <span>Changed from <span style='font-weight:bold;'>{Model.PreviousFirstName}</span>
+                                        to <span style='font-weight:bold;'>{Model.FirstName}<br /></span></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                    <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+";
+
+var lastNameHtml = string.IsNullOrEmpty(Model.LastName) ? string.Empty : $@"
+    <table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; padding-bottom:20px; background-color: #fafafa;'>
+        <tbody>
+            <tr>
+                <td style='font-size: 0; padding-top: 10px;' align='left' valign='top' width='508'>
+                    <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                    
+                    <div style='display: inline-block; max-width: 111px; vertical-align: top; width: 100%;'>
+                        <table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px;'>
+                                        <span>Last name:</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]></td>
+                    <td align='left' valign='top' width='375'>
+                    <![endif]-->
+                    
+                    <div style='display: inline-block; max-width: 397px; vertical-align: top; width: 100%;'>
+                        <table cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px; padding-right: 10px;'>
+                                        <span>Changed from <span style='font-weight:bold;'>{previousLastName}</span> to <span style='font-weight:bold;'>{lastName}<br /></span></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                    <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+";
+
+var emailHtml = string.IsNullOrEmpty(Model.Email) ? string.Empty : $@"
+    <table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; padding-bottom:20px; background-color: #fafafa;'>
+        <tbody>
+            <tr>
+                <td style='font-size: 0; padding-top: 5px;' align='left' valign='top' width='508'>
+                    <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+                    <div style='display: inline-block; max-width: 111px; vertical-align: top; width: 100%;'>
+                        <table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px;'>
+                                        <span>Email:</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--[if (gte mso 9)|(lte ie 8)]></td>
+                    <td align='left' valign='top' width='375'>
+                    <![endif]-->
+                    
+                    <div style='display: inline-block; max-width: 397px; vertical-align: top; width: 100%;'>
+                        <table cellspacing='0' cellpadding='0' align='left' style='width: 100%;'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px; padding-right: 10px;'>
+                                        <span>Changed from <span style='font-weight:bold;'>{previousEmail}</span>
+                                        to <span style='font-weight:bold;'>{Model.Email}<br /></span></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                    <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+";
+
+var mobileHtml = string.IsNullOrEmpty(Model.Mobile) ? string.Empty : $@"
+    <table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; padding-bottom:20px; background-color: #fafafa; /* border:1px solid #e0e0e0; */'>
+        <tbody>
+            <tr>
+                <td style='font-size: 0; padding-top: 10px;' align='left' valign='top'>
+                    <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+                    <div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
+                        <table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%; /* border: 1px solid #e0e0e0; */' class='vb-content'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px;'>
+                                        <span>Phone number:</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--[if (gte mso 9)|(lte ie 8)]></td>
+                    <td align='left' valign='top' width='375'>
+                    <![endif]-->
+                    
+                    <div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
+                        <table cellspacing='0' cellpadding='0' align='left' style='width: 100%; /* border: 1px solid #e0e0e0; */' class='vb-content'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left; height: 20px; padding-left: 10px; word-break: break-all; padding-top: 5px; padding-right: 10px;'>
+                                        <span>Changed from <span style='font-weight: bold;'>{previousMobile}</span>
+                                        to <span style='font-weight: bold;'>{mobile}<br /></span></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                    <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+";
+
+
+var updatedProfileContent = $@" 
+    <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table width='550' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' class='vb-row fullpad' style='width: 100%; max-width: 550px; background-color: #fff;'>
+                            <tbody>
+                                <tr>
+                                    <td align='center' valign='top'>
+                                        <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='510'><tr><![endif]-->
+                                        <!--[if (gte mso 9)|(lte ie 8)]><td align='center' valign='top' width='510'><![endif]-->
+
+                                        <table width='510' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 510px; background-color: #fafafa; border:1px solid #e0e0e0;'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style='font-size: 0;max-width:510px; width:100%' align='center' valign='top'>
+                                                                {userNameHtml}
+                                                                {firstNameHtml}
+                                                                {lastNameHtml}
+                                                                {emailHtml}
+                                                                {mobileHtml}
+ </td >
+                                                             </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                        <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                                    </td>
+                                </tr>
+                            </tbody>
+						</table>";
+
+    var instruction = @"<table style='text-align:left;width:100%;max-width:550px;background-color:#fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td style='font-size:1px;' height='20'>&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table style='text-align:left;width:100%;max-width:550px;background-color:#fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style='padding-left:20px;padding-right:20px;font-size:12px;color:#3f3f3f;font-family:arial,helvetica,sans-serif;line-height:20px;'>
+                                                        <span>
+                                                            If you are unable to access your account, please contact your System Administrator<br />
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>";
+
+
+
 }
+
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'><head>
     <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
@@ -9,7 +304,11 @@
     <style type='text/css'>
       /* yahoo, hotmail */
     .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div{ line-height: 100%; }
-    
+
+      .im {
+          color: #000000 !important;
+      }
+      
     /* outlook */
     #outlook a{ padding:0;}
     table{ mso-table-lspace:0pt; mso-table-rspace:0pt;}
@@ -70,6 +369,37 @@
                             <tr>
                                 <td align='center' valign='top'>
                             <![endif]-->
+
+                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style='padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
+                                                            <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                            @if (Model.CustomEmailTemplateEnabled)
+                                                            {
+                                                                <span data-id="hidden">   
+                                                                    @Model.HeaderContent
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span data-id="hidden">   
+                                                                    Your profile has been updated
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <table style='width:100%' border='0' cellpadding='0' cellspacing='0'>
                             <tbody>
                                 <tr>
@@ -138,63 +468,37 @@
                             </tbody>
                         </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style='padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
-                                                        <span data-id="hidden">   
-                                                         Your profile has been updated
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style='padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
-                                                        <span>
-                                                            Hello @Model.FullName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style='padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
+                                                            <span>
+                                                                Hello @Model.FullName,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
@@ -214,14 +518,24 @@
                                             <tbody>
                                                 <tr>
                                                     <td style='padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;'>
-                                                        <span>   
-                                                        Your profile has been updated 
-														@if (@Model.Admin != null) 
-														{ 
-														  @:by @Model.Admin
-														}
-														.<br />
-                                                        </span>
+                                                        @if (Model.CustomEmailTemplateEnabled)
+                                                        {
+                                                            <span>
+                                                                @Html.Raw(@headerContent.Replace("{:UpdatedProfileContent}", updatedProfileContent)
+                                                                     .Replace("{:Instruction}", instruction))
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>   
+                                                                Your profile has been updated 
+														        @if (@Model.Admin != null) 
+														        { 
+														          @:by @Model.Admin
+														        }
+														        .<br />
+                                                            </span>
+                                                        }
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -231,354 +545,370 @@
                             </tbody>
                         </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='20'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <table width='550' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' class='vb-row fullpad' style='width: 100%; max-width: 550px; background-color: #fff;'>
-                            <tbody>
-                                <tr>
-                                    <td style='padding-left:20px;padding-right:20px;' align='center' valign='top'>
-                                        <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='510'><tr><![endif]-->
-                                        <!--[if (gte mso 9)|(lte ie 8)]><td align='center' valign='top' width='510'><![endif]-->
+                            <table width='550' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' class='vb-row fullpad' style='width: 100%; max-width: 550px; background-color: #fff;'>
+                                <tbody>
+                                    <tr>
+                                        <td style='padding-left:20px;padding-right:20px;' align='center' valign='top'>
+                                            <!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='510'><tr><![endif]-->
+                                            <!--[if (gte mso 9)|(lte ie 8)]><td align='center' valign='top' width='510'><![endif]-->
 
-                                        <table width='510' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 510px; background-color: #fafafa; border:1px solid #e0e0e0;'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style='font-size: 0;max-width:510px; width:100%' align='center' valign='top'>
+                                            <table width='510' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 510px; background-color: #fafafa; border:1px solid #e0e0e0;'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style='font-size: 0;max-width:510px; width:100%' align='center' valign='top'>
 
-                                                        @if (!String.IsNullOrWhiteSpace(@Model.Username))
-                                                        {
-                                                        @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa;'>
-                                                            @:<tbody>
+                                                            @if (!String.IsNullOrWhiteSpace(@Model.Username))
+                                                            {
+                                                                @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa;'>
+                                                                @:<tbody>
                                                                 @:<tr>
-                                                                    @:<td style='font-size: 0;padding-top: 5px;' align='left' valign='top' width='508'>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+                                                                @:<td style='font-size: 0;padding-top: 5px;' align='left' valign='top' width='508'>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
 
-                                                                        @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
-                                                                            @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
-                                                                                            @:<span>Username:</span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td>
-                                                                        @:<td align='left' valign='top' width='375'>
-                                                                        @:<![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
-                                                                            @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
-                                                                                            @:<span>Changed from <span style='font-weight:bold;'>
-																							@Model.PreviousUsername
-																							@:</span> to <span style='font-weight:bold;'>
-																							@Model.Username<br />
-                                                                                            @:</span></span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
-
-                                                                    @:</td>
-                                                                @:</tr>
-                                                            @:</tbody>
-													    @:</table>
-											            }
-                                                        @if (!String.IsNullOrWhiteSpace(@Model.FirstName))
-                                                        {
-                                                        @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa;'>
-                                                            @:<tbody>
+                                                                @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
+                                                                @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
                                                                 @:<tr>
-                                                                    @:<td style='font-size: 0;padding-top: 5px;' align='left' valign='top' width='508'>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
-                                                                            @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
-                                                                                            @:<span>First name:</span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td>
-                                                                        @:<td align='left' valign='top' width='375'>
-                                                                        @:<![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
-                                                                            @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
-                                                                                            @:<span>Changed from <span style='font-weight:bold;'>
-																							@Model.PreviousFirstName
-																							@:</span> to <span style='font-weight:bold;'>
-																							@Model.FirstName<br />
-                                                                                            @:</span></span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
-
-                                                                    @:</td>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
+                                                                @:<span>Username:</span>
+                                                                @:</td>
                                                                 @:</tr>
-                                                            @:</tbody>
-													    @:</table>
-											            }
-														@if (@Model.LastName != null)
-                                                        {
-                                                        @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa; /* border:1px solid #e0e0e0; */'>
-                                                            @:<tbody>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td>
+                                                                @:<td align='left' valign='top' width='375'>
+                                                                @:<![endif]-->
+
+                                                                @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
+                                                                @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
                                                                 @:<tr>
-                                                                    @:<td style='font-size: 0;padding-top: 10px;' align='left' valign='top' width='508'>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
-                                                                            @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
-                                                                                            @:<span>Last name:</span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td>
-                                                                        @:<td align='left' valign='top' width='375'>
-                                                                        @:<![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
-                                                                            @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
-                                                                                            @:<span>Changed from <span style='font-weight:bold;'>
-																							@(string.IsNullOrWhiteSpace(Model.PreviousLastName) ? "Empty" : Model.PreviousLastName)
-																							@:</span> to <span style='font-weight:bold;'>
-																							@(string.IsNullOrWhiteSpace(Model.LastName) ? "Empty" : Model.LastName)<br />
-																							@:</span></span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
-
-                                                                    @:</td>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
+                                                                @:<span>Changed from <span style='font-weight:bold;'>
+                                                                @Model.PreviousUsername
+                                                                @:</span> to <span style='font-weight:bold;'>
+                                                                @Model.Username
+                                                                <br />
+                                                                @:</span></span>
+                                                                @:</td>
                                                                 @:</tr>
-                                                            @:</tbody>
-                                                        @:</table>
-														}
-                                                        @if (!String.IsNullOrWhiteSpace(@Model.Email))
-                                                        {
-                                                        @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa;'>
-                                                            @:<tbody>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                            }
+                                                            @if (!String.IsNullOrWhiteSpace(@Model.FirstName))
+                                                            {
+                                                                @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa;'>
+                                                                @:<tbody>
                                                                 @:<tr>
-                                                                    @:<td style='font-size: 0;padding-top: 5px;' align='left' valign='top' width='508'>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+                                                                @:<td style='font-size: 0;padding-top: 5px;' align='left' valign='top' width='508'>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
 
-                                                                        @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
-                                                                            @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
-                                                                                            @:<span>Email:</span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td>
-                                                                        @:<td align='left' valign='top' width='375'>
-                                                                        @:<![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
-                                                                            @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
-                                                                                            @:<span>Changed from <span style='font-weight:bold;'>
-																							@(string.IsNullOrWhiteSpace(Model.PreviousMail) ? "Empty" : Model.PreviousMail)
-																							@:</span> to <span style='font-weight:bold;'>
-																							@Model.Email<br />
-                                                                                            @:</span></span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
-
-                                                                    @:</td>
-                                                                @:</tr>
-                                                            @:</tbody>
-													    @:</table>
-											            }
-														@if (@Model.Mobile != null)
-                                                        {  
-                                                        @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa; /* border:1px solid #e0e0e0; */'>
-                                                            @:<tbody>
+                                                                @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
+                                                                @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
                                                                 @:<tr>
-                                                                    @:<td style='font-size: 0;padding-top: 10px;' align='left' valign='top'>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
-
-                                                                        @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
-                                                                            @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;padding-left: 10px;word-break: break-all;padding-top: 5px;'>
-                                                                                            @:<span>Phone number:</span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td>
-                                                                        @:<td align='left' valign='top' width='375'>
-                                                                        @:<![endif]-->
-                                                                        @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
-                                                                            @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
-                                                                                @:<tbody>
-                                                                                    @:<tr>
-                                                                                        @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
-                                                                                            @:<span>Changed from <span style='font-weight: bold;'>
-																								@(string.IsNullOrWhiteSpace(Model.PreviousMobile) ? "Empty" : Model.PreviousMobile)
-																								@:</span> to <span style='font-weight: bold;'>
-																								@(string.IsNullOrWhiteSpace(Model.Mobile) ? "Empty" : Model.Mobile)<br />
-																								@:</span>
-                                                                                            @:</span>
-                                                                                        @:</td>
-                                                                                    @:</tr>
-                                                                                @:</tbody>
-                                                                            @:</table>
-                                                                        @:</div>
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
-                                                                        @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
-
-                                                                    @:</td>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
+                                                                @:<span>First name:</span>
+                                                                @:</td>
                                                                 @:</tr>
-                                                            @:</tbody>
-                                                        @:</table>
-														}														
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td>
+                                                                @:<td align='left' valign='top' width='375'>
+                                                                @:<![endif]-->
 
-                                        <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
-                                        <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
-                                    </td>
-                                </tr>
-                            </tbody>
-						</table>
-                        @if (@Model.Admin != null)
-                        {						
-                        @:<table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            @:<tbody>
+                                                                @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
+                                                                @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
+                                                                @:<span>Changed from <span style='font-weight:bold;'>
+                                                                @Model.PreviousFirstName
+                                                                @:</span> to <span style='font-weight:bold;'>
+                                                                @Model.FirstName
+                                                                <br />
+                                                                @:</span></span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                            }
+                                                            @if (@Model.LastName != null)
+                                                            {
+                                                                @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa; /* border:1px solid #e0e0e0; */'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 0;padding-top: 10px;' align='left' valign='top' width='508'>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+
+                                                                @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
+                                                                @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
+                                                                @:<span>Last name:</span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td>
+                                                                @:<td align='left' valign='top' width='375'>
+                                                                @:<![endif]-->
+
+                                                                @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
+                                                                @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
+                                                                @:<span>Changed from <span style='font-weight:bold;'>
+
+                                                                @(string.IsNullOrWhiteSpace(Model.PreviousLastName) ? "Empty" : Model.PreviousLastName
+                                                                    )
+                                                                @:</span> to <span style='font-weight:bold;'>
+
+                                                                @(string.IsNullOrWhiteSpace(Model.LastName) ? "Empty" : Model.LastName
+                                                                    )<br />
+                                                                @:</span></span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                            }
+                                                            @if (!String.IsNullOrWhiteSpace(@Model.Email))
+                                                            {
+                                                                @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa;'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 0;padding-top: 5px;' align='left' valign='top' width='508'>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+
+                                                                @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
+                                                                @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break: break-all;padding-top: 5px;'>
+                                                                @:<span>Email:</span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td>
+                                                                @:<td align='left' valign='top' width='375'>
+                                                                @:<![endif]-->
+
+                                                                @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
+                                                                @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;/* border: 1px solid #e0e0e0; */padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
+                                                                @:<span>Changed from <span style='font-weight:bold;'>
+
+                                                                @(string.IsNullOrWhiteSpace(Model.PreviousMail) ? "Empty" : Model.PreviousMail
+                                                                    )
+                                                                @:</span> to <span style='font-weight:bold;'>
+                                                                @Model.Email
+                                                                <br />
+                                                                @:</span></span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                            }
+                                                            @if (@Model.Mobile != null)
+                                                            {
+                                                                @:<table width='508' cellspacing='0' cellpadding='0' bgcolor='#fafafa' class='vb-row fullpad' style='width: 100%; max-width: 508px; background-color: #fafafa; /* border:1px solid #e0e0e0; */'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 0;padding-top: 10px;' align='left' valign='top'>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><table align='center' border='0' cellspacing='0' cellpadding='0' width='508'><tr><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]><td align='left' valign='top' width='111'><![endif]-->
+
+                                                                @:<div style='display: inline-block; max-width: 111px; vertical-align: top; width:100%;'>
+                                                                @:<table width='111' cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;padding-left: 10px;word-break: break-all;padding-top: 5px;'>
+                                                                @:<span>Phone number:</span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td>
+                                                                @:<td align='left' valign='top' width='375'>
+                                                                @:<![endif]-->
+                                                                @:<div style='display: inline-block; max-width: 397px; vertical-align: top; width:100%;'>
+                                                                @:<table cellspacing='0' cellpadding='0' align='left' style='width: 100%;/* border: 1px solid #e0e0e0; */' class='vb-content'>
+                                                                @:<tbody>
+                                                                @:<tr>
+                                                                @:<td style='font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-align: left;height: 20px;padding-left: 10px;word-break:break-all;padding-top: 5px;padding-right: 10px;'>
+                                                                @:<span>Changed from <span style='font-weight: bold;'>
+
+                                                                @(string.IsNullOrWhiteSpace(Model.PreviousMobile) ? "Empty" : Model.PreviousMobile
+                                                                    )
+                                                                @:</span> to <span style='font-weight: bold;'>
+
+                                                                @(string.IsNullOrWhiteSpace(Model.Mobile) ? "Empty" : Model.Mobile
+                                                                    )<br />
+                                                                @:</span>
+                                                                @:</span>
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                                @:</div>
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                                                @:<!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+
+                                                                @:</td>
+                                                                @:</tr>
+                                                                @:</tbody>
+                                                                @:</table>
+                                                            }														
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <!--[if (gte mso 9)|(lte ie 8)]></td><![endif]-->
+                                            <!--[if (gte mso 9)|(lte ie 8)]></tr></table><![endif]-->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @if (@Model.Admin != null)
+                            {
+                                @:<table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                @:<tbody>
                                 @:<tr>
-                                    @:<td style='font-size: 1px;' height='20'>&nbsp;</td>
+                                @:<td style='font-size: 1px;' height='20'>&nbsp;</td>
                                 @:</tr>
-                            @:</tbody>
-                        @:</table>
+                                @:</tbody>
+                                @:</table>
 
-                        @:<table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            @:<tbody>
+                                @:<table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                @:<tbody>
                                 @:<tr>
-                                    @:<td>
-                                        @:<table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            @:<tbody>
-                                                @:<tr>
-                                                    @:<td style='padding-left:20px;padding-right:20px;font-size: 12px;color: #3f3f3f;font-family:arial, helvetica, sans-serif;line-height: 20px;'>
-                                                        @:<span>
-                                                        @:If you are unable to access your account, please contact your System Administrator<br />
-                                                        @:</span>
-                                                    @:</td>
-                                                @:</tr>
-                                            @:</tbody>
-                                        @:</table>
-                                    @:</td>
+                                @:<td>
+                                @:<table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                @:<tbody>
+                                @:<tr>
+                                @:<td style='padding-left:20px;padding-right:20px;font-size: 12px;color: #3f3f3f;font-family:arial, helvetica, sans-serif;line-height: 20px;'>
+                                @:<span>
+                                @:If you are unable to access your account, please contact your System Administrator<br />
+                                @:</span>
+                                @:</td>
                                 @:</tr>
-                            @:</tbody>
-                        @:</table>
+                                @:</tbody>
+                                @:</table>
+                                @:</td>
+                                @:</tr>
+                                @:</tbody>
+                                @:</table>
+                            }
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:Arial, Helvetica, sans-serif;">
+                                                            <span>
+                                                                Thanks,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="10">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f;font-family:Arial, Helvetica, sans-serif">
+                                                            <span>
+                                                                @Model.OrganizationName.
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         }
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style="padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f; font-family:Arial, Helvetica, sans-serif;">
-                                                        <span>
-                                                            Thanks,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="10">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style="padding-left:20px;padding-right:20px;font-size: 14px; color: #3f3f3f;font-family:Arial, Helvetica, sans-serif">
-                                                        <span>
-                                                            @Model.OrganizationName.
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
                                 <tr>
@@ -627,7 +957,7 @@
                                                 <tr>
                                                     <td style="line-height:20px; padding-left:20px;padding-right:20px;font-size: 14px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;">
                                                         <span data-id="hidden">
-                                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                                            @disclaimerContent
                                                         </span>
                                                     </td>
                                                 </tr>

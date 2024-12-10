@@ -14,6 +14,7 @@
     var isEnableSSL = ViewBag.SystemSettings.MailSettings?.MailSettingsIsSecureAuthentication;
     var loginUserEmail = _identityResponse.User.Email;
     var isLogsTab = (Context.Request.Query["tab"].ToString().ToLower() == "logs") ? "active" : string.Empty;
+    var isCustomEmailTab = (Context.Request.Query["tab"].ToString().ToLower() == "custom-email-template") ? "active" : string.Empty;
     var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "email-settings") || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isLogsTab)) ? "active" : string.Empty;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
@@ -34,7 +35,7 @@
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
     </environment>
 }
-@section scripts{
+@section scripts {
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
     </environment>
@@ -47,6 +48,7 @@
         var updateEmailSettingsUrl = "@Url.Action("UpdateEmailSettings", "Administration")";
         var sentTestMail = "@Url.Action("SentTestMail", "Administration")";
         var loginUserEmail = "@loginUserEmail";
+        var updateEmailConfigureDataUrl = "@Url.Action("UpdateEmailConfigureEvent", "Administration")";
         var emailSettingsConfigUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.EmailSettingsConfiguration)";
         var emailSettingsLogUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.EmailSettingsLogs)";
         var isUMSEmailSettingsInherited = @Json.Serialize(isUMSEmailSettingsInherited);
@@ -74,6 +76,9 @@
             <ul id="email-settings-tab-nav" class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="@isSettingsTab">
                     <a href="#email-settings" id="email-settings-tab" aria-controls="email-settings-tab" role="tab" data-toggle="tab">@T["Settings"]</a>
+                </li>
+                <li role="presentation" class="">
+                    <a href="#custom-email-template" id="custom-email" aria-controls="custom-email-template" role="tab" data-toggle="tab">@T["Template"]</a>
                 </li>
                 <li role="presentation" class="@isLogsTab">
                     <a href="#logs" id="email-logs-tab" aria-controls="email-activity-logs-tab" role="tab" data-toggle="tab">@T["Logs"]</a>
@@ -233,10 +238,13 @@
                     @await Html.PartialAsync("_EmailActivityLog")
                 </div>
                 @await Html.PartialAsync("_EmailLogInfo")
+                <div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 bi-page-body @isCustomEmailTab" id="custom-email-template">
+                    @await Html.PartialAsync("_CustomizeEmailContent")
+                </div>
             </div>
         </div>
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
-    </div>   
+    </div>
     <environment include="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailConfiguration.js"></script>
     </environment>

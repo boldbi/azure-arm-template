@@ -1,0 +1,131 @@
+﻿@using Newtonsoft.Json
+@{
+    ViewBag.Title = "EmailActivityLogs";
+    var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts {
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.min.js"></script>
+    </environment>
+}
+
+<script type="text/javascript">
+    var filterEmailLogsUrl = "@Url.Action("GetEmailLogs", "Administration")";
+    var emailSettingsPagePermissionUrl = "@Url.Action("CheckAdminPagePermission", "Administration")";
+    var specificEventListURL = "@Url.Action("SpecificEvents", "Administration")";
+    var markAsDefaultUrl = "@Url.Action("MarkEmailTemplateAsDefault", "Administration")";
+    var emailActivityLogDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+    var emailActivityLogTimeFomat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
+</script>
+<script type="text/x-jsrender" id="email-template-name">
+    <span class="grid-content" title="{{:EmailTemplateName}}" data-toggle="tooltip">{{:EmailTemplateName}}</span>
+</script>
+<script type="text/x-jsrender" id="description">
+    <span class="grid-content" title="{{:Description}}" data-toggle="tooltip">{{:Description}}</span>
+</script>
+
+<script type="text/x-jsrender" id="optionsForTemplate">
+    <div class="dropdown actions-container context-menu" >
+        <span class="dropdown-toggle option-icon" title="@T["Actions"]" data-toggle="dropdown">
+                <span title="@T["Actions"]" data-toggle="tooltip" class="su su-options"> </span>
+        </span>
+        <ul class="dropdown-menu email-menu" role="menu">
+        <li class="menu-group">
+                <a class="mark-as-default" title="@T["Set default template"]" data-template-id="{{:TemplateId}}" data-toggle="tooltip">
+                    <i class="su su-nav-settings"></i>
+                    <span class="menu-text">@T["Set default template"]</span>
+                </a>
+            </li>
+            <li class="menu-group">
+                <a href="@Url.Action("SpecificEventEmailTemplate" , "Administration")?templateId={{:TemplateId}}">
+                    <i class="su su-eye"></i>
+                    <span class="menu-text" title="@T["View"]" data-toggle="tooltip" >@T["View"]</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</script>
+<div id="customEmaiGrid" class="col-lg-12 no-padding dialog-override">
+</div>
+<div id="template-add-dialog-wrapper" style="display: none">
+    <div class="dialog" id="template-add-dialog">
+        <form class="dialog-body col-xs-12 no-padding add-template-dialog-form" id="dialog-container" style="display: none" autocomplete="off">
+            <div class="col-xs-12" id="mark-default-division" style=display:none>
+                <div class="col-xs-12 no-padding text-label">@T["Please select a template to set as the default for this event."]</div>
+                <div class="col-xs-12 no-padding dropup">
+                    <select id="mark-as-default-list" class="selectpicker" data-live-search="true" data-size="5" placeholder="@T["select a template to make it as the default template"]">
+                    </select>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+</div>
+
+<script type="text/x-jsrender" id="configure">
+    <span title="{{if CustomEmailTemplate === 'Enabled'}}@T["Edit"]{{else}}@T["Configure"]{{/if}}" data-toggle="dropdown">
+        <a href="@Url.Action("EmailConfigure", "Administration")?templateId={{:TemplateId}}" class="configure-email">
+            <span>{{if CustomEmailTemplate === 'Enabled'}}@T["Edit"]{{else}}@T["Configure"]{{/if}}</span>
+        </a>
+    </span>
+</script>
+<script>
+    GridLocalization(window.Server.App.Localization.EmailActivityLogsEmpty);
+    var customEmailTemplateData = @Html.Raw(JsonConvert.SerializeObject(ViewBag.CustomEmailTemplateDeatils));
+    $("#customEmaiGrid").ejGrid({
+        dataSource: customEmailTemplateData,
+        gridLines: ej.Grid.GridLines.None,
+        allowPaging: true,
+        pageSettings: { pageSize: 20 },
+        allowSorting: true,
+        enableAltRow: false,
+        allowSearching: true,
+        allowFiltering: true,
+        allowSelection: true,
+        filterSettings: { filterType: "menu" },
+        actionBegin: "fnActionBegin",
+        dataBound: function (args) {
+            $('[data-toggle="tooltip"]').tooltip({ container: $('body') });
+            $("#checkbox-header").change(headCheckboxOnChange);
+            this.model.indexes = {}; /* Additional property*/
+        },
+        columns: [
+            { field: 'EmailTemplateName', headerText: "@T["Template"]", type: "string", width: 30, allowFiltering: false, allowSorting: true, templateID: "#email-template-name", visible: isSelfHosted },
+            { field: 'Description', headerText: "@T["Description"]", type: "string", width: 60, allowFiltering: false, allowSorting: true, templateID: "#description", visible: isSelfHosted },
+            {
+                field: 'TemplateUsed',
+                headerText: "@T["Default Template"]",
+                type: 'string',
+                width: 30,
+                allowFiltering: false,
+                allowSorting: false
+            },
+            {
+                template: true,
+                allowSorting: false,
+                templateID: "#optionsForTemplate",
+                width:7,
+                allowFiltering: false
+            }
+        ]
+    });
+</script>
+<script type="text/x-jsrender" id="inherited">
+    {{if Inherited != null}}
+    need to add class to the
+    {{else}}
+    --
+    {{/if}}
+</script>
+<environment include="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailActivityLog.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/emailActivityLog.min.js"></script>
+</environment>

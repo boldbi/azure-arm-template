@@ -5,6 +5,9 @@
 function proceedAutoDeployment(result) {
     $.ajax({
         url: setSystemSettingsUrl,
+        headers: {
+            "CSRF-TOKEN": document.cookie.split("; ").find(row => row.startsWith("BOLD-UMS-XSRF-TOKEN=")).split("=")[1],
+        },
         type: "POST",
         async: false,
         data: {

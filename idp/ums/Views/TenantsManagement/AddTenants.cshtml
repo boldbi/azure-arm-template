@@ -15,7 +15,14 @@
     var reportScheme = baseUri.Scheme;
     var biDomain = baseUri.Authority;
     var reportDomain = baseUri.Authority;
-
+    var canDisableEmailSettingsOption = 
+        ViewBag.MailSettings == null || 
+        string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsHost) || 
+        ViewBag.MailSettings.MailSettingsPort <= 0 ||
+        string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsSenderName) || 
+        string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsAddress) || 
+        string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsUserName) || 
+        string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsPassword);
     if (ViewBag.IsBoldBIMultiTenant && !ViewBag.IsBoldReportsMultiTenant)
     {
         item = "dashboards";
@@ -128,6 +135,7 @@
         var IsReportsPrefixSchema = ("@ViewBag.IsReportsPrefixSchema".toLowerCase() === "true");
         var BIUmsPrefixSchema = ("@ViewBag.BIUmsPrefixSchema".toLowerCase() === "true");
         var isUmsStartupWithOracle = ("@ViewBag.IsUmsStartupWithOracle".toLowerCase() === "true");
+        var canDisableEmailSettingsOption =  "@canDisableEmailSettingsOption".toLowerCase() === "true";
     </script>
 </head>
 <body>
@@ -318,7 +326,10 @@
                                                 <option value="@(GlobalSettingsOptions.Language.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.Language)</option>
                                                 <option value="@(GlobalSettingsOptions.Branding.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.Branding)</option>
                                                 <option value="@(GlobalSettingsOptions.LookAndFeel.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.LookAndFeel)</option>
-                                                <option value="@(GlobalSettingsOptions.Email.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.Email)</option>
+                                                @if (!canDisableEmailSettingsOption)
+                                                {
+                                                    <option value="@(GlobalSettingsOptions.Email.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.Email)</option>
+                                                }
                                                 <option value="@(GlobalSettingsOptions.Account.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.Account)</option>
                                             </select>
                                         </div>

@@ -1155,6 +1155,26 @@ CREATE TABLE [BOLDTC_UserAttributes](
 	[IsActive] [bit] NOT NULL)
 ;
 
+CREATE TABLE [BOLDTC_CustomEmailTemplate](
+[Id] [int] IDENTITY(1,1) primary key NOT NULL,
+[IsEnabled] [bit] NULL,
+[DisclaimerContent] [nvarchar](255) NOT NULL,
+[HeaderContent] [nvarchar](255) NULL,
+[Subject] [nvarchar](255) NULL,
+[TemplateName] [nvarchar](255) NULL,
+[Language] [nvarchar](255) NOT NULL,
+[MailBody] [nvarchar](max) NOT NULL,
+[CreatedDate] [datetime] NOT NULL,
+[ModifiedDate] [datetime] NULL,
+[SendEmailAsHTML] [bit] NOT NULL,
+[IsActive] [bit] NOT NULL,
+[TemplateId] [int] NOT NULL,
+[IsDefaultTemplate][bit] NOT NULL,
+[IsSystemDefault][bit] NOT NULL,
+[Description][nvarchar](255) NULL,
+[ModifiedBy][uniqueidentifier] NOT NULL,
+[TemplateLocalizationKey][nvarchar](255) NULL);
+
 INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'Registration', 1)
 INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'StatusUpdated', 1)
 INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'PaymentUpdated', 1)

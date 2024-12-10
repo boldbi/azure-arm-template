@@ -1,6 +1,23 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
+    var itemURL = $@"{Model.BaseUrl.TrimEnd('/')}/{Model.ItemUrl}";
+    var itemName = string.Empty;
+
+    if (Model.ItemType == "UserManagement" || Model.ItemType == "AllGroups" || Model.ItemType == "AllUsers")
+    {
+        itemName = $@"{Model.ItemType}";
+    }
+    else if (Model.ItemType == "Settings" || Model.ItemType == "Permissions")
+    {
+        itemName = Model.ItemType == "AllGroups" ? "Groups" : Model.ItemType == "AllUsers" ? "Users" : Model.ItemType;
+        itemName = "All " + itemName;
+    }
+    else
+    {
+        itemName = "All " + Model.ItemType + "s";
+    }
 }
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -11,6 +28,10 @@
         /* yahoo, hotmail */
         .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
             line-height: 100%;
+        }
+
+        .im {
+            color: #000000 !important;
         }
 
         /* outlook */
@@ -38,6 +59,11 @@
         /*Windows Mobile*/
         body {
             -ms-text-size-adjust: 100%;
+        }
+
+        a {
+            text-decoration: none;
+            color: #4a90e2;
         }
     </style>
     <style type="text/css">
@@ -105,6 +131,79 @@
                                             <tr>
                                                 <td align='left' valign='top' width='200'>
                                             <![endif]-->
+                                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                            <tbody>
+                                                                <tr>
+
+                                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;">
+                                                                        <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                                            @if (!Model.CustomEmailTemplateEnabled)
+                                                                            {
+                                                                                @if (Model.ItemType == "Settings")
+                                                                                {
+                                                                                    <span data-id="hidden">
+
+                                                                                        You have been given access to @(Model.ItemType)
+                                                                                    </span>
+                                                                                }
+                                                                                else if (Model.ItemType == "UserManagement")
+                                                                                {
+                                                                                    <span data-id="hidden">
+
+                                                                                        You have been given access to @(Model.ItemType)
+                                                                                    </span>
+
+                                                                                }
+                                                                                else if (Model.ItemType == "Permissions")
+                                                                                {
+                                                                                    <span data-id="hidden">
+
+                                                                                        You have been given access to manage all @(Model.ItemType)
+                                                                                    </span>
+
+                                                                                }
+                                                                                else if (Model.ItemType == "AllGroups")
+                                                                                {
+                                                                                    <span data-id="hidden">
+
+                                                                                        You have been given @Model.PermissionType access to all groups.
+                                                                                    </span>
+
+                                                                                }
+                                                                                else if (Model.ItemType == "AllUsers")
+                                                                                {
+                                                                                    <span>
+
+                                                                                        You have been given access to manage all users.
+
+                                                                                    </span>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span data-id="hidden">
+
+                                                                                        You have been given @Model.PermissionType access to all the @(Model.ItemType + "s")
+                                                                                    </span>
+                                                                                }
+                                                                            }
+                                                                            else{
+                                                                                <span data-id="hidden">
+                                                                                    @Html.Raw(Model.HeaderContent.Replace("{:ItemType}", Model.ItemType))
+                                                                                </span>
+                                                                            }
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                         <div class='' width='200' style='display: inline-block; max-width: 200px; vertical-align: top; width: 100%;'>
                                             <table style='border-collapse: separate;width: 100%; max-width:200px;' class='' align='left' border='0' cellpadding='0' cellspacing='0' width='200'>
                                                 <tbody>
@@ -156,107 +255,44 @@
                             </tbody>
                         </table>
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                        @* <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
                                 <tr>
                                     <td style="font-size: 1px;" height="20">&nbsp;</td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </table> *@
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;">
-                                                        @if (Model.ItemType == "Settings")
-                                                        {
-                                                            <span data-id="hidden">
-
-                                                                You have been given access to @(Model.ItemType)
-                                                            </span>
-                                                        }
-                                                        else if (Model.ItemType == "UserManagement")
-                                                        {
-                                                            <span data-id="hidden">
-
-                                                                You have been given access to @(Model.ItemType)
-                                                            </span>
-
-                                                        }
-                                                        else if (Model.ItemType == "Permissions")
-                                                        {
-                                                            <span data-id="hidden">
-
-                                                                You have been given access to manage all @(Model.ItemType)
-                                                            </span>
-
-                                                        }
-                                                        else if (Model.ItemType == "AllGroups")
-                                                        {
-                                                            <span data-id="hidden">
-
-                                                                You have been given @Model.PermissionType access to all groups.
-                                                            </span>
-
-                                                        }
-                                                        else if (Model.ItemType == "AllUsers")
-                                                        {
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;">
                                                             <span>
-
-                                                                You have been given access to manage all users.
-
+                                                                Hello @Model.DisplayName,<br />
                                                             </span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span data-id="hidden">
-
-                                                                You have been given @Model.PermissionType access to all the @(Model.ItemType + "s")
-                                                            </span>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;">
-                                                        <span>
-                                                            Hello @Model.DisplayName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
@@ -276,175 +312,186 @@
                                             <tbody>
                                                 <tr>
                                                     <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
-                                                        @if (Model.ItemType == "Settings")
+                                                        @if (Model.CustomEmailTemplateEnabled)
                                                         {
                                                             <span>
-
-                                                                @Model.Admin has given you access to all @Model.ItemType.<br />
+                                                                @Html.Raw(Model.MailHeaderContent.Replace("{:ItemURL}", itemName)
+                                                            .Replace("{:Resource.Uri}", itemURL))
                                                             </span>
+
+                                                        }
+                                                        else{               
+                                                            @if (Model.ItemType == "Settings")
+                                                            {
+                                                                <span>
+
+                                                                    @Model.Admin has given you access to all @Model.ItemType.<br />
+                                                                </span>
+                                                            }
+                                                            else if (Model.ItemType == "UserManagement")
+                                                            {
+                                                                <span>
+
+                                                                    @Model.Admin has given you access to @Model.ItemType.<br />
+                                                                </span>
+                                                            }
+                                                            else if (Model.ItemType == "Permissions")
+                                                            {
+                                                                <span>
+
+                                                                    @Model.Admin has given you access to manage all @(Model.ItemType).<br />
+                                                                </span>
+                                                            }
+                                                            else if (Model.ItemType == "AllGroups")
+                                                            {
+                                                                <span>
+
+                                                                    @Model.Admin has given you @Model.PermissionType access to all groups.<br />
+                                                                </span>
+                                                            }
+                                                            else if (Model.ItemType == "AllUsers")
+                                                            {
+                                                                <span>
+
+                                                                    @Model.Admin has given you create and manage access to all users.<br />
+                                                                </span>
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>
+
+                                                                    @Model.Admin has given you @Model.PermissionType access to all the @(Model.ItemType + "s") <br />
+                                                                </span>
+
+                                                            }
+                                                        }
+                                                        
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        @if (Model.ItemType == "Settings")
+                                                        {
+                                                            <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                                <span data-id="hidden" style="color: #3f3f3f;">
+                                                                    <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>All @(Model.ItemType)</a>
+                                                                </span>
+                                                            </td>
                                                         }
                                                         else if (Model.ItemType == "UserManagement")
                                                         {
-                                                            <span>
-
-                                                                @Model.Admin has given you access to @Model.ItemType.<br />
-                                                            </span>
+                                                            <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                                <span data-id="hidden" style="color: #3f3f3f;">
+                                                                    <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>@(Model.ItemType)</a>
+                                                                </span>
+                                                            </td>
                                                         }
                                                         else if (Model.ItemType == "Permissions")
                                                         {
-                                                            <span>
-
-                                                                @Model.Admin has given you access to manage all @(Model.ItemType).<br />
-                                                            </span>
+                                                            <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                                <span data-id="hidden" style="color: #3f3f3f;">
+                                                                    <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>All @(Model.ItemType)</a>
+                                                                </span>
+                                                            </td>
                                                         }
                                                         else if (Model.ItemType == "AllGroups")
                                                         {
-                                                            <span>
-
-                                                                @Model.Admin has given you @Model.PermissionType access to all groups.<br />
-                                                            </span>
+                                                            <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                                <span data-id="hidden" style="color: #3f3f3f;">
+                                                                    <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>@(Model.ItemType)</a>
+                                                                </span>
+                                                            </td>
                                                         }
                                                         else if (Model.ItemType == "AllUsers")
                                                         {
-                                                            <span>
-
-                                                                @Model.Admin has given you create and manage access to all users.<br />
-                                                            </span>
-
+                                                            <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                                <span data-id="hidden" style="color: #3f3f3f;">
+                                                                    <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>@(Model.ItemType)</a>
+                                                                </span>
+                                                            </td>
                                                         }
                                                         else
                                                         {
-                                                            <span>
-
-                                                                @Model.Admin has given you @Model.PermissionType access to all the @(Model.ItemType + "s") <br />
-                                                            </span>
-
+                                                            <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                                <span data-id="hidden" style="color: #3f3f3f;">
+                                                                    <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>All @(Model.ItemType + "s")</a>
+                                                                </span>
+                                                            </td>
                                                         }
 
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    @if (Model.ItemType == "Settings")
-                                                    {
-                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                            <span data-id="hidden" style="color: #3f3f3f;">
-                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>All @(Model.ItemType)</a>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;">
+                                                            <span>
+                                                                Regards,<br />
                                                             </span>
                                                         </td>
-                                                    }
-                                                    else if (Model.ItemType == "UserManagement")
-                                                    {
-                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                            <span data-id="hidden" style="color: #3f3f3f;">
-                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>@(Model.ItemType)</a>
-                                                            </span>
-                                                        </td>
-                                                    }
-                                                    else if (Model.ItemType == "Permissions")
-                                                    {
-                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                            <span data-id="hidden" style="color: #3f3f3f;">
-                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>All @(Model.ItemType)</a>
-                                                            </span>
-                                                        </td>
-                                                    }
-                                                    else if (Model.ItemType == "AllGroups")
-                                                    {
-                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                            <span data-id="hidden" style="color: #3f3f3f;">
-                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>@(Model.ItemType)</a>
-                                                            </span>
-                                                        </td>
-                                                    }
-                                                    else if (Model.ItemType == "AllUsers")
-                                                    {
-                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                            <span data-id="hidden" style="color: #3f3f3f;">
-                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>@(Model.ItemType)</a>
-                                                            </span>
-                                                        </td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                            <span data-id="hidden" style="color: #3f3f3f;">
-                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style='text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;'>All @(Model.ItemType + "s")</a>
-                                                            </span>
-                                                        </td>
-                                                    }
-
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;">
-                                                        <span>
-                                                            Regards,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="10">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="10">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
                                 <tr>
                                     <td>
                                         <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
@@ -462,7 +509,7 @@
                                 </tr>
                             </tbody>
                         </table>
-
+                        }
 
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
@@ -515,7 +562,7 @@
                                                 <tr>
                                                     <td style=" line-height:20px; padding-left:20px;padding-right:20px; font-size: 12px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;">
                                                         <span data-id="hidden">
-                                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                                            @disclaimerContent
                                                         </span>
                                                     </td>
                                                 </tr>

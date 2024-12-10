@@ -1,6 +1,7 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
 }
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -11,6 +12,10 @@
         /* yahoo, hotmail */
         .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
             line-height: 100%;
+        }
+
+        .im {
+            color: #000000 !important;
         }
 
         /* outlook */
@@ -87,6 +92,48 @@
                             <tr>
                                 <td align='center' valign='top'>
                             <![endif]-->
+                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                            <tbody>
+                                                <tr>
+                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
+                                                        <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                            @if (Model.CustomEmailTemplateEnabled)
+                                                            {
+                                                                <span data-id="hidden">
+                                                                    @Model.HeaderContent
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span data-id="hidden">
+
+                                                                    @if (Model.DirectoryType.ToString().ToLower() == "AzureAD".ToLower())
+                                                                    {
+                                                                        <span>Azure Active Directory Synchronization failed</span>
+                                                                    }
+                                                                    else if (Model.DirectoryType.ToString().ToLower() == "WindowsAD".ToLower())
+                                                                    {
+                                                                        <span>Windows Active Directory Synchronization failed</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>Database Synchronization failed</span>
+                                                                    }
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <table style='width:100%' border='0' cellpadding='0' cellspacing='0'>
                             <tbody>
                                 <tr>
@@ -155,75 +202,37 @@
                             </tbody>
                         </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='30'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;'>
-                                                        <span data-id="hidden">
-
-                                                            @if (Model.DirectoryType.ToString().ToLower() == "AzureAD".ToLower())
-                                                            {
-                                                                <span>Azure Active Directory Synchronization failed</span>
-                                                            }
-                                                            else if (Model.DirectoryType.ToString().ToLower() == "WindowsAD".ToLower())
-                                                            {
-                                                                <span>Windows Active Directory Synchronization failed</span>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span>Database Synchronization failed</span>
-                                                            }
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
-                                                        <span>
-                                                            Hello @Model.DisplayName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;'>
+                                                            <span>
+                                                                Hello @Model.DisplayName,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
@@ -243,22 +252,31 @@
                                             <tbody>
                                                 <tr>
                                                     <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;'>
-                                                        <span>
-                                                            Users and groups failed to synchronize with
+                                                        @if (Model.CustomEmailTemplateEnabled)
+                                                        {
+                                                            <span>
+                                                                @Html.Raw(Model.MailHeaderContent.Replace("{:Error}", "<span>" + Model.Error.Message + "</span>"))
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                 Users and groups failed to synchronize with
                                                             @if (Model.DirectoryType.ToString().ToLower() == "AzureAD".ToLower())
                                                             {
-                                                                <Span>Azure Active Directory</Span>
+                                                            <Span>Azure Active Directory</Span>
                                                             }
                                                             else if (Model.DirectoryType.ToString().ToLower() == "WindowsAD".ToLower())
                                                             {
-                                                                <span>Windows Active Directory</span>
+                                                            <span>Windows Active Directory</span>
                                                             }
                                                             else
                                                             {
-                                                                <span>Database</span>
+                                                            <span>Database</span>
                                                             }
                                                             due to the following error.<br />
-                                                        </span>
+                                                            </span>
+                                                        }
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -268,14 +286,35 @@
                             </tbody>
                         </table>
 
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='20'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='20'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:92%; margin-left:20px;  border:1px solid #e0e0e0;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style='background-color: #fafafa; padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px; '>
+                                                            <span style='line-height:30px;'>
+                                                                @Model.Error.Message<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
                         <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
                             <tbody>
@@ -297,64 +336,57 @@
                             </tbody>
                         </table>
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='30'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;'>
+                                                            <span>
+                                                                Regards,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style=' padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;'>
-                                                        <span>
-                                                            Regards,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td style='font-size: 1px;' height='10'>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td style='font-size: 1px;' height='10'>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
-                                            <tbody>
-                                                <tr>
-                                                    <td style='padding-left:20px;padding-right:20px;font-size: 14px;color: #3f3f3f;font-weight: normal;font-family:Arial, Helvetica, sans-serif;'>
-                                                        <span>
-                                                            @Model.OrganizationName
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style='text-align:left;width:100%;max-width: 550px;background-color: #fff;' width='550' bgcolor='#ffffff' border='0' cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style='text-align:left;width:100%;' cellpadding='0' cellspacing='0'>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style='padding-left:20px;padding-right:20px;font-size: 14px;color: #3f3f3f;font-weight: normal;font-family:Arial, Helvetica, sans-serif;'>
+                                                            <span>
+                                                                @Model.OrganizationName
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
 
@@ -410,7 +442,7 @@
                                                 <tr>
                                                     <td style=' line-height:20px; padding-left:20px;padding-right:20px; font-size: 12px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;'>
                                                         <span data-id="hidden">
-                                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                                            @disclaimerContent
                                                         </span>
                                                     </td>
                                                 </tr>

@@ -11,6 +11,9 @@
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DomainBinding);
     var pageDescription = T["Rebrand with your company name, logo, domain, time zone, and date-time display formats."];
     var isEnableCopyrightInfo = _globalAppSettings.SystemSettings.IsEnableCopyrightInfo;
+    var isShowEmailLogo = _globalAppSettings.SystemSettings.IsShowEmailLogo;
+    var isShowLoginLogo = _globalAppSettings.SystemSettings.IsShowLoginLogo;
+    var isShowFooterLogoCopyRightInfo = _globalAppSettings.SystemSettings.IsShowFooterLogoCopyRightInfo;
     var isEnablePoweredBySyncfusion = _globalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion;
     var isGlobalUMSSettingsInherited = globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings;
     var isUMSBrandingSettingsInherited = isGlobalUMSSettingsInherited && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.Branding);
@@ -24,6 +27,9 @@
 <script>
     var isSitesPage = "true";
     var isEnableCopyrightInfo = @Json.Serialize(isEnableCopyrightInfo);
+    var isShowEmailLogo = @Json.Serialize(isShowEmailLogo);
+    var isShowLoginLogo = @Json.Serialize(isShowLoginLogo);
+    var isShowFooterLogoCopyRightInfo = @Json.Serialize(isShowFooterLogoCopyRightInfo);
     var isEnablePoweredBySyncfusion = @Json.Serialize(isEnablePoweredBySyncfusion);
     var isUMSDateTimeSettingsInherited = @Json.Serialize(isUMSDateTimeSettingsInherited);
     var isUMSBrandingSettingsInherited = @Json.Serialize(isUMSBrandingSettingsInherited);
@@ -256,7 +262,7 @@
                         }
                     </div>
                 </div>
-                <div class="form-group blur-whitelable-content col-xs-12 no-margin no-padding copy-right-info">
+                <div class="form-group blur-whitelable-content col-xs-12 site-settings-page-section no-margin no-padding copy-right-info">
                     <div class="col-xs-12 no-padding">
                         <div class="form-group no-margin">
                             <div id="enable-checkbox">
@@ -280,6 +286,46 @@
                                 <span class="validation-errors"></span>
                             </div>
                         }
+                    </div>
+                </div>
+                <div class="blur-whitelable-content col-lg-12 no-padding branding-info">
+                    <div class="branding-configuration-header">
+                        <h3 class="title sub-section-heading no-margin">@T["Email Brand Configuration"]</h3>
+                        <div class="info-message-site-settings">
+                            @T["These branding features will appear in the email to the recipient."]
+                        </div>
+                    </div>
+                    <div class="col-xs-12 no-padding">
+                        <div class="form-group no-margin">
+                            <div id="enable-checkbox">
+                                @Html.CheckBox("showemaillogo", new { @class = "material-checkbox ums-inherit-branding", @id = "showemaillogo" })
+                                @Html.Hidden("showemaillogo")
+                                @Html.Label("showemaillogo", T["Show Email Logo"].Value, new { @class = "app-textbox-label col-xs-2 section-label show-email-logo" })
+                                <div class="col-sm-1 col-xs-1 no-padding info-icon-align">
+                                    <span class="cursor-type"><span data-toggle="tooltip" class="su su-info" data-placement="right" title="@T["Enabling this option will display the email logo in the email template."]"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group no-margin">
+                            <div id="enable-checkbox">
+                                @Html.CheckBox("showloginlink", new { @class = "material-checkbox ums-inherit-branding", @id = "showloginlink" })
+                                @Html.Hidden("showloginlink")
+                                @Html.Label("showloginlink", T["Show login link"].Value, new { @class = "app-textbox-label col-xs-2 section-label show-login-link" })
+                                <div class="col-sm-1 col-xs-1 no-padding info-icon-align">
+                                    <span class="cursor-type"><span data-toggle="tooltip" class="su su-info" data-placement="right" title="@T["Enabling this option will display login link in the email template."]"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group no-margin">
+                            <div id="enable-checkbox">
+                                @Html.CheckBox("showfooterlogocopyinfo", new { @class = "material-checkbox ums-inherit-branding", @id = "showfooterlogocopyinfo" })
+                                @Html.Hidden("showfooterlogocopyinfo")
+                                @Html.Label("showfooterlogocopyinfo", T["Show footer logo and copyright info"].Value, new { @class = "app-textbox-label col-xs-3 section-label show-footer-logo" })
+                                <div class="col-sm-1 col-xs-1 no-padding info-icon-align">
+                                    <span class="cursor-type"><span class="su su-info" data-toggle="tooltip" data-placement="right" title="@T["Enabling this option will display the footer logo and copyright information in the email template."]"></span></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@
     var showBoldSignUp = ViewBag.IsBoldSign ?? false;
     var isAzureResetPassword = TempData["AzureResetPassword"];
     var customCssPath = System.IO.Path.GetFullPath(AppEnvironment.GetAppDataFolderPath() + "/idp/content/styles/login.css");
+    var customLoginContent = GlobalAppSettings.SystemSettings.CustomizeLoginContent;
 }
 
 @section styles{
@@ -27,7 +28,7 @@
 }
 
 @section scripts{
-       <script nonce="@Context.Items["ScriptNonce"]">
+    <script nonce="@Context.Items["ScriptNonce"]">
         var callBackUri = "@callBackUri";
         var IsAdfsUserStatus = '@IsAdfsUserStatus';
         var validateEmailUrl = "@Url.Action("ValidateEmail", "Accounts")";
@@ -42,6 +43,7 @@
         var rootUrl = "@Url.Content("~/")";
         var homeUrl = "@Url.Action("Index", "Home")";
         var mfaVerificationPageUrl = "@Url.Action("LoginMfaVerificationCodeValidation", "Accounts")";
+        var loginContent = "@customLoginContent";
     </script>
 
       <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts-login.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/accounts-login.js")" crossorigin="anonymous"asp-append-version="true"></script>
