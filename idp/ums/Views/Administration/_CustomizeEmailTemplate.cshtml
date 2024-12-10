@@ -1,0 +1,58 @@
+﻿@{
+    var isTemplateTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "template") ? "active" : string.Empty;
+
+}
+<script nonce="@Context.Items["ScriptNonce"]">
+    var isSelfHosted = @Json.Serialize(CloudAppConfig.IsSelfHosted);
+    var templateListUrl = "@Url.Action("EmailTemplateForGrid", "Administration")";
+    var specificEventListURL = "@Url.Action("SpecificEvents", "Administration")";
+    var markAsDefaultUrl = "@Url.Action("MarkEmailTemplateAsDefault", "Administration")";
+</script>
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="options">
+    <div class="dropdown actions-container">
+        <span class="dropdown-toggle option-icon" data-toggle="dropdown">
+            <span class="su su-options"> </span>
+        </span>
+        <ul class="dropdown-menu" role="menu">
+            <li>
+                <a href="#" class="mark-as-default" data-template-name="${EmailTemplateName}" data-template-id="${TemplateId}">
+                    <i class="su su-nav-settings"></i>
+                    <span>@T["Set default template"]</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("SpecificEventEmailTemplate", "Administration")?templateId=${TemplateId}" target="_blank" class="configure-email">
+                <i class="su su-eye"></i>
+                    <span>${if (CustomEmailTemplate === 'Enabled')}@T["View"]${else}@T["View"]${/if}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</script> 
+
+<div role="tabpanel" class="tab-pane col-md-12 col-xs-12 col-sm-12 email-page-body @isTemplateTab" id="templates">
+    <div id="customEmailTemplateGrid" class="col-lg-12 no-padding dialog-override">
+    </div>
+    
+</div>
+
+<div id="template-add-dialog-wrapper">
+    <div class="modal" tabindex="-1" role="dialog">
+        <div id="template-add-dialog" role="document">
+            <form class="col-lg-12 no-padding add-template-dialog-form modal-content" id="dialog-container" autocomplete="off">
+                <div class="modal-body col-xs-12 form dialog-background">
+                    <div class="">
+                        <label class="app-textbox-label choose-from-lable">@T["Please select a template to set as the default for this event."]</label>
+                        <input id="mark-as-default-list" class="selectpicker method-type" placeholder="@T["select a template"]" />
+                    </div>
+                </div>
+                <div class="col-xs-12 modal-footer">
+                    <div class="col-xs-4"></div>
+                    <div class="col-xs-8 no-padding">
+                        <input type="button" id="default" class="primary-button mark-default-disable" value="@T["Set default template"]"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

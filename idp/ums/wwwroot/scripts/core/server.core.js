@@ -302,6 +302,10 @@ $(document).on("keyup", "textarea", function (event) {
 });
 
 $(document).on("keyup", "textarea", function (event) {
+    
+    if ($(this).attr("id") === "email-body-container_editable-content") {
+        return; 
+    }
     if (event.keyCode != 8 && event.keyCode != 46) {
         var max = 255;
         if ($(this).attr("maxlength") != undefined) {
@@ -328,7 +332,7 @@ $(document).on("focus", ".placeholder", function () {
     $(this).prev("input").focus();
 });
 
-$(document).on("keyup", "#search-users, #search-tenants, #search-tenants-allsites, #search-tenants-favorite,#search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-languages", function (e) {
+$(document).on("keyup", "#search-users, #search-tenants, #search-tenants-allsites, #search-tenants-favorite,#search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-template,#search-languages", function (e) {
     var element = "#" + this.id;
     if ($(element).val() != "") {
         if (element == "#search-home-page" || element == "#search-tenant-users") {
@@ -347,6 +351,7 @@ $(document).on("keyup", "#search-users, #search-tenants, #search-tenants-allsite
             $(element).siblings("span.search-application").css("display", "none");
             $(element).siblings("span.search-allsites").css("display", "none");
             $(element).siblings("span.search-favorite").css("display", "none");
+            $(element).siblings("span.search-template").css("display", "none");
         }
     } else {
         if (element == "#search-home-page" || element == "#search-tenant-users") {
@@ -435,7 +440,7 @@ $(document).on("click", "#clear-search,.clear-search,#add-user-clear-search,#add
     }
 });
 
-$(document).on("keydown", "#search-users, #search-tenants, #search-tenants-allsites, #search-tenants-favorite, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-languages", function (e) {
+$(document).on("keydown", "#search-users, #search-tenants, #search-tenants-allsites, #search-tenants-favorite, #search-app-users, #add-user-search,#search-tenant-users,#add-tenant-search,#search-event,#search-template, #search-languages", function (e) {
     $.xhrPool.abortAll();
     var currentKeyCode = parseInt(e.which);
     var element = "#" + this.id;
@@ -501,6 +506,10 @@ function PerformSearch(currentId) {
     }
     else if (currentId == "#search-event") {
         gridObj = document.getElementById('emailActivityLogGrid').ej2_instances[0];
+        gridObj.refresh();
+    }
+    else if (currentId == "#search-template") {
+        gridObj = document.getElementById('specificEmailTemplateListGrid').ej2_instances[0];
         gridObj.refresh();
     }
     else if (currentId == "#search-languages") {

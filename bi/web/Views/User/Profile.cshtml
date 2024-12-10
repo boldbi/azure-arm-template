@@ -20,6 +20,7 @@
     var isPasswordUpdateFailure = ViewBag.IsPasswordUpdateFailure;
     var isUserPreferenceSuccess = ViewBag.IsUserPreferenceUpdateSuccess;
     var isUserPreferenceFailure = ViewBag.IsUserPreferenceUpdateFailure;
+    var apiKeyDetailCount = ViewBag.ApiKeyDetailCount;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId").ToString() : string.Empty;
     var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UserProfile);
@@ -33,6 +34,7 @@
     var isProfileSettingsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-settings") ? "active" : string.Empty;
     var isProfileNotificationsTab = (Context.Request.Query["tab"].ToString().ToLower() == "profile-notifications") ? "active" : string.Empty;
     var isTokenGenerateTab = (Context.Request.Query["tab"].ToString().ToLower() == "personal-token-generate") ? "active" : string.Empty;
+    var isApiKeyGenerateTab = (Context.Request.Query["tab"].ToString().ToLower() == "generate-api-key") ? "active" : string.Empty;
     List<string> groupName = new List<string>();
     var isUserLanguagePreferenceDisabled = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference;
     var pageDescription = T["Manage your profile settings and privacy controls"];
@@ -41,11 +43,11 @@
 
 @section scripts{
     <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css"/>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css"/>
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.min.js"></script>
     </environment>
     <script type="text/javascript">
@@ -58,7 +60,12 @@
         var deleteavatarUrl = "@Url.Action("deleteavatar", "UserManagement")";
         var getdefaultavatarUrl = "@Url.Action("getdefaultavatar", "User")";
         var saveUserNotificationSettingsUrl = "@Url.Action("savenotificationsettings", "User")";
-
+        var apiKeyDetails = "@Url.Action("GetApiKeyDetails", "User")";
+        var addApiKeyUrl = "@Url.Action("AddApiKey", "User")";
+        var deleteApiKeyUrl = "@Url.Action("DeleteApiKeyDetails", "User")";
+        var editApiKeyUrl = "@Url.Action("EditApiKey", "User")";
+        
+        var isSettingsPage = false;
         var successMessage = "@isProfileUpdateSuccess";
         var failureMessage = "@isProfileUpdateFailure";
         var passwordSuccessMessage = "@isPasswordUpdateSuccess";
@@ -68,9 +75,19 @@
         var userPreferencesuccessMessage = "@isUserPreferenceSuccess";
         var userPreferenceFailureMessage = "@isUserPreferenceFailure";
         var profileSettingsUrl = "@Url.Action("UpdateProfileSettings", "User")";
+        var getApikeyUrl = isSettingsPage ? "@(Url.Action("GetAllApiKey", "Administration"))" : "@(Url.Action("GetApiKeyDetails", "User"))";
         var personalTokenGenerateUrl = "@Url.Action("GetToken", "User")";
+        var scheduleRangeDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
+        var scheduleRangeTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
+        var today = new Date();
         $(document).ready(function () {
-
+            $("#token-datePicker").ejDatePicker({
+                footer: false,
+                minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+                dateFormat: scheduleRangeDateFormat,
+                enableStrictMode: true,
+                locale: "en-US"
+            });
             if ("@ViewBag.IsDefaultHomepage" == "True") {
                 $("#default-homepage").attr("data-original-value", "@ViewBag.DefaultHomePageId");
             }
@@ -79,7 +96,9 @@
                 $("#no-default-homepage").removeClass("hide");
                 $("#homepage-name").addClass("hide");
             }
+            
         });
+        
         $(document).on('show.bs.dropdown', '#homepage-list', function () {
             if (@userHomepage.Count == 0) {
                 $('#default-homepage > option:first').hide();
@@ -134,6 +153,9 @@
                 </li>
                 <li role="presentation" class="@isTokenGenerateTab">
                     <a href="#personal-token-generate" id="profile-notifications-tab" aria-controls="token-generate-tab-control" role="tab" data-toggle="tab">@T["PERSONAL ACCESS TOKEN"]</a>
+                </li>
+                <li role="presentation" class="@isApiKeyGenerateTab">
+                    <a href="#generate-api-key" id="generate-api-key-tab" aria-controls="api-key-generate-tab-control" role="tab" data-toggle="tab">@T["API KEY"]</a>
                 </li>
             </ul>
         </div>
@@ -205,9 +227,9 @@
                                     <label class="">@T["Groups"]:</label>
                                     <span id="groups-name">
                                         @{ for (var group = 0; group < ViewBag.GroupList.Count; group++)
-                                            {
-                                                groupName.Add(@ViewBag.GroupList[group].Name);
-                                            }
+                                           {
+                                               groupName.Add(@ViewBag.GroupList[group].Name);
+                                           }
                                         }
                                         @(String.Join(", ", groupName))
                                     </span>
@@ -333,6 +355,9 @@
                 </div>
                 @await Html.PartialAsync("_UserNotificationPreference")
                 <div role="tabpanel" id="personal-token-generate" class="profile-section col-xs-12 tab-pane bi-page-body @isTokenGenerateTab">
+                    <div class="bg-warning api-key-alert">
+                        @T["Personal access tokens will no longer be supported and will be removed in upcoming releases. We recommend using API keys, which are the alternative to personal access tokens, to ensure continued access to our services."]
+                    </div>
                     <div id="generate-token-container">
                         <div class="personal-access-token-description">@T["A personal access token serves the same purpose as an OAuth access token. It enables secure embedding of the dashboard viewer and designer within your application. Additionally, this token grants access to all our REST API endpoints."]</div>
                         <div id="get-access-token" class="input-field-wrapper col-xs-12 no-padding">
@@ -360,6 +385,9 @@
                         </div>
                     </div>
                     
+                </div>
+                <div role="tabpanel" id="generate-api-key" class="profile-section col-xs-12 tab-pane bi-page-body @isApiKeyGenerateTab">
+                    @await Html.PartialAsync("~/Views/User/_ApiKeyMenu.cshtml")
                 </div>
             </div>
         </div>

@@ -1,0 +1,302 @@
+﻿@{
+    ViewBag.Title = T["Administration"].Value + " - "  + GlobalAppSettings.SystemSettings.OrganizationName;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
+    var disclaimerContent = ViewBag.DisclaimerContent != null ? ViewBag.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
+    var headerContent = ViewBag.HeaderContent != null ? ViewBag.HeaderContent : string.Empty;
+    var subject = ViewBag.Subject != null ? ViewBag.Subject : string.Empty;
+    var sendEmailAsHTML = ViewBag.SendEmailAsHTML != null ? ViewBag.SendEmailAsHTML : false;
+    var isEnabled = ViewBag.IsEnabled != null ? ViewBag.IsEnabled : false;
+    var showEmailLogo = ViewBag.ShowEmailLogo != null ? ViewBag.ShowEmailLogo : false;
+    var showLoginLink = ViewBag.ShowLoginLink != null ? ViewBag.ShowLoginLink : false;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var showFooterLogo = ViewBag.ShowFooterLogo != null ? ViewBag.ShowFooterLogo : false;
+    var emailBody = ViewBag.MailBody == null ? ViewBag.DefaultBodyContent : ViewBag.MailBody;
+    var templateIDvalue = ViewBag.TemplateId;
+    var backIconUrl =ViewBag.IsEditTemplate ? (Url.Action("SpecificEventEmailTemplate", "Administration") + $"?templateId={ViewBag.TemplateId}") : (Url.Action("Administration", "Administration") + "/e-mail-settings?view=template");
+    var templates = ViewBag.Templates;
+    var specificEventTemplates = ViewBag.SpecificTemplate;
+    var isEditTemplate = ViewBag.IsEditTemplate;
+    var test = false;
+}
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/site-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/site-settings.css")" asp-append-version="true" />
+<style>
+    .e-ddl .e-input, .e-ddl .e-input-group {
+        color: #000; /* Ensure text color is set */
+    }
+    .e-dropdownbase .e-list-item {
+        color: #000; /* Ensure list item text color is set */
+    }
+</style>
+}
+
+
+@section scripts {
+    
+    <script>
+        var updateEmailConfigureDataUrl = "@Url.Action("UpdateEmailConfigureEvent", "Administration")";
+        var createNewTemplateURL = "@Url.Action("CreateNewTemplateFromExistingTemplate", "Administration")";
+        var emailBodyContent = @Json.Serialize(emailBody);
+        var sendEmailAsHTML = @Json.Serialize(sendEmailAsHTML);
+        var isEditTemplate = @Json.Serialize(isEditTemplate);
+        var specificEventTemplates = @Json.Serialize(specificEventTemplates);
+        var markAsDefaultUrl = "@Url.Action("MarkEmailTemplateAsDefault", "Administration")";
+        var templateListUrl = "@Url.Action("SpecificTemplateEvents", "Administration")";
+        var specificEventListURL = "@Url.Action("SpecificEvents", "Administration")";
+        var deleteTemplateUrl = "@Url.Action("DeleteTemplate", "Administration")";
+        var templateIDValue= "@templateIDvalue";
+    </script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="IsDefault">
+    ${if (IsDefaultTemplateString === "false")}
+    <span title=@T["No"] data-toggle="dropdown">
+            <span>@T["No"]</span>
+        </span>
+        ${else}
+        <span title="@T["Yes"]" data-toggle="dropdown">
+            <span>@T["Yes"]</span>
+        </span>
+        ${/if}
+        
+</script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="systemtemplatename">
+        <span title="${EmailTemplateName}" data-toggle="dropdown" class="emailtemplatefield">
+            <span id="email-template-name" data-toggle="tooltip" title="${EmailTemplateName}">${EmailTemplateName}</span>
+            ${if (IsSystemDefaultString === "true")}
+             <span style="margin-left: 3px;" class="badge badge-secondary1 badge-secondary2" data-toggle="tooltip" title="@T["This is a predefined template by the application."]">@T["System"]</span>
+             ${/if}
+             ${if (IsDefaultTemplateString === "true" && IsSystemDefaultString !== "true")}
+             <span style="margin-left: 3px;" class="badge badge-secondary1 badge-secondary2" data-toggle="tooltip" title="@T["This is a custom template set as the default by user."]">@T["Default"]</span>
+             ${/if}
+        </span>
+
+    </script>
+    
+    @if (!isEditTemplate)
+    {
+        <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="options">
+    <div class="dropdown actions-container">
+        <span class="dropdown-toggle option-icon" data-toggle="dropdown">
+            <span class="su su-options"> </span>
+        </span>
+        <ul class="dropdown-menu" role="menu">
+        ${if (!IsSystemDefault)}
+        <li>
+            <a href="@Url.Action("EmailConfigure", "Administration")?templateId=${TemplateId}&id=${Id}" data-toggle="tooltip" data-unique-id = "${Id}" target="_blank" class="configure-email" data-template-name="${EmailTemplateName}" data-template-id="${TemplateId}" title="Edit">
+                <i class="su su-edit"></i>
+                <span>@T["Edit"]</span>
+            </a>
+        </li>
+        ${/if}
+        <li>
+            <a id="copy-template" class="configure hover" data-template-name="${EmailTemplateName}"  data-toggle="tooltip" data-unique-id = "${Id}" data-template-id="${TemplateId}" title="Copy">
+                <i class="su su-copy"></i>
+                <span>@T["Copy"]</span>
+            </a>
+        </li>
+        ${if (IsDefaultTemplateString === "false")}
+        <li>
+            <a class="markasdefault hover" data-template-name="${EmailTemplateName}" data-toggle="tooltip" data-unique-id = "${Id}" data-template-id="${TemplateId}" title="Mark as Default">
+                <i class="su su-tick"></i>
+                <span>@T["Mark as default"]</span>
+            </a>
+        </li>
+        ${/if}
+        ${if (IsDefaultTemplateString === "false" && IsSystemDefaultString === "false") }
+        <li>
+            <a class="delete-template hover" data-template-name="${EmailTemplateName}" data-toggle="tooltip" data-unique-id = "${Id}" data-template-id="${TemplateId}" title="Delete">
+                <i class="su su-delete"></i>
+                <span>@T["Delete"]</span>
+            </a>
+        </li>
+                ${/if}
+        </ul>
+    </div>
+</script>
+    }
+
+<script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/email-configuration.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/email-configuration.js")" crossorigin="anonymous" asp-append-version="true"></script>
+}
+
+@section MainSection
+{
+    @await Html.PartialAsync("_AdminMenu")
+<div class="col-xs-12 no-padding no-margin width-alignment header-alignment">
+    <div class="col-md-12 admin-page-header">
+        <a class="back-button pull-left" href="@backIconUrl" data-toggle="tooltip" data-original-title=@T["Email Settings"] data-placement="bottom" data-container="body">
+            <i class="su su-arrow-back"> </i>
+        </a>
+        <div class="admin-page-header-description col-xs-6 no-padding" id="application-title">
+            <hgroup class="col-xs-12 header-group">
+                <h1 data-templateId = '@ViewBag.TemplateId' data-unique-id = '@ViewBag.UniqueId' id="email-template-name" class="page-title">@ViewBag.EmailTemplateName</h1>
+                <h5 class="page-description">@ViewBag.Description</h5>
+            </hgroup>
+        </div>
+        <div class="col-xs-4 top-nav-sec no-padding">
+            @await Html.PartialAsync("../Shared/_TopMenu")
+        </div>
+    </div>
+
+    <div id="email-setting" class="col-xs-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+        <div class="col-xs-12 no-padding">
+            <div class="col-xs-6 no-padding button-section button-align">
+                @if (isEditTemplate)
+                {
+                    <button class="secondary-button pull-right" id="cancel-settings">@T["Cancel"]</button>
+                    <button type="button" title="" id="UpdateEmail-Configuration" name="UpdateEmailConfigure" class="primary-button app-btn-primary pull-right update-mail-configure">
+                        <span>@T["Save"]</span>
+                    </button>
+                }
+                else
+                {
+                    <div class="pull-left">
+                        <div id="search-area" class="pull-right no-margin">
+                            <input type="text" class="pull-left" id="search-template" placeholder="@T["Search template"]" />
+                            <span class="su su-inner-close close-icon pull-left" data-toggle="tooltip" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-user pull-left" data-toggle="tooltip" title="@T["Search template"]"></span>
+                        </div>
+                    </div>
+                    <button type="button" title="" id="copy-email-template" name="copytemplate" class="primary-button app-btn-primary pull-right copy-template">
+                        <span>@T["Create Template"]</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+    @if (!isEditTemplate)
+    {
+        <div role="tabpanel" class="col-xs-12 admin-page-content-container" id="specifc-templates">
+            <div id="specific-grid-container">
+                <div id="specificEmailTemplateListGrid" class="col-lg-12 no-padding dialog-override">
+                </div>
+                <div id="template-add-dialog-wrapper">
+                    <div class="modal" tabindex="-1" role="dialog">
+                        <div id="template-add-dialog" role="document">
+                            <form class="col-lg-12 no-padding add-template-dialog-form modal-content" id="dialog-container" autocomplete="off">
+                                <div class="modal-body col-xs-12 form copy-dialog-style">
+                                    <div class="col-xs-12 form-padding" style="padding: 0">
+                                        <label class="col-xs-4 app-textbox-label text-right lable-style">@T["Template name"] *</label>
+                                        <div class="col-xs-8 no-padding input-container">
+                                            <input type="text" id="templateName" maxlength="254" class="form-control input-style" placeholder="@T["Template name"]" name="Template name" data-name="Template name" required>
+                                            <span class="templateAdd-validation-messages validate-error" id="invalid-templatename">"Template name cant be empty"</span>
+                                        </div>
+                                    </div>
+                                    <div class="" style="margin-bottom: 18px; position: relative; top: 72px">
+                                        <label class="app-textbox-label text-right copy-from-lable">@T["Copy from template"] *</label>
+                                        <div class="copy-container">
+                                            <input id="copy-template-list" data-live-search="true" class="selectpicker method-type" placeholder="@T["select a template"]"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 modal-footer">
+                                    <div class="no-padding">
+                                        <input type="button" id="add-template" class="primary-button" value="@T["Save"]"/>
+                                        <input type="button" id="cancel-template" class="secondary-button popup-close" value="Cancel"/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @await Html.PartialAsync("../Shared/_FooterOnPremise")
+        </div>
+
+    }
+    else
+    {
+            <div id="email-configure" class="col-xs-12 admin-page-content-container" role="tabpanel" aria-labelledby="email-configure">
+        <div class="bi-page-content col-xs-12 no-padding">
+            <input type="hidden" id="defaultBodyContent" value="@ViewBag.DefaultBodyContent" />
+            <div id="email-content-container" class="col-xs-12 no-padding">                
+                <div class="email-content-header">
+                    <h3 class="email-content-header no-margin">@T["Email Content"]</h3>
+                    <h5 class="email-content-description">
+                        @T["You can customize email content, such as the subject and body here."]
+                    </h5>
+                </div>
+                <div class="col-xs-12 no-padding subject-align">
+                    <h4 class="subject-header no-margin">@T["Template name"]</h4>
+                    <div class="form-input-field col-xs-12 no-padding padding-class name-text">
+                        <input type="text" id="template-name-input" class="form-control txt-holder validation-padding subject-fields" value="@ViewBag.SpecificTemplateName" data-maxlength="100" @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) />
+                        <div class="validate-error" id="template-content-validation"></div>
+                    </div>
+                </div>
+                <div class="email-configure-container html-checkbox-style">
+                    <div class="custom-template-label inline-align activation html-mail-checkbox-header">
+                        @T["HTML Email"]
+                    </div>
+                    <div class="material-switch inline-align">
+                        <input type="checkbox" id="sendemailashtml" @(sendEmailAsHTML ? "checked" : string.Empty) @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) />
+                        <label for="sendemailashtml" class="label-primary"></label>
+                    </div>
+                    <div class="info-message">
+                        @Html.Raw("Disabling this option allows the application to send emails in Rich Text format. The Rich Text format will remove all HTML styles, including branding logos, login options, footer content, disclaimer content, preheader content, and background colors.")
+                    </div>
+                </div>
+                <div class="col-xs-12 no-padding subject-align">
+                    <h4 class="subject-header no-margin">@T["Subject"]</h4>
+                    <div class="form-input-field col-xs-12 no-padding subject-text">
+                        <input type="text" id="subject-input" class="form-control txt-holder validation-padding subject-fields" name="subject" placeholder="" value="@subject" data-maxlength="255" @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) />
+                        <div class="validate-error" id="subject-content-validation">@T["Please enter the subject"]</div>
+                    </div>
+                </div>
+                <div class="col-xs-12 no-padding">
+                    <h4 class="header-content-header no-margin">@T["Pre Header"]</h4>
+                    <div class="form-input-field col-xs-12 no-padding header-content-text">
+                        <input type="text" id="header-content-input" class="form-control txt-holder validation-padding header-content-fields" name="header-content" placeholder="" value="@headerContent" data-maxlength="255" @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) />
+                        <div class="validate-error" id="header-content-validation"></div>
+                    </div>
+                </div>
+                <div class="no-padding email-custom-editor @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty)" id="email-editor-area">
+                    <div class="col-sm-12 col-xs-12 no-padding email-editor custom-bootstrap-styles" id="email-editor-panel">
+                        <div class="col-sm-2 col-xs-2 no-padding align-center email-body-label"><span>@T["Body"]</span></div>
+                        <div class="col-sm-12 col-xs-12 no-padding" id="email-body-container"></div>
+                        <div id="email-content-validation" style="visibility: visible;"></div>
+                    </div>
+                </div>
+
+                <div class="col-xs-12 no-padding disclaimer-content">
+                    <h4 class="disclaimer-content-header no-margin">@T["Disclaimer Content"]</h4>
+                    <div class="form-input-field col-xs-12 no-padding disclaimer-content-text">
+                        <textarea id="disclaimer-content-input" class="form-control txt-holder validation-padding disclaimer-content-fields" name="disclaimer-content" placeholder="" data-maxlength="255" @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) >@disclaimerContent</textarea>
+                        <div class="validate-error" id="disclaimer-content-validation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="template-add-dialog-wrapper">
+            <div class="modal" tabindex="-1" role="dialog">
+                <div id="template-add-dialog" role="document">
+                    <form class="col-lg-12 no-padding add-template-dialog-form modal-content" id="dialog-container" autocomplete="off">
+                        <div class="modal-body col-xs-12 form dialog-background">
+                            <div class="col-xs-12 form-padding">
+                                <label class="col-xs-4 app-textbox-label text-right">@T["Template name"]</label>
+                                <div class="col-xs-8 no-padding">
+                                    <input type="text" id="templateName" maxlength="254" class="form-control" placeholder="@T["Template name"]" name="Template name" data-name="Template name" required>
+                                    <span class="templateAdd-validation-messages" id="invalid-templatename"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 modal-footer">
+                            <div class="col-xs-4"></div>
+                            <div class="col-xs-8 no-padding">
+                                <input type="button" id="add-template" class="primary-button" value="@T["Add"]" />
+                                <input type="button" id="cancel-template" class="secondary-button popup-close" value="Cancel" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+
+    }
+@await Html.PartialAsync("../Administration/_DeleteTemplate")
+}
+
+@* Closing brace for the code block *@

@@ -45,7 +45,7 @@ $(document).ready(function () {
     dropDownList.appendTo("#model-language");
 
     var uploadDialog = new ejs.popups.Dialog({
-        header: window.Server.App.LocalizationContent.UploadLangauage,
+        header: window.Server.App.LocalizationContent.UploadLanguage,
         content: document.getElementById("upload-content"),
         showCloseIcon: true,
         width: '424px',

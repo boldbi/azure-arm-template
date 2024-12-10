@@ -35,6 +35,16 @@
                                     @Html.Raw(string.Format(T["An error occurred while processing your dashboard download request. Please click {0} to know more."].Value, "<a target='_blank' href='" + downloadedResourcesUrl + "'>here</a>"))
                                 </span>
                             </span>
+                            <span ng-if="item.NotificationSource=='@NotificationSource.ApiKeyExpiration' && !item.ApiKeyExpired">
+                                <span>
+                                    @Html.Raw(string.Format(T["Your API Key will be expire on {0} "].Value, "{{item.TokenValidity}}"))
+                                </span>
+                            </span>
+                            <span ng-if="item.NotificationSource=='@NotificationSource.ApiKeyExpiration' && item.ApiKeyExpired">
+                                <span>
+                                    @Html.Raw(string.Format(T["Your API Key is expired on {0} "].Value, "{{item.TokenValidity}}"))
+                                </span>
+                            </span>
                             <span ng-switch-when="@((int) ItemCommentLogType.Added)">
                                 <span ng-if="item.DoneById == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Dashboard) ">@T["You have commented on the dashboard"]</span>
                                 <span ng-if="item.DoneById == item.CurrentUserId && item.ItemTypeId == @((int) ItemType.Widget) ">@T["You have commented on the widget"]</span>
@@ -88,6 +98,9 @@
                         <span ng-if="item.NotificationSource =='@NotificationSource.Download'" class="notification-type-icon">
                             <span class="su su-download"></span>
                         </span>
+                        <span ng-if="item.NotificationSource =='@NotificationSource.ApiKeyExpiration'" class="notification-type-icon">
+                            <span class="su su-api-key"></span>
+                        </span>
                         <span ng-switch="item.ItemTypeId" class="notification-link-content">
                             <span ng-switch-when="@((int) ItemType.Dashboard)">
                                 <a target="_blank" class="notification-item-link" href="{{getNotificationUrl(item)}}">{{item.ItemName}}</a>
@@ -97,8 +110,11 @@
                                     <a target="_blank" class="notification-item-link" href="{{getNotificationUrl(item)}}">{{item.ItemName}}</a>
                                 </span>
                                 <span ng-if="item.WidgetDetail!=null || item.WidgetDetail.length != 0">
-                                   @Html.Raw(string.Format(T["{0} in dashboard {1}"].Value, "<a target='_blank' class='notification-item-link' href='{{getNotificationUrl(item)}}'>{{item.ItemName}}</a><span>", "</span><a target='_blank' class='notification-item-link' href='{{getNotificationUrl(item)}}'>{{item.WidgetDetail[0].DashboardItemName }}</a>"))
+                                    @Html.Raw(string.Format(T["{0} in dashboard {1}"].Value, "<a target='_blank' class='notification-item-link' href='{{getNotificationUrl(item)}}'>{{item.ItemName}}</a><span>", "</span><a target='_blank' class='notification-item-link' href='{{getNotificationUrl(item)}}'>{{item.WidgetDetail[0].DashboardItemName }}</a>"))
                                 </span>
+                            </span>
+                            <span ng-if="item.NotificationSource=='@NotificationSource.ApiKeyExpiration'">
+                                {{item.ApiKeyName}}
                             </span>
                             <span ng-switch-default>
                                 {{item.ItemName}}

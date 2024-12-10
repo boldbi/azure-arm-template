@@ -1,0 +1,98 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/bootstrap.min.js"></script>
+    </environment>
+}
+
+<div id="generate-api-key-container">
+    <div id="generate-key-section">
+        <div class="api-key-description api-key-bottom">@T["API keys provide a simpler alternative to OAuth for connecting to and authenticating services."]</div>
+        <div class="col-md-7 api-key-container api-key-bottom no-padding">
+            <button type="button" title="" id="generate-api-key-button" class="primary-button app-btn-primary" onclick="GenerateAPIKey()">
+                @T["Generate API Key"]
+            </button>
+        </div>
+    </div>
+    <div class="api-key-separator showorhideapigrid"></div>
+    <div id="manage-key-section" class="showorhideapigrid">
+        <span class="manage-key-title">@T["Manage Keys"]</span>
+        <div class="col-xs-12 no-padding" id="api-key-grid">
+            @await Html.PartialAsync("_GenerateApiKey")
+        </div>
+    </div>
+</div>
+<div id="generate-api-key-div">
+    <div class="dialog">
+        <form id="generate-apikey-form" class="col-md-12 dialog-body">
+            <table>
+                <tbody>
+                    <tr>
+                        <td><div class="apikey-name">@T["Name"]<span class="mandatory">*</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class ="margin-bottom">
+                                <input type="text" id="api-key_name" class="popup form-control text-field text" data-maxlength="255" value="" tabindex="1" autofocus name="apiKeyName" placeholder="Enter api key name">
+                                <span id="validate-name" class="validation-message text"></span>
+                                <div id="plugin_validation" class="validation-message text"></div>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="token-validity">
+                                <span class="material-switch token-toogle-checkbox">
+                                    <input type="checkbox" id="token-validity-enabled" @(false ? "checked" : string.Empty) />
+                                    <label for="token-validity-enabled" class="label-primary"></label>
+                                </span>
+                                @T["API Key Expiration"]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="token-description">@T["Enable this option to configure expiry date for the API key."]</span></td>
+                    </tr>
+                    <tr id="show-hide-datepicker">
+                        <td>
+                            <div class="col-sm-3 col-xs-3 token-date-picker no-padding">
+                                <input type="text" name="token-date-range" class="form-control full-width" id="token-datePicker">
+                                <span id="token-validate" class="validation-message text"></span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="update-api-key-div">
+    <div class="dialog">
+        <form id="update-apikey-form" class="col-md-12 dialog-body">
+            <table>
+                <tbody>
+                <tr>
+                    <td><div class="update-apikey-name">@T["Name"]<span class="mandatory">*</span></div></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class ="margin-bottom">
+                            <input type="text" id="update-api-key_name" class="popup form-control text-field text" data-maxlength="255" value="" tabindex="1" autofocus name="updateapiKeyName">
+                            <span id="validate-name" class="validation-message text"></span>
+                            <div id="plugin_validation" class="validation-message text"></div>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="apikey-delete-confirmation" class="col-lg-12 no-padding"></div>

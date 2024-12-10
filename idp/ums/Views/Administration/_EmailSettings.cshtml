@@ -11,6 +11,7 @@
 
     var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "email-settings") ? "active" : string.Empty;
     var isLogsTab = (Context.Request.Query["view"] == "logs") ? "active" : string.Empty;
+    var isTemplateTab = (Context.Request.Query["view"] == "template") ? "active" : string.Empty;
     var mailAccount = new List<SelectListItem>
     {
         new SelectListItem { Value = "0", Text = T["SMTP"].Value, Selected = GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAccount == MailAccount.SMTP },
@@ -44,6 +45,9 @@
         <ul id="email-settings-tab-nav" class="nav nav-tabs" role="tablist">
             <li role="presentation" class="@isSettingsTab">
                 <a href="#email-settings" id="email-settings-tab" aria-controls="email-settings-tab" role="tab" data-toggle="tab">@T["Settings"]</a>
+            </li>
+            <li role="presentation" class="@isTemplateTab">
+                <a href="#templates" id="email-template-tab" aria-controls="email-atemplate-tab" role="tab" data-toggle="tab">@T["Template"]</a>
             </li>
             <li role="presentation" class="@isLogsTab">
                 <a href="#logs" id="email-logs-tab" aria-controls="email-activity-logs-tab" role="tab" data-toggle="tab">@T["Logs"]</a>
@@ -240,6 +244,7 @@
 
             </div>
             @await Html.PartialAsync("_EmailActivityLog")
+            @await Html.PartialAsync("_CustomizeEmailTemplate")
         </div>
     </div>
     @await Html.PartialAsync("../Shared/_FooterOnPremise")

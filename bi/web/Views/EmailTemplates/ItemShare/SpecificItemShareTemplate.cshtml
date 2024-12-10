@@ -1,6 +1,18 @@
 ﻿@model Syncfusion.Server.Base.DataClasses.EmailTemplateModel
 @{
     Layout = null;
+    var disclaimerContent = @Model.CustomEmailTemplateEnabled ? @Model.DisclaimerContent : "This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.";
+    //     var itemURL = $@"
+    //     <td style='padding-right:20px;font-size:14px;padding-right:20px;font-family:Arial,Helvetica,sans-serif;color:#3f3f3f;text-align:left;'>
+    //         <span data-id='hidden' style='color:#3f3f3f;'>
+    //             <a href='{Model.BaseUrl.TrimEnd('/')}/{Model.ItemUrl}' target='' style='text-decoration:none;word-break:break-all;color:#4a90e2;font-weight:normal;'>{Model.ItemName}</a>
+    //         </span>
+    //     </td>
+    // ";
+    var itemURL = $@"{Model.BaseUrl.TrimEnd('/')}/{Model.ItemUrl}";
+
+
+
 }
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -16,6 +28,10 @@
         /* outlook */
         #outlook a {
             padding: 0;
+        }
+
+        .im {
+            color: #000000 !important;
         }
 
         table {
@@ -38,6 +54,10 @@
         /*Windows Mobile*/
         body {
             -ms-text-size-adjust: 100%;
+        }
+        a{
+            text-decoration:none;
+            color: #4a90e2;
         }
     </style>
     <style type="text/css">
@@ -87,6 +107,57 @@
                             <tr>
                                 <td align="center" valign="top">
                             <![endif]-->
+
+
+                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                            <tbody>
+                                                <tr>
+                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;">
+                                                        <div style="opacity: 0;max-height: 0;overflow:hidden;visibility:hidden">
+                                                            @if (!Model.CustomEmailTemplateEnabled)
+                                                            {
+                                                                @if (Model.ItemType == "Settings")
+                                                                {
+                                                                    <span data-id="hidden">
+                                                                        You have been given access to @Model.ItemType
+                                                                    </span>
+                                                                }
+                                                                else if (Model.ItemType == "UserManagement")
+                                                                {
+                                                                    <span data-id="hidden">
+                                                                        You have been given access to a group
+                                                                    </span>
+                                                                }
+                                                                else if (Model.ItemType == "Permissions")
+                                                                {
+                                                                    <span data-id="hidden">
+                                                                        You have given access to manage @Model.ItemName @(Model.ItemType)
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span data-id="hidden">
+                                                                        A @Model.ItemType has been shared with you
+                                                                    </span>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                @Html.Raw(Model.HeaderContent.Replace("{:ItemType}", Model.ItemType))
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
                                 <tr>
@@ -163,55 +234,46 @@
                             </tbody>
                         </table>
 
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 18px; color: #3f3f3f; font-weight:bold; font-family:arial, helvetica, sans-serif;">
-                                                        @if (Model.ItemType == "Settings")
-                                                        {
-                                                            <span data-id="hidden">
-                                                                You have been given access to @Model.ItemType
-                                                            </span>
-                                                        }
-                                                        else if (Model.ItemType == "UserManagement")
-                                                        {
-                                                            <span data-id="hidden">
-                                                                You have been given access to a group
-                                                            </span>
-                                                        }
-                                                        else if (Model.ItemType == "Permissions")
-                                                        {
-                                                            <span data-id="hidden">
-                                                                You have given access to manage @Model.ItemName @(Model.ItemType)
-                                                            </span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span data-id="hidden">
-                                                                A @Model.ItemType has been shared with you
-                                                            </span>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;">
+                                                            <span>
+                                                                Hello @Model.DisplayName,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
 
 
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
@@ -221,147 +283,130 @@
                                         <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
                                             <tbody>
                                                 <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif;">
-                                                        <span>
-                                                            Hello @Model.DisplayName,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    @if (Model.ItemType == "Settings")
+                                                    @if (Model.CustomEmailTemplateEnabled)
                                                     {
                                                         <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
                                                             <span>
-                                                                @Model.Admin has given you access to the @Model.ItemType - '@Model.ItemName'.<br />
+                                                                @Html.Raw(Model.MailHeaderContent.Replace("{:ItemURL}", Model.ItemName)
+                                                            .Replace("{:Resource.Uri}", itemURL))
                                                             </span>
                                                         </td>
-                                                    }
-                                                    else if (Model.ItemType == "UserManagement")
-                                                    {
-                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
-                                                            <span>
-                                                                @Model.Admin has given you access to the group - '@Model.ItemName'.<br />
-                                                            </span>
-                                                        </td>
-                                                    }
-                                                    else if (Model.ItemType == "Permissions")
-                                                    {
-                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
-                                                            <span>
-                                                                @Model.Admin has given you access to manage '@Model.ItemName' @(Model.ItemType).<br />
-                                                            </span>
-                                                        </td>
+
                                                     }
                                                     else
                                                     {
-                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
-                                                            <span>
-                                                                @Model.Admin has shared the @Model.ItemType - '@Model.ItemName' with you.<br />
+                                                        @if (Model.ItemType == "Settings")
+                                                        {
+                                                            <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                                <span>
+                                                                    @Model.Admin has given you access to the @Model.ItemType - '@Model.ItemName'.<br />
+                                                                </span>
+                                                            </td>
+                                                        }
+                                                        else if (Model.ItemType == "UserManagement")
+                                                        {
+                                                            <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                                <span>
+                                                                    @Model.Admin has given you access to the group - '@Model.ItemName'.<br />
+                                                                </span>
+                                                            </td>
+                                                        }
+                                                        else if (Model.ItemType == "Permissions")
+                                                        {
+                                                            <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                                <span>
+                                                                    @Model.Admin has given you access to manage '@Model.ItemName' @(Model.ItemType).<br />
+                                                                </span>
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-family:arial, helvetica, sans-serif; line-height: 20px;">
+                                                                <span>
+                                                                    @Model.Admin has shared the @Model.ItemType - '@Model.ItemName' with you.<br />
+                                                                </span>
+                                                            </td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        @if (!Model.CustomEmailTemplateEnabled)
+                        {
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="20">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
+                                                            <span data-id="hidden" style="color: #3f3f3f;">
+                                                                <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style="text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;">@Model.ItemName</a>
                                                             </span>
                                                         </td>
-                                                    }
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="20">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style="padding-left:20px;padding-right:20px;font-size: 14px; padding-right: 20px;font-family: Arial, Helvetica, sans-serif; color: #3f3f3f; text-align:left;">
-                                                        <span data-id="hidden" style="color: #3f3f3f;">
-                                                            <a href="@(Model.BaseUrl.TrimEnd('/') + "/" + Model.ItemUrl)" target='' style="text-decoration: none; word-break:break-all; color: #4a90e2; font-weight: normal;">@Model.ItemName</a>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="30">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="30">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                                <tr>
-                                                    <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;">
-                                                        <span>
-                                                            Regards,<br />
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style=" padding-left:20px;padding-right:20px; font-size: 14px; color: #3f3f3f; font-weight:normal; font-family:Arial, Helvetica, sans-serif;">
+                                                            <span>
+                                                                Regards,<br />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
-                                <tr>
-                                    <td style="font-size: 1px;" height="10">&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1px;" height="10">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
-                            <tbody>
+                            <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
                                 <tr>
                                     <td>
                                         <table style="text-align:left;width:100%;" cellpadding="0" cellspacing="0">
@@ -379,7 +424,7 @@
                                 </tr>
                             </tbody>
                         </table>
-
+                        }
 
                         <table style="text-align:left;width:100%;max-width: 550px;background-color: #fff;" width="550" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
                             <tbody>
@@ -432,7 +477,7 @@
                                                 <tr>
                                                     <td style=" line-height:20px; padding-left:20px;padding-right:20px; font-size: 12px; color: #7a7a7a; opacity:0.5; font-family:Arial, Helvetica, sans-serif;">
                                                         <span data-id="hidden">
-                                                            This is an automatically generated message, please do not reply to this mail. If you have any question, please contact your administrator.
+                                                            @disclaimerContent
                                                         </span>
                                                     </td>
                                                 </tr>

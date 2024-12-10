@@ -977,6 +977,26 @@ CREATE TABLE [BoldBI_DSMetrics]  (
    RefreshStatus VARCHAR(255),
    RefreshException VARCHAR(255))
 ;
+	   
+CREATE TABLE [BOLDBI_CustomEmailTemplate](
+[Id] [int] IDENTITY(1,1) primary key NOT NULL,
+[IsEnabled] [bit] NULL,
+[DisclaimerContent] [nvarchar](255) NOT NULL,
+[HeaderContent] [nvarchar](255) NULL,
+[Subject] [nvarchar](255) NULL,
+[TemplateName] [nvarchar](255) NULL,
+[Language] [nvarchar](255) NOT NULL,
+[MailBody] [nvarchar](max) NOT NULL,
+[CreatedDate] [datetime] NOT NULL,
+[ModifiedDate] [datetime] NULL,
+[SendEmailAsHTML] [bit] NOT NULL,
+[IsActive] [bit] NOT NULL,
+[TemplateId] [int] NOT NULL,
+[IsDefaultTemplate][bit] NOT NULL,
+[IsSystemDefault][bit] NOT NULL,
+[Description][nvarchar](255) NULL,
+[ModifiedBy][int] NOT NULL,
+[TemplateLocalizationKey][nvarchar](255) NULL);
 
 CREATE TABLE [BoldBI_ai_qnawidgethistory] (
    searchid VARCHAR(255) PRIMARY KEY,
@@ -1003,6 +1023,19 @@ CREATE TABLE [BOLDBI_Notification] (
     [NotificationTo] [int] NULL,    
     [ModifiedDate] [datetime] NOT NULL,
     [IsRead] [bit] NOT NULL,
+    [IsActive] [bit] NOT NULL)
+;
+
+CREATE TABLE [BOLDBI_ApiKeyDetails] (
+    [Id] [uniqueidentifier] PRIMARY KEY NOT NULL,
+    [Name] [nvarchar](255) NOT NULL,
+    [ModifiedDate] [datetime] NOT NULL,
+    [CreatedDate] [datetime] NOT NULL,
+    [LastUsedDate] [datetime] NULL,
+    [ApiKey] nvarchar(100) NULL,
+    [TokenValidity] [datetime] NULL,
+    [CreatedBy] [int] NOT NULL,
+    [ModifiedBy] [int] NOT NULL,
     [IsActive] [bit] NOT NULL)
 ;
 
@@ -1074,6 +1107,8 @@ INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'CORS Settings',1)
 INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Look and Feel',1)
 ;
 INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'Site Credentials',1)
+;
+INSERT into [BOLDBI_SettingsType] (Name,IsActive) Values (N'API Key',1)
 ;
 INSERT into [BOLDBI_ItemLogType] (Name,IsActive) VALUES ( N'Added',1)
 ;
@@ -1528,6 +1563,8 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationWhenWatchEnabled',N'UserNotificationSettings.UserSystemNotificationSettings.EnableNotificationWhenWatchEnabled',GETDATE(),1)
 ;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForApiKeyExpiration',N'UserNotificationSettings.UserSystemNotificationSettings.EnableNotificationForApiKeyExpiration',GETDATE(),1)
+;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForDashboardOwner',N'UserNotificationSettings.UserMailNotificationSettings.EnableNotificationForDashboardOwner',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForAccessibleUser',N'UserNotificationSettings.UserMailNotificationSettings.EnableNotificationForAccessibleUser',GETDATE(),1)
@@ -1535,6 +1572,8 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationOnUserMention',N'UserNotificationSettings.UserMailNotificationSettings.EnableNotificationOnUserMention',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationWhenWatchEnabled',N'UserNotificationSettings.UserMailNotificationSettings.EnableNotificationWhenWatchEnabled',GETDATE(),1)
+;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableNotificationForApiKeyExpiration',N'UserNotificationSettings.UserMailNotificationSettings.EnableNotificationForApiKeyExpiration',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (2,N'EnableUserScheduleNotification',N'UserNotificationSettings.UserMailNotificationSettings.EnableUserScheduleNotification',GETDATE(),1)
 ;
@@ -1553,6 +1592,8 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationWhenWatchEnabled',N'NotificationSettings.SystemNotificationSettings.EnableNotificationWhenWatchEnabled',GETDATE(),1)
 ;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationForApiKeyExpiration',N'NotificationSettings.SystemNotificationSettings.EnableNotificationForApiKeyExpiration',GETDATE(),1)
+;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationForDashboardOwner',N'NotificationSettings.MailNotificationSettings.EnableNotificationForDashboardOwner',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationForAccessibleUser',N'NotificationSettings.MailNotificationSettings.EnableNotificationForAccessibleUser',GETDATE(),1)
@@ -1560,6 +1601,8 @@ INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive)
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationOnUserMention',N'NotificationSettings.MailNotificationSettings.EnableNotificationOnUserMention',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationWhenWatchEnabled',N'NotificationSettings.MailNotificationSettings.EnableNotificationWhenWatchEnabled',GETDATE(),1)
+;
+INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableNotificationForApiKeyExpiration',N'NotificationSettings.MailNotificationSettings.EnableNotificationForApiKeyExpiration',GETDATE(),1)
 ;
 INSERT into [BOLDBI_LogField] (ModuleId,Field,Description,ModifiedDate,IsActive) VALUES (3,N'EnableUserScheduleNotification',N'NotificationSettings.MailNotificationSettings.EnableUserScheduleNotification',GETDATE(),1)
 ;

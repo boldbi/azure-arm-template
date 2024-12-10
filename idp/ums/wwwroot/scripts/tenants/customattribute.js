@@ -283,7 +283,7 @@ function saveCustomAttribute() {
             CreatedDate: new Date(),
             ModifiedDate: new Date(),
             CustomAttributeId: customAttributeId,
-            UserId = userId
+            UserId: userId
         }
     }
 
@@ -336,6 +336,36 @@ function beforeCloseAttributeDialog() {
     isAttributeEdit = false;
     customAttributeInfo = "";
     $("#custom-attribute-form").find(".e-input-group").removeClass("e-error");
+}
+
+function saveDefaultAttributes(databaseType, tenantType){
+    addSiteAttribute = [];
+    if (databaseType.toLowerCase() !== "mysql"){
+        var schemaDefaultAttribute = {
+            Name: window.Server.App.LocalizationContent.DefaultSchemaName,
+            Value: $("#schema-name").val().trim() || (databaseType.toLowerCase() === "postgresql" ? window.Server.App.LocalizationContent.DefaultSchemaForPostgres : window.Server.App.LocalizationContent.DefaultSchemaForMSSQL),
+            CreatedDate: new Date(),
+            ModifiedDate: new Date(),
+            CustomAttributeId: customAttributeId
+        }
+        addSiteAttribute.push(schemaDefaultAttribute);
+    }
+    var serverDefaultAttribute = {
+        Name: tenantType.toLowerCase() === "boldreportsonpremise" ? window.Server.App.LocalizationContent.DefaultReportsPrefixName : window.Server.App.LocalizationContent.DefaultBIPrefixName,
+        Value: $("#txt-server-prefix").val().trim() || (tenantType.toLowerCase() === "boldreportsonpremise" ? window.Server.App.LocalizationContent.DefaultPrefixForReports : window.Server.App.LocalizationContent.DefaultPrefixForBI),
+        CreatedDate: new Date(),
+        ModifiedDate: new Date(),
+        CustomAttributeId: customAttributeId
+    }
+    var tenantDefaultAttribute = {
+        Name: window.Server.App.LocalizationContent.DefaultUMSPrefixName,
+        Value: $("#txt-ums-prefix").val().trim() || window.Server.App.LocalizationContent.DefaultPrefixForUMS,
+        CreatedDate: new Date(),
+        ModifiedDate: new Date(),
+        CustomAttributeId: customAttributeId
+    }
+    addSiteAttribute.push(serverDefaultAttribute);
+    addSiteAttribute.push(tenantDefaultAttribute);
 }
 
 $(document).on("keyup focusout", "#custom-attribute-name", function (e) {
@@ -399,7 +429,7 @@ function updateCustomAttribute(attributeId) {
             CanEncrypt: $("#encrypt-custom-attribute").is(":checked"),
             CreatedDate: new Date(),
             ModifiedDate: new Date(),
-            UserId = userId
+            UserId: userId
         }
         updateCustomAttributeUrl = editUserCustomAttributeUrl;
     }

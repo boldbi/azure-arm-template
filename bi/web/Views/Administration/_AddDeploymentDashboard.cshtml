@@ -1,41 +1,50 @@
 ﻿<div   id="add-deployment-dashboard"   style="display:none">
     <form   class="col-lg-12 no-padding"  id="dialog-container" autocomplete="off">
         <div   class="modal-body col-xs-12 no-padding form">
-            <div class="col-xs-12 no-padding deployment-field-container">
-                <label class="col-xs-4 col-lg-4 text-left no-padding">@T["Category name for dashboard deployment"]<span class="mandatory">*</span></label>
-                <div class="col-xs-8 col-lg-8 no-padding">
-                    <input type="text" id="destination-category-name" data-maxlength="255" class="form-control  validation select-override-input" name="category-name" />
-                    <span id="invalid-category" class="useradd-validation-messages"></span>
-                </div>                
-            </div>
-            <div class="col-xs-12 no-padding deployment-field-container">
-                <label class="col-xs-4 col-lg-4 text-left no-padding">@T["Dashboard name in deployment site"]<span class="mandatory">*</span></label>
-                <div class="col-xs-8 col-lg-8 no-padding">
-                    <input type="text" id="destination-name" data-maxlength="255" class="form-control  validation select-override-input" name="dashboard-name" />
-                    <span id="invalid-destination" class="useradd-validation-messages"></span>
-                </div>
-            </div>
-            <div class="col-xs-12 no-padding deployment-field-container">
-                <label class="col-xs-4 col-lg-4 text-left margin-down no-padding">@T["Description"]</label>
-                <div class="col-xs-8 col-lg-8 no-padding description-destination">
-                    <textarea id="description" name="destination-description" class="form-control  validation select-override-description" data-maxlength="1024"></textarea>
-                    <span id="invalid-category" class="useradd-validation-messages"></span>
-                </div>
-            </div>
             <div id="deployment-category-container" class="col-xs-12 no-padding deployment-dropdown-container">
-                <label  class="col-xs-4 col-lg-4 text-left margin-down no-padding">@T["Select category"]<span class="mandatory">*</span></label>
-                <div  class="col-xs-8 col-lg-8  no-padding">
-                    <input class="form-control" id="select-category" title="@T["Select category"]" />
+                <label  class="col-xs-4 col-lg-4 text-left margin-down no-padding">@T["Source Category"]<span class="mandatory">*</span></label>
+                <div  class="col-xs-6 col-lg-6  no-padding items-name-dropdown pull-right">
+                    <input class="form-control pull-right" id="select-category" title="@T["Select category"]" />
                     <span id="invalid-category-selector" style="display:none" class="display">@T["Please select the category"]</span>
                 </div>
             </div>
             <div id="deployment-dashboard-container" class="col-xs-12 no-padding deployment-dropdown-container">
-                <label  class="col-xs-4 col-lg-4 text-left margin-down no-padding">@T["Select dashboard"]<span class="mandatory">*</span></label>
-                <div  class="col-xs-8 col-lg-8 no-padding">
+                <label  class="col-xs-4 col-lg-4 text-left margin-down no-padding">@T["Source Dashboard"]<span class="mandatory">*</span></label>
+                <div  class="col-xs-6 col-lg-6 no-padding items-name-dropdown pull-right">
                     <select  class="selectpicker dropup form-control select-override-selector"   id="select-dashboard"   data-size="5"  data-live-search="true" title="@T["Select dashboard"]" data-none-results-text = "@T["No results match"]">
                         <option  value=""  selected="selected"  disabled="disabled">@T["Select dashboard"]</option>
                     </select>
                     <span  id="invalid-dashboard-selector" style="display:none" class="display">@T["Please select the dashboard"]</span>
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding category-dashboard-name-fields">
+                <div class="col-xs-12 no-padding deployment-field-container">
+                    <label class="col-xs-6 col-lg-6 text-left no-padding">@T["Category name for deployment site"]<span class="mandatory">*</span></label>
+                    <div class="col-xs-6 col-lg-6 no-padding">
+                        <input type="text" id="destination-category-name" data-maxlength="255" class="form-control  validation select-override-input pull-right" name="category-name" />
+                        <span id="invalid-category" class="useradd-validation-messages"></span>
+                    </div>                
+                </div>
+                <div class="col-xs-12 no-padding deployment-field-container">
+                    <label class="col-xs-6 col-lg-6 text-left no-padding">@T["Dashboard name for deployment site"]<span class="mandatory">*</span></label>
+                    <div class="col-xs-6 col-lg-6 no-padding">
+                        <input type="text" id="destination-name" data-maxlength="255" class="form-control  validation select-override-input pull-right" name="dashboard-name" />
+                        <span id="invalid-destination" class="useradd-validation-messages"></span>
+                    </div>
+                </div>
+                <div class="col-xs-6 col-lg-6 no-padding pull-right use-selected-item-names">
+                    <div  id="use-selected-category-dashboard-name"   class="pad-enable display-inline pull-right">
+                        @Html.CheckBox("selected-category-dashboard-name", new { @class = "material-checkbox  pull-left" })
+                        @Html.Hidden("selected-category-dashboard-name")
+                        @Html.Label("selected-category-dashboard-name", T["Use the source category and dashboard name."].Value, new { @id = "selected-category-dashboard-name" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 no-padding deployment-field-container description-textarea">
+                <label class="col-xs-6 col-lg-6 text-left margin-down no-padding">@T["Description"]</label>
+                <div class="col-xs-6 col-lg-6 no-padding description-destination">
+                    <textarea id="description" name="destination-description" class="form-control  validation select-override-description pull-right" data-maxlength="1024"></textarea>
+                    <span id="invalid-category" class="useradd-validation-messages"></span>
                 </div>
             </div>
         </div>
@@ -53,7 +62,7 @@
                 @Html.Label("enable-datasource", T["Lock data source editing in published site."].Value, new { @id = "datasource-label" })
             </div>
         </div>
-        <div class="col-xs-12 no-padding">
+        <div class="col-xs-12 no-padding make-dashboard-public">
             <div  id="make-dashboard-public-checkbox"   class="pad-enable display-inline">
                 @Html.CheckBox("make-public", new { @class = "material-checkbox  pull-left" })
                 @Html.Hidden("make-public")

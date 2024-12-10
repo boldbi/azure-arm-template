@@ -1,0 +1,41 @@
+﻿
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    <script>
+        var deleteDownloadedDashboard = "@Url.Action("DeleteDownloadedDashboard", "Items")";
+        var cdnLink = "@dashboardServerResourceUrl";
+    </script>
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+
+<div id="downloaded-dashboard-delete">
+    <div id="downloaded-dashboard-confirmation" class="no-padding">
+        <input type="hidden" id="hidden-itemName" value="@ViewBag.ItemName" />
+        <input type="hidden" id="hidden-itemId" value="@ViewBag.ItemId" />
+        <input type="hidden" id="hidden-jobId" value="@ViewBag.JobId" />
+        <div class="col-md-12 success-message pull-left no-padding"></div>
+        <div class="col-xs-12 no-padding" id="container">
+            <div class="modal-body col-xs-12 no-padding">
+                <div class="col-xs-12 no-padding">
+                    <div class="delete-msg">
+                        @Html.Raw("<span>" + String.Format(ViewBag.DeleteDashboardFileConfirmation, "</span><span id = 'delete-dashboard-name' class='delete-item-body highlight-name'>" + ViewBag.itemName + "</span>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+</div>

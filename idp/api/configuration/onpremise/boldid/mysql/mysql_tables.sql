@@ -914,6 +914,27 @@ CREATE TABLE {database_name}.BOLDTC_UserAttributes(
 	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
+CREATE TABLE {database_name}.BOLDTC_CustomEmailTemplate (
+Id INT AUTO_INCREMENT PRIMARY KEY,
+    IsEnabled BIT,
+    DisclaimerContent VARCHAR(255) NOT NULL,
+    HeaderContent VARCHAR(255) NULL,
+    Subject VARCHAR(255),
+    TemplateName VARCHAR(255),
+    Language VARCHAR(255) NOT NULL,
+    MailBody TEXT NOT NULL,
+    CreatedDate DATETIME NOT NULL,
+    ModifiedDate DATETIME,
+    SendEmailAsHTML BIT NOT NULL,
+    IsActive BIT NOT NULL,
+	TemplateId INT NOT NULL,
+	IsDefaultTemplate BIT NOT NULL,
+	IsSystemDefault BIT NOT NULL,
+	Description VARCHAR(255) NULL,
+	ModifiedBy char(38) NOT NULL,
+	TemplateLocalizationKey VARCHAR(255) NULL
+);
+
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'Registration', 1);
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'StatusUpdated', 1);
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'PaymentUpdated', 1);

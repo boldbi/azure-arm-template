@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 8.2.22
+*  version : 8.3.17
 *  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -18187,7 +18187,7 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
             }
             else {
                 if (textPosition == "bottom")
-                    y += (2 * textOffset.height + lineHeight);
+                    y += (textOffset.height + lineHeight);
                 else if (textPosition == "top")
                     y -= lineHeight;
             }
@@ -25677,6 +25677,7 @@ var Gradient = function (colors) {
                 bbdesigner$.each(this.model.chartRegions, function (index, regionItem) {
                     if (!BoldBIDashboard.util.isNullOrUndefined(regionItem.SeriesIndex)) {
 					var currentSer = seriesCollection[regionItem.SeriesIndex];
+                    var dataLabel = currentSer.marker.dataLabel;
                     if (chartObj.model.AreaType == "polaraxes" && currentSer.drawType.toLowerCase() == 'column' && evt.target) {
                         if (chartObj.model.enableCanvasRendering) {
                                     if (currentSer.type.toLowerCase() == "polar") {
@@ -25748,8 +25749,10 @@ var Gradient = function (colors) {
                     else {
                         if (!chartObj.model.enableCanvasRendering) {
                             if(evt.target.id == chartObj.svgObject.id + "_Series" + regionItem.SeriesIndex + "_Point" + regionItem.Region.PointIndex ||
-                                evt.target.id == chartObj.svgObject.id + "_Series" + regionItem.SeriesIndex + "_Point" + regionItem.Region.PointIndex + "_symbol" ||
-                                evt.target.id == chartObj.svgObject.id + "_trackSymbol_" + regionItem.SeriesIndex + "_" + regionItem.Region.PointIndex)
+                                evt.target.id == chartObj.svgObject.id + "_Series" + regionItem.SeriesIndex + "_Point" + regionItem.Region.PointIndex + "_symbol" || 
+                                evt.target.id == chartObj.svgObject.id + "_trackSymbol_" + regionItem.SeriesIndex + "_" + regionItem.Region.PointIndex ||
+                                (dataLabel.visible && (dataLabel.textPosition == "middle" || dataLabel.textPosition == "bottom") && 
+								evt.target.id ==  chartObj.svgObject.id + "_SeriesText" + regionItem.Region.PointIndex  + regionItem.SeriesIndex))
                                 region = regionItem;                           
                         }
                         else if ((((currentX >= regionItem.Region.Bounds.X) && (currentX <= (regionItem.Region.Bounds.X + (regionItem.Region.Bounds.Width))))) && ((currentY > regionItem.Region.Bounds.Y) && (currentY < (regionItem.Region.Bounds.Y) + (regionItem.Region.Bounds.Height)))) {
