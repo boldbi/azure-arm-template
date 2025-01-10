@@ -213,6 +213,49 @@ $(document).ready(function () {
     });
     uploadEmailLogo.appendTo("#upload-emaillogo-image");
 
+    var uploadAILogo = new ej.inputs.Uploader({
+        asyncSettings: {
+            saveUrl: window.fileUploadUrl + "?imageType=ailogo&&timeStamp=" + currentDate,
+        },
+        uploading: addHeaders,
+        autoUpload: true,
+        showFileList: false,
+        multiple: false,
+        maxFileSize: 30000000,
+        allowedExtensions: ".PNG,.png,.jpg,.JPG,.jpeg,.JPEG,.svg,.SVG",
+        buttons: { browse: window.Server.App.LocalizationContent.LogoButton },
+        selected: function (e) {
+            showWaitingPopup('content-area');
+            currentDate = $.now();
+            type = e.filesData[0]?.type.toLowerCase();
+            var extension = "." + type;
+            if (type === undefined) {
+                hideWaitingPopup('content-area');
+            }
+            else if (extension != ".png" && extension != ".jpg" && extension != ".jpeg" && extension != ".svg") {
+                $(".ai-logo").find(".validation-error-image").text(window.Server.App.LocalizationContent.InValidFileFormat);
+                $(".ai-logo").addClass("upload-error-border");
+                hideWaitingPopup('content-area');
+            }
+            else {
+                $(".ai-logo").find(".validation-error-image").text("");
+                $(".ai-logo").removeClass("upload-error-border");
+                this.asyncSettings.saveUrl = window.fileUploadUrl + "?imageType=ailogo&&timeStamp=" + currentDate;
+            }
+        },
+        success: function fileselect(e) {
+            var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
+            var extension = "." + type;
+            window.SystemSettingsProperties.AILogo = "ai_logo_" + currentDate + extension;
+            var imageUrl = window.baseRootUrl + "content/images/application/" + "ai_logo_" + currentDate + extension + "?v=" + $.now();
+            $("#ai_logo_img").attr("src", imageUrl);
+            hideWaitingPopup('content-area');
+            $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
+            $('#upload-image').removeAttr("disabled");
+        }
+    });
+    uploadAILogo.appendTo("#upload-ai-logo-image");
+
     var uploadPoweredLogo = new ej.inputs.Uploader({
         asyncSettings: {
             saveUrl: window.fileUploadUrl + "?imageType=poweredlogo&&timeStamp=" + currentDate,
@@ -730,6 +773,7 @@ $(document).ready(function () {
                MainScreenLogo: window.SystemSettingsProperties.MainScreenLogo,
                FavIcon: window.SystemSettingsProperties.FavIcon,
                EmailLogo: window.SystemSettingsProperties.EmailLogo,
+               AILogo: window.SystemSettingsProperties.AILogo,
                PoweredByLogo: window.SystemSettingsProperties.PoweredByLogo,
                WelcomeNoteText: $("#txt_welcome_note").val(),
                TimeZone: document.getElementById("time-zone").ej2_instances[0].value,

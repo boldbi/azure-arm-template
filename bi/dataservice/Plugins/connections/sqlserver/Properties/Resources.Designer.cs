@@ -1728,7 +1728,7 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
         }
         
         // <summary>
-        ///   Looks up a localized string similar to  TOTALPERCENTAGE.
+        ///   Looks up a localized string similar to TOTALPERCENTAGE.
         /// </summary>
         internal static string SqlTotalPercentage
         {
@@ -1737,7 +1737,7 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
                 return ResourceManager.GetString("SqlTotalPercentage", resourceCulture);
             }
         }
-
+        
         // <summary>
         ///   Looks up a localized string similar to  STRING_AGG.
         /// </summary>
@@ -1746,6 +1746,39 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
             get
             {
                 return ResourceManager.GetString("SqlStringAgg", resourceCulture);
+            }
+        }
+        
+        // <summary>
+        ///   Looks up a localized string similar to SqlFiscalQuarter
+        /// </summary>
+        internal static string SqlFiscalQuarter
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlFiscalQuarter", resourceCulture);
+            }
+        }
+
+        // <summary>
+        ///   Looks up a localized string similar to SqlFiscalQuarter
+        /// </summary>
+        internal static string SqlFiscalQuarterYear
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlFiscalQuarterYear", resourceCulture);
+            }
+        }
+
+        // <summary>
+        ///   Looks up a localized string similar to SqlFiscalQuarter
+        /// </summary>
+        internal static string SqlFiscalMonthYear
+        {
+            get
+            {
+                return ResourceManager.GetString("SqlFiscalMonthYear", resourceCulture);
             }
         }
     }

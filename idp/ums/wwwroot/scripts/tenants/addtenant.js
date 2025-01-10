@@ -342,6 +342,10 @@ $(document).ready(function () {
                         newDbConfiguration(waitingPopUpElement);
                     }
 
+                    if (IsBiPrefixSchema && getDropDownValue("tenant-type").toLowerCase() !== "boldreportsonpremise"){
+                        saveDefaultAttributes(databaseType, getDropDownValue("tenant-type"));
+                    }
+
                     if (!$(".database-error").is(":visible")) {
                         if ($("#txt-password-db").is(":text")) {
                             $("#txt-password-db").parent().find(".show-hide-password").click();
@@ -356,9 +360,6 @@ $(document).ready(function () {
                             $(this).removeClass("storage-config").addClass("update");
                         } else {
                             $(this).attr("value", "Next");
-                            if (IsBiPrefixSchema && getDropDownValue("tenant-type").toLowerCase() !== "boldreportsonpremise"){
-                                saveDefaultAttributes(databaseType, getDropDownValue("tenant-type"));
-                            }
                             nextToStoragePage();
                         }
                         $(this).removeAttr("disabled").addClass("next-alignment");

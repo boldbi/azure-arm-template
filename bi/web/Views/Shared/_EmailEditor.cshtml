@@ -3,7 +3,11 @@
     Layout = null;
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isSelfHosted = ServerAppConfig.IsSelfHosted;
 }
+<script>
+    var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+</script>
 
 <environment include="Development,CloudDevelopment">
     <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/emaileditor.css" />
@@ -24,30 +28,33 @@
 </head>
 <body>
 <div class="no-padding email-custom-editor" id="email-editor-area">
-    <div class="no-padding  align-center choose-template">
-        @Html.Label("email-templates", T["Choose a template"].Value, new { @class = "enabled-label" })
-    </div>
-    <div class="info-message" style="font-size: 13px; padding-bottom: 5px;">
-        @T["Please select an email template from the list to apply a predefined layout and content for your email."]
-    </div>
-    <div class="template-dropdown no-padding" id="select-template">
-        <select id="email-templates" class="selectpicker" data-size="5" title="@T["Select a template"]" data-hide-disabled="true">
-        </select>
-    </div>
-    <div class="col-sm-12 col-xs-12 no-padding enabled-div email-template-header-placement">
-        <div class="col-sm-2 col-xs-2 no-padding  align-center">
-            @Html.Label("enable-schedule-template", T["Email Customization"].Value, new { @class = "enabled-label" })
+    @if (isSelfHosted)
+    {
+        <div class="no-padding  align-center choose-template">
+            @Html.Label("email-templates", T["Choose a template"].Value, new { @class = "enabled-label" })
         </div>
-        <div class="col-sm-10 col-xs-10 pull-left no-margin enabled-label-div email-template-alignment">
-            <span class="material-switch text-left">
-                <input type="checkbox" name="Enable-Schedule-Editor" id="enable-schedule-template"/>
-                <label class="label-primary" for="enable-schedule-template"></label>
-            </span>
+        <div class="info-message" style="font-size: 13px; padding-bottom: 5px;">
+            @T["Please select an email template from the list to apply a predefined layout and content for your email."]
         </div>
-        <div class="info-message col-sm-12 col-xs-12 no-padding Info-alignment" style="font-size: 13px; margin-top:5px !important; ">
-            @T["Enabling this option allows you to customize the email template content for this particular schedule. You cannot customize the email template when 'Inherit default from settings' option is selected."]
+        <div class="template-dropdown no-padding" id="select-template">
+            <select id="email-templates" class="selectpicker" data-size="5" title="@T["Select a template"]" data-hide-disabled="true">
+            </select>
         </div>
-    </div>
+        <div class="col-sm-12 col-xs-12 no-padding enabled-div email-template-header-placement">
+            <div class="col-sm-2 col-xs-2 no-padding  align-center">
+                @Html.Label("enable-schedule-template", T["Email Customization"].Value, new { @class = "enabled-label" })
+            </div>
+            <div class="col-sm-10 col-xs-10 pull-left no-margin enabled-label-div email-template-alignment">
+                <span class="material-switch text-left">
+                    <input type="checkbox" name="Enable-Schedule-Editor" id="enable-schedule-template"/>
+                    <label class="label-primary" for="enable-schedule-template"></label>
+                </span>
+            </div>
+            <div class="info-message col-sm-12 col-xs-12 no-padding Info-alignment" style="font-size: 13px; margin-top:5px !important; ">
+                @T["Enabling this option allows you to customize the email template content for this particular schedule. You cannot customize the email template when 'Inherit default from settings' option is selected."]
+            </div>
+        </div>
+    }
     <div class="col-sm-12 col-xs-12 no-padding" id="email-subject-panel">
         <div class="col-sm-2 col-xs-2 no-padding align-center email-label"><span>@T["Subject"]</span></div>
         <div class="col-sm-12 col-xs-12 no-padding email-subject-text"><input type="text" class="form-control cls-schname" value="" id="subject-area" data-maxlength="255"></div>

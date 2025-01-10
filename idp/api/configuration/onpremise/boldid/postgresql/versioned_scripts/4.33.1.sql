@@ -1,0 +1,20 @@
+CREATE TABLE BOLDTC_CustomEmailTemplate (
+                                            Id SERIAL PRIMARY KEY,
+                                            IsEnabled smallint,
+                                            DisclaimerContent VARCHAR(255) NOT NULL,
+                                            HeaderContent VARCHAR(255) NULL,
+                                            Subject VARCHAR(255),
+                                            TemplateName VARCHAR(255),
+                                            Language VARCHAR(255) NOT NULL,
+                                            MailBody TEXT NOT NULL,
+                                            CreatedDate TIMESTAMP NOT NULL,
+                                            ModifiedDate TIMESTAMP,
+                                            SendEmailAsHTML smallint NOT NULL,
+                                            IsActive smallint NOT NULL,
+                                            TemplateId INTEGER NOT NULL,
+                                            IsDefaultTemplate smallint NOT NULL,
+                                            IsSystemDefault smallint NOT NULL,
+                                            Description VARCHAR(255) NULL,
+                                            ModifiedBy uuid NOT NULL,
+                                            TemplateLocalizationKey VARCHAR(255) NULL
+);

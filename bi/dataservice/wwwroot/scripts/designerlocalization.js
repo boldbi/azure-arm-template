@@ -444,6 +444,7 @@ var Designer = {
                     excelExportText: "Allow Excel Export",
                     imageExportText: "Allow Image Export",
                     pdfExportText: "Allow PDF Export",
+					pptExportText: "Allow PowerPoint Export",
                     hiddenColumnExportText: "Include Hidden Columns",
 					pagesizeToolTip: "If the page size option is not chosen in the drop-down menu, then all of the options are taken into consideration when exporting PDFs."
                 },
@@ -490,6 +491,7 @@ var Designer = {
                     showValueLabels: "Show Value Labels",
                     isInversed:"Inverse Scroll Bar",
 					rawData: "Show Raw Data",
+					allowCellSelection: "Allow Cell Selection",
                     rawDataInfo: "This option will remove the aggregation in grid columns and show raw data.",
 					enableSmoothScroll: "Enable Smooth Scroll",
                     pageSize:"Page Size",
@@ -648,6 +650,8 @@ var Designer = {
 					primaryAxisTitle: "Primary Axis Title",
 					secondaryAxisLabel: "Secondary Axis Label",
 					secondaryAxisTitle: "Secondary Axis Title",
+					primary: "Primary",
+					secondary: "Secondary",
 					header: "Header",
                     content: "Content"
                 },
@@ -827,7 +831,7 @@ var Designer = {
                     kpiType: "Type",
                     kpiValueColorOption: "Color Option",
                     kpiValueColor: "Color",
-                    kpiFontSize: "KPIFontSize"
+                    kpiFontSize: "Font Size"
                 },
 				heatMapSortSettings:{
 				xAxis: "X-Axis",
@@ -1237,10 +1241,10 @@ var Designer = {
 				impersonateInfo: "While using Windows AD login in Bold BI you can impersonate the logged-in user while processing the data from ",
 				enableImpersonate: "Impersonate User",
 				emptyCollection: "There are no collections in the currently selected database.",
-				oracleExtractAlertText: "Extract connections are supported only when using MSSQL, PostgresSQL or MySQL as Data Store.",
-                oracleExtractAlertHeaderText: "Data Source",
                 invalidSheetsNoteTxt: "Ignore invalid data sheets and continue data extraction by clicking ‘Yes’.",
                 continueButtonText: "Yes",
+				 oracleExtractAlertText: "Extract connections are supported only when using MSSQL, PostgresSQL or MySQL as Data Store.",
+                oracleExtractAlertHeaderText: "Data Source",
                 closeBtnText: "No",
                 dataSourceType: {
                     file: "File",
@@ -2320,7 +2324,7 @@ var Designer = {
                     youtube: "YouTube",
                     salesforce: "Salesforce",
                     instagram: "Instagram",
-                    microsoftDynamicsSales: "Microsoft Dynamics CRM Sales",
+                    microsoftDynamicsSales: "Microsoft Dynamics 365 CRM Sales",
                     microsoftDynamicsService: "Microsoft Dynamics CRM Service",
                     microsoftOneDrive: "Microsoft OneDrive",
                     microsoftOutlookCalendar: "Microsoft Outlook Calendar",
@@ -2570,8 +2574,8 @@ var Designer = {
 				exportFail: "Exporting failed",
 				exportFailedContent: "Your export request has failed.",
                 exportRestrictContent: "An export request with similar settings is already in progress. Please wait until it is completed.",
-                dialogmsgETL:"We recommend utilizing the Bold Data Hub to manage data source operations. To initiate this process, click on the 'Redirect to Bold Data Hub' button.",
-                etlDialogHeaderText: "Redirect to Bold Data Hub",
+                dialogmsgETL:"We recommend utilizing the Bold ETL to manage data source operations. To initiate this process, click on the 'Redirect to Bold ETL' button.",
+                etlDialogHeaderText: "Redirect to Bold ETL",
                 etlContinuebtnText: "Continue with connector"
             },
             errorCodes: {
@@ -2711,8 +2715,8 @@ var Designer = {
                 saveSuccess: "Dashboard has been successfully published. Do you want to view the dashboard?",
                 tableViewMessage: "This action will discard all the changes in table view. Do you want to continue anyway?",
                 visualDesignerMsgOnQuery: "Custom query is not supported in design mode. Please remove your custom query to switch back to design mode.",
-                customTableView: "You don’t have access to this item, or your administrator has restricted access for this user. Please contact your administrator for assistance.",
-				visualDesignerSwitcherMsg: "Default query has been modified. Please remove the modifications or clear the query to switch back to design mode.",
+				customTableView: "You don’t have access to this item, or your administrator has restricted access for this user. Please contact your administrator for assistance.",
+                visualDesignerSwitcherMsg: "Default query has been modified. Please remove the modifications or clear the query to switch back to design mode.",
                 selectTableMessage: "Please select a table to create the data source.",
                 columnTypeChangePrefixMsg: "Changing the datatype will invalidate the ",
                 columnTypeChangeValidationMsgCommon: "Changing the column data type will invalidate filters and sorting applied on this column.",
@@ -6205,6 +6209,7 @@ var Designer = {
                 exportPdfDisplayText: "PDF",
                 exportExcelDisplayText: "Excel",
 				exportCsvDisplayText:"CSV",
+				exportPptDisplayText: "PowerPoint",
                 exportRefreshDisplayText: "Refresh",
 				bannerRefreshDisplayText: "Clear cache and refresh",
                 backButtonTooltipText: "Back to designer",
@@ -6219,6 +6224,7 @@ var Designer = {
 				performanceMetricsPopText:"Metrics",
 				enableMetrics: "Enable Metrics",
 				enableMobileView: "Restrict Mobile View On Desktop"
+				
             },
             filterOverviewPopup: {
                 appliedFilters: "Applied Filters",
@@ -6234,6 +6240,7 @@ var Designer = {
             exportPanel: {
                 csvExport: "CSV",
                 csvExportTitle: "CSV Export",
+				pptExportTitle: "PowerPoint Export",
                 dashboardOption: "Dashboard",
                 excelExport: "Excel",
                 excelExportTitle: "Excel Export",
@@ -6246,6 +6253,7 @@ var Designer = {
                 orientation: "Orientation",
                 pageSize: "Page Size",
                 pdfExport: "PDF",
+				pptExport: "PowerPoint",
                 pdfExportTitle: "PDF Export",
                 resolution: "Resolution(dpi)",
                 widgetOption: "Widgets",
@@ -7724,7 +7732,7 @@ var Designer = {
                 deleteDashboardTitleContent: "Delete Dashboard",
                 deleteButtonContent: "Yes, Delete",
 				schemaDsErrorMessage1: "Ignore the schema mismatch by accepting below. You can resolve other errors by configuring these data sources individually in the configuration window.",
-				schemaDsErrorMessage2: "Ignore the schema mismatch to proceed with uploading he data source.",
+				schemaDsErrorMessage2: "Ignore the schema mismatch to proceed with uploading the data source.",
 				schemaDsError1: "Found ",
 				schemaDsError2: " schema mismatch error(s)",
 				schemaDsError3: "other error(s) ",
@@ -7825,6 +7833,8 @@ var Designer = {
 				cloudlicenseWarning: "The license must be updated to enable AI features.",
 				cloudActivationSuccess: "Note: Activation has been completed. Click 'Continue' to validate your license.",
 				manageLicense: "Manage License",
+				summaryText: "Summary",
+				AiSummary: "Summarize"
             },
 			replaceValues: { 
 				applyBtnText: "Apply",
@@ -7924,7 +7934,7 @@ var Designer = {
                 dashboardProcess:"Parsing Time",
                 dashboardLayoutRender:"Layout Time",
 				datasourceName :"Name",
-                dataSourceMode: "Mode",
+				dataSourceMode: "Mode",
 				liveMode: "Live",
 				extractMode: "Extract",
 				dataSourceRefreshTime: "Last Refresh",
@@ -7936,6 +7946,39 @@ var Designer = {
                     widgetQueryProcess:"- Querying",
                     widgetClientRender:"Rendering"
                 }
+            },
+			fixedLayout: {
+                propertyDisplayName: "Size",
+                type: "Type",
+                layoutTypeAutomatic: "Automatic",
+                layoutTypeFixed: "Fixed",
+                layoutTypeRange: "Range",
+                fixed: "Fixed",
+                genericDesktop: "Generic Desktop(1366 x 768)",
+                desktopBrowser: "Desktop Browser(1000 x 800)",
+                fullScreen: "Full Screen(1024 x 768)",
+                laptopBrowser: "Laptop Browser(800 x 600)",
+                webPageEmbedded: "Web Page Embedded(800 x 800)",
+                blogEmbedded: "Blog Embedded(650 x 860)",
+                smallBlogEmbedded: "Small Blog Embedded(420 x 650)",
+                column: "Column(550 x 1000)",
+                powerPoint: "PowerPoint(1600 x 900)",
+                story: "Story(1016 x 964)",
+                letterPortrait: "Letter Portrait(850 x 1100)",
+                letterLandscape: "Letter Landscape(1100 x 850)",
+                legalLandscape: "Legal Landscape(1150 x 700)",
+                a3Portrait: "A3 Portrait(1169 x 1654)",
+                a3Landscape: "A3 Landscape(1654 x 1169)",
+                a4Portrait: "A4 Portrait(827 x 1169)",
+                a4Landscape: "A4 Landscape(1169 x 827)",
+                custom: "Custom",
+                height: "Height",
+                width: "Width",
+                maximum: "Maximum",
+                minimum: "Minimum",
+                apply: "Apply",
+                applyAndSave: "Apply & Save",
+				columnAlertMessage: "You are decreasing the layout size, which will impact the widgets located after Column 48. Please adjust the size of your widgets or remove some to ensure they fit properly."
             }
 		}
     }
