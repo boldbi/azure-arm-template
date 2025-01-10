@@ -1,7 +1,7 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 8.3.17
-*  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
+*  version : 9.1.73
+*  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
 *  licensing@syncfusion.com. Any infringement will be prosecuted under
@@ -18187,7 +18187,7 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
             }
             else {
                 if (textPosition == "bottom")
-                    y += (textOffset.height + lineHeight);
+                    y += (textOffset.height + lineHeight); // 922785 - to reduce bottom spacing
                 else if (textPosition == "top")
                     y -= lineHeight;
             }
@@ -21837,6 +21837,7 @@ var Gradient = function (colors) {
 		this._drawBackInterior();
         this.model.chartRegions = [];         
 		this.model.outsideDataRegionPoints = [];
+        this.model.marker = BoldBIDashboard.util.isNullOrUndefined(this.model.marker) ? [] : this.model.marker;
 		this.model.regionCount = null;
 		this.model.totalRadius = null;
 		this.model.circularRadius = [];
@@ -21864,11 +21865,29 @@ var Gradient = function (colors) {
             this.model._sideBySideSeriesPlacement = (this.model.enable3D) ? false : true;
         else
             this.model._sideBySideSeriesPlacement = this.model.sideBySideSeriesPlacement;
+        this._trigger("showMarkerVisibility", this.model);
         for (var i = 0; i < seriesLength; i++)
         {
             series = this.model.series[i];
             seriesType = series.type.toLowerCase();
             series._isTransposed = (seriesType.indexOf("bar") == -1) ? series.isTransposed : !series.isTransposed;
+            // 421892 - Fix for displaying tooltip without marker
+            this.model.marker.push(bbdesigner$.extend(true, {}, series.marker));
+            if (seriesType === "line" || seriesType === "spline") {
+                series.marker.visible = this.model.enableSeriesMaker;
+                if(!series.marker.visible){
+                    series.marker.visible = true;
+                    series.marker.fill = "transparent";
+                    series.marker.border.color = "transparent";
+                }
+                else if (this.model.ChartType === "ComboChart") {
+                    series.marker.fill = this.model.marker[i] != null && this.model.marker[i] != undefined ?  this.model.marker[i].fill : this.model.marker[i - 1].fill;
+                    series.marker.border.color = this.model.marker[i] != null && this.model.marker[i] != undefined ? this.model.marker[i].border.color : this.model.marker[i - 1].border.color;
+                } else {
+                    series.marker.fill = this.model.marker[i].fill;
+                    series.marker.border.color = this.model.marker[i].border.color;
+                }
+            }
             trendlines = series.trendlines;
 			len = trendlines.length;
 			for(var j = 0; j< len ;j++){
@@ -25677,7 +25696,7 @@ var Gradient = function (colors) {
                 bbdesigner$.each(this.model.chartRegions, function (index, regionItem) {
                     if (!BoldBIDashboard.util.isNullOrUndefined(regionItem.SeriesIndex)) {
 					var currentSer = seriesCollection[regionItem.SeriesIndex];
-                    var dataLabel = currentSer.marker.dataLabel;
+					var dataLabel = currentSer.marker.dataLabel;
                     if (chartObj.model.AreaType == "polaraxes" && currentSer.drawType.toLowerCase() == 'column' && evt.target) {
                         if (chartObj.model.enableCanvasRendering) {
                                     if (currentSer.type.toLowerCase() == "polar") {
@@ -25749,9 +25768,9 @@ var Gradient = function (colors) {
                     else {
                         if (!chartObj.model.enableCanvasRendering) {
                             if(evt.target.id == chartObj.svgObject.id + "_Series" + regionItem.SeriesIndex + "_Point" + regionItem.Region.PointIndex ||
-                                evt.target.id == chartObj.svgObject.id + "_Series" + regionItem.SeriesIndex + "_Point" + regionItem.Region.PointIndex + "_symbol" || 
+                                evt.target.id == chartObj.svgObject.id + "_Series" + regionItem.SeriesIndex + "_Point" + regionItem.Region.PointIndex + "_symbol" ||
                                 evt.target.id == chartObj.svgObject.id + "_trackSymbol_" + regionItem.SeriesIndex + "_" + regionItem.Region.PointIndex ||
-                                (dataLabel.visible && (dataLabel.textPosition == "middle" || dataLabel.textPosition == "bottom") && 
+								(dataLabel.visible && (dataLabel.textPosition == "middle" || dataLabel.textPosition == "bottom") && 
 								evt.target.id ==  chartObj.svgObject.id + "_SeriesText" + regionItem.Region.PointIndex  + regionItem.SeriesIndex))
                                 region = regionItem;                           
                         }

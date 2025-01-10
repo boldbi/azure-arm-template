@@ -1,7 +1,7 @@
 /*!
 *  filename: ej1.treemap.all.js
-*  version : 8.3.17
-*  Copyright Syncfusion Inc. 2001 - 2024. All rights reserved.
+*  version : 9.1.73
+*  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
 *  licensing@syncfusion.com. Any infringement will be prosecuted under
@@ -3391,8 +3391,8 @@
                 }
                 if (element != null) {
                     bbdesigner$(element).css({ "left": event.pageX + 10, "top": event.pageY + 10, "display": "block" , "position": "fixed" });
-					bbdesigner$(treeMap.element[0]).append(element);
-                }
+                    bbdesigner$(document.body).append(element);
+				}
             }
         },
 

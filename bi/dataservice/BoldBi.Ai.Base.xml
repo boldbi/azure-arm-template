@@ -160,7 +160,13 @@
             generating AI responses, validating JSON, and logging activities.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.#ctor(BoldBi.Ai.Base.Contracts.IConnectionFactory,BoldBi.Ai.Base.Contracts.IChatMessageProcessor,BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.Contracts.IResponseBuilder)">
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.AiAssistanceOperations"/> class.
+            </summary>
+            <param name="memoryCache">Memory cache to store items.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.#ctor(BoldBi.Ai.Base.Contracts.IConnectionFactory,BoldBi.Ai.Base.Contracts.IChatMessageProcessor,BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.Contracts.IResponseBuilder,Microsoft.Extensions.Caching.Memory.IMemoryCache)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.AiAssistanceOperations"/> class.
             </summary>
@@ -168,6 +174,7 @@
             <param name="chatMessageProcessor">Processor for AI chat message handling.</param>
             <param name="usageProcessor">Processor to calculate and log AI usage metrics.</param>
             <param name="responseBuilder">Builder to construct AI responses.</param>
+            <param name="memoryCache">Memory cache to store items.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.ReleventQuestionProcess(System.String,System.String)">
             <summary>
@@ -176,6 +183,28 @@
             <param name="jsonInput">JSON string containing the input data for question generation.</param>
             <param name="licenseKey">Unique license key identifying the user or tenant.</param>
             <returns>An object containing the processed relevant questions or error details if an exception occurs.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.WidgetSummarizationProcess(System.String,System.String)">
+            <summary>
+            Processes the widget summarization request by validating input,
+            generating a kernel, and retrieving summarization results.
+            </summary>
+            <param name="jsonInput">The JSON string containing the widget summarization request details.</param>
+            <param name="licenseKey">The license key required for AI services authorization.</param>
+            <returns>
+            Returns a <see cref="T:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse"/> object if the operation is successful,
+            or an error response if an exception occurs.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.GenerateWidgetSummarizationAsync(BoldBi.Ai.Base.Enums.AiOperation,BoldBi.Ai.Base.Enums.Mode,BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,System.String)">
+            <summary>
+            Process for generating widget summary.
+            </summary>
+            <param name="operation">The AI operation to perform.</param>
+            <param name="mode">The mode of operation.</param>
+            <param name="aiAssistanceRequest">Details of the AI assistance request.</param>
+            <param name="licenseKey">The license key for the operation.</param>
+            <returns>Summary of a widget.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.ProcessQnaQuery(System.String,System.String)">
             <summary>
@@ -284,6 +313,41 @@
             <param name="aiAssistanceRequest">AI assistance request object containing details such as Query ID and session info.</param>
             <param name="licenseKey">Unique license key identifying the user or tenant.</param>
             <returns>A ChatResponse containing information about widget operations including created, updated or deleted widgets.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.PreProcessQuery(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Pre-processes the query by updating the chat history from the cache.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request containing session details and previous context.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.PostProcessQuery(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Post-processes the query by updating the chat history to the cache.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request containing session details and updated context.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.UpdateHistoryFromCache(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Retrieves the chat history from the memory cache and updates the AI assistance request's previous context.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request to update with the cached chat history.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.UpdateHistoryToCache(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Updates the memory cache with the current chat history from the AI assistance request.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request containing the updated chat history to cache.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.CheckAndRemoveFromCache(System.String)">
+            <summary>
+            Checks the chat history for the specified session in the memory cache and removes the oldest entries
+            if the history exceeds a specified limit.
+            </summary>
+            <param name="sessionId">The session ID used to identify the chat history in the memory cache.</param>
+            <remarks>
+            If the number of entries in the chat history reaches 50, the oldest 20 entries are removed to prevent
+            excessive memory usage. The updated history is then saved back to the memory cache.
+            </remarks>
         </member>
         <member name="T:BoldBi.Ai.Base.AIConnection.AiConnectionFactory">
             <summary>
@@ -727,6 +791,14 @@
             <param name="licenseKey">The license key required for processing the request.</param>
             <returns>A task representing the asynchronous operation, with an object containing the result of the chat query processing.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IAiAssistanceOperations.WidgetSummarizationProcess(System.String,System.String)">
+            <summary>
+            Retrieves responses for relevant questions based on the user's input.
+            </summary>
+            <param name="jsonInput">The JSON input containing the user's relevant question query.</param>
+            <param name="licenseKey">The license key required for processing the request.</param>
+            <returns>A task representing the asynchronous operation, with an object containing the result of processing the relevant question query.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Contracts.IAxisProperty">
             <summary>
             Defines the properties that any axis-related class should implement.
@@ -762,13 +834,16 @@
             Gets the raw output string generated by the AI process.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Contracts.IBoldAiProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.Contracts.IBoldAiProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Builds an input string for the specified AI operation.
             </summary>
             <param name="operation">The AI operation type to perform.</param>
             <param name="tableInfo">Optional table information to include in the input.</param>
             <param name="previousQuestion">Optional previous question to reference in the input.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>A string representing the built input for the AI operation.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.Contracts.IBoldAiProcess.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
@@ -974,13 +1049,16 @@
             <param name="aiAssistanceResponse">Optional AI assistance response for additional processing.</param>
             <returns>A task that represents the asynchronous operation. The task result contains an <see cref="T:BoldBi.Ai.Base.Models.AIResponseBuilder.IChatResponse"/> object.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.ChartUpdationProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.ChartUpdationProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Builds the input required for the process, specifically the visualization prompt.
             </summary>
             <param name="operation">The type of operation being performed.</param>
             <param name="tableInfo">Optional table information used in the prompt.</param>
             <param name="previousQuestion">Optional previous question for context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>The prepared input string for the operation.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.ChartUpdationProcess.FindPropertyMatch(System.String)">
@@ -989,6 +1067,16 @@
             </summary>
             <param name="answer">The raw response text from the AI.</param>
             <returns>A string representing the corrected chart properties in key-value format.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.ChartUpdationProcess.ProcessFuzzyMatching(System.String)">
+            <summary>
+            Performs fuzzy matching to find the best matching property name from a predefined list of property names.
+            </summary>
+            <param name="key">The key to match against the property names.</param>
+            <returns>
+            Returns the best matching property name if a match is found with a similarity score greater than or equal to 80.
+            If no match is found, the original key is returned.
+            </returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.ChartUpdationProcess.PrepareVisualizationPrompt">
             <summary>
@@ -1007,13 +1095,16 @@
             Handles the process of preparing inputs and outputs for creating a visual.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateVisualProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateVisualProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Constructs and prepares an input string for visualization based on the operation, table information, and a previous question.
             </summary>
             <param name="operation">The AI operation type (e.g., creating or updating a widget).</param>
             <param name="tableInfo">Serialized table schema information used for visualization.</param>
             <param name="previousQuestion">A previous question used to provide additional context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>A formatted string ready for AI processing.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateVisualProcess.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
@@ -1069,13 +1160,16 @@
             Gets the raw output data returned by AI processing.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateWidgetProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateWidgetProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Constructs and prepares an input string for visualization based on the operation, table information, and a previous question.
             </summary>
             <param name="operation">The AI operation type (e.g., creating or updating a widget).</param>
             <param name="tableInfo">Serialized table schema information used for visualization.</param>
             <param name="previousQuestion">A previous question used to provide additional context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>A formatted string ready for AI processing.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateWidgetProcess.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
@@ -1140,13 +1234,16 @@
             Gets the raw output data returned by AI processing.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.GenerateQuestionProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.GenerateQuestionProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Builds the input prompt for the AI model to generate questions based on the table schema.
             </summary>
             <param name="operation">The type of AI operation (e.g., generating questions).</param>
             <param name="tableInfo">Optional. A string containing table schema information, if available.</param>
             <param name="previousQuestion">Optional. A previous question to provide additional context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>A string prompt instructing the AI model to generate questions.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.GenerateQuestionProcess.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
@@ -1185,13 +1282,16 @@
             Gets the raw output data after processing.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.JsonFormatter.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.JsonFormatter.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Builds the input message required by the AI service.
             </summary>
             <param name="operation">The AI operation type.</param>
             <param name="tableInfo">Optional. Information about the table schema, if applicable.</param>
             <param name="previousQuestion">Optional. The previous question context, if any.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>A string prompt instructing the AI service to format data as JSON.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.JsonFormatter.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
@@ -1236,13 +1336,16 @@
             Gets the raw output data after processing.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.QnaCreateWidgetProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.QnaCreateWidgetProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Builds the input message required for the AI operation.
             </summary>
             <param name="operation">The AI operation type.</param>
             <param name="tableInfo">JSON string containing table schema information.</param>
             <param name="previousQuestion">The previous question for context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>A formatted string for system message preparation.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CoreProcesses.QnaCreateWidgetProcess.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
@@ -1312,7 +1415,7 @@
             <returns>A task representing the asynchronous operation, but not implemented.</returns>
             <exception cref="T:System.NotImplementedException">This method is not implemented.</exception>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.TextAnswerGenerationProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.TextAnswerGenerationProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Builds the input for the AI process based on the operation, table information, and previous question.
             This method is not implemented in this class.
@@ -1320,6 +1423,9 @@
             <param name="operation">The AI operation to perform.</param>
             <param name="tableInfo">Optional table information for input processing.</param>
             <param name="previousQuestion">Optional previous question for context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
             <returns>Throws a <see cref="T:System.NotImplementedException"/> as this method is not implemented.</returns>
             <exception cref="T:System.NotImplementedException">This method is not implemented.</exception>
         </member>
@@ -1352,6 +1458,69 @@
             <param name="aiAssistanceRequest">The AI assistance request containing parameters.</param>
             <returns>Throws a <see cref="T:System.NotImplementedException"/> as this method is not implemented.</returns>
             <exception cref="T:System.NotImplementedException">This method is not implemented.</exception>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess">
+            <summary>
+            Handles input and output for widget summary.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.RawInput">
+            <summary>
+            Gets the raw input data prepared for AI processing.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.RawOutput">
+            <summary>
+            Gets the raw output data returned by AI processing.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.BuildInput(BoldBi.Ai.Base.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Method to build input for widget summary.
+            </summary>
+            <param name="operation">The AI operation to perform.</param>
+            <param name="tableInfo">Optional table information for input processing.</param>
+            <param name="previousQuestion">Optional previous question for context.</param>
+            <param name="data">Optional data of the widget.</param>
+            <param name="columnBindings">Optional column bindings of the widget.</param>
+            <param name="widget">Optional widget data.</param>
+            <returns>A prompt for widget summarization.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.Run(BoldBi.Ai.Base.AIConnection.IAiConnection,System.String,System.String,System.String)">
+            <summary>
+            Runs the AI connection and processes the provided message and question.
+            This method is not implemented in this class.
+            </summary>
+            <param name="connection">The AI connection instance for processing.</param>
+            <param name="message">The message content to send for AI processing.</param>
+            <param name="question">The question or query to ask the AI.</param>
+            <param name="licenseKey">The license key for authorization.</param>
+            <returns>A task representing the asynchronous operation, with a result containing the processed output as a <see cref="T:Microsoft.SemanticKernel.TextContent"/> object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.BuildOutput(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.TextContent,BoldBi.Ai.Base.Models.AIResponseBuilder.AiAssistanceResponse)">
+            <summary>
+            Processes the AI response and prepares the output based on the provided request and AI response data.
+            </summary>
+            <param name="aiAssistanceRequest">Contains the details of the AI assistance request.</param>
+            <param name="openAiResponse">The response received from the AI model as a <see cref="T:Microsoft.SemanticKernel.TextContent"/> object.</param>
+            <param name="aiAssistanceResponse">Optional; contains additional response data to aid output preparation.</param>
+            <returns>A task representing the asynchronous operation, with a result containing the prepared output object.</returns>
+            <exception cref="T:BoldBi.Ai.Base.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
+            <exception cref="T:BoldBi.Ai.Base.ExceptionHandler.ConnectionException">Thrown if there is an error with the AI connection.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.PrepareSystemMessage(System.String,System.String,System.String)">
+            <summary>
+            Prepares the system message to instruct the AI on how to handle chart property-related queries.
+            </summary>
+            <returns>The system message string.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.WidgetSummarizationProcess.FormatSummaryAsHtml(System.String)">
+            <summary>
+            Method to change Ai response into html format.
+            </summary>
+            <param name="summaryContent">AI response for widget summary.</param>
+            <returns> A html formatted response for widget summary.</returns>
+            <exception cref="T:BoldBi.Ai.Base.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
         </member>
         <member name="T:BoldBi.Ai.Base.CustomNullableAttribute">
             <summary>
@@ -1408,6 +1577,9 @@
         </member>
         <member name="F:BoldBi.Ai.Base.Enums.AiOperation.CreateVisual">
             <summary> create a visual </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.Enums.AiOperation.WidgetSummarize">
+            <summary> Create a summary for a widget </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Enums.AiProvider">
             <summary>
@@ -1535,6 +1707,12 @@
         </member>
         <member name="F:BoldBi.Ai.Base.Enums.WidgetTypes.Map">
             <summary>Displays geographical data on a map.</summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.Enums.WidgetTypes.Gauge">
+            <summary> Displays radial gauge.</summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.Enums.WidgetTypes.KpiCard">
+            <summary> Displays KPI.</summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Enums.Mode">
             <summary>
@@ -2474,10 +2652,11 @@
             Handles the processing of dead-letter queues as a hosted service.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.#ctor">
+        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.ScheduledActions"/> class.
             </summary>
+            <param name="memoryCache">Stores memory cache.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.StartAsync(System.Threading.CancellationToken)">
             <summary>
@@ -3727,10 +3906,11 @@
             <param name="rankJson">The AI field with custom sorting information.</param>
             <returns>A dictionary containing custom sorting information, or null if not applicable.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FilterInfoProcessor.UpdateCustomSorting(System.Collections.Generic.Dictionary{System.String,System.Object},System.Collections.Generic.Dictionary{System.String,System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.String})">
+        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FilterInfoProcessor.UpdateCustomSorting(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Collections.Generic.Dictionary{System.String,System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>
             Updates the custom sorting details based on the provided parameters.
             </summary>
+            <param name="chartType">The type of chart for which the fields are being prepared.</param>
             <param name="aiField">A dictionary containing AI field data.</param>
             <param name="columnsData">A dictionary mapping column names to their respective IDs.</param>
             <param name="keysList">A list of keys available for matching.</param>
@@ -3738,6 +3918,34 @@
             <returns>
             A JSON string representing the custom sorting configuration if sorting is applied;
             otherwise, <c>null</c>.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FilterInfoProcessor.GetSortingType(BoldBi.Ai.Base.Enums.Order,System.String)">
+            <summary>
+            Determines the sorting type based on the provided sorting type and chart type.
+            </summary>
+            <param name="sortingType">The current sorting type (Ascending or Descending).</param>
+            <param name="chartType">The type of chart to check if sorting changes are required.</param>
+            <returns>
+            Returns the updated sorting type based on whether sorting changes are required for the specified chart type.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FilterInfoProcessor.IsSortingChangesRequiredForWidget(System.String)">
+            <summary>
+            Checks whether sorting changes are required for a specific chart type.
+            </summary>
+            <param name="chartType">The chart type to check.</param>
+            <returns>
+            Returns true if sorting changes are required for the specified chart type; otherwise, false.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FilterInfoProcessor.GetCustomSortType(BoldBi.Ai.Base.Enums.SortingType)">
+            <summary>
+            Retrieves the custom sorting type string based on the provided sorting type enumeration value.
+            </summary>
+            <param name="type">The sorting type enumeration value.</param>
+            <returns>
+            Returns the string representation of the sorting type, such as "Alphabetic", "Field", or "DataSource".
             </returns>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FilterInfoProcessor.PrepareMeasureFilterInfo(BoldBi.Ai.Base.Models.Filters,System.String)">
@@ -4166,6 +4374,12 @@
             Manages the creation and termination of AI sessions, along with logging related activities.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.SessionManager"/> class.
+            </summary>
+            <param name="memoryCache">Stores memory cache.</param>
+        </member>
         <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.CreateSession(System.String)">
             <summary>
             Creates a new AI session based on the provided JSON input and logs relevant details.
@@ -4388,6 +4602,14 @@
             <param name="status">The status of the response.</param>
             <param name="aiModel">The AI model used for the request.</param>
         </member>
+        <member name="M:BoldBi.Ai.Base.LoggingSystem.ActivityLogger.WidgetSummaryLog(BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest,System.String,System.String)">
+            <summary>
+            Logs AI summary activity for widget request.
+            </summary>
+            <param name="aiAssistanceRequest">The request containing AI assistance information.</param>
+            <param name="response">The response generated by the AI model.</param>
+            <param name="aiModel">The AI model used for the request.</param>
+        </member>
         <member name="M:BoldBi.Ai.Base.LoggingSystem.ActivityLogger.DataLog(System.String,System.String,System.String,BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Logs data information about the data source involved in an AI assistance request.
@@ -4455,6 +4677,26 @@
         <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest.Url">
             <summary>
             Gets or sets the server url making the request.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest.SessionHistory">
+            <summary>
+            Gets or sets the history of the chat.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest.WidgetSummarizationRequest">
+            <summary>
+            Gets or sets the widget summarization request data for widget summary.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest.SessionIdAlias1">
+            <summary>
+            Sets the session ID using the alias "sessionid" when deserializing from JSON.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.AiAssistanceRequest.SessionIdAlias2">
+            <summary>
+            Sets the session ID using the alias "sesssionid" when deserializing from JSON.
             </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Models.AIInputBuilder.ChartProperty">
@@ -4570,6 +4812,31 @@
         <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.TableInfoDetails.Fields">
             <summary>
             Gets or sets the list of field information associated with the data source.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Models.AIInputBuilder.WidgetSummarizationRequest">
+            <summary>
+            Stores the summary request for the widget.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.WidgetSummarizationRequest.WidgetSummaryId">
+            <summary>
+            Gets or Sets the WidgetSummaryId.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.WidgetSummarizationRequest.ColumnBindings">
+            <summary>
+            Gets or sets column bindings of a widget.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.WidgetSummarizationRequest.Data">
+            <summary>
+            Gets or sets the data of a widget.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIInputBuilder.WidgetSummarizationRequest.Widget">
+            <summary>
+            Gets or sets the title of the widget.
             </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Models.AILicense.AiKeyDetails">
@@ -5053,6 +5320,66 @@
             Gets or sets the greetings message.
             </summary>
         </member>
+        <member name="T:BoldBi.Ai.Base.Models.AIResponseBuilder.ColorCustomization">
+            <summary>
+            Represents the color customization settings.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.ColorCustomization.Rule">
+            <summary>
+            Gets or sets the rules for color customization.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.ColorCustomization.Individual">
+            <summary>
+            Gets or sets the individual color customizations.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Models.AIResponseBuilder.Rule">
+            <summary>
+            Represents a rule for color customization.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Rule.Column">
+            <summary>
+            Gets or sets the column name for the rule.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Rule.Type">
+            <summary>
+            Gets or sets the type of comparison for the rule.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Rule.Value">
+            <summary>
+            Gets or sets the values for the rule.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Rule.Color">
+            <summary>
+            Gets or sets the color associated with the rule.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Models.AIResponseBuilder.Individual">
+            <summary>
+            Represents an individual color customization entry.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Individual.Column">
+            <summary>
+            Gets or sets the column name for the individual entry.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Individual.Value">
+            <summary>
+            Gets or sets the value for the individual entry.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.Individual.Color">
+            <summary>
+            Gets or sets the color associated with the individual entry.
+            </summary>
+        </member>
         <member name="T:BoldBi.Ai.Base.Models.AIResponseBuilder.CreateWidgetResponse">
             <summary>
             Represents the response for creating a widget in the chat interface.
@@ -5350,6 +5677,11 @@
             Gets or sets the name of the widget that was updated.
             </summary>
         </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.UpdateWidgetResponse.ColorCustomization">
+            <summary>
+            Gets or sets the color customization.
+            </summary>
+        </member>
         <member name="T:BoldBi.Ai.Base.Models.AIResponseBuilder.UsageTokens">
             <summary>
             Represents the usage of tokens for API interactions.
@@ -5387,6 +5719,36 @@
         <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.UsageTokens.CompletionTokens">
             <summary>
             Gets or sets the number of completion tokens used.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse">
+            <summary>
+            Stores the summary response for the widget.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse.AiResponse">
+            <summary>
+            Gets or sets the AI-generated response.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse.Question">
+            <summary>
+            Gets or sets the question that may have prompted the response.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse.Model">
+            <summary>
+            Gets or sets the model used for generating the response.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse.SummaryId">
+            <summary>
+            Gets or sets the summary ID for widget summary.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.AIResponseBuilder.WidgetSummarizationResponse.UsageTokens">
+            <summary>
+            Gets or sets the usage tokens associated with the response.
             </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Models.AzureAICredentials">
@@ -5896,9 +6258,9 @@
             SQL query to check if a license is active for a given tenant.
             </summary>
         </member>
-        <member name="F:BoldBi.Ai.Base.Models.DatabaseLog.SqlQueries.UpdateTenantId">
+        <member name="F:BoldBi.Ai.Base.Models.DatabaseLog.SqlQueries.IsInternal">
             <summary>
-            SQL query to update tenant id for specific tenant.
+            SQL query to check if a tenants is internal or not.
             </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Models.DatabaseLog.UsageLogConstants">
@@ -6038,6 +6400,31 @@
         <member name="P:BoldBi.Ai.Base.Models.Columns.Row">
             <summary>
             Gets or sets the details of the offset axis.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.Columns.ActualValue">
+            <summary>
+            Gets or sets the details of the radial gauge/kpi actualvalue value.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.Columns.TargetValue">
+            <summary>
+            Gets or sets the details of the radial gauge/kpi targetvalue value.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.Columns.GaugeMinimum">
+            <summary>
+            Gets or sets the details of the radial gauge min value.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.Columns.GaugeMaximum">
+            <summary>
+            Gets or sets the details radial gauge max value.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Models.Columns.Series">
+            <summary>
+            Gets or sets the details radial gauge series value.
             </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Models.CustomSorting">
