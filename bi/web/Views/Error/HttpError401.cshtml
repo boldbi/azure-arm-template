@@ -1,0 +1,117 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Access Denied"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    var cdnLink = ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
+    var ipAddress = Context.Connection.RemoteIpAddress;
+    var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    bool isEmbedSignature = Convert.ToBoolean(requestUrl.Query.ToLower().Contains("embed_signature"));
+    bool isEmbedUserToken = Convert.ToBoolean(requestUrl.Query.ToLower().Contains("embed_user_token"));
+    var isEmbedExpired = ViewBag.IsEmbedExpired == null ? false : ViewBag.IsEmbedExpired;
+    var isTimeStampRequired = ViewBag.IsTimeStampRequired == null ? false : ViewBag.IsTimeStampRequired;
+    var nonce = ViewBag.Nonce == null ? false : ViewBag.Nonce;
+    var isEmbedEnabled = ViewBag.IsEmbedEnabled == null ? false : ViewBag.IsEmbedEnabled;
+    var publishedItemIsLocked = ViewBag.IsPublishedCanEdit == null ? false : ViewBag.IsPublishedCanEdit;
+    var publishedDatasourceIsLocked = ViewBag.IsDatasourceCanEdit == null ? false : ViewBag.IsDatasourceCanEdit;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var noPermissionAccess = ViewBag.NoAccess == null ? false : ViewBag.NoAccess;
+    var isSlideshow = Convert.ToBoolean(requestUrl.Query.ToLower().Contains("isslideshow"));
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/error-page.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.min.css" />
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/error-page.min.js"></script>
+    </environment>
+    <script>
+        var setPermissionUrl = "@Url.Action("SetCookieStoragePermission", "Accounts")";
+    </script>
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@globalAppSettings.SystemSettings.LoginLogo" onerror="if (this.src != '@globalAppSettings.SystemSettings.CDNLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo') this.src = '@globalAppSettings.SystemSettings.CDNLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo';" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@themeBasedImageHelper.AccessDeniedImage()" class="error-image-2">
+                </div>
+                <div class="error-type">@T["Access Denied"]</div>
+                @if (publishedItemIsLocked)
+                {
+                    <div class="error-text">
+                        @T["Editing access is denied because the dashboard was published from another site and editing has been disabled."]<br>@T["Please contact the site administrator for help."]
+                    </div>
+                }
+                else if (publishedDatasourceIsLocked)
+                {
+                    <div class="error-text">
+                        @T["Editing access is denied for the data source because it was published from another site and editing has been disabled."]<br>@T["Please contact the site administrator for help."]
+                    </div>
+                }
+                else if (isEmbedEnabled)
+                {
+                    <div class="error-text">
+                        @T["Embed authentication is disabled."]<br>@T["Please contact the site administrator for help."]
+                    </div>
+                }
+                else if (isTimeStampRequired)
+                {
+                    <div class="error-text">
+                        @T["The embed_timestamp value is missing the dashboard signature URL."]<br>@T["You must pass the current timestamp value while you setting embed_expirationtime value."]
+                    </div>
+                }
+                else if (isEmbedExpired || nonce)
+                {
+                    <div class="error-text">
+                        @T["The embed dashboard link is invalid or expired."]<br>@T["Please contact the site administrator for help."]
+                    </div>
+                }
+                else if (embedConfig != null && (isEmbedSignature || isEmbedUserToken))
+                {
+                    <div class="error-text">
+                        @T["You do not have permission to view this dashboard."]<br>@T["Please contact your administrator."]
+                    </div>
+                }
+                else if (noPermissionAccess)
+                {
+                    <div class="error-text">
+                        @T["You do not have permission to view this dashboard."]<br>@T["Please contact your administrator."]
+                    </div>
+                }
+                else
+                {
+                    <div class="error-text">
+                        @Html.Raw(string.Format(T["Oops! The dashboard you are trying to access is restricted from viewing from the current IP address: {0}"].Value, "<b>" + ipAddress + "</b>"))<br>@T["Please contact the site administrator for help."]
+                    </div>
+
+                    @if (!isSlideshow)
+                    {
+                        <div class="take-me-back-to-home-page"><span class="error-page-cursor"><a class="error-to-beck-text-color" href="@Url.Action("Dashboards", "Dashboards")">@T["Go to home page"]</a></span></div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</body>
+</html>

@@ -1,0 +1,9 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var appCustomtheme = ServerAppConfig.IsSelfHosted ? (globalAppSettings != null && globalAppSettings.SystemSettings != null && !globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? globalAppSettings.SystemSettings.CustomApplicationTheme : ServerAppConfig.Theme.ApplicationTheme) : globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.CustomApplicationTheme : string.Empty;
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+
+<link asp-append-version="true" rel="stylesheet" class="application-theme-ref" href="@ServerAppConfig.GetCustomThemeUrl(appCustomtheme, dns, globalAppSettings)" />

@@ -1,0 +1,93 @@
+﻿@{
+    Layout = null;
+}
+<html>
+<head>
+       <script nonce="@Context.Items["ScriptNonce"]">
+        $(document).on("click", "#item-link", function () {
+            this.setSelectionRange(0, this.value.length);
+        });
+
+        $(document).on("click", "#container-name", function () {
+            this.setSelectionRange(0, this.value.length);
+        });
+
+        $(document).on("click", "#dialog-close", function () {
+            onGetLinkDialogClose();
+        });
+        $(document).on("click", "#Cancel", function () {
+            onGetLinkDialogClose();
+        });
+        $(document).ready(function () {
+            $("#item-link-copy").removeClass("focusdiv");
+            $("#item-link").on("focusin", function () {
+                $("#item-link-copy").addClass("focusdiv");
+            });
+            $("#item-link").on("focusout", function () {
+                $("#item-link-copy").removeClass("focusdiv");
+            });
+        });
+
+        function load() {
+            if (($(parent.window).width()) > 1400) {
+                $(".dialog").addClass("iframe");
+            }
+
+            if (($(parent.window).width()) < 1400) {
+                $(".dialog").removeClass("iframe");
+            }
+        }
+    </script>
+</head>
+<body onload="load()">
+    <div id="get_item_link" class="col-12 float-start no-padding dialog" style="display:none">
+        <div class="col-12 float-start dialog-header">
+            <div class="col-6 float-start no-padding">
+                <span class="su su-link Head-icon"></span>
+                <span class="PopupTitle">Get Link</span>
+            </div>
+            <div class="col-6 float-start no-padding">
+                <a href="#" title="Close" class="PopupClose text-decoration-none" id="dialog-close"><span class="su su-close"></span></a>
+            </div>
+            <div class="report-name no-padding col-12 float-start link-item-name ellipsis" style="padding-left:5px;padding-top: 10px;"></div>
+        </div>
+        <div class="dialog-body col-12 float-start no-padding">
+            <div class="col-12 float-start">
+                <div class="get-link-body">
+                    <div class="link-div" style="display:none">
+                        <div class="col-sm-12 col-12 float-start no-padding">
+                            <span style="white-space:normal;float:left;margin-bottom:10px">
+                                <span class="db-link">Connection String:</span>
+                            </span>
+                        </div>
+                        <input  id="item-link" class="form-control" readonly />
+                        <div class="form-control su su-copy text focus" id="item-link-copy" readonly="" data-bs-original-title="Click to copy"></div>
+                    </div>
+                    <div class="container-link-div" style="display:none">
+                        <div class="col-sm-12 col-12 float-start no-padding">
+                            <span style="white-space:normal;float:left;margin-bottom:10px;margin-top:10px">
+                                <span class="db-link">Container Name:</span>
+                            </span>
+                        </div>
+                        <input  id="container-name" class="form-control" readonly />
+                        <div class="form-control su su-copy text focus" id="container-name-copy" readonly="" data-bs-original-title="Click to copy"></div>
+                    </div>
+
+                    <strong style="padding-top:15px;float:left" class="note">Note:</strong>
+                    <span style="padding-top:5px;padding-bottom:10px;white-space:normal;float:left">
+                        <span class="link">
+                            Anyone can navigate to this link, but only users with the appropriate permissions will be able to view.
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 float-start dialog-footer rightAlign no-right-padding no-left-padding" style="position:relative !important;font-size:14px !important">
+            <div class="float-end"></div>
+            <div class="no-padding centerAlign validationArea" id="close">
+                <input title="" type="button" id="Cancel" class="btn secondary-button PopupClose" value="OK"  tabindex="3" autofocus />
+            </div>
+        </div>
+    </div>
+</body>
+</html>

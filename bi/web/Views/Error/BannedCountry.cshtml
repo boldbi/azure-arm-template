@@ -1,0 +1,76 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var isValidIP = ViewBag.IsRestrictedFor == "spamip" ? true : false;
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@string.Format(T["{0} Cloud Management"].Value, "Syncfusion") - @T["Access Denied"]</title>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.min.css" />
+    </environment>
+    <script>
+
+        function OnLoginLogoLoadError() {
+            var alternateImage = "@cdnLink/static/company/@ServerAppConfig.AppSettings.AppBranding.Identifier/logo/v1/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo"
+            if (document.getElementsByClassName('error-image-1').src != alternateImage) {
+                document.getElementsByClassName("error-image-1")[0].src = alternateImage;
+            }
+        }
+    </script>
+    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body class="error-full-content" id="banned-country-page">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@globalAppSettings.SystemSettings.LoginLogo" onerror="OnLoginLogoLoadError()" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@themeBasedImageHelper.AccessDeniedImage()" class="error-image-2">
+                </div>
+                <div class="error-type">
+                    @T["Access Denied"]
+                </div>
+
+                @if (isValidIP)
+                {
+                    <div class="error-text">
+                        @string.Format(T["This {0} address has been flagged for suspicious activity and is restricted from accessing our site."].Value, "IP")<br /> @Html.Raw(String.Format(T["If you believe you have received this message in error, please contact {0}"].Value, "<a href='mailto:" + @ServerAppConfig.AppSettings.Syncfusion.SalesTeam + "'>" + @ServerAppConfig.AppSettings.Syncfusion.SalesTeam + "</a>")) @T["Thank you."]
+                    </div>
+                }
+                else
+                {
+                    <div class="error-text">
+                        @Html.Raw(String.Format(T["{0} is a {1} company and is subject to {2} export laws. Consequently, due to your location, we may not allow access to any material on our site."].Value, GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier ? @ServerAppConfig.BrandingJson.IsWhiteLabelling ? @ServerAppConfig.BrandingJson.BrandingName : "Bold BI(Powered By Syncfusion)" : "Syncfusion", "United States", "US"))<br />
+                        @Html.Raw(String.Format(T["If you believe that this is inaccurate, please contact {0}"].Value, "<a href='mailto:" + @ServerAppConfig.AppSettings.Syncfusion.SalesTeam + "'>" + @ServerAppConfig.AppSettings.Syncfusion.SalesTeam + "</a>")) @T["Thank you."]
+                    </div>
+                }
+                <div class="take-me-back-to-home-page">
+                    <p> @ViewData["IsRestrictedFor"]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+</body>
+</html>
