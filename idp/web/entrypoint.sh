@@ -57,4 +57,4 @@ if [ -d "$app_data_location" ]; then
 fi
 
 echo "Executing ID-Web service..."
-dotnet Syncfusion.Server.IdentityProvider.Core.dll
+dotnet Syncfusion.Server.IdentityProvider.Core.dll --urls=http://0.0.0.0:80

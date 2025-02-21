@@ -25,7 +25,20 @@
     var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UserProfile);
     var dashboardSettings = ViewBag.DashboardSettings;
-    var userPreference = !string.IsNullOrWhiteSpace(Context.Request.Cookies[ServerAppConfig.UserLanguageCookieName]) ? CookieRequestCultureProvider.ParseCookieValue(Context.Request.Cookies[ServerAppConfig.UserLanguageCookieName]).Cultures.FirstOrDefault().Value : identityResponse.UserPreference.LanguageSettings.Language;
+    var userCookieValue = Context.Request.Cookies[ServerAppConfig.UserLanguageCookieName];
+    var userPreference = string.Empty;
+    if (string.IsNullOrWhiteSpace(userCookieValue))
+    {
+        userPreference = identityResponse.UserPreference.LanguageSettings.Language;
+    }
+    else
+    {
+        var parsedCulture = CookieRequestCultureProvider.ParseCookieValue(userCookieValue);
+        if (parsedCulture != null)
+        {
+            userPreference = parsedCulture.Cultures.FirstOrDefault().Value;
+        }
+    }
     var languagePreference = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference && !string.IsNullOrWhiteSpace(globalAppSettings.SystemSettings.Language) ? globalAppSettings.SystemSettings.Language : userPreference;
     var cultureLanguageObj = new CultureInfo(!string.IsNullOrWhiteSpace(languagePreference) ? languagePreference : "en-us");
     var nativeNameTitleCase = cultureLanguageObj.TextInfo.ToTitleCase(cultureLanguageObj.NativeName);
