@@ -10,4 +10,5 @@ if [ -f "/application/utilities/customwidgetupgrader/CustomWidgetUpgrader.dll" ]
 fi
 
 echo "Executing Designer Web Service..."
-dotnet Syncfusion.Dashboard.Designer.Web.Service.dll
+dotnet Syncfusion.Dashboard.Designer.Web.Service.dll --urls=http://0.0.0.0:80
+
