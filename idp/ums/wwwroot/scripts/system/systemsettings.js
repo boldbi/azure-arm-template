@@ -289,7 +289,7 @@ $(document).ready(function () {
         }
     });
 
-    if ($('meta[name=has-drm-configuration]').attr("content") == "true") {
+    if ($('meta[name=is-ignore-drm-configuration]').attr("content") == "true") {
         $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
         $(".startup-content").fadeIn();
         $("#system-settings-welcome-container").hide();

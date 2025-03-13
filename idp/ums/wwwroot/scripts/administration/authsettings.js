@@ -318,6 +318,16 @@ $(document).ready(function () {
         $(".success-message, .error-message").hide();
     });
 
+    scope.enableDisableEncryption = function () {
+        
+        if ($("#enable-jwt-encryption").is(":checked")) {
+            $("#jwt-encryption-key").prop("disabled", true);
+        }
+        else {
+            $("#jwt-encryption-key").prop("disabled", false);
+        }
+    }
+
     scope.hideValidationMessage = function (data, name) {
         var updateAuthSettingsButton;
         if (name === "oauth") {
@@ -648,6 +658,11 @@ $(document).ready(function () {
 
     function updateJwtSetting() {
         var jwtEnabled = $("#enable-jwt").is(":checked");
+        var encryptionInfo = {
+            IsEncryptionEnabled: $("#enable-jwt-encryption").is(":checked"),
+            PublicKey: "",
+            PrivateKey: ""
+        };
         var authSettingsData = {
             IsEnabled: jwtEnabled,
             AuthProvider: $("input[name='jwtAuthenticationProvider']").val().trim(),
@@ -658,6 +673,7 @@ $(document).ready(function () {
                 LoginUrl: $("input[name='jwtLoginUrl']").val().trim(),
                 LogOutUrl: $("input[name='jwtLogOutUrl']").val().trim(),
                 Logo: $("input[name='jwtLogo']").val().trim(),
+                EncryptionValues: JSON.stringify(encryptionInfo)
             }
         };
         $.ajax({
@@ -1082,6 +1098,24 @@ function fnRegenerateSigningKey() {
     });
 }
 
+function fnRegenerateEncryptionKey() {
+    $.ajax({
+        type: "POST",
+        url: refreshEncryptionKeyUrl,
+        success: function (data) {
+            if (data != false) {
+                SuccessAlert(window.Server.App.LocalizationContent.RegenerateEncryptionKey, window.Server.App.LocalizationContent.RegenerateEncryptionKeySuccess, 7000);
+                $("#jwt-encryption-key").val(data);
+            } else {
+                WarningAlert(window.Server.App.LocalizationContent.RegenerateEncryptionKey, window.Server.App.LocalizationContent.RegenerateEncryptionKeyError, null, 7000);
+            }
+        },
+        error: function () {
+            WarningAlert(window.Server.App.LocalizationContent.RegenerateEncryptionKey, window.Server.App.LocalizationContent.RegenerateEncryptionKeyError, null, 7000);
+        }
+    });
+}
+
 function onRegenerateSigningKeyDialogOpen() {
     if ($("#enable-jwt").is(":checked")) {
         dialog.show();
@@ -1094,10 +1128,10 @@ $("#enable-jwt").change(function () {
 
 function jwtSigningKeyShowHide() {
     if ($("#enable-jwt").is(":checked")) {
-        $("#jwt-signing-key,#show-signing-key").prop("disabled", false);
+        $("#jwt-signing-key,#show-signing-key,#jwt-encryption-key,#show-encryption-key,#enable-jwt-encryption").prop("disabled", false);
     }
     else {
-        $("#jwt-signing-key,#show-signing-key").prop("disabled", true);
+        $("#jwt-signing-key,#show-signing-key,#jwt-encryption-key,#show-encryption-key,#enable-jwt-encryption").prop("disabled", true);
     }
 }
 
@@ -1139,12 +1173,20 @@ function ongroupImportchange(args) {
     }
 }
 
+$(document).on("click", "#generate-encryption-key", function () {
+    fnRegenerateEncryptionKey();
+});
+
 $(document).on("click", "#generate-signing-key", function () {
     onRegenerateSigningKeyDialogOpen();
 });
 
 $(document).on("click", "#copy-signing-key", function () {
     fnCopySigningKey('#jwt-signing-key', '#copy-signing-key');
+});
+
+$(document).on("click", "#copy-encryption-key", function () {
+    fnCopySigningKey('#jwt-encryption-key', '#copy-encryption-key');
 });
 
 $(document).on("click", "#openid-mobile-callback-link-copy", function () {

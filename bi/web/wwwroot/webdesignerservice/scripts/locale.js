@@ -67,7 +67,9 @@
                     separateline: "Line",
                     dateBucket: "Date Group",
 					textFilter: "Text Filter",
-                    tabbedWidget: "Tab Widget"
+                    tabbedWidget: "Tab Widget",
+                    buttonWidget: "Button",
+                    qaWidget: "Q&A"
                 },
                 widgetDescription: {
                     columnChartDesc: "Compare values for a set of unordered items across categories using vertical bars arranged horizontally.",
@@ -115,7 +117,9 @@
                     lineDesc: "Separate the widgets.",
                     dateBucketDesc: "Used to change the date format dynamically for the connected widgets.",
 					textFilterDesc: "Filter based on the search performed in the text box.",
-                    tabWidgetDesc: "Combine multiple widgets within tabs."
+                    tabWidgetDesc: "Combine multiple widgets within tabs.",
+                    buttonDesc: "Button",
+                    qaDesc: "Transform your questions into insightful charts.",
                 },
                 widgetDataRequiredMessage: {
                     gridDataRequiredMessage: "Grid requires atleast 1 Column to render",
@@ -170,7 +174,9 @@
                     customWidgetToRender: " to render.",
                     combineWidgetDataReq: "Any widgets",
                     lineDataReq: "None",
-                    dateBucketDataReq: "None"
+                    dateBucketDataReq: "None",
+                    buttonReq: "None",
+                    qaReq: "No data required"
                 },
                 refreshTooltip: "Refresh",
                 noWidgetMessage: "Something went wrong. Refresh the dashboard list and try again."
@@ -587,7 +593,8 @@
                     listBoxShowAll:"Show All",
                     tabLoaderText: "Enable Tab loader",
                     mapValueType: "Value Type",
-                    columnChooser: "Enable Column Chooser"
+                    columnChooser: "Enable Column Chooser",
+					enableRTL: "Enable RTL"
                 },
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -835,7 +842,13 @@
                     kpiType: "Type",
                     kpiValueColorOption: "Color Option",
                     kpiValueColor: "Color",
-                    kpiFontSize: "Font Size"
+                    kpiFontSize: "Font Size",
+                    absoluteDifference: "Absolute Difference",
+                    percentOfDifference: "Percent of Difference",
+                    percentOfTarget: "Percent of Target",
+                    actualValue: "Actual Value",
+                    targetValue: "Target Value",
+                    percentOfChange: "Percent of Change"
                 },
 				heatMapSortSettings:{
 				xAxis: "X-Axis",
@@ -1250,8 +1263,6 @@
                 oracleExtractAlertHeaderText: "Data Source",
                 invalidSheetsNoteTxt: "Ignore invalid data sheets and continue data extraction by clicking ‘Yes’.",
                 continueButtonText: "Yes",
-				 oracleExtractAlertText: "Extract connections are supported only when using MSSQL, PostgresSQL or MySQL as Data Store.",
-                oracleExtractAlertHeaderText: "Data Source",
                 closeBtnText: "No",
                 dataSourceType: {
                     file: "File",
@@ -1309,6 +1320,7 @@
 					apacheDoris: "Apache Doris",
                     redShift:"Redshift",
                     azureSQLDataWarehouse:"AzureSQLDataWarehouse",
+					microsoftfabric: 'Microsoft Fabric',
                     jira: {
                         name: "Jira",
                         templates: {
@@ -6610,17 +6622,17 @@
                 viewUsermsg: "View Users",
                 addFilter: "Add Filter",
                 tileHeader: "Untitled Filter",
-                dialogTitle: "Configure User Filters",
+                dialogTitle: "Setup Row Level Security - User Filter",
                 userListTitle: "Users / Groups",
                 fieldListTitle: "Fields",
                 useFilterFromErrMsg: "No selected items Found",
-                alertDialogTitle: "Configure User Filters",
+                alertDialogTitle: "Setup Row Level Security - User Filter",
                 alertDialogAlertMsg: "Changing the Data Column will reset the configuration. Do you want to continue?",
                 sort: "Sort",
                 autoMapUsers: "Auto Map Users",
                 filter: "Filter",
                 refresh: "Refresh",
-                menuItemText: "Configure User Filters",
+                menuItemText: "Setup Row Level Security - User Filter",
                 runText: "Run",
                 emailText: "Email",
                 deleteAlertDialogMsg: "Do you want to delete this filter?",
@@ -7855,56 +7867,20 @@
 				AiSummaryCopySuccessMessage: "Copied!",
 				releaseNoteTitle: "Latest Updates",
 				releaseNotes: {
-					releaseNote1:"",	
+					releaseNote1: "AI Copilot now supports conditional formatting for Grid and Scatter Plot widgets.",
+					releaseNote2: "Auto-suggestion of data source names using @mentions in AI Copilot and AI Agent.",
+					releaseNote3: "Enhanced user experience in dashboard summaries and widget insights.",
+					releaseNote4: "AI Agent now provides text replies for expression fields in data sources.",
 				},
-				
 				linkBasedNotes : {
 					releaseNotes1:[
 						{
-							linkName : "ConfigureKey",
-							textContent1 : "Configure your own OpenAI or Azure OpenAI key for AI features.",
-							textContent2 : " Click for details.",
-							replaceText : " Click for details." 
-						}
-					],
-					releaseNotes2:[
-						{
-							linkName : "DataPolicies",
-							textContent1 : "Data policies have been updated.",
-							textContent2: "Please review them by visiting the following link.",
-							replaceText : " link" 
-						}
-					],
-					releaseNotes3:[
-						{
-							linkName : "TextualResponse",
-							textContent1 : "The AI agent can now respond in text to your data queries. We have made a few changes in data processing.",
-							textContent2: " See them here.",
-							replaceText : " See them here." 
-						}
-					],
-					releaseNotes4:[
-						{
-							linkName : "WidgetInsights",
-							textContent1 : "Introducing widget insights ",
-							textContent2 : "widget insights ",
-							replaceText : "widget insights " 
-						},
-						{
-							linkName : "DashboardSummaries",
-							textContent1 : "and dashboard summaries",
-							textContent2 : "dashboard summaries",
-							replaceText : "dashboard summaries" 
-						},
-						{
 							linkName : "",
-							textContent1 : " : see the story behind your data. ",
-							textContent2 : "" ,
-							replaceText : "" 
+							textContent1 : "",
+							textContent2 : "",
+							replaceText : "", 
 						},
-						
 					],
-					
 				},
 				connectionFailed : "Connection failed: The AI server is not accepting connections at the moment." ,
 				aiSettingPage: "Ai settings page.",
@@ -7997,7 +7973,8 @@
 				width: "Width",
                 fill: "Fill",
                 enableBackgroundColor: "Enable Background Color",
-                enableBackgroundImage: "Enable Background Image"
+                enableBackgroundImage: "Enable Background Image",
+				selectDashboard: "Select Dashboard"
             },
             exportListing: {
                 title: "Export",
@@ -8012,6 +7989,8 @@
             metricsContainer: {
                 title: "Performance Metrics",
                 close: "Close",
+                widgetProcessTimeId: "widget",
+                widgetProcessTime: "Widgets Processing Time",
                 dashboardProcess:"Parsing Time",
                 dashboardLayoutRender:"Layout Time",
 				datasourceName :"Name",

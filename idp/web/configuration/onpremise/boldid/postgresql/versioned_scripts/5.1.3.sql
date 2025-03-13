@@ -1,10 +1,10 @@
-CREATE TABLE [BoldTC_AICredentials](
-    [Id] uniqueidentifier NOT NULL,
-    [AIModel] [int] NOT NULL,
-    [AIConfiguration] [nvarchar](4000) NULL,
-    [CreatedById] [uniqueidentifier] NULL,
-    [ModifiedById] [uniqueidentifier] NULL,
-    [CreatedDate] [datetime] NOT NULL,
-    [ModifiedDate] [datetime] NOT NULL,
-    [IsActive] [bit] NOT NULL)
+CREATE TABLE BoldTC_AICredentials(
+                                     Id uuid NOT NULL,
+                                     AIModel INTEGER NOT NULL,
+                                     AIConfiguration varchar(4000) NULL,
+                                     CreatedById uuid NULL,
+                                     ModifiedById uuid NULL,
+                                     CreatedDate timestamp NOT NULL,
+                                     ModifiedDate timestamp NOT NULL,
+                                     IsActive smallint NOT NULL)
 ;

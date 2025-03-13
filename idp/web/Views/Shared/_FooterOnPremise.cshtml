@@ -2,13 +2,12 @@
 @using Syncfusion.Server.Base
 @using Syncfusion.Server.Base.DataClasses
 @{
-    var poweredByImageSrc = $"{CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')}/logos?type=poweredby";
+    var poweredByImageSrc = (ViewBag.PoweredByLogo != null) ? ViewBag.PoweredByLogo : $"{CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')}/logos?type=poweredby";
     var poweredbyClass = GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion ? "d-block" : "d-none";
     var copyrightClass = GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "d-block" : "d-none";
     var separatorparagraphClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion && GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "d-block" : "d-none";
     var separatorFooterClass = (GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion || GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo) ? "d-block" : "d-none";
-    var copyrightInformation = HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
-
+    var copyrightInformation = (ViewBag.CopyRightInformation != null) ? ViewBag.CopyRightInformation : HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
 }   
 
 <div id="base-footer-div">
@@ -31,7 +30,9 @@
             <div class="copyright-poweredby">
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 dropup no-padding language-area float-start no-padding ">
                     <div class="col-12 col-lg-12 no-padding float-start" id="lang_menu">
-                        <p class="float-start @copyrightClass" id="copyrightinfo"> @(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</p>
+                        <p class="float-start no-margin @copyrightClass" id="copyrightinfo">
+                            @Html.Raw(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))
+                        </p>
                     </div>
                 </div>
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 no-padding float-end" id="enablefooter">

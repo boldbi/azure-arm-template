@@ -159,6 +159,16 @@
                                 }
                             },
                             dataBound: function(args) {
+                                var gridData = args.model.currentViewData; // Get the currently displayed data
+
+                                if (gridData && gridData.length) {
+                                    gridData.forEach(function(item) {
+                                        item.IsViewDeleted = item.IsViewDeleted !== undefined ? item.IsViewDeleted : false;
+                                        item.IsScheduledItemDeleted = item.IsScheduledItemDeleted !== undefined ? item.IsScheduledItemDeleted : false;
+                                        item.DashboardViewId = item.DashboardViewId && item.DashboardViewId !== "@Guid.Empty" ? item.DashboardViewId : null;
+                                        item.DashboardWidgetId = item.DashboardWidgetId && item.DashboardWidgetId !== "@Guid.Empty" ? item.DashboardWidgetId : null;
+                                    });
+                                }
                                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
                                     new bootstrap.Tooltip(element, {
                                         animation: true,
@@ -306,11 +316,11 @@
                         <span><a class="grid-content item-name-isdeleted" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:DeletedItemName}}</a></span>
                     {{else MultiDashboardName}}
                         <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ParentItemId}}/{{:ItemCategoryName}}/{{:MultiDashboardName}}?tab={{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
-                    {{else DashboardWidgetId != "@Guid.Empty" && DashboardViewId != "@Guid.Empty"}}
+                    {{else DashboardWidgetId != "@Guid.Empty" && DashboardViewId != "@Guid.Empty" && DashboardWidgetId != null && DashboardViewId != null}}
                         <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}&viewid={{:DashboardViewId}}" target="_blank">{{:ItemName}}</a></span>
-                    {{else DashboardWidgetId != "@Guid.Empty"}}
+                    {{else DashboardWidgetId != "@Guid.Empty" && DashboardWidgetId != null}}
                         <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?isWidgetMode=true&serverWidgetId={{:DashboardWidgetId}}" target="_blank">{{:ItemName}}</a></span>
-                    {{else DashboardViewId != "@Guid.Empty"}}
+                    {{else DashboardViewId != "@Guid.Empty" && DashboardViewId != null}}
                         <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}?viewid={{:DashboardViewId}}" target="_blank">{{:ItemName}}</a></span>
                     {{else}}
                         <span><a class="grid-content" href="@Url.Action("Dashboards", "Dashboards")/{{:ItemId}}/{{:ItemCategoryName}}/{{:ItemName}}" target="_blank">{{:ItemName}}</a></span>
@@ -318,12 +328,12 @@
                 </div>
                 {{if IsViewDeleted || IsScheduledItemDeleted}}
                     <span class="su su-view views is-view-deleted disabled-icon-color"></span>
-                {{else DashboardViewId != "@Guid.Empty"}}
+                {{else DashboardViewId != "@Guid.Empty" && DashboardViewId != null}}
                     <span class="su su-view views is-view-active"></span>
                 {{/if}}
                 {{if IsWidgetDeleted || IsScheduledItemDeleted}}
                     <i class="su su-widgets widgets widget-icon-isdeleted disabled-icon-color"><span class="widget-name-isdeleted">{{:DeletedWidgetName}}</span></i>
-                {{else DashboardWidgetId != "@Guid.Empty"}}
+                {{else DashboardWidgetId != "@Guid.Empty" && DashboardWidgetId != null}}
                     <i class="su su-widgets widgets"> <span class="widget-name-isactive">{{:WidgetItemName}}</span></i>
                 {{/if}}
             </script>

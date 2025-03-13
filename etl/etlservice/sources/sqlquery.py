@@ -26,7 +26,7 @@ def load_standalone_table_resource() -> None:
        end_date_str = end_date.to_datetime_string()      # '2023-01-02 00:00:00'
        query = f"""{9} WHERE {2} """
     else:
-        query = "{9}"
+        query = f'''{9}'''
     with engine.connect() as conn:
     # Select genome table, stream data in batches of 100 {2} elements
         rows = conn.execution_options(yield_per=100).exec_driver_sql(query)

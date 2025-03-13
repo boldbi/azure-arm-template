@@ -75,6 +75,7 @@
     var absolutePath = requestUrl.AbsolutePath.ToString().ToLower();
     var showSideNavMenu = absolutePath.ToLower().Contains("/dashboard-designer") || absolutePath.ToLower().Contains("/datasource-designer");
     var isUMSLogoInherited = globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.Branding);
+    var showLicenseWarningIcon = ServerAppConfig.ShowLicenseWarning;
 }
 
 <environment include="Development,CloudDevelopment">
@@ -112,12 +113,12 @@
 
             @if (!ServerAppConfig.IsSelfHosted || (ServerAppConfig.IsSelfHosted && isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard]))
             {
-	        	<li class="sf-nav-item mobile-hidden" id="create-item" data-action="create-items">
-	                <a class="sf-nav-link" href="javascript:void(0)">
-	                    <span class="menu-icon-container create-menu-icon">
-	                        <i class="su su-add"></i>
-	                    </span>
-	                </a>
+                <li class="sf-nav-item mobile-hidden" id="create-item" data-action="create-items">
+                    <a class="sf-nav-link" href="javascript:void(0)">
+                        <span class="menu-icon-container create-menu-icon">
+                            <i class="su su-add"></i>
+                        </span>
+                    </a>
                 </li>
             }
 
@@ -182,6 +183,14 @@
     {
         <nav id="sub-nav" class="sf-nav-group mobile-hidden">
             <ul>
+                @if (showLicenseWarningIcon)
+                {
+                    <li class="sub-menu-action help-icon-list-item" id="license-warning-designer">
+                        <span class="menu-icon-container">
+                            <i class="su su-warning-alt warning-icon-color"></i>
+                        </span>
+                    </li>
+                }
                 @if (showNotifications)
                 {
                     <li class="sub-menu-action">

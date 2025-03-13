@@ -358,6 +358,12 @@ $(document).ready(function () {
                 AzureAiApiKey: $("#azureai-apikey").val().trim()
             };
 
+            var licenseValidationMessage = window.Server.App.LocalizationContent.BoldAIserviceLicenseError
+                + "<div class='license-warning-content'>"
+                + window.Server.App.LocalizationContent.LicenseWarningContent3 + "<a class='text-decoration-none' href='" + idpUrl + "/ums/administration/license-settings'>" + window.Server.App.LocalizationContent.LicenseWarningContent4 + "</a>" + window.Server.App.LocalizationContent.LicenseWarningContent5
+                + "</div>";
+
+
             $.ajax({
                 type: "POST",
                 url: window.updateAISettingsUrl,
@@ -369,7 +375,13 @@ $(document).ready(function () {
                         $(".error-message, .success-message").css("display", "none");
                         hideWaitingPopup('server-app-container');
                         window.location.reload();
-                    } else {
+                    } else if (!(result.Status) && result.HasLicenseError !== undefined && result.HasLicenseError) {
+                        hideWaitingPopup('server-app-container');
+                        messageBox("", window.Server.App.LocalizationContent.AiConnectionFailed, licenseValidationMessage, "success", function () {
+                            onCloseMessageBox();
+                        });
+                    }
+                    else {
                         hideWaitingPopup('server-app-container');
                         messageBox("", window.Server.App.LocalizationContent.AiConnectionFailed, result.Message, "success", function () {
                             onCloseMessageBox();

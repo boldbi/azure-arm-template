@@ -62,6 +62,7 @@
         var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
         var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
         var idpUrl = "@ServerAppConfig.InternalAppIdpUrl";
+        var drmValue = "@ServerAppConfig.DRM";
         var isFirstTenant = @Json.Serialize(isFirstTenant);
         var siteRegistrationCompleted = false;
         $(function() {
@@ -91,10 +92,7 @@
 
                         if (typeof (result.AdditionalData) != "undefined" && result.AdditionalData != null && result.Percentage == 100) {
                             siteRegistrationCompleted = true;
-                            if (typeof (result.AdditionalData.RedirectUrl) != "undefined" && !isNullOrWhitespace(result.AdditionalData.RedirectUrl) && isFirstTenant) {
-                                $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
-                                $("body").addClass("welcome-page-footer-alignment");
-                                $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");
+                            if (typeof (result.AdditionalData.RedirectUrl) != "undefined" && !isNullOrWhitespace(result.AdditionalData.RedirectUrl) && isFirstTenant && isNullOrWhitespace(drmValue)) {
                                 $(".user-name span").text(result.AdditionalData.DisplayName);
                                 $(".profile-pic-tag").attr({
                                     "data-id": result.AdditionalData.UserId,
@@ -139,11 +137,9 @@
                     if (result.deploymentFailed) {
                         window.location.href = result.redirectUrl;
                     } else {
-                        if (result.isDefaultTenant) {
+                        if (result.isDefaultTenant && isNullOrWhitespace(drmValue)) {
                             $(".deploy-tenant-parent, .deployment-footer").addClass("hide");
-                            $("body").addClass("welcome-page-footer-alignment");
-                            $(".deployment-header, .welcome-tenant-parent, .base-footer-wrapper").removeClass("hide");
-                            $(".dashboard-parent-container > a, #close-welcome-page").attr("href", result.redirectUrl);
+                            window.location = result.redirectUrl;
                         }
                         else {
                             window.location = result.redirectUrl

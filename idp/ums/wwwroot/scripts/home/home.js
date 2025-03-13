@@ -238,13 +238,11 @@ function showSiteDownAlert() {
     }
 }
 $(document).on('click', '.search-allsites', function () {
-    $("ul.nav.nav-tabs li").removeClass("active");
     $("#search-tenants-allsites").closest("li").addClass("active");
     $("#search-tenants-allsites").show();
     $(".search-icon").addClass("no-border");
 });
 $(document).on('click', '.search-favorite', function () {
-    $("ul.nav.nav-tabs li").removeClass("active");
     $("#search-tenants-favorite").closest("li").addClass("active");
     $("#search-tenants-favorite").show();
     $(".search-icon").addClass("no-border");

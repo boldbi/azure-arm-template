@@ -6,7 +6,6 @@
     var accessKey = GlobalAppSettings.Configuration["IdP:AzureBlobStorageAccessKey"];
     var blobServiceEndpoint = GlobalAppSettings.Configuration["IdP:AzureBlobServiceEndpoint"];
     var containerName = GlobalAppSettings.Configuration["IdP:AzureBlobContainerName"];
-    var hasDRMConfiguration = ViewBag.HasDRMConfiguration ? "true" : "false";
     var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
     var pathbase = Context.Request.PathBase;
     var serverUserHelp = string.Format(T["Please refer to {0}this{1} documentation to know about what are the permissions need to be assigned to allow {2} to connect and use the database."].Value, "<a class='text-decoration-none' target='_blank' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration, ViewBag.TenantType) + "'>", "</a>", helpLinkData);
@@ -29,7 +28,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
 
-    <meta name="has-drm-configuration" content="@hasDRMConfiguration">
+    <meta name="is-ignore-drm-configuration" content="true">
     <meta name="IdStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdStorageConfiguration)" />
     <meta name="AdminCreation" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation)" />
     <meta name="ServerStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ServerStorageConfiguration)" />
@@ -84,7 +83,6 @@
         var accessKey = "@Html.Raw(accessKey)";
         var blobServiceEndpoint = "@blobServiceEndpoint";
         var containerName = "@containerName";
-        var hasDRMConfiguration = "@ViewBag.HasDRMConfiguration";
         var sqlParameter = "@sqlParameter";
         var postgresSQLParameter = "@postgresSQLParameter";
         var mySQLParameter = "@mySQLParameter";
@@ -120,7 +118,7 @@
                 <div id="system-settings-general" class="col-lg-12 col-md-12 col-sm-12 col-12 float-start">
                     <div class="col-lg-7 col-md-7 col-sm-7 col-7" id="image-parent-container">
                         <div class="image-container">
-                            <img class="startup-image" src="@Url.Content("~/images/static/startup/login-to-activate.png")" />
+                            <img class="startup-image" src="" />
                             <div class="startup-content display-none">
                                 <span class="first-content">@T["Step 1: You’re an administrator"]</span>
                                 <span class="second-content">@T["Administrators have complete control over the application."]</span>
@@ -128,116 +126,9 @@
                                 {
                                     <a class="text-decoration-none" id="help-link" href="@(await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation))" target="_blank">@T["Need help?"]</a>
                                 }
-                            </div>
-                            <div class="welcome-content">
-                                <span class="first-content">@T["See Clearly. Act Boldly."]</span>
-                                @if (!CloudAppConfig.IsHideHelpLink)
-                                {
-                                    <a class="text-decoration-none" href="@(await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.SetupHelp))" target="_blank">@T["Need setup help?"]</a>
-                                }
-                            </div>
+                            </div>                          
                         </div>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-5 col-5 float-start" id="system-settings-welcome-container">
-                        <div class="welcome-content">
-                            <span class="first-content @(CloudAppConfig.Branding.IsWhiteLabelling ? "align-center" : "")">
-                                @Html.Raw(welcomeMessage)
-                            </span>
-
-                            <span class="second-content">
-                                @T["To proceed with the installation, please activate your account."]
-                            </span>
-                            @if (!CloudAppConfig.Branding.IsWhiteLabelling)
-                            {
-                               <div class="btn-holder">
-                                    <button type="button" id="online-license" license-service-url="@ViewBag.SubscriptionUrl" class="proceed-button content-display">@T["Login to activate account"]</button>
-                                </div>
-                                <div class="col-12 float-start align-center">
-                                    <span class="link-header">@T["Behind Firewall?"] <a id="offline-license" class="link-decoration" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads)" data-tenant-type="@((int)ViewBag.TenantType)">@T["Upload your unlock Key file."]</a></span>
-                                </div>
-                                <div class="divider-container col-12 float-start">
-                                    <hr class="connect-line-left"><div class="content text-body">@T["or Connect with"]</div><hr class="connect-line-right">
-                                </div>
-                                <div class="col-12 float-start align-center">
-                                    <span class="link-header">@T["Don’t have an account?"] <a class="link-decoration" target="_blank" href="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Pricing)">@T["Sign Up"]</a></span>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="btn-holder">
-                                    <button type="button" id="offline-license" class="proceed-button content-display" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads)" data-tenant-type="@((int)ViewBag.TenantType)">@T["Upload your unlock Key file."]</button>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                    <div class="system-settings-offline-license col-lg-5 col-md-5 col-sm-5 col-5 float-start" id="system-settings-offline-license-container">
-                        <div id="popup-container" class="col-12 float-start no-padding">
-                            <div class="col-12 float-start upload-header no-padding">
-                                <div class="col-12 float-start no-padding">
-                                    <span class="popup-title">@T["Offline Setup"]</span>
-                                    @if (!CloudAppConfig.Branding.IsWhiteLabelling)
-                                    {
-                                        <p class="title-description">
-                                            @Html.Raw(string.Format(T["Provide the {0} unlock key file downloaded from the website to proceed with the offline installation. If you do not have a unlock key file, you can download it {1}here{2}."].Value, displayName, "<a target='_blank' class='text-decoration-none' href='" + await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads) + "'>", "</a>"))
-                                        </p>
-                                    }
-                                    else
-                                    {
-                                        <p class="title-description">
-                                            @Html.Raw(string.Format(T["Provide the {0} unlock key file to proceed with the offline installation."].Value, displayName))
-                                        </p>
-                                    }
-                                </div>
-                            </div>
-                            <div class="col-12 float-start upload-content no-padding">
-                                <div id="upload-section" class="col-12 float-start no-padding">
-                                    <div id="file-lable" class="col-12 float-start">
-                                        <label id="upload-lable">@T["Select the unlock key file"]</label>
-                                    </div>
-                                    <div class="upload-btn-wrapper col-12 float-start no-padding">
-                                        <input type="text" id="file-name" class="col-8 float-start" placeholder="@T["choose file"]" readonly="readonly" />
-                                        <img id="browse-lic" class="col-4 float-start" src="~/images/common/folder.svg" />
-                                        <input type='file' id="getFile" accept=".lic" class="display-none">
-                                        <div id="tenant-type" class="display-none"></div>
-                                        <div class="validation-error-message col-12 float-start display-none"></div>
-                                    </div>
-                                    <div id="license-details" class="col-12 float-start">
-                                        <div id="customer-email-container" class="col-12 float-start no-padding display-none">
-                                            <label class="col-4 float-start no-padding license-detail-lable">@T["Email"]</label>
-                                            <p id="customer-email" class="col-8 float-start no-padding"></p>
-                                        </div>
-                                        <div id="subscription-id-container" class="col-12 float-start no-padding display-none">
-                                            <label class="col-4 float-start no-padding  license-detail-lable">@T["Subscription Id"]</label>
-                                            <p id="subscription-id" class="col-8 float-start no-padding"></p>
-                                        </div>
-                                        <div id="subscription-name-container" class="col-12 float-start no-padding display-none">
-                                            <label class="col-4 float-start no-padding  license-detail-lable">@T["Subscription Name"]</label>
-                                            <p id="subscription-name" class="col-8 float-start no-padding"></p>
-                                        </div>
-                                        @if (!CloudAppConfig.Branding.IsWhiteLabelling)
-                                        {
-                                            <div id="plan-name-container" class="col-12 float-start no-padding display-none">
-                                                <label class="col-4 float-start no-padding  license-detail-lable">@T["Plan Name"]</label>
-                                                <p id="plan-name" class="col-8 float-start no-padding"></p>
-                                            </div>
-                                        }
-                                        <div id="tenant-status-container" class="col-12 float-start no-padding display-none">
-                                            <label class="col-4 float-start no-padding  license-detail-lable">@T["Tenant Status"]</label>
-                                            <p id="tenant-status" class="col-8 float-start no-padding">Licensed</p>
-                                        </div>
-                                        <div id="expiry-date-container" class="col-12 float-start no-padding display-none">
-                                            <label class="col-4 float-start no-padding  license-detail-lable">@T["Expiry Date"]</label>
-                                            <p id="expiry-date" class="col-8 float-start no-padding"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 float-start upload-footer btn-holder">
-                                <input id="return-startup-home" type="button" value="@T["Back"]"  class="col-6 float-start remove-margin-left secondary-button">
-                                <input disabled id="confirm-license" type="button" value="@T["Next"]"  class="col-6 float-start proceed-button">
-                            </div>
-                        </div>
-                    </div>
+                    </div>                  
                     @await Html.PartialAsync("_DatabaseConfiguration")
                     @await Html.PartialAsync("_FileStorage")
                     @await Html.PartialAsync("_ConfigurationMode")
