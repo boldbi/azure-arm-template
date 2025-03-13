@@ -98,6 +98,13 @@
             <param name="licenseKey">Unique license key identifying the user or tenant.</param>
             <returns>An object containing information about widget operations or error details if an exception occurs.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.UpdateAssistanceResponseAsync(System.String)">
+            <summary>
+            Asynchronously updates the assistance response based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON string containing the input data for the response update.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
         <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.ProcessFormatQueryOutput(System.String,System.String)">
             <summary>
             Processes the formatted query output based on the given JSON input and license key.
@@ -121,7 +128,7 @@
             <param name="question">User's original question.</param>
             <returns>A ChatResponse containing a greeting message if matched, otherwise the AI's raw response.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.GenerateAIResponseAsync(BoldBi.Ai.Base.Contracts.IBoldAiProcess,BoldBi.Ai.Core.Enums.AiOperation,System.String,System.String,System.String,System.String)">
+        <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.GenerateAIResponseAsync(BoldBi.Ai.Base.Contracts.IBoldAiProcess,BoldBi.Ai.Core.Enums.AiOperation,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Generates an AI response using the provided AI process and parameters.
             </summary>
@@ -131,6 +138,7 @@
             <param name="licenseKey">The license key for the operation.</param>
             <param name="tableInfo">Optional table information for the AI.</param>
             <param name="previousHistories">Optional history of previous queries.</param>
+            <param name="modeType">Optional mode type of the dashboard.</param>
             <returns>The AI-generated response as <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent"/>.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.AiAssistanceOperations.GetTableInfoContent(System.String)">
@@ -369,6 +377,13 @@
             <param name="jsonInput">The JSON input containing the user's relevant question query.</param>
             <param name="licenseKey">The license key required for processing the request.</param>
             <returns>A task representing the asynchronous operation, with an object containing the result of processing the relevant question query.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IAiAssistanceOperations.UpdateAssistanceResponseAsync(System.String)">
+            <summary>
+            Asynchronously updates the assistance response based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON-formatted string containing the assistance response details.</param>
+            <returns>A task representing the asynchronous operation.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Contracts.IBoldAiProcess">
             <summary>
@@ -618,18 +633,25 @@
             <param name="args">The arguments containing the AI connection, message, and question.</param>
             <returns>A task representing the asynchronous operation that returns the response from the AI.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateQueryProcess.FormatTableInfo(System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateQueryProcess.FormatTableInfo(System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIInputBuilder.TableInfoDetails})">
             <summary>
             Formats the table information, ensuring consistency in connection type and filtering out unnecessary fields.
             </summary>
             <param name="tableInfo">The JSON string containing table information.</param>
             <returns>A formatted JSON string representing the table information.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateQueryProcess.PrepareTableContent(System.String)">
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateQueryProcess.PrepareTableQueryContent(System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIInputBuilder.TableInfoDetails})">
             <summary>
             Prepares the content for each table, formatting it as a structured string containing table and column details.
             </summary>
-            <param name="tableInfo">The list of data sources to process.</param>
+            <param name="requiredDs">The list of data sources to process.</param>
+            <returns>A string representing table names and their corresponding columns in JSON-like format.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CoreProcesses.CreateQueryProcess.PrepareTableContent(System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIInputBuilder.TableInfoDetails})">
+            <summary>
+            Prepares the content for each table, formatting it as a structured string containing table and column details.
+            </summary>
+            <param name="requiredDs">The list of data sources to process.</param>
             <returns>A string representing table names and their corresponding columns in JSON-like format.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.CoreProcesses.CreateVisualProcess">
@@ -1035,12 +1057,11 @@
             Provides utility methods for managing AI credential configurations.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CredentialManager.ValidateAndActivate(System.String)">
+        <member name="M:BoldBi.Ai.Base.CredentialManager.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
-            Checks if a tenant is allowed based on the provided JSON input.
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.CredentialManager"/> class.
             </summary>
-            <param name="jsonInput">The JSON input containing the tenant ID.</param>
-            <returns>An object indicating whether the tenant is allowed access.</returns>
+            <param name="context">The database context used for accessing application data.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.CredentialManager.VerifyDefinedAIConfiguration(System.String,System.String,System.String,System.Boolean,System.String)">
             <summary>
@@ -1066,6 +1087,13 @@
             <param name="inputCredentials">Optional property of input credentials.</param>
             <param name="isCredentialsCheck">Optional property of isCredentialsCheck.</param>
             <returns>A JSON response indicating the AI Configuration.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CredentialManager.ValidateAndActivate(System.String)">
+            <summary>
+            Checks if a tenant is allowed based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON input containing the tenant ID.</param>
+            <returns>An object indicating whether the tenant is allowed access.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CredentialManager.MakeServerRequestAsync">
             <summary>
@@ -1267,11 +1295,12 @@
             Handles the processing of dead-letter queues as a hosted service.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.ScheduledActions"/> class.
             </summary>
             <param name="memoryCache">Stores memory cache.</param>
+            <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.StartAsync(System.Threading.CancellationToken)">
             <summary>
@@ -1292,16 +1321,16 @@
             Disposes the resources used by the <see cref="T:BoldBi.Ai.Base.Extensions.ScheduledActions"/> class.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.UpdateSessionEndTimes(BoldBi.Ai.Core.Contracts.DbServiceDeployment.IResourceHandler)">
+            <summary>
+            Periodically checks and updates session end times for sessions with no end time.
+            </summary>
+        </member>
         <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.DoWork(System.Object)">
             <summary>
             Method that is called at regular intervals to process dead-letter queues.
             </summary>
             <param name="state">An object containing information to be used by the callback method. This parameter is not used in this implementation.</param>
-        </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.UpdateSessionEndTimes">
-            <summary>
-            Periodically checks and updates session end times for sessions with no end time.
-            </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter">
             <summary>
@@ -1309,11 +1338,12 @@
             This service is designed to run daily, removing data older than a specified cutoff period.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter"/> class.
             </summary>
             <param name="memoryCache">The memory cache instance used for caching operations.</param>
+            <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.StartAsync(System.Threading.CancellationToken)">
             <summary>
@@ -1340,25 +1370,17 @@
             </summary>
             <param name="state">An optional state object (not used in this implementation).</param>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.DeleteOldRecordsAsync``1(Microsoft.EntityFrameworkCore.DbSet{``0},System.String)">
-            <summary>
-            Deletes records older than a cutoff date from the specified DbSet.
-            </summary>
-            <typeparam name="T">The type of the entity in the DbSet.</typeparam>
-            <param name="dbSet">The DbSet from which old records will be deleted.</param>
-            <param name="dateColumnName">The name of the date column used to determine record age.</param>
-            <returns>A task that represents the asynchronous delete operation.</returns>
-        </member>
         <member name="T:BoldBi.Ai.Base.Extensions.UsageLogConsumer">
             <summary>
             A background service that consumes and processes messages from queues.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.UsageLogConsumer.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Extensions.UsageLogConsumer.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.UsageLogConsumer"/> class.
             </summary>
             <param name="memoryCache">The memory cache instance used for caching operations.</param>
+            <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.UsageLogConsumer.ExecuteAsync(System.Threading.CancellationToken)">
             <summary>
@@ -1475,6 +1497,18 @@
             </remarks>
             <exception cref="T:Newtonsoft.Json.JsonSerializationException">Thrown when deserialization of the input data fails.</exception>
             <exception cref="T:System.InvalidOperationException">Thrown when a specified method or type cannot be found or invoked.</exception>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Helpers.ConfigureAICloudHelper">
+            <summary>
+            Provides helper methods for configuring AI cloud providers.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ConfigureAICloudHelper.GetCloudAIConfiguration(System.String)">
+            <summary>
+            Retrieves the AI configuration based on the specified provider.
+            </summary>
+            <param name="provider">The AI provider name (e.g., "openai" or "azureai").</param>
+            <returns>A <see cref="T:BoldBi.Ai.Base.CustomAIConfiguration"/> object containing the provider-specific settings.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext">
             <summary>
@@ -1699,10 +1733,19 @@
             Provides methods to fetch pricing and other details from the database.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudFetchFromDb.#ctor">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudFetchFromDb.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudFetchFromDb"/> class with database connection strings.
             </summary>
+            <param name="dbContext">The DB context instance.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudFetchFromDb.FormatNumber(System.Double,System.String)">
+            <summary>
+            Format the AI usage values.
+            </summary>
+            <param name="value">AI Usage values.</param>
+            <param name="unit">unit of the AI usage.</param>
+            <returns>Formatted AI usage value.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudFetchFromDb.IsAllowedTenant(System.String)">
             <summary>
@@ -1778,11 +1821,13 @@
             The resource handler implementation.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper"/> class.
             </summary>
             <param name="memoryCache">The memory cache instance.</param>
+            <param name="dbContext">The db context for meta data.</param>
+            <param name="usageLogDbContext">The db context for usage data.</param>
         </member>
         <member name="P:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper.PricingLogHelper">
             <summary>
@@ -1951,18 +1996,21 @@
             Helper class for selecting the appropriate database configuration based on the deployment type.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.GetService(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.GetService(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Gets the appropriate logging service based on the deployment type.
             </summary>
             <param name="memoryCache">The memory cache instance.</param>
+            <param name="dbContext">The db context for meta data.</param>
+            <param name="usageLogDbContext">The db context for usage data.</param>
             <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.DbServiceDeployment.IResourceHandler"/> corresponding to the deployment type.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.FetchFromDb(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.FetchFromDb(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
             Gets the appropriate database fetch service based on the deployment type.
             </summary>
             <param name="memoryCache">The memory cache instance.</param>
+            <param name="dbContext">The db context instance.</param>
             <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.DbServiceDeployment.IFetchFromDB"/> corresponding to the deployment type.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb">
@@ -1970,11 +2018,12 @@
             Provides methods to fetch pricing and other details from the database.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb"/> class with database connection strings.
             </summary>
             <param name="memoryCache">The memory cache instance.</param>
+            <param name="dbContext">The db Context instance.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb.IsAllowedTenant(System.String)">
             <summary>
@@ -2254,17 +2303,13 @@
             Processes dead-letter messages from various Concurrent Queues.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor"/> class.
             </summary>
-        </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor.GetDeadLetterQueueProcessor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
-            <summary>
-            Gets the singleton instance of <see cref="T:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor"/>.
-            </summary>
-            <param name="memoryCache">The memory cache instance used for caching operations.</param>
-            <returns>The single instance of <see cref="T:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor"/>.</returns>
+            <param name="memoryCache">The memory cache.</param>
+            <param name="dbContext">The db context for meta data.</param>
+            <param name="usageLogDbContext">The db context for usage data.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor.AddToDeadLetterQueue(System.String,System.Object)">
             <summary>
@@ -2368,6 +2413,25 @@
             <param name="logAction">The logging action to perform.</param>
             <returns>A task representing the result of processing.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.Helpers.ErrorMessageProvider">
+            <summary>
+            Provides error messages based on error codes retrieved from configuration.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ErrorMessageProvider.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.ErrorMessageProvider"/> class.
+            </summary>
+            <param name="configuration">The application configuration containing error messages.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ErrorMessageProvider.GetErrorMessage(System.String,System.Object[])">
+            <summary>
+            Retrieves an error message for the specified error code.
+            </summary>
+            <param name="errorCode">The error code for which the message is to be retrieved.</param>
+            <param name="args">Optional arguments to format the error message.</param>
+            <returns>The formatted error message if found; otherwise, a default unknown error message.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Helpers.FieldBuilder">
             <summary>
             A class responsible for building AI assistance responses by processing input JSON data,
@@ -2442,16 +2506,16 @@
             The name of the container (e.g., report, dashboard, or data model) that the field belongs to.
             </param>
             <returns>
-            A <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field"/> object that represents the BI field, including its name, display name,
+            A <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.Field"/> object that represents the BI field, including its name, display name,
             container name, table name, summary type (if applicable), date/time format, and expression-related metadata.
             </returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.FieldBuilder.MergeFields(System.Collections.Generic.List{BoldBi.Ai.Base.Models.AIOutputPreparation.Field}[])">
+        <member name="M:BoldBi.Ai.Base.Helpers.FieldBuilder.MergeFields(System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIOutputPreparation.Field}[])">
             <summary>
             Merges multiple lists of fields into a single list, combining all elements while ignoring null lists.
             </summary>
             <param name="fieldLists">
-            An array of lists containing <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field"/> objects to be merged. Null lists will be ignored during the merge process.
+            An array of lists containing <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.Field"/> objects to be merged. Null lists will be ignored during the merge process.
             </param>
             <returns>
             A single <see cref="T:System.Collections.Generic.List`1"/> containing all the fields from the provided lists.
@@ -2467,7 +2531,7 @@
             Each transformation contributes to the resulting list of fields.
             </param>
             <returns>
-            A task that represents the asynchronous operation. The task result contains a <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.BiField"/> object
+            A task that represents the asynchronous operation. The task result contains a <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.BiField"/> object
             with the generated fields populated based on the provided transformations.
             </returns>
         </member>
@@ -2480,7 +2544,7 @@
             This includes filter and window-related data used to generate BI fields.
             </param>
             <returns>
-            A task that represents the asynchronous operation. The task result contains a <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.BiField"/> object
+            A task that represents the asynchronous operation. The task result contains a <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.BiField"/> object
             with the generated fields based on the provided transformation.
             </returns>
             <remarks>
@@ -2489,7 +2553,7 @@
             <item><description><see cref="M:BoldBi.Ai.Base.Helpers.FieldBuilder.AddTransformFilterFields(System.Collections.Generic.List{BoldBi.Ai.Core.Models.VisualCreation.Filters})"/> processes filter-based transformations.</description></item>
             <item><description><see cref="M:BoldBi.Ai.Base.Helpers.FieldBuilder.AddTransformRankFields(System.Collections.Generic.List{BoldBi.Ai.Core.Models.VisualCreation.Rank})"/> processes rank-based transformations (window operations).</description></item>
             </list>
-            The fields from both operations are merged using <see cref="M:BoldBi.Ai.Base.Helpers.FieldBuilder.MergeFields(System.Collections.Generic.List{BoldBi.Ai.Base.Models.AIOutputPreparation.Field}[])"/>.
+            The fields from both operations are merged using <see cref="M:BoldBi.Ai.Base.Helpers.FieldBuilder.MergeFields(System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIOutputPreparation.Field}[])"/>.
             </remarks>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.FieldBuilder.AddTransformFilterFields(System.Collections.Generic.List{BoldBi.Ai.Core.Models.VisualCreation.Filters})">
@@ -2501,7 +2565,7 @@
             Each filter contributes metadata such as column name, aggregate type, time unit, and additional filter information.
             </param>
             <returns>
-            A task that represents the asynchronous operation. The task result contains a list of <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field"/> objects
+            A task that represents the asynchronous operation. The task result contains a list of <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.Field"/> objects
             populated based on the provided filters. If the input is null, the task returns <c>null</c>.
             </returns>
             <remarks>
@@ -2522,7 +2586,7 @@
             Each rank filter contributes group-by fields and associated metadata.
             </param>
             <returns>
-            A task that represents the asynchronous operation. The task result contains a list of <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field"/> objects
+            A task that represents the asynchronous operation. The task result contains a list of <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.Field"/> objects
             populated based on the rank filters. If the input is null, the task returns an empty list.
             </returns>
             <remarks>
@@ -2534,15 +2598,15 @@
             These fields are marked as filter columns and invisible by default.
             </remarks>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.FieldBuilder.UpdateUniqueColumnName(System.Collections.Generic.List{BoldBi.Ai.Base.Models.AIOutputPreparation.Field})">
+        <member name="M:BoldBi.Ai.Base.Helpers.FieldBuilder.UpdateUniqueColumnName(System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIOutputPreparation.Field})">
             <summary>
             Updates the unique column names for a list of BI (Business Intelligence) fields by assigning a sequential identifier to each field.
             </summary>
             <param name="fields">
-            A list of <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field"/> objects to be updated with unique column names.
+            A list of <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.Field"/> objects to be updated with unique column names.
             </param>
             <returns>
-            The updated list of <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field"/> objects with unique column names assigned.
+            The updated list of <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.Field"/> objects with unique column names assigned.
             </returns>
             <remarks>
             This method iterates through the list of fields and assigns a unique column name in the format "columnX",
@@ -2612,12 +2676,6 @@
             <summary>
             Helper class for managing AI licenses.
             </summary>
-        </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
-            <summary>
-            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper"/> class.
-            </summary>
-            <param name="memoryCache">The memory cache used for rate limit caching.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
@@ -2822,7 +2880,7 @@
             <param name="aiResponse">The AI response with textual content and model ID.</param>
             <returns>A task that represents the asynchronous operation. The task result contains an <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.IChatResponse"/> containing the prepared widget information.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FieldInfoPreparer.CreateResponse(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse,BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent,System.Collections.Generic.List{BoldBi.Ai.Base.Models.AIOutputPreparation.ColumnsAndFieldInfoModel})">
+        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FieldInfoPreparer.CreateResponse(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse,BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent,System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIOutputPreparation.ColumnsAndFieldInfoModel})">
             <summary>
             Creates a response object containing the widget type and field information based on the AI assistance request and response.
             </summary>
@@ -2846,7 +2904,7 @@
             </summary>
             <param name="fieldInfoArray">The JSON array containing field information.</param>
             <param name="chartType">The type of chart for which field information is being prepared.</param>
-            <returns>A list of <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.ColumnsAndFieldInfoModel"/> representing organized field information models.</returns>
+            <returns>A list of <see cref="T:BoldBi.Ai.Core.Models.AIOutputPreparation.ColumnsAndFieldInfoModel"/> representing organized field information models.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.FieldInfoPreparer.ProcessFieldInfoTemplate(Newtonsoft.Json.Linq.JToken,System.Type)">
             <summary>
@@ -3295,7 +3353,7 @@
             <param name="defaultChartType">The default chart type, if specified.</param>
             <returns>Returns the detected chart type as a <see cref="T:BoldBi.Ai.Core.Enums.WidgetTypes"/>.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.WidgetInfoValidator.ResolveWidgetType(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse,System.Collections.Generic.List{BoldBi.Ai.Base.Models.AIOutputPreparation.ColumnsAndFieldInfoModel})">
+        <member name="M:BoldBi.Ai.Base.Helpers.OutputPreparation.Classes.WidgetInfoValidator.ResolveWidgetType(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse,System.Collections.Generic.List{BoldBi.Ai.Core.Models.AIOutputPreparation.ColumnsAndFieldInfoModel})">
             <summary>
             Resolves the widget type based on the AI assistance request, response, and field information models.
             </summary>
@@ -3517,6 +3575,12 @@
             Helper class for managing AI sandbox users.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.SandboxUsersHelper.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.SandboxUsersHelper"/> class.
+            </summary>
+            <param name="dbContext"> Contains the database context for accessing AI license data. </param>
+        </member>
         <member name="M:BoldBi.Ai.Base.Helpers.SandboxUsersHelper.AddSandboxUser(System.String)">
             <summary>
             Adds or updates a sandbox user based on the provided JSON input.
@@ -3530,11 +3594,13 @@
             Manages the creation and termination of AI sessions, along with logging related activities.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.SessionManager"/> class.
             </summary>
             <param name="memoryCache">Stores memory cache.</param>
+            <param name="dbContext">The db context for meta data.</param>
+            <param name="usageLogDbContext">The db context for usage data.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.CreateSession(System.String)">
             <summary>
@@ -3680,108 +3746,6 @@
             <param name="licenseKey">The encrypted license key for the tenant.</param>
             <param name="modelId">The ID of the AI model used for processing.</param>
             <param name="request">The AI assistance request object containing additional metadata.</param>
-        </member>
-        <member name="T:BoldBi.Ai.Base.Models.AIOutputPreparation.BiField">
-            <summary>
-            Represents a business intelligence field structure used in AI output preparation.
-            </summary>
-        </member>
-        <member name="M:BoldBi.Ai.Base.Models.AIOutputPreparation.BiField.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Models.AIOutputPreparation.BiField"/> class.
-            Initializes a new instance.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.BiField.Fields">
-            <summary>
-            Gets or Sets the collection of fields associated with this BI field.
-            </summary>
-        </member>
-        <member name="T:BoldBi.Ai.Base.Models.AIOutputPreparation.ColumnsAndFieldInfoModel">
-            <summary>
-            Represents a model containing column name information and associated field details.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.ColumnsAndFieldInfoModel.ColumnName">
-            <summary>
-            Gets or sets the name of the column.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.ColumnsAndFieldInfoModel.FieldInfos">
-            <summary>
-            Gets or sets the list of field information associated with the column.
-            </summary>
-        </member>
-        <member name="T:BoldBi.Ai.Base.Models.AIOutputPreparation.Field">
-            <summary>
-            Represents a field used in data processing with relevant properties for configuration and filtering.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.Name">
-            <summary>
-            Gets or sets the name of the field.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.ContainerName">
-            <summary>
-            Gets or sets the container name to which the field belongs.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.SummaryType">
-            <summary>
-            Gets or sets the summary type used for aggregation or display of the field.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.DateTimeFormat">
-            <summary>
-            Gets or sets the datetime format associated with the field, if applicable.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.DisplayName">
-            <summary>
-            Gets or sets the display name for the field, which can be shown in UI elements.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.UniqueColumnName">
-            <summary>
-            Gets or sets the unique column name for the field.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.TableName">
-            <summary>
-            Gets or sets the table name where the field is located.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.IsVisible">
-            <summary>
-            Gets or sets a value indicating whether the field is visible. Default is true.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.IsFilterColumn">
-            <summary>
-            Gets or sets a value indicating whether the field can be used as a filter column. Default is false.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.FilterInfo">
-            <summary>
-            Gets or sets the filter information for the field, which can be used to apply filter conditions.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.RankFilterInfo">
-            <summary>
-            Gets or sets the rank filter information for the field, which can be used to apply rank-based filter conditions.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.IsExpressionField">
-            <summary>
-            Gets or sets a value indicating whether the field is an expression field (computed via expressions). Default is false.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Base.Models.AIOutputPreparation.Field.CustomSorting">
-            <summary>
-            Gets or sets the custom sorting logic or criteria for the object.
-            This property can be used to define or access a custom sorting mechanism.
-            </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Utilities.AIDatabaseInfo">
             <summary>

@@ -9,6 +9,13 @@
             An authorization filter that validates API requests based on a license key.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication"/> class.
+            </summary>
+            <param name="dbContext">The helper class for managing licenses.</param>
+            <param name="errorMessageProvider">The error message provider.</param>
+        </member>
         <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
             <summary>
             Asynchronously checks if the request contains a valid license key.
@@ -36,11 +43,12 @@
             An action filter that checks the validity of an AI connection before executing an action.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.ConnectionCheckActionFilter.#ctor(BoldBi.Ai.Core.ConnectionValidation.AiConnection)">
+        <member name="M:BoldBi.Ai.Service.Authentication.ConnectionCheckActionFilter.#ctor(BoldBi.Ai.Core.ConnectionValidation.AiConnection,BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.ConnectionCheckActionFilter"/> class.
             </summary>
             <param name="handler">The AI connection handler used to validate the connection.</param>
+            <param name="errorMessageProvider">The error message provider.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.ConnectionCheckActionFilter.OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext)">
             <summary>
@@ -55,11 +63,13 @@
             Implements <see cref="T:Microsoft.AspNetCore.Mvc.Filters.IAsyncAuthorizationFilter"/> to handle authorization asynchronously.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.RateLimitHelper"/> class.
             </summary>
             <param name="cache">An instance of <see cref="T:Microsoft.Extensions.Caching.Memory.IMemoryCache"/> used for caching rate limit data.</param>
+            <param name="dbContext">An instance of <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext"/> used for db connection.</param>
+            <param name="errorMessageProvider">The error message provider.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
             <summary>
@@ -119,6 +129,12 @@
             An authorization filter that validates requests based on a server token.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication.#ctor(BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication"/> class.
+            </summary>
+            <param name="errorMessageProvider">The error message provider.</param>
+        </member>
         <member name="M:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
             <summary>
             Asynchronously checks if the request contains a valid static token.
@@ -130,6 +146,12 @@
             <summary>
             An authorization filter that validates requests based on a static token.
             </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.StaticTokenAuthentication.#ctor(BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.StaticTokenAuthentication"/> class.
+            </summary>
+            <param name="errorMessageProvider">The error message provider.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.StaticTokenAuthentication.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
             <summary>
@@ -293,12 +315,13 @@
             Controller for handling AI assistance operations including chat, QnA, sessions, and feedback.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.#ctor(BoldBi.Ai.Base.Contracts.ISessionManager,BoldBi.Ai.Base.Contracts.IAiAssistanceOperations)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.#ctor(BoldBi.Ai.Base.Contracts.ISessionManager,BoldBi.Ai.Base.Contracts.IAiAssistanceOperations,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.AiAssistanceController"/> class.
             </summary>
             <param name="sessionManager">The session manager for handling session-related operations.</param>
             <param name="aiAssistanceOperations">The service for processing AI-related operations.</param>
+            <param name="usageLogDbContext">The DB context used to log usage data.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.ValidateConnection">
             <summary>
@@ -369,6 +392,13 @@
             <param name="jsonInput">Details for generating summary</param>
             <returns></returns>
         </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.UpdateAssistantResponseAsync(System.Object)">
+            <summary>
+            Asynchronously updates the assistance response based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON-formatted containing containing the assistance response details.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Service.Controllers.AiPricingLoggerController">
             <summary>
             Controller for handling AI pricing log requests.
@@ -420,6 +450,12 @@
             API Controller for managing AI credentials. 
             Provides endpoints to validate and save AI configuration credentials.
             </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.CredentialsController.#ctor(BoldBi.Ai.Base.CredentialManager)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.CredentialsController"/> class.
+            </summary>
+            <param name="credentialManager">The helper class for managing credentials.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Controllers.CredentialsController.ValidateCredentials(System.Object)">
             <summary>
@@ -493,6 +529,13 @@
             license activation, and sandbox user management.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.#ctor(BoldBi.Ai.Base.Helpers.SandboxUsersHelper,BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.TenantController"/> class.
+            </summary>
+            <param name="sandboxUsersHelper">The helper class for managing tenant.</param>
+            <param name="fetchFromDb">The helper class for managing DB.</param>
+        </member>
         <member name="M:BoldBi.Ai.Service.Controllers.TenantController.IsAllowedTenant(System.Object)">
             <summary>
             Checks if a tenant is allowed access based on the provided tenant ID.
@@ -556,11 +599,12 @@
             A health check class that checks the health of a PostgreSQL database connection.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck.#ctor(System.String)">
+        <member name="M:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck"/> class.
             </summary>
-            <param name="connectionString">The connection string for the PostgreSQL database.</param>
+            <param name="appDbContext">The meta DB context.</param>
+            <param name="usageLogDbContext">The usage log DB context.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext,System.Threading.CancellationToken)">
             <summary>

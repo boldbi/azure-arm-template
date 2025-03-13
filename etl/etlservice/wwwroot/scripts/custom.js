@@ -170,28 +170,38 @@ window.getComputedStyleValue = function (elementId, propertyName) {
     }
 };
 
-window.openAuthWindow = function (authenticationUrl,width, height, siteId){
-    return new Promise((resolve, reject) =>{
-        let left = 0;
+window.openAuthWindow = function (authenticationUrl, width, height) {
+    return new Promise((resolve, reject) => {
+        let left = (screen.width - width) / 2;
         let top = (screen.height - height) / 2;
         let features = `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`;
 
         let authWindow = window.open(authenticationUrl, '_blank', features);
-        const interval = setInterval(function () {
+
+        if (!authWindow) {
+            reject(new Error("Popup blocked by browser"));
+            return;
+        }
+
+        let interval = setInterval(() => {
             try {
-                if (authWindow.closed) {
+                if (!authWindow || authWindow.closed) {
                     clearInterval(interval);
+                    reject(new Error("Authentication window closed before completion."));
                     return;
                 }
-                //if (authWindow.location.hostname === "localhost" && authWindow.location.pathname === "/8702964b-5926-4dd6-a56d-8477b8b1ba1d/etl/oauth") {
-                if (authWindow.location.hostname === "localhost") {
-                    clearInterval(interval);
-                    const params = new URLSearchParams(authWindow.location.search);
-                    const code = params.get("code");
-                    const state = params.get("state");
-                    if (code) {
+
+                let url = authWindow.location.href;
+                if (url.includes("code=")) {
+                    let params = new URLSearchParams(url.split('?')[1]);
+                    let authCode = params.get("code");
+
+                    if (authCode) {
+                        console.log(authCode);
+                        clearInterval(interval);
                         authWindow.close();
-                        resolve(code);
+                        resolve(authCode);
+
                     }
                 }
             } catch (e) {
@@ -200,6 +210,8 @@ window.openAuthWindow = function (authenticationUrl,width, height, siteId){
         }, 1000);
     });
 };
+
+
 window.EscapeClick = function () {
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
@@ -248,14 +260,6 @@ window.removeOutsideClickListenerSchedule = (id) => {
     }
 };
 
-window.triggerFileInputClick= function(elementId) {
-    var element =   document.getElementById('file-input-bigquery');
-    if (element) {
-        element.click();
-    }
-}
-
-
 window.setActiveNavItem = function(navId) {
     var element = document.getElementById(navId);
     element.parentElement.querySelectorAll(".nav-item a").forEach(link => link.classList.remove("active"));
@@ -287,3 +291,11 @@ window.addOutsideClickListenerForHelpIcon = (elementId, dotNetObj) => {
         dispose: () => document.removeEventListener('click', handleClick)
     };
 };
+
+window.inputfileclick = () => {
+    var element =   document.getElementById('file-input-bigquery');
+    if (element) {
+        element.click();
+
+    }
+}

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 11.1.5
+*  version : 11.2.7
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -11991,7 +11991,8 @@
                 this._selectedRow(bbdesigner$rowIndex);
             Data = this._virtualScrollingSelection || this.model.allowPaging || this._enableCheckSelect ? this._virtualSelectedRecords : Data;
 			var selectedIndex = this.model.scrollSettings.enableVirtualization ? bbdesigner$rowIndex : this._selectedRow();
-            var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: Object.values(Data), target: target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex, parentTarget: e, hasUnselectedRows: this.unSelectedRowsIndexes.length > 0, isSelectAllChecked: this._selectAllchecked };
+            var reqdData = this.element.attr('id').includes("_Chart_trendline_grid_col") && Data.hasOwnProperty("LineColor") && Data.hasOwnProperty("LineStyle") && Data.hasOwnProperty("LineType") && Data.hasOwnProperty("LineVisible") && Data.hasOwnProperty("LineWidth") ? Data : Object.values(Data);
+            var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: reqdData, target: target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex, parentTarget: e, hasUnselectedRows: this.unSelectedRowsIndexes.length > 0, isSelectAllChecked: this._selectAllchecked };
             this._previousIndex = this.selectedRowsIndexes.length ? rowIndex :this._previousIndex;
 			if(this.model.scrollSettings.enableVirtualization){
 				this._prevSelIndex = bbdesigner$rowIndex; 

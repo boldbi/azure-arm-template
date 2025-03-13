@@ -106,7 +106,7 @@ function handleApplyLicense(addButtonObj, evt) {
                 beforeSend: showWaitingPopup('startup-page-container-waiting-element'),
                 success: function (result) {
                     if (result.Status) {
-                        $('meta[name=has-drm-configuration]').attr("content", "true");
+                        $('meta[name=is-ignore-drm-configuration]').attr("content", "true");
                         $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();
                         $(".startup-content").fadeIn();
                         $("#system-settings-welcome-container").hide();
@@ -262,7 +262,7 @@ function confirmLicenseUpdate() {
             beforeSend: showWaitingPopup('startup-page-container-waiting-element'),
             success: function (result) {
                 if (result.Status) {
-                    $('meta[name=has-drm-configuration]').attr("content", "true");
+                    $('meta[name=is-ignore-drm-configuration]').attr("content", "true");
                     offlineLicenseComplete();
                     $("#image-parent-container .startup-image").removeClass("offline-width")
                     $("#image-parent-container .startup-image").hide().attr("src", adminSetupImageUrl).fadeIn();

@@ -3,39 +3,67 @@ var changeSubscriptionDialog;
 $(document).ready(function () {
     if (location.href.match(/boldbi/) != null) {
         history.pushState(null, '', '?product=embedded-bi');
+        $("ul.nav.nav-tabs li").removeClass("active");
+        $("#bold-bi").closest("li").addClass("active");
         $("#bold-bi").tab("show");
+        $("#bold-bi-tab").addClass("active");
+        $("#bold-reports-tab").removeClass("active");
     }
 
     else if (location.href.match(/boldreports/) != null) {
         history.pushState(null, '', '?product=enterprise-reporting');
+        $("ul.nav.nav-tabs li").removeClass("active");
+        $("#bold-reports").closest("li").addClass("active");
         $("#bold-reports").tab("show");
+        $("#bold-reports-tab").addClass("active");
+        $("#bold-bi-tab").removeClass("active");
     }
 
     else if (location.href.match(/embedded-bi/) != null) {
         history.pushState(null, '', '?product=enterprise-bi');
+        $("ul.nav.nav-tabs li").removeClass("active");
+        $("#bold-bi").closest("li").addClass("active");
         $("#bold-bi").tab("show");
+        $("#bold-bi-tab").addClass("active");
+        $("#bold-reports-tab").removeClass("active");
     }
 
     else if (location.href.match(/enterprise-reporting/) != null) {
         history.pushState(null, '', '?product=enterprise-reporting');
+        $("ul.nav.nav-tabs li").removeClass("active");
+        $("#bold-reports").closest("li").addClass("active");
         $("#bold-reports").tab("show");
+        $("#bold-reports-tab").addClass("active");
+        $("#bold-bi-tab").removeClass("active");
     }
 
     else if (location.href.match(/boldbi/) == null && location.href.match(/boldreports/) == null && location.href.match(/boldbi/) == null && location.href.match(/boldbi/) == null) {
         
         if (isBoldBiLicenseAvailable.toLowerCase() == "true" && isBoldReportsLicenseAvailable.toLowerCase() == "true") {
             history.pushState(null, '', '?product=embedded-bi');
+            $("ul.nav.nav-tabs li").removeClass("active");
+            $("#bold-bi").closest("li").addClass("active");
             $("#bold-bi").tab("show");
+            $("#bold-bi-tab").addClass("active");
+            $("#bold-reports-tab").removeClass("active");
         }
         
         else if (isBoldBiLicenseAvailable.toLowerCase() == "true" && isBoldReportsLicenseAvailable.toLowerCase() == "false") {
             history.pushState(null, '', '?product=embedded-bi');
+            $("ul.nav.nav-tabs li").removeClass("active");
+            $("#bold-bi").closest("li").addClass("active");
             $("#bold-bi").tab("show");
+            $("#bold-bi-tab").addClass("active");
+            $("#bold-reports-tab").removeClass("active");
         }
 
         else if (isBoldBiLicenseAvailable.toLowerCase() == "false" && isBoldReportsLicenseAvailable.toLowerCase() == "true") {
             history.pushState(null, '', '?product=enterprise-reporting');
+            $("ul.nav.nav-tabs li").removeClass("active");
+            $("#bold-reports").closest("li").addClass("active");
             $("#bold-reports").tab("show");
+            $("#bold-reports-tab").addClass("active");
+            $("#bold-bi-tab").removeClass("active");
         }
     }
 
@@ -48,6 +76,8 @@ $(document).ready(function () {
                 $(this).closest("li").addClass("active");
                 if (query !== "?product=embedded-bi" || query !== "?product=boldbi") {
                     history.pushState(null, '', '?product=embedded-bi');
+                    $("#bold-bi-tab").addClass("active");
+                    $("#bold-reports-tab").removeClass("active");
                 }
                 break;
 
@@ -55,6 +85,8 @@ $(document).ready(function () {
                 $(this).closest("li").addClass("active");
                 if (query !== "?product=enterprise-reporting" || query !== "?product=boldreports") {
                     history.pushState(null, '', '?product=enterprise-reporting');
+                    $("#bold-reports-tab").addClass("active");
+                    $("#bold-bi-tab").removeClass("active");
                 }
                 break;
         }

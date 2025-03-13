@@ -1085,6 +1085,7 @@ function enableIsolationCode() {
     var isEnabled = $("#isolation-enable-switch").is(":checked");
     if (isEnabled) {
         $("#isolation-code").removeAttr("disabled");
+        $("#row-security-enable-switch").prop("disabled", false);
         $("#isolation-code").focus();
     } else {
         $("#isolation-code").attr('disabled', 'disabled');
@@ -1092,6 +1093,7 @@ function enableIsolationCode() {
         $("#isolation-code-validation").html("");
         $("#isolation-code").removeClass("has-error");
         isIsolationCodeUpdated = false;
+        $("#row-security-enable-switch").prop("disabled", true);
     }
 
     if ($("#isolation-code").val() == "" && isEnabled) {
@@ -1269,10 +1271,11 @@ $(document).on("click", "#update-isolation-code", function (e) {
     var isolationCode = $("#isolation-code").val().trim();
     var tenantInfoId = $(".isolation-code-value").attr("data-tenant-id");
     var isIsolationCodeEnabled = $("#isolation-enable-switch").is(":checked");
+    var isRowLevelSecurityEnabled = $("#row-security-enable-switch").prop("checked");
     showWaitingPopup('content-area');
     $.ajax({
         type: "POST",
-        data: { tenantInfoId: tenantInfoId, isolationCode: isolationCode, isIsolationCodeEnabled: isIsolationCodeEnabled },
+        data: { tenantInfoId: tenantInfoId, isolationCode: isolationCode, isIsolationCodeEnabled: isIsolationCodeEnabled, isRowLevelSecurityEnabled: isRowLevelSecurityEnabled },
         url: updateIsolationCodeUrl,
         success: function (result) {
             if (result.Status) {

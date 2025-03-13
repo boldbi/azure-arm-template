@@ -28,7 +28,7 @@
     var hideModifiedDate = iscustomUIProfile ? hideMenusAndOptions || customUI.Profiles[0].Dashboards.HideModifiedDate : false;
     var hideFavorite = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideFavorite) : false;
     var hideDashboardsFiltering = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDashboardsFiltering) : false;
-    var hideDownloadCheckbox = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDownloadCheckbox) : false;
+    var hideDownloadCheckbox = iscustomUIProfile ? (hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDownloadCheckbox)) : (ServerAppConfig.CanHideDownloadDashboard || false);
     var hideDownload = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDownload) : false;
     var hideFilterOverView = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideFilterOverView) : false;
     var hideEdit = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideEdit) : false;
@@ -927,9 +927,9 @@
                                 &nbsp;
                                 <i class="su su-sort"></i>
                             </span>
-                            <div class="dashboard-select-all no-padding no-margin" ng-class="{'col-3' : samePagePreview, 'col-4' : !samePagePreview}" ng-show="!isTablet && !isMobile && activeMenu !== @((int)DisplayCategory.DraftItems) && !hideDownloadCheckbox">
-                                @Html.CheckBox("dashboard-list-select-all", false, new { @class = "material-checkbox", @autocomplete = "off", ng_disabled = "totalDashboardCount == 0" })
-                                <label for="dashboard-list-select-all" class="dashboard-select-all-checkbox"></label>
+                            <div class="dashboard-select-all no-padding no-margin"  ng-class="{'col-3' : samePagePreview, 'col-4' : !samePagePreview}" ng-show="!isTablet && !isMobile && activeMenu !== @((int)DisplayCategory.DraftItems) && !hideDownloadCheckbox">
+                                @Html.CheckBox("dashboard-list-select-all", false, new { @class = "material-checkbox", @autocomplete = "off", ng_disabled = "totalDashboardCount == 0",  ng_if = "!hideDownloadCheckbox" })
+                                <label for="dashboard-list-select-all" class="dashboard-select-all-checkbox"  ng-if="!hideDownloadCheckbox"></label>
                                 <span class="col-4 download-icon" ng-click="downloadBulkDashboard()" style="display:none">
                                     <span class="dashboard-select-options">
                                         <i class="su su-download"></i>
@@ -1101,9 +1101,9 @@
                                         <li ng-repeat="dashboardItem in currentDashboards | limitTo: (isMobile ? totalDashboardCount : pageLimit)" class="col-12 no-padding dashboard-tile" ng-class="{'dashboard-tile-hide-author': (hideAuthorName && ((dashboardItem.IsMultiDashboard && hideMultitabText) || !dashboardItem.IsMultiDashboard)) && activeMenu !== @((int)DisplayCategory.UsageAnalytics), 'dashboard-tile-hide-description': !dashboardItem.Description || hideDescription, 'dashboard-draft-height' : ((dashboardItem.IsDraft && !dashboardItem.IsUploadDraft)  || activeMenu == @((int)DisplayCategory.UsageAnalytics) || hideDashboardInfoSection), 'highlighted': dashboardItem.highlighted }" my-post-repeat-directive>
                                             <div ng-if="!dashboardItem.IsDraft" class="col-12 no-padding" ng-class="{'dashboard-draft-height' : activeMenu == @((int)DisplayCategory.UsageAnalytics) || hideDashboardInfoSection}" ng-click="canPreventDashboardOpenNavigation($event) ? null : redirectToDashboard(viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name))">
                                                 <div class="dashboard-info-section col-12" ng-class="{'dashboard-tile-hide-description-div': !dashboardItem.Description || hideDescription, 'dashboard-usage-height' : activeMenu == @((int)DisplayCategory.UsageAnalytics) || hideDashboardInfoSection}">
-                                                    <div class="dashboard-select-list col-1 no-padding prevent-dashboard-navigation" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics) && !hideDownloadCheckbox">
+                                                    <div class="dashboard-select-list col-1 no-padding prevent-dashboard-navigation" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
                                                         @Html.CheckBox("{{dashboardItem.Id}}", false, new { @id="{{dashboardItem.Id}}", @class = "dashboard-select-individual material-checkbox", @autocomplete = "off" })
-                                                        <label for="{{dashboardItem.Id}}" ng-if="!isTablet && !isMobile && !dashboardItem.IsMultiDashboard"></label>
+                                                        <label for="{{dashboardItem.Id}}" ng-if="!isTablet && !isMobile && !dashboardItem.IsMultiDashboard && !hideDownloadCheckbox"></label>
                                                         <span class="su favorite favorite-icon" ng-class="{'favorite-hide-author': (hideAuthorName && ((dashboardItem.IsMultiDashboard && hideMultitabText) || !dashboardItem.IsMultiDashboard)), 'su-favorite': (!dashboardItem.IsDraft && dashboardItem.IsFavorite), 'su-dis-favorite': (!dashboardItem.IsDraft && !dashboardItem.IsFavorite)}" ng-hide="schemesDetails != null && !schemesDetails.Favorite || activeMenu === @((int)DisplayCategory.UsageAnalytics)" data-favorite="{{dashboardItem.IsFavorite}}" ng-click="toggleFavorite($event)"></span>
                                                     </div>
                                                     <div class="open-link no-padding" ng-class="setWidthForDashboardName()">
@@ -1280,9 +1280,10 @@
                                                         </div>
                                                         <div class="no-padding dashboard-open">
                                                             <span class="open-link-icon no-margin" title="" ng-show="!isTablet && !isMobile && !samePagePreview && activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
-                                                                <a class="web-designer option-click" href="{{viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name)}}" target="_blank">
+                                                                <a class="web-designer option-click"ng-click="redirectToDashboard(viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name))" href="javascript:void(0);" target="_blank">
                                                                     <i class="items view-item su su-external-link"></i>
-                                                                </a>                                          
+                                                                </a>
+
                                                             </span> 
                                                         </div>
                                                     </div>
@@ -1359,7 +1360,7 @@
                                                 <div class="dashboard-info-section col-12" ng-class="{'dashboard-tile-hide-description-div': !dashboardItem.Description || hideDescription, 'dashboard-usage-height' : activeMenu == @((int)DisplayCategory.UsageAnalytics) || hideDashboardInfoSection}">
                                                     <div class="dashboard-select-list col-1 no-padding" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
                                                         @Html.CheckBox("{{dashboardItem.Id}}", false, new { @id="{{dashboardItem.Id}}", @class = "dashboard-select-individual material-checkbox", @autocomplete = "off" })
-                                                        <label for="{{dashboardItem.Id}}" ng-if="!isTablet && !isMobile"></label>
+                                                        <label for="{{dashboardItem.Id}}" ng-if="!isTablet && !isMobile && !hideDownloadCheckbox"></label>
                                                     </div>
                                                     <div class="col-12 open-link no-padding" ng-class="setWidthForDashboardName()">
                                                         <a class="col-12 no-padding" ng-click="uploadDialogOpen()" href="#">

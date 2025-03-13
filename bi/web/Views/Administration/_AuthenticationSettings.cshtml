@@ -82,6 +82,7 @@
         var userDirectoryDefaultAuth = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DefaultAuthentication)";
         var updateauthsettingsUrl = "@Url.Action("UpdateAuthenticationSettings", "Administration")";
         var refreshSigningKeyUrl = "@Url.Action("RegenerateSigningKey", "Administration")";
+        var refreshJWTEncryptionKeyUrl = "@Url.Action("RegenerateJWTEncryptionKey", "Administration")";
         var updateauthcontrolUrl = "@Url.Action("UpdateAuthControl", "Administration")";
         var updateLoginOptionsUrl = "@Url.Action("UpdateLoginOptions", "Administration")";
         var defaultauthsettingsUrl = "@Url.Action("UpdateDefaultAuthentication", "Administration")";
@@ -586,89 +587,6 @@
                                 </form>
                             </div>
                         </div>
-                        
-                        <div role="tabpanel" class="tab-pane" id="jwt-settings">
-                            <div id="jwt-page-body" class="col-12 bi-page-body">
-                                <form id="jwt-setting" name="jwtSettingsForm" class="auth-settings-form form-top-margin no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
-                                    <input type="hidden" name="jwtAuthenticationProvider" value="@ViewBag.JwtSettings.AuthProvider">
-                                    <input type="hidden" name="jwtLogo" value="">
-                                    <div class="col-12 no-padding separator-margin">
-                                        <div class="col-md-12 no-padding">
-                                            <div class="col-12 no-padding ">
-                                                @Html.CheckBox("jwtIsEnabled", new { @class = "material-checkbox", ng_model = "jwtIsEnabled", ng_change = "hideValidationMessage(jwtIsEnabled, 'jwt')" })
-                                                @Html.Hidden("jwtIsEnabled")
-                                                <label for="jwtIsEnabled">
-                                                    <span>
-                                                        @string.Format(T["Enable {0}"].Value, "JWT")
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 no-padding first-auth-field">
-                                            <div class="col-12 no-padding">
-                                                <label class="app-textbox-label">@T["Name"]</label>
-                                            </div>
-                                            <div class="auth-input-display" ng-class="(jwtSettingsForm.jwtName.$dirty && jwtSettingsForm.jwtName.$invalid) ? 'has-error' : ''">
-                                                <input type="text" class="form-control txt-holder validation-padding" ng-model="jwtName" ng-init="jwtName='@ViewBag.JwtSettings.JWTSettings.Name'" name="jwtName" placeholder="@T["Name"]" id="jwt-provider-name" data-ng-disabled="!jwtIsEnabled" required/>
-                                                <span class="validation-message" ng-show="jwtSettingsForm.jwtName.$error.required && jwtSettingsForm.jwtName.$dirty && jwtIsEnabled">@string.Format(T["Please enter the {0} name."].Value, "JWT")</span>
-                                            </div>
-                                            <div class="info-message no-padding">@T["Name of the authentication provider to be displayed in the login page."]</div>
-                                        </div>
-                                        <div class="col-12 logo-align no-padding">
-                                            <div class="col-md-12 no-padding">
-                                                <label class="app-textbox-label">@T["Provider Logo"]</label>
-                                            </div>
-                                            <div class="col-12 no-padding logo-container">
-                                                <div id="jwt-image-upload-box" class="auth-image-upload-box validation-padding">
-                                                    <div class="js-image-preview" style="background-image:{{jwtLogoUrl}}"></div>
-                                                    <div class="upload-options">
-                                                        <label>
-                                                            <span>@T["Change logo"]</span>
-                                                            <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="jwtLogoUrl" ng-init="jwtLogoUrl='@ViewBag.JwtSettings.LogoUrl'" name="jwtLogoUrl" data-ng-disabled="!jwtIsEnabled" ng-required="jwtIsEnabled" required/>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <span class="validation-message" ng-show="!jwtSettingsForm.isValidJwtLogoUrl && jwtIsEnabled"></span>
-                                            </div>
-                                            <div class="info-message no-padding">@T["Logo of the authentication provider to be displayed in the login page."]</div>
-                                        </div>
-                                        <div class="col-12 no-padding auth-fields-margin">
-                                            <div class="col-12 no-padding">
-                                                <label class="app-textbox-label">@T["Remote Login URL"]</label>
-                                            </div>
-                                            <div class="auth-input-display" ng-class="(jwtSettingsForm.jwtLoginUrl.$dirty && jwtSettingsForm.jwtLoginUrl.$invalid) ? 'has-error' : ''">
-                                                <input type="text" class="form-control txt-holder validation-padding" ng-model="jwtLoginUrl" ng-init="jwtLoginUrl='@ViewBag.JwtSettings.JWTSettings.LoginUrl'" ng-pattern="@oauthRegEx" name="jwtLoginUrl" placeholder="@T["Remote Login URL"]" id="jwt-authority" data-ng-disabled="!jwtIsEnabled" required />
-                                                <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLoginUrl.$error.required && jwtSettingsForm.jwtLoginUrl.$dirty && jwtIsEnabled">@T["Please enter the login url."]</span>
-                                                <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLoginUrl.$error.pattern && jwtSettingsForm.jwtLoginUrl.$dirty && jwtIsEnabled">@T["Please enter a valid login url."]</span>
-                                            </div>
-                                            <div class="info-message no-padding">@string.Format(T["An remote login {0} where the resource owner grants authorization to the {1} client to access protected resources."].Value, "URL", "JWT")</div>
-                                        </div>
-                                        <div class="col-12 no-padding auth-fields-margin">
-                                            <div class="col-12 no-padding">
-                                                <label class="app-textbox-label">@T["Remote Logout URL"]</label>
-                                            </div>
-                                            <div class="auth-input-display" ng-class="(jwtSettingsForm.jwtLogOutUrl.$dirty && jwtSettingsForm.jwtLogOutUrl.$invalid) ? 'has-error' : ''">
-                                                <input type="text" class="form-control txt-holder validation-padding" ng-model="jwtLogOutUrl" ng-init="jwtLogOutUrl='@ViewBag.JwtSettings.JWTSettings.LogOutUrl'" ng-pattern="@oauthRegEx" name="jwtLogOutUrl" placeholder="@T["Remote Logout URL(Optional)"]" id="jwt-client-id" data-ng-disabled="!jwtIsEnabled" />
-                                                <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLogOutUrl.$error.pattern && jwtSettingsForm.jwtLogOutUrl.$dirty && jwtIsEnabled">@T["Please enter a valid logout url."]</span>
-                                            </div>
-                                            <div class="info-message no-padding">@T["We support logout endpoints that have static request parameters."]</div>
-                                        </div>
-                                        <div class="col-12 no-padding auth-fields-margin">
-                                            <div class="col-12 no-padding">
-                                                <label class="app-textbox-label">@T["Signing Key"]</label>
-                                            </div>
-                                            <div class="col-12 no-padding" ng-class="(jwtSettingsForm.jwtSigningKey.$dirty && jwtSettingsForm.jwtSigningKey.$invalid) ? 'has-error' : ''">
-                                                <input type="password" id="jwt-signing-key" readonly="" class="form-control txt-holder validation-padding signing-key-values @(!enableSigningKeyOptions ? "signing-key-width" : string.Empty)" name="jwtSigningKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@ViewBag.JwtSettings.JWTSettings.SigningKey" />
-                                                
-                                                <div class="su su-eye form-control show-hide-password copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="show-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></div>
-                                                <div class="su su-copy form-control copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="copy-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to copy"]"></div>
-                                                <div class="su su-synchronize form-control text focus copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="generate-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to Regenerate"]" data-bs-trigger="hover"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
 
                         @if (ServerAppConfig.IsSelfHosted)
                         {
@@ -870,6 +788,105 @@
                                                 </div>
                                             </div>
                                         </feature>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane" id="jwt-settings">
+                                <div id="jwt-page-body" class="col-12 bi-page-body">
+                                    <form id="jwt-setting" name="jwtSettingsForm" class="auth-settings-form form-top-margin no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+                                        <input type="hidden" name="jwtAuthenticationProvider" value="@ViewBag.JwtSettings.AuthProvider">
+                                        <input type="hidden" name="jwtLogo" value="">
+                                        <div class="col-12 no-padding separator-margin">
+                                            <div class="col-md-12 no-padding">
+                                                <div class="col-12 no-padding ">
+                                                    @Html.CheckBox("jwtIsEnabled", new { @class = "material-checkbox", ng_model = "jwtIsEnabled", ng_change = "hideValidationMessage(jwtIsEnabled, 'jwt')" })
+                                                    @Html.Hidden("jwtIsEnabled")
+                                                    <label for="jwtIsEnabled">
+                                                        <span>
+                                                            @string.Format(T["Enable {0}"].Value, "JWT")
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 no-padding first-auth-field">
+                                                <div class="col-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Name"]</label>
+                                                </div>
+                                                <div class="auth-input-display" ng-class="(jwtSettingsForm.jwtName.$dirty && jwtSettingsForm.jwtName.$invalid) ? 'has-error' : ''">
+                                                    <input type="text" class="form-control txt-holder validation-padding" ng-model="jwtName" ng-init="jwtName='@ViewBag.JwtSettings.JWTSettings.Name'" name="jwtName" placeholder="@T["Name"]" id="jwt-provider-name" data-ng-disabled="!jwtIsEnabled" required/>
+                                                    <span class="validation-message" ng-show="jwtSettingsForm.jwtName.$error.required && jwtSettingsForm.jwtName.$dirty && jwtIsEnabled">@string.Format(T["Please enter the {0} name."].Value, "JWT")</span>
+                                                </div>
+                                                <div class="info-message no-padding">@T["Name of the authentication provider to be displayed in the login page."]</div>
+                                            </div>
+                                            <div class="col-12 logo-align no-padding">
+                                                <div class="col-md-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Provider Logo"]</label>
+                                                </div>
+                                                <div class="col-12 no-padding logo-container">
+                                                    <div id="jwt-image-upload-box" class="auth-image-upload-box validation-padding">
+                                                        <div class="js-image-preview" style="background-image:{{jwtLogoUrl}}"></div>
+                                                        <div class="upload-options">
+                                                            <label>
+                                                                <span>@T["Change logo"]</span>
+                                                                <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" ng-model="jwtLogoUrl" ng-init="jwtLogoUrl='@ViewBag.JwtSettings.LogoUrl'" name="jwtLogoUrl" data-ng-disabled="!jwtIsEnabled" ng-required="jwtIsEnabled" required/>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <span class="validation-message" ng-show="!jwtSettingsForm.isValidJwtLogoUrl && jwtIsEnabled"></span>
+                                                </div>
+                                                <div class="info-message no-padding">@T["Logo of the authentication provider to be displayed in the login page."]</div>
+                                            </div>
+                                            <div class="col-12 no-padding auth-fields-margin">
+                                                <div class="col-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Remote Login URL"]</label>
+                                                </div>
+                                                <div class="auth-input-display" ng-class="(jwtSettingsForm.jwtLoginUrl.$dirty && jwtSettingsForm.jwtLoginUrl.$invalid) ? 'has-error' : ''">
+                                                    <input type="text" class="form-control txt-holder validation-padding" ng-model="jwtLoginUrl" ng-init="jwtLoginUrl='@ViewBag.JwtSettings.JWTSettings.LoginUrl'" ng-pattern="@oauthRegEx" name="jwtLoginUrl" placeholder="@T["Remote Login URL"]" id="jwt-authority" data-ng-disabled="!jwtIsEnabled" required />
+                                                    <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLoginUrl.$error.required && jwtSettingsForm.jwtLoginUrl.$dirty && jwtIsEnabled">@T["Please enter the login url."]</span>
+                                                    <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLoginUrl.$error.pattern && jwtSettingsForm.jwtLoginUrl.$dirty && jwtIsEnabled">@T["Please enter a valid login url."]</span>
+                                                </div>
+                                                <div class="info-message no-padding">@string.Format(T["An remote login {0} where the resource owner grants authorization to the {1} client to access protected resources."].Value, "URL", "JWT")</div>
+                                            </div>
+                                            <div class="col-12 no-padding auth-fields-margin">
+                                                <div class="col-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Remote Logout URL"]</label>
+                                                </div>
+                                                <div class="auth-input-display" ng-class="(jwtSettingsForm.jwtLogOutUrl.$dirty && jwtSettingsForm.jwtLogOutUrl.$invalid) ? 'has-error' : ''">
+                                                    <input type="text" class="form-control txt-holder validation-padding" ng-model="jwtLogOutUrl" ng-init="jwtLogOutUrl='@ViewBag.JwtSettings.JWTSettings.LogOutUrl'" ng-pattern="@oauthRegEx" name="jwtLogOutUrl" placeholder="@T["Remote Logout URL(Optional)"]" id="jwt-client-id" data-ng-disabled="!jwtIsEnabled" />
+                                                    <span class="validation-message top-padding" ng-show="jwtSettingsForm.jwtLogOutUrl.$error.pattern && jwtSettingsForm.jwtLogOutUrl.$dirty && jwtIsEnabled">@T["Please enter a valid logout url."]</span>
+                                                </div>
+                                                <div class="info-message no-padding">@T["We support logout endpoints that have static request parameters."]</div>
+                                            </div>
+                                            <div class="col-12 no-padding auth-fields-margin">
+                                                <div class="col-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Signing Key"]</label>
+                                                </div>
+                                                <div class="col-12 no-padding" ng-class="(jwtSettingsForm.jwtSigningKey.$dirty && jwtSettingsForm.jwtSigningKey.$invalid) ? 'has-error' : ''">
+                                                    <input type="password" id="jwt-signing-key" readonly="" class="form-control txt-holder validation-padding signing-key-values @(!enableSigningKeyOptions ? "signing-key-width" : string.Empty)" name="jwtSigningKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@ViewBag.JwtSettings.JWTSettings.SigningKey" />
+                                                
+                                                    <div class="su su-eye form-control show-hide-password copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="show-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></div>
+                                                    <div class="su su-copy form-control copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="copy-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to copy"]"></div>
+                                                    <div class="su su-synchronize form-control text focus copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="generate-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to Regenerate"]" data-bs-trigger="hover"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 no-padding auth-fields-margin jwt-encryption-field">
+                                                <div class="material-switch inline-align col-12" ng-click="enableDisableEncryption()">
+                                                    <input type="checkbox" id="enable-jwt-encryption" @(ViewBag.IsEncryptionEnabled ? "checked" : string.Empty) ng-change="enableDisableEncryption()" />
+                                                    <label for="enable-jwt-encryption" class="label-primary"></label>
+                                                </div>
+                                                <div class="app-textbox-label inline-align activation">
+                                                    @T["Enable Encryption"]
+                                                </div>
+                                                <div class="info-message no-padding">@T["Enable encryption to enhance the security of JWT tokens. When enabled, tokens need to be encrypted using a public key before transmission."]</div>
+                                                <div class="col-12 no-padding" ng-class="(jwtSettingsForm.jwtSigningKey.$dirty && jwtSettingsForm.jwtSigningKey.$invalid) ? 'has-error' : ''">
+                                                    <input type="password" id="jwt-encryption-key" readonly="" class="form-control txt-holder validation-padding signing-key-values @(!ViewBag.IsEncryptionEnabled ? "encryption-key-width" : string.Empty)" name="jwtEncryptionKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@ViewBag.PublicKey" data-ng-disabled="!jwtIsEnabled" />
+                                                    <div class="su su-eye form-control show-hide-password copy-signing-key-values @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? string.Empty : "display-none")" id="show-encryption-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></div>
+                                                    <div class="su su-copy form-control copy-signing-key-values @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? string.Empty : "display-none")" id="copy-encryption-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to copy"]"></div>
+                                                    <div class="su su-synchronize form-control text focus copy-signing-key-values @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? string.Empty : "display-none")" id="generate-encryption-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to Regenerate"]" data-bs-trigger="hover"></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </form>
                                 </div>
                             </div>

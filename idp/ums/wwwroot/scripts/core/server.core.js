@@ -875,6 +875,16 @@ function IsValidUsernameLength(username) {
     }
 }
 
+$(document).on("click", "#license-warning-icon", function () {
+    var messageContent = window.Server.App.LocalizationContent.LicenseWarningContent1
+        + "<div class='license-warning-content'>"
+        + window.Server.App.LocalizationContent.LicenseWarningContent2 + window.Server.App.LocalizationContent.LicenseWarningContent3.toLowerCase() + "<a class='text-decoration-none' href='" + idpUrl + "/ums/administration/license-settings'>" + window.Server.App.LocalizationContent.LicenseWarningContent4 + "</a>" + window.Server.App.LocalizationContent.LicenseWarningContent5
+        + "</div>";
+    messageBox("", window.Server.App.LocalizationContent.LicenseWarningHeader, messageContent, "success", function () {
+        onCloseMessageBox();
+    });
+});
+
 function IsValidContactNumber(contactNumber) {
     var regex = /^(?:|[0-9\-\+]{9,15})$/;
     if (regex.test(contactNumber)) {

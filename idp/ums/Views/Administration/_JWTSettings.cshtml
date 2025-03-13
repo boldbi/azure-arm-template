@@ -80,6 +80,22 @@
                         <div class="su su-sync form-control text focus copy-signing-key-values @(enableSigningKeyOptions ? string.Empty : "display-none")" id="generate-signing-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to Regenerate"]" data-bs-trigger="hover"></div>
                     </div>
                 </div>
+                <div class="col-md-12 float-start no-padding input-field-margin margin-bottom jwt-encryption-field">
+                    <div class="material-switch inline-align col-12" ng-change="enableDisableEncryption()">
+                        <input type="checkbox" id="enable-jwt-encryption" @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? "checked" : string.Empty) ng-change="enableDisableEncryption()" />
+                        <label for="enable-jwt-encryption" class="label-primary"></label>
+                    </div>
+                    <div class="app-textbox-label inline-align activation">
+                        @T["Enable Encryption"]
+                    </div>
+                    <div class="info-message no-padding">@T["Enable encryption to enhance the security of JWT tokens. When enabled, tokens need to be encrypted using a public key before transmission."]</div>
+                    <div class="col-12 no-padding" ng-class="(jwtSettingsForm.jwtSigningKey.$dirty && jwtSettingsForm.jwtSigningKey.$invalid) ? 'has-error' : ''">
+                        <input type="password" id="jwt-encryption-key" readonly="" class="form-control txt-holder validation-padding signing-key-values @(!ViewBag.IsEncryptionEnabled ? "encryption-key-width" : string.Empty)" name="jwtEncryptionKey" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" value="@ViewBag.PublicKey" data-ng-disabled="!jwtIsEnabled" />
+                        <div class="su su-eye form-control show-hide-password copy-signing-key-values @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? string.Empty : "display-none")" id="show-encryption-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></div>
+                        <div class="su su-copy form-control copy-signing-key-values @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? string.Empty : "display-none")" id="copy-encryption-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to copy"]"></div>
+                        <div class="su su-sync form-control text focus copy-signing-key-values @(ViewBag.IsEncryptionEnabled != null && ViewBag.IsEncryptionEnabled ? string.Empty : "display-none")" id="generate-encryption-key" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to Regenerate"]" data-bs-trigger="hover"></div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
