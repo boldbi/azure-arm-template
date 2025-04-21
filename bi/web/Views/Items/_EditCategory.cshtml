@@ -1,0 +1,45 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var requesrUrl = url.AbsolutePath.ToString().ToLower();
+}
+<div id="EditCategoryPopup" style="display:none">
+    <div style="background:white;" class="dialog">
+        <form id="update_category_content" class="col-md-12 dialog-body">
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Category Name"]<span class="mandatory">*</span></div></td>
+                        <td>
+                            <span>
+                                <input type="text" id="category_name" class="popup form-control text-field bottom-margin30 text" data-maxlength="255" value="" tabindex="1" autofocus name="categoryName">
+                                <span id="validate-name" class="validation-message text"></span>
+                                <div id="plugin_validation" class="validation-message text"></div>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right padding-right-15"><div class="bottom-margin30">@T["Description"]</div></td>
+                        <td>
+                            <textarea class="form-control text-field top-margin text" maxlength="1024" id="category_description" tabindex="2"></textarea>
+                            <span class="help-text">
+                                <span class="help-text-mandatory">*</span>@T["1024 characters maximum"]
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+
+@if (requesrUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1){
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/edit-category.min.js"></script>
+    </environment>
+}

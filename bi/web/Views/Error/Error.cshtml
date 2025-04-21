@@ -1,0 +1,63 @@
+﻿@{
+    Layout = null;
+    var cdnLink = @GlobalAppSettings.CdnDomain;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var favicon = new Uri(Context.Request.GetDisplayUrl()).GetLeftPart(UriPartial.Authority) + "/ums/logos?type=favicon";
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Internal Server Error"] - @GlobalAppSettings.BrandingDisplayName</title>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/css/error-page/error-page..css" />
+        <script asp-append-version="true" src="~/Scripts/jQuery/jquery-1.10.2.min.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.min.css" />
+        <script asp-append-version="true" src="~/Scripts/jQuery/jquery-1.10.2.min.js"></script>
+    </environment>
+    <script>
+        $(document).ready(function () {
+            $(".base-container-bg").css("display", "");
+        });
+    </script>
+    <link rel="icon" href="@favicon" onerror="if (this.href != '@cdnLink/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+</head>
+<body>
+    <div class="base-container-bg" style="display: none">
+        <div class="base-conatiner" id="base-conatiner">
+            <div id="main-div">
+                <div class="app-logo">
+                    <img src="@GlobalAppSettings.CdnDomain/email/images/main-logo.png" />
+                </div>
+                <div class="secondary-div">
+                    <div class="page-title">
+                        @T["Internal Server Error"]
+                    </div>
+                    @if (!ServerAppConfig.IsSelfHosted)
+                    {
+                        <div class="page-content">@string.Format(T["The requested page failed to load. If the problem persists, please contact {0} Support."].Value, @ServerAppConfig.BrandingJson.BrandingName)</div>
+                        <div class="support-div">
+                            <a href="@ServerAppConfig.AppSettings.Syncfusion.ProductionName/support" class="support-button">@T["Create a Support ticket"]</a>
+                        </div>
+                    }
+                    else
+                    {
+                    <div class="page-content">@T["The requested page failed to load. If the problem persists, please contact your administrator."]</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+﻿@model LogResponse
+
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Notifications"].Value +" - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.MessageBox = false;
+    var idPAvatarUrl = globalAppSettings.SystemSettings.IDPUrl + "/User/Avatar";
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SystemNotifications);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+@section Styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/notification-listing.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/notification-listing.min.css" />
+    </environment>
+}
+
+@section Scripts{
+
+    <script>
+        $(document).ready(function () {
+            $("#notifciation-page-container #user-notification-container").show();
+            $("#user-system-notification").hide();
+            userNotificationContainer.show().removeClass("user-notification-close").addClass("user-notification-open");
+            ejs.popups.createSpinner({
+                target: document.getElementById('notifciation-page-container')
+            });
+            ejs.popups.setSpinner({ type: 'Material' });
+            ejs.popups.showSpinner(document.getElementById('notifciation-page-container'));
+            var notificationController = angular.element(userNotificationObj).scope();
+            notificationController.getUserSystemNotification();
+        });
+    </script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/notification-listing.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/notification-listing.min.js"></script>
+    </environment>
+}
+
+@section MainSection{
+    <div id="notifciation-page-container">
+        @await Html.PartialAsync("~/Views/Notification/_UserNotificationPartial.cshtml")
+    </div>
+}

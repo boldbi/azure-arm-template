@@ -1,0 +1,101 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+@{
+    var includeHeader = ViewBag.IncludeHeader != null ? ViewBag.IncludeHeader : false;
+    var loginBackgroundImage = ViewBag.LoginBackgroundImage;
+    var headerLogo = (ViewBag.LoginLogo != null) ? ViewBag.LoginLogo : Url.Content($"{CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')}/logos?type=login");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var defaultErrorImg = '@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorImage)';
+        document.addEventListener("DOMContentLoaded", function () {
+            var loginLogo = document.getElementById("loginLogo");
+            if (loginLogo) {
+                loginLogo.addEventListener("error", function () {                  
+                    this.src = defaultErrorImg;
+                });
+            }
+        });
+    </script>
+
+    @await Html.PartialAsync("~/Views/Shared/_OGPContent.cshtml")
+    @await Html.PartialAsync("_PasswordPolicyRules")
+    @RenderSection("meta", false)
+    <title>
+        @ViewBag.Title
+    </title>
+
+    @await Html.PartialAsync("_Favicon")
+    <link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')/bundles/css/cssloader.css" asp-append-version="true" />
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/accounts-layout.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/accounts-layout.css")" crossorigin="anonymous" asp-append-version="true" />
+    @RenderSection("styles", false)
+
+    @if (!string.IsNullOrWhiteSpace(loginBackgroundImage))
+    {
+        var imageUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.TrimEnd('/') + "/content/images/application/" + loginBackgroundImage;
+        <style>
+            body {
+                background-image: url(@imageUrl) !important;
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-color: var(--surface);
+            }
+
+            .account-parent {
+                background: transparent;
+            }
+
+            .account-bg {
+                background-color: var(--surface);
+                box-shadow: 0px 0px 5px #c9ced0;
+            }
+        </style>
+    }
+</head>
+<body id="body">
+    @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+
+    @if (includeHeader)
+    {
+        <section id="header">
+            @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
+        </section>
+    }
+    <div class="account-parent @(includeHeader ? "header-padding" : string.Empty)">
+        <div class="account-child">
+            <div class="account-bg">
+                <div class="account-header">
+                    <img id="loginLogo" alt="Login Logo" src="@headerLogo" />
+                </div>
+                @RenderSection("MainSection", true)
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/accounts.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/ej2.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    @RenderSection("scripts", false)
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        $(document).ready(function () {
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl)
+            });
+
+            createWaitingPopup('body');
+        });
+    </script>
+</body>
+</html>

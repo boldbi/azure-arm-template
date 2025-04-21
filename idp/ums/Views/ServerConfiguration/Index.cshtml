@@ -1,0 +1,162 @@
+﻿@{
+    Layout = null;
+    var displayName = GlobalAppSettings.BrandingDisplayName;
+    var connectionType = GlobalAppSettings.Configuration["IdP:AzureBlobConnectionType"];
+    var storageAccountName = GlobalAppSettings.Configuration["IdP:AzureBlobStorageAccountName"];
+    var accessKey = GlobalAppSettings.Configuration["IdP:AzureBlobStorageAccessKey"];
+    var blobServiceEndpoint = GlobalAppSettings.Configuration["IdP:AzureBlobServiceEndpoint"];
+    var containerName = GlobalAppSettings.Configuration["IdP:AzureBlobContainerName"];
+    var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
+    var pathbase = Context.Request.PathBase;
+    var productName = ViewBag.TenantType == TenantType.BoldBIOnPremise ? GlobalAppSettings.GetDescription(ProductName.BoldBIOnPremise) : GlobalAppSettings.GetDescription(ProductName.BoldReportsOnPremise);
+    var serverUserHelp = string.Format(T["Please refer to the {0}documentation{1} for details on the permissions required to allow {2} Server to connect to and use the database."].Value, "<a target='_blank' class='text-decoration-none' href='" + (await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration, ViewBag.TenantType)) + "'>", "</a>", productName);
+    var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
+    var postgresSQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQL_Connection_Parameters);
+    var mySQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MySQL_Connection_Parameters);
+    var oracleParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Oracle_Connection_Parameters);
+    var nonce = Context.Items["ScriptNonce"];
+    var isBoldBI = GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName;
+    var productBrandingName = isBoldBI ? CloudAppConfig.Branding.ProductSpecificBranding.BrandingBIName : CloudAppConfig.Branding.ProductSpecificBranding.BrandingReportsName;
+    var welcomeMessageTemplate = CloudAppConfig.Branding.IsWhiteLabelling ? T["Welcome to {0}"].Value : T["Welcome to {0} Enterprise Server"].Value;
+    var welcomeMessage = string.Format(welcomeMessageTemplate, $"<span>{productBrandingName}</span>");
+    var useSingleTenantDb = GlobalAppSettings.SystemSettings.UseSingleTenantDb != null && (bool)GlobalAppSettings.SystemSettings.UseSingleTenantDb;
+    var tenantSchema = GlobalAppSettings.SystemSettings.SchemaName ?? string.Empty;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+
+    <meta name="is-ignore-drm-configuration" content="true">
+    <meta name="IdStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdStorageConfiguration)" />
+    <meta name="AdminCreation" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation)" />
+    <meta name="ServerStorageConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ServerStorageConfiguration)" />
+    <meta name="ServerDataStoreConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.ServerDataStoreConfiguration)" />
+    <meta name="IdDatabaseConfiguration" content="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.IdDatabaseConfiguration)" />
+    @await Html.PartialAsync("../Shared/_PasswordPolicyRules")
+<title> @Html.Raw(string.Format(T["Welcome to {0}"].Value, displayName))</title>
+    <link rel="icon" href="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/favicon.ico")" />  
+
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+
+    <link rel="stylesheet" href="~/bundles/css/system-configuration.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/system-configuration.css")" crossorigin="anonymous" asp-append-version="true" />
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/system-configuration.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/system-configuration.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/ej2.js")" crossorigin="anonymous" asp-append-version="true"></script>
+
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var idStorageConfiguration = $('meta[name="IdStorageConfiguration"]').attr("content");
+        var adminCreation = $('meta[name="AdminCreation"]').attr("content");
+        var serverStorageConfiguration = $('meta[name="ServerStorageConfiguration"]').attr("content");
+        var serverDataStoreConfiguration = $('meta[name="ServerDataStoreConfiguration"]').attr("content");
+
+        var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
+        var connectDatabaseUrl = "@Url.Action("ConnectDatabase", "ServerConfiguration")";
+        var generateDatabaseUrl = "@Url.Action("GenerateDatabase", "ServerConfiguration")";
+        var generateSQLTablesUrl = "@Url.Action("GenerateTablesInDB", "ServerConfiguration")";
+        var checkTableExistsUrl = "@Url.Action("CheckTableAlreadyExists", "ServerConfiguration")";
+        var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
+        var deleteStatusUrl = "@Url.Action("DeleteProgressFile", "ServerConfiguration")";
+        var blobDetails = "@Url.Action("GetAzureDetails", "TenantsManagement")";
+        var blobExist = "@Url.Action("IsBlobExists", "ServerConfiguration")";
+        var updateLicenseKeyUrl = "@Url.Action("ApplyLicenseKey", "ServerConfiguration")";
+        var validateLicenseKeyUrl = "@Url.Action("ValidateLicenseKey", "ServerConfiguration")";
+        var validateStartupUrl = "@Url.Action("ValidateStartup", "ServerConfiguration")";
+        var useSingleTenantDb = "@useSingleTenantDb".toLowerCase() === "true";
+        var storageType = "@ViewBag.StorageType";
+
+        var serverSetupImageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-startup-image.svg")";
+        var adminSetupImageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-admin-setup.svg")";
+        var storageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/file-storage-image.svg")";
+        var offlineSetupImageUrl = "@Url.Content("~/images/static/startup/offline-setup.png")";
+        var startupHome = "@Url.Content("~/images/static/startup/login-to-activate.png")";
+
+        var isBoldBI = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName)".toLowerCase() == "true";
+        var isAzureApplication = ("@ViewBag.IsAzureApplication".toLowerCase() === "true");
+        var isBoldReports = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldReports.DisplayName)".toLowerCase() == "true";
+        var connectionType = "@connectionType";
+        var storageAccountName = "@storageAccountName";
+        var tenantSchema = "@tenantSchema";
+        // Removing Html.Raw may lead to encoded value for access key in Azure App Service.
+        var accessKey = "@Html.Raw(accessKey)";
+        var blobServiceEndpoint = "@blobServiceEndpoint";
+        var containerName = "@containerName";
+        var sqlParameter = "@sqlParameter";
+        var postgresSQLParameter = "@postgresSQLParameter";
+        var mySQLParameter = "@mySQLParameter";
+        var oracleParameter = "@oracleParameter";
+        var databaseConfigurationUrl = $('meta[name="IdDatabaseConfiguration"]').attr("content");
+        var isSiteCreation = false;
+        var isSimpleModeValue = "true";
+        var actionType = "";
+        var biProductname = "@AppBranding.Bold.ProductName";
+        var reportsProductname = "@AppBranding.BoldReports.ProductName";
+        var isWhiteLabelling = "@CloudAppConfig.Branding.IsWhiteLabelling".toLowerCase() == "true";
+        var IsOracleSupportBi = ("@ViewBag.IsOracleSupportBi".toLowerCase() === "true");
+        var IsOracleSupportReports = ("@ViewBag.IsOracleSupportReports".toLowerCase() === "true");
+        var IsBiPrefixSchema = ("@ViewBag.IsBiPrefixSchema".toLowerCase() === "true");
+        var IsReportsPrefixSchema = ("@ViewBag.IsReportsPrefixSchema".toLowerCase() === "true");
+        $(document).ready(function () {
+            $(document).click(function (e) {
+                if (e.target.id != "info-icon") {
+                    $('#prefix-message').css("display", "none");
+                }
+                if (e.target.id != "info-icon-postgressql") {
+                    $('#prefix-message-postgresql').css("display", "none");
+                }
+            });
+        });
+    </script>
+</head>
+<body id="startup-page-container-waiting-element" class="startup-page-container-body">
+    <div id="startup-waiting-element" class="startup-waiting-popup storage-page-content">
+        @await Html.PartialAsync("_Header.OnpremiseStartup")
+        <div class="system-startUp-settings-bg">
+            <div class="startup-page-conatiner" id="startup-page-conatiner">
+                <div id="system-settings-general" class="col-lg-12 col-md-12 col-sm-12 col-12 float-start">
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-7" id="image-parent-container">
+                        <div class="image-container">
+                            <img class="startup-image" src="" />
+                            <div class="startup-content display-none">
+                                <span class="first-content">@T["Step 1: You’re an administrator"]</span>
+                                <span class="second-content">@T["Administrators have complete control over the application."]</span>
+                                <span class="third-content"></span>
+                                @if (!CloudAppConfig.IsHideHelpLink)
+                                {
+                                    <a class="text-decoration-none" id="help-link" href="@(await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AdminCreation))" target="_blank">@T["Need help?"]</a>
+                                }
+                            </div>                          
+                        </div>
+                    </div>                  
+                    @await Html.PartialAsync("_DatabaseConfiguration")
+                    @await Html.PartialAsync("_FileStorage")
+                    @await Html.PartialAsync("_ConfigurationMode")
+                    @await Html.PartialAsync("_UserAccount")
+                    
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start" id="progress-parent-container">
+                        <div class="image-container">
+                            <img class="startup-image" src="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-deployment-image.svg")" />
+                            <div class="progressBar-container">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 10%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="deployment-status">@T["Fetching information..."]</span>
+                            <div class="deployment-error">
+                                <h4>@T["Deployment Failed"]</h4>
+                                <p>@T["Application configuration failed due to the following error."]</p>
+                                <textarea type="text" id="error-display" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

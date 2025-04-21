@@ -1,0 +1,36 @@
+﻿  <script nonce="@Context.Items["ScriptNonce"]">    
+    function CloseGroup() {
+        parent.$(".modal,.modal-backdrop").remove();
+    }
+    $(document).on("click", "#group-Close-button", function () {
+        CloseGroup();
+    });
+    function ValidateCSVFile() {
+        var csvfile = document.getElementById("csvfile");
+        return false;
+    }
+    $("form").on("submit", function () {
+        return ValidateCSVFile();
+    });
+</script>
+<link href="~/Content/Styles/Bootstrap.css" rel="stylesheet" />
+<link href="~/Content/Styles/Style.css" rel="stylesheet" />
+<form action="@Url.Action("UploadFileFormAction", "User")" target="_parent" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div class="modal-header dialog-header-confirm">
+        <button class="close" id="group-Close-button" type="button">
+            ×
+        </button><h4 class="modal-title">Add users by uploading CSV file</h4>
+    </div>
+    <div class="modal-body col-12 float-start content">
+        <div class="col-6 float-start">
+            <input type="file" name="csvfile" id="csvfile">
+        </div>
+        <div class="col-6 float-start no-padding">
+            <a href="/Content/Documents/Template.csv" class="text-decoration-none" title="" style="float:right;">
+                Download template
+            </a>
+        </div>
+    </div>
+    <div class="modal-footer content" style="text-align:right;"><input type="submit" value="Show list" class="btn btn-blue"></div>
+</form>

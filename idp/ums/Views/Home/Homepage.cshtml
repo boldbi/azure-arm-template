@@ -1,0 +1,229 @@
+﻿@using System.Web;
+@using Microsoft.AspNetCore.Html
+@model List<TenantDetail>
+@{
+    Layout = null;
+    var tenantIdentifierPrefix = CloudAppConfig.TenantIdentifierPrefix;
+    var idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    var userId = Context.User.GetUserId();
+    var profilePicture = idPUrl + "/User/Avatar?id=" + ViewBag.UserId + "&ImageSize=64";
+    var displayName = ViewBag.UserDetails.DisplayName;
+    var createSiteUrl = @Url.Action("Sites", "TenantsManagement") + "?action=create-new-site";
+    var adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
+    var poweredbyClass = GlobalAppSettings.SystemSettings.IsEnablePoweredBySyncfusion ? "block" : "none";
+    var copyrightClass = GlobalAppSettings.SystemSettings.IsEnableCopyrightInfo ? "block" : "none";
+    var imageUrl = GlobalAppSettings.SystemSettings.BaseUrl;
+    var requestUrl = new Uri(this.Context.Request.GetDisplayUrl());
+    var currentUrlPath = requestUrl.PathAndQuery.ToLower();
+    var copyrightInformation = HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
+    var isAllSitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "all-sites") ? "active" : string.Empty;
+    var isFavoriteTab = (Context.Request.Query["view"] == "favorites") ? "active" : string.Empty;
+    var isMobile = DeviceDetection.IsMobile(Context); 
+    var cardviewCookie= string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
+    var encodedCookieValue = new HtmlString(cardviewCookie);
+}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <title>@T["Home"] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/homepage.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/homepage.css")" crossorigin="anonymous" asp-append-version="true" />
+</head>
+<body>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+<script nonce="@Context.Items["ScriptNonce"]">
+            var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
+            var allsites = @Html.Raw(JsonConvert.SerializeObject(Model));
+            var userId = "@userId";
+            var viewCookie="@cardviewCookie";
+            var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
+            var TenantFavoriteListurl = "@Url.Action("TenantFavoriteList", "TenantsManagement")";
+            var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
+            var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
+            var isMobile = @isMobile.ToString().ToLower();
+            var theme = "@GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower()";
+            var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
+            var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
+            var brokenImageForTiles = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorSquareImage)";
+       </script>
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-tenant-template">
+            ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                <span>@AppBranding.Bold.ProductName</span>
+            ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                <span>@AppBranding.BoldReports.ProductName</span>
+            ${/if}
+        </script>
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
+            ${if (UseCustomBranding)}
+            <div class="lazyload img-loader site-logo-container">
+                <img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo" ]">
+                <div class="tenant-name-container">
+                    <div class="tenant-name"> ${TenantName}  </div>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+                    ${/if}
+                </div>
+            </div>
+            ${else}
+            <div class="lazyload img-loader site-logo-container">
+                <img id="icon-logo" class="icon-logo sites-logo"  loading="lazy" src="${SiteUrl}/get-client-logo?logotype=headerlogo&theme=@Html.Raw(GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower())" ]">
+                <div class="tenant-name-container">
+                    <div class="tenant-name"> ${TenantName}  </div>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+                    ${/if}
+                </div>
+             </div>
+            ${/if}
+</script>
+        <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-url-template">
+            <a class="grid-content text-decoration-none" title="${SiteUrl}"  href="${SiteUrl}" target="_blank">${SiteUrl}</a>
+        </script>
+       
+    <div id="site-down-alert"></div>
+    @await Html.PartialAsync("_SiteDownAlert")
+    <div id="header-container">
+        <img id ="boldbi-logo" class="boldbi-logo" src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
+        <div class="side-header">
+            @if (adminType == AdminType.SuperAdmin)
+            {
+                if (ViewBag.IsMultiTenant)
+                {
+                    <a class="create-site primary-button text-decoration-none" href="@createSiteUrl">
+                        <div class="create-button">
+                            <span class="su su-add manage-icon"></span>
+                            <span class="new-site">@T["Create new site"]</span>
+                        </div>
+                    </a>
+                }  
+            }
+            <div class="col-2 top-nav-sec">
+                @await Html.PartialAsync("Profile")
+            </div>
+        </div>
+    </div>
+
+    <div id="main-body-container">
+        <div id="body-container">
+            <div class="admin-home">
+                <span title="@displayName" class=" user-name"> @string.Format(T["Welcome, {0} "].Value,displayName)  </span>
+                <span class="grid-icon su su-wave-emoji wave-icon">
+                    <img src="@Url.Content("~/images/wave-icon.svg")" alt="@T["wave Logo"]" class="wave-icon">
+                </span>
+            </div>
+            <div class="col-12 float-start no-padding allsites-page-nav-bar">
+                <ul id="all-sites-tab-nav" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="@isAllSitesTab">
+                        <a href="#all-sites" class="text-decoration-none" id="all-sites-tab" aria-controls="all-sites-tab" role="tab" data-bs-toggle="tab">@T["All Sites"]</a>
+                    </li>
+                    <li role="presentation" class="@isFavoriteTab">
+                        <a href="#favorites" class="text-decoration-none" id="favorite-sites-tab" aria-controls="favorite-sites-log-tab" role="tab" data-bs-toggle="tab">@T["Favorites"]</a>
+                    </li>
+                    <li role="presentation" id="card-view" class="float-end" title="@T["Tile View"]" data-trigger="hover" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <button id="card-view-button" class="btn btn-default" type="button">
+                            <i class="su su-card-view" aria-hidden="true"></i>
+                        </button>
+                    </li>
+                    <li role="presentation" id="grid-view" class="float-end" title="@T["List View"]" data-trigger="hover" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <button id="grid-view-button" class="btn btn-default" type="button">
+                            <i class="su su-list-view" aria-hidden="true"></i>
+                        </button>
+                    </li>
+                    <li role="presentation" id="sorting-sites" class="float-end" title="@T["Sort"]" data-trigger="hover" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <div class="dropdown">
+                            <button id="sort-site-button" class="btn btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="su su-sort" aria-hidden="true"></i>
+                            </button>
+                            <div id="sorting-options-sites" class="dropdown-menu" aria-labelledby="sorting-sites" style="">
+                                <span class="dropdown-section-title order-by">@T["Sort by"]</span>
+                                <input type="radio" id="sort-by-alphabetical" name="sort-by-sites" class="css-radio" value="alphabetical" checked="">
+                                <label for="sort-by-alphabetical" class="app-textbox-label radio-btn-label notransition alphabetical">@T["Alphabetical"]</label>
+                                <span class="sf-top-menu-separator"></span>
+                                <span class="dropdown-section-title order-by">@T["Order by"]</span>
+                                <input type="radio" id="order-ascending" name="order-by-sites" class="css-radio" value="ascending" checked>
+                                <label for="order-ascending" class="app-textbox-label radio-btn-label notransition asc" >@T["Ascending"]</label>
+                                <input type="radio" id="order-descending" name="order-by-sites" class="css-radio" value="descending">
+                                <label for="order-descending" class="app-textbox-label radio-btn-label notransition desc">@T["Descending"]</label>
+
+                            </div>
+                        </div>
+                    </li>
+
+                    <li role="presentation" id="sorting-favorites" class="float-end" title="@T["Sort"]" data-trigger="hover" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <div class="dropdown">
+                            <button id="sort-favorite-button" class="btn btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <i class="su su-sort" aria-hidden="true"></i>
+                            </button>
+                            <div id="sorting-options-favorites" class="dropdown-menu" aria-labelledby="sorting-sites" >
+                                <span class="dropdown-section-title order-by">@T["Sort by"]</span>
+                                <input type="radio" id="site-alphabetical" name="sort-by-favorite" class="css-radio" value="alphabetical" checked="">
+                                <label for="site-alphabetical" class="app-textbox-label radio-btn-label notransition alphabetical">@T["Alphabetical"]</label>
+                                <span class="sf-top-menu-separator"></span>
+                                <span class="dropdown-section-title order-by">@T["Order by"]</span>
+                                <input type="radio" id="favorite-ascending" name="order-by-favorite" class="css-radio" value="ascending" checked>
+                                <label for="favorite-ascending" class="app-textbox-label radio-btn-label notransition asc" >@T["Ascending"]</label>
+                                <input type="radio" id="favorite-descending" name="order-by-favorite" class="css-radio" value="descending">
+                                <label for="favorite-descending" class="app-textbox-label radio-btn-label notransition desc">@T["Descending"]</label>
+
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li role="presentation" id="search-area-sites" class="float-end searchAll-sites search-bar">
+                        <input type="text" class="float-end search-text" id="search-tenants-allsites" placeholder="@T["Search sites"]" />
+                        <span class="su su-inner-close close-icon close-allSites float-end" id="clear-search"></span>
+                        <span class="su su-search search-allsites add-class search-icon float-end" title="@T["Search"]" data-bs-toggle="tooltip" data-bs-placement="top"></span>
+                    </li>
+
+                    <li role="presentation" id="search-area" class="float-end searchFavorite-sites search-bar">
+                        <input type="text" class="float-end search-text" id="search-tenants-favorite" placeholder="@T["Search sites"]" />
+                        <span class="su su-inner-close close-icon close-favorite float-end" id="clear-search"></span>
+                        <span class="su su-search search-favorite add-class search-icon float-end" title="@T["Search"]" data-bs-toggle="tooltip" data-bs-placement="top"></span>
+                    </li>
+
+
+                </ul>
+            </div>
+            <div id="all-sites-container" class="col-md-12 col-lg-12 col-sm-12 admin-page-content-container admin-page-container-with-tab" role="tabpanel" aria-labelledby="all-sites">
+                <div class="admin-page-content no-padding">
+                    <div class="tab-content no-padding">
+                        <div id="card-loading" class="skeleton-wrapper">
+                            <div class="skeleton-card">
+                                <div class="skeleton img"></div>
+                                <div class="skeleton text">
+                                    <div class="line"></div>
+                                    <div class="line short"></div>
+                                    <div class="line"></div>
+                                    <div class="line short"></div>
+                                </div>
+                            </div>
+                        </div>
+                        @await Html.PartialAsync("_AllSites")
+                        @await Html.PartialAsync("_FavoriteSites")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="footer-container" class="displaynone">
+            <div class="copyright-container" style="display:@copyrightClass">
+                <div class="copyright">@(copyrightInformation.Replace("$$CurrentYear$$", DateTime.UtcNow.Year.ToString()))</div>
+            </div>
+            <div class="footer-logo-container" style="display:@poweredbyClass">
+                <div class="powered-by">@T["Powered by"]</div>
+                <img class="footer-logo" src="@Url.Content("~/logos?type=poweredby")" alt="@T["Footer Logo"]">
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

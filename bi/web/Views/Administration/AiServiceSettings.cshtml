@@ -1,0 +1,213 @@
+@{
+    var globalAppSettings = _globalAppSettings;
+    var isMaster = globalAppSettings.SystemSettings.IsMaster;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    ViewBag.Title = T["AI Service"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var isSettingsTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "ai-settings") ? "active" : string.Empty;
+    var selectedAIModel = ViewBag.aiCredentials?.AIModel ?? (int)AIModel.BoldAIService;
+    var aiProviders = new List<SelectListItem>
+    {
+        new SelectListItem {
+            Value = $"{GlobalAppSettings.GetDescription(AIModel.BoldAIService)}",
+            Text = T[$"{GlobalAppSettings.GetDescription(AIModel.BoldAIService)}"].Value,
+            Selected = selectedAIModel == (int)AIModel.BoldAIService
+        },
+        new SelectListItem {
+            Value = $"{GlobalAppSettings.GetDescription(AIModel.OpenAI)}",
+            Text = T[$"{GlobalAppSettings.GetDescription(AIModel.OpenAI)}"].Value,
+            Selected = selectedAIModel == (int)AIModel.OpenAI
+        },
+        new SelectListItem {
+            Value = $"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}",
+            Text = T[$"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}"].Value,
+            Selected = selectedAIModel == (int)AIModel.AzureAI
+        }
+    };
+    var openAi = ViewBag.aiCredentials != null && ViewBag.aiCredentials.AIModel == (int)AIModel.OpenAI ? ViewBag.aiCredentials.OpenAI : new OpenAI();
+    var azureAI = ViewBag.aiCredentials != null && ViewBag.aiCredentials.AIModel == (int)AIModel.AzureAI ? ViewBag.aiCredentials.AzureAI : new AzureAI();
+    var enableAiFeature = ViewBag.aiCredentials != null ? ViewBag.aiCredentials.EnableAIFeature : false  ;
+    var isAiSummariesEnabledGlobally = ViewBag.aiCredentials != null ? ViewBag.aiCredentials.IsAISummariesEnabledGlobally : false;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var pageDescription = T["Configuration for AI settings."];
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var aimodelContent =  GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.AiModel);
+    var boldaiservice = GlobalAppSettings.GetDescription(AIModel.BoldAIService);
+    var openai = GlobalAppSettings.GetDescription(AIModel.OpenAI);
+    var azureai = GlobalAppSettings.GetDescription(AIModel.AzureAI);
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+    </environment>
+}
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+    </environment>
+    <script>
+    var boldaiservice = "@boldaiservice";
+    var openai = "@openai";
+    var azureai = "@azureai";
+    var updateAISettingsUrl = "@Url.Action("AddOrUpdateAiCredentialsSettings", "Administration")";
+   
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-12 no-padding no-margin ai-service-settings @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")" style="height: 100%">
+    <div id="dashboard-settings-header" class="col-12 no-padding">
+        @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["AI Settings"] }, { "PageDescription", @pageDescription } })
+        <div class="col-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
+            <div class="col-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <a href="@Url.Action("AiServiceSettings", "Administration")" class="secondary-button app-btn-secondary float-end" id="cancel-dashboard-settings" title="">@T["Cancel"]</a>
+                    <input type="button" title="" id="update-ai-settings" class="primary-button app-btn-primary pull-right" value="@T["Save"]"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ai-settings-header" class="col-12 no-padding bi-page-nav-bar">
+            <ul id="ai-settings-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isSettingsTab">
+                    <a href="#ai-settings" id="ai-settings-tab" aria-controls="ai-settings-tab" role="tab" class="text-decoration-none" data-bs-toggle="tab">@T["General"]</a>
+                </li>
+            </ul>
+    </div>
+    <div id="ai-settings-container" class="bi-page-container col-12 admin-panel-full-width" role="tabpanel" aria-labelledby="ai-settings">
+        <div class="bi-page-content col-12 no-padding">
+            <div id="organization-block" class="bi-page-content col-12 no-padding">
+                <div role="tabpanel" class="tab-pane ai-page-body @isSettingsTab" id="ai-settings">
+                        <form id="ai-setting-form" class="col-md-12 form-horizontal bi-page-body" autocomplete="off">
+                            <div class="no-padding">
+                                <div class="col-12 float-start no-padding">
+                                    <div class="info-label">
+                                        @Html.CheckBox("aimodel-enable-switch", enableAiFeature, new { @class = "material-checkbox" })
+                                        @Html.Hidden("aimodel-enable-switch")
+                                        <label for="aimodel-enable-switch">@T["Enable AI Agent"]</label>
+                                    </div>
+                                    <div class="enable-ai-info-message col-12 float-start">
+                                        @T["The AI assistant processes your queries using metadata while ensuring your data remains private and secure."]
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 float-start no-padding enable-ai">
+                                <div class="col-12 float-start no-padding">
+                                    <div class="info-label">
+                                        @Html.CheckBox("ai-concent", isAiSummariesEnabledGlobally, new { @class = "material-checkbox" })
+                                        @Html.Hidden("ai-concent")
+                                        <label for="ai-concent">@T["Enable widget insights and dashboard summary"]</label>
+                                    </div>
+                                    <div class="enable-ai-info-message col-12 float-start">
+                                        @T[$"By enabling this feature, you consent to {AppBranding.BoldBI.CompanyName} processing both metadata and summarized data using the configured AI services. This allows {AppBranding.BoldBI.CompanyName} to provide contextual insights, helping you make data-driven decisions."]
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12 float-start app-font-div form-group">
+                                <div class="col-12 float-start no-padding ai-service-dropdown">
+                                    @Html.Label("ai-providers", T["AI Model"].Value, new { @class = "app-textbox-label col-lg-12" })
+                                </div>
+                                <div class="admin-settings-drop-down col-lg-5 no-padding app-font-customize ">
+                                    @Html.DropDownList("ai_providers_type", aiProviders, new { @class = "selectpicker form-control", id = "ai-providers" })
+                                </div>
+                            </div>
+
+                            <div class="col-12 float-start app-font-div form-group input-field-margin openai-field">
+                                <div class="col-12 float-start no-padding">
+                                    @Html.Label("open-ai-api-key", T["Open AI API Key"].Value, new
+                                    {
+                                        @class = "app-textbox-label"
+                                    })
+                                </div>
+                                <div>
+                                    <input type="text" id="open-ai-api-key" class="form-control txt-holder validation-padding mail-settings-fields" name="openai_apikey" placeholder="@T["Open AI API Key"]" value="@openAi.OpenAiApiKey" />
+                                    <span class="validation-errors"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 float-start app-font-div form-group input-field-margin azureai-field">
+                                <div class="col-12 float-start no-padding">
+                                    @Html.Label("azure-model-name", T["Model Name"].Value, new
+                                    {
+                                        @class = "app-textbox-label col-lg-12"
+                                    })
+                                </div>
+                                <div class="form-input-field col-12 float-start no-padding">
+                                    <input type="text" id="azure-model-name" class="form-control txt-holder validation-padding mail-settings-fields" name="azure_model_name" placeholder="Model Name" value="@azureAI.ModelName" />
+                                    <span class="validation-errors"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 float-start app-font-div form-group input-field-margin azureai-field">
+                                <div class="col-12 float-start no-padding">
+                                    @Html.Label("resource-name", T["Resource Name"].Value, new
+                                    {
+                                        @class = "app-textbox-label col-lg-12"
+                                    })
+                                </div>
+                                <div class="form-input-field col-12 float-start no-padding">
+                                    <input type="text" id="resource-name" class="form-control txt-holder validation-padding mail-settings-fields" name="resource_name" placeholder="Resource Name" value="@azureAI.ResourceName" />
+                                    <span class="validation-errors"></span>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12 float-start app-font-div form-group input-field-margin azureai-field">
+                                <div class="col-12 float-start no-padding">
+                                    @Html.Label("deployment-name", T["Deployment Name"].Value, new
+                                    {
+                                        @class = "app-textbox-label"
+                                    })
+                                </div>
+                                <div>
+                                    <input type="text" id="deployment-name" class="form-control txt-holder validation-padding mail-settings-fields" name="deployment_name" placeholder="@T["Deployment Name"]" value="@azureAI.DeploymentName" />
+                                    <span class="validation-errors"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 float-start app-font-div form-group input-field-margin azureai-field">
+                                <div class="col-12 float-start no-padding">
+                                    @Html.Label("azureai-apikey", T["Azure AI API Key"].Value, new
+                                    {
+                                        @class = "app-textbox-label"
+                                    })
+                                </div>
+                                <div>
+                                    <input type="text" id="azureai-apikey" class="form-control txt-holder validation-padding mail-settings-fields" name="azureai_apikey" placeholder="@T["Azure AI API Key"]" value="@azureAI.AzureAiApiKey" />
+                                    <span class="validation-errors"></span>
+                                </div>
+                            </div>
+
+                            @if (!ServerAppConfig.IsHideHelpLink)
+                            {
+                                <div class="bold-ai-service-note col-12 float-start">
+                                    @Html.Raw(string.Format(T["Read our Privacy and Data use policy for more information {0}View Full Policy{1}."].Value, "<a target='_blank' class='text-decoration-none' href="+(ServerAppConfig.AppSettings.Documentation.BaseUri + aimodelContent )+"'>", "</a>"))
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="bold-ai-service-note col-12 float-start">
+                                    @T["Read our Privacy and Data use policy for more information."]
+                                </div>
+                            }
+
+                        </form>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+</div>
+}
