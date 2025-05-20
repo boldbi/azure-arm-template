@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 11.3.24
+*  version : 11.3.31
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing

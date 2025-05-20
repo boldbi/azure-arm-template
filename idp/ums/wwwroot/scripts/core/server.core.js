@@ -1139,9 +1139,6 @@ window.onpopstate = function (e) {
         var category = decodeURI(pathArray[pathArray.length - 1]);
         $(".category-link[data-category='" + category + "']").trigger("click");
     }
-    if (e.state !== null && (JSON.stringify(e.state) !== JSON.stringify({}) || tabName !== null)) {
-        document.getElementById('dashboard_render_iframe').contentWindow.postMessage('filter', "*");
-    }
 };
 
 function getQueryVariable(variable) {
