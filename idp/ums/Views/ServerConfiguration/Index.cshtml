@@ -13,6 +13,8 @@
     var sqlParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MSSQL_Connection_Parameters);
     var postgresSQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.PostgreSQL_Connection_Parameters);
     var mySQLParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.MySQL_Connection_Parameters);
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrlPath = requestUrl.AbsolutePath.ToString().ToLower();
     var oracleParameter = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Oracle_Connection_Parameters);
     var nonce = Context.Items["ScriptNonce"];
     var isBoldBI = GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName;
@@ -64,9 +66,15 @@
         var blobExist = "@Url.Action("IsBlobExists", "ServerConfiguration")";
         var updateLicenseKeyUrl = "@Url.Action("ApplyLicenseKey", "ServerConfiguration")";
         var validateLicenseKeyUrl = "@Url.Action("ValidateLicenseKey", "ServerConfiguration")";
+        var amazons3Exist = "@Url.Action("IsAmazonS3Exists", "ServerConfiguration")";
         var validateStartupUrl = "@Url.Action("ValidateStartup", "ServerConfiguration")";
+        var isOCIStorageExist = "@Url.Action("IsOCIStorageExists", "ServerConfiguration")";
         var useSingleTenantDb = "@useSingleTenantDb".toLowerCase() === "true";
         var storageType = "@ViewBag.StorageType";
+        var requestUrlPath = "@requestUrlPath";
+        var getAddTenantUrl = "@Url.Action("AddTenants", "TenantsManagement")";
+        var isAmazonS3 = ("@ViewBag.IsAmazonS3".toLowerCase() === "true");
+        var IsOciObjectStorage = ("@ViewBag.IsOciObjectStorage".toLowerCase() === "true");
 
         var serverSetupImageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-startup-image.svg")";
         var adminSetupImageUrl = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/server-admin-setup.svg")";
@@ -92,6 +100,9 @@
         var isSiteCreation = false;
         var isSimpleModeValue = "true";
         var actionType = "";
+        var requestUrlPath = "@requestUrlPath";
+        var getAddTenantUrl = "@Url.Action("AddTenants", "TenantsManagement")";
+        var isAmazonS3 = ("@ViewBag.IsAmazonS3".toLowerCase() === "true");
         var biProductname = "@AppBranding.Bold.ProductName";
         var reportsProductname = "@AppBranding.BoldReports.ProductName";
         var isWhiteLabelling = "@CloudAppConfig.Branding.IsWhiteLabelling".toLowerCase() == "true";

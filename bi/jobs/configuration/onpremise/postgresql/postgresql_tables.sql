@@ -1028,14 +1028,15 @@ CREATE TABLE SyncDS_CustomEmailTemplate (
     MailBody TEXT NOT NULL,
     CreatedDate TIMESTAMP NOT NULL,
     ModifiedDate TIMESTAMP,
-	SendEmailAsHTML smallint NOT NULL,
+    SendEmailAsHTML smallint NOT NULL,
+    CustomVisibilityOptions TEXT NOT NULL,
     IsActive smallint NOT NULL,
-	TemplateId INTEGER NOT NULL,
-	IsDefaultTemplate smallint NOT NULL,
-	IsSystemDefault smallint NOT NULL,
-	Description VARCHAR(255) NULL,
-	ModifiedBy int NULL,
-	TemplateLocalizationKey VARCHAR(255) NULL
+    TemplateId INTEGER NOT NULL,
+    IsDefaultTemplate smallint NOT NULL,
+    IsSystemDefault smallint NOT NULL,
+    Description VARCHAR(255) NULL,
+    ModifiedBy int NULL,
+    TemplateLocalizationKey VARCHAR(255) NULL
 );
 
 CREATE TABLE SyncDS_ApiKeyDetails (
@@ -1083,6 +1084,25 @@ CREATE TABLE SyncDS_AI_SESSIONS (
     Environment TEXT
 );
 
+CREATE TABLE SyncDS_AI_REQUESTS (
+    MessageId TEXT PRIMARY KEY NOT NULL,
+    SearchDate TIMESTAMP WITH TIME ZONE,
+    Message TEXT,
+    DatasourceId TEXT,
+    SessionId TEXT,
+    HasError BOOLEAN,
+    Response TEXT,
+    StatusMessage TEXT,
+    AiModel TEXT,
+    TenantId TEXT,
+    UserEmail TEXT,
+    Feedback TEXT,
+    UserInfo TEXT,
+    RequestType TEXT,
+    Environment TEXT,
+    IsValidResponse BOOLEAN,
+    IsWidgetRendered BOOLEAN
+);
 
 
 ---- PASTE INSERT Queries below this section --------

@@ -3,23 +3,42 @@
     var isCookiesTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "cookie-options") ? "active" : string.Empty;
 }
 <div role="tabpanel" class="tab-pane col-12 float-start col-lg-12 col-md-12 col-sm-12 admin-page-body @isCookiesTab" id="cookie-options">
-    <div id="cookie-options-settings-body" class="col-12 float-start no-padding">
-        <div class="col-12 float-start no-padding">
-            <label class="app-textbox-label samesite">@T["SameSite Attribute"]</label>
+    <div id="cookie-options-settings-body" class="col-12 no-padding">
+        <div class="">
+            <div class="col-12 no-padding">
+                <label class="app-textbox-label samesite">@T["SameSite Attribute"]</label>
+            </div>
+            <div class="radio-button-section" id="lax">
+                <input type="radio" id="lax-cookie" name="cookie" class="css-radio" value="Lax" @((int)ViewBag.CookiesSettings == (int)SameSiteAttribute.Lax ? "checked" : string.Empty) />
+                <label for="lax-cookie" class="app-textbox-label radio-btn-label notransition" id="labellax">@T["Lax"]</label>
+            </div>
+            <div class="radio-button-section" id="strict">
+                <input type="radio" id="strict-cookie" name="cookie" class="css-radio" value="Strict" @((int)ViewBag.CookiesSettings == (int)SameSiteAttribute.Strict ? "checked" : string.Empty) />
+                <label for="strict-cookie" class="app-textbox-label radio-btn-label notransition" id="labelstrict">@T["Strict"]</label>
+            </div>
+            <div class="radio-button-section" id="none">
+                <input type="radio" id="none-cookie" name="cookie" class="css-radio" value="None" @((int)ViewBag.CookiesSettings == (int)SameSiteAttribute.None ? "checked" : string.Empty) />
+                <label for="none-cookie" class="app-textbox-label radio-btn-label notransition" id="labelnone">@T["None"]</label>
+            </div>
+            <div class="cookie-notification">
+            </div>
         </div>
-        <div class="radio-button-section" id="lax">
-            <input type="radio" id="lax-cookie" name="cookie" class="css-radio" value="Lax" @((int) ViewBag.CookiesSettings == (int)SameSiteAttribute.Lax ? "checked" : string.Empty)/>
-            <label for="lax-cookie" class="app-textbox-label radio-btn-label notransition" id="labellax">@T["Lax"]</label>
-        </div>
-        <div class="radio-button-section" id="strict">
-            <input type="radio" id="strict-cookie" name="cookie" class="css-radio" value="Strict" @((int) ViewBag.CookiesSettings == (int)SameSiteAttribute.Strict ? "checked" : string.Empty)/>
-            <label for="strict-cookie" class="app-textbox-label radio-btn-label notransition" id="labelstrict">@T["Strict"]</label>
-        </div>
-        <div class="radio-button-section" id="none">
-            <input type="radio" id="none-cookie" name="cookie" class="css-radio" value="None" @((int) ViewBag.CookiesSettings == (int)SameSiteAttribute.None ? "checked" : string.Empty)/>
-            <label for="none-cookie" class="app-textbox-label radio-btn-label notransition" id="labelnone">@T["None"]</label>
-        </div>
-        <div class="cookie-notification">
+
+        <div class="chips-container">
+            <div class="no-padding">
+                <div class="material-switch inline-align">
+                    <input type="checkbox" id="enable-chips" @(GlobalAppSettings.SystemSettings.IsChipsEnabled ? "checked" : string.Empty) />
+                    <label for="enable-chips" class="label-primary"></label>
+                </div>
+                <div class="app-textbox-label inline-align">
+                    @T["Enable CHIPS for IFrame-based Embedding"]
+                </div>
+                <div class="info-message" id="chip-message">
+                    @T["Mechanism that allows cookies to be partitioned based on the top-level site, meaning that cookies set by one website cannot be accessed by another."]
+                </div>
+            </div>
+            <div class="cookie-chips-notification">
+            </div>
         </div>
     </div>
 </div>

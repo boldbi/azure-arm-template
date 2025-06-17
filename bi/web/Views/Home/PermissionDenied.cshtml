@@ -53,13 +53,16 @@
                 </div>
                 <div class="error-type">@T["Access Denied"]</div>
                 <div class="error-text">
+                    @{
+                    #pragma warning disable SCS0029
+                    }
                     @if (!canDownloadTemplate)
                     {
                         @T["You do not have permission to download this dashboard template."]<br>@contactAdmin
                     }
                     else if (_identityResponse.IsAdmin && !globalAppSettings.SystemSettings.UsageAnalytics && url.ToString().ToLower().Contains("/usage-analytics/"))
                     {
-                        @Html.Raw(string.Format(T["Usage analytics dashboards are disabled in {0}dashboard settings{1}."].Value, "<a href='" + Url.Action("DashboardSettings", "Administration") + "'>", "</a>"))
+                        @Html.Raw(string.Format(T["Enterprise insights dashboards are disabled in {0}dashboard settings{1}."].Value, "<a href='" + Url.Action("DashboardSettings", "Administration") + "'>", "</a>"))
                     }
                     else if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) != -1)
                     {
@@ -100,6 +103,10 @@
                     else
                     {
                         @T["You do not have permission to view this page."]<br>@contactAdmin
+                    }
+
+                    @{
+                    #pragma warning restore SCS0029
                     }
                 </div>
             </div>

@@ -4,6 +4,106 @@
         <name>BoldBi.Ai.Service</name>
     </assembly>
     <members>
+        <member name="T:BoldBi.Ai.Service.AiLogsManager.CloudAiLogsConfigurator">
+            <summary>
+            Configures logging for cloud-based environments.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiLogsManager.CloudAiLogsConfigurator.ConfigureLogs">
+            <summary>
+            Configures and returns an instance of the logger for cloud environments.
+            </summary>
+            <returns>An instance of <see cref="T:log4net.ILog"/> configured for cloud logging.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiLogsManager.CloudAiLogsConfigurator.GetLog4NetConfig">
+            <summary>
+            Retrieves and updates the log4net XML configuration for cloud logging.
+            </summary>
+            <returns>An <see cref="T:System.Xml.XmlDocument"/> containing the log4net configuration.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiLogsManager.CloudAiLogsConfigurator.UpdateXmlNode(System.Xml.XmlDocument,System.String,System.String)">
+            <summary>
+            Updates the specified XML node with the given value.
+            </summary>
+            <param name="doc">The XML document to modify.</param>
+            <param name="xpath">The XPath query specifying the node to update.</param>
+            <param name="value">The new value to set in the node.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Service.AiLogsManager.IAiLogsConfigurator">
+            <summary>
+            Defines a contract for configuring AI logs.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiLogsManager.IAiLogsConfigurator.ConfigureLogs">
+            <summary>
+            Configures and returns an instance of the logger.
+            </summary>
+            <returns>An instance of <see cref="T:log4net.ILog"/> configured for logging.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Service.AiLogsManager.OnPremiseAiLogsConfigurator">
+            <summary>
+            Configures logging for on-premise environments.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiLogsManager.OnPremiseAiLogsConfigurator.ConfigureLogs">
+            <summary>
+            Configures and returns an instance of the logger for on-premise environments.
+            </summary>
+            <returns>An instance of <see cref="T:log4net.ILog"/> configured for on-premise logging.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiLogsManager.OnPremiseAiLogsConfigurator.CreateRollingFileAppender(System.String,System.String,log4net.Core.Level)">
+            <summary>
+            Creates a rolling file appender for logging.
+            </summary>
+            <param name="name">The name of the appender.</param>
+            <param name="filePath">The file path where logs will be stored.</param>
+            <param name="logLevel">The log level for filtering messages.</param>
+            <returns>A configured instance of <see cref="T:log4net.Appender.RollingFileAppender"/>.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Service.AiServiceConfigManager.GeneralAiServiceConfigurator">
+            <summary>
+            Provides configuration and initialization methods for AI-related services.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiServiceConfigManager.GeneralAiServiceConfigurator.InitializeCommonConfiguration(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Configures and initializes AI service settings.
+            </summary>
+            <param name="configuration">The <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/> used to configure the application.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Service.AiServiceConfigManager.IAiServiceConfigurator">
+            <summary>
+            Defines a contract for configuring AI services.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiServiceConfigManager.IAiServiceConfigurator.Configure(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Configures the AI service settings and dependencies.
+            </summary>
+            <param name="configuration">The configuration instance containing the application settings.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Service.AiServiceConfigManager.LocalDebugConfigurator">
+            <summary>
+            Configures AI service settings for local debugging by binding values from the configuration.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiServiceConfigManager.LocalDebugConfigurator.Configure(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Configures AI service settings by binding configuration values to application settings.
+            </summary>
+            <param name="configuration">The configuration instance containing the application settings.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Service.AiServiceConfigManager.OnPremiseAiServiceConfigurator">
+            <summary>
+            Configures AI service settings for on-premise deployments by binding values from the configuration.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.AiServiceConfigManager.OnPremiseAiServiceConfigurator.Configure(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Configures AI service settings by binding configuration values to application settings.
+            </summary>
+            <param name="configuration">The configuration instance containing the application settings.</param>
+        </member>
         <member name="T:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication">
             <summary>
             An authorization filter that validates API requests based on a license key.
@@ -13,30 +113,26 @@
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication"/> class.
             </summary>
-            <param name="dbContext">The helper class for managing licenses.</param>
-            <param name="errorMessageProvider">The error message provider.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
             <summary>
             Asynchronously checks if the request contains a valid license key.
             </summary>
-            <param name="context">The context for the authorization filter.</param>
-            <returns>A task representing the asynchronous operation.</returns>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.IsAllowedAPIKey(System.String)">
             <summary>
             Checks if the provided API key is valid and active.
             </summary>
-            <param name="aiServiceKey">The API key to validate.</param>
-            <returns>True if the API key is valid and active; otherwise, false.</returns>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.IsAllowedToken(System.String,System.String)">
             <summary>
             Checks if the provided API key is valid and active.
             </summary>
-            <param name="token">The token to be validated.</param>
-            <param name="tenantId">The tenantId key to validate.</param>
-            <returns>True if the API key is valid and active; otherwise, false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.UnauthorizedResponse(System.String)">
+            <summary>
+            Returns an unauthorized response with an error message.
+            </summary>
         </member>
         <member name="T:BoldBi.Ai.Service.Authentication.ConnectionCheckActionFilter">
             <summary>
@@ -123,24 +219,6 @@
             <param name="statusCode">The status code for the response, typically 429 (Too Many Requests).</param>
             <param name="remainingAmount">The remaining balance amount, if applicable.</param>
             <param name="rateLimit">The maximum allowed rate limit, if applicable.</param>
-        </member>
-        <member name="T:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication">
-            <summary>
-            An authorization filter that validates requests based on a server token.
-            </summary>
-        </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication.#ctor(BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
-            <summary>
-            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication"/> class.
-            </summary>
-            <param name="errorMessageProvider">The error message provider.</param>
-        </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.ServerTokenAuthentication.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
-            <summary>
-            Asynchronously checks if the request contains a valid static token.
-            </summary>
-            <param name="context">The context for the authorization filter.</param>
-            <returns>A task representing the asynchronous operation.</returns>
         </member>
         <member name="T:BoldBi.Ai.Service.Authentication.StaticTokenAuthentication">
             <summary>
@@ -310,6 +388,19 @@
             <param name="configuration">The configuration manager instance.</param>
             <param name="appConfiguration">The application configuration.</param>
         </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAzureAppConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes application configuration.
+            </summary>
+            <param name="configuration">The configuration manager instance.</param>
+            <param name="appConfiguration">The application configuration.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetAzurePrivateKey(Microsoft.Extensions.Configuration.ConfigurationManager)">
+            <summary>
+            Downloads the private key file (privatekeys.dat) from Azure Blob Storage and returns its content as a string.
+            </summary>
+            <param name="configuration">The application configuration manager instance.</param>
+        </member>
         <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.UpdateInternalInforomation(Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Updates internal information using the provided application configuration.
@@ -321,77 +412,79 @@
             Controller for handling AI assistance operations including chat, QnA, sessions, and feedback.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.#ctor(BoldBi.Ai.Base.Contracts.ISessionManager,BoldBi.Ai.Base.Contracts.IAiAssistanceOperations,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.#ctor(BoldBi.Ai.Base.Contracts.ISessionManager,BoldBi.Ai.Base.Contracts.IAiChatAssistanceOperations,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext,BoldBi.Ai.Base.Contracts.IAiSummarizationOperations,BoldBi.Ai.Base.Contracts.IQnAWidgetOperations)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.AiAssistanceController"/> class.
             </summary>
             <param name="sessionManager">The session manager for handling session-related operations.</param>
-            <param name="aiAssistanceOperations">The service for processing AI-related operations.</param>
+            <param name="aiChatAssistanceOperations">The service for processing AI-related operations.</param>
             <param name="usageLogDbContext">The DB context used to log usage data.</param>
+            <param name="summarizationOperations">summarize the widget insights and dashboard summary</param>
+            <param name="qnAWidgetOperations">visual creation operation for Qna Widgets</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.ValidateConnection">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.ValidateConnectionAsync">
             <summary>
             Validates the connection by checking the provided details.
             </summary>
             <returns>HTTP 200 OK if the connection is valid, or an appropriate error response.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.SendRequest(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.SendRequestAsync(System.Object)">
             <summary>
             Sends a chat message to the AI and processes the response.
             </summary>
             <param name="jsonInput">The chat message input in JSON format.</param>
             <returns>An asynchronous task containing the AI response.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.FormatQueryResultRequest(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.FormatQueryResultRequestAsync(System.Object)">
             <summary>
             Sends a chat message to the AI and processes the response.
             </summary>
             <param name="jsonInput">The chat message input in JSON format.</param>
             <returns>An asynchronous task containing the AI response.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.QnaSendRequest(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.QnaSendRequestAsync(System.Object)">
             <summary>
             Sends a QnA message to the AI and retrieves the response.
             </summary>
             <param name="jsonInput">The QnA message input in JSON format.</param>
             <returns>An asynchronous task containing the AI response to the QnA message.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.StartSession(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.StartSessionAsync(System.Object)">
             <summary>
             Starts a new AI session.
             </summary>
             <param name="jsonInput">The session data in JSON format.</param>
             <returns>An asynchronous task containing the result of session creation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.EndSession(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.EndSessionAsync(System.Object)">
             <summary>
             Ends an existing AI session.
             </summary>
             <param name="jsonInput">The session data in JSON format.</param>
             <returns>An asynchronous task containing the result of session termination.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.AiAssistance(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.AiAssistanceAsync(System.Object)">
             <summary>
             Processes sample queries and retrieves relevant AI responses.
             </summary>
             <param name="jsonInput">The sample queries input in JSON format.</param>
             <returns>An asynchronous task containing relevant responses for the queries.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.UpdateFeedback(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.UpdateFeedbackAsync(System.Object)">
             <summary>
             Updates feedback information provided by the user.
             </summary>
             <param name="jsonInput">The feedback data in JSON format.</param>
             <returns>An asynchronous task containing the result of the feedback update.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.RetrieveFeedback(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.RetrieveFeedbackAsync(System.Object)">
             <summary>
             Retrieves feedback information based on the provided input.
             </summary>
             <param name="jsonInput">The feedback query in JSON format.</param>
             <returns>An asynchronous task containing the retrieved feedback information.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.GetAiSummary(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.GetAiSummaryAsync(System.Object)">
             <summary>
             Retrieves AI summary for widget, dashboard and data points
             </summary>
@@ -405,6 +498,34 @@
             <param name="jsonInput">The JSON-formatted containing containing the assistance response details.</param>
             <returns>A task representing the asynchronous operation.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.UpdateWidgetRenderStatus(System.Object)">
+            <summary>
+            updates the widget status in  db
+            </summary>
+            <param name="jsonInput">Details for widget status</param>
+            <returns></returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.GenerateAiDashboardAsync(System.Object)">
+            <summary>
+            Sends a query to the AI and processes.
+            </summary>
+            <param name="jsonInput">The query input in JSON format.</param>
+            <returns>An asynchronous task containing the AI response.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.GetMatchedDatasourceAsync(System.Object)">
+            <summary>
+            Sends a input to the AI and processes.
+            </summary>
+            <param name="jsonInput">The query nad data sources input in JSON format.</param>
+            <returns>An asynchronous task containing the AI response.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.CheckDashboardQuestionAsync(System.Object)">
+            <summary>
+            Sends a input to the AI and processes.
+            </summary>
+            <param name="jsonInput">The query had data sources input in JSON format.</param>
+            <returns>An asynchronous task containing the AI response.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Service.Controllers.AiPricingLoggerController">
             <summary>
             Controller for handling AI pricing log requests.
@@ -416,35 +537,35 @@
             </summary>
             <param name="fetchFromDb"></param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetMessageUsage(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetMessageUsageAsync(System.Object)">
             <summary>
             Retrieves pricing information for a specific search message by its ID.
             </summary>
             <param name="searchId">The ID of the search message.</param>
             <returns>A JSON string containing the pricing details of the specified search message.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetSessionUsage(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetSessionUsageAsync(System.Object)">
             <summary>
             Retrieves pricing information for a specific session by its ID.
             </summary>
             <param name="sessionId">The ID of the session.</param>
             <returns>A JSON string containing the pricing details of the specified session.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetUserUsageLog(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetUserUsageLogAsync(System.Object)">
             <summary>
             Retrieves usage logs for a specific user based on their email address.
             </summary>
             <param name="userEmail">The email address of the user whose usage logs are to be retrieved.</param>
             <returns>A JSON string containing the usage log details for the specified user.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetTenantUsageLog(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetTenantUsageLogAsync(System.Object)">
             <summary>
             Retrieves usage logs for a specific tenant based on the license key and optional date range.
             </summary>
             <param name="tenantId">The tenant whose usage logs are to be retrieved.</param>
             <returns>A JSON string containing the usage log details for the specified tenant</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetAiUsage(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.AiPricingLoggerController.GetAiUsageAsync(System.Object)">
             <summary>
             Retrieves usage details for session, today and remaining
             </summary>
@@ -463,7 +584,7 @@
             </summary>
             <param name="credentialManager">The helper class for managing credentials.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.CredentialsController.ValidateCredentials(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.CredentialsController.ValidateCredentialsAsync(System.Object)">
             <summary>
             Validates the provided AI configuration credentials.
             </summary>
@@ -473,7 +594,7 @@
             The result indicates whether the credentials are valid.
             </returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.CredentialsController.IsValidAiKey(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.CredentialsController.IsValidAiKeyAsync(System.Object)">
             <summary>
             Checks if a tenant is allowed access based on the provided tenant ID.
             </summary>
@@ -494,35 +615,35 @@
             </summary>
             <param name="licenseManageHelper">The helper class for managing licenses.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.AddAiLicense(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.AddAiLicenseAsync(System.Object)">
             <summary>
             Adds a new AI license based on the provided license information.
             </summary>
             <param name="license">The license information to be added in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.UpdateAiLicense(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.UpdateAiLicenseAsync(System.Object)">
             <summary>
             Updates an existing AI license with the provided license information.
             </summary>
             <param name="license">The updated license information in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.RemoveAiLicense(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.RemoveAiLicenseAsync(System.Object)">
             <summary>
             Removes an AI license based on the provided tenant ID.
             </summary>
             <param name="tenantId">The ID of the tenant whose license is to be removed, provided in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.DeactivateAiLicense(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.DeactivateAiLicenseAsync(System.Object)">
             <summary>
             Deactivates an AI license based on the provided tenant ID.
             </summary>
             <param name="tenantId">The ID of the tenant whose license is to be deactivated, provided in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.GetLicenseDetails(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.GetLicenseDetailsAsync(System.Object)">
             <summary>
             Retrieves details of an AI license based on the provided license key.
             </summary>
@@ -542,7 +663,7 @@
             <param name="sandboxUsersHelper">The helper class for managing tenant.</param>
             <param name="fetchFromDb">The helper class for managing DB.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.IsAllowedTenant(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.IsAllowedTenantAsync(System.Object)">
             <summary>
             Checks if a tenant is allowed access based on the provided tenant ID.
             </summary>
@@ -552,7 +673,7 @@
             Returns a boolean or equivalent response structure indicating access permissions.
             </returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.GetBalanceAmount(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.GetBalanceAmountAsync(System.Object)">
             <summary>
             Retrieves the balance amount for a given license key.
             </summary>
@@ -562,7 +683,7 @@
             Returns a numerical value or equivalent response structure representing the balance.
             </returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.ActivateLicense(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.ActivateLicenseAsync(System.Object)">
             <summary>
             Activates an AI license based on the input provided.
             </summary>
@@ -572,7 +693,7 @@
             Returns a response structure indicating the success or failure of the activation operation.
             </returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.InsertSandboxUsers(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.InsertSandboxUsersAsync(System.Object)">
             <summary>
             Inserts a new sandbox user based on the input provided.
             </summary>
@@ -587,14 +708,14 @@
             Controller for handling token-related operations.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TokenController.GenerateToken(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.TokenController.GenerateTokenAsync(System.Object)">
             <summary>
             Generates an encrypted token based on the provided AI key JSON.
             </summary>
             <param name="aiKeyJson">An object containing the AI key in JSON format.</param>
             <returns>A task that represents the asynchronous operation. The task result contains the generated token.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TokenController.GenerateTokenForID">
+        <member name="M:BoldBi.Ai.Service.Controllers.TokenController.GenerateTokenForIDAsync">
             <summary>
             Generates an encrypted token based on the provided AI key JSON.
             </summary>
@@ -611,7 +732,7 @@
             </summary>
             <param name="next">The next middleware delegate in the request pipeline.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.ExceptionMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+        <member name="M:BoldBi.Ai.Service.ExceptionMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             Invokes the middleware to process HTTP requests and handle exceptions.
             </summary>

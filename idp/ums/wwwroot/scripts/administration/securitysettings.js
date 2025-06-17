@@ -306,16 +306,21 @@ $(document).ready(function () {
 
     var sameSiteDialog = new ej.popups.Dialog({
         content: document.getElementById("samesite-dialog-content"),
+        header: window.Server.App.LocalizationContent.CookieOption,
         buttons: [
             { click: confirmation, buttonModel: { content: window.Server.App.LocalizationContent.OKButton, isPrimary: true } }
         ],
         width: "424px",
         isModal: true,
         animationSettings: { effect: 'Zoom' },
-        visible: false
+        visible: false,
+        beforeOpen: function () {
+            var content = $("#enable-chips").is(":checked") ? window.Server.App.LocalizationContent.EnableChipsCookieContent : window.Server.App.LocalizationContent.CookieContent;
+            content = content.replace("{0}", partitionCookie);
+            sameSiteDialog.setProperties({ content: content });
+        }
     });
     sameSiteDialog.appendTo("#samesite-dialog");
-
 });
 
 $(document).on("click", "#update-password-settings", function () {
@@ -1526,6 +1531,10 @@ $(document).on("change", "#lax-cookie", function () {
     if ($("#lax-cookie").is(":checked")) {
         $(".cookie-notification").html(window.Server.App.LocalizationContent.LaxInformation);
         $(".cookie-notification").show();
+        if ($("#enable-chips").is(":checked"))
+        {
+            document.getElementById("enable-chips").checked = false;
+        }
     }
     else {
         $(".cookie-notification").hide();
@@ -1536,6 +1545,10 @@ $(document).on("change", "#strict-cookie", function () {
     if ($("#strict-cookie").is(":checked")) {
         $(".cookie-notification").html(window.Server.App.LocalizationContent.StrictInformation);
         $(".cookie-notification").show();
+        if ($("#enable-chips").is(":checked"))
+        {
+            document.getElementById("enable-chips").checked = false;
+        }
     }
     else {
         $(".cookie-notification").hide();
@@ -1546,9 +1559,21 @@ $(document).on("change", "#none-cookie", function () {
     if ($("#none-cookie").is(":checked")) {
         $(".cookie-notification").html(window.Server.App.LocalizationContent.NoneInformation.format("</br></br>", "<b>", "</b>"));
         $(".cookie-notification").show();
+        $(".cookie-chips-notification").hide(); 
     }
     else {
         $(".cookie-notification").hide();
+    }
+});
+
+$(document).on('click', "#enable-chips", function () {
+    var isChecked = $(this).is(":checked");
+    var sameSiteAttribute = $("input:radio[name=cookie]:checked").val();
+    if (isChecked)
+    {
+        if (sameSiteAttribute !== "None") {
+            document.getElementById("none-cookie").checked = true;
+        }
     }
 });
 
@@ -1556,6 +1581,7 @@ function confirmation() {
     document.getElementById("samesite-dialog").ej2_instances[0].hide();
     var userSettings = {
         SameSiteAttribute: $("input:radio[name=cookie]:checked").val(),
+        IsChipsEnabled : $("#enable-chips").is(":checked")
     };
     $.ajax({
         type: "POST",

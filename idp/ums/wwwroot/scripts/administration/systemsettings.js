@@ -12,16 +12,18 @@ $(document).ready(function () {
     var isPowerdbyLogoChange = false;
     var currentDate = $.now();
     var prevLang = $("#language").val();
+    var scriptPattern = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+    var containsScript = false;
 
     dropDownListInitialization('#time-zone', window.Server.App.LocalizationContent.TimeZone, true);
     dropDownListInitialization('#date-format', window.Server.App.LocalizationContent.DateFormat, true);
     dropDownListInitialization('#time_format', window.Server.App.LocalizationContent.TimeFormat);
     dropDownListInitialization('#language', window.Server.App.LocalizationContent.Language);
-    dropDownListInitialization('#enable-ssl', '');
     dropDownListInitialization('#mail-account', '');
     dropDownListInitialization('#ai-providers', '');
-    document.getElementById("enable-ssl").ej2_instances[0].value = isSecureConnection ? "https" : "http";
-    document.getElementById("enable-ssl").ej2_instances[0].text = isSecureConnection ? "https" : "http";
+    dropDownListInitialization('#enable-ssl-site', '');
+    document.getElementById("enable-ssl-site").ej2_instances[0].value = isSecureConnection ? "https" : "http";
+    document.getElementById("enable-ssl-site").ej2_instances[0].text = isSecureConnection ? "https" : "http";
     document.getElementById("time-zone").ej2_instances[0].value = selectedTimeZoneValue;
     document.getElementById("time-zone").ej2_instances[0].text = selectedTimeZoneText;
     document.getElementById("time_format").ej2_instances[0].value = selectedTimeFormatValue;
@@ -55,7 +57,6 @@ $(document).ready(function () {
         buttons: { browse: window.Server.App.LocalizationContent.LogoButton },
         selected: function (e) {
             showWaitingPopup('content-area');
-            currentDate = $.now();
             type = e.filesData[0]?.type.toLowerCase();
             var extension = "." + type;
             if (type === undefined) {
@@ -66,6 +67,27 @@ $(document).ready(function () {
                 $(".login-screen-logo").addClass("upload-error-border");
                 hideWaitingPopup('content-area');
             }
+            else if (extension === ".svg") {
+                var file = e.filesData[0].rawFile;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var fileContent = event.target.result;
+                    containsScript = scriptPattern.test(fileContent);
+
+                    if (containsScript) {
+                        $(".login-screen-logo").find(".validation-error-image").text(window.Server.App.LocalizationContent.InValidFileFormat);
+                        $(".login-screen-logo").addClass("upload-error-border");
+                        hideWaitingPopup('content-area');
+                    } else {
+                        $(".login-screen-logo").find(".validation-error-image").text("");
+                        $(".login-screen-logo").removeClass("upload-error-border");
+                        uploadLoginLogo.asyncSettings.saveUrl = window.fileUploadUrl + "?imageType=loginlogo&&timeStamp=" + currentDate;
+                    }
+
+                    scriptPattern.lastIndex = 0;
+                };
+                reader.readAsText(file);
+            }
             else {
                 $(".login-screen-logo").find(".validation-error-image").text("");
                 $(".login-screen-logo").removeClass("upload-error-border");
@@ -73,14 +95,16 @@ $(document).ready(function () {
             }
         },
         success: function fileselect(e) {
-            var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
-            var extension = "." + type;
-            window.SystemSettingsProperties.LoginLogo = "login_logo_" + currentDate + extension;
-            var imageUrl = window.baseRootUrl + "content/images/application/" + "login_logo_" + currentDate + extension + "?v=" + $.now();
-            $("#display-login-logo").attr("src", imageUrl);
-            hideWaitingPopup('content-area');
-            $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
-            $('#upload-image').removeAttr("disabled");
+            if (!containsScript) {
+                var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
+                var extension = "." + type;
+                window.SystemSettingsProperties.LoginLogo = "login_logo_" + currentDate + extension;
+                var imageUrl = window.baseRootUrl + "content/images/application/" + "login_logo_" + currentDate + extension + "?v=" + $.now();
+                $("#display-login-logo").attr("src", imageUrl);
+                hideWaitingPopup('content-area');
+                $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
+                $('#upload-image').removeAttr("disabled");
+            }
         }
     });
     uploadLoginLogo.appendTo("#upload-login-image");
@@ -98,7 +122,6 @@ $(document).ready(function () {
         buttons: { browse: window.Server.App.LocalizationContent.LogoButton },
         selected: function (e) {
             showWaitingPopup('content-area');
-            currentDate = $.now();
             type = e.filesData[0]?.type.toLowerCase();
             var extension = "." + type;
             if (type === undefined) {
@@ -109,6 +132,27 @@ $(document).ready(function () {
                 $(".header-logo").addClass("upload-error-border");
                 hideWaitingPopup('content-area');
             }
+            else if (extension === ".svg") {
+                var file = e.filesData[0].rawFile;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var fileContent = event.target.result;
+                    containsScript = scriptPattern.test(fileContent);
+
+                    if (containsScript) {
+                        $(".header-logo").find(".validation-error-image").text(window.Server.App.LocalizationContent.InValidFileFormat);
+                        $(".header-logo").addClass("upload-error-border");
+                        hideWaitingPopup('content-area');
+                    } else {
+                        $(".header-logo").find(".validation-error-image").text("");
+                        $(".header-logo").removeClass("upload-error-border");
+                        uploadLoginLogo.asyncSettings.saveUrl = window.fileUploadUrl + "?imageType=mainlogo&&timeStamp=" + currentDate;
+                    }
+
+                    scriptPattern.lastIndex = 0;
+                };
+                reader.readAsText(file);
+            }
             else {
                 $(".header-logo").find(".validation-error-image").text("");
                 $(".header-logo").removeClass("upload-error-border");
@@ -116,15 +160,17 @@ $(document).ready(function () {
             }
         },
         success: function fileselect(e) {
-            var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
-            var extension = "." + type;
-            window.SystemSettingsProperties.MainScreenLogo = "main_logo_" + currentDate + extension;
-            isMainLogoChange = true;
-            var imageUrl = window.baseRootUrl + "content/images/application/" + "main_logo_" + currentDate + extension + "?v=" + $.now();
-            $("#mainscreen_logo_img").attr("src", imageUrl);
-            hideWaitingPopup('content-area');
-            $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
-            $('#upload-image').removeAttr("disabled");
+            if (!containsScript) {
+                var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
+                var extension = "." + type;
+                window.SystemSettingsProperties.MainScreenLogo = "main_logo_" + currentDate + extension;
+                isMainLogoChange = true;
+                var imageUrl = window.baseRootUrl + "content/images/application/" + "main_logo_" + currentDate + extension + "?v=" + $.now();
+                $("#mainscreen_logo_img").attr("src", imageUrl);
+                hideWaitingPopup('content-area');
+                $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
+                $('#upload-image').removeAttr("disabled");
+            }
         }
     });
     uploadMainLogo.appendTo("#upload-Main-screen-image");
@@ -142,7 +188,6 @@ $(document).ready(function () {
         buttons: { browse: window.Server.App.LocalizationContent.FavIconButton },
         selected: function (e) {
             showWaitingPopup('content-area');
-            currentDate = $.now();
             type = e.filesData[0]?.type.toLowerCase();
             var extension = "." + type;
             if (type === undefined) {
@@ -153,6 +198,27 @@ $(document).ready(function () {
                 $(".favicon").addClass("upload-error-border");
                 hideWaitingPopup('content-area');
             }
+            else if (extension === ".svg") {
+                var file = e.filesData[0].rawFile;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var fileContent = event.target.result;
+                    containsScript = scriptPattern.test(fileContent);
+
+                    if (containsScript) {
+                        $(".favicon").find(".validation-error-image").text(window.Server.App.LocalizationContent.InValidFileFormat);
+                        $(".favicon").addClass("upload-error-border");
+                        hideWaitingPopup('content-area');
+                    } else {
+                        $(".favicon").find(".validation-error-image").text("");
+                        $(".favicon").removeClass("upload-error-border");
+                        uploadLoginLogo.asyncSettings.saveUrl = window.fileUploadUrl + "?imageType=favicon&&timeStamp=" + currentDate;
+                    }
+
+                    scriptPattern.lastIndex = 0;
+                };
+                reader.readAsText(file);
+            }
             else {
                 $(".favicon").find(".validation-error-image").text("");
                 $(".favicon").removeClass("upload-error-border");
@@ -160,15 +226,17 @@ $(document).ready(function () {
             }
         },
         success: function fileselect(e) {
-            var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
-            var extension = "." + type;
-            window.SystemSettingsProperties.FavIcon = "favicon_" + currentDate + extension;
-            isFavIconChange = true;
-            var imageUrl = window.baseRootUrl + "content/images/application/" + "favicon_" + currentDate + extension + "?v=" + $.now();
-            $("#favicon_logo_img").attr("src", imageUrl);
-            hideWaitingPopup('content-area');
-            $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
-            $('#upload-image').removeAttr("disabled");
+            if (!containsScript) {
+                var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
+                var extension = "." + type;
+                window.SystemSettingsProperties.FavIcon = "favicon_" + currentDate + extension;
+                isFavIconChange = true;
+                var imageUrl = window.baseRootUrl + "content/images/application/" + "favicon_" + currentDate + extension + "?v=" + $.now();
+                $("#favicon_logo_img").attr("src", imageUrl);
+                hideWaitingPopup('content-area');
+                $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
+                $('#upload-image').removeAttr("disabled");
+            }
         }
     });
     uploadFavicon.appendTo("#upload-favicon-image");
@@ -186,7 +254,6 @@ $(document).ready(function () {
         buttons: { browse: window.Server.App.LocalizationContent.LogoButton },
         selected: function (e) {
             showWaitingPopup('content-area');
-            currentDate = $.now();
             type = e.filesData[0]?.type.toLowerCase();
             var extension = "." + type;
             if (type === undefined) {
@@ -197,6 +264,27 @@ $(document).ready(function () {
                 $(".email-logo").addClass("upload-error-border");
                 hideWaitingPopup('content-area');
             }
+            else if (extension === ".svg") {
+                var file = e.filesData[0].rawFile;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var fileContent = event.target.result;
+                    containsScript = scriptPattern.test(fileContent);
+
+                    if (containsScript) {
+                        $(".email-logo").find(".validation-error-image").text(window.Server.App.LocalizationContent.InValidFileFormat);
+                        $(".email-logo").addClass("upload-error-border");
+                        hideWaitingPopup('content-area');
+                    } else {
+                        $(".email-logo").find(".validation-error-image").text("");
+                        $(".email-logo").removeClass("upload-error-border");
+                        uploadLoginLogo.asyncSettings.saveUrl = window.fileUploadUrl + "?imageType=emaillogo&&timeStamp=" + currentDate;
+                    }
+
+                    scriptPattern.lastIndex = 0;
+                };
+                reader.readAsText(file);
+            }
             else {
                 $(".email-logo").find(".validation-error-image").text("");
                 $(".email-logo").removeClass("upload-error-border");
@@ -204,14 +292,16 @@ $(document).ready(function () {
             }
         },
         success: function fileselect(e) {
-            var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
-            var extension = "." + type;
-            window.SystemSettingsProperties.EmailLogo = "email_logo_" + currentDate + extension;
-            var imageUrl = window.baseRootUrl + "content/images/application/" + "email_logo_" + currentDate + extension + "?v=" + $.now();
-            $("#email_logo_img").attr("src", imageUrl);
-            hideWaitingPopup('content-area');
-            $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
-            $('#upload-image').removeAttr("disabled");
+            if (!containsScript) {
+                var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
+                var extension = "." + type;
+                window.SystemSettingsProperties.EmailLogo = "email_logo_" + currentDate + extension;
+                var imageUrl = window.baseRootUrl + "content/images/application/" + "email_logo_" + currentDate + extension + "?v=" + $.now();
+                $("#email_logo_img").attr("src", imageUrl);
+                hideWaitingPopup('content-area');
+                $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
+                $('#upload-image').removeAttr("disabled");
+            }
         }
     });
     uploadEmailLogo.appendTo("#upload-emaillogo-image");
@@ -272,7 +362,6 @@ $(document).ready(function () {
         buttons: { browse: window.Server.App.LocalizationContent.LogoButton },
         selected: function (e) {
             showWaitingPopup('content-area');
-            currentDate = $.now();
             type = e.filesData[0]?.type.toLowerCase();
             var extension = "." + type;
             if (type === undefined) {
@@ -283,6 +372,27 @@ $(document).ready(function () {
                 $(".footer-logo").addClass("upload-error-border");
                 hideWaitingPopup('content-area');
             }
+            else if (extension === ".svg") {
+                var file = e.filesData[0].rawFile;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var fileContent = event.target.result;
+                    containsScript = scriptPattern.test(fileContent);
+
+                    if (containsScript) {
+                        $(".footer-logo").find(".validation-error-image").text(window.Server.App.LocalizationContent.InValidFileFormat);
+                        $(".footer-logo").addClass("upload-error-border");
+                        hideWaitingPopup('content-area');
+                    } else {
+                        $(".footer-logo").find(".validation-error-image").text("");
+                        $(".footer-logo").removeClass("upload-error-border");
+                        uploadLoginLogo.asyncSettings.saveUrl = window.fileUploadUrl + "?imageType=poweredlogo&&timeStamp=" + currentDate;
+                    }
+
+                    scriptPattern.lastIndex = 0;
+                };
+                reader.readAsText(file);
+            }
             else {
                 $(".footer-logo").find(".validation-error-image").text("");
                 $(".footer-logo").removeClass("upload-error-border");
@@ -290,15 +400,17 @@ $(document).ready(function () {
             }
         },
         success: function fileselect(e) {
-            var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
-            var extension = "." + type;
-            window.SystemSettingsProperties.PoweredByLogo = "powered_logo_" + currentDate + extension;
-            isPowerdbyLogoChange = true;
-            var imageUrl = window.baseRootUrl + "content/images/application/" + "powered_logo_" + currentDate + extension + "?v=" + $.now();
-            $("#display-powered-logo").attr("src", imageUrl);
-            hideWaitingPopup('content-area');
-            $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
-            $('#upload-image').removeAttr("disabled");
+            if (!containsScript) {
+                var type = e.file.type.toLowerCase() == "svg" ? e.file.type.toLowerCase() : "png";
+                var extension = "." + type;
+                window.SystemSettingsProperties.PoweredByLogo = "powered_logo_" + currentDate + extension;
+                isPowerdbyLogoChange = true;
+                var imageUrl = window.baseRootUrl + "content/images/application/" + "powered_logo_" + currentDate + extension + "?v=" + $.now();
+                $("#display-powered-logo").attr("src", imageUrl);
+                hideWaitingPopup('content-area');
+                $("#image-container").find(".tooltip-container[data-image='login-screen']").tooltip("hide");
+                $('#upload-image').removeAttr("disabled");
+            }
         }
     });
     uploadPoweredLogo.appendTo("#upload-poweredlogo-image");
@@ -334,16 +446,13 @@ $(document).ready(function () {
 
     $(document).on("click", "#UpdateAiSettings", function () {
         var aiModel = document.getElementById("ai-providers").ej2_instances[0].value;
-        var modelName= (aiModel == "Azure AI" ? $("#azure-model-name").val().trim() : "");
-        
-        if (aiModel == boldaiservice)
-        {
+        var modelName = (aiModel == "Azure AI" ? $("#azure-model-name").val().trim() : "");
+
+        if (aiModel == boldaiservice) {
             aiModel = "0";
-        } else if (aiModel == openai)
-        {
+        } else if (aiModel == openai) {
             aiModel = "1";
-        } else if (aiModel == azureai)
-        {
+        } else if (aiModel == azureai) {
             aiModel = "2";
         }
 
@@ -352,7 +461,7 @@ $(document).ready(function () {
             if (!$("#ai-setting-form").valid()) {
                 return;
             }
-            
+
             var aiSettingsData = {
                 AIModel: parseInt(aiModel),
                 ModelName: modelName,
@@ -371,7 +480,7 @@ $(document).ready(function () {
             $.ajax({
                 type: "POST",
                 url: window.updateAISettingsUrl,
-                data: {aiSettings: JSON.stringify(aiSettingsData), enableAiFeature : $("#aimodel-enable-switch").is(":checked"), isAiSummariesEnabledGlobally : $("#ai-concent").is(":checked")},
+                data: { aiSettings: JSON.stringify(aiSettingsData), enableAiFeature: $("#aimodel-enable-switch").is(":checked"), isAiSummariesEnabledGlobally: $("#ai-concent").is(":checked") },
                 beforeSend: showWaitingPopup('server-app-container'),
                 success: function (result) {
                     if (result.Status) {
@@ -400,7 +509,7 @@ $(document).ready(function () {
     });
 
     function validateIPWhitelisted() {
-        var domain = getSslValue() + "://" + $("#site_url").val() ;
+        var domain = getSslValue() + "://" + $("#site_url").val();
         $.ajax({
             type: "POST",
             url: validateIPWhitelistedUrl,
@@ -766,7 +875,7 @@ $(document).ready(function () {
             }
         }
     });
-    
+
 
     if ($("#active-directory-container").is(":visible")) {
         var query = (window.location.search).toString();
@@ -838,8 +947,7 @@ $(document).ready(function () {
             $("#site-copyright-error").html("");
             $("#site-copyright-error").hide();
             $("#site-copyright").attr("style", "border-color:var(--input-box-border-normal-color) !important");
-            if ($("#site-copyright").val() === '')
-            {
+            if ($("#site-copyright").val() === '') {
                 document.getElementById("site-copyright").value = copyrightInformation;
                 $("#site-copyright").closest("div").removeClass("has-error");
             }
@@ -848,13 +956,11 @@ $(document).ready(function () {
             $("#copyrightinfo").removeClass("d-none").show();
             $("#site-copyright").removeAttr('disabled');
             $("#site-copyright-error").show();
-            if ($("#site-copyright").val() === '')
-            {
+            if ($("#site-copyright").val() === '') {
                 $("#site-copyright-error").html(window.Server.App.LocalizationContent.CopyRightValidator);
                 $("#site-copyright").closest("div").addClass("has-error");
             }
-            else
-            {
+            else {
                 $("#site-copyright").closest("div").removeClass("has-error");
             }
         }
@@ -890,160 +996,133 @@ $(document).ready(function () {
     }
 
     $(document).on("click", "#UpdateSystemSettings,#UpdateSystemSettings-bottom,#UpdateDatabaseSettings-bottom,#update-mail-settings", function () {
-        if($("#site_url").val().length>0)
-        {
-            validateIPWhitelisted();
-        }
-        
+
+
         if (($("#look-and-feel-form").find(".has-error").length == 0 && $("#email-setting-form").find(".has-error").length == 0)) {
-           var messageHeader = $(this).hasClass("update-system-settings") ? window.Server.App.LocalizationContent.SiteSettings : window.Server.App.LocalizationContent.EmailSettings;
-           var enableSecureMail = $("#secure-mail-authentication").is(":checked");
-           RemoveUploadBoxError();
+            var messageHeader = $(this).hasClass("update-system-settings") ? window.Server.App.LocalizationContent.SiteSettings : window.Server.App.LocalizationContent.EmailSettings;
+            var enableSecureMail = $("#secure-mail-authentication").is(":checked");
+            RemoveUploadBoxError();
 
             if (!$("#look-and-feel-form").valid() || !$("#email-setting-form").valid()) {
-               return;
-           }
-            
-           var isUrlChange = false;
-           if ($("#site_url").attr("data-original-value") != $("#site_url").val()) {
-               isUrlChange = true;
-           }
-           var isReloadPage = false;
-           if (getSslValue() != $("#scheme_value").attr("data-value") || $("#site_url").attr("data-original-value") !== $("#site_url").val() || prevLang != $("#language").val()) {
-               isReloadPage = true;
-           }
-           var siteURL = $("#site_url").val();
-           var isMailSettingsChanged = false;
-           var isMailPasswordChanged = false;
-           var mailSettings = new Object;
-           if (parseInt($("#port-number").val()) != window.SystemSettingsProperties.MailSettingsPort
-               || $("#smtp-address").val() != window.SystemSettingsProperties.MailSettingsHost
-               || $("#mail-display-name").val() != window.SystemSettingsProperties.MailSettingsSenderName
-               || $("#mail-user-name").val() != window.SystemSettingsProperties.MailSettingsAddress
-               || enableSecureMail != window.SystemSettingsProperties.MailSettingsIsSecureAuthentication) {
-               isMailSettingsChanged = true;
+                return;
+            }
 
-               mailSettings = {
-                   Address: $("#mail-user-name").val(),
-                   Password: $("#mail_password").val(),
-                   Host: $("#smtp-address").val(),
-                   SenderName: $("#mail-display-name").val(),
-                   Port: parseInt($("#port-number").val()),
-                   IsSecureAuthentication: enableSecureMail
-               };
-           }
+            var isMailSettingsChanged = false;
+            var isMailPasswordChanged = false;
+            var mailSettings = new Object;
+            if (parseInt($("#port-number").val()) != window.SystemSettingsProperties.MailSettingsPort
+                || $("#smtp-address").val() != window.SystemSettingsProperties.MailSettingsHost
+                || $("#mail-display-name").val() != window.SystemSettingsProperties.MailSettingsSenderName
+                || $("#mail-user-name").val() != window.SystemSettingsProperties.MailSettingsAddress
+                || enableSecureMail != window.SystemSettingsProperties.MailSettingsIsSecureAuthentication) {
+                isMailSettingsChanged = true;
 
-           if ($("#mail-password").val() !== "") {
-               isMailPasswordChanged = true;
-           }
+                mailSettings = {
+                    Address: $("#mail-user-name").val(),
+                    Password: $("#mail_password").val(),
+                    Host: $("#smtp-address").val(),
+                    SenderName: $("#mail-display-name").val(),
+                    Port: parseInt($("#port-number").val()),
+                    IsSecureAuthentication: enableSecureMail
+                };
+            }
 
-           var mailProtocol = document.getElementById("mail-account").ej2_instances[0].value != undefined && !isNullOrWhitespace(document.getElementById("mail-account").ej2_instances[0].value) ? parseInt(document.getElementById("mail-account").ej2_instances[0].value) : 0;
-           var mailSettings = {
-               MailSettingsAddress: $("#mail-user-name").val(),
-               MailSettingsAuthType: mailProtocol == 0 ? parseInt($("input[name='mail-authentication-type']:checked").val()) : $("#oauth-mail-authentication-type").val(),
-               MailSettingsUserName: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#sender-user-name").val() : "",
-               MailSettingsPassword: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#mail-password").val() : "",
-               MailSettingsHost: $("#smtp-address").val(),
-               MailSettingsSenderName: $("#mail-display-name").val(),
-               MailSettingsPort: parseInt($("#port-number").val()) != undefined && !isNullOrWhitespace($("#port-number").val()) ? parseInt($("#port-number").val()) : 0,
-               MailSettingsIsSecureAuthentication: enableSecureMail,
-               MailSettingsAccount: mailProtocol,
-               MailSettingsTenantId: $("#tenant-id").val(),
-               MailSettingsClientId: $("#client-id").val(),
-               MailSettingsClientSecret: $("#client-secret").val(),
-           };
+            if ($("#mail-password").val() !== "") {
+                isMailPasswordChanged = true;
+            }
 
-           var systemSettingsData = {
-               OrganizationName: $("#site-orgname").val(),
-               LoginLogo: window.SystemSettingsProperties.LoginLogo,
-               MainScreenLogo: window.SystemSettingsProperties.MainScreenLogo,
-               FavIcon: window.SystemSettingsProperties.FavIcon,
-               EmailLogo: window.SystemSettingsProperties.EmailLogo,
-               AILogo: window.SystemSettingsProperties.AILogo,
-               PoweredByLogo: window.SystemSettingsProperties.PoweredByLogo,
-               WelcomeNoteText: $("#txt_welcome_note").val(),
-               TimeZone: document.getElementById("time-zone").ej2_instances[0].value,
-               DateFormat: document.getElementById("date-format").ej2_instances[0].value,
-               BaseUrl: getSslValue() + "://" + $("#site_url").val(),
-               EnableDomainChange: $("#domain-change").is(":checked"),
-               IsSecureConnection: getSslValue() === "https",
-               MailSettings: mailSettings,
-               MachineName: $("#machineName").val(),
-               HostDomain: $("#hostDomain").val(),
-               Language: document.getElementById("language").ej2_instances[0].value,
-               IsEnablePoweredBySyncfusion: $("#enablepoweredbysyncfusion").is(":checked"),
-               IsEnableCopyrightInfo: $("#enablecopyrightinfo").is(":checked"),
-               CopyrightInformation: $("#site-copyright").val(),
-               TimeFormat: document.getElementById("time_format").ej2_instances[0].value,
-               IgnoreSslValidation: $("#ssl-certificate").is(":checked")
-           };
+            var mailProtocol = document.getElementById("mail-account").ej2_instances[0].value != undefined && !isNullOrWhitespace(document.getElementById("mail-account").ej2_instances[0].value) ? parseInt(document.getElementById("mail-account").ej2_instances[0].value) : 0;
+            var mailSettings = {
+                MailSettingsAddress: $("#mail-user-name").val(),
+                MailSettingsAuthType: mailProtocol == 0 ? parseInt($("input[name='mail-authentication-type']:checked").val()) : $("#oauth-mail-authentication-type").val(),
+                MailSettingsUserName: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#sender-user-name").val() : "",
+                MailSettingsPassword: parseInt($("input[name='mail-authentication-type']:checked").val()) === 1 ? $("#mail-password").val() : "",
+                MailSettingsHost: $("#smtp-address").val(),
+                MailSettingsSenderName: $("#mail-display-name").val(),
+                MailSettingsPort: parseInt($("#port-number").val()) != undefined && !isNullOrWhitespace($("#port-number").val()) ? parseInt($("#port-number").val()) : 0,
+                MailSettingsIsSecureAuthentication: enableSecureMail,
+                MailSettingsAccount: mailProtocol,
+                MailSettingsTenantId: $("#tenant-id").val(),
+                MailSettingsClientId: $("#client-id").val(),
+                MailSettingsClientSecret: $("#client-secret").val(),
+            };
 
-           $.ajax({
-               type: "POST",
-               url: window.updateSystemSettingsUrl,
-               data: {systemSettingsData: JSON.stringify(systemSettingsData)},
-               beforeSend: showWaitingPopup('server-app-container'),
-               success: function (result) {
-                   if (isReloadPage) {
-                       if (isUrlChange) {
-                           var restartLinkHtml = "<a href='" + restartLink + "' target='_blank'>click here.</a>";
-                           messageBox("", window.Server.App.LocalizationContent.RestartApplication, window.Server.App.LocalizationContent.RestartApplicationLink + restartLinkHtml, "success", function () {
-                               parent.onCloseMessageBox();
-                               var currentURL = window.location.pathname;
-                               window.location.href = getSslValue() + "://" + siteURL + currentURL.substring(currentURL.indexOf("/ums/administration"));
-                           });
-                       } else {
-                           window.location.href = getSslValue() + "://" + location.host + location.pathname;
-                       }
-                   } else {
-                       if (isMainLogoChange) {
-                           $("#application-logo").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.MainScreenLogo);
-                       }
+            var systemSettingsData = {
+                OrganizationName: $("#site-orgname").val(),
+                LoginLogo: window.SystemSettingsProperties.LoginLogo,
+                MainScreenLogo: window.SystemSettingsProperties.MainScreenLogo,
+                FavIcon: window.SystemSettingsProperties.FavIcon,
+                EmailLogo: window.SystemSettingsProperties.EmailLogo,
+                AILogo: window.SystemSettingsProperties.AILogo,
+                PoweredByLogo: window.SystemSettingsProperties.PoweredByLogo,
+                WelcomeNoteText: $("#txt_welcome_note").val(),
+                TimeZone: document.getElementById("time-zone").ej2_instances[0].value,
+                DateFormat: document.getElementById("date-format").ej2_instances[0].value,
+                MailSettings: mailSettings,
+                MachineName: $("#machineName").val(),
+                HostDomain: $("#hostDomain").val(),
+                Language: document.getElementById("language").ej2_instances[0].value,
+                IsEnablePoweredBySyncfusion: $("#enablepoweredbysyncfusion").is(":checked"),
+                IsEnableCopyrightInfo: $("#enablecopyrightinfo").is(":checked"),
+                CopyrightInformation: $("#site-copyright").val(),
+                TimeFormat: document.getElementById("time_format").ej2_instances[0].value,
+            };
 
-                       if (isPowerdbyLogoChange) {
-                           $("#poweredbysyncfusion img").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.PoweredByLogo);
-                       }
+            $.ajax({
+                type: "POST",
+                url: window.updateSystemSettingsUrl,
+                data: { systemSettingsData: JSON.stringify(systemSettingsData) },
+                beforeSend: showWaitingPopup('server-app-container'),
+                success: function (result) {
 
-                       $("#copyrightinfo").html(systemSettingsData.CopyrightInformation);
-                       if (isFavIconChange) {
-                           var link = document.createElement("link");
-                           link.type = "image/x-icon";
-                           link.rel = "shortcut icon";
-                           link.href = window.baseRootUrl + "content/images/application/" + systemSettingsData.FavIcon;
-                           document.getElementsByTagName("head")[0].appendChild(link);
-                       }
+                    if (isMainLogoChange) {
+                        $("#application-logo").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.MainScreenLogo);
+                    }
 
-                       var pageTitle = document.title.split("-")[0] + " - " + $("#site-orgname").val();
-                       document.title = pageTitle;
-                   }
+                    if (isPowerdbyLogoChange) {
+                        $("#poweredbysyncfusion img").attr("src", window.baseRootUrl + "content/images/application/" + systemSettingsData.PoweredByLogo);
+                    }
 
-                   if (result.status) {
-                       if ($("#enablepoweredbysyncfusion").is(":checked")) {
-                           $("#poweredbysyncfusion").removeClass("d-none").addClass("d-block");
-                       } else {
-                           $("#poweredbysyncfusion").removeClass("d-block").addClass("d-none");
-                       }
-                       if ($("#enablecopyrightinfo").is(":checked")) {
-                           $("#copyrightinfo").removeClass("d-none").addClass("d-block");
-                       } else {
-                           $("#copyrightinfo").removeClass("d-block").addClass("d-none");
-                       }
-                       if ($("#enablepoweredbysyncfusion").is(":checked") && $("#enablecopyrightinfo").is(":checked")) {
-                           $("#footer-separator").removeClass("d-none").addClass("d-block");
-                       } else {
-                           $("#footer-separator").removeClass("d-block").addClass("d-none");
-                       }
-                       SuccessAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
-                       SetCookie();
-                   } else {
-                       WarningAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.Message, 7000);
-                       $(".error-message, .success-message").css("display", "none");
-                   }
-                   hideWaitingPopup('server-app-container');
-               }
-           });
+                    $("#copyrightinfo").html(systemSettingsData.CopyrightInformation);
+                    if (isFavIconChange) {
+                        var link = document.createElement("link");
+                        link.type = "image/x-icon";
+                        link.rel = "shortcut icon";
+                        link.href = window.baseRootUrl + "content/images/application/" + systemSettingsData.FavIcon;
+                        document.getElementsByTagName("head")[0].appendChild(link);
+                    }
+
+                    var pageTitle = document.title.split("-")[0] + " - " + $("#site-orgname").val();
+                    document.title = pageTitle;
+
+
+                    if (result.status) {
+                        if ($("#enablepoweredbysyncfusion").is(":checked")) {
+                            $("#poweredbysyncfusion").removeClass("d-none").addClass("d-block");
+                        } else {
+                            $("#poweredbysyncfusion").removeClass("d-block").addClass("d-none");
+                        }
+                        if ($("#enablecopyrightinfo").is(":checked")) {
+                            $("#copyrightinfo").removeClass("d-none").addClass("d-block");
+                        } else {
+                            $("#copyrightinfo").removeClass("d-block").addClass("d-none");
+                        }
+                        if ($("#enablepoweredbysyncfusion").is(":checked") && $("#enablecopyrightinfo").is(":checked")) {
+                            $("#footer-separator").removeClass("d-none").addClass("d-block");
+                        } else {
+                            $("#footer-separator").removeClass("d-block").addClass("d-none");
+                        }
+                        SuccessAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdated, 7000);
+                        SetCookie();
+                    } else {
+                        WarningAlert(messageHeader, window.Server.App.LocalizationContent.SiteSettingsUpdateFalied, result.Message, 7000);
+                        $(".error-message, .success-message").css("display", "none");
+                    }
+                    hideWaitingPopup('server-app-container');
+                }
+            });
         }
-      });
+    });
 
 
     EnableOrDisableAIModel();
@@ -1131,8 +1210,7 @@ function EnableOrDisableAIModel() {
         $("#ai-concent").prop("disabled", false);
         document.getElementById("ai-providers").ej2_instances[0].enabled = true;
     }
-    else
-    {
+    else {
         document.getElementById("ai-providers").ej2_instances[0].enabled = false;
         $("#ai-providers").prop("disabled", true);
         $("#open-ai-api-key").prop("disabled", true);
@@ -1254,14 +1332,6 @@ $(document).on("change", "input[name='mail-authentication-type']", function () {
         authTextBoxes.siblings(".validation-errors").text("");
     }
 });
-
-$(document).on("change click", '#site_url', function () {
-    onBaseUrlChange();
-});
-
-function onBaseUrlChange() {
-    $(".exist-domain-info").addClass("d-block").removeClass("d-none");
-};
 
 $(document).on("mouseenter", ".highlight-image", function () {
     var image = $(this).attr("data-image").toLowerCase();

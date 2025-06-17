@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 11.3.24
+*  version : 12.1.5
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -16591,7 +16591,7 @@
                     this.getFooterTable().find("colgroup").first().replaceWith(this.getHeaderTable().find("colgroup").clone());                
             }
             var scrollObj = !BoldBIDashboard.isNullOrUndefined(this.getContent().data("BoldBIDashboardScroller")) ? this.getScrollObject() : null;
-            if(scrollObj && scrollObj.isVScroll() && !BoldBIDashboard.isNullOrUndefined(this.getFooterContent()))
+            if(scrollObj && scrollObj.isHScroll() && !BoldBIDashboard.isNullOrUndefined(this.getFooterContent()))
             {
                 this.getFooterContent().find("colgroup").append("<col style='width : " + this.model.scrollSettings.scrollerSize + "px'></col>");
                 if(!this.getFooterContent().find("tr.e-gridSummaryRows td.e-scrollindent").length)

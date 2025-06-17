@@ -50,7 +50,13 @@
         else if (ViewBag.IsAccountActivation)
         {
             <div class="status-message text-body">
-            @Html.Raw(string.Format(T["An email with instructions on how to verify your account has been sent to {0}."].Value, maskedEmail))
+                @{
+#pragma warning disable SCS0029
+                }
+                @Html.Raw(string.Format(T["An email with instructions on how to verify your account has been sent to {0}."].Value, maskedEmail))
+                @{
+#pragma warning restore SCS0029
+                }
             </div>
             <div class="text-body resend-verification">@T["If you have not received it, please click the following link."]</div>
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=true" value="@T["Resend activation link"]">
@@ -60,6 +66,9 @@
         else if (accountNotExist)
         {
             <div class="status-message text-body">
+                @{
+#pragma warning disable SCS0029
+                }
                 @if (email.ToString().Contains('@'))
                 {
                     @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0} {1}"].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>", $"{localization.EmailNotExist}"))
@@ -68,7 +77,9 @@
                 {
                     @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}"].Value, string.Format(T[$"{localization.UsernameNotExist}"].Value, $"{email}")))
                 }
-                
+                @{
+#pragma warning restore SCS0029
+                }
             </div>
             <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">
@@ -78,7 +89,13 @@
         else
         {
             <div class="status-message text-body">
+                @{
+#pragma warning disable SCS0029
+                }
                 @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}."].Value, maskedEmail))
+                @{
+#pragma warning restore SCS0029
+                }
             </div>
             <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">

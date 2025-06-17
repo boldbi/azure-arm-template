@@ -489,7 +489,7 @@
 </script>
 
 <script type="text/x-jsrender" id="data-status">
-    {{if DatasourceType=="@((int)ConnectionMode.Extract)" && ExtractEngine != "@ExtractEngine.DataHub.ToString().ToLower()"}}
+    {{if DatasourceType=="@((int)ConnectionMode.Extract)"}}
     <div>
         {{if ScheduleStatus=="@((int)ScheduleStatus.Success)"}}
         <div>
@@ -555,6 +555,11 @@
             </div>
             {{/if}}
         </div>
+        {{else ExtractEngine == "@ExtractEngine.DataHub.ToString().ToLower()" && !IsScheduleSynced}}
+        <div>
+            <span class="not-applicable data-refresh-status su su-schedule-status"></span>
+            <span data-bs-toggle="tooltip" data-placement="top" title="@T["Please edit and save the refresh settings again in order to obtain the refresh status of this data source."]">@Html.Raw(String.Format(T["Not synced with {0}"].Value, "Data Hub"))</span>
+        </div>
         {{else !IsScheduleConfigured}}
         <div>
             <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="not-refreshed" data-last-attempt="" data-status="refreshnotconfigured" title="@T["Refresh schedule not configured"]">
@@ -574,11 +579,6 @@
             </span>
         </div>
         {{/if}}
-    </div>
-    {{else DatasourceType=="@((int)ConnectionMode.Extract)" && ExtractEngine == "@ExtractEngine.DataHub.ToString().ToLower()"}}
-    <div>
-        <span class="not-applicable data-refresh-status su su-schedule-status"></span>
-        <span data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Not synced with {0}"].Value,"Data Hub"))">@Html.Raw(String.Format(T["Not synced with {0}"].Value,"Data Hub"))</span>
     </div>
     {{else DatasourceType=="@((int)ConnectionMode.ExtractWithoutRefresh)"}}
     <div>
@@ -668,13 +668,13 @@
                     templateID: "#itemname",
                     field: "Name",
                     cssClass: gridName == "dashboards" ? "align-name" : "",
-                    width: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)) ? 80 : 80,
+                    width: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1270)) ? 40 : 80,
                     type: "string",
                     allowFiltering: true
                 },
                 {
                     headerText: "@T["Description"]",
-                    width: gridName == "datasources" ? 70 : 120,
+                    width: gridName == "datasources" && (window.innerWidth > 1270) ? 30 : gridName == "datasources" ? 70 : 120,
                     template: true,
                     headerTemplateID: "#descriptionheader",
                     field: "Description",
@@ -696,7 +696,7 @@
                 },
                 {
                     headerText: "@T["Owner"]",
-                    width: (window.innerWidth > 1200) ? 50 : 40,
+                    width: (window.innerWidth > 1270) ? 40 : (window.innerWidth > 1200) ? 50 : 40,
                     headerTemplateID: "#ownerheader",
                     field: "CreatedByDisplayName",
                     visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)),
@@ -707,7 +707,7 @@
                 },
                 {
                     headerText: "@T["Data Type"]",
-                    width: (window.innerWidth > 1200) ? 60 : 50,
+                    width: (window.innerWidth > 1270) ? 40 : (window.innerWidth > 1200) ? 60 : 50,
                     field: "DisplayName",
                     visible: ("@isMobile.ToString().ToLower()" == "false" && (window.innerWidth > 1200)),
                     allowFiltering: true,

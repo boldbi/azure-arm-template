@@ -369,6 +369,7 @@ CREATE TABLE BOLDTC_TenantInfo (
 	UseCustomBranding smallint NOT NULL,
 	IsNewImDbDatabase smallint NOT NULL,
 	IsNewDatabase smallint NOT NULL,
+	StorageType INT NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTINFO PRIMARY KEY (Id)
 )
 ;
@@ -947,6 +948,17 @@ CREATE TABLE BOLDTC_AICredentials(
     ModifiedDate timestamp NOT NULL,
     IsActive smallint NOT NULL)
 ;
+
+CREATE TABLE BOLDTC_TenantStorageDetails (
+    Id uuid NOT NULL,
+    TenantInfoId uuid NOT NULL,
+    StorageType INT NOT NULL,
+    ConnectionInfo VARCHAR(1026),
+    CreatedDate TIMESTAMP NOT NULL,
+    ModifiedDate TIMESTAMP NOT NULL,
+    IsActive smallint NOT NULL,
+    CONSTRAINT PK_BOLDTC_TenantStorageDetails PRIMARY KEY (Id)
+);
 
 INSERT into BOLDTC_TenantLogType  ( Name , IsActive ) VALUES (N'Registration', 1);
 INSERT into BOLDTC_TenantLogType  ( Name ,  IsActive ) VALUES (N'StatusUpdated', 1);

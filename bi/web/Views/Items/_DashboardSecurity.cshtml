@@ -39,41 +39,47 @@
     </script>
 </head>
 <body>
-    <div id="itemsettings-dialog-content" style="display:none">
-        <span class="security-info">
-            @T["Dashboard security options control which websites, IP addresses, and applications can access or embed the dashboard"].
-            @if (!@ServerAppConfig.IsHideHelpLink)
-            {
-                @Html.Raw(String.Format(T["Learn more about dashboard security {0}here{1}."].Value, "<a href="+(ServerAppConfig.AppSettings.Documentation.BaseUri + dashboardSecurityHelpSiteUrl)+" target='_blank'>","</a>"))
-            }
+<div id="itemsettings-dialog-content" style="display:none">
+    @{
+    #pragma warning disable SCS0029
+    }
+    <span class="security-info">
+        @T["Dashboard security options control which websites, IP addresses, and applications can access or embed the dashboard"].
+        @if (!@ServerAppConfig.IsHideHelpLink)
+        {
+            @Html.Raw(String.Format(T["Learn more about dashboard security {0}here{1}."].Value, "<a href=" + (ServerAppConfig.AppSettings.Documentation.BaseUri + dashboardSecurityHelpSiteUrl) + " target='_blank'>", "</a>"))
+        }
+    </span>
+    @{
+    #pragma warning restore SCS0029
+    }
+    <div class="item-settings-content-list">
+        <p>@T["Accept embedding requests from these websites:"]</p>
+        <span id="domain-name-content" class="item-settings-input">
+            <span id="domain-chip-content" class="item-settings-chip"></span>
+            <input id="domain-input-text" autocomplete="off" class="form-control item-settings-content" placeholder="@T["Enter the list of domains separated by commas."]" maxlength="253" autofocus>
         </span>
-        <div class="item-settings-content-list">
-            <p>@T["Accept embedding requests from these websites:"]</p>
-            <span id="domain-name-content" class="item-settings-input">
-                <span id="domain-chip-content" class="item-settings-chip"></span>
-                <input id="domain-input-text" autocomplete="off" class="form-control item-settings-content" placeholder="@T["Enter the list of domains separated by commas."]" maxlength="253" autofocus>
-            </span>
-            <span class="domain-name-validation" style="display:none">@T["One or more invalid domains"]</span>
-        </div>
-        <div class="item-settings-content-list">
-            <p>@T["Allow dashboard access from these IP addresses:"]</p>
-            <span id="ip-address-content" class="item-settings-input">
-                <span id="ip-chip-content" class="item-settings-chip"></span>
-                <input id="ip-input-text" autocomplete="off" class="form-control item-settings-content" placeholder="@T["Enter the list of IP addresses separated by commas."]" maxlength="45">
-            </span>
-            <span class="ip-address-validation" style="display:none">@T["One or more invalid IP addresses"]</span>
-        </div>
-        <div id="item-settings-container">
-            <label class="item-settings-label">@T["Apply these settings"]</label>
-            <div class="center-align">
-                <div class="item-settings-dropdown">
-                    <select id="select-option" class="selectpicker full-width">
-                        <option value=@((int)SecuritySettingScope.Always)>@T["Always"]</option>
-                        <option value=@((int)SecuritySettingScope.Public)>@T["When the dashboard is public and accessed anonymously"]</option>
-                        <option value=@((int)SecuritySettingScope.Embedded)>@T["When the dashboard is embedded"]</option>
-                    </select>
-                </div>
+        <span class="domain-name-validation" style="display:none">@T["One or more invalid domains"]</span>
+    </div>
+    <div class="item-settings-content-list">
+        <p>@T["Allow dashboard access from these IP addresses:"]</p>
+        <span id="ip-address-content" class="item-settings-input">
+            <span id="ip-chip-content" class="item-settings-chip"></span>
+            <input id="ip-input-text" autocomplete="off" class="form-control item-settings-content" placeholder="@T["Enter the list of IP addresses separated by commas."]" maxlength="45">
+        </span>
+        <span class="ip-address-validation" style="display:none">@T["One or more invalid IP addresses"]</span>
+    </div>
+    <div id="item-settings-container">
+        <label class="item-settings-label">@T["Apply these settings"]</label>
+        <div class="center-align">
+            <div class="item-settings-dropdown">
+                <select id="select-option" class="selectpicker full-width">
+                    <option value=@((int)SecuritySettingScope.Always)>@T["Always"]</option>
+                    <option value=@((int)SecuritySettingScope.Public)>@T["When the dashboard is public and accessed anonymously"]</option>
+                    <option value=@((int)SecuritySettingScope.Embedded)>@T["When the dashboard is embedded"]</option>
+                </select>
             </div>
         </div>
     </div>
+</div>
 </body>

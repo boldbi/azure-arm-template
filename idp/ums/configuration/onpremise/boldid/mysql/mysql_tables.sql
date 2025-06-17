@@ -384,6 +384,7 @@ CREATE TABLE {database_name}.BOLDTC_TenantInfo (
 	UseCustomBranding tinyint(1) NOT NULL,
 	IsNewImDbDatabase tinyint(1) NOT NULL,
 	IsNewDatabase tinyint(1) NOT NULL,
+	StorageType int NOT NULL,
   CONSTRAINT PK_BOLDTC_TENANTINFO PRIMARY KEY (Id ASC)
 ) ROW_FORMAT=DYNAMIC
 ;
@@ -958,6 +959,17 @@ CREATE TABLE {database_name}.BOLDTC_AICredentials(
     PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
 
+CREATE TABLE {database_name}.BOLDTC_TenantStorageDetails (
+    Id char(38) NOT NULL,
+    TenantInfoId char(38) NOT NULL,
+    StorageType int NOT NULL,
+    ConnectionInfo nvarchar(1026),
+    CreatedDate datetime NOT NULL,
+    ModifiedDate datetime NOT NULL,
+    IsActive tinyint(1) NOT NULL,
+    CONSTRAINT PK_BOLDTC_TenantStorageDetails PRIMARY KEY (Id ASC)
+);
+
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'Registration', 1);
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'StatusUpdated', 1);
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'PaymentUpdated', 1);
@@ -1118,6 +1130,7 @@ INSERT {database_name}.BOLDTC_Source (Type, Value, CreatedDate, ModifiedDate, Is
 INSERT {database_name}.BOLDTC_Source (Type, Value, CreatedDate, ModifiedDate, IsActive) VALUES (N'Report Server API', 8, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1);
 INSERT {database_name}.BOLDTC_Source (Type, Value, CreatedDate, ModifiedDate, IsActive) VALUES (N'Report Server Jobs', 9, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1);
 INSERT {database_name}.BOLDTC_Source (Type, Value, CreatedDate, ModifiedDate, IsActive) VALUES (N'Admin Utility', 10, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1);
+
 
 ALTER TABLE {database_name}.BOLDTC_CouponLog ADD CONSTRAINT BOLDTC_CouponLog_fk0 FOREIGN KEY (CouponLogTypeId) REFERENCES {database_name}.BOLDTC_CouponLogType(Id)
 

@@ -22,6 +22,7 @@
     var downloadPermissionAccess = GlobalAppSettings.GetDescription(PermissionAccess.Download).ToLower();
     var downloadPermissionAccessId = (int)PermissionAccess.Download;
     var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
+    var generateEmbedSignatureUrl = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
 }
 
 <script>
@@ -43,9 +44,16 @@
     window.currentUserId = "@currentUserId";
     window.downloadPermissionAccess = "@downloadPermissionAccess";
     window.downloadPermissionAccessId = "@downloadPermissionAccessId";
+ 	var generateEmbedSignatureUrl = "@generateEmbedSignatureUrl";
+    @{
+#pragma warning disable SCS0029
+    }
     window.sharedUserGroupList = @Html.Raw(Json.Serialize(@data));
     window.accessModeList = @Html.Raw(Json.Serialize(@data));
     var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+    @{
+#pragma warning restore SCS0029
+    }
     var isSelfHosted =  @Json.Serialize(isSelfHosted);
 </script>
 
@@ -295,6 +303,7 @@
             <div class="embed-text-area-section">
                 <span id="copy-embed-code" class="float-end app-hyperlink"><span class="su su-copy"></span>@T["Copy"]</span>
                 <textarea id="embed-code" class="form-control" readonly></textarea>
+                <div id="embed-error-message" class="mt-2 text-danger" style="display: none;"></div>
             </div>
             <div class="embed-configuration col-12">
                 <div class="embed-config-row col-12 d-flex no-padding datasource-hide" style="margin-bottom: 10px;" ng-show="currentItemType == @dashboardType">
@@ -378,6 +387,10 @@
                                             <input class="form-check-input embed-dashboard-banner" type="checkbox" checked value="" id="header">
                                             <label class="form-check-label" for="header">Header</label>
                                         </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input embed-dashboard-banner" type="checkbox" checked disabled value="" id="preview-as">
+                                                <label class="form-check-label" for="preview-as">Preview As</label>
+                                            </div>
                                         <div class="form-check">
                                             <input class="form-check-input embed-dashboard-banner" type="checkbox" value="" id="views">
                                             <label class="form-check-label" for="views">Views</label>
@@ -512,6 +525,19 @@
                     <span class="material-switch text-left">
                         <input type="checkbox" class="mode-change" id="embed-export" />
                         <label for="embed-export" class="label-primary"></label>
+                    </span>
+                </div>
+                <div class="embed-config-row d-flex col-12 no-padding">
+                    <div class="col-5 no-padding">
+                        <label>@T["Embed Signature"]</label>
+                        <div class="info-popup">
+                            <span class="dropdown-toggle" data-bs-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                            <div class="dropdown-menu" role="menu">@T["Enable this to get the embed signature"]<br>@T["If this is enabled, users can get iframe code with embed signature."]</div>
+                        </div>
+                    </div>
+                    <span class="material-switch text-left">
+                        <input type="checkbox" class="mode-signature-change" id="embed-signature" />
+                        <label for="embed-signature" class="label-primary"></label>
                     </span>
                 </div>
                 @if (isSelfHosted)

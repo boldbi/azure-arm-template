@@ -1,4 +1,4 @@
-﻿function dropDownListInitialization(id, placeHolder, allowFilter) {
+﻿function dropDownListInitialization(id, placeHolder, allowFilter = false) {
     var dropDownList = new ejs.dropdowns.DropDownList({
         index: 0,
         floatLabelType: "Never",

@@ -25,7 +25,7 @@
     };
     var openAi = ViewBag.aiCredentials != null && ViewBag.aiCredentials.AIModel == (int)AIModel.OpenAI ? ViewBag.aiCredentials.OpenAI : new OpenAI();
     var azureAI = ViewBag.aiCredentials != null && ViewBag.aiCredentials.AIModel == (int)AIModel.AzureAI ? ViewBag.aiCredentials.AzureAI : new AzureAI();
-    var enableAiFeature = ViewBag.aiCredentials != null ? ViewBag.aiCredentials.EnableAIFeature : false  ;
+    var enableAiFeature = ViewBag.aiCredentials?.EnableAIFeature ?? true;
     var isAiSummariesEnabledGlobally = ViewBag.aiCredentials != null ? ViewBag.aiCredentials.IsAISummariesEnabledGlobally : false;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
@@ -36,6 +36,7 @@
     var boldaiservice = GlobalAppSettings.GetDescription(AIModel.BoldAIService);
     var openai = GlobalAppSettings.GetDescription(AIModel.OpenAI);
     var azureai = GlobalAppSettings.GetDescription(AIModel.AzureAI);
+    var enableAiSupport = ServerAppConfig.EnableAiFeature && globalAppSettings.SystemSettings.IsAiServiceEnabled;
 }
 
 @section styles{
@@ -57,6 +58,7 @@
     var boldaiservice = "@boldaiservice";
     var openai = "@openai";
     var azureai = "@azureai";
+    var enableAiSupport = @Json.Serialize(enableAiSupport);
     var updateAISettingsUrl = "@Url.Action("AddOrUpdateAiCredentialsSettings", "Administration")";
    
     </script>
@@ -76,13 +78,7 @@
             </div>
         </div>
     </div>
-    <div id="ai-settings-header" class="col-12 no-padding bi-page-nav-bar">
-            <ul id="ai-settings-tab-nav" class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="@isSettingsTab">
-                    <a href="#ai-settings" id="ai-settings-tab" aria-controls="ai-settings-tab" role="tab" class="text-decoration-none" data-bs-toggle="tab">@T["General"]</a>
-                </li>
-            </ul>
-    </div>
+   
     <div id="ai-settings-container" class="bi-page-container col-12 admin-panel-full-width" role="tabpanel" aria-labelledby="ai-settings">
         <div class="bi-page-content col-12 no-padding">
             <div id="organization-block" class="bi-page-content col-12 no-padding">

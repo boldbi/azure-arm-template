@@ -1,5 +1,5 @@
 ﻿@using System.Net;
-
+@using Syncfusion.Server.Base.Resources.Storage;
 @model AuthSettings
 
 @{
@@ -17,7 +17,7 @@
     @Html.Hidden("provider", "Azure AD B2C")
     <input type="hidden" id="azure-email" name="email" />
     <button id="azureb2c-login" class="@($"login-provider auth-login-button link-button button-style login-button-openid {(isPopUp ? "popup-login-button" : "")}")" data-login-url="@azureb2cloginAction" type="@((isPopUp ? "button" : "submit"))">
-        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+        @if (FileHandler.StorageType != StorageType.FileStorage)
         {
             <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
         }
@@ -34,7 +34,7 @@
     @Html.Hidden("tenantId", auth.TenantId.ToString())
     @Html.Hidden("authProviderLocation", auth.AuthProviderLocation.ToString())
     <button id="azureb2c-login" class="@($"login-provider auth-login-button link-button button-style login-button-openid {(isPopUp ? "popup-login-button" : "")}")" data-login-url="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" type="@((isPopUp ? "button" : "submit"))">
-        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+        @if (FileHandler.StorageType != StorageType.FileStorage)
         {
             <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
         }
@@ -45,4 +45,3 @@
         <span class="login-provider-name"> Sign in with @(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
     </button>
 }
-

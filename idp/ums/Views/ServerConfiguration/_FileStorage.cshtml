@@ -1,4 +1,4 @@
-﻿@{ 
+﻿﻿@{
     var helpLinkData = ViewBag.TenantType == TenantType.BoldBIOnPremise ? AppBranding.Bold.ProductName : AppBranding.BoldReports.ProductName;
     var appBranding = GlobalAppSettings.Branding;
     var storageType = ViewBag.StorageType != null ? ViewBag.StorageType : 0;
@@ -15,18 +15,20 @@ $(document).on("submit", "#blob-storage-form", function () {
     validate_storage_type();
 });
 </script>
+
     <div class="system-settings-page-container" id="system-settings-filestorage-container">
-        <div class="database-types">
-            <div class="center-storage-types col-12 float-start radio-padding">
-                <div class="first-radio-align col-6 float-start radio-padding">
-                    <input type="radio" id="file-storage" class="radio-button" name="IsBlobStorage" />
-                </div>
-                <div class="second-radio-align radio-padding col-6 float-start">
-                    <input type="radio" id="blob-storage" class="radio-button" name="IsBlobStorage" />
-                </div>
+    <div class="database-types center-align">
+        <div class="center-storage-types">
+            <div id="storage-type-dropdown" class="system-settings-startup-page-fields txt-holder database-dropdown-margin">
+                <select id="storage-type" class="system-settings-startup-page-fields db-fields" data-width="100%">
+                    <option class="no-margin-dropdown-ul" value="0">@T["File Storage"]</option>
+                    <option class="no-margin-dropdown-ul" value="1">@T["Azure Blob Storage"]</option>
+                    <option class="no-margin-dropdown-ul" value="2">@T["Oracle Cloud Infrastructure Storage"]</option>
+                    <option class="no-margin-dropdown-ul" value="3">@T["Amazon S3"]</option>
+                </select>
+            </div>
             </div>
         </div>
-
 
         @if (appBranding == AppBranding.Bold.Identifier)
         {
@@ -85,63 +87,125 @@ $(document).on("submit", "#blob-storage-form", function () {
             </div>
         }
 
-        <div class="storage-block">
-            <div class="azure-validation display-none">
-                <span class="blob-error-message validation-txt-errors">@T["Invalid Azure Blob storage"]</span>
-            </div>
-            <form id="blob-storage-form" autocomplete="off">
-                @Html.AntiForgeryToken()
-                <div>
-                    <div class="form-div form-group">
-                        <input type="text" tabindex="1" id="txt-accountname" name="accountname" value="@ViewBag.AccountName" class="" placeholder="@T["Storage account name"]"/>
-                        <span class="startup-validation txt-accountname validation-txt-errors"></span>
+    <div class="storage-block">
+        <div class="azure-validation display-none">
+            <span class="blob-error-message validation-txt-errors">@T["Invalid Azure Blob storage"]</span>
+        </div>
+        <form id="blob-storage-form" autocomplete="off">
+            @Html.AntiForgeryToken()
+            <div>
+                <div class="form-div form-group">
+                    <input type="text" tabindex="1" id="txt-accountname" name="accountname" value="@ViewBag.AccountName" class="" placeholder="@T["Storage account name"]"/>
+                    <span class="startup-validation txt-accountname validation-txt-errors"></span>
+                </div>
+                <div class="form-div form-group">
+                    <input type="text" tabindex="3" id="txt-accesskey" class="" value="@ViewBag.AccessKey" placeholder="@T["Access key"]" name="accesskey"/>
+                    <span class="startup-validation txt-accesskey validation-txt-errors"></span>
+                </div>
+                <div class="form-div form-group">
+                    <input type="text" tabindex="4" id="txt-containername" class="" value="@ViewBag.ContainerName" placeholder="@T["Container name"]" name="containername" autocomplete="off"/>
+                    <span class="startup-validation txt-containername validation-txt-errors"></span>
+                </div>
+                <div class="form-div form-group">
+                    <div class="sub-head connection-label radio-label">@T["Connection"]</div>
+                    <div class="connection-types">
+                        <input type="radio" id="https" class="radio-button"/>
                     </div>
-                    <div class="form-div form-group">
-                        <input type="text" tabindex="3" id="txt-accesskey" class="" value="@ViewBag.AccessKey" placeholder="@T["Access key"]" name="accesskey"/>
-                        <span class="startup-validation txt-accesskey validation-txt-errors"></span>
+                    <div class="connection-types">
+                        <input type="radio" id="http" class="radio-button"/>
                     </div>
-                    <div class="form-div form-group">
-                        <input type="text" tabindex="4" id="txt-containername" class="" value="@ViewBag.ContainerName" placeholder="@T["Container name"]" name="containername" autocomplete="off"/>
-                        <span class="startup-validation txt-containername validation-txt-errors"></span>
-                    </div>
-                    <div class="form-div form-group">
-                        <div class="sub-head connection-label radio-label">@T["Connection"]</div>
-                        <div class="connection-types">
-                            <input type="radio" id="https" class="radio-button"/>
-                        </div>
-                        <div class="connection-types">
-                            <input type="radio" id="http" class="radio-button"/>
-                        </div>
-                        <div class="connection-types">
-                            <input type="radio" id="custom-endpoint" class="radio-button"/>
-                        </div>
-                    </div>
-                    <div class="custom-endpoint-form-element">
-                        <div class="form-div form-group">
-                            <input type="text" tabindex="6" id="txt-bloburl" class="" value="@ViewBag.BlobUrl" placeholder="@T["Blob URL"]" name="bloburl" autocomplete="off"/>
-                            <span class="startup-validation txt-bloburl validation-txt-errors"></span>
-                            <div class=" info-content txt-box-info">(For example : http://****.example.net)</div>
-                        </div>
-                    </div>
-                    <div class="form-div form-group">
-                        <textarea name="connectionString" id="connection-string" readonly="" style="resize: both;max-height: 100px;max-width: 450px;" class="form-control">DefaultEndpointsProtocol=https;AccountName=;AccountKey=</textarea>
+                    <div class="connection-types">
+                        <input type="radio" id="custom-endpoint" class="radio-button"/>
                     </div>
                 </div>
-            </form>
-            <div class="file-storage-button btn-holder center-align" id="tenant-storage">
-                <input type="button" tabindex="7" id="tenantstorage" class="proceed-button " value="@T["Next"]" />
+                <div class="custom-endpoint-form-element">
+                    <div class="form-div form-group">
+                        <input type="text" tabindex="6" id="txt-bloburl" class="" value="@ViewBag.BlobUrl" placeholder="@T["Blob URL"]" name="bloburl" autocomplete="off"/>
+                        <span class="startup-validation txt-bloburl validation-txt-errors"></span>
+                        <div class=" info-content txt-box-info">(For example : http://****.example.net)</div>
+                    </div>
+                </div>
+                <div class="form-div form-group">
+                    <textarea name="connectionString" id="connection-string" readonly="" style="resize: both;max-height: 100px;max-width: 450px;" class="form-control">DefaultEndpointsProtocol=https;AccountName=;AccountKey=</textarea>
+                </div>
             </div>
-            <div class="file-storage-button btn-holder center-align" id="report-storage">
-                <input type="button" tabindex="7" id="reportstorage" class="proceed-button" value="@T["Next"]" />
+        </form>
+    </div>
+    <div class="oci-object-storage">
+        <div class="oci-object-storage-validation display-none">
+            <span class="oci-object-storage-error-message validation-txt-errors">@T["Invalid OCI Object storage details"]</span>
+        </div>
+        <form id="oci-object-storage-form" autocomplete="off">
+            <div class="form-div form-group section-content-first">
+                <div class="oci-object-region-drop-down no-padding">
+                    @Html.DropDownList("ociregion", ViewBag.OciRegions as IEnumerable<SelectListItem>, new { id = "oci-object-region", @class = "form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["Select ociregion"].Value, data_live_search = "true", data_live_search_placeholder = "Search" })
+                </div>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="1" id="txt-oci-bucketname" name="bucketname" value="" class="" placeholder="@T["Bucket name"]" />
+                <span class="startup-validation txt-bucketname validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="2" id="txt-oci-accesskey" class="" value="" placeholder="@T["Access Key"]" name="accesskey" />
+                <span class="startup-validation txt-accesskeyid validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="password" tabindex="3" id="txt-secretkey" class="" value="" placeholder="@T["Secret Key"]" name="secretkey" autocomplete="off" />
+                <span class="startup-validation txt-accesskeysecret validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="4" id="txt-namespace" class="" value="" placeholder="@T["Name Space"]" name="namespace" autocomplete="off" />
+                <span class="startup-validation txt-namespace validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="4" id="txt-oci-rootfoldername" class="" value="" placeholder="@T["Root Folder Name"]" name="rootfoldername" autocomplete="off" />
+                <span class="startup-validation txt-oci-rootfoldername validation-txt-errors"></span>
             </div>
 
-            @if (appBranding == AppBranding.Bold.Identifier)
-            {
-                <input id="get-intermediate-db-configuration" value="true" hidden />
-            }
-            else
-            {
-                <input id="get-intermediate-db-configuration" value="false" hidden />
-            }
-        </div>
+        </form>
     </div>
+    <div class="amazon-s3-storage">
+        <div class="amazon-s3-storage-validation display-none">
+            <span class="amazon-s3-storage-error-message validation-txt-errors">@T["Invalid Amazon S3 storage"]</span>
+        </div>
+        <form id="amazon-s3-storage-form" autocomplete="off">
+            <div class="form-div form-group section-content-first">
+                <div class="aws-region-drop-down no-padding">
+                    @Html.DropDownList("awsregion", ViewBag.AwsRegion as IEnumerable<SelectListItem>, new { id = "aws-region", @class = "form-control", data_none_results_text = T["No results match"].Value, data_size = "10", title = T["Select awsregion"].Value, data_live_search = "true", data_live_search_placeholder = "Search" })
+                </div>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="1" id="txt-bucketname" name="bucketname" value="" class="" placeholder="@T["Bucket name"]" />
+                <span class="startup-validation txt-bucketname validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="2" id="txt-accesskeyid" class="" value="" placeholder="@T["Access Key Id"]" name="accesskeyid" />
+                <span class="startup-validation txt-accesskeyid validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="password" tabindex="3" id="txt-accesskeysecret" class="" value="" placeholder="@T["Access Key Secret"]" name="accesskeysecret" autocomplete="off" />
+                <span class="startup-validation txt-accesskeysecret validation-txt-errors"></span>
+            </div>
+            <div class="form-div form-group">
+                <input type="text" tabindex="4" id="txt-rootfoldername" class="" value="" placeholder="@T["Root Folder Name"]" name="rootfoldername" autocomplete="off" />
+                <span class="startup-validation txt-rootfoldername validation-txt-errors"></span>
+            </div>
+
+        </form>
+    </div>
+    <div class="file-storage-button btn-holder center-align" id="tenant-storage">
+        <input type="button" tabindex="7" id="tenantstorage" class="proceed-button " value="@T["Next"]" />
+    </div>
+    <div class="file-storage-button btn-holder center-align" id="report-storage">
+        <input type="button" tabindex="7" id="reportstorage" class="proceed-button" value="@T["Next"]" />
+    </div>
+
+    @if (appBranding == AppBranding.Bold.Identifier)
+    {
+        <input id="get-intermediate-db-configuration" value="true" hidden />
+    }
+    else
+    {
+        <input id="get-intermediate-db-configuration" value="false" hidden />
+    }
+</div>

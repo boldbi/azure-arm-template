@@ -12,7 +12,7 @@ function proceedAutoDeployment(result) {
         async: false,
         data: {
             systemSettingsData: result.systemSettingsData,
-            azureData: result.azureData,
+            storage: result.storage,
             tenantInfo: result.tenantInfo,
             globalAdminDetails: result.globalAdminDetails,
             configurationMode : configurationMode

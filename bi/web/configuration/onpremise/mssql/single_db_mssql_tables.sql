@@ -82,7 +82,7 @@ CREATE TABLE [BOLDBI_AICredentials](
     [ModifiedById] [uniqueidentifier] NULL,
     [CreatedDate] [datetime] NOT NULL,
     [ModifiedDate] [datetime] NOT NULL,
-    [IsActive] [bit] NOT NULL NULL,
+    [IsActive] [bit] NOT NULL,
     [IsAIModel] [bit] NOT NULL DEFAULT 0,
     [EnableAIFeature] [bit] NOT NULL DEFAULT 0,
     [IsAISummariesEnabledGlobally] [bit] NOT NULL DEFAULT 0
@@ -148,7 +148,8 @@ CREATE TABLE [BOLDBI_ItemView](
 	[ItemViewId] [uniqueidentifier] NOT NULL,
 	[QueryString] nvarchar(max) NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
-	[IsActive] [bit] NOT NULL)
+	[IsActive] [bit] NOT NULL,
+    [IsWidgetLinking] [bit] NOT NULL)
 ;
 
 CREATE TABLE [BOLDBI_ItemLogType](
@@ -269,7 +270,7 @@ CREATE TABLE [BOLDBI_ScheduleDetail](
 	[EndDate] [datetime] NULL,
 	[EndAfter] [int] NULL DEFAULT 0,
 	[NextSchedule] [datetime] NULL,
-	[ExportTypeId] [int] NOT NULL,
+	[ExportTypeId] [int] NULL,
 	[MultiExportType] [nvarchar](max) NULL,
 	[IsEnabled] [bit] NOT NULL,
 	[CreatedById] [int] NOT NULL,
@@ -1029,6 +1030,7 @@ CREATE TABLE [BOLDBI_CustomEmailTemplate](
 [CreatedDate] [datetime] NOT NULL,
 [ModifiedDate] [datetime] NULL,
 [SendEmailAsHTML] [bit] NOT NULL,
+[CustomVisibilityOptions] [nvarchar](max) NOT NULL,
 [IsActive] [bit] NOT NULL,
 [TemplateId] [int] NOT NULL,
 [IsDefaultTemplate][bit] NOT NULL,
@@ -1109,6 +1111,26 @@ CREATE TABLE [BOLDBI_AI_CHAT] (
     [RequestType] NVARCHAR(MAX),
     [Environment] NVARCHAR(MAX)
     );
+
+CREATE TABLE [BOLDBI_AI_REQUESTS] (
+    [MessageId] NVARCHAR(255) NOT NULL PRIMARY KEY,
+    [SearchDate] DATETIMEOFFSET,
+    [Message] NVARCHAR(MAX),
+    [DatasourceId] NVARCHAR(MAX),
+    [SessionId] NVARCHAR(MAX),
+    [HasError] BIT,
+    [Response] NVARCHAR(MAX),
+    [StatusMessage] NVARCHAR(MAX),
+    [AiModel] NVARCHAR(MAX),
+    [TenantId] NVARCHAR(MAX),
+    [UserEmail] NVARCHAR(MAX),
+    [Feedback] NVARCHAR(MAX),
+    [UserInfo] NVARCHAR(MAX),
+    [RequestType] NVARCHAR(MAX),
+    [Environment] NVARCHAR(MAX),
+    [IsValidResponse] BIT,
+    [IsWidgetRendered] BIT
+);
 
 ---- PASTE INSERT Queries below this section --------
 

@@ -602,8 +602,11 @@ $(document).ready(function () {
                 Logo: $("input[name='azureB2CLogo']").val().trim(),
                 ApplicationId: $("input[name='ApplicationIdB2C']").val().trim(),
                 TenantName: $("input[name='TenantNameB2C']").val().trim(),
+                TenantId: $("input[name='TenantIdB2C']").val().trim(),
+                ClientSecret: $("input[name='ClientSecretB2C']").val().trim(),
                 SigninPolicy: $("input[name='PolicyB2C']").val().trim(),
                 AzureB2CProviderName: $("input[name='AzureB2CProviderName']").val().trim()
+
                 //PasswordResetPolicy: $("input[name='PasswordPolicyB2C']").val().trim()
             }
         };

@@ -994,6 +994,7 @@ CREATE TABLE BOLDBI_CustomEmailTemplate (
     CreatedDate TIMESTAMP NOT NULL,
     ModifiedDate TIMESTAMP NULL,
     SendEmailAsHTML NUMBER(1,0) NOT NULL,
+    CustomVisibilityOptions NCLOB NOT NULL,
     IsActive NUMBER(1,0) NOT NULL,
     TemplateId NUMBER NOT NULL,
     IsDefaultTemplate NUMBER(1,0) NOT NULL,
@@ -1088,6 +1089,26 @@ CREATE TABLE BOLDBI_AICredentials (
   IsAIModel NUMBER(1,0) DEFAULT 0 NOT NULL,
   EnableAIFeature NUMBER(1,0) DEFAULT 0 NOT NULL,
   IsAISummariesEnabledGlobally NUMBER(1,0) DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE BOLDBI_AI_REQUESTS (
+    "MessageId" VARCHAR2(255) PRIMARY KEY,
+    "SearchDate" TIMESTAMP,
+    "Message" VARCHAR2(255),
+    "DatasourceId" VARCHAR2(255),
+    "SessionId" VARCHAR2(255),
+    "HasError" NUMBER(1),
+    "Response" VARCHAR2(255),
+    "StatusMessage" VARCHAR2(255),
+    "AiModel" VARCHAR2(255),
+    "TenantId" VARCHAR2(255),
+    "UserEmail" VARCHAR2(255),
+    "Feedback" VARCHAR2(255),
+    "UserInfo" VARCHAR2(255),
+    "RequestType" VARCHAR2(255),
+    "Environment" VARCHAR2(255),
+    "IsValidResponse" NUMBER(1),
+    "IsWidgetRendered" NUMBER(1)
 );
 
 ---- PASTE INSERT Queries below this section --------

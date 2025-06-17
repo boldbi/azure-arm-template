@@ -11,6 +11,8 @@
     var headerContent = ViewBag.HeaderContent != null ? ViewBag.HeaderContent : string.Empty;
     var subject = ViewBag.Subject != null ? ViewBag.Subject : string.Empty;
     var sendEmailAsHTML = ViewBag.SendEmailAsHTML != null ? ViewBag.SendEmailAsHTML : false;
+    var hideLoginOption = ViewBag.HideLoginOption != null ? ViewBag.HideLoginOption : false;
+    var hideScheduleAttachment = ViewBag.HideScheduleAttachment != null ? ViewBag.HideScheduleAttachment : false;
     var isEnabled = ViewBag.IsEnabled != null ? ViewBag.IsEnabled : false;
     var showEmailLogo = ViewBag.ShowEmailLogo != null ? ViewBag.ShowEmailLogo : false;
     var showLoginLink = ViewBag.ShowLoginLink != null ? ViewBag.ShowLoginLink : false;
@@ -46,6 +48,8 @@
         var emailSettingsConfigUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.EmailSettingsConfiguration)";
         var emailBody = @Json.Serialize(emailBody);
         var sendEmailAsHTML = @Json.Serialize(sendEmailAsHTML);
+        var hideLoginOption = @Json.Serialize(hideLoginOption);
+        var hideScheduleAttachment = @Json.Serialize(hideScheduleAttachment);
         var isEditTemplate = @Json.Serialize(isEditTemplate);
         var specificEventTemplates = @Json.Serialize(specificEventTemplates);
         var markAsDefaultUrl = "@Url.Action("MarkEmailTemplateAsDefault", "Administration")";
@@ -286,6 +290,30 @@
                         </div>
                         <div class="info-message">
                             @Html.Raw("Disabling this option allows the application to send emails in Rich Text format. The Rich Text format will remove all HTML styles, including branding logos, login options, footer content, disclaimer content, preheader content, and background colors.")
+                        </div>
+                    </div>
+                    <div class="email-configure-container hide-attachment-checkbox-style">
+                        <div class="custom-template-label inline-align activation hide-attachment-checkbox-header">
+                            @T["Hide Mail Attachment"]
+                        </div>
+                        <div class="material-switch inline-align">
+                            <input type="checkbox" id="hideattachmenthtml" @(hideScheduleAttachment ? "checked" : string.Empty) @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) />
+                            <label for="hideattachmenthtml" class="label-primary"></label>
+                        </div>
+                        <div class="info-message">
+                            @Html.Raw("Enabling this option will hide attachments in scheduled emails.")
+                        </div>
+                    </div>
+                    <div class="email-configure-container disable-login-checkbox-style">
+                        <div class="custom-template-label inline-align activation disable-login-checkbox-header">
+                            @T["Hide Login Option"]
+                        </div>
+                        <div class="material-switch inline-align">
+                            <input type="checkbox" id="disableloginhtml" @(hideLoginOption ? "checked" : string.Empty) @(ViewBag.IsDisableEmailContent ? "disabled" : string.Empty) />
+                            <label for="disableloginhtml" class="label-primary"></label>
+                        </div>
+                        <div class="info-message">
+                            @Html.Raw("Enable this option to hide the sign-in button in emails.")
                         </div>
                     </div>
                     <div class="col-12 no-padding subject-align">

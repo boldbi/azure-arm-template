@@ -20,7 +20,13 @@
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.min.js"></script>
     </environment>
     <script>
+        @{
+#pragma warning disable SCS0029
+        }
         var publishedItemDetails = @Html.Raw(Json.Serialize(ViewBag.PublishedItemDetails));
+        @{
+#pragma warning restore SCS0029
+        }
         var synchronizeSitesUrl = { "dashboard": "@Url.Action("SynchronizePublishedItem", "Publish")", "datasource": "@Url.Action("SynchronizeDataSourcePublishedItem", "Publish")" };
         var removePublishedItemUrl = "@Url.Action("RemovePublishedItem", "Publish")";
         var synchronizePublishedBulkItems = "@Url.Action("SynchronizeBulkItem", "Publish")";
@@ -28,6 +34,7 @@
         var enablePublishModule = @Json.Serialize(enablePublishModule);
         var onlinePublishHelpLinkUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManagePublishedDashboards)";
         var offlinePublishHelpLinkUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.OfflinePage)";
+    
     </script>
 
     @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @pageHeader }, { "PageDescription", @pageDescription } })

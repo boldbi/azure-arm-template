@@ -370,6 +370,7 @@ CREATE TABLE BOLDTC_TenantInfo (
     ResourceLimitationSettings CLOB,
     UseCustomBranding NUMBER(1) NOT NULL,
     IsNewImDbDatabase NUMBER(1) NOT NULL,
+    StorageType NUMBER NOT NULL,
     IsNewDatabase NUMBER(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_TENANTINFO PRIMARY KEY (Id)
 );
@@ -931,6 +932,17 @@ CREATE TABLE BOLDTC_AICredentials (
     ModifiedDate TIMESTAMP NOT NULL,
     IsActive NUMBER(1) NOT NULL,
     CONSTRAINT PK_BOLDTC_AICREDENTIALS PRIMARY KEY (Id)
+);
+
+CREATE TABLE BOLDTC_TenantStorageDetails (
+    Id VARCHAR2(36) NOT NULL,
+    TenantInfoId VARCHAR2(36) NOT NULL,
+    StorageType NUMBER NOT NULL,
+    ConnectionInfo CLOB,
+    CreatedDate TIMESTAMP NOT NULL,
+    ModifiedDate TIMESTAMP NOT NULL,
+    IsActive NUMBER(1) NOT NULL,
+    CONSTRAINT PK_BOLDTC_TenantStorageDetails PRIMARY KEY (Id)
 );
 
 

@@ -6,9 +6,6 @@ $(document).ready(function () {
     radioButtonInitialization("#new-db", "New database", "databaseType", true, "0");
     radioButtonInitialization("#existing-db", "Existing database", "databaseType", false, "1");
 
-    radioButtonInitialization("#file-storage", "File Storage", "IsBlobStorage", true, "0");
-    radioButtonInitialization("#blob-storage", "Azure Blob Storage", "IsBlobStorage", false, "1");
-    
     radioButtonInitialization("#single-database", "Shared Sites Database", "ConfigurationMode", true, "0");
     radioButtonInitialization("#database-per-tenant", "Separate Site Databases", "ConfigurationMode", false, "1")
     
@@ -16,10 +13,13 @@ $(document).ready(function () {
     radioButtonInitialization("#http", "Use HTTP", "Connection", false, "http");
     radioButtonInitialization("#custom-endpoint", "Specify custom endpoints", "Connection", false, "customendpoint");
 
-    dropDownListInitialization('#database-type', 'Server type');
+    dropDownListInitialization('#database-type', 'Server type', false);
+    dropDownListInitialization('#storage-type', 'Storage type', false);
+    dropDownListInitialization('#aws-region', 'Region', true);
+    dropDownListInitialization('#oci-object-region', 'Region', true);
 
     if (isSiteCreation) {
-        dropDownListInitialization('#branding-type', 'Use Branding');
+        dropDownListInitialization('#branding-type', 'Use Branding', false);
         inputBoxInitialization('#tenant-name');
         inputBoxInitialization('#tenant-identifier');
         inputBoxInitialization('#site-isolation-code', true);
@@ -48,13 +48,22 @@ $(document).ready(function () {
     inputBoxInitialization('#txt-containername');
     inputBoxInitialization('#txt-bloburl');
 
+    inputBoxInitialization('#txt-oci-bucketname');
+    inputBoxInitialization('#txt-oci-accesskey');
+    inputBoxInitialization('#txt-secretkey');
+    inputBoxInitialization('#txt-namespace');
+    inputBoxInitialization('#txt-oci-rootfoldername');
+
     inputBoxInitialization('#txt-firstname');
     inputBoxInitialization('#txt-lastname');
     inputBoxInitialization('#txt-username');
     inputBoxInitialization('#txt-emailid');
     inputBoxInitialization('#new-password');
     inputBoxInitialization('#txt-confirm-password');
-
+    inputBoxInitialization('#txt-bucketname');
+    inputBoxInitialization('#txt-accesskeyid');
+    inputBoxInitialization('#txt-accesskeysecret');
+    inputBoxInitialization('#txt-rootfoldername');
     inputBoxInitialization('#tenant-table-prefix');
     inputBoxInitialization('#server-table-prefix');
     inputBoxInitialization('#txt-server-prefix');
@@ -65,12 +74,20 @@ $(document).ready(function () {
 });
 
 function onDropDownListChange(args) {
+    debugger;
     if (args.element.id == 'database-type')
         onDatbaseChange(args);
     if (args.element.id == 'check-windows')
         onWindowsChange(args);
     if (args.element.id == 'tenant-type')
         changeTenantType(args);
+    if (args.element.id == 'storage-type') {
+        if (requestUrlPath == getAddTenantUrl) {
+            gridChange();
+        }
+
+        onStorageTypeChange(args.value.toLowerCase());
+    }
 }
 
 function onAuthRadioButtonChange(args) {
@@ -81,20 +98,29 @@ function onDatabaseRadioButtonChange(args) {
     onDbSelectChange(args);
 }
 
-function onBlobRadioButtonChange(args) {
-    onBlobStorageChange(args);
-}
-
 function onConnectionRadioButtonChange(args) {
     onConnectionRadioChange(args);
 }
 
-function dropDownListInitialization(id, placeHolder) {
+function dropDownListInitialization(id, placeHolder, allowFilter = false) {
     var dropDownList = new ejs.dropdowns.DropDownList({
         index: 0,
         floatLabelType: "Always",
         placeholder: placeHolder,
         change: onDropDownListChange,
+        allowFiltering: allowFilter,
+        filtering: function (e) {
+            // Custom filtering logic
+            var query = new ejs.data.Query();
+            // Split the entered text by spaces and perform filtering for each word
+            if (e.text !== '') {
+                var words = e.text.split(' '); // Split by space
+                for (var word of words) {
+                    query = query.where('text', 'contains', word, true); // Perform case-insensitive search
+                }
+                e.updateData(dropDownList.dataSource, query);
+            }
+        },
         cssClass: 'e-outline e-custom'
     });
 
@@ -130,9 +156,6 @@ function radioButtonInitialization(id, label, name, isChecked, value) {
 
     if (name == 'databaseType')
         radiobutton.change = onDatabaseRadioButtonChange
-
-    if (name == 'IsBlobStorage')
-        radiobutton.change = onBlobRadioButtonChange
 
     if (name == 'Connection')
         radiobutton.change = onConnectionRadioButtonChange

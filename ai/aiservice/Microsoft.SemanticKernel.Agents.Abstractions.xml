@@ -1,0 +1,1181 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.SemanticKernel.Agents.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.SemanticKernel.Agents.Agent">
+            <summary>
+            Base abstraction for all Semantic Kernel agents.  An agent instance
+            may participate in one or more conversations, or <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            A conversation may include one or more agents.
+            </summary>
+            <remarks>
+            In addition to identity and descriptive meta-data, an <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>
+            must define its communication protocol, or <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/>.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Agent.Description">
+            <summary>
+            Gets the description of the agent (optional).
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Agent.Id">
+            <summary>
+            Gets the identifier of the agent (optional).
+            </summary>
+            <value>
+            The identifier of the agent. The default is a random GUID value, but that can be overridden.
+            </value>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Agent.Name">
+            <summary>
+            Gets the name of the agent (optional).
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Agent.LoggerFactory">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.Logging.ILoggerFactory"/> for this <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Agent.Logger">
+            <summary>
+            The <see cref="T:Microsoft.Extensions.Logging.ILogger"/> associated with this  <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Agent.ActiveLoggerFactory">
+            <summary>
+            Get the active logger factory, if defined; otherwise, provide the default.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Agent.GetChannelKeys">
+            <summary>
+            Set of keys to establish channel affinity.  Minimum expected key-set:
+            <example>
+            yield return typeof(YourAgentChannel).FullName;
+            </example>
+            </summary>
+            <remarks>
+            Two specific agents of the same type may each require their own channel.  This is
+            why the channel type alone is insufficient.
+            For example, two OpenAI Assistant agents each targeting a different Azure OpenAI endpoint
+            would require their own channel. In this case, the endpoint could be expressed as an additional key.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Agent.CreateChannelAsync(System.Threading.CancellationToken)">
+            <summary>
+            Produce an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> appropriate for the agent type.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>An <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> appropriate for the agent type.</returns>
+            <remarks>
+            Every agent conversation, or <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>, will establish one or more <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/>
+            objects according to the specific <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> type.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Agent.RestoreChannelAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Produce an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> appropriate for the agent type based on the provided state.
+            </summary>
+            <param name="channelState">The channel state, as serialized</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>An <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> appropriate for the agent type.</returns>
+            <remarks>
+            Every agent conversation, or <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>, will establish one or more <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/>
+            objects according to the specific <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> type.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AgentChannel">
+            <summary>
+            Defines the communication protocol for a particular <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> type.
+            </summary>
+            <remarks>
+            An agent provides it own <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> via <see cref="M:Microsoft.SemanticKernel.Agents.Agent.CreateChannelAsync(System.Threading.CancellationToken)"/>.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChannel.Logger">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.Extensions.Logging.ILogger"/> associated with the <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel.Serialize">
+            <summary>
+            Responsible for providing the serialized representation of the channel.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel.ReceiveAsync(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)">
+            <summary>
+            Receive the conversation messages.  Used when joining a conversation and also during each agent interaction.
+            </summary>
+            <param name="history">The chat history at the point the channel is created.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel.ResetAsync(System.Threading.CancellationToken)">
+            <summary>
+            Reset any persistent state associated with the channel.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <remarks>
+            The channel won't be reused; rather, it will be discarded and a new one created.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel.InvokeAsync(Microsoft.SemanticKernel.Agents.Agent,System.Threading.CancellationToken)">
+            <summary>
+            Perform a discrete incremental interaction between a single <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> and <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+            <param name="agent">The agent actively interacting with the chat.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>Asynchronous enumeration of messages.</returns>
+            <remarks>
+            In the enumeration returned by this method, a message is considered visible if it is intended to be displayed to the user.
+            Example of a non-visible message is function-content for functions that are automatically executed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel.InvokeStreamingAsync(Microsoft.SemanticKernel.Agents.Agent,System.Collections.Generic.IList{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)">
+            <summary>
+            Perform a discrete incremental interaction between a single <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> and <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> with streaming results.
+            </summary>
+            <param name="agent">The agent actively interacting with the chat.</param>
+            <param name="messages">The receiver for the completed messages generated</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>Asynchronous enumeration of streaming messages.</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel.GetHistoryAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retrieve the message history specific to this channel.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>Asynchronous enumeration of messages.</returns>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AgentChannel`1">
+            <summary>
+            Defines the communication protocol for a particular <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> type.
+            </summary>
+            <typeparam name="TAgent">The agent type for this channel.</typeparam>
+            <remarks>
+            An agent provides it own <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> via <see cref="M:Microsoft.SemanticKernel.Agents.Agent.CreateChannelAsync(System.Threading.CancellationToken)"/>.
+            This class is a convenience upcast to an agent for <see cref="M:Microsoft.SemanticKernel.Agents.AgentChannel`1.InvokeAsync(`0,System.Threading.CancellationToken)"/>.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel`1.InvokeAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Process a discrete incremental interaction between a single <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> and a <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+            <param name="agent">The agent actively interacting with the chat.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>Asynchronous enumeration of messages.</returns>
+            <remarks>
+            In the enumeration returned by this method, a message is considered visible if it is intended to be displayed to the user.
+            Example of a non-visible message is function-content for functions that are automatically executed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel`1.InvokeAsync(Microsoft.SemanticKernel.Agents.Agent,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel`1.InvokeStreamingAsync(`0,System.Collections.Generic.IList{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)">
+            <summary>
+            Process a discrete incremental interaction between a single <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> and a <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+            <param name="agent">The agent actively interacting with the chat.</param>
+            <param name="messages">The receiver for the completed messages generated</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>Asynchronous enumeration of messages.</returns>
+            <remarks>
+            In the enumeration returned by this method, a message is considered visible if it is intended to be displayed to the user.
+            Example of a non-visible message is function-content for functions that are automatically executed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChannel`1.InvokeStreamingAsync(Microsoft.SemanticKernel.Agents.Agent,System.Collections.Generic.IList{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AgentChat">
+            <summary>
+            Provides a point of interaction for one or more agents.
+            </summary>
+            <remarks>
+            <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat" /> instances don't support concurrent invocation and
+            will throw an exception if concurrent activity is attempted for any public method.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChat.Agents">
+            <summary>
+            Gets the agents participating in the chat.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChat.IsActive">
+            <summary>
+            Gets a value that indicates whether a chat operation is active. Activity is defined as
+            any execution of a public method.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChat.LoggerFactory">
+            <summary>
+            Gets the <see cref="T:Microsoft.Extensions.Logging.ILoggerFactory"/> associated with the <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChat.Logger">
+            <summary>
+            Gets the <see cref="T:Microsoft.Extensions.Logging.ILogger"/> associated with this chat.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChat.History">
+            <summary>
+            Gets the internal history to expose it to subclasses.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.InvokeAsync(System.Threading.CancellationToken)">
+            <summary>
+            Processes a series of interactions between the agents participating in this chat.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>An asynchronous enumeration of messages.</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.InvokeStreamingAsync(System.Threading.CancellationToken)">
+            <summary>
+            Processes a series of interactions between the agents participating in this chat.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>An asynchronous enumeration of messages.</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.GetChatMessagesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the chat history.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>The message history.</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.GetChatMessagesAsync(Microsoft.SemanticKernel.Agents.Agent,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the message history, either the primary history or
+            an agent-specific version.
+            </summary>
+            <param name="agent">An optional agent, if requesting an agent history.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>The message history.</returns>
+            <remarks>
+            <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat" /> instances don't support concurrent invocation and
+            will throw exception if concurrent activity is attempted.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.AddChatMessage(Microsoft.SemanticKernel.ChatMessageContent)">
+             <summary>
+             Appends a message to the conversation. Adding a message while an agent
+             is active is not allowed.
+             </summary>
+             <param name="message">A non-system message to append to the conversation.</param>
+             <remarks>
+             Adding a message to the conversation requires that any active <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> remains
+             synchronized, so the message is broadcast to all channels.
+            
+             <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat" /> instances don't support concurrent invocation and
+             will throw exception if concurrent activity is attempted.
+             </remarks>
+             <exception cref="T:Microsoft.SemanticKernel.KernelException">A system message is present, and no other action is taken.</exception>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.AddChatMessages(System.Collections.Generic.IReadOnlyList{Microsoft.SemanticKernel.ChatMessageContent})">
+             <summary>
+             Appends messages to the conversation. Adding messages while an agent
+             is active is not allowed.
+             </summary>
+             <param name="messages">A set of non-system messages to append to the conversation.</param>
+             <remarks>
+             Adding messages to the conversation requires that any active <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> remains
+             synchronized, so the messages are broadcast to all channels.
+            
+             <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat" /> instances don't support concurrent invocation and
+             will throw exception if concurrent activity is attempted.
+             </remarks>
+             <exception cref="T:Microsoft.SemanticKernel.KernelException">A system message is present, and no other action is taken.
+             -or-
+             The chat has current activity.</exception>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.InvokeAgentAsync(Microsoft.SemanticKernel.Agents.Agent,System.Threading.CancellationToken)">
+            <summary>
+            Processes a discrete incremental interaction between a single <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> and a <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+            <param name="agent">The agent actively interacting with the chat.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>An asynchronous enumeration of messages.</returns>
+            <remarks>
+            <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat" /> instances don't support concurrent invocation and
+            will throw exception if concurrent activity is attempted.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.InvokeStreamingAgentAsync(Microsoft.SemanticKernel.Agents.Agent,System.Threading.CancellationToken)">
+            <summary>
+            Processes a discrete incremental interaction between a single <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> and a <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+            <param name="agent">The agent actively interacting with the chat.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>Asynchronous enumeration of messages.</returns>
+            <remarks>
+            <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat" /> instances don't support concurrent invocation and
+            will throw exception if concurrent activity is attempted.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.ResetAsync(System.Threading.CancellationToken)">
+            <summary>
+            Resets the chat, clearing all history and persisted state.
+            All agents will remain present.
+            </summary>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.ClearActivitySignal">
+            <summary>
+            Clear activity signal to indicate that activity has ceased.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.SetActivityOrThrow">
+            <summary>
+            Checks to ensure the chat is not concurrently active and throws an exception if it is.
+            If not, activity is signaled.
+            </summary>
+            <remarks>
+            Rather than allowing concurrent invocation to result in undefined behavior or failure,
+            it's preferred to fail fast to avoid side effects or state mutation.
+            The activity signal is used to manage ability and visibility for taking actions based
+            on conversation history.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChat.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AgentChatSerializer">
+            <summary>
+            Serializes and deserializes an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatSerializer.SerializeAsync``1(``0,System.IO.Stream,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Serializes the provided <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> to the target stream.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatSerializer.DeserializeAsync(System.IO.Stream,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Provides a <see cref="T:Microsoft.SemanticKernel.Agents.AgentChatSerializer"/> that's able to restore an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AgentChatSerializer.Participants">
+            <summary>
+            Gets the participants of the original <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> so that
+            the caller can include them in the restored <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatSerializer.DeserializeAsync``1(``0)">
+            <summary>
+            Restores the <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> to the previously captured state.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AggregatorMode">
+            <summary>
+            Defines the relationship between the internal aggregated chat and the chat
+            with which <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> is participating.
+            </summary>
+        </member>
+        <member name="F:Microsoft.SemanticKernel.Agents.AggregatorMode.Flat">
+            <summary>
+            A flat embedding of the aggregated chat within another chat.
+            </summary>
+        </member>
+        <member name="F:Microsoft.SemanticKernel.Agents.AggregatorMode.Nested">
+            <summary>
+            A nested embedding the aggregated chat within another chat.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AggregatorAgent">
+            <summary>
+            Allows an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> to participate in another <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> as an <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>.
+            </summary>
+            <param name="chatProvider">A factory method that produces a new <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> instance.</param>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgent.#ctor(System.Func{Microsoft.SemanticKernel.Agents.AgentChat})">
+            <summary>
+            Allows an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> to participate in another <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> as an <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>.
+            </summary>
+            <param name="chatProvider">A factory method that produces a new <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> instance.</param>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.AggregatorAgent.Mode">
+            <summary>
+            Gets the relationship between the internal aggregated chat and the chat
+            with which <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> is participating.
+            </summary>
+            <value>
+            The relationship between the internal aggregated chat and the chat
+            with which <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> is participating. The default value is <see cref="F:Microsoft.SemanticKernel.Agents.AggregatorMode.Flat"/>.
+            </value>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgent.GetChannelKeys">
+            <inheritdoc/>
+            <remarks>
+            Different <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> instances will never share the same channel.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgent.CreateChannelAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgent.RestoreChannelAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AggregatorChannel">
+            <summary>
+            Adapt channel contract to underlying <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorChannel.#ctor(Microsoft.SemanticKernel.Agents.AgentChat)">
+            <summary>
+            Adapt channel contract to underlying <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorChannel.GetHistoryAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorChannel.InvokeAsync(Microsoft.SemanticKernel.Agents.AggregatorAgent,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorChannel.InvokeStreamingAsync(Microsoft.SemanticKernel.Agents.AggregatorAgent,System.Collections.Generic.IList{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorChannel.ReceiveAsync(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorChannel.ResetAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Extensions.ChatHistoryExtensions">
+            <summary>
+            Provides extension methods for <see cref="T:Microsoft.SemanticKernel.ChatMessageContent"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Extensions.ChatHistoryExtensions.ToDescending(Microsoft.SemanticKernel.ChatCompletion.ChatHistory)">
+            <summary>
+            Enumerates a chat history in descending order.
+            </summary>
+            <param name="history">The chat history to sort.</param>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Extensions.ChatHistoryExtensions.ToDescendingAsync(Microsoft.SemanticKernel.ChatCompletion.ChatHistory)">
+            <summary>
+            Enumerates a history in descending order asynchronously.
+            </summary>
+            <param name="history">The chat history to sort.</param>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Extensions.AgentExtensions">
+            <summary>
+            Extension methods for <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Extensions.AgentExtensions.GetName(Microsoft.SemanticKernel.Agents.Agent)">
+            <summary>
+            Provides a name for the agent, even if it's the identifier.
+            (since <see cref="P:Microsoft.SemanticKernel.Agents.Agent.Name"/> allows null)
+            </summary>
+            <param name="agent">The target agent</param>
+            <returns>The agent name as a non-empty string</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Extensions.AgentExtensions.GetDisplayName(Microsoft.SemanticKernel.Agents.Agent)">
+            <summary>
+            Provides the display name of the agent.
+            </summary>
+            <param name="agent">The target agent</param>
+            <remarks>
+            Currently, it's intended for telemetry purposes only.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue">
+            <summary>
+            Utility class used by <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> to manage the broadcast of
+            conversation messages via the <see cref="M:Microsoft.SemanticKernel.Agents.AgentChannel.ReceiveAsync(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.ChatMessageContent},System.Threading.CancellationToken)"/>.
+            Interaction occurs via two methods:
+            - <see cref="M:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.Enqueue(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.Agents.Internal.ChannelReference},System.Collections.Generic.IReadOnlyList{Microsoft.SemanticKernel.ChatMessageContent})"/>: Adds messages to a channel specific queue for processing.
+            - <see cref="M:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.EnsureSynchronizedAsync(Microsoft.SemanticKernel.Agents.Internal.ChannelReference,System.Threading.CancellationToken)"/>: Blocks until the specified channel's processing queue is empty.
+            </summary>
+            <remarks>
+            Maintains a set of channel specific queues, each with individual locks.
+            Queue specific locks exist to synchronize access to an individual queue only.
+            Due to the closed "friend" relationship between with <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>,
+            <see cref="T:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue"/> is never invoked concurrently, which eliminates
+            race conditions over the queue dictionary.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.BlockDuration">
+            <summary>
+            Defines the yield duration when waiting on a channel-queue to synchronize
+            and drain.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.Enqueue(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.Agents.Internal.ChannelReference},System.Collections.Generic.IReadOnlyList{Microsoft.SemanticKernel.ChatMessageContent})">
+            <summary>
+            Enqueue a set of messages for a given channel.
+            </summary>
+            <param name="channelRefs">The target channels for which to broadcast.</param>
+            <param name="messages">The messages being broadcast.</param>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.EnsureSynchronizedAsync(Microsoft.SemanticKernel.Agents.Internal.ChannelReference,System.Threading.CancellationToken)">
+            <summary>
+            Blocks until a channel-queue is not in a receive state to ensure that
+            channel history is complete.
+            </summary>
+            <param name="channelRef">A <see cref="T:Microsoft.SemanticKernel.Agents.Internal.ChannelReference"/> structure.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>false when channel is no longer receiving.</returns>
+            <throws>
+            When channel is out of sync.
+            </throws>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.ReceiveAsync(Microsoft.SemanticKernel.Agents.Internal.ChannelReference,Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference,System.Threading.CancellationToken)">
+            <summary>
+            Processes the specified queue with the provided channel, until queue is empty.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference">
+            <summary>
+            Utility class to associate a queue with its specific lock.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.IsEmpty">
+            <summary>
+            Convenience logic
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.QueueLock">
+            <summary>
+            Queue specific lock to control queue access with finer granularity
+            than the state-lock.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.Queue">
+            <summary>
+            The target queue.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.ReceiveTask">
+            <summary>
+            The task receiving and processing messages from <see cref="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.Queue" />.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.ReceiveFailure">
+            <summary>
+            Capture any failure that may occur during execution of <see cref="P:Microsoft.SemanticKernel.Agents.Internal.BroadcastQueue.QueueReference.ReceiveTask"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Internal.ChannelReference">
+            <summary>
+            Tracks channel along with its hashed key.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Internal.ChannelReference.#ctor(Microsoft.SemanticKernel.Agents.AgentChannel,System.String)">
+            <summary>
+            Tracks channel along with its hashed key.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.ChannelReference.Channel">
+            <summary>
+            The referenced channel.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Internal.ChannelReference.Hash">
+            <summary>
+            The channel hash.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Internal.KeyEncoder">
+            <summary>
+            Utility to encode a list of string keys to an base-64 encoded hash.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Internal.KeyEncoder.GenerateHash(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Produces a base-64 encoded hash for a set of input strings.
+            </summary>
+            <param name="keys">A set of input strings</param>
+            <returns>A base-64 encoded hash</returns>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.KernelAgent">
+            <summary>
+            Provides a base class for agents utilizing <see cref="T:Microsoft.SemanticKernel.Kernel"/> plugins or services.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.KernelAgent.Arguments">
+            <summary>
+            Gets the arguments for the agent instruction parameters (optional).
+            </summary>
+            <remarks>
+            Also includes <see cref="T:Microsoft.SemanticKernel.PromptExecutionSettings"/>.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.KernelAgent.Instructions">
+            <summary>
+            Gets the instructions for the agent (optional).
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.KernelAgent.Kernel">
+            <summary>
+            Gets the <see cref="P:Microsoft.SemanticKernel.Agents.KernelAgent.Kernel"/> containing services, plugins, and filters for use throughout the agent lifetime.
+            </summary>
+            <value>
+            The <see cref="P:Microsoft.SemanticKernel.Agents.KernelAgent.Kernel"/> containing services, plugins, and filters for use throughout the agent lifetime. The default value is an empty Kernel, but that can be overridden.
+            </value>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.KernelAgent.Template">
+            <summary>
+            Gets or sets a prompt template based on the agent instructions.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.KernelAgent.ActiveLoggerFactory">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.KernelAgent.FormatInstructionsAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelArguments,System.Threading.CancellationToken)">
+            <summary>
+            Formats the system instructions for the agent.
+            </summary>
+            <param name="kernel">The <see cref="P:Microsoft.SemanticKernel.Agents.KernelAgent.Kernel"/> containing services, plugins, and other state for use by the agent.</param>
+            <param name="arguments">Optional arguments to pass to the agents's invocation, including any <see cref="T:Microsoft.SemanticKernel.PromptExecutionSettings"/>.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for cancellation requests. The default is <see cref="P:System.Threading.CancellationToken.None"/>.</param>
+            <returns>The formatted system instructions for the agent.</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.KernelAgent.MergeArguments(Microsoft.SemanticKernel.KernelArguments)">
+            <summary>
+            Provides a merged instance of <see cref="T:Microsoft.SemanticKernel.KernelArguments"/> with precedence for override arguments.
+            </summary>
+            <param name="arguments">The override arguments.</param>
+            <remarks>
+            This merge preserves original <see cref="T:Microsoft.SemanticKernel.PromptExecutionSettings"/> and <see cref="T:Microsoft.SemanticKernel.KernelArguments"/> parameters.
+            It allows for incremental addition or replacement of specific parameters while also preserving the ability
+            to override the execution settings.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AgentChatLogMessages">
+            <summary>
+            Extensions for logging <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> invocations.
+            </summary>
+            <remarks>
+            This extension uses the <see cref="T:Microsoft.Extensions.Logging.LoggerMessageAttribute"/> to
+            generate logging code at compile time to achieve optimized code.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.s_logAgentChatGetChatMessages">
+            <summary>
+            Logs retrieval of <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> messages.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatAddingMessages(Microsoft.Extensions.Logging.ILogger,System.String,System.Int32)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> adding messages (started).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatAddedMessages(Microsoft.Extensions.Logging.ILogger,System.String,System.Int32)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> added messages (complete).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatInvokingAgent(Microsoft.Extensions.Logging.ILogger,System.String,System.Type,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> invoking agent (started).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatInvokedAgentMessage(Microsoft.Extensions.Logging.ILogger,System.String,System.Type,System.String,System.String,Microsoft.SemanticKernel.ChatMessageContent)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> invoked agent message
+            </summary>
+        </member>
+        <member name="F:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.s_logAgentChatInvokedStreamingAgentMessages">
+            <summary>
+            Logs retrieval of streamed <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> messages.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatInvokedAgent(Microsoft.Extensions.Logging.ILogger,System.String,System.Type,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> invoked agent (complete).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatCreatingChannel(Microsoft.Extensions.Logging.ILogger,System.String,System.Type,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> creating agent channel (started).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AgentChatLogMessages.LogAgentChatCreatedChannel(Microsoft.Extensions.Logging.ILogger,System.String,System.Type,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> created agent channel (complete).
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.AggregatorAgentLogMessages">
+            <summary>
+            Extensions for logging <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> invocations.
+            </summary>
+            <remarks>
+            This extension uses the <see cref="T:Microsoft.Extensions.Logging.LoggerMessageAttribute"/> to
+            generate logging code at compile time to achieve optimized code.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgentLogMessages.LogAggregatorAgentCreatingChannel(Microsoft.Extensions.Logging.ILogger,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> creating channel (started).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgentLogMessages.LogAggregatorAgentCreatedChannel(Microsoft.Extensions.Logging.ILogger,System.String,System.String,Microsoft.SemanticKernel.Agents.AggregatorMode,System.Type)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> created channel (complete).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgentLogMessages.LogOpenAIAssistantAgentRestoringChannel(Microsoft.Extensions.Logging.ILogger,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> restoring serialized channel (started).
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.AggregatorAgentLogMessages.LogOpenAIAssistantAgentRestoredChannel(Microsoft.Extensions.Logging.ILogger,System.String,System.String)">
+            <summary>
+            Logs <see cref="T:Microsoft.SemanticKernel.Agents.AggregatorAgent"/> restored serialized channel (complete).
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Serialization.AgentChannelState">
+            <summary>
+            Captures the serialized state of an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> along with relevant meta-data.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentChannelState.ChannelKey">
+            <summary>
+            The unique key for the channel.
+            </summary>
+            <remarks>
+            This is a hash <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> generates and manages based <see cref="M:Microsoft.SemanticKernel.Agents.Agent.GetChannelKeys"/>.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentChannelState.ChannelType">
+            <summary>
+            The fully qualified type name of the channel.
+            </summary>
+            <remarks>
+            Not utilized in deserialization, but useful for auditing the serialization payload.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentChannelState.ChannelState">
+            <summary>
+            The serialized channel state, as provided by <see cref="M:Microsoft.SemanticKernel.Agents.AgentChannel.Serialize"/>.
+            </summary>
+            <remarks>
+            Converter will serialize JSON string as JSON.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Serialization.AgentChatState">
+            <summary>
+            Captures the serialized state of an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/> along with relevant meta-data.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentChatState.Participants">
+            <summary>
+            Metadata to identify the <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> instances participating in an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentChatState.History">
+            <summary>
+            The serialized chat history.
+            </summary>
+            <remarks>
+            Converter will serialize JSON string as JSON.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentChatState.Channels">
+            <summary>
+            The state of each <see cref="T:Microsoft.SemanticKernel.Agents.AgentChannel"/> active in an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant">
+            <summary>
+            References an <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> instance participating in an <see cref="T:Microsoft.SemanticKernel.Agents.AgentChat"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant.Id">
+            <summary>
+            Gets the captured <see cref="P:Microsoft.SemanticKernel.Agents.Agent.Id"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant.Name">
+            <summary>
+            Gets the captured <see cref="P:Microsoft.SemanticKernel.Agents.Agent.Name"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant.Type">
+            <summary>
+            Gets the fully qualified <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/> type name.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant.#ctor">
+            <summary>
+            Creates a new instance of <see cref="T:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant"/>.
+            </summary>
+            <remarks>
+            This parameterless constructor is for deserialization.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant.#ctor(Microsoft.SemanticKernel.Agents.Agent)">
+            <summary>
+            Creates a new instance of <see cref="T:Microsoft.SemanticKernel.Agents.Serialization.AgentParticipant"/> with the specified agent.
+            </summary>
+            <remarks>
+            This is a convenience constructor for serialization.
+            </remarks>
+            <param name="agent">The referenced <see cref="T:Microsoft.SemanticKernel.Agents.Agent"/>.</param>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference">
+            <summary>
+            Represents a <see cref="T:Microsoft.SemanticKernel.ChatMessageContent"/> for serialization without metadata.
+            </summary>
+            <param name="message">The referenced message</param>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.#ctor(Microsoft.SemanticKernel.ChatMessageContent)">
+            <summary>
+            Represents a <see cref="T:Microsoft.SemanticKernel.ChatMessageContent"/> for serialization without metadata.
+            </summary>
+            <param name="message">The referenced message</param>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.AuthorName">
+            <summary>
+            Gets the referenced <see cref="P:Microsoft.SemanticKernel.ChatMessageContent.AuthorName"/> property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.Role">
+            <summary>
+            Gets the referenced <see cref="P:Microsoft.SemanticKernel.ChatMessageContent.Role"/> property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.Items">
+            <summary>
+            Gets the referenced <see cref="P:Microsoft.SemanticKernel.ChatMessageContent.Items"/> collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.ModelId">
+            <summary>
+            Gets the referenced <see cref="P:Microsoft.SemanticKernel.KernelContent.ModelId"/> property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.MimeType">
+            <summary>
+            Gets the referenced <see cref="P:Microsoft.SemanticKernel.KernelContent.MimeType"/> property.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference.Prepare(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.ChatMessageContent})">
+            <summary>
+            Converts a set of messages to <see cref="T:Microsoft.SemanticKernel.Agents.Serialization.ChatMessageReference"/> instances.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Agents.Serialization.JsonChannelStateConverter">
+             <summary>
+             Translates the serialized state to avoid escaping nested JSON as string.
+             </summary>
+             <example>
+             Without converter:
+             <code>
+             {
+               "state": "{\"key\":\"value\"}"
+             }
+             </code>
+            
+             With converter:
+             <code>
+             {
+               "state": {"key": "value"}
+             }
+             </code>
+            
+             Always:
+             <code>
+             {
+               "state": "text",
+             }
+             </code>
+             </example>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Serialization.JsonChannelStateConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Agents.Serialization.JsonChannelStateConverter.Write(System.Text.Json.Utf8JsonWriter,System.String,System.Text.Json.JsonSerializerOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ActivityExtensions.StartActivityWithTags(System.Diagnostics.ActivitySource,System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Diagnostics.ActivityKind)">
+            <summary>
+            Starts an activity with the specified name and tags.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ActivityExtensions.SetTags(System.Diagnostics.Activity,System.ReadOnlySpan{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Adds tags to the activity.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ActivityExtensions.AttachSensitiveDataAsEvent(System.Diagnostics.Activity,System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Adds an event to the activity. Should only be used for events that contain sensitive data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ActivityExtensions.SetError(System.Diagnostics.Activity,System.Exception)">
+            <summary>
+            Sets the error status and type on the activity.
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics">
+            <summary>
+            Model diagnostics helper class that provides a set of methods to trace model activities with the OTel semantic conventions.
+            This class contains experimental features and may change in the future.
+            To enable these features, set one of the following switches to true:
+                `Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnostics`
+                `Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive`
+            Or set the following environment variables to true:
+               `SEMANTICKERNEL_EXPERIMENTAL_GENAI_ENABLE_OTEL_DIAGNOSTICS`
+               `SEMANTICKERNEL_EXPERIMENTAL_GENAI_ENABLE_OTEL_DIAGNOSTICS_SENSITIVE`
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.StartCompletionActivity``1(System.Uri,System.String,System.String,System.String,``0)">
+            <summary>
+            Start a text completion activity for a given model.
+            The activity will be tagged with the a set of attributes specified by the semantic conventions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.StartCompletionActivity``1(System.Uri,System.String,System.String,Microsoft.SemanticKernel.ChatCompletion.ChatHistory,``0)">
+            <summary>
+            Start a chat completion activity for a given model.
+            The activity will be tagged with the a set of attributes specified by the semantic conventions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.StartAgentInvocationActivity(System.String,System.String,System.String)">
+            <summary>
+            Start an agent invocation activity and return the activity.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetCompletionResponse(System.Diagnostics.Activity,System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.TextContent},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Set the text completion response for a given activity.
+            The activity will be enriched with the response attributes specified by the semantic conventions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetCompletionResponse(System.Diagnostics.Activity,System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.ChatMessageContent},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Set the chat completion response for a given activity.
+            The activity will be enriched with the response attributes specified by the semantic conventions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.EndStreaming(System.Diagnostics.Activity,System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.StreamingKernelContent},System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.FunctionCallContent},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Notify the end of streaming for a given activity.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetResponseId(System.Diagnostics.Activity,System.String)">
+            <summary>
+            Set the response id for a given activity.
+            </summary>
+            <param name="activity">The activity to set the response id</param>
+            <param name="responseId">The response id</param>
+            <returns>The activity with the response id set for chaining</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetPromptTokenUsage(System.Diagnostics.Activity,System.Int32)">
+            <summary>
+            Set the prompt token usage for a given activity.
+            </summary>
+            <param name="activity">The activity to set the prompt token usage</param>
+            <param name="promptTokens">The number of prompt tokens used</param>
+            <returns>The activity with the prompt token usage set for chaining</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetCompletionTokenUsage(System.Diagnostics.Activity,System.Int32)">
+            <summary>
+            Set the completion token usage for a given activity.
+            </summary>
+            <param name="activity">The activity to set the completion token usage</param>
+            <param name="completionTokens">The number of completion tokens used</param>
+            <returns>The activity with the completion token usage set for chaining</returns>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.IsModelDiagnosticsEnabled">
+            <summary>
+            Check if model diagnostics is enabled
+            Model diagnostics is enabled if either EnableModelDiagnostics or EnableSensitiveEvents is set to true and there are listeners.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.IsSensitiveEventsEnabled">
+            <summary>
+            Check if sensitive events are enabled.
+            Sensitive events are enabled if EnableSensitiveEvents is set to true and there are listeners.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.ToOpenAIFormat(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.ChatMessageContent})">
+            <summary>
+            Convert chat history to a string aligned with the OpenAI format
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.ToOpenAIFormat(System.Text.StringBuilder,Microsoft.SemanticKernel.ChatCompletion.ChatMessageContentItemCollection)">
+            <summary>
+            Helper method to convert tool calls to a string aligned with the OpenAI format
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.StartCompletionActivity``2(System.Uri,System.String,System.String,``0,``1,System.Func{``0,System.String})">
+            <summary>
+            Start a completion activity and return the activity.
+            The `formatPrompt` delegate won't be invoked if events are disabled.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetCompletionResponse``1(System.Diagnostics.Activity,``0,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Func{``0,System.String})">
+            <summary>
+            Set the completion response for a given activity.
+            The `formatCompletions` delegate won't be invoked if events are disabled.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.SetCompletionResponse(System.Diagnostics.Activity,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.List{Microsoft.SemanticKernel.StreamingKernelContent}},System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.FunctionCallContent},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Set the streaming completion response for a given activity.
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.OrganizeStreamingContent(System.Collections.Generic.IEnumerable{Microsoft.SemanticKernel.StreamingKernelContent})">
+            <summary>
+            Organize streaming content by choice index
+            </summary>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.Diagnostics.ModelDiagnostics.ModelDiagnosticsTags">
+            <summary>
+            Tags used in model diagnostics
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Verify.AsciiLettersDigitsUnderscoresRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^[0-9A-Za-z_]*$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a character in the set [0-9A-Z_a-z] atomically any number of times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Verify.FilenameRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^[^.]+\\.[^.]+$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a character other than '.' atomically at least once.<br/>
+            ○ Match '.'.<br/>
+            ○ Match a character other than '.' greedily at least once.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Verify.NotNull(System.Object,System.String)">
+            <summary>
+            Equivalent of ArgumentNullException.ThrowIfNull
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.Verify.ParametersUniqueness(System.Collections.Generic.IReadOnlyList{Microsoft.SemanticKernel.KernelParameterMetadata})">
+            <summary>
+            Make sure every function parameter name is unique
+            </summary>
+            <param name="parameters">List of parameters</param>
+        </member>
+        <member name="T:Microsoft.SemanticKernel.AppContextSwitchHelper">
+            <summary>
+            Helper class to get app context switch value
+            </summary>
+        </member>
+        <member name="M:Microsoft.SemanticKernel.AppContextSwitchHelper.GetConfigValue(System.String,System.String)">
+            <summary>
+            Returns the value of the specified app switch or environment variable if it is set.
+            If the switch or environment variable is not set, return false.
+            The app switch value takes precedence over the environment variable.
+            </summary>
+            <param name="appContextSwitchName">The name of the app switch.</param>
+            <param name="envVarName">The name of the environment variable.</param>
+            <returns>The value of the app switch or environment variable if it is set; otherwise, false.</returns>
+        </member>
+        <member name="T:System.ExceptionExtensions">
+            <summary>
+            Exception extension methods.
+            </summary>
+        </member>
+        <member name="M:System.ExceptionExtensions.IsCriticalException(System.Exception)">
+            <summary>
+            Check if an exception is of a type that should not be caught by the kernel.
+            </summary>
+            <param name="ex">Exception.</param>
+            <returns>True if <paramref name="ex"/> is a critical exception and should not be caught.</returns>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.IsExternalInit">
+            <summary>
+            Reserved to be used by the compiler for tracking metadata.
+            This class should not be used by developers in source code.
+            </summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the AsciiLettersDigitsUnderscoresRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.AsciiLettersDigitsUnderscoresRegex_0.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FilenameRegex_1">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the FilenameRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.FilenameRegex_1.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FilenameRegex_1.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FilenameRegex_1.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FilenameRegex_1.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FilenameRegex_1.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FilenameRegex_1.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FilenameRegex_1.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FilenameRegex_1.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Utilities">
+            <summary>Helper methods used by generated <see cref="T:System.Text.RegularExpressions.Regex"/>-derived implementations.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout">
+            <summary>Default timeout value set in <see cref="T:System.AppContext"/>, or <see cref="F:System.Text.RegularExpressions.Regex.InfiniteMatchTimeout"/> if none was set.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_hasTimeout">
+            <summary>Whether <see cref="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout"/> is non-infinite.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiWordChars">
+            <summary>Supports searching for characters in or not in "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".</summary>
+        </member>
+    </members>
+</doc>
