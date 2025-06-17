@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 11.3.24
+*  version : 12.1.5
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -8979,7 +8979,7 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
         },
 
         _renderSuggestionList: function () {
-            var oldWrapper = bbdesigner$("#" + this.element.context.id + "_suggestion").get(0);
+            var oldWrapper = bbdesigner$("#" + this.element[0].id + "_suggestion").get(0);
             if (oldWrapper)
                 bbdesigner$(oldWrapper).remove();
             this.suggestionList = BoldBIDashboard.buildTag("div.e-atc-popup e-popup e-widget e-box " + this.model.cssClass + "#" + this.target.id + "_suggestion", "", { "display": "none" }).attr("role", "listbox");
@@ -9165,7 +9165,7 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
             this._isOpened = true;
             this.showSuggestionBox = true;
             var _suggestionListItems = this._getLiTags();
-            this._listSize = _suggestionListItems.size();
+            this._listSize = _suggestionListItems.length;
 
 
             bbdesigner$(window).bind("resize", bbdesigner$.proxy(this._OnWindowResize, this));
@@ -10404,7 +10404,7 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
             this._hiddenInput.attr({ 'value': this.model.value }).addClass('e-input');
 			this.wrapper.attr({'role': 'spinbutton', 'aria-valuemin': this.model.minValue, 'aria-valuemax': this.model.maxValue, 'aria-valuenow': this.model.value,});
             this.element.attr({'aria-live': 'assertive', "value": this.model.value });
-            var spinbutton = bbdesigner$('<span class="e-select"><span class="e-spin e-spin-up " role="button" aria-label="Increase Value" unselectable="on" /><span class="e-spin e-spin-down" role="button" aria-label="Decrease Value" unselectable="on" /></span>');
+            var spinbutton = bbdesigner$('<span class="e-select"><span class="e-spin e-spin-up " role="button" aria-label="Increase Value" unselectable="on" /></span><span class="e-spin e-spin-down" role="button" aria-label="Decrease Value" unselectable="on" /></span></span>');
             spinbutton.find('.e-spin-up').append(BoldBIDashboard.buildTag('span.e-icon e-arrow e-arrow-sans-up').attr({ 'role': 'presentation', 'unselectable': 'on' }));
             spinbutton.find('.e-spin-down').append(BoldBIDashboard.buildTag('span.e-icon e-arrow e-arrow-sans-down').attr({ 'role': 'presentation', 'unselectable': 'on' }));
             this.innerWrap.append(spinbutton);
@@ -36689,12 +36689,12 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
                 '<div class="e-dashboarddatepicker-calander-selector-wrapper">' +
                 '<div class="e-dashbaorddatepicker-date-selectors">' +
                 '<div style="margin-right: 5px;" class="e-dashboarddatepicker-input-container left">' +
-                '<span class="e-fromspan left"/>' +
-                '<input class="e-input-mini left" type="text" name="daterangepicker_start" value="" />' +
+                '<span class="e-fromspan left"/></span>' +
+                '<input class="e-input-mini left" type="text" name="daterangepicker_start" value="" /></input>' +
                 '</div>' +
                 '<div  class="e-dashboarddatepicker-input-container left">' +
-                '<span class="e-tospan left"/>' +
-                '<input class="e-input-mini left" type="text" name="daterangepicker_end" value="" />' +
+                '<span class="e-tospan left"/></span>' +
+                '<input class="e-input-mini left" type="text" name="daterangepicker_end" value="" /></input>' +
                 '</div>' +
                 '</div>' +
                 '<div class="e-dashboarddatepicker-calander-wrapper">' +
@@ -36746,7 +36746,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
         _createCalender: function (calender, currentDate) {
             var calenderTable = bbdesigner$("<table>");
             calenderTable.append(this._renderHeader(currentDate));
-            calenderTable.append(this._renderCalenderDays(currentDate));
+            calenderTable.append("<tbody>" + this._renderCalenderDays(currentDate) + "</tbody>");
             bbdesigner$(calender).append(calenderTable);
         },
         _setRTL: function (datePickerWrapper) {
@@ -37421,7 +37421,7 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
         },
         _updateCalenderDates: function (selectedCalender, date, header) {
             selectedCalender.find("tbody").remove();
-            selectedCalender.find("table").append(this._renderCalenderDays(date));
+            selectedCalender.find("table").append("<tbody>" + this._renderCalenderDays(date) + "</tbody>");
             selectedCalender.find(".e-current-month").html(header);
             if (this.model.datePickerType === "range") {
                 if (!BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) {

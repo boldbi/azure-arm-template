@@ -17,6 +17,9 @@
     var reportDomain = baseUri.Authority;
     var useSingleTenantDb = GlobalAppSettings.SystemSettings.UseSingleTenantDb != null && (bool)GlobalAppSettings.SystemSettings.UseSingleTenantDb;
     var tenantSchema = GlobalAppSettings.SystemSettings.SchemaName ?? string.Empty;
+    var ConfiguredStorageType = ViewBag.ConfiguredStorageType != null ? ViewBag.ConfiguredStorageType : '0';
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrlPath = requestUrl.AbsolutePath.ToString().ToLower();
     var canDisableEmailSettingsOption = 
         ViewBag.MailSettings == null || 
         string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsHost) || 
@@ -109,6 +112,7 @@
         var getMasterSiteUrl = "@Url.Action("GetIsMasterSite", "TenantsManagement")";
         var umsSitesUrl = "@Url.Action("Sites", "TenantsManagement")";
         var checkValidDatabaseUrl = "@Url.Action("ValidateDatabaseChange", "TenantsManagement")";
+        var isOCIStorageExist = "@Url.Action("IsOCIStorageExists", "ServerConfiguration")";
         var isBoldBI = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName)".toLowerCase() == "true";
         var isAzureApplication = ("@ViewBag.IsAzureApplication".toLowerCase() === "true");
         var isBoldReports = "@(GlobalAppSettings.BrandingDisplayName == AppBranding.BoldReports.DisplayName)".toLowerCase() == "true";
@@ -118,6 +122,8 @@
         var isCommonLogin = ("@(ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)".toLowerCase() === "true");
         var useSiteIdentifierEnable = "@useSiteIdentifier".toLowerCase() === "true";
         var sqlParameter = "@sqlParameter";
+        var requestUrlPath = "@requestUrlPath";
+        var getAddTenantUrl = "@Url.Action("AddTenants", "TenantsManagement")";
         var postgresSQLParameter = "@postgresSQLParameter";
         var mySQLParameter = "@mySQLParameter";
         var oracleParameter = "@oracleParameter";
@@ -128,6 +134,7 @@
         var isSiteCreation = true;
         var isSimpleModeValue = "true";
         var validateIsolationCodeUrl = "@Url.Action("IsValidIsolationCode", "TenantsManagement")";
+        var amazons3Exist = "@Url.Action("IsAmazonS3Exists", "ServerConfiguration")";
         var biProductname = "@AppBranding.Bold.ProductName";
         var reportsProductname = "@AppBranding.BoldReports.ProductName";
         var IsDefaultSchemaUms = ("@ViewBag.IsDefaultSchemaUms".toLowerCase() === "true");
@@ -141,6 +148,7 @@
         var isUmsStartupWithOracle = ("@ViewBag.IsUmsStartupWithOracle".toLowerCase() === "true");
         var canDisableEmailSettingsOption =  "@canDisableEmailSettingsOption".toLowerCase() === "true";
         var tenantSchema = "@tenantSchema";
+        var ConfiguredStorageType = "@ConfiguredStorageType";
     </script>
 </head>
 <body>
@@ -327,7 +335,13 @@
                                         </div>
                                         <div class="bi-branding">
                                             <label class="field-label">@T["Inherit Global Settings"]</label>
+                                            @{
+#pragma warning disable SCS0029
+                                            }
                                             <span tabindex="0" class="info-icon su su-info" role="button" data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus" data-bs-html="true" data-bs-content="@Html.Raw(string.Format(T["Based on settings chosen,the following information will be copied to tenant: {0} Localization, {1} Date and Time Formats, {1} Font Family, {1} Email Configuration, {1} Account Settings, {1} Images. {2} Otherwise, default images and values will be used for the tenant settings."].Value, "<ul><li>", "</li><li>", "</li></ul>"))"></span>
+                                            @{
+#pragma warning restore SCS0029
+                                            }
                                             <select id="global-settings-options" data-width="100%">
                                                 <option value="@(GlobalSettingsOptions.DateTime.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.DateTime)</option>
                                                 <option value="@(GlobalSettingsOptions.Language.ToString())">@EnumHelper.GetDescription(GlobalSettingsOptions.Language)</option>

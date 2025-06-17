@@ -47,20 +47,27 @@
     <input type="hidden" id="defaultSettings" value="@ViewBag.DefaultView" />
 </div>
 <script>
+    @{
+    #pragma warning disable SCS0029
+    }
     var permission = @Html.Raw(JsonConvert.SerializeObject(permission));
+    @{
+    #pragma warning restore SCS0029
+    }
     if ($("#restrict-auto-save-filter").is(":disabled")) {
         if (@Json.Serialize(ViewBag.IsAdminAccount) || (permission["DashboardSettings"] || permission["All"])) {
-             $("#tooltip-info").html(@Html.Raw(string.Format("'" + T["Autosave filter is disabled in {0}dashboard settings{1}."].Value, "<span><a target=\"_blank\" href=\" " + Url.Action("DashboardSettings", "Administration") + "\">","</a></span>") + "'"));
+             $("#tooltip-info").html(@Html.Raw(string.Format("'" + T["Autosave filter is disabled in {0}dashboard settings{1}."].Value, "<span><a target=\"_blank\" href=\" " + Url.Action("DashboardSettings", "Administration") + "\">", "</a></span>") + "'"));
         }else {
             $("#tooltip-info").html(@Html.Raw("'" + T["Autosave filter is disabled by the system administrator. Please contact your system administrator to enable this."].Value + "'"));
         }
     }
     else {
         if (!@Json.Serialize(IsHideHelpLink)) {
-            $("#tooltip-info").html(@Html.Raw(string.Format("'" + T["The dashboards will be rendered with the last applied filters by the users. Learn more about {0}autosaving filters{1}."].Value, "<span><a target=\"_blank\" href=\" "+ (helpSiteBaseUrl + autoSaveHelpSiteUrl) + "\">","</a></span>") + "'"));
+            $("#tooltip-info").html(@Html.Raw(string.Format("'" + T["The dashboards will be rendered with the last applied filters by the users. Learn more about {0}autosaving filters{1}."].Value, "<span><a target=\"_blank\" href=\" " + (helpSiteBaseUrl + autoSaveHelpSiteUrl) + "\">", "</a></span>") + "'"));
 
         }else {
             $("#tooltip-info").html(@Html.Raw("'" + T["The dashboards will be rendered with the last applied filters by the users."].Value + "'"));
         }
     }
+
 </script>

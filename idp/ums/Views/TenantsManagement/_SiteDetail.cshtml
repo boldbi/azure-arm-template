@@ -2,6 +2,7 @@
 @{
     var tenantImageType = (TenantType)Model.TenantTypeId == TenantType.BoldBIOnPremise ? AppBranding.Bold.Identifier : AppBranding.BoldReports.Identifier;
     var activeTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "general") ? "active" : string.Empty;
+    var StorageType = (int)Model.StorageType;
 }
 
 <script type="text/javascript" nonce="@Context.Items["ScriptNonce"]">
@@ -32,7 +33,13 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start form-group ">
                     @Html.Label("application-url", T["Site URL"].Value, new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-4 float-start" })
                     <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-8 float-start application-url active ">
+                        @{
+#pragma warning disable SCS0029
+                        }
                         <a title=@Html.Raw(Model.Tenant.SiteUrl) class="text-decoration-none" data-bs-toggle="tooltip" target="_blank" href=@Html.Raw(Model.Tenant.SiteUrl)>@Html.Raw(Model.Tenant.SiteUrl) </a>
+                        @{
+#pragma warning restore SCS0029
+                        }
                     </div>
                 </div>
                 <div class="col-md-12 float-start form-group">
@@ -55,18 +62,30 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start form-group ">
                     @Html.Label("Storage Type", T["Storage Type"].Value, new { @class = "app-textbox-label col-lg-2 col-md-2 col-sm-3 col-4 float-start" })
                     <div class="form-input-field col-lg-4 col-md-5 col-sm-6 col-8 float-start storage-type ">
-                        @if (string.IsNullOrWhiteSpace(Model.BlobConnectionString) || Model.BlobConnectionString == null)
-                        {
-                            <div>
-                                @T["File Storage"]
-                            </div>
-                        }
-                        else
-                        {
-                            <div>
-                                @T["Blob Storage"]
-                            </div>
-                        }
+                            @if (StorageType == 0)
+                            {
+                                <div>
+                                    @T["File Storage"]
+                                </div>
+                            }
+                            else if (StorageType == 1)
+                            {
+                                <div>
+                                    @T["Blob Storage"]
+                                </div>
+                            }
+                            else if (StorageType == 3)
+                            {
+                                <div>
+                                    @T["AmazonS3"]
+                                </div>
+                            }
+                            else if (StorageType == 4)
+                            {
+                                <div>
+                                    @T["OCI Object Stoarge"]
+                                </div>
+                            }
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start form-group ">

@@ -16,6 +16,8 @@ $(document).ready(function () {
         return new bootstrap.Popover(popoverTriggerEl)
     })
     $("#blob-storage-form").hide();
+    $("#oci-object-storage-form").hide("slow");
+    $("#amazon-s3-storage-form").hide("slow");
     $("#report-storage").hide();
     $("#system-settings-user-account-container").hide();
 
@@ -71,10 +73,6 @@ $(document).ready(function () {
         var configurationModeType = getRadioButtonValue('ConfigurationMode');
         if ($(this).attr("id") == "advanced-tab") {
             var databaseType = getDropDownValue("database-type");
-            if (databaseType === "Oracle") {
-                e.preventDefault();
-            }
-            else {
                 $("#default-tab").removeClass("active");
                 $("#advanced-tab").addClass("active");
                 $("#simple-tenant-prefix").hide();
@@ -140,15 +138,8 @@ $(document).ready(function () {
                     $(".ser-schema-prefix-hide").removeClass("visually-hidden").addClass("d-block");
                 }
 
-                if (!(configurationModeType !== undefined && configurationModeType === "0")) {
-                    itemsList[3].style.display = "none";
-                }
                 isSimpleModeValue = "false";
-            }
 
-            if (!(configurationModeType !== undefined && configurationModeType === "0")) {
-                itemsList[3].style.display = "none";
-            }
             if (configurationModeType !== undefined && configurationModeType === "0")
             {
                 $("#server-database-name").hide();
@@ -382,7 +373,7 @@ function getFormData() {
             Prefix: prefix,
             TenantPrefix: tenantPrefix
         },
-        StorageType: window.storageType
+        StorageType: getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type")
     };
 
     var azureData = {
@@ -400,10 +391,45 @@ function getFormData() {
         TenantIdentifier: "site1",
     };
 
+    var storageType = getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type");
+    if (storageType == "3") {
+        amazons3details = {
+            Region: getDropDownValue("aws-region"),
+            BucketName: $("#txt-bucketname").val(),
+            AccessKeyId: $("#txt-accesskeyid").val(),
+            AccessKeySecret: $("#txt-accesskeysecret").val(),
+            RootFolderName: $("#txt-rootfoldername").val()
+        }
+    } else {
+        amazons3details = {}
+    }
+
+    if (storageType == "4") {
+        ociObjectStoragedetails = {
+            Region: getDropDownValue("oci-object-region"),
+            BucketName: $("#txt-oci-bucketname").val(),
+            AccessKey: $("#txt-oci-accesskey").val(),
+            SecretKey: $("#txt-secretkey").val(),
+            RootFolderName: $("#txt-oci-rootfoldername").val(),
+            OCINameSpace: $("#txt-namespace").val()
+        }
+    } else {
+        ociObjectStoragedetails = {}
+    }
+
+    var storage = {
+        StorageType = systemSettingsData.StorageType,
+        AzureBlob = azureData,
+        OciObjectStorage = ociObjectStoragedetails,
+        AmazonS3 = amazons3details
+    }
+
     $("#global-admin-details").val(JSON.stringify(globalAdmin));
     $("#system-settings-data").val(JSON.stringify(systemSettingsData));
     $("#azure-data").val(JSON.stringify(azureData));
+    $("#oci-object-data").val(JSON.stringify(ociObjectStoragedetails));
     $("#tenant-info").val(JSON.stringify(tenantInfo));
+    $("#storage-info").val(JSON.stringify(storage));
 }
 
 function validateEmail(email, eventType) {
@@ -783,7 +809,7 @@ function getDatabaseFormValues() {
                 Prefix: prefix,
                 TenantPrefix: tenantPrefix
             },
-            StorageType: $("input[name='IsBlobStorage']:checked").val(),
+            StorageType: getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type"),
             TenantIsolation:
             {
                 IsEnabled: $("#isolation-enable-switch").is(":checked"),
@@ -796,11 +822,17 @@ function getDatabaseFormValues() {
 }
 
 
-function postSystemSettingsData(systemSettingsDetails, azuredetails, userName, tenantDetails, brandingType, isAddFromServer, userId, globalSettingsValues) {
+function postSystemSettingsData(systemSettingsDetails, azuredetails, userName, tenantDetails, brandingType, isAddFromServer, userId, amazons3details, globalSettingsValues) {
     var userNameData = (userName != undefined && userName != null) ? JSON.stringify(userName) : $("#tenant-email").val();
     var tenantDetailsData = (tenantDetails != undefined && tenantDetails != null) ? JSON.stringify(tenantDetails) : null;
-    var userIdValue = (userId != undefined && userId !=null) ? JSON.stringify(userId) : null;
-    setSystemSettingsData = { systemSettingsData: JSON.stringify(systemSettingsDetails), azureData: JSON.stringify(azuredetails), userName: userNameData, tenantDetails: tenantDetailsData, brandingType: brandingType, userIds: userIdValue, globalSettingsOptions: globalSettingsValues };
+    var userIdValue = (userId != undefined && userId != null) ? JSON.stringify(userId) : null;
+    var storage = {
+        StorageType = systemSettingsDetails.StorageType,
+        AzureBlob = azuredetails,
+        OCIObjectStorage = ociObjectStoragedetails,
+        AmazonS3 = amazons3details
+    }
+    setSystemSettingsData = { systemSettingsData: JSON.stringify(systemSettingsDetails), storage: JSON.stringify(storage), userName: userNameData, tenantDetails: tenantDetailsData, brandingType: brandingType, userIds: userIdValue, globalSettingsOptions: globalSettingsValues };
     $.ajax({
         type: "POST", url: setSystemSettingsUrl, data: setSystemSettingsData,
         success: function (setSystemSettingsResponse) {
@@ -834,7 +866,8 @@ function postSystemSettingsData(systemSettingsDetails, azuredetails, userName, t
 function validate_report_storage() {
     $(".blob-error-message").hide();
     showWaitingPopup('startup-page-conatiner', true);
-    var storageType = $("input[name='IsBlobStorage']:checked").val();
+    var storageType = getDropDownValue("storage-type");
+    storageType = getDropDownValue("storage-type") == "2" ? "4" : storageType;
     window.storageType = storageType;
     var azuredetails = "";
     var tenantDetails = {
@@ -997,6 +1030,31 @@ function getTenantType() {
     return tenantType;
 }
 
+function ResizeHeightForDOM() {
+    var height = "";
+    var modalheight = "";
+
+    if ($(".storage-form").hasClass("show")) {
+        var storageType = getDropDownValue("storage-type");
+        storageType = getDropDownValue("storage-type") == "2" ? "4" : storageType;
+        if (storageType == "0") {
+            height = $(window).height() - $(".modal-header").height() - 210;
+            modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
+        }
+        else if (storageType == "1") {
+            height = $(window).height() - $(".modal-header").height() - 210 + 280;
+            modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
+        }
+        else {
+            height = $(window).height() - $(".modal-header").height() - 210 + 140;
+            modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
+        }
+    }
+
+    $(".dialog-body-div").css("height", "auto");
+    gridHeight = height;
+}
+
 function forceToLower(input) {
     input.value = input.value.toLowerCase();
 }
@@ -1026,13 +1084,19 @@ function ResizeHeightForDOM() {
     //}
 
     if ($(".storage-form").hasClass("d-block")) {
-        if ($("#file-storage").is(":checked")) {
+        var storageType = getDropDownValue("storage-type");
+        if (storageType == "0") {
             height = $(window).height() - $(".modal-header").height() - 210;
             modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
-        } else {
+        }
+        else if (storageType == "1") {
             height = $(window).height() - $(".modal-header").height() - 210 + 280;
             modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
         }
+        else {
+            height = $(window).height() - $(".modal-header").height() - 210 + 140;
+            modalheight = $("#dialog-body-container").height() + $("#dialog-body-header").height() + 102;
+    }
     }
 
     //if ($(".tenant-user-form").hasClass("d-block")) {

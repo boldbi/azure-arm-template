@@ -30,6 +30,7 @@
     string jwtLoginUrl = Url.Action("JwtLogin", "accounts");
     var azureb2cloginAction = ViewBag.ReturnURL != null ? Url.Action("AzureB2CLogin", "accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("AzureB2CLogin", "accounts");
     var baseURL = GlobalAppSettings.SystemSettings.BaseUrl;
+    var hideExternalLoginProviders = GlobalAppSettings.SystemSettings.HideExternalLoginProviders;
 }
 <script nonce="@Context.Items["ScriptNonce"]">
     var defaultErrorImageSrcFroAzure = "@Url.Content("~/images/common/application/azuread.png")";
@@ -41,7 +42,7 @@
                 this.src = defaultErrorImageSrcFroAzure;
             };
         }
-       
+
     });
         var defaultErrorImageSrcForWindows = "@Url.Content("~/images/common/application/windows-ad.svg")";
         document.addEventListener("DOMContentLoaded", function () {
@@ -54,7 +55,7 @@
         }
     });
 </script>
-@if (showExternalAuthentication || showAuthLogin)
+@if (!hideExternalLoginProviders && (showExternalAuthentication || showAuthLogin))
 {
     <meta name="base_url" content="@baseURL" />
     <div class="external-container">
@@ -68,77 +69,77 @@
                     <input id="external-authentication-client-id" type="hidden" name="clientId" value="@ViewBag.ClientId" />
                 }
 
-            <div class="col-12 float-start no-padding">
-                @if (showExternalAuthentication)
-                {
-                    @foreach (var item in orderedProviders)
+                <div class="col-12 float-start no-padding">
+                    @if (showExternalAuthentication)
                     {
-                        <form method="post" action="@loginAction" class="external-login-buttons">
-                            <button class="col-6 float-start no-padding login-provider link-button button-style" type="submit" id="@item.Name.Replace(" ", "").ToLower()-login">
-                                @Html.AntiForgeryToken()
-                                @Html.Hidden("provider", item.DisplayName)
-                                <input type="hidden" id="azure-email" name="email" />
-                                <img id="azuread-error-image" class="external-provider" alt="Azure AD" src="@microsoftLogoLink" />
-                                <span id="adfs-login-text" class="login-provider-name">@T["Sign in with Microsoft"]</span>
-                                <div id="validate-azure-user" class="error-message validation-holder">
-                                </div>
-                            </button>
-                        </form>
-                    }
-                }
-
-                @if (showAuthLogin)
-                {
-                    foreach (var auth in authSettings)
-                    {
-                        if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication)
+                        @foreach (var item in orderedProviders)
                         {
-                            <form id="login-button-windows" class="external-login-buttons">
-                                @Html.AntiForgeryToken()
-                                <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
-                                    <img id="windows-ad-error-image" class="external-provider" alt="Windows AD" src="@windowsADLogoLink"/>
-                                    <span class="windows-ad-login-text">@T["Sign in with Windows AD"]</span>
-                                    <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
+                            <form method="post" action="@loginAction" class="external-login-buttons">
+                                <button class="col-6 float-start no-padding login-provider link-button button-style" type="submit" id="@item.Name.Replace(" ", "").ToLower()-login">
+                                    @Html.AntiForgeryToken()
+                                    @Html.Hidden("provider", item.DisplayName)
+                                    <input type="hidden" id="azure-email" name="email" />
+                                    <img id="azuread-error-image" class="external-provider" alt="Azure AD" src="@microsoftLogoLink" />
+                                    <span id="adfs-login-text" class="login-provider-name">@T["Sign in with Microsoft"]</span>
+                                    <div id="validate-azure-user" class="error-message validation-holder">
+                                    </div>
                                 </button>
                             </form>
                         }
+                    }
 
-                        if (auth.AuthProvider == AuthProvider.AzureADB2C)
+                    @if (showAuthLogin)
+                    {
+                        foreach (var auth in authSettings)
                         {
-                            if(GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                            if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication)
                             {
-                                <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
-                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "IsPopUp", true}, { "Auth", auth } })
-                            }
-                            else
-                            {
-                                <form method="post" action="@azureb2cloginAction" class="external-login-buttons">
+                                <form id="login-button-windows" class="external-login-buttons">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider"/>
-                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
+                                    <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
+                                        <img id="windows-ad-error-image" class="external-provider" alt="Windows AD" src="@windowsADLogoLink" />
+                                        <span class="windows-ad-login-text">@T["Sign in with Windows AD"]</span>
+                                        <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
+                                    </button>
                                 </form>
                             }
-                        }
 
-                        if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD && auth.AuthProvider != AuthProvider.AzureADB2C)
-                        {
-                            if(GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                            if (auth.AuthProvider == AuthProvider.AzureADB2C)
                             {
-                                <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
-                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData){ {"IsPopUp", true}, { "Auth", auth } })
-                            }
-                            else
-                            {
-                                <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
-                                    @Html.AntiForgeryToken()
+                                if (GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                                {
                                     <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "IsPopUp", true }, { "Auth", auth } })
+                                }
+                                else
+                                {
+                                    <form method="post" action="@azureb2cloginAction" class="external-login-buttons">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
                                         @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
-                                </form>
+                                    </form>
+                                }
+                            }
+
+                            if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD && auth.AuthProvider != AuthProvider.AzureADB2C)
+                            {
+                                if (GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                                {
+                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "IsPopUp", true }, { "Auth", auth } })
+                                }
+                                else
+                                {
+                                    <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                        @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
+                                    </form>
+                                }
                             }
                         }
                     }
-                }
-            </div>
+                </div>
             </div>
         </div>
     </div>

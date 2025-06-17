@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.card.all.js
-*  version : 11.3.24
+*  version : 12.1.5
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -135,6 +135,7 @@ var NumberFormatting = /** @class */ (function () {
         var billion = Math.pow(ten, nine);
         var trillion = Math.pow(ten, twelve);
         var number = num;
+        var response = { fraction: number, symbol: "" };
         //if (this.model.valueRepresentation.currencyCulture === "en-IN") {
         //    if (((number >= thousand) && (number < lakhs)) || ((number <= -thousand) && (number > -lakhs))) {
         //        return { fraction: this.calculateFraction(number, thousand), symbol: "K" };
@@ -151,27 +152,27 @@ var NumberFormatting = /** @class */ (function () {
         //    }
         //} else {	
         if (((number >= thousand) && (number < million)) || ((number <= -thousand) && (number > -million))) {
-            return { fraction: this.calculateFraction(number, thousand), symbol: "K" };
+            response = { fraction: this.calculateFraction(number, thousand), symbol: "K" };
         }
 		if (this.isRequiredCulture(culture) && enableLakhsAndCroreRep) {
 			if (((number >= lakh) && (number < crores)) || ((number <= -lakh) && (number > -crores))) {
-				return { fraction: this.calculateFraction(number, lakh), symbol: "L" };
+				response = { fraction: this.calculateFraction(number, lakh), symbol: "L" };
 			} else if (number >= crores || number <= -crores) {
-				return { fraction: this.calculateFraction(number, crores), symbol: "Cr" };
+				response = { fraction: this.calculateFraction(number, crores), symbol: "Cr" };
 			}
 		}
 		else {
 			if (((number >= million) && (number < billion)) || ((number <= -million) && (number > -billion))) {
-				return { fraction: this.calculateFraction(number, million), symbol: "M" };
+				response = { fraction: this.calculateFraction(number, million), symbol: "M" };
 			} else if (((number >= billion) && (number < trillion)) || ((number <= -billion) && (number > -trillion))) {
-				return { fraction: this.calculateFraction(number, billion), symbol: "B" };
+				response = { fraction: this.calculateFraction(number, billion), symbol: "B" };
 			} else if (number >= trillion || number <= -trillion) {
-				return { fraction: this.calculateFraction(number, trillion), symbol: "T" };
+				response = { fraction: this.calculateFraction(number, trillion), symbol: "T" };
 			}
 		}
         //}
 
-        return { fraction: number, symbol: "" };
+        return response;
     };
 	NumberFormatting.prototype.isRequiredCulture = function (cultureName) {
          var cultures = [

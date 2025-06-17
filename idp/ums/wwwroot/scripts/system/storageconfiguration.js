@@ -88,11 +88,147 @@ $(document).ready(function () {
         }
 
     });
+
+    $("#oci-object-storage-form").validate({
+        focusInvalid: false,
+        errorElement: "span",
+        onkeyup: function (element, event) {
+            if (event.keyCode != 9) {
+                isKeyUp = true;
+                $(element).valid();
+                isKeyUp = false;
+            }
+            else
+                true;
+        },
+        onfocusout: function (element) {
+            $(element).valid();
+        },
+        rules: {
+            bucketname: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            accesskey: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            secretkey: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            rootfoldername: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            namespace: {
+                isRequired: true,
+                hasWhiteSpace: false
+            }
+        },
+        highlight: function (element) {
+            $(element).closest('div').addClass("e-error");
+            $(element).closest(".e-outline").siblings(".startup-validation").show();
+        },
+        unhighlight: function (element) {
+            $(element).closest('div').removeClass('e-error');
+            $(element).closest(".e-outline").siblings(".startup-validation").hide();
+            $(".oci-object-storage-error-message").css("display", "none");
+            changeFooterPostion();
+        },
+        errorPlacement: function (error, element) {
+            $(element).closest(".e-outline").siblings(".startup-validation").text(error.html());
+            changeFooterPostion();
+        },
+        messages: {
+            bucketname: {
+                isRequired: window.Server.App.LocalizationContent.OCIBucketNameEmpty
+            },
+            accesskey: {
+                isRequired: window.Server.App.LocalizationContent.OCIAccessKeyEmpty
+            },
+            secretkey: {
+                isRequired: window.Server.App.LocalizationContent.OCISecretKeyEmpty
+            },
+            rootfoldername: {
+                isRequired: window.Server.App.LocalizationContent.OCIRootFolderNameEmpty
+            },
+            namespace: {
+                isRequired: window.Server.App.LocalizationContent.OCINameSpaceEmpty
+            }
+        }
+
+    });
+
+    $("#amazon-s3-storage-form").validate({
+        focusInvalid: false,
+        errorElement: "span",
+        onkeyup: function (element, event) {
+            if (event.keyCode != 9) {
+                isKeyUp = true;
+                $(element).valid();
+                isKeyUp = false;
+            }
+            else
+                true;
+        },
+        onfocusout: function (element) {
+            $(element).valid();
+        },
+        rules: {
+            bucketname: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            accesskeyid: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            accesskeysecret: {
+                isRequired: true,
+                hasWhiteSpace: false
+            },
+            rootfoldername: {
+                isRequired: true,
+                hasWhiteSpace: false
+            }
+        },
+        highlight: function (element) {
+            $(element).closest('div').addClass("e-error");
+            $(element).closest(".e-outline").siblings(".startup-validation").show();
+        },
+        unhighlight: function (element) {
+            $(element).closest('div').removeClass('e-error');
+            $(element).closest(".e-outline").siblings(".startup-validation").hide();
+            $(".amazon-s3-storage-error-message").css("display", "none");
+            changeFooterPostion();
+        },
+        errorPlacement: function (error, element) {
+            $(element).closest(".e-outline").siblings(".startup-validation").text(error.html());
+            changeFooterPostion();
+        },
+        messages: {
+            bucketname: {
+                isRequired: window.Server.App.LocalizationContent.AmazonBucketName
+            },
+            accesskeyid: {
+                isRequired: window.Server.App.LocalizationContent.AmazonAccessKeyId
+            },
+            accesskeysecret: {
+                isRequired: window.Server.App.LocalizationContent.AmazonAccessKeySecret
+            },
+            rootfoldername: {
+                isRequired: window.Server.App.LocalizationContent.AmazonRootFolderName
+            }
+        }
+
+    });
 });
 
 function validate_storage_type() {
+    debugger;
     $(".blob-error-message").hide();
-    var storageType = getRadioButtonValue('IsBlobStorage');
+    var storageType = getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type");
     window.storageType = storageType;
     if (storageType == "1") {
         if ($("#blob-storage-form").valid()) {
@@ -143,7 +279,70 @@ function validate_storage_type() {
             changeFooterPostion();
             return false;
         }
-    } else {
+    } else if (storageType == "4") {
+        if ($("#oci-object-storage-form").valid()) {
+            var ociStorageConfiguration = {
+                Region: getDropDownValue("oci-object-region"),
+                BucketName: $("#txt-oci-bucketname").val(),
+                AccessKey: $("#txt-oci-accesskey").val(),
+                SecretKey: $("#txt-secretkey").val(),
+                RootFolderName: $("#txt-oci-rootfoldername").val(),
+                OCINameSpace: $("#txt-namespace").val()
+            }
+
+            showWaitingPopup('startup-waiting-element');
+            $.ajax({
+                type: "POST",
+                url: isOCIStorageExist,
+                data: { ociStorageConfiguration: JSON.stringify(ociStorageConfiguration) },
+                success: function (data) {
+                    if (data.result == true) {
+                        $("#image-parent-container, #system-settings-filestorage-container").hide();
+                        registerApplication(isSimpleModeSelction());
+                        return false;
+                    }
+                    else {
+                        hideWaitingPopup('startup-waiting-element');
+                        $(".oci-object-storage-validation,.oci-object-storage-error-message").css("display", "block");
+                        changeFooterPostion();
+                    }
+                }
+            });
+        }
+        return false;
+    }
+    else if (storageType == "3") {
+        if ($("#amazon-s3-storage-form").valid) {
+            var amazons3configuration = {
+                Region: getDropDownValue("aws-region"),
+                BucketName: $("#txt-bucketname").val(),
+                AccessKeyId: $("#txt-accesskeyid").val(),
+                AccessKeySecret: $("#txt-accesskeysecret").val(),
+                RootFolderName: $("#txt-rootfoldername").val()
+            }
+
+            showWaitingPopup('startup-waiting-element');
+            $.ajax({
+                type: "POST",
+                url: amazons3Exist,
+                data: { amazons3configuration: JSON.stringify(amazons3configuration) },
+                success: function (data) {
+                    if (data.result == true) {
+                        $("#image-parent-container, #system-settings-filestorage-container").hide();
+                        registerApplication(isSimpleModeSelction());
+                        return false;
+                    }
+                    else {
+                        hideWaitingPopup('startup-waiting-element');
+                        $(".amazon-s3-storage-validation,.amazon-s3-storage-error-message").css("display", "block");
+                        changeFooterPostion();
+                    }
+                }
+            });
+        }
+        return false;
+    }
+    else {
         $("#image-parent-container, #system-settings-filestorage-container").hide();
         registerApplication(isSimpleModeSelction());
         return false;
@@ -176,10 +375,11 @@ function onConnectionRadioChange(args) {
     changeFooterPostion();
 }
 
-function onBlobStorageChange(args) {
-    var checkedVal = args.value;
+function onStorageTypeChange(checkedVal) {
     if (checkedVal == "0") {
         $("#blob-storage-form").hide("slow");
+        $("#amazon-s3-storage-form").hide("slow");
+        $("#oci-object-storage-form").hide("slow");
         if (storageButtonValue === "tenant") {
             $(".content-value").slideDown("slow");
         } else {
@@ -187,7 +387,9 @@ function onBlobStorageChange(args) {
         }
         $(".storage-checkbox").hide("slow");
         $(".azure-validation").css("display", "none");
-    } else {
+        $(".oci-object-storage-validation").css("display", "none");
+        $(".amazon-s3-storage-validation").css("display", "none");
+    } else if (checkedVal == "1") {
         $(".content-value").hide();
         $(".report-content").hide();
         if (storageButtonValue === "tenant") {
@@ -197,13 +399,40 @@ function onBlobStorageChange(args) {
             $(".storage-checkbox").show("slow");
         }
         $("#blob-storage-form").slideDown("slow");
+        $("#oci-object-storage-form").hide("slow");
+        $("#amazon-s3-storage-form").hide("slow");
         $(".validation-txt-errors").hide();
         $(".azure-validation").css("display", "none");
+        $(".oci-object-storage-validation").css("display", "none");
+        $(".amazon-s3-storage-validation").css("display", "none");
         $(".e-error").removeClass("e-error");
+        $("div.placeholder").remove();
+        ResizeHeightForDOM();
+    } else if (checkedVal == "2") {
+        $("#blob-storage-form").hide("slow");
+        $(".content-value").hide();
+        $(".report-content").hide();
+        $(".azure-validation").css("display", "none");
+        $(".e-error").removeClass("e-error");
+        $("#oci-object-storage-form").slideDown("slow");
+        $(".amazon-s3-storage-validation").css("display", "none");
+        $("#amazon-s3-storage-form").hide("slow");
+        $("div.placeholder").remove();
+        ResizeHeightForDOM();
+    }
+    else {
+        $("#blob-storage-form").hide("slow");
+        $(".content-value").hide();
+        $(".report-content").hide();
+        $(".azure-validation").css("display", "none");
+        $(".e-error").removeClass("e-error");
+        $("#oci-object-storage-form").hide("slow");
+        $("#amazon-s3-storage-form").slideDown("slow");
+        $(".azure-validation").css("display", "none");
+        $(".oci-object-storage-validation").css("display", "none");
         $("div.placeholder").remove();
         ResizeHeightForDOM();
     }
     addPlacehoder("#system-settings-filestorage-container");
     changeFooterPostion();
 }
-

@@ -38,7 +38,7 @@ $(document).ready(function () {
     }
 
     else if (location.href.match(/boldbi/) == null && location.href.match(/boldreports/) == null && location.href.match(/boldbi/) == null && location.href.match(/boldbi/) == null) {
-        
+
         if (isBoldBiLicenseAvailable.toLowerCase() == "true" && isBoldReportsLicenseAvailable.toLowerCase() == "true") {
             history.pushState(null, '', '?product=embedded-bi');
             $("ul.nav.nav-tabs li").removeClass("active");
@@ -47,7 +47,7 @@ $(document).ready(function () {
             $("#bold-bi-tab").addClass("active");
             $("#bold-reports-tab").removeClass("active");
         }
-        
+
         else if (isBoldBiLicenseAvailable.toLowerCase() == "true" && isBoldReportsLicenseAvailable.toLowerCase() == "false") {
             history.pushState(null, '', '?product=embedded-bi');
             $("ul.nav.nav-tabs li").removeClass("active");

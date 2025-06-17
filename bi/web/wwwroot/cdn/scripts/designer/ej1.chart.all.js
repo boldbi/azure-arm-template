@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 11.3.24
+*  version : 12.1.5
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -10467,6 +10467,23 @@ BoldBIDashboard.EjAxisRenderer.prototype = {
 											var prevStartX = prePoint + xAxis.x - (preTextWidth/2);
 											var currStartX = options.x - (textWidth/2);
 										}
+										if (position === "shift" && xAxisLabelLength > 1 && i === xAxisLabelLength - 1) {
+                                            var nextXLabel = labels[i],
+                                                prevXLabel = labels[i - 1];
+                                            var nextPoint = Math.floor(BoldBIDashboard.EjSvgRender.utils._getPointXY(nextXLabel.Value, range, xAxis.isInversed) * xAxis.width),
+                                                prevPoint = Math.floor(BoldBIDashboard.EjSvgRender.utils._getPointXY(prevXLabel.Value, range, xAxis.isInversed) * xAxis.width);
+                                            var pointSpacing = Math.abs(nextPoint - prevPoint);
+                                            var fontSize = 12; // default value
+                                            if (xAxis.font && typeof xAxis.font.size === 'string' && !isNaN(parseFloat(xAxis.font.size))) {
+                                                fontSize = parseFloat(xAxis.font.size);
+                                            }
+                                            var estimatedCharSpacing = fontSize * 0.6;
+                                            var minLabelCharCount = 8;
+                                            var minSpacing = (estimatedCharSpacing * minLabelCharCount) + this.diff;
+                                            if (pointSpacing < minSpacing) {
+                                                labelText = label.displayText = '';
+                                            }
+                                        }
                                         if ((xAxis.isInversed) ? (value < pointX + width) : (value > pointX - width || currStartX < prevStartX))
                                             label.displayText = labelText = '';
                                     } else {
@@ -10541,8 +10558,14 @@ BoldBIDashboard.EjAxisRenderer.prototype = {
                          }         
                         }                  
                          if ((!this.edgeLabel) && !this.zoomed && !xAxis.zoomed && !(labelRotation) && !(intersectAction == "rotate90") && !(intersectAction == "rotate45") && (((pointX + xAxis.x) + (textWidth / 2)) > (bbdesigner$(this.svgObject).width()))) {
+						var xPos = options.x; 
                         bbdesigner$(options).attr('x', (bbdesigner$(this.svgObject).width() - 2));
                         bbdesigner$(options).attr('text-anchor', 'end');
+						// to check last is overlapped with previous label after moving inside areabounds
+						if((options.x - textSize.width) < (labels[i-1].region.bounds.x + labels[i-1].region.bounds.width)){
+							 bbdesigner$(options).attr('x',xPos);
+							 bbdesigner$(options).attr('text-anchor', 'start');							 
+						}	
                     }
 					labels[i].y = options.y;
 					

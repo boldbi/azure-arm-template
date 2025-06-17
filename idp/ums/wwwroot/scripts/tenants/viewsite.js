@@ -1106,7 +1106,8 @@ var inputFields = [
     "#dashboards-limitation-textbox",
     "#schedule-limitation-textbox",
     "#data-source-limitation-textbox",
-    "#slideshow-limitation-textbox"
+    "#slideshow-limitation-textbox",
+    "#user-limitation-textbox"
 ];
 function validateIntegerInput(inputElement, validationMessageElement) {
     var value = $(inputElement).val().trim();
@@ -1171,6 +1172,7 @@ $("#update-resource-limitation").on("click", function () {
             scheduleLimitation: $("#schedule-limitation-textbox").val() ? $("#schedule-limitation-textbox").val().trim() : "",
             dataSourcesLimitation: $("#data-source-limitation-textbox").val() ? $("#data-source-limitation-textbox").val().trim() : "",
             slideShowLimitation: $("#slideshow-limitation-textbox").val() ? $("#slideshow-limitation-textbox").val().trim() : "",
+            userLimitation: $("#user-limitation-textbox").val() ? $("#user-limitation-textbox").val().trim() : "",
         };
         showWaitingPopup("content-area");
         $.ajax({

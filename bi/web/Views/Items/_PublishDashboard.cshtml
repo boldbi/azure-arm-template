@@ -87,6 +87,10 @@
                     @Html.CheckBox("make-public", new { @class = "material-checkbox" })
                     @Html.Label("make-public", T["Make dashboard as public in published site."].Value, new { @class = "toggle-space" })
                 </div>
+                <div ng-if="itemType == '@((int)ItemType.Dashboard)'" id="ignore-sync-checkbox">
+                    @Html.CheckBox("ignore-datasource-sync", new { @class = "material-checkbox" })
+                    @Html.Label("ignore-datasource-sync", T["Skip All Data Source Publishing on the Target Site to Use Existing Data Sources."].Value, new { @class = "toggle-space" })
+                </div>
             </div>
             <div class="col-6 publish-info">
                 <h5>@T["Sites"]:</h5>
@@ -100,12 +104,18 @@
                 <h5 ng-if="itemType == '@((int)ItemType.Datasource)'">@T["Note"]</h5>
                 <p ng-if="itemType == '@((int)ItemType.Datasource)'">@T["Publishing the data source will automatically publish all of the linked data sources on destination sites. Click Advanced below to check the linked data source details."]</p>
                 <div class="advanced-info">
+                    @{
+#pragma warning disable SCS0029
+                    }
                     <p ng-if="itemType == '@((int)ItemType.Dashboard)'">
                         @Html.Raw(String.Format(T["If you want to publish the dashboard for a specific user, click on {0}Advanced{1} and choose the user you want."].Value, "<b>", "</b>"))
                     </p>
                     <p ng-if="itemType == '@((int)ItemType.Datasource)'">
                         @Html.Raw(String.Format(T["If you want to publish the data source for a specific user, click on {0}Advanced{1} and choose the user you want."].Value, "<b>", "</b>"))
                     </p>
+                    @{
+#pragma warning restore SCS0029
+                    }
                 </div>
             </div>
         </div>
@@ -175,6 +185,11 @@
                         <select ng-if="itemType == '@((int)ItemType.Dashboard)'" id="datasource-list-dropdown" class="form-control select-picker-publishdialog" title='@T["Select data sources"]' multiple="" data-size="5" data-actions-box="true" data-live-search="true" style="display:none"></select>
                         <select ng-if="itemType == '@((int)ItemType.Datasource)'" id="datasource-list-dropdown" class="form-control select-picker-publishdialog" title='@T["Select linked data sources"]' multiple="" data-size="5" data-actions-box="true" data-live-search="true" style="display:none"></select>
                     </div>
+                </div>
+                <div ng-if="itemType == '@((int)ItemType.Dashboard)'" id="advanced-ignore-sync-checkbox">
+                    <input type="checkbox" id="advanced-ignore-datasource-sync" class="material-checkbox" ng-model="p.CanIgnoreDataSourceUpdate" />
+                    <input name="advanced-ignore-datasource-sync" type="hidden" value="false" ng-model="p.CanIgnoreDataSourceUpdate">
+                    <label for="advanced-ignore-datasource-sync">@T["Skip All Data Source Publishing on the Target Site to Use Existing Data Sources."] </label>
                 </div>
             </div>
         </div>

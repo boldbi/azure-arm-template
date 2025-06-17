@@ -55,13 +55,13 @@
 }
 
 
-@section scripts{
+@section scripts {
     <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css"/>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css"/>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css" />
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.min.js"></script>
     </environment>
     <script type="text/javascript">
@@ -78,7 +78,7 @@
         var addApiKeyUrl = "@Url.Action("AddApiKey", "User")";
         var deleteApiKeyUrl = "@Url.Action("DeleteApiKeyDetails", "User")";
         var editApiKeyUrl = "@Url.Action("EditApiKey", "User")";
-        
+
         var isSettingsPage = false;
         var successMessage = "@isProfileUpdateSuccess";
         var failureMessage = "@isProfileUpdateFailure";
@@ -111,9 +111,9 @@
                 $("#no-default-homepage").removeClass("hide");
                 $("#homepage-name").addClass("hide");
             }
-            
+
         });
-        
+
         $(document).on('show.bs.dropdown', '#homepage-list', function () {
             if (@userHomepage.Count == 0) {
                 $('#default-homepage > option:first').hide();
@@ -141,7 +141,7 @@
         });
     </script>
 }
-@section MainSection{
+@section MainSection {
     @await Html.PartialAsync("_ProfileMenu")
     <div class="col-12 no-padding no-margin width-alignment">
         @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["My Profile"] }, { "PageDescription", @pageDescription } })
@@ -225,7 +225,7 @@
                             </div>
                             <div class="form-element-label">
                                 <label class="">@T["Phone"]:</label>
-                                <span id="user-phonenumber" name="user-phonenumber" type="text" value="@(!string.IsNullOrWhiteSpace(userDetail.ContactNumber) ? userDetail.ContactNumber : "--")">@(!string.IsNullOrWhiteSpace(userDetail.ContactNumber) ?  userDetail.ContactNumber : "--")</span>
+                                <span id="user-phonenumber" name="user-phonenumber" type="text" value="@(!string.IsNullOrWhiteSpace(userDetail.ContactNumber) ? userDetail.ContactNumber : "--")">@(!string.IsNullOrWhiteSpace(userDetail.ContactNumber) ? userDetail.ContactNumber : "--")</span>
                             </div>
                             <div class="form-element-label" style="display:none">
                                 <label class="app-textbox-label col-lg-6 col-md-6 col-sm-6 col-6 no-padding">
@@ -241,10 +241,11 @@
                                 <div class="form-element-label">
                                     <label class="">@T["Groups"]:</label>
                                     <span id="groups-name">
-                                        @{ for (var group = 0; group < ViewBag.GroupList.Count; group++)
-                                           {
-                                               groupName.Add(@ViewBag.GroupList[group].Name);
-                                           }
+                                        @{
+                                            for (var group = 0; group < ViewBag.GroupList.Count; group++)
+                                            {
+                                                groupName.Add(@ViewBag.GroupList[group].Name);
+                                            }
                                         }
                                         @(String.Join(", ", groupName))
                                     </span>
@@ -284,7 +285,7 @@
                                                 </button>
                                                 @{
                                                     int i;
-                                                    var supportedCultures = GlobalAppSettings.GetSupportedLanguages();
+                                                    var supportedCultures = GlobalAppSettings.GetSupportedLanguages(globalAppSettings);
                                                     var supportedLanguages = supportedCultures.OrderBy(x => x.Name).ToList();
                                                     int cellcnt = supportedLanguages.Count() + 1;
                                                     int maxcols = supportedLanguages.Count() + 1;
@@ -399,7 +400,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
                 <div role="tabpanel" id="generate-api-key" class="profile-section col-12 tab-pane bi-page-body @isApiKeyGenerateTab">
                     @await Html.PartialAsync("~/Views/User/_ApiKeyMenu.cshtml")

@@ -342,14 +342,14 @@ $(document).on('click', '.toggle-button-favorite', function (event) {
 });
 
 $(document).on('keyup', '#search-tenants-allsites', function () {
-    if ($('#card-view-button').hasClass('active') && !isNullOrWhitespace($("#search-tenants-allsites").val().trim())) {
+    if ($('#card-view-button').hasClass('active')) {
         skipAll = 0;
         $("#tenant-cards-container-all").empty();
         loadTenantCards(TenantSites + "?userId=" + userId, skipAll, take);
     }
 });
 $(document).on('keyup', '#search-tenants-favorite', function () {
-    if ($('#card-view-button').hasClass('active') && !isNullOrWhitespace($("#search-tenants-favorite").val().trim())) {
+    if ($('#card-view-button').hasClass('active')) {
         skipFavorite = 0;
         $("#tenant-cards-container-favorite").empty();
         loadFavoriteCards(TenantFavoriteListurl + "?userId=" + userId, skipFavorite, take);

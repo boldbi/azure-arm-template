@@ -1,0 +1,105 @@
+﻿@{
+    ViewBag.Title = T["Proxy Settings"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var protocolTypes = new List<SelectListItem>
+    {  new SelectListItem
+        {
+            Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+        },
+        new SelectListItem
+        {
+             Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+        }
+    };
+    var siteUrl = Url.Action("Sites", "TenantsManagement");
+    var existingDomainUrl = GlobalAppSettings.SystemSettings.BaseUrl + siteUrl + "?searchKey=" + GlobalAppSettings.SystemSettings.BaseUrl;
+    var isSecureConnection = GlobalAppSettings.SystemSettings.IsSecureConnection;
+    var restartLink = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.RestartApplication);
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/bundles/css/proxy-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/proxy-settings.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+@section scripts {
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/proxy-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/proxy-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var proxySettingsUrl = "@Url.Action("UpdateProxySettings", "Administration")";
+        var isSecureConnection = "@isSecureConnection.ToString()" == "True";
+        var ignoreSslValidation = "@(GlobalAppSettings.SystemSettings.IgnoreSslValidation.ToString())".toLowerCase()  == "true";
+        var validateIPWhitelistedUrl = "@Url.Action("IsIPWhitelisted", "TenantsManagement")";
+        var restartLink = "@restartLink";
+    </script>
+}
+
+@section MainSection {
+
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div id="proxy-settings-header" class="col-12 float-start col-md-12 col-sm-12 admin-page-header header-without-button">
+            <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
+                <hgroup class="col-12 float-start header-group">
+                    <h1 class="page-title">
+                        @T["Proxy Settings"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Configure proxy settings to route traffic through a specified proxy server."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+
+        </div>
+
+        <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
+            <div class="col-12 float-start no-padding">
+                <div class=" col-6 float-start no-padding admin-header-btn float-end" id="user-management-options">
+                    <button class="secondary-button float-end" id="cancel-settings">@T["Cancel"]</button>
+                    <button type="button" id="update-proxy-settings" name="update-proxy-settings" class="primary-button float-end">
+                        <span>@T["Save"]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="proxy-container" class="col-12 float-start col-md-12 col-sm-12 admin-page-content-container">
+        <div class="admin-page-content col-12 float-start no-padding">
+            <form id="proxy-settings-form" class="col-md-12 form-horizontal admin-page-body ng-pristine ng-valid" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <div class="sub-section no-padding">
+                    <div class="form-group">
+                        @Html.Label("enable-ssl", T["Site or Proxy URL"].Value, new { @class = "col-12 float-start app-textbox-label" })
+
+                        <div id="ssl-selectpicker" class="input-group no-padding">
+                            <div class="input-group-addon">
+                                @Html.DropDownList("enableSsl", protocolTypes, new { id = "enable-ssl", @class = "enable-ssl", data_live_search = "false" })
+                            </div>
+                            <div class="no-padding">
+                                <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="@T["Enter your URL"]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+                            </div>
+                        </div>
+                        <div id="site-url-validation" class="col-12 float-start no-padding validation-errors site-url-validation"></div>
+                        <div class="exist-domain-info">
+                            <div class="info-message site-help-message">
+                                @T["Configure HTTPS instead of HTTP if the domain has a valid SSL certificate and is configured in your environment."]
+                            </div>
+                            @Html.CheckBox("domain-change", true, new { @class = "material-checkbox", id = "domain-change" })
+                            @Html.Hidden("domain-change")
+                            <label for="domain-change" class="app-textbox-label no-margin">
+                                @Html.Raw(string.Format(T["Update the URL of the {0}sites{1} that are deployed to the same URL."].Value, "<a target='_blank' class='text-decoration-none' href='" + existingDomainUrl + "'>", "</a>"))
+                            </label>
+                        </div>
+                        <div id="enable-checkbox" class="col-12 float-start no-padding enable-ssl-checkbox">
+                            @Html.CheckBox("ssl-certificate", new { @class = "material-checkbox", @id = "ssl-certificate" })
+                            @Html.Hidden("c")
+                            @Html.Label("ssl-certificate", T["Ignore the SSL certificate validation errors."].Value, new { @class = "app-textbox-label col-4 float-start section-label ssl-certification" })
+                        </div>
+
+                        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
+                    </div>
+                </div>
+            </form>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

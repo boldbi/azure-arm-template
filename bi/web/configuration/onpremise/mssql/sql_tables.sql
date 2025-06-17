@@ -130,7 +130,7 @@ CREATE TABLE [BOLDBI_ItemView](
 	[QueryString] nvarchar(max) NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
 	[IsActive] [bit] NOT NULL,
-	IsWidgetLinking [bit] NOT NULL)
+	[IsWidgetLinking] [bit] NOT NULL)
 ;
 
 CREATE TABLE [BOLDBI_ItemLogType](
@@ -994,6 +994,7 @@ CREATE TABLE [BOLDBI_CustomEmailTemplate](
 [CreatedDate] [datetime] NOT NULL,
 [ModifiedDate] [datetime] NULL,
 [SendEmailAsHTML] [bit] NOT NULL,
+[CustomVisibilityOptions] [nvarchar](max) NOT NULL,
 [IsActive] [bit] NOT NULL,
 [TemplateId] [int] NOT NULL,
 [IsDefaultTemplate][bit] NOT NULL,
@@ -1088,6 +1089,26 @@ CREATE TABLE [BOLDBI_AICredentials](
     [IsAISummariesEnabledGlobally][bit] NOT NULL DEFAULT (0)
     )
 ;
+
+CREATE TABLE [BOLDBI_AI_REQUESTS] (
+    [MessageId] NVARCHAR(255) NOT NULL PRIMARY KEY,
+    [SearchDate] DATETIMEOFFSET,
+    [Message] NVARCHAR(MAX),
+    [DatasourceId] NVARCHAR(MAX),
+    [SessionId] NVARCHAR(MAX),
+    [HasError] BIT,
+    [Response] NVARCHAR(MAX),
+    [StatusMessage] NVARCHAR(MAX),
+    [AiModel] NVARCHAR(MAX),
+    [TenantId] NVARCHAR(MAX),
+    [UserEmail] NVARCHAR(MAX),
+    [Feedback] NVARCHAR(MAX),
+    [UserInfo] NVARCHAR(MAX),
+    [RequestType] NVARCHAR(MAX),
+    [Environment] NVARCHAR(MAX),
+    [IsValidResponse] BIT,
+    [IsWidgetRendered] BIT
+);
 
 ---- PASTE INSERT Queries below this section --------
 
