@@ -4,7 +4,7 @@ import yaml
 import urllib.request
 import json
 
-filePath = ("{1}")
+filePath = (r"{1}")
 if({5}):
     with urllib.request.urlopen(filePath) as file:
         loaded_data = yaml.safe_load(file)
@@ -13,7 +13,7 @@ if({5}):
     elif isinstance(loaded_data, dict):
         df = pd.json_normalize(loaded_data)
 elif({8}):
-    with open("{1}") as f:
+    with open(r"{1}") as f:
         json_data = json.load(f)
     if isinstance(json_data, list):
         df = pd.DataFrame(json_data)

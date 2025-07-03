@@ -323,7 +323,7 @@ function getFormData() {
     var tenantPrefix = getTenantPrefix(serverType === "Oracle" ? $("#tenant-table-prefix").val() : isAdvancedTab ? ($("#new-db").is(":checked") ? $("#server-prefix-name").val() : $("#server-table-prefix").val()) : ($("#new-db").is(":checked") ? $("#txt-server-prefix").val() : $("#tenant-table-prefix").val()));
     switch (database) {
         case "mssql":
-            var databaseName = $("#new-db").is(":checked") ? $("#txt-dbname").val() : $("#databaseName").val();
+            var databaseName = $("#new-db").is(":checked") ? $("#txt-dbname").val() : $("#database-name").val();
             break;
         case "mysql":
             var databaseName = $("#new-db").is(":checked") ? $("#txt-dbname").val() : $("#database-name").val();

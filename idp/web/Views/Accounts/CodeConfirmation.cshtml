@@ -1,4 +1,4 @@
-﻿@using Syncfusion.Server.Base;
+﻿﻿﻿@using Syncfusion.Server.Base;
 @using Syncfusion.Server.Base.DataClasses;
 @using Syncfusion.Server.Base.Localization;
 @inject LocalizationHandler localization;
@@ -12,12 +12,12 @@
     var maskedEmail = new UserManagement().GetMaskedEmailString(email);
 }
 
-@section styles{
+@section styles {
     <link rel="stylesheet" href="~/bundles/css/accounts-code-confirmation.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/accounts-code-confirmation.css")" crossorigin="anonymous" asp-append-version="true" />
 }
 
-@section scripts{
-       <script nonce="@Context.Items["ScriptNonce"]">
+@section scripts {
+    <script nonce="@Context.Items["ScriptNonce"]">
         var email = "@email";
         $(document).ready(function () {
             $(document).on("click", ".forgot-pwd-link", function (event) {
@@ -36,7 +36,7 @@
     </script>
 }
 
-@section MainSection{
+@section MainSection {
     <div class="code-confirmation-body">
         <div class="icon-container">
             <div class="su su-tick"></div>
@@ -63,39 +63,10 @@
             <div class="divider-light"></div>
             <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">@T["The verification link expires in 2 days!"]</span></div>
         }
-        else if (accountNotExist)
-        {
-            <div class="status-message text-body">
-                @{
-#pragma warning disable SCS0029
-                }
-                @if (email.ToString().Contains('@'))
-                {
-                    @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0} {1}"].Value, $"<a id='tenant-email' href='mailto:{email}'>{email}</a>", $"{localization.EmailNotExist}"))
-                }
-                else
-                {
-                    @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}"].Value, string.Format(T[$"{localization.UsernameNotExist}"].Value, $"{email}")))
-                }
-                @{
-#pragma warning restore SCS0029
-                }
-            </div>
-            <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
-            <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">
-            <div class="divider-light"></div>
-            <div class="text-body expiration-time"><span class="info-icon">i</span><span class="message">@T["The recovery link expires in two hours!"]</span></div>
-        }
         else
         {
             <div class="status-message text-body">
-                @{
-#pragma warning disable SCS0029
-                }
-                @Html.Raw(string.Format(T["An email with instructions on how to recover your password has been sent to {0}."].Value, maskedEmail))
-                @{
-#pragma warning restore SCS0029
-                }
+                @T["If an account with this email address exists, a password reset link will be sent."]
             </div>
             <div class="text-body resend-verification">@T["If you have not received it, click the following link."]</div>
             <input id="mail-resend" type="button" class="btn-holder link-button" href="@Url.Action("RecoverAccount","Accounts")?isaccountactivation=false" value="@T["Resend recovery link"]">

@@ -308,7 +308,7 @@ $(document).ready(function () {
                     $(this).removeAttr("disabled");
                 }
 
-                if( actionType.toLowerCase() != "edit") {
+                if (actionType.toLowerCase() != "edit") {
                     if (isBoldReportsTenantType()) {
                         document.getElementById("tenant-table-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
                         document.getElementById("txt-server-prefix").ej2_instances[0].value = defaultValues.DefaultPrefixForReports;
@@ -372,7 +372,8 @@ $(document).ready(function () {
                         }
 
                         $('#details-next').removeAttr("disabled");
-                    } else {
+                    }
+                    else {
                         $(this).removeAttr("disabled");
                     }
                 }
@@ -382,101 +383,21 @@ $(document).ready(function () {
                     $("#details-next").click();
                 }
             }
-            else if ($(this).hasClass("data-security") && ($(".storage-form").find(".e-error").length == 0 || useSingleTenantDb)) {
-                if (systemSettingsDetails) {
-                    systemSettingsDetails.StorageType = getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type");
-                }
-
-                if ($("#blob-storage-form").valid() && systemSettingsDetails && systemSettingsDetails.StorageType == "1") {
-                    parent.showWaitingPopup(waitingPopUpElement);
-
-                    $.ajax({
-                        type: "POST",
-                        url: blobExist,
-                        data: { connectionString: azuredetails.ConnectionString, containerName: window.containername },
-                        success: function (result) {
-                            parent.hideWaitingPopup(waitingPopUpElement);
-                            if (typeof result.Data != "undefined") {
-                                if (result.Data.Key.toString().toLowerCase() == "true") {
-                                    $(".azure-validation,.blob-error-message").css("display", "none");
-                                    $(".storage-form #system-settings-filestorage-container").hide();
-                                    moveStepper("front", 4);
-                                    nextToDataSecurityPage();
-                                }
-                                else {
-                                    $(".azure-validation,.blob-error-message").css("display", "block");
-                                }
-                            }
-                            else {
-                                $(".azure-validation,.blob-error-message").css("display", "block");
-                            }
-                        }
-                    });
-
-                    $(this).removeAttr("disabled");
-                }
-                else if ($("#amazon-s3-storage-form").valid && systemSettingsDetails && systemSettingsDetails.StorageType == "3") {
-                    var amazons3configuration = {
-                        Region: getDropDownValue("aws-region"),
-                        BucketName: $("#txt-bucketname").val(),
-                        AccessKeyId: $("#txt-accesskeyid").val(),
-                        AccessKeySecret: $("#txt-accesskeysecret").val(),
-                        RootFolderName: $("#txt-rootfoldername").val()
-                    }
-
-                    parent.showWaitingPopup(waitingPopUpElement);
-                    $.ajax({
-                        type: "POST",
-                        url: amazons3Exist,
-                        data: { amazons3configuration: JSON.stringify(amazons3configuration) },
-                        success: function (data) {
-                            parent.hideWaitingPopup(waitingPopUpElement);
-                            if (data.result == true) {
-                                $(".amazon-s3-storage-validation,.amazon-s3-storage-error-message").css("display", "none");
-                                $(".storage-form #system-settings-filestorage-container").hide();
-                                if (!isBoldReportsTenantType()) {
-                                    moveStepper("front", 4);
-                                    nextToDataSecurityPage();
-                                }
-                                else {
-                                    moveStepper("front", 4);
-                                    nextToUserPage();
-                                }
-                            }
-                            else {
-                                $(".amazon-s3-storage-validation,.amazon-s3-storage-error-message").css("display", "block");
-                            }
-                        }
-                    });
-
-                    $(this).removeAttr("disabled");
-                }
-                else if (systemSettingsDetails && systemSettingsDetails.StorageType == "0") {
-                    $(".storage-form #system-settings-filestorage-container").hide();
-                    moveStepper("front", 4);
-                    nextToDataSecurityPage();
-                    $(this).removeAttr("disabled");
-                }
-                else {
-                    $(this).removeAttr("disabled");
-                }
-
-                if (useSingleTenantDb)
-                {
+            else if ($(this).hasClass("data-security") && $(".tenant-database-form").find(".e-error").length == 0 && ($(".storage-form").find(".e-error").length == 0 || useSingleTenantDb)) {
+                if (useSingleTenantDb) {
                     moveStepper("front", 4);
                     systemSettingsDetails = {
                         TenantIsolation:
-                            {
-                                IsEnabled: $("#isolation-enable-switch").is(":checked"),
-                                IsolationCode: $("#site-isolation-code").val()
-                            },
+                        {
+                            IsEnabled: $("#isolation-enable-switch").is(":checked"),
+                            IsolationCode: $("#site-isolation-code").val()
+                        },
                         CustomAttribute: [],
                     };
                     nextToDataSecurityPage();
                 }
                 else {
-                    saveDatabaseValuesTemporarly();
-
+                    
                     if ($(".tenant-database-form #db-content-holder").valid()) {
                         var databaseType = getDropDownValue("database-type");
 
@@ -487,12 +408,95 @@ $(document).ready(function () {
                         }
 
                         if (!$(".database-error").is(":visible")) {
+                            if (systemSettingsDetails) {
+                                systemSettingsDetails.StorageType = getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type");
+                            }
+
+                            saveDatabaseValuesTemporarly();
+                            if ($("#blob-storage-form").valid() && systemSettingsDetails && systemSettingsDetails.StorageType == "1") {
+                                parent.showWaitingPopup(waitingPopUpElement);
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: blobExist,
+                                    data: { connectionString: azuredetails.ConnectionString, containerName: window.containername },
+                                    success: function (result) {
+                                        parent.hideWaitingPopup(waitingPopUpElement);
+                                        if (typeof result.Data != "undefined") {
+                                            if (result.Data.Key.toString().toLowerCase() == "true") {
+                                                $(".azure-validation,.blob-error-message").css("display", "none");
+                                                $(".storage-form #system-settings-filestorage-container").hide();
+                                                moveStepper("front", 4);
+                                                nextToDataSecurityPage();
+                                            }
+                                            else {
+                                                $(".azure-validation,.blob-error-message").css("display", "block");
+                                            }
+                                        }
+                                        else {
+                                            $(".azure-validation,.blob-error-message").css("display", "block");
+                                        }
+                                    }
+                                });
+
+                                $(this).removeAttr("disabled");
+                            }
+                            else if ($("#amazon-s3-storage-form").valid && systemSettingsDetails && systemSettingsDetails.StorageType == "3") {
+                                var amazons3configuration = {
+                                    Region: getDropDownValue("aws-region"),
+                                    BucketName: $("#txt-bucketname").val(),
+                                    AccessKeyId: $("#txt-accesskeyid").val(),
+                                    AccessKeySecret: $("#txt-accesskeysecret").val(),
+                                    RootFolderName: $("#txt-rootfoldername").val()
+                                }
+
+                                parent.showWaitingPopup(waitingPopUpElement);
+                                $.ajax({
+                                    type: "POST",
+                                    url: amazons3Exist,
+                                    data: { amazons3configuration: JSON.stringify(amazons3configuration) },
+                                    success: function (data) {
+                                        parent.hideWaitingPopup(waitingPopUpElement);
+                                        if (data.result == true) {
+                                            $(".amazon-s3-storage-validation,.amazon-s3-storage-error-message").css("display", "none");
+                                            $(".storage-form #system-settings-filestorage-container").hide();
+                                            if (!isBoldReportsTenantType()) {
+                                                moveStepper("front", 4);
+                                                nextToDataSecurityPage();
+                                            }
+                                            else {
+                                                moveStepper("front", 4);
+                                                nextToUserPage();
+                                            }
+                                        }
+                                        else {
+                                            $(".amazon-s3-storage-validation,.amazon-s3-storage-error-message").css("display", "block");
+                                        }
+                                    }
+                                });
+
+                                $(this).removeAttr("disabled");
+                            }
+                            else if (systemSettingsDetails && systemSettingsDetails.StorageType == "0") {
+                                $(".storage-form #system-settings-filestorage-container").hide();
+                                moveStepper("front", 4);
+                                nextToDataSecurityPage();
+                                $(this).removeAttr("disabled");
+                            }
+                            else {
+                                $(this).removeAttr("disabled");
+                            }
+
+                            if (isBoldReportsTenantType()) {
+                                $(".isolation-part").removeClass("d-block").addClass("d-none");
+                            } else {
+                                $(".isolation-part").removeClass("d-none").addClass("d-block");
+                            }
                             if ($("#txt-password-db").is(":text")) {
                                 $("#txt-password-db").parent().find(".show-hide-password").click();
                                 $("#txt-password-db").parent().find(".tooltip").css("display", "none");
                             }
 
-                            saveDatabaseValuesTemporarly();
                             moveStepper("front", 3);
 
                             if (actionType.toLowerCase() == "edit") {
@@ -509,14 +513,10 @@ $(document).ready(function () {
                         }
 
                         $('#details-next').removeAttr("disabled");
-                    } else {
+                    }
+                    else {
                         $(this).removeAttr("disabled");
                     }
-                }
-                if (isBoldReportsTenantType()) {
-                    $(".isolation-part").removeClass("d-block").addClass("d-none");
-                } else {
-                    $(".isolation-part").removeClass("d-none").addClass("d-block");
                 }
             }
             else if (($(".tenant-user-form").hasClass("d-none") && $(this).hasClass("user")) && ($(".storage-form").find(".e-error").length == 0 || useSingleTenantDb)) {
@@ -576,6 +576,7 @@ $(document).ready(function () {
                         $("#details-back").show().removeClass("back-button");
                         if (getDropDownValue("database-type").toLowerCase() == "mssql" || getDropDownValue("database-type").toLowerCase() == "postgresql" || getDropDownValue("database-type").toLowerCase() == "mysql" || getDropDownValue("database-type").toLowerCase() == "oracle") {
                             checkingNewDBConnection(waitingPopUpElement, actionType);
+                            saveDatabaseValuesTemporarly();
                         } else {
                             updateTenant(waitingPopUpElement);
                         }
@@ -664,11 +665,8 @@ $(document).ready(function () {
             {
                 $("#details-next").removeClass("storage-config").addClass("database");
             }
-
         }
         else if ($("#details-next").hasClass("data-security")) {
-
-
             $("#details-next").attr("value", window.Server.App.LocalizationContent.NextButton);
             $(".tenant-registration-form").removeClass("d-block").addClass("d-none");
             $(".tenant-user-form").removeClass("d-block").addClass("d-none");
@@ -679,7 +677,6 @@ $(document).ready(function () {
             $("#header-description").show();
 
             $("#details-next").removeClass("data-security").addClass("storage-config");
-
 
             moveStepper("back", 2);
 
@@ -716,8 +713,6 @@ $(document).ready(function () {
             }
 
             $("#search-area").hide();
-
-
         }
         else if ($("#details-next").hasClass("user")) {
             if (useSingleTenantDb)
