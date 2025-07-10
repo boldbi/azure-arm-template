@@ -1,0 +1,133 @@
+﻿@using Microsoft.AspNetCore.Mvc.ViewFeatures;
+@using Microsoft.Extensions.DependencyInjection;
+
+@{
+    Layout = null;
+    var parentId = ViewBag.ParentId;
+    var itemDetail = ViewBag.ItemDetail as ItemDetail;
+    var isUserAuthenticatedInCurrentTenant = ViewBag.IsUserAuthenticatedInCurrentTenant;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
+    bool isSlideshow = ViewBag.IsSlideshow == null ? false : Convert.ToBoolean(ViewBag.IsSlideshow);
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var isOwner = ViewBag.IsOwner;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var isUsageAnalytics = ViewBag.IsUsageAnalytics != null;
+}
+
+    <environment include="Development,CloudDevelopment">
+        <script>
+        var permissionScript = "@dashboardServerResourceUrl/cdn/scripts/share-permission.js?v=@ServerAppConfig.ProductVersion";
+        var permissionStyle = "@dashboardServerResourceUrl/cdn/css/share-permission.css?v=@ServerAppConfig.ProductVersion";
+        var dashboardOptionScript = "@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-options.js?v=@ServerAppConfig.ProductVersion";
+        var dashboardOptionStyle = "@dashboardServerResourceUrl/cdn/css/designer/dashboard-options.css?v=@ServerAppConfig.ProductVersion";
+
+        </script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script>
+        var permissionScript = "@dashboardServerResourceUrl/cdn/scripts/share-permission.min.js?v=@ServerAppConfig.ProductVersion";
+        var permissionStyle = "@dashboardServerResourceUrl/cdn/css/share-permission.min.css?v=@ServerAppConfig.ProductVersion";
+        var dashboardOptionScript = "@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-options.min.js?v=@ServerAppConfig.ProductVersion";
+        var dashboardOptionStyle = "@dashboardServerResourceUrl/cdn/css/designer/dashboard-options.min.css?v=@ServerAppConfig.ProductVersion";
+
+        </script>
+    </environment>
+<head>
+    <script>
+        var preloadScripts = [];
+
+        var preloadStyles = [];
+
+        if (!embedConfig.IsEmbedDashboard) {
+            preloadScripts.push(permissionScript);
+            preloadStyles.push(permissionStyle);
+        }
+        preloadScripts.push(dashboardOptionScript);
+        preloadStyles.push(dashboardOptionStyle);
+
+        function DashboarDelayResources(resourceLinkArray, resourceType) {
+            for (var resource = 0; resource < resourceLinkArray.length; resource++) {
+                if (resourceType == "script") {
+                    var preloadLink = document.createElement(resourceType);
+                    preloadLink.type = "text/javascript";
+                    preloadLink.src = resourceLinkArray[resource];
+                } else {
+                    var preloadLink = document.createElement("link");
+                    preloadLink.rel = "stylesheet";
+                    preloadLink.href = resourceLinkArray[resource];
+                }
+                document.head.appendChild(preloadLink);
+            }
+        }
+
+        DashboarDelayResources(preloadScripts, "script");
+        DashboarDelayResources(preloadStyles, "style");
+        var angularManualBootstrap = true;
+        var itemDetail = @Json.Serialize(itemDetail);
+        var isOwner = @Json.Serialize(isOwner);
+        var isUsageAnalytics = @Json.Serialize(isUsageAnalytics);
+		var cdnLink = "@dashboardServerResourceUrl";
+    </script>
+</head>
+
+@if (!isUsageAnalytics)
+{
+    @await Html.PartialAsync("~/Views/DashboardViewerV2/_DashboardViews.cshtml")
+}
+
+@if (isUserAuthenticatedInCurrentTenant)
+{
+    @await Html.PartialAsync("~/Views/Items/_ItemInfo.cshtml")
+}
+
+@if (isUserAuthenticatedInCurrentTenant && !embedConfig.IsEmbedDashboard && !isSlideshow && !embedConfig.IsEmbedCode && !isUsageAnalytics)
+{
+    @await Html.PartialAsync("../Items/_SharePermission")
+}
+
+@await Html.PartialAsync("../Items/_GetLink")
+
+<div id="viewShare_popup" class="col-md-12 DisplayNone">
+    <div id="sharepopup_wrapper_WaitingPopup" class="e-waitpopup-sharepopup">
+        <div class="loader-blue loader-icon" id="loader-icon">
+            <svg class="circular">
+                <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+            </svg>
+        </div>
+    </div>
+    <iframe id="viewShare_popup_iframe" class="EditIframe"></iframe>
+</div>
+
+<div class="ViewShare_popup_shadow"></div>
+
+<div id="save-view-popup" class="displayNone" data-item-id="@(parentId != null ? parentId : itemDetail.Id)" data-widget-id="" data-widget-name="">
+    <iframe id="save-view-popup-iframe" class="" style="height: 100%; width: 100%;"></iframe>
+</div>
+
+<div id="progress-alert-container" class="custom-bootstrap-styles"></div>
+
+<div id="success-alert" class="custom-bootstrap-styles">
+    <div id="image-container">
+        <div class="image-holder">
+            <span class="su su-tick" alt="Success Icon"></span>
+        </div>
+    </div>
+    <div id="message">
+        <h1 id="message-header"></h1>
+        <span id="message-content"></span>
+    </div>
+</div>
+<div id="warning-alert" class="custom-bootstrap-styles">
+    <div id="image-container">
+        <span class="su su-warning-alt" alt="Warning Icon"></span>
+    </div>
+    <div id="message" class="div-close">
+        <h1 id="message-header"></h1>
+        <span id="message-content"></span>
+    </div>
+    <div class="close-div">
+        <span id="close-content">@T["Close"]</span>
+    </div>
+</div>

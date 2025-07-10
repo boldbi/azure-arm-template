@@ -1,0 +1,48 @@
+﻿@using System.Net;
+
+@model AuthSettings
+
+@{
+    var authLogoPrefixUrl = new Uri(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp).GetLeftPart(UriPartial.Authority) + (Context.Request.PathBase.ToString().ToLower().Equals("/api") ? string.Empty : Context.Request.PathBase.ToString()) + "/content/images/application/authlogo/";
+    var azureb2cloginAction = ViewBag.ReturnURL != null ? Url.Action("AzureB2CLogin", "accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("AzureB2CLogin", "accounts");
+    string openidLoginUrl = Url.Action("OpenIdLogin", "accounts");
+    string oauthLoginUrl = Url.Action("OAuthLogin", "accounts");
+    string jwtLoginUrl = Url.Action("JwtLogin", "accounts");
+    var isPopUp = ViewData["IsPopUp"] as bool? ?? false;
+    var auth = ViewData["Auth"] as AuthSettings;
+}
+
+@if (auth.AuthProvider == AuthProvider.AzureADB2C)
+{
+    @Html.Hidden("provider", "Azure AD B2C")
+    <input type="hidden" id="azure-email" name="email" />
+    <button id="azureb2c-login" class="@($"login-provider auth-login-button link-button button-style login-button-openid {(isPopUp ? "popup-login-button" : "")}")" data-login-url="@azureb2cloginAction" type="@((isPopUp ? "button" : "submit"))">
+        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+        {
+            <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
+        }
+        else
+        {
+            <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + auth.AzureADB2CSettings.Logo)" alt="@T["AuthLogo"]" />
+        }
+        <span class="login-provider-name"> Sign in with @auth.AzureADB2CSettings.AzureB2CProviderName</span>
+    </button>
+}
+@if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD && auth.AuthProvider != AuthProvider.AzureADB2C)
+{
+    <input type="hidden" value="@ViewBag.ReturnURL" id="authReturnUrl" name="authReturnUrl" />
+    @Html.Hidden("tenantId", auth.TenantId.ToString())
+    @Html.Hidden("authProviderLocation", auth.AuthProviderLocation.ToString())
+    <button id="azureb2c-login" class="@($"login-provider auth-login-button link-button button-style login-button-openid {(isPopUp ? "popup-login-button" : "")}")" data-login-url="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" type="@((isPopUp ? "button" : "submit"))">
+        @if (GlobalAppSettings.SystemSettings.StorageType == (int)StorageType.AzureBlob)
+        {
+            <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src='@Url.Content($"~/authlogo?path={auth.LogoUrl}")' alt="@T["AuthLogo"]" />
+        }
+        else
+        {
+            <img class="open-id-logo" id="openid_logo_img" style="margin: 0 auto" src="@(authLogoPrefixUrl + (auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.Logo : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.Logo : auth.JwtSettings.Logo))" alt="@T["AuthLogo"]" />
+        }
+        <span class="login-provider-name"> Sign in with @(auth.AuthProvider == AuthProvider.CustomOAuth ? auth.OAuthAuthSettings.ProviderName : auth.AuthProvider == AuthProvider.CustomOIDC ? auth.OIDCAuthSettings.ProviderName : auth.JwtSettings.Name)</span>
+    </button>
+}
+

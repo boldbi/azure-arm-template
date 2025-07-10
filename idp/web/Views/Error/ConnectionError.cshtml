@@ -1,0 +1,74 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using Syncfusion.Server.Base;
+
+@{
+    Layout = null;
+    var imageHelper = new ImageHelper(Context);
+    var errormessage = Context.Items["ErrorMessage"] as string;
+    var errorstacktrace = Context.Items["ErrorStackTrace"] as string;
+    var errorcode = Context.Items["ErrorCode"] as string;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Database Error"]</title>
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/error-page.css")" crossorigin="anonymous" asp-append-version="true" />
+    <script src="~/bundles/js/error.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/error.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var defaultErrorImageSrc = "@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimage = document.getElementById("connection-error-image");
+            if (logoimage) {
+                logoimage.onerror = function () {
+                    this.onerror = null;
+                    this.src = defaultErrorImageSrc;
+                };
+            }
+        });
+    </script>
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img id="connection-error-image" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')}/logos?type=login")" class="error-image-1">                </div>
+                <div class="error-image-center-2">
+                    <img src="@imageHelper.InternalServerErrorImage()" class="error-image-2">
+                </div>
+                <div class="error-type">@T["Database connection error"]</div>
+                <div class="error-text">
+                    @T["Sorry! Server has encountered error while establishing the connection to application database. This error could be occurred due to below possible causes:"]
+                </div>
+                @if (!string.IsNullOrWhiteSpace(errormessage))
+                {
+                    @if (GlobalAppSettings.SystemSettings.ShowStackTrace || isAdmin)
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorCode"]:@errorcode 
+                                @T["ErrorMessage"]:@errormessage 
+                                @T["ErrorStacktrace"]:@errorstacktrace
+                            </textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-bs-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorCode"]:@errorcode 
+                                @T["ErrorMessage"]:@errormessage
+                            </textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-bs-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("_FooterOnPremise")
+</body>
+</html>

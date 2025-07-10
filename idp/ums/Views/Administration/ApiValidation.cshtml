@@ -1,0 +1,73 @@
+﻿@{
+    ViewBag.Title = T["API Validator"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var idpUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.Trim('/');
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/api-validation.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/api-validation.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+@section scripts{
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/api-validation.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/api-validation.js")" crossorigin="anonymous" asp-append-version="true"></script>
+       <script nonce="@Context.Items["ScriptNonce"]">
+        var validateTokenRequestUrl = "@Url.Action("ValidateTokenRequest", "Administration")";
+        var getEndpointResponseRequestUrl = "@Url.Action("GetEndpointResponse", "Administration")";
+    </script>
+}
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div id="api-keys-header" class="col-12 col-md-12 col-sm-12 float-start admin-page-header header-without-button">
+            <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
+                <hgroup class="col-12 float-start header-group">
+                    <h1 class="page-title">
+                        @T["API Validator"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Validate the functionality of REST APIs."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+
+        </div>
+    </div>
+
+    <div id="api-validation-container" class="col-12 col-md-12 col-sm-12 float-start admin-page-content-container">
+        <div class="admin-page-content col-12 float-start no-padding">
+            <div class="col-12 float-start admin-page-body">
+                <div class="col-md-12 float-start no-padding">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Token Endpoint"]</label>
+                    </div>
+                    <div>
+                        <input class="form-control end-point-textbox" disabled value="@idpUrl/api/token" readonly />
+                    </div>
+                    <div>
+                        <button id="validate-token" class="primary-button">@T["Validate"]</button>
+                    </div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["API Endpoint"]</label>
+                    </div>
+                    <div>
+                        <input id="get-request-end-point" type="text" class="form-control end-point-textbox" required />
+                    </div>
+                    <div>
+                        <button id="get-response" class="primary-button" disabled="disabled">@T["Get Response"]</button>
+                    </div>
+                    <div class="validation-message"></div>
+                    <div class="info-message no-padding">@T["Provide the endpoint that supports GET requests."]</div>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+    @await Html.PartialAsync("_ApiValidationResponse")
+}

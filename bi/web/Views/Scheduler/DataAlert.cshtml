@@ -1,0 +1,40 @@
+﻿@{
+    Layout = null;
+    var canEdit = Convert.ToBoolean(ViewBag.CanWrite);
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var dashboardServerResourceUrl = _globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+}
+
+<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+    <div id="dataAlert" style="width:100%;height:100%"></div>
+
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+    {
+        <style>
+            :root {
+                --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+            }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+                --designer-font: var(--font-family) !important;
+            }
+        </style>
+    }
+</body>
+
+<script>
+        var sharedDataSources = @Html.Raw(ViewBag.SharedDatasources);
+        var itemId = "@ViewBag.ItemId";
+        var version = "@ViewBag.Version";
+        var designerToken = "@ViewBag.AccessToken";
+        var canEdit = @Json.Serialize(canEdit);
+        var dashboardCustomThemename = "@(ServerAppConfig.IsSelfHosted && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : _globalAppSettings.SystemSettings.CustomDashboardTheme)";
+        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : _globalAppSettings.SystemSettings.ThemeAppearance)";
+        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : _globalAppSettings.SystemSettings.CustomApplicationTheme)";
+</script>
