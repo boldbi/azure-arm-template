@@ -10,6 +10,18 @@
         "description": "App name for Bold BI Server. The name must be between 3 and 24 characters long, and can contain only numbers and lowercase letters."
       }
     },
+    "appServicePlanSize": {
+      "type": "string",
+      "allowedValues": [
+        "P1v3: 2core-8gb_RAM",
+        "P2v3: 4core-16gb_RAM",
+        "P3v3: 8core-32gb_RAM"
+      ],
+      "defaultValue": "P1v3: 2core-8gb_RAM",
+      "metadata": {
+        "description": "The pricing tier size for the App Service Plan."
+      }
+    },
     "storageAccountName": {
       "type": "string",
       "maxLength": 24,
@@ -33,31 +45,42 @@
     }
   },
   "variables": {
+    "sizeMapping": {
+      "P1v3: 2core-8gb_RAM": "P1v3",
+      "P2v3: 4core-16gb_RAM": "P2v3",
+      "P3v3: 8core-32gb_RAM": "P3v3"
+    },
     "WebAppSvcPlanWorkerSize": "0",
-    "WebAppSvcPlanSKU": "Basic",
-    "WebAppSvcPlanName": "BoldBIAppSvcPlan"
+    "WebAppSvcPlanSKU": "PremiumV3",
+    "WebAppSvcPlanName": "BoldBIAppSvcPlan",
+    "WebAppSvcPlanSize": "[variables('sizeMapping')[parameters('appServicePlanSize')]]",
+    "WebAppSvcPlanCapacity": 1
   },
   "resources": [
     {
       "name": "[variables('WebAppSvcPlanName')]",
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2014-06-01",
+      "apiVersion": "2022-03-01",
       "dependsOn": [],
       "tags": {
         "displayName": "AppSvcPlan"
       },
+      "sku": {
+        "name": "[variables('WebAppSvcPlanSize')]",
+        "tier": "[variables('WebAppSvcPlanSKU')]",
+        "size": "[variables('WebAppSvcPlanSize')]",
+        "capacity": "[variables('WebAppSvcPlanCapacity')]"
+      },
       "properties": {
-        "name": "[variables('WebAppSvcPlanName')]",
-        "sku": "[variables('WebAppSvcPlanSKU')]",
-        "workerSize": "[variables('WebAppSvcPlanWorkerSize')]"
+        "reserved": false
       }
     },
     {
       "name": "[parameters('WebAppName')]",
       "type": "Microsoft.Web/sites",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-08-01",
+      "apiVersion": "2022-03-01",
       "dependsOn": [
         "[concat('Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]"
       ],
@@ -75,12 +98,12 @@
             }
           ]
         },
-        "clientAffinityEnabled": "false",
+        "clientAffinityEnabled": false,
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]"
       },
       "resources": [
         {
-          "apiVersion": "2015-08-01",
+          "apiVersion": "2022-03-01",
           "name": "web",
           "type": "config",
           "dependsOn": [
@@ -137,7 +160,7 @@
           }
         },
         {
-          "apiVersion": "2015-08-01",
+          "apiVersion": "2022-03-01",
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
@@ -152,7 +175,7 @@
         {
           "name": "appsettings",
           "type": "config",
-          "apiVersion": "2015-08-01",
+          "apiVersion": "2022-03-01",
           "dependsOn": [
             "[concat('Microsoft.Web/sites/', parameters('WebAppName'))]",
             "web",
@@ -163,18 +186,18 @@
           },
           "properties": {
             "IdP:AzureBlobStorageAccountName": "[toLower(parameters('storageAccountName'))]",
-            "IdP:AzureBlobServiceEndpoint": "[concat('https://',toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:AzureBlobServiceEndpoint": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
             "IdP:AzureBlobStorageAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName'))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
             "IdP:AzureBlobContainerName": "boldbicontainer",
             "IdP:AzureBlobConnectionType": "https",
-            "IdP:AzureBlobStorageUri": "[concat('https://',toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:AzureBlobStorageUri": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
             "IdP:StorageType": "AzureBlob",
             "StorageType": "AzureBlob",
             "IsAzureApplication": "true",
             "log4net.Config": "logs\\log4net.config",
             "WEBSITE_DYNAMIC_CACHE": "0",
             "WEBSITE_LOAD_USER_PROFILE": "1",
-            "ApplicationUrl": "[concat('https://',parameters('WebAppName'), '.azurewebsites.net')]"
+            "ApplicationUrl": "[concat('https://', parameters('WebAppName'), '.azurewebsites.net')]"
           }
         }
       ]
@@ -183,14 +206,14 @@
       "name": "[toLower(parameters('storageAccountName'))]",
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [],
+      "apiVersion": "2022-05-01",
       "tags": {
         "displayName": "storageaccount"
       },
-      "properties": {
-        "accountType": "[parameters('storageAccountType')]"
-      }
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "properties": {}
     }
   ]
 }
