@@ -61,26 +61,26 @@
       "name": "[variables('WebAppSvcPlanName')]",
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2021-02-01",
       "dependsOn": [],
       "tags": {
-        "displayName": "AppSvcPlan"
+      "displayName": "AppSvcPlan"
       },
       "sku": {
-        "name": "[variables('WebAppSvcPlanSize')]",
-        "tier": "[variables('WebAppSvcPlanSKU')]",
-        "size": "[variables('WebAppSvcPlanSize')]",
-        "capacity": "[variables('WebAppSvcPlanCapacity')]"
+      "name": "[variables('WebAppSvcPlanSize')]",
+      "tier": "[variables('WebAppSvcPlanSKU')]",
+      "size": "[variables('WebAppSvcPlanSize')]",
+      "capacity": "[variables('WebAppSvcPlanCapacity')]"
       },
       "properties": {
-        "reserved": false
-      }
+      "reserved": false
+     }
     },
     {
       "name": "[parameters('WebAppName')]",
       "type": "Microsoft.Web/sites",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2015-08-01",
       "dependsOn": [
         "[concat('Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]"
       ],
@@ -98,12 +98,12 @@
             }
           ]
         },
-        "clientAffinityEnabled": false,
+        "clientAffinityEnabled": "false",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]"
       },
       "resources": [
         {
-          "apiVersion": "2022-03-01",
+          "apiVersion": "2015-08-01",
           "name": "web",
           "type": "config",
           "dependsOn": [
@@ -160,7 +160,7 @@
           }
         },
         {
-          "apiVersion": "2022-03-01",
+          "apiVersion": "2015-08-01",
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
@@ -175,7 +175,7 @@
         {
           "name": "appsettings",
           "type": "config",
-          "apiVersion": "2022-03-01",
+          "apiVersion": "2015-08-01",
           "dependsOn": [
             "[concat('Microsoft.Web/sites/', parameters('WebAppName'))]",
             "web",
@@ -186,18 +186,18 @@
           },
           "properties": {
             "IdP:AzureBlobStorageAccountName": "[toLower(parameters('storageAccountName'))]",
-            "IdP:AzureBlobServiceEndpoint": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:AzureBlobServiceEndpoint": "[concat('https://',toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
             "IdP:AzureBlobStorageAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName'))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
             "IdP:AzureBlobContainerName": "boldbicontainer",
             "IdP:AzureBlobConnectionType": "https",
-            "IdP:AzureBlobStorageUri": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:AzureBlobStorageUri": "[concat('https://',toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
             "IdP:StorageType": "AzureBlob",
             "StorageType": "AzureBlob",
             "IsAzureApplication": "true",
             "log4net.Config": "logs\\log4net.config",
             "WEBSITE_DYNAMIC_CACHE": "0",
             "WEBSITE_LOAD_USER_PROFILE": "1",
-            "ApplicationUrl": "[concat('https://', parameters('WebAppName'), '.azurewebsites.net')]"
+            "ApplicationUrl": "[concat('https://',parameters('WebAppName'), '.azurewebsites.net')]"
           }
         }
       ]
@@ -206,14 +206,14 @@
       "name": "[toLower(parameters('storageAccountName'))]",
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2022-05-01",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [],
       "tags": {
         "displayName": "storageaccount"
       },
-      "sku": {
-        "name": "[parameters('storageAccountType')]"
-      },
-      "properties": {}
+      "properties": {
+        "accountType": "[parameters('storageAccountType')]"
+      }
     }
   ]
 }
