@@ -187,15 +187,15 @@
                                     type: "string",
                                     width: ("@isMobile.ToString().ToLower()" == "false" &&
                                     (window.innerWidth > 1040))
-                                    ? 100
-                                    : 80
+                                    ? 70
+                                    : 60
                                 },
                                 {
                                     field: "ItemName",
                                     headerText: "@T["Dashboard"]",
                                     templateID: "#dashboard-template",
                                     type: "string",
-                                    width: 100,
+                                    width: 70,
                                     visible: ("@isMobile.ToString().ToLower()" == "false" &&
                                     (window.innerWidth > 1040))
                                 },
@@ -209,7 +209,7 @@
                                 {
                                     field: "NextScheduleString",
                                     headerText: "@T["Next Run Scheduled At"]",
-                                    width: 100,
+                                    width: 70,
                                     headerTemplateID: "#next-schedule-header",
                                     allowSorting: false,
                                     allowFiltering: false
@@ -217,7 +217,7 @@
                                 {
                                     field: "CreatedByDisplayName",
                                     headerText: "@T["Owner"]",
-                                    width: 100,
+                                    width: 70,
                                     headerTemplateID: "#owner-column",
                                     allowSorting: true,
                                     allowFiltering: true
@@ -225,7 +225,7 @@
                                 {
                                     field: "Status",
                                     headerText: "@T["Status"]",
-                                    width: 60,
+                                    width: 100,
                                     allowSorting: false,
                                     templateID: "#status-template",
                                     allowFiltering: false,
@@ -343,7 +343,15 @@
                 @T["Active"]
                 {{else Status=="Inactive"}}
                 <span class="inactive su su-schedule-status"></span>
-                @T["Inactive"]
+                {{if FailureOccurence >= @ServerAppConfig.FailureOccurrence }}
+                @Html.Raw(String.Format(T["Schedule disabled due to {0} consecutive failures"].Value, @ServerAppConfig.FailureOccurrence))
+                <span class="failure-history">
+                    <span class="su su-run-history"></span>
+                    <a href="javascript:void(0);" class="schedule-history" title="" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}")'>@T["Check Schedule History"]</a>
+                </span>
+                {{else}}
+                @Html.Raw(String.Format(T["Schedule disabled by {0}"].Value, "{{:ModifiedByFullName}}"))
+                {{/if}}
                 {{else}}
                 <span class="done su su-schedule-status"></span>
                 @T["Completed"]

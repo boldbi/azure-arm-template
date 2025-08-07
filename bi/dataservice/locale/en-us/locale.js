@@ -16,7 +16,8 @@
                     distribution: "Distribution",
                     composition: "Composition",
                     filters: "Filters",
-                    miscellaneous: "Miscellaneous"
+                    miscellaneous: "Miscellaneous",
+					ej2: "Charts V2"
                 },
                 widgetTitle: {
                     columnChart: "Column",
@@ -263,7 +264,7 @@
                 containerActionsText: "Container Actions",
                 exportName: "Export Settings",
                 basicSettingsText: "Basic Settings",
-                pivotChartSettingsText: "PivotChart Settings",
+                pivotChartSettingsText: "Pivot Chart Settings",
                 tooltipSettingsText: "Tooltip Settings",
                 linkText: "Link",
                 filterText: "Filter",
@@ -333,14 +334,38 @@
 					summaryPadding: "Padding",
 					enableSummaryFontSize: "Auto Font Size",
 					summaryFontSize: "Font Size",
-					customizeButton: "Customize"
+					customizeButton: "Customize",
+					summaryRowDialogTitle: "Grid Summary Configuration",
+					addSummaryText: "Add Summary",
+					updateBtnText: "Update",
+					summaryRowDialogType: "Type",
+					summaryRowDialogTitleText: "Title",
+					summaryRowDialogShowValue: "Show Value ",
+					summaryRowDialogTitleColor: "Title Color",
+					summaryRowDialogValueColor: "Value Color",
+					summaryRowDialogTitleAlign: "Title Align",
+					summaryRowDialogValueAlign: "Value Align",
+					summaryRowDialogMeasureAuto: "Auto",
+					summaryRowDialogMeasureSum: "Sum",
+					summaryRowDialogMeasureAverage: "Average",
+					summaryRowDialogMeasureMinimum: "Minimum",
+					summaryRowDialogMeasureMaximum: "Maximum",
+					summaryRowDialogMeasureCount: "Count",
+					summaryRowDialogMeasureDCount: "Distinct Count",
+					summaryRowDialogMeasureExpression: "Expression",
                 },
                 filter: {
                     actAsMasterWidget: "Act As Master Widget",
                     ignoreFilterActions: "Ignore Filter Actions",
                     hierarchicalFilter: "Enable Hierarchical Filtering",
                     allowFiltering: "Allow Filter",
-                    persistVirtualSelection: "Persist Virtual Selection"
+                    persistVirtualSelection: "Persist Virtual Selection",
+					filterType: "FilterType",
+					allowFilterType: {
+						allowBarFilter: "Bar",
+						allowMenuFilter: "Menu",
+						allowExcelFilter: "Excel"
+					},
                 },
                 linking: {
                     enableLinkText: "Enable Link",
@@ -359,7 +384,6 @@
                     appendColumn: "Append Column",
                     urlPreview: "URL Preview",
                     linkDestination: "Link Destination",
-                    defaultText: "Default",
                     advancedText: "Advanced",
                     targetText: "Target",
                     targetField: {
@@ -407,7 +431,6 @@
                     backgroundColor: "Background Color",
                     transparency: "Transparency",
                     backgroundMode: {
-                        default: "Default",
                         fill: "Fill",
                         uniform: "Uniform",
                         uniformToFill: "Uniform To Fill"
@@ -438,7 +461,9 @@
                     enableBackgroundColor: "Enable Background Color",
                     enableBackgroundImage: "Enable Background Image",
                     foregroundColor: "Foreground Color",
-                    enableForegroundColor: "Enable Foreground Color"
+                    enableForegroundColor: "Enable Foreground Color",
+					usePaletteColor: "Use Palette Color",
+					usePaletteColorInfo: "Enable this property to apply widget colors based on index. By default, colors are applied based on data."
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -450,7 +475,8 @@
                     allowExportingText: "Allow Exporting",
 					showHeaderText: "Show Header",
                     canvasStyle: "Canvas Style",
-                    bannerPanelStyle: "Banner Panel Style"
+                    bannerPanelStyle: "Banner Panel Style",
+					CommonWidgetSettings: "Common Widget Settings"
                 },
                 exportSettings: {
                     csvExportText: "Allow CSV Export",
@@ -627,6 +653,7 @@
                 tooltipSettings: {
                     showTooltip: "Show Tooltip",
                     showValueInTooltip: "Show Value In Tooltip",
+					enableLegendColor: "Apply Legend Color",
                     customizeTooltip: "Customize Tooltip",
                     customizeTooltipBtnText: "Customize Tooltip",
                     customizeTooltipDialogTitleText: "Customize Tooltip Settings",
@@ -1080,6 +1107,9 @@
 				dataCacheScheduleTuesday: "Tuesday",
 				dataCacheScheduleMonday: "Monday",
 				dataCacheScheduleSunday: "Sunday",
+				dataCacheScheduleWeekEndDay: "weekendday",
+				dataCacheScheduleWeekDay: "weekday",
+				dataCacheScheduleDay: "day",
 				dataCacheScheduleOfEvery: "of every",
 				dataCacheScheduleMonth: "month(s)",
 				dataCacheScheduleDayText: "Day",
@@ -1090,6 +1120,16 @@
 				dataCacheScheduleNeverText: "Never",
 				dataCacheScheduleAfterText: "After",
 				dataCacheScheduleOnText: "On",
+				dataCacheScheduleHourly: "Hourly",
+				dataCacheScheduleDaily: "Daily",
+				dataCacheScheduleWeekly: "Weekly",
+				dataCacheScheduleMonthly: "Monthly",
+				dataCacheScheduleFirst: "first",
+				dataCacheScheduleSecond: "second",
+				dataCacheScheduleThird: "third",
+				dataCacheScheduleFourth: "fourth",
+				dataCacheScheduleLast: "last",
+				dataCacheHelpDoc: "here",
                 headerNewConnectionText: "NEW CONNECTION",
                 newDataSourceText: "NEW DATA SOURCE",
                 dataSourceTypeText: "Data Source Type",
@@ -1175,6 +1215,17 @@
                 runText: "Run",
                 filterText: "Filter",
                 joinText: "Join",
+				relationShipText: "RelationShip",
+				dataRelation: "Data Relation",
+				newRelationButton:"New Relationship",
+				fromTable: "From Table",
+				fromColumn: "From Column",
+				toTable: "To Table",
+				toColumn: "To Column",
+				cardinality: "Cardinality",
+				crossFilter: "Cross filter direction",
+				relationTooltip : "The join indicates an entity relationship when data relation is enabled",
+				relationNoRecordPreview : "Data Preview is not supported for Data Relationships",
                 dsExpressionText: "Expression",
                 parameterHeaderText: "Dashboard Parameter",
 				dataSamplingHeaderText: "Data Sampling",
@@ -2535,6 +2586,7 @@
                 previewAndConnect: "Preview & Connect",
                 considerFirstRowHeader: "Consider the first row as header",
                 removeExpressionText: "Deleting an expression will affect the widgets that have already been configured with it. Do you still want to proceed?",
+				confirmRemoveExpressionText:'Do you want to delete the <strong>{expressionname}</strong> expression?',
                 oAuthAccountType: "Connected as",
                 switchOAuthAccount: "Change",
                 intermediateDbMsg: "Files and web-API-related data sources require an intermediate database. ",
@@ -2700,7 +2752,8 @@
                 createCategoryTooltip: "Create category",
                 selectCategoryWatermarkText: "Select Category",
                 publishText: "Publish",
-                openText: "Open"
+                openText: "Open",
+				noSuggestion: "No suggestions"
             },
             masterSlaveWindow: {
                 addMastersButtonText: "Add Master Widget(s)",
@@ -2725,7 +2778,8 @@
                 profileNameEditAdd: "Only one item can be edited or added",
                 filterKeyEmpty: "Profile name cannot be empty.",
                 filterKeyExist: "A filter profile with the same name already exists.",
-                widgetsAvailable: "widgets available."
+                widgetsAvailable: "widgets available.",
+				deleteIconTooltip: "Delete"
             },
 			translationWindow: {
 				dialogTitle:"Dynamic Language Translator",
@@ -2737,7 +2791,9 @@
 				deleteMsg: "Deleting the widget will remove its associated data from the Dynamic Language Translator window.",
 				closeText:"Close",
 				dropDownWatermarkText: "Select Language",
-				iconLabel: "Localize Dashboard"
+				iconLabel: "Localize Dashboard",
+				entityText: "Entity",
+				keyText: "Key"
 			},
             dataConfigurationPanel: {
                 collapse: "Collapse",
@@ -2846,7 +2902,8 @@
 				joinMessageRockset: "Rockset does not support the FULL OUTER JOIN",
         combineDsWithCustomQueryAlertMessage: "The append data sources feature does not support data sources in code view mode.",
         firstAndLastMessage: "The First and Last option is not supported for aggregate expressions.",
-				relativeDateFilterValidationMessage: "Please choose or enter a valid date. The date value cannot be empty."
+				relativeDateFilterValidationMessage: "Please choose or enter a valid date. The date value cannot be empty.",
+				expressionValidationMessage: "Would you like to validate the expression while executing the query?"
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -3732,22 +3789,22 @@
 				customerDeposit: "Customer Deposit",
 				customerMessage: "Customer Message",
 				customerPayment: "Customer Payment",
-				customerRefund: "Customer Refund", 
-				customerStatus: "Customer Status", 
-				customerSubsidiaryRelationship: "Customer Subsidiary Relationship", 
-				department: "Department", 
-				deposit: "Deposit", 
-				depositApplication: "Deposit Application", 
-				descriptionItem: "Description Item", 
-				discountItem: "Discount Item", 
-				downloadItem: "Download Item", 
-				emailTemplate: "Email Template", 
-				employee: "Employee", 
-				estimate: "Estimate", 
-				expenseCategory: "Expense Category", 
-				expenseReport: "Expense Report", 
-				fairValuePrice: "Fair Value Price", 
-				fulfillmentRequest: "Fulfillment Request", 
+				customerRefund: "Customer Refund",
+				customerStatus: "Customer Status",
+				customerSubsidiaryRelationship: "Customer Subsidiary Relationship",
+				department: "Department",
+				deposit: "Deposit",
+				depositApplication: "Deposit Application",
+				descriptionItem: "Description Item",
+				discountItem: "Discount Item",
+				downloadItem: "Download Item",
+				emailTemplate: "Email Template",
+				employee: "Employee",
+				estimate: "Estimate",
+				expenseCategory: "Expense Category",
+				expenseReport: "Expense Report",
+				fairValuePrice: "Fair Value Price",
+				fulfillmentRequest: "Fulfillment Request",
 				giftCertificateItem: "Gift Certificate Item",
 				inboundShipment: "Inbound Shipment",
 				intercompanyJournalEntry: "Intercompany Journal Entry",
@@ -4302,7 +4359,8 @@
                 okButtonText: "Apply",
 				multiselectText: "Hold CTRL to select multiple items",
 				enableAll: "Enable all",
-				dragDropText: "Drag and drop the column from the left side panel"
+				dragDropText: "Drag and drop the column from the left side panel",
+				searchPlaceHolder: "Search Column"
             },
             almaDataSource: {
                 ping: "Ping",
@@ -6571,7 +6629,11 @@
 					stdDevSampDesc: "Calculates the sample standard deviation, estimating spread for a sample.",
 					stdDevSampEx: "STDDEVSAMP(numeric_expression)",
 					stdDevPopDesc: "Calculates the population standard deviation, measuring spread for the entire population.",
-					stdDevPopEx: "STDDEVPOP(numeric_expression)"
+					stdDevPopEx: "STDDEVPOP(numeric_expression)",
+					previousValueDesc: "Returns the value from a specified previous row in the result set relative to the current row.",
+					previousValueEx: "PREVIOUSVALUE(expression, offset)",
+					nextValueDesc: "Returns the value from a specified subsequent row in the result set relative to the current row.",
+					nextValueEx: "NEXTVALUE(expression, offset)"
                 }
             },
             queryJoiner: {
@@ -6703,13 +6765,49 @@
                 valueTypeInformation: "The percentage will be calculated by using the maximum value of the Based On field.",
                 defaultColor: "Default Color",
                 reset: "Reset",
-                defaultFormat: "Null Formatting"
+                defaultFormat: "Null Formatting",
+				gradientText: "Gradient",
+				ruleText: "Rule",
+				individualText: "Individual",
+				gradient: {
+					nullFormatZero: "As zero",
+					nullFormatSpecific: "Specific",
+					placeholderMinimum: "Minimum",
+					placeholderAverage: "Average",
+					placeholderMaximum: "Maximum",
+				},
+				rule: {
+					valueText: "Value",
+					percentageText: "Percentage",
+					greaterthanCondition: "Greater than",
+					greaterthanOrEqualCondition: "Greater than or Equal to",
+					lessthanCondition: "Less than",
+					lessthanOrEqualCondition: "Less than or Equal to",
+					equalCondition: "Equal to",
+					notEqualCondition: "Not equal to",
+					betweenCondition: "Between",
+					notBetweenCondition: "Not between",
+					startswith: "Starts With",
+					endswith: "Ends With",
+					contains: "Contains",
+					notContains: "Not Contains",
+					equals: "Equals",
+					notEquals: "Not Equals",
+					rightToText: "Right to Text",
+					leftToText: "Left to Text",
+					iconOnly: "Icon Only",
+				},
+				conditionalFormat: {
+					colorSettings: "Color Settings",
+					formattingType: "Formatting Type",
+					background: "Background",
+					foreground: "ForeGround"
+				}
             },
             colorCustomBasicLocale: {
                 dimensionRadioBtnText: "Text",
                 measureRadioBtnText: "Number",
                 advanceText: "Conditional Formatting",
-                basicText: "Default",
                 addConditions: "Add Conditions",
                 modifyConditions: "Modify Conditions",
                 advancedConditionalFormatting: "Advanced Conditional Formatting",
@@ -6746,6 +6844,7 @@
                 markFavoriteTooltip: "Mark as favorite",
                 markUnFavorieTooltip: "Remove from favorites",
                 filterOverview: "Filters Overview",
+				interactionFilters: "Interaction Widgets",
                 dateSplit: "To",
                 appliedFilters: "Applied Filters",
                 dashboardOptions: "Dashboard Options",
@@ -6768,7 +6867,12 @@
                 enableCommentDisplayText: "Enable Comment",
 				performanceMetricsPopText:"Metrics",
 				enableMetrics: "Enable Metrics",
-				enableMobileView: "Restrict Mobile View On Desktop"				
+				enableMobileView: "Restrict Mobile View On Desktop",
+				enableRTL: "Enable RTL",
+				widgetInteractionValues: {
+                    reorder: "Column reorder applied",
+                    columnchooser: "Column exclusion applied"
+                }
             },
             filterOverviewPopup: {
                 appliedFilters: "Applied Filters",
@@ -6776,6 +6880,7 @@
                 unsavedView: "Unsaved View",
                 saveAsFilterTooltip: "Save As",
                 saveFilterTooltip: "Save",
+                interactionTooltip: "Saves data from both Applied Filters and Interaction Widgets",
                 viewSavedFilters: "VIEW SAVED FILTERS",
                 clearTooltip: "Clear",
                 dateSplit: "To",
@@ -6824,7 +6929,15 @@
 				pagewiseOption: "Enable pagewise exporting",
 				pagewiseExportInfo: "If this option is enabled, {0} data will be exported. As a result, if there is more data, it will take longer to finish the PDF export.",
                 exportLimitation: "{0} export has a default limit of {1} rows. This limit can be modified by the administrator through the config settings.",
-				exportListingSuccessMsg: "Export was completed successfully. If the download does not begin, please click the button below to download manually."
+				exportListingSuccessMsg: "Export was completed successfully. If the download does not begin, please click the button below to download manually.",
+				exportNote: "Note",
+				pdfPortrait: "Portrait",
+				pdfLandscape: "Landscape",
+				pdfBoth: "Both Portrait and Landscape",
+				pdfPageA3: "A3",
+				pdfPageA4: "A4",
+				pdfPageA5: "A5",
+				pdfPageLetter: "Letter",
             },
             maximize: {
                 maximize: "Maximize",
@@ -6849,7 +6962,9 @@
             common: {
                 all: "All",
                 auto: "Auto",
-                search: "Search"
+                search: "Search",
+				defaultText: "Default",
+				addText: "Add"
             },
             labelParameter: {
                 title: "Title",
@@ -6906,7 +7021,17 @@
                 millionsText: "Millions",
                 croresText: "Crores",
                 billionsText: "Billions",
-				enableLkhsAndCrores: "Enable lakhs and crores"
+				enableLkhsAndCrores: "Enable lakhs and crores",
+				measureFormatTitle: "Measure Formatting",
+				measureFormatType: "Type",
+				measureFormatDecimalPlaces: "Decimal Places",
+				measureFormatRepresentation: "Representation",
+				measureFormatCurrency: "Currency",
+				measureFormatLeftText: "Left",
+				measureFormatRightText: "Right",
+				measureFormatPreviewText: "Preview:",
+				measureFormatTypeNumber: "Number",
+				measureFormatTypePercentage: "Percentage",
             },
 			widgetConfiguration: {
                 enableAll: "Enable All",
@@ -7073,6 +7198,8 @@
                 saveParameterMessage: "The parameter has been added successfully.",
                 updateParameterMessage: "The parameter has been updated successfully.",
                 datasourceNotification: "Do not use this parameter to current data source. It will execute cyclically and result will be infinite but you can use this parameter in another data source.",
+				tableAlertMessage: 'Table field is not supported in web live mode',
+				ignoreFilterQueryNotification: "Ignore where query when DisableWhereForSelectAll option is enabled in config file",
                 nameText: "name",
                 descText: "description",
                 modeText: "mode",
@@ -8763,6 +8890,14 @@
 				DashboardRelevantQuestions: "Dashboard Suggestions",
 				aiPreviewViewModeDashboard: "Dashboard creation is only supported in Design mode. Please switch modes to proceed.",
 				aiDatasourceNotAvailable: "No data available for your query. Please check the data source list and try again.",
+				identifyDatasource: "Identifying the matched data source based on your query.",
+				checkDatasource: "Checking if a relevant data source exists in your dashboard for matched data source.",
+				importServerDatasource: "No matching data source found in the current dashboard. Looking for a suitable data source on the server.",
+				importDatasourceSuccess: "A suitable data source was found and successfully imported from the server into your dashboard.",
+				aiDashboardWidgetResponse: "Creating dashboard widgets based on your query and the selected data source.",
+				aiDashboardReady: "Your dashboard has been successfully created and is now ready for use.",
+				aiExpressionSaveMessage : "Please wait a moment while the expression is being saved.",
+				visualWithExpressionMessage : "Your request is being processed to create a visual. Please wait a moment.",
             },
 			replaceValues: { 
 				applyBtnText: "Apply",
@@ -8885,6 +9020,11 @@
                 layoutTypeFixed: "Fixed",
                 layoutTypeRange: "Range",
                 fixed: "Fixed",
+				fullHD: "Full HD(1920 x 1080)",
+				qHD: "QHD(2560 x 1440)",
+				fourk: "4K(3840 x 2160)",
+				ultraWideQHD: "UltraWide QHD(3440 x 1440)",
+				ultraWideFullHD: "UltraWide Full HD(2560 x 1080)",
                 genericDesktop: "Generic Desktop(1366 x 768)",
                 desktopBrowser: "Desktop Browser(1000 x 800)",
                 fullScreen: "Full Screen(1024 x 768)",
@@ -8909,6 +9049,7 @@
                 minimum: "Minimum",
                 apply: "Apply",
                 applyAndSave: "Apply & Save",
+				cellMarigin: "Cell Margin",
 				columnAlertMessage: "You are decreasing the layout size, which will impact the widgets located after Column 48. Please adjust the size of your widgets or remove some to ensure they fit properly."
             }
 		}

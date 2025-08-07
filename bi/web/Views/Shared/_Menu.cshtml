@@ -42,6 +42,7 @@
     var allItemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
     var userPermissionItem = JsonConvert.SerializeObject(ViewBag.ItemAddOptions);
     var userPermissionsDictionary = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var aiAgentPageUrl = Url.Action("AIAgent", "AIService");
     var hasOwnedDashboard = ViewBag.HasOwnedDashboard;
     var customUI = globalAppSettings.SystemSettings.CustomUI;
     var showNotifications = ServerAppConfig.IsSelfHosted && customUI?.Profiles != null && customUI.Profiles[0].Notifications != null ? customUI.Profiles[0].Notifications.ShowMenu : true;
@@ -76,6 +77,7 @@
     var showSideNavMenu = absolutePath.ToLower().Contains("/dashboard-designer") || absolutePath.ToLower().Contains("/datasource-designer");
     var isUMSLogoInherited = globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.Branding);
     var showLicenseWarningIcon = ServerAppConfig.ShowLicenseWarning;
+    var isShowDataHub = ServerAppConfig.IsSelfHosted ? ServerAppConfig.ShowDataHub : true;
 }
 
 <environment include="Development,CloudDevelopment">
@@ -124,8 +126,8 @@
 
             <li ng-repeat="items in menuList | orderBy:'Order' | filter:{ShowMenu:true} | filter: {Condition: true} as result" ng-init="count()" ng-if="items.Condition" id="{{items.Id}}">
                 <ul class="default-lists" style="padding: 0; display:none" ng-class="!items.MobileClassName ? 'mobile-view-height' : ''">
-                    <li class="mobile-hidden sf-nav-separator" ng-show="{{currentCount == '4' || currentCount == '8' && result.length < 10 }}"></li>
-                    <li class="{{items.IsSelected}} {{items.MobileClassName}}" ng-class="{{$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)}} ? 'sf-nav-administration-item sf-nav-item' : 'sf-nav-item'" ng-show="{{result.length > 9 ? $index < 6 : $index < 9}}">
+                    <li class="mobile-hidden sf-nav-separator" ng-show="{{currentCount == '4' || currentCount == '8' && result.length < 11 }}"></li>
+                    <li class="{{items.IsSelected}} {{items.MobileClassName}}" ng-class="{{$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)}} ? 'sf-nav-administration-item sf-nav-item' : 'sf-nav-item'" ng-show="{{result.length > 10 ? $index < 6 : $index < 10}}">
                         <a class="sf-nav-link" href="{{items.OpenLink}}" target="{{items.OpenBehavior}}" id="{{items.HrefId}}">
                             <span class="menu-icon-container">
                                 <i class="{{items.ImageLink}} {{items.ImageClassName}}" ng-style="{'background-image': items.ImageClassName == 'custom-menu' ? 'url(' + items.ImageLink +')' : ''}"></i>
@@ -133,7 +135,7 @@
                             <span class="menu-label">{{items.Display}}</span>
                         </a>
                     </li>
-                    <li class="sf-nav-administration-collapse-item listing-dropdown dropup" ng-class="result.length < 10 ? 'menu-toggle' : ''" ng-if="$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)">
+                    <li class="sf-nav-administration-collapse-item listing-dropdown dropup" ng-class="result.length < 11 ? 'menu-toggle' : ''" ng-if="$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)">
                         <a class="dropdown-toggle mobile-hidden" data-bs-toggle="dropdown" ng-show="{{$index == 5 && items.Condition}}">
                             <span class="menu-icon-container">
                                 <i class="su su-dots-menu"></i>
@@ -301,22 +303,20 @@
                                     <li id="more-sites-id">
                                     </li>
                                 }
-                                @if (showManageSite && !ServerAppConfig.IsSandbox)
+                                
+                                @if ((ServerAppConfig.Sandbox.BI.Enabled && !string.IsNullOrWhiteSpace(ServerAppConfig.Sandbox.BI.AdminEmail) && emailAddress.ToLower() == ServerAppConfig.Sandbox.BI.AdminEmail.ToLower()) || (showManageSite && !ServerAppConfig.Sandbox.BI.Enabled))
                                 {
                                     @if (showYourSites)
                                     {
                                         <li class="sf-sub-menu-separator admin-privilege" style="display: none;"></li>
                                     }
-                                    @if (!ServerAppConfig.IsSandbox)
-                                    {
-                                        <li class="sub-menu-item sub-menu-profile admin-privilege" style="display: none;">
-                                            <a rel="alternate" hreflang="en" href="@manageSitesUrl" target="_blank">
-                                                <div class="manage-site">@T["Manage sites (Admin access)"]</div>
-                                            </a>
-                                        </li>
-                                    }
+                                    <li class="sub-menu-item sub-menu-profile admin-privilege" style="display: none;">
+                                        <a rel="alternate" hreflang="en" href="@manageSitesUrl" target="_blank">
+                                            <div class="manage-site">@T["Manage sites (Admin access)"]</div>
+                                        </a>
+                                    </li>
                                 }
-                                @if (showMyProfile && !ServerAppConfig.IsSandbox)
+                                @if (showMyProfile && !ServerAppConfig.Sandbox.BI.Enabled)
                                 {
                                     <li class="sf-sub-menu-separator"></li>
                                 }
@@ -330,6 +330,25 @@
                                             <div class="sub-menu-user-name"><div class="sub-menu-user-name-style">@displayName</div><div class="sub-menu-user-email-style">@(ServerAppConfig.IsAutoGeneratedMail(emailAddress) ? userName : emailAddress)</div></div>
                                             <div class="profile-pic-tag" data-id="@idpreferenceId" data-type="user" data-display-name="@displayName" data-image-size="28" data-bs-toggle="profile-tag-tooltip" title="@displayName" data-placement="top"></div>
                                         </div>
+                                    </a>
+                                </li>
+                            }
+                            @if (ServerAppConfig.Sandbox.BI.Enabled)
+                            {
+                                <li class="sf-sub-menu-separator"></li>
+                                <li class="sub-menu-item">
+                                    <a href="@ServerAppConfig.Sandbox.BI.WebsiteDomain.Accounts" target="_blank">
+                                        @T["View Account"]
+                                    </a>
+                                </li>
+                                <li class="sub-menu-item">
+                                    <a href="@ServerAppConfig.Sandbox.BI.WebsiteDomain.Pricing" target="_blank">
+                                        @T["Pricing Plan"]
+                                    </a>
+                                </li>
+                                <li class="sub-menu-item">
+                                    <a href="@ServerAppConfig.Sandbox.BI.WebsiteDomain.HelpSite" target="_blank">
+                                        @T["Help Documentation"]
                                     </a>
                                 </li>
                             }
@@ -391,6 +410,7 @@
     var userPermissionUrl = "@Url.Action("userpermission", "permission")";
     var currentUrlLocalPath = "@requestUrl.LocalPath.ToLower()";
     var boldETLUrl = @Json.Serialize(navigateETLUrl);
+    var aiAgentPageUrl = @Json.Serialize(aiAgentPageUrl);
     var isMobile = @Json.Serialize(isMobile);
     var isImageRequest = @Json.Serialize(isImageRequest);
     var isAdmin = @Json.Serialize(Convert.ToBoolean(Context.Session.GetString("IsAdmin")));
@@ -405,6 +425,7 @@
     var ishideDashboardMenu = @Json.Serialize(ishideDashboardMenu);
     var enablePublishModule = @Json.Serialize(@ServerAppConfig.IsSelfHosted) ? @Json.Serialize(ServerAppConfig.EnablePublishModule) : @Json.Serialize(globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule);
     var allItemsCount = @Html.Raw(JsonConvert.SerializeObject(allItemsCount));
+    var isShowDataHub = @Json.Serialize(isShowDataHub);
     @{
 #pragma warning restore SCS0029
     }

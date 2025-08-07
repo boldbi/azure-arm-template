@@ -20,6 +20,7 @@
     bool canDisableDashboardChange = ViewBag.CanDisableDashboardChange != null ? ViewBag.CanDisableDashboardChange : false;
     bool canDisableCategoryChange = ViewBag.CanDisableCategoryChange != null ? ViewBag.CanDisableCategoryChange : false;
     bool canDisableViewChange = ViewBag.CanDisableViewChange != null ? ViewBag.CanDisableViewChange : false;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     bool canShowViewDropDown = ViewBag.CanShowViewDropDown != null ? ViewBag.CanShowViewDropDown : false;
     bool IsViewDeleted = Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsViewDeleted != null ? ViewBag.IsViewDeleted : false;
 }
@@ -197,7 +198,10 @@
                                         {
                                             foreach (var widget in ViewBag.WidgetsDetails)
                                             {
-                                                <option value="@widget.WidgetDesignerId" selected="selected" data-excel="@widget.WidgetInformation.Exportoption.Excel.ToString().ToLower()" data-pdf="@widget.WidgetInformation.Exportoption.Pdf.ToString().ToLower()" data-csv="@widget.WidgetInformation.Exportoption.Csv.ToString().ToLower()" data-image="@widget.WidgetInformation.Exportoption.Image.ToString().ToLower()" data-export-pagewise="@widget.WidgetInformation.CanExportPdfPageWise.ToString().ToLower()">@widget.WidgetItemName</option>
+                                                @if (widget.WidgetInformation != null)
+                                                 {
+                                                    <option value="@widget.WidgetDesignerId" selected="selected" data-excel="@widget.WidgetInformation.Exportoption.Excel.ToString().ToLower()" data-pdf="@widget.WidgetInformation.Exportoption.Pdf.ToString().ToLower()" data-csv="@widget.WidgetInformation.Exportoption.Csv.ToString().ToLower()" data-image="@widget.WidgetInformation.Exportoption.Image.ToString().ToLower()" data-export-pagewise="@widget.WidgetInformation.CanExportPdfPageWise.ToString().ToLower()">@widget.WidgetItemName</option>
+                                                 }
                                             }
                                         }
                                     </select>
@@ -351,6 +355,7 @@
     var disableWidgetScheduleExport = @Json.Serialize(disableWidgetScheduleExport);
     var isWidgetDeleted = @Json.Serialize(IsWidgetDeleted);
     var isViewDeleted = @Json.Serialize(IsViewDeleted);
+    var isSandbox = @Json.Serialize(isSandbox);
     var canDisableDashboardChange = @Json.Serialize(canDisableDashboardChange);
     var canDisableCategoryChange = @Json.Serialize(canDisableCategoryChange);
     var canDisableViewChange = @Json.Serialize(canDisableViewChange);

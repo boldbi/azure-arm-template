@@ -111,7 +111,7 @@
                 </li>
             }
 
-            @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.AiService])))
+            @if (isAdmin || (model != null && (model[SettingsScopes.All] || (model.ContainsKey(SettingsScopes.AiService) && model[SettingsScopes.AiService]))))
             {
                     <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(aiServiceSettingPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                 <a id="webhook-settings-link" href="@aiServiceSettingPageUrl">
@@ -143,7 +143,7 @@
         {
                 <label for="admin-menu-category-designer">@T["Designer"]</label>
             <ul class="admin-menu-category" id="admin-menu-category-designer">
-                @if (!ServerAppConfig.IsSandbox && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.DataStoreSettings]))))
+                    @if (!ServerAppConfig.Sandbox.BI.Enabled && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.DataStoreSettings]))))
                 {
                     <li class="admin-menu-item @(currentUrl.IndexOf(dataStoreSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                         <a id="dataStore-settings-link" href="@dataStoreSettingsUrl">
@@ -195,17 +195,14 @@
                     </a>
                 </li>
             }
-            @if (ServerAppConfig.IsSelfHosted)
+            @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.Accounts])))
             {
-                @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.Accounts])))
-                {
-                    <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(userSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
-                        <a id="user-settings-link" href="@userSettingsUrl">
-                            <i class="su su-user_settings_icon"></i>
-                            <span>@T["Accounts"]</span>
-                        </a>
-                    </li>
-                }
+                <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(userSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                    <a id="user-settings-link" href="@userSettingsUrl">
+                        <i class="su su-user_settings_icon"></i>
+                        <span>@T["Accounts"]</span>
+                    </a>
+                </li>
             }
             @if (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.UserDirectorySettings])))
             {
@@ -216,7 +213,7 @@
                     </a>
                 </li>
             }
-            @if (!ServerAppConfig.IsSandbox && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.AuthenticationSettings]))))
+                @if (!ServerAppConfig.Sandbox.BI.Enabled && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.AuthenticationSettings]))))
             {
                 <li class="mobile-hidden admin-menu-item @(currentUrl.IndexOf(authenticationSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                     <a id="authentication-settings-link" class="" href="@authenticationSettingsUrl">
@@ -233,7 +230,7 @@
         <ul class="admin-menu-category" id="admin-menu-category-Notification">
             @if (ServerAppConfig.IsSelfHosted)
             {
-                @if (!ServerAppConfig.IsSandbox && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.Email]))))
+                    @if (!ServerAppConfig.Sandbox.BI.Enabled && (isAdmin || (model != null && (model[SettingsScopes.All] || model[SettingsScopes.Email]))))
                 {
                     <li class="admin-menu-item @(currentUrl.IndexOf(emailSettingsUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(emailConfigureUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
                         <a id="email-settings-link" href="@emailSettingsUrl">

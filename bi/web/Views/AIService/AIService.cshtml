@@ -1,0 +1,172 @@
+﻿@using Newtonsoft.Json
+@{
+    Layout = null;
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
+    var globalAppSettings = _globalAppSettings;
+    var isDebug = globalAppSettings.SystemSettings.IsDebug;
+    var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
+    var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
+    var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
+    var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
+    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var aiLogo = globalAppSettings.SystemSettings.AILogo;
+    var currentUrl = Context.Request.GetEncodedUrl();
+    var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var cdnLink = globalAppSettings.SystemSettings.CDNLink;
+    var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
+    var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
+    var dataServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings).TrimEnd('/');
+    var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var isAIEnabledGlobally = ViewBag.AICredentials != null ? ViewBag.AICredentials.EnableAIFeature : ServerAppConfig.EnableAiFeature;
+    var isAiSummariesEnabledGlobally = ViewBag.AICredentials != null ? ViewBag.AICredentials.IsAISummariesEnabledGlobally : ServerAppConfig.IsAiSummariesEnabledGlobally;
+    var isBoldAISelected = isSelfHosted ? (ViewBag.AICredentials != null ? ViewBag.AICredentials.IsAIModel : ServerAppConfig.IsAiModel) : true;
+    var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var isSingleDatabaseMode = _globalAppSettings.SystemSettings.ConfigurationMode ==
+                               ConfigurationMode.SingleDatabaseForAllTenants;
+}
+<!DOCTYPE html>
+
+<html style="height:100%;width:100% ; overflow:hidden;">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    @if (!isSelfHosted && !globalAppSettings.SystemSettings.IsDebug)
+    {
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    }
+
+    <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
+    <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
+    <meta name="designer_service:url" content="@designerServiceUrl" />
+    <meta name="data_service:url" content="@dataServiceUrl" />
+    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
+    <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
+    <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
+
+    <title>@T["AI Agent"] - @globalAppSettings.SystemSettings.OrganizationName</title>
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
+    }
+
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+
+    @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
+    {
+        <style>
+            :root {
+                --designer-font: 'Roboto','Heebo','Segoes UI' !important;
+            }
+        </style>
+    }
+    else
+    {
+        <style>
+            :root {
+                --designer-font: var(--font-family) !important;
+            }
+        </style>
+    }
+
+    <script>
+        var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var isAIFeatureEnabled =  @Json.Serialize(globalAppSettings.SystemSettings.IsAiServiceEnabled);
+        var isWidgetSummarizationFeatureEnabled = @Json.Serialize(globalAppSettings.SystemSettings.IsWidgetSummarizationEnabled);
+        var isDashboardInsightFeatureEnabled = @Json.Serialize(globalAppSettings.SystemSettings.IsDashboardInsightEnabled);
+        var isBoldAISelected = @Html.Raw(Json.Serialize(isBoldAISelected));
+        var isAIEnabledGlobally = @Html.Raw(Json.Serialize(isAIEnabledGlobally));
+        var isAiSummariesEnabledGlobally = @Html.Raw(Json.Serialize(isAiSummariesEnabledGlobally));
+        var currentUrl = "@currentUrl";
+        var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
+        var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
+        var custombrandName = "@ServerAppConfig.CustomBrandName";
+        var organizationName = "@globalAppSettings.SystemSettings.OrganizationName";
+        var isDebug = "@isDebug";
+        var idpreferenceId = "@idpreferenceId";
+        var idpUrl = "@idPUrl";
+        var helpSiteBaseUrl = "@helpSiteBaseUrl";
+        var appBranding = "@GlobalAppSettings.Branding";
+        var rootUrlAction = "@rootUrl";
+        var isSelfHosted = @Json.Serialize(isSelfHosted);
+        var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
+        var isSessionActiveUrl = "@Url.Action("IsSessionActive", "Accounts")";
+        var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
+        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+        var appVersion = "@ServerAppConfig.ProductVersion";
+        var faviconLogo = "@faviconLogo";
+        var aiLogo = "@aiLogo";
+        var isSingleDatabaseMode = "@isSingleDatabaseMode";
+        var modelLanguage = "@ViewBag.ModelLanguage";
+        var firstDayOfWeek = "@ViewBag.FirstDayOfWeek"
+
+    </script>
+</head>
+<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+    </environment>
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-unifiedaiagent.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-unifiedaiagent.min.js"></script>
+    </environment>
+
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ai-agent.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ai-agent.min.js"></script>
+    </environment>
+
+    <section id="menu-area" class="custom-bootstrap-styles">
+        @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
+    </section>
+    <div id="ai_agent_Item"></div>
+
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
+    }
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+</body>
+
+
+</html>

@@ -10,6 +10,7 @@
     var isUsersTab = (Context.Request.Query["tab"] == "users") ? "active" : string.Empty;
     var isSettingsTab = (Context.Request.Query["tab"] == "settings") ? "active" : string.Empty;
     var enableAIFeature = GlobalAppSettings.SystemSettings.AI.EnableAiFeature != null && (bool)GlobalAppSettings.SystemSettings.AI.EnableAiFeature;
+    var isFreeTier = GlobalAppSettings.SystemSettings.Sandbox.BI.Enabled || GlobalAppSettings.SystemSettings.Sandbox.Reports.Enabled;
 }
 
 @section styles{
@@ -211,7 +212,7 @@
                             <a href="#ai-serviceKey-tab" class="text-decoration-none" aria-controls="ai-serviceKey-tab" role="tab" data-bs-toggle="tab">@T["AI"]</a>
                         </li>
                     }
-                    @if (Model.TenantTypeId == (int)TenantType.BoldBIOnPremise && ViewBag.ResourceLimitationEnable)
+                    @if (isFreeTier || ViewBag.ResourceLimitationEnable)
                     {
                         <li role="presentation" class="@isResourceLimitationTab" id="resource-limitation">
                             <a href="#resource-limitation-tab" class="text-decoration-none" aria-controls="resource-limitation-tab" role="tab" data-bs-toggle="tab">@T["Limitations"]</a>

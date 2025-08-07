@@ -151,6 +151,28 @@
             </summary>
             <returns>A <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> instance used for building and managing the classification workflow.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.AiAgentProcess.Classification.Handler.CreateExpressionHandler">
+            <summary>
+            Handles Expression response classification and processes AI assistance requests.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAgentProcess.Classification.Handler.CreateExpressionHandler.HandleAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIInputBuilder.InputDataBuilder,BoldBi.Ai.Core.Models.AIResponseBuilder.ClassifyOutputArgs)">
+            <summary>
+            Processes text responses and emits an event if applicable.
+            If no text response is found, it passes the request to the next handler in the chain.
+            </summary>
+            <param name="context">The execution context of the process step.</param>
+            <param name="inputDataBuilder">The input data containing text responses.</param>
+            <param name="args">classify Output args used for get the ai assistance information.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiAgentProcess.Classification.Handler.CreateExpressionHandler.SetNext(BoldBi.Ai.Base.Contracts.AgentProcess.IClassifierHandler)">
+            <summary>
+            Sets the next handler in the classification processing chain.
+            </summary>
+            <param name="nextHandler">The next handler to process the request.</param>
+            <returns>The assigned next handler.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.AiAgentProcess.Classification.Handler.CreateWidgetHandler">
             <summary>
             Handles the classification process for creating widgets within the AI system.
@@ -673,7 +695,7 @@
             generating AI responses, validating JSON, and logging activities.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.#ctor(BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.AiSampleQuestion.Interfaces.ISampleQuestionBuilder,BoldBi.Ai.Base.AiAnswerTextualResponse.Builder.Interfaces.IAiRecordAnalysisBuilder,Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.#ctor(BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.AiSampleQuestion.Interfaces.ISampleQuestionBuilder,BoldBi.Ai.Base.AiAnswerTextualResponse.Builder.Interfaces.IAiRecordAnalysisBuilder,BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.AiChatAssistantProcess"/> class.
             </summary>
@@ -722,6 +744,14 @@
             <param name="licenseKey">Unique license key identifying the user or tenant.</param>
             <returns>An object containing information about dashboard creation or an error message if an exception occurs.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.ProcessChatExpressionQueryUsingStructureOutputAsync(System.String,System.String)">
+            <summary>
+            Processes the provided JSON input with the expression column and provide widget creation information for the AI Chat Assistant.
+            </summary>
+            <param name="jsonInput">A JSON string containing the input data for processing.</param>
+            <param name="tenantId">Tenant ID information for each user.</param>
+            <returns>The result contains an object with information about widget creation.</returns>
+        </member>
         <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.ProcessChatQueryAsync(System.String,System.String)">
             <summary>
             Processes the chat-based queries to determine if widgets need to be created or updated based on the JSON input.
@@ -745,15 +775,6 @@
             <param name="tenantId">The license key for AI operations.</param>
             <returns>A task that represents the asynchronous operation, returning the formatted response as an object.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.GetTableInfoContent(System.String)">
-            <summary>
-            Retrieves the table information, such as column names, data types, etc.,
-            by deserializing the provided table information string and converting
-            it into a formatted string representation.
-            </summary>
-            <param name="tableInfo">A JSON string containing the table information (e.g., column names, data types, etc.).</param>
-            <returns>A string containing the formatted table information based on the provided table details.</returns>
-        </member>
         <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.ExtractMatchedDatasourceAsync(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,System.String)">
             <summary>
             Process for extract the matched data source ID.
@@ -769,16 +790,6 @@
             <param name="aiAssistanceRequest">Details of the AI assistance request.</param>
             <param name="licenseKey">The license key for the operation.</param>
             <returns>Data source Id of the dashboard question.</returns>
-        </member>
-        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.GenerateAIDashboardResponsesAsync(BoldBi.Ai.Base.CoreProcesses.CreateDashboardVisualProcess,System.Collections.Generic.List{System.String},System.String,System.String)">
-            <summary>
-            Generates an AI response using the provided AI process and parameters.
-            </summary>
-            <param name="process">The AI process instance.</param>
-            <param name="questions">The input question to the AI.</param>
-            <param name="sessionId">The session ID for the operation.</param>
-            <param name="tableInfo">Optional table information for the AI.</param>
-            <returns>The AI-generated response as <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent"/>.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.ValidateInput(System.String)">
             <summary>
@@ -929,7 +940,7 @@
             Provides operations for widget and dashboard summarization using AI.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiSummarization.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.AiSummarization.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.AiSummarization"/> class.
             </summary>
@@ -958,6 +969,86 @@
             </summary>
             <param name="jsonInput">The input JSON containing AI assistance context.</param>
             <returns>An instance of <see cref="T:BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest"/> with the validated and populated data.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CacheServices.IMemoryCacheService">
+            <summary>
+            Represents a memory cache service for storing, retrieving, and removing cached items.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.IMemoryCacheService.Set(System.String,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Stores the specified value in the memory cache with the given key.
+            </summary>
+            <param name="key">The unique key to identify the cached item.</param>
+            <param name="value">The value to be stored in the cache.</param>
+            <param name="expiry">The expiry of the key.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.IMemoryCacheService.Get``1(System.String)">
+            <summary>
+            Retrieves the cached item associated with the specified key.
+            </summary>
+            <typeparam name="T">The type of the value expected from the cache.</typeparam>
+            <param name="key">The key associated with the cached item.</param>
+            <returns>The cached value if found; otherwise, <c>null</c>.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.IMemoryCacheService.Remove(System.String)">
+            <summary>
+            Removes the cached item associated with the specified key.
+            </summary>
+            <param name="key">The key of the item to remove from the cache.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.IMemoryCacheService.TryGetValue``1(System.String,``0@)">
+            <summary>
+            Tries to get a value from the cache by key.
+            </summary>
+            <typeparam name="T">The type of the value.</typeparam>
+            <param name="key">The cache key.</param>
+            <param name="value">The retrieved value if found; otherwise, default.</param>
+            <returns>True if the key exists; otherwise, false.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService">
+            <summary>
+            Provides an on-premise, in-memory cache implementation of the <see cref="T:BoldBi.Ai.Base.CacheServices.IMemoryCacheService"/> interface using <see cref="T:Microsoft.Extensions.Caching.Memory.IMemoryCache"/>.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService"/> class.
+            </summary>
+            <param name="memoryCache">The in-memory cache instance provided by dependency injection.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService.Get``1(System.String)">
+            <summary>
+            Retrieves the cached item associated with the specified key.
+            </summary>
+            <typeparam name="T">The expected type of the cached item.</typeparam>
+            <param name="key">The key used to retrieve the cached item.</param>
+            <returns>The cached value if found; otherwise, <c>default</c> of <typeparamref name="T"/>.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService.Remove(System.String)">
+            <summary>
+            Removes the cached item associated with the specified key.
+            </summary>
+            <param name="key">The key of the item to remove from the cache.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService.Set(System.String,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Stores the specified value in the cache with the given key.
+            </summary>
+            <param name="key">The key under which the value will be stored.</param>
+            <param name="value">The value to store in the cache.</param>
+            <param name="expiry">The expiry of the key.</param>
+            <returns>A completed task.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CacheServices.OnPremiseCacheService.TryGetValue``1(System.String,``0@)">
+            <summary>
+            Tries to get a value from the cache by key.
+            </summary>
+            <typeparam name="T">The type of the value.</typeparam>
+            <param name="key">The cache key.</param>
+            <param name="value">The retrieved value if found; otherwise, default.</param>
+            <returns>True if the key exists; otherwise, false.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Constants">
             <summary>
@@ -1131,9 +1222,19 @@
             Method name for initiating validation of visual properties.
             </summary>
         </member>
+        <member name="F:BoldBi.Ai.Base.Constant.AgentProcessMethods.VisualValidationFieldDataType">
+            <summary>
+            Method name for initiating validation of visual properties.
+            </summary>
+        </member>
         <member name="F:BoldBi.Ai.Base.Constant.AgentProcessMethods.UpdateMessageContentFromAi">
             <summary>
             Method name for updating the message content generated by AI.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.Constant.AgentProcessMethods.UpdateExpressionFromAi">
+            <summary>
+            Method name for updating the Expression generated by AI.
             </summary>
         </member>
         <member name="F:BoldBi.Ai.Base.Constant.AgentProcessMethods.UpdateExceptionInformation">
@@ -1281,6 +1382,14 @@
         <member name="M:BoldBi.Ai.Base.Contracts.IAiChatAssistanceOperations.ProcessFormatQueryOutputAsync(System.String,System.String)">
             <summary>
             Processes a formatted query from the user and returns a response.
+            </summary>
+            <param name="jsonInput">The JSON input containing the user's format query.</param>
+            <param name="licenseKey">The license key required for processing the request.</param>
+            <returns>A task representing the asynchronous operation, with an object containing the result of the format query processing.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IAiChatAssistanceOperations.ProcessChatExpressionQueryUsingStructureOutputAsync(System.String,System.String)">
+            <summary>
+            Processes a formatted query with expression column from the user and returns a response.
             </summary>
             <param name="jsonInput">The JSON input containing the user's format query.</param>
             <param name="licenseKey">The license key required for processing the request.</param>
@@ -1543,13 +1652,14 @@
             <param name="args">The input which contains parameters required for the input building.</param>
             <returns>A formatted string ready for AI processing.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.CreateVisualResponse.Builder.BuildInputStep.PrepareSystemMessage(System.String)">
+        <member name="M:BoldBi.Ai.Base.CreateVisualResponse.Builder.BuildInputStep.PrepareSystemMessage(System.String,System.Collections.Generic.List{System.String})">
             <summary>
             Generates a system message for an AI assistant based on the type of operation and provided details.
             For `DataConfiguration` operations, the message instructs the assistant to provide chart fields from the given table schema and includes previous questions for context.
             For other operations, the message details rules for creating Bold BI charts, specifying required key names, their order, and constraints for the `Name` field.
             </summary>
             <param name="tableInfoContent">The content of the table schema used for visualization.</param>
+            <param name="expressionColumns">list of Column name of the expression.</param>
             <returns>A formatted string containing the instructions and rules for the AI assistant based on the operation type.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.CoreProcesses.CreateDashboardVisualProcess">
@@ -1917,6 +2027,171 @@
             <param name="previousQuestion">previous questions information.</param>
             <returns>A formatted string containing the instructions and rules for the AI assistant based on the operation type.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder">
+            <summary>
+            Responsible for building the process to create an SQL expression.
+            Configures and orchestrates the various steps involved in the expression creation process using a builder pattern.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder.CreateBuilder">
+            <summary>
+            Creates and returns a new instance of the <see cref="T:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder"/>.
+            </summary>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.AgentProcess.IProcessInstanceBuilder"/>.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder.AddStepsAndProcess">
+            <summary>
+            Adds the necessary steps for the process and configures the orchestration flow.
+            </summary>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.AgentProcess.IProcessInstanceBuilder"/> with configured steps and processes.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder.Build">
+            <summary>
+            Builds and returns the configured process.
+            </summary>
+            <returns>The constructed <see cref="T:Microsoft.SemanticKernel.KernelProcess"/>.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder.BuildOrchestrateEvent">
+            <summary>
+            Configures the event orchestration for the process.
+            </summary>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.AgentProcess.IProcessInstanceBuilder"/> with configured event orchestration.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder.Create(System.String)">
+            <summary>
+            Initializes the process builder with a specified name.
+            </summary>
+            <param name="name">The name of the process to be created.</param>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.AgentProcess.IProcessInstanceBuilder"/> initialized with the process name.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Builder.ExpressionBuilder.GetProcessBuilder">
+            <summary>
+            Retrieves the current <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> instance.
+            </summary>
+            <returns>The current <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> instance.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildInputStep">
+            <summary>
+            Represents a process step responsible for building input for SQL function creation.
+            This class prepares a system prompt to guide the generation of valid SQL expressions based on provided table information.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildInputStep.BuildInput(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Builds the input asynchronously by preparing a system prompt that describes guidelines for SQL expression creation.
+            </summary>
+            <param name="kernel">The kernel executing the process.</param>
+            <param name="context">The context of the current process step.</param>
+            <param name="args">Arguments containing the table information needed to build the prompt.</param>
+            <returns>A task that represents the asynchronous operation, containing the process arguments with the prepared prompt.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildInputStep.GetFilteredDataSource(BoldBi.Ai.Core.Models.AIInputBuilder.TableInfoDetails)">
+            <summary>
+            Filters the table information to match the specified data source name and constructs a JSON string.
+            </summary>
+            <param name="matchedSource">Data source details to filter by.</param>
+            <returns>A JSON string representing the filtered data source information.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildInputStep.PrepareSystemPrompt(System.String,System.String,System.String)">
+            <summary>
+            Prepares the system prompt with guidelines for creating SQL expressions.
+            </summary>
+            <param name="tableInfo">The table information to be included in the prompt.</param>
+            <param name="querySummaryForExpression">The summarization for the question.</param>
+            <param name="connectionType">The type of database connection (e.g., PostgreSQL, MSSQL).</param>
+            <returns>A string containing the system prompt with SQL guidelines and table schema details.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildOutputStep">
+            <summary>
+            Represents a process step for building the output for SQL function creation.
+            This class evaluates the need for SQL expression creation based on AI response and emits appropriate events.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildOutputStep.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.AIResponseBuilder.Response})">
+            <summary>
+            Activates the process step by capturing and assigning the current state,
+            then invokes the base implementation asynchronously.
+            </summary>
+            <param name="state">The current kernel process step state containing the response.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.ValueTask"/> that represents the asynchronous activation operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.BuildOutputStep.BuildOutput(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Builds the output by determining if an SQL expression is needed based on AI response analysis.
+            </summary>
+            <param name="kernel">The kernel executing the process.</param>
+            <param name="context">The context of the current process step.</param>
+            <param name="args">Arguments containing the AI response and related information for building the output.</param>
+            A task that represents the asynchronous operation, containing the process arguments after evaluating the need for an SQL expression.
+            <returns> A task that represents the asynchronous operation, returning the built output arguments containing the question, assistance request, and AI response.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CreateExpressionProcess.Step.CreatesExpression">
+            <summary>
+            Represents a process step for creating an SQL expression.
+            This class interacts with the AI connection to generate an expression based on user input and system prompts.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.CreatesExpression.CreateExpression(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Asynchronously sends an SQL expression based on the provided arguments.
+            </summary>
+            <param name="kernel">The kernel executing the process.</param>
+            <param name="context">The context of the current process step.</param>
+            <param name="args">Arguments containing the message and question for creating the expression.</param>
+            <returns> A task that represents the asynchronous operation, returning the built output arguments containing the question, assistance request, and AI response.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateCreatedExpression">
+            <summary>
+            Represents a process step for creating and validating an SQL expression.
+            This class interacts with the AI connection to generate an expression based on user input and system prompts.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateCreatedExpression.ValidateCreatedExpressionIsValidAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Asynchronously creates and validates an SQL expression based on the provided arguments.
+            </summary>
+            <param name="kernel">The kernel executing the process.</param>
+            <param name="context">The context of the current process step.</param>
+            <param name="args">Arguments containing the message and question for creating the expression.</param>
+            <returns>
+            A task representing the asynchronous operation,
+            returning the arguments containing the question, assistance request, and AI response.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateCreatedExpression.GetSystemPrompt">
+            <summary>
+            Provides a system prompt to decide if an expression should be processed based on predefined rules.
+            </summary>
+            <returns>A string representing the system prompt with expression processing rules.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateExpressionNeeded">
+            <summary>
+            Represents a process step to validate whether an SQL expression is needed for a given query.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateExpressionNeeded.ValidateExpressionNeededForGivenQueryAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Validates if an expression is needed for the given query by evaluating field information sufficiency.
+            </summary>
+            <param name="kernel">The kernel managing the step execution.</param>
+            <param name="context">The execution context for the kernel step.</param>
+            <param name="args">Arguments containing the query and table information.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateExpressionNeeded.FilterTableDetails(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Filters the table details and create a simplified JSON representation.
+            </summary>
+            <param name="args">Run process arguments containing the table information.</param>
+            <returns>A JSON string representing filtered table details with data source name and custom query.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Steps.ValidateExpressionNeeded.GetSystemPrompt(System.String)">
+            <summary>
+            Constructs the system prompt to evaluate the sufficiency of provided field information for a given question.
+            </summary>
+            <param name="tableInfo">The field information.</param>
+            <returns>The constructed prompt as a string.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.CreateVisualProcess.Builder.VisualCreationBuilder">
             <summary>
             Provides the implementation for building and orchestrating the visual creation process
@@ -1951,6 +2226,11 @@
         <member name="P:BoldBi.Ai.Base.CreateVisualProcess.Builder.VisualCreationBuilder._validateProperties">
             <summary>
             Gets or sets the process step responsible for validating the chart properties.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.CreateVisualProcess.Builder.VisualCreationBuilder._validateDataType">
+            <summary>
+            Gets or sets the process step responsible for validating the Field Datatype.
             </summary>
         </member>
         <member name="P:BoldBi.Ai.Base.CreateVisualProcess.Builder.VisualCreationBuilder._visualManager">
@@ -2097,6 +2377,33 @@
             <param name="visualProperty">The visual property to be validated.</param>
             <returns>A task representing the asynchronous operation.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.CreateVisualProcess.Steps.ValidateDataTypeStep">
+            <summary>
+            Represents a step in the kernel process that validates data types within visual properties.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateVisualProcess.Steps.ValidateDataTypeStep.ValidateFieldDataTypeAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.VisualCreation.FieldDataTypeValidationProperty)">
+            <summary>
+            Asynchronously validates the data types of fields specified in a visual property.
+            Emits events based on the validation outcome, including success, failure, or error warnings.
+            </summary>
+            <param name="kernel">The kernel instance used to manage this process step.</param>
+            <param name="context">The context for the process step containing execution and results management.</param>
+            <param name="property">Contains the visual property details and the table information for validation.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateVisualProcess.Steps.ValidateDataTypeStep.ValidateEncodings(BoldBi.Ai.Core.Models.VisualCreation.VisualProperty,BoldBi.Ai.Core.Models.AIInputBuilder.TableInfoDetails,System.String)">
+            <summary>
+            Validates the encodings in a visual property against the specified table information.
+            Generates error messages or a greeting response if data type mismatches are found.
+            </summary>
+            <param name="visualProperty">The visual property containing encodings to be validated.</param>
+            <param name="tableInfo">The table information containing field data types.</param>
+            <param name="question">The question context for which the validation is performed.</param>
+            <returns>
+            A <see cref="T:BoldBi.Ai.Core.Models.VisualCreation.FieldDataTypeValidationProperty"/> object containing any error messages or a greeting response.
+            </returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.CreateVisualProcess.Steps.ValidateProperties">
             <summary>
             Represents a kernel process step that validates the encoding properties of a visual widget,
@@ -2217,6 +2524,15 @@
             <param name="property">The visual property to validate.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.CreateVisualProcess.Steps.VisualManage.InitiateValidationFieldDataTypeAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.VisualCreation.VisualProperty)">
+            <summary>
+            Initiates validation of Table Fields DataType.
+            </summary>
+            <param name="kernel">The kernel instance.</param>
+            <param name="context">The process context.</param>
+            <param name="property">The visual property to validate.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
         <member name="M:BoldBi.Ai.Base.CreateVisualProcess.Steps.VisualManage.InitiateBuildOutputAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext)">
             <summary>
             Emits the final visual output.
@@ -2224,6 +2540,16 @@
             <param name="kernel">The kernel instance.</param>
             <param name="context">The process context.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateVisualProcess.Steps.VisualManage.BuildAssistanceResponseAsync(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent)">
+            <summary>
+            Builds the AI assistance response based on the given output text and table information.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request containing metadata such as table information.</param>
+            <param name="aiOutput">The AI-generated output text to process.</param>
+            <returns>
+            A task that represents the asynchronous operation. The task result contains the constructed <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse"/>.
+            </returns>
         </member>
         <member name="M:BoldBi.Ai.Base.CreateVisualProcess.Steps.VisualManage.CompleteAsync(Microsoft.SemanticKernel.KernelProcessStepContext)">
             <summary>
@@ -2246,12 +2572,24 @@
             Gets or sets the feedback message related to the visual operation.
             </summary>
         </member>
+        <member name="T:BoldBi.Ai.Base.CreateVisualWithExpression.CreateVisualWithExpressionProcess">
+            <summary>
+            Defines the process for creating a visual with expressions.
+            Configures and orchestrates the steps and events necessary for visual creation using a process builder.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.CreateVisualWithExpression.CreateVisualWithExpressionProcess.CreateProcess">
+            <summary>
+            Creates and returns a configured process builder for visual creation with expressions.
+            </summary>
+            <returns>A configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the CreateVisualWithExpression process.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.CredentialManager">
             <summary>
             Provides utility methods for managing AI credential configurations.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CredentialManager.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.CredentialManager.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.CredentialManager"/> class.
             </summary>
@@ -2452,6 +2790,433 @@
             Gets a value indicating whether the target allows null values.
             </summary>
         </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.DashboardQuestionIdentifierProcess">
+            <summary>
+            Defines the process builder for handling Dashboard Question Identification,
+            including steps for initiating, building input/output, running and get the response.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.DashboardQuestionIdentifierProcess.CreateProcess">
+            <summary>
+            Creates and configures the process flow for handling a Dashboard Question Identification.
+            This includes steps for initiation, input preparation, execution, output building.
+            </summary>
+            <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the Dashboard Question Identification process.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildInputStep">
+            <summary>
+            Represents a step in the kernel process that builds the input message
+            for the Dashboard Question Identifier process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildInputStep.BuildInputForQuestionIdentifier(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Constructs and prepares an input string for Dashboard Question Identifier Process.
+            </summary>
+            <param name="args">The input which contains parameters required for the input building.</param>
+            <returns>A formatted string ready for AI processing.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildInputStep.PrepareSystemMessage">
+            <summary>
+            Prepares a system message that defines the rules for determining whether a user's natural language question
+            is a dashboard creation request.
+            </summary>
+            <returns>A formatted string containing the system message.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildOutputStep">
+            <summary>
+            Represents the kernel process step responsible for building the output for a Dashboard Question Identifier Process.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildOutputStep._state">
+            <summary>
+            Internal state to maintain response data throughout the process step.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildOutputStep.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.AIResponseBuilder.MatchQuestionResponse})">
+            <summary>
+            Activates the step and loads the provided state.
+            </summary>
+            <param name="state">The state to be activated in the current process step.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.ValueTask"/> representing the activation operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildOutputStep.BuildOutputForQuestionIdentifier(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Processes the AI response and prepares the output based on the provided request and AI response data.
+            </summary>
+            <param name="args">The input that contains the AI response and the assistance request data.</param>
+            <param name="context">Contex.</param>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">Thrown if there is an error with the AI connection.</exception>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierBuildOutputStep.PrepareOutput(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Prepares the output based on the AI response and assistance request data.
+            </summary>
+            <param name="args">The input that contains the AI response and the assistance request data.</param>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.MatchQuestionResponse"/> object containing the processed output.</returns>
+            <remarks>
+            This method deserializes the AI response and populates the MatchQuestionResponse object.
+            </remarks>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierRunInputStep">
+            <summary>
+            A kernel process step that runs an AI process to identify the dashboard Question
+            based on developer and user input.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DashboardQuestionIdentifier.Steps.QuestionIdentifierRunInputStep.RunInputQuestionIdentifierAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Executes the AI process to generate a response using the configured AI connection
+            by utilizing the provided developer and user messages.
+            </summary>
+            <param name="args">The input arguments containing the developer message, user question, and AI assistance request.</param>
+            <param name="context"> context.</param>
+            <returns>
+            A task representing the asynchronous operation, returning a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> object
+            that contains the AI assistance request and the generated response.
+            </returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.DataSourceMatcherProcess">
+            <summary>
+            Defines the process builder for handling DataSource Matching Process,
+            including steps for initiating, building input/output, running and get the response.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.DataSourceMatcherProcess.CreateProcess">
+            <summary>
+            Creates and configures the process flow for handling a Datasource Matching Process.
+            This includes steps for initiation, input preparation, execution, output building.
+            </summary>
+            <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the Datasource Matching process.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildInputStep">
+            <summary>
+            Represents the kernel process step responsible for building the input for a DataSource Matcher Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildInputStep.BuildInputForDataSourceMatcher(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Constructs and prepares an input string for DataSource Matcher Process.
+            </summary>
+            <param name="args">The input which contains parameters required for the input building.</param>
+            <returns>A formatted string ready for AI processing.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildInputStep.PrepareSystemMessage(System.String,System.Collections.Generic.List{System.Collections.Generic.Dictionary{System.String,System.String}},System.Collections.Generic.List{System.Collections.Generic.Dictionary{System.String,System.String}})">
+            <summary>
+            Prepares a system message that defines the rules for determining the most relevant datasource
+            for a dashboard creation request.
+            </summary>
+            <param name="question">The user's natural language question.</param>
+            <param name="dashboardDatasources">A list of dashboard datasources.</param>
+            <param name="serverDatasources">A list of server datasources.</param>
+            <returns>A formatted string containing the system message.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildOutputStep">
+            <summary>
+            Represents the kernel process step responsible for building the output for a DataSource Matcher Process.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildOutputStep._state">
+            <summary>
+            Internal state to maintain response data throughout the process step.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildOutputStep.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.AIResponseBuilder.MatchDatasourceResponse})">
+            <summary>
+            Activates the step and loads the provided state.
+            </summary>
+            <param name="state">The state to be activated in the current process step.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.ValueTask"/> representing the activation operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildOutputStep.BuildOutputForDataSourceMatcher(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Processes the AI response and prepares the output based on the provided request and AI response data.
+            </summary>
+            <param name="args">The input that contains the AI response and the assistance request data.</param>
+            <param name="context">Context.</param>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">Thrown if there is an error with the AI connection.</exception>
+            <returns><see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherBuildOutputStep.PrepareOutput(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Prepares the output based on the AI response and assistance request data.
+            </summary>
+            <param name="args">The input that contains the AI response and the assistance request data.</param>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.MatchDatasourceResponse"/> object containing the processed output.</returns>
+            <remarks>
+            This method deserializes the AI response and populates the MatchDatasourceResponse object.
+            </remarks>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherRunInputStep">
+            <summary>
+            A kernel process step that runs an AI process to find the exact matching datasource
+            based on developer and user input.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.DataSourceMatcher.Steps.DataSourceMatcherRunInputStep.RunInputForDataSourceMatcherAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Executes the AI process to generate a response using the configured AI connection
+            by utilizing the provided developer and user messages.
+            </summary>
+            <param name="args">The input arguments containing the developer message, user question, and AI assistance request.</param>
+            <param name="context">kernel.</param>
+            <returns>
+            A task representing the asynchronous operation, returning a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> object
+            that contains the AI assistance request and the generated response.
+            </returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.GenerateDashboardProcess">
+            <summary>
+            Defines the process builder for handling Dashboard Creation Process,
+            including other processes and steps for initiating, building input/output, running and get the response.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.GenerateDashboardProcess.CreateProcess">
+            <summary>
+            Creates and configures the process flow for handling a Dashboard Creation Process.
+            This includes steps for initiation, input preparation, execution, output building.
+            </summary>
+            <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the Dashboard Creation Process.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.DashboardQuestionGenerationProcess">
+            <summary>
+            Defines the process builder for handling Dashboard Question Generation Process,
+            including steps for initiating, building input/output, running and get the response.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.DashboardQuestionGenerationProcess.CreateProcess">
+            <summary>
+            Creates and configures the process flow for handling a Dashboard Question Generation.
+            This includes steps for initiation, input preparation, execution, output building.
+            </summary>
+            <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the Dashboard Question Generation process.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationBuildInputStep">
+            <summary>
+            Represents the kernel process step responsible for building the input for a Dashboard Question Generation Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationBuildInputStep.BuildInputForQuestionGeneration(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Constructs and prepares an input string for Dashboard Question Generation Process.
+            </summary>
+            <param name="args">The input which contains parameters required for the input building.</param>
+            <returns>A formatted string ready for AI processing.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationBuildInputStep.PrepareSystemMessage(BoldBi.Ai.Core.Models.CoreProcesses.BuildInputArgs)">
+            <summary>
+            Builds the input prompt for the AI model to generate questions based on the table schema.
+            Ensures generated questions comply with system message rules for chart generation.
+            </summary>
+            <param name="args">The input which contains parameters required for the input building.</param>
+            <returns>A string prompt instructing the AI model to generate questions.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationBuildOutputStep">
+            <summary>
+            Represents the kernel process step responsible for building the output for a Dashboard Question Generation Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationBuildOutputStep.BuildOutputForQuestionGenerationAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Processes the AI response and prepares the output based on the provided request and AI response data.
+            </summary>
+            <param name="kernel">The kernel instance used to coordinate the step execution.</param>
+            <param name="context">The current process step context used for emitting events.</param>
+            <param name="args">The input that contains the AI response and the assistance request data.</param>
+            <returns>A task representing the asynchronous operation, with the prepared output emitted via an event.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">Thrown if there is an error with the AI connection.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationBuildOutputStep.PrepareDashboardQuestionsAsync(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Prepares a set of dashboard questions based on the provided AI response and assistance request data.
+            </summary>
+            <param name="args">The arguments containing the AI assistance request and the AI response data.</param>
+            <returns>
+            A task that represents the asynchronous operation. The task result contains a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/>
+            object enriched with dashboard creation questions derived from the AI response.
+            </returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationRunInputStep">
+            <summary>
+            Represents the kernel process step responsible for running the input for a Dashboard Question Generation Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardQuestionGeneration.Steps.QuestionGenerationRunInputStep.RunInputQuestionGenerationAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Executes the AI process to generate a response using the configured AI connection
+            by utilizing the provided developer and user messages.
+            </summary>
+            <param name="args">The input arguments containing the developer message, user question, and AI assistance request.</param>
+            <param name="context">kernel context.</param>
+            <returns>
+            A task representing the asynchronous operation, returning a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> object
+            that contains the AI assistance request and the generated response.
+            </returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.DashboardResponseGenerationProcess">
+            <summary>
+            Defines the process builder for handling Dashboard Response Generation,
+            including steps for initiating, building input/output, running and get the response.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.DashboardResponseGenerationProcess.CreateProcess">
+            <summary>
+            Creates and configures the process flow for handling a Dashboard Response Generation.
+            This includes steps for initiation, input preparation, execution, output building.
+            </summary>
+            <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the Dashboard Response Generation process.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep">
+            <summary>
+            Represents the kernel process step responsible for building the input for a Dashboard Response Generation Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep.BuildInputForResponseGeneration(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Constructs and prepares an input string for Dashboard Response Generation Process.
+            </summary>
+            <param name="args">The input which contains parameters required for the input building.</param>
+            <param name="context">Context.</param>
+            <returns>A formatted string ready for AI processing.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep.PrepareSystemMessage(System.String)">
+            <summary>
+            Generates a system message for an AI assistant based on the type of operation and provided details.
+            For `DataConfiguration` operations, the message instructs the assistant to provide chart fields from the given table schema and includes previous questions for context.
+            For other operations, the message details rules for creating Bold BI charts, specifying required key names, their order, and constraints for the `Name` field.
+            </summary>
+            <param name="tableInfoContent">The content of the table schema used for visualization.</param>
+            <returns>A formatted string containing the instructions and rules for the AI assistant based on the operation type.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep.GetTableInfoContent(System.String)">
+            <summary>
+            Retrieves the table information, such as column names, data types, etc.,
+            by deserializing the provided table information string and converting
+            it into a formatted string representation.
+            </summary>
+            <param name="tableInfo">A JSON string containing the table information (e.g., column names, data types, etc.).</param>
+            <returns>A string containing the formatted table information based on the provided table details.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildOutputStep">
+            <summary>
+            Represents the kernel process step responsible for building the output for a Dashboard Response Generation Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildOutputStep.BuildOutputForResponseGenerationAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Processes the AI response and prepares the output in the form of sample questions.
+            </summary>
+            <param name="kernel">The kernel instance used to coordinate the step execution.</param>
+            <param name="context">The current process step context used for emitting events.</param>
+            <param name="args">The input which contains parameters required for the output building.</param>
+            <returns>A task representing the asynchronous operation, with a result of type <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.IChatResponse"/> containing the processed output.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">Thrown if there is an error with the AI connection.</exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an error in AI processing.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildOutputStep.ProcessOpenAiResponsesAsync(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Processes a list of OpenAI responses to generate dashboard widgets and compiles them into a chat response.
+            </summary>
+            <param name="args">The arguments containing details about the AI assistance request, responses, and other necessary data for processing.</param>
+            <param name="context">Context.</param>
+            <returns>
+            A task representing the asynchronous operation, resulting in a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.ChatResponse"/> object
+            that contains the generated dashboard widgets based on the processed OpenAI responses.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildOutputStep.BuildOutputAsync(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Processes the AI response and prepares the output based on AI response data.
+            </summary>
+            <param name="args">The input which contains parameters required for the output building.</param>
+            <param name="context">Context.</param>
+            <returns>A task representing the asynchronous operation, with a result containing the prepared output object.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">Thrown if there is an error with the AI connection.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildOutputStep.UpdateTokensAsync(Microsoft.SemanticKernel.KernelProcessStepContext,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Updates the token usage details based on metadata received from the AI response.
+            </summary>
+            <param name="context">The kernel step context.</param>
+            <param name="metaData">Metadata dictionary containing token usage data.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildOutputStep.GetIntMetadataValue(System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <summary>
+            Retrieves an integer value from the metadata dictionary using the specified key.
+            </summary>
+            <param name="metadata">The metadata dictionary.</param>
+            <param name="key">The key for the desired value.</param>
+            <returns>The integer value if successfully parsed; otherwise, 0.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationRunInputStep">
+            <summary>
+            Represents the kernel process step responsible for running the input for a Dashboard Response Generation Process.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationRunInputStep.RunInputResponseGenerationAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs,Microsoft.SemanticKernel.KernelProcessStepContext)">
+            <summary>
+            Executes the AI process to generate a response using the configured AI connection
+            by utilizing the provided developer and user messages.
+            </summary>
+            <param name="args">The input arguments containing the developer message, user question, and AI assistance request.</param>
+            <param name="context">contex.</param>
+            <returns>
+            A task representing the asynchronous operation, returning a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> object
+            that contains the AI assistance request and the generated response.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationRunInputStep.RunAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Executes the AI process to generate a response from an AI connection based on the provided message and question.
+            </summary>
+            <param name="args">The input which contains parameters required for the execute process.</param>
+            <returns>A task representing the asynchronous operation, with a result containing the processed output as a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent"/> object.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Steps.DashboardCreationResponseStep">
+            <summary>
+            Represents the kernel process step responsible for building the output for a Dashboard Creation Process.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Steps.DashboardCreationResponseStep._state">
+            <summary>
+            Internal state to maintain response data throughout the process step.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Steps.DashboardCreationResponseStep.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.AIResponseBuilder.Response})">
+            <summary>
+            Activates the step and loads the provided state.
+            </summary>
+            <param name="state">The state to be activated in the current process step.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.ValueTask"/> representing the activation operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Steps.DashboardCreationResponseStep.BuildOutputForTextualResponse(BoldBi.Ai.Core.Models.AIResponseBuilder.ChatResponse)">
+            <summary>
+            Builds the output for a textual response based on the provided chat response.
+            </summary>
+            <param name="chatResponse">The chat response containing the output data.</param>
+            <remarks>
+            This method populates the internal state with the chat response.
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Steps.DashboardCreationResponseStep.UpdateExceptionInformationAsync(System.Object)">
+            <summary>
+            Updates the response to include exception details and mark it as an error.
+            </summary>
+            <param name="ex">The exception information.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Steps.DashboardCreationResponseStep.UpdateTokensAsync(BoldBi.Ai.Core.Models.AIResponseBuilder.UsageTokens)">
+            <summary>
+            Updates the full token usage information.
+            </summary>
+            <param name="tokens">The complete token usage data.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.DeleteVisual.DeleteVisualProcess">
             <summary>
             Represents the process responsible for handling the deletion of a widget.
@@ -2482,11 +3247,10 @@
             Handles the processing of dead-letter queues as a hosted service.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
+        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.ScheduledActions"/> class.
             </summary>
-            <param name="memoryCache">Stores memory cache.</param>
             <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.ScheduledActions.StartAsync(System.Threading.CancellationToken)">
@@ -2525,11 +3289,10 @@
             This service is designed to run daily, removing data older than a specified cutoff period.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
+        <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter"/> class.
             </summary>
-            <param name="memoryCache">The memory cache instance used for caching operations.</param>
             <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.ScheduledDataDeleter.StartAsync(System.Threading.CancellationToken)">
@@ -2562,11 +3325,10 @@
             A background service that consumes and processes messages from queues.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Extensions.UsageLogConsumer.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
+        <member name="M:BoldBi.Ai.Base.Extensions.UsageLogConsumer.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Extensions.UsageLogConsumer"/> class.
             </summary>
-            <param name="memoryCache">The memory cache instance used for caching operations.</param>
             <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Extensions.UsageLogConsumer.ExecuteAsync(System.Threading.CancellationToken)">
@@ -2652,23 +3414,6 @@
             <param name="licenseKey">The license key associated with the user request.</param>
             <param name="tokenPerRequest">The cost of the request based on token usage.</param>
             <param name="aiAssistanceRequest">The assistance request containing logging details.</param>
-        </member>
-        <member name="T:BoldBi.Ai.Base.Helpers.CacheManager">
-            <summary>
-            Provides methods for managing cache related to rate limits.
-            </summary>
-        </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.CacheManager.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
-            <summary>
-            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.CacheManager"/> class.
-            </summary>
-            <param name="memoryCache">The memory cache to store the rate limits.</param>
-            <param name="dbContext">The database context to fetch rate limits from.</param>
-        </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.CacheManager.AddRateLimitToCache">
-            <summary>
-            Adds rate limits to the cache from the database.
-            </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Helpers.ChatMessageClassifier">
             <summary>
@@ -2765,6 +3510,11 @@
             Gets or sets the AI licenses in the database.
             </summary>
         </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.ai_credits_updates">
+            <summary>
+            Gets or sets the AI credits in the database.
+            </summary>
+        </member>
         <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.bold_ai_chat">
             <summary>
             Gets or sets the AI search usage data in the database.
@@ -2792,7 +3542,7 @@
             Implements the <see cref="T:BoldBi.Ai.Core.Contracts.DbServiceDeployment.IDbOperations"/> interface to handle various database interactions.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseContext.OnPremiseDbContext.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseContext.OnPremiseDbContext.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseContext.OnPremiseDbContext"/> class.
             </summary>
@@ -2808,7 +3558,7 @@
             Clears the current instance of OnPremiseDbContext.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseContext.OnPremiseDbContext.GetInstance(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseContext.OnPremiseDbContext.GetInstance(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Retrieves the singleton instance of OnPremiseDbContext.
             </summary>
@@ -3053,7 +3803,7 @@
             The resource handler implementation.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudLogHelper"/> class.
             </summary>
@@ -3235,7 +3985,7 @@
             Helper class for selecting the appropriate database configuration based on the deployment type.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.GetService(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.GetService(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Gets the appropriate logging service based on the deployment type.
             </summary>
@@ -3244,7 +3994,7 @@
             <param name="usageLogDbContext">The db context for usage data.</param>
             <returns>An instance of <see cref="T:BoldBi.Ai.Core.Contracts.DbServiceDeployment.IResourceHandler"/> corresponding to the deployment type.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.FetchFromDb(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.ConfigSelectorHelper.FetchFromDb(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
             Gets the appropriate database fetch service based on the deployment type.
             </summary>
@@ -3257,7 +4007,7 @@
             Provides methods to fetch pricing and other details from the database.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb"/> class with database connection strings.
             </summary>
@@ -3318,7 +4068,7 @@
             Provides methods to fetch pricing and other details from the database.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseFetchFromDb.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseFetchFromDb.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseFetchFromDb"/> class with database connection strings.
             </summary>
@@ -3378,7 +4128,7 @@
             Helper class for logging and managing on-premise database operations.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseLogHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseLogHelper.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseLogHelper"/> class.
             </summary>
@@ -3455,7 +4205,7 @@
             On Premise Db Log Helper.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremisePricingLogHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremisePricingLogHelper.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremisePricingLogHelper"/> class.
             On premise Db operations.
@@ -3488,7 +4238,7 @@
             On premise usage log helper.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseUsageLogHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseUsageLogHelper.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseUsageLogHelper"/> class.
              On premise usage log helper.
@@ -3552,12 +4302,20 @@
             <param name="searchActivity">Search Activity Object.</param>
             <returns>Update Feedback information.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremiseUsageLogHelper.PrepareOracleData(BoldBi.Ai.Base.Helpers.DatabaseContext.OnPremiseDbContext,BoldBi.Ai.Core.Models.DatabaseLog.SearchActivity)">
+            <summary>
+            Update the AI search activity data.
+            </summary>
+            <param name="onPremiseDbContext">DB Context.</param>
+            <param name="searchActivity">Search Activity Object.</param>
+            <returns>Update tracking columns.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor">
             <summary>
             Processes dead-letter messages from various Concurrent Queues.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
+        <member name="M:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.DeadLetterQueueProcessor"/> class.
             </summary>
@@ -3910,12 +4668,11 @@
             Helper class for managing AI licenses.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.CacheManager)">
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper"/> class.
             </summary>
             <param name="dbContext"> Contains the database context for accessing AI license data. </param>
-            <param name="cacheManager"> Contains the instance of cache manager. </param>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.AddAiLicense(System.Object)">
             <summary>
@@ -3951,6 +4708,13 @@
             </summary>
             <param name="aiKey">The AI key as a string.</param>
             <returns>JSON response with license details or error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.EnableAiLicense(System.String)">
+            <summary>
+            Enables AI licenses for a given tenant.
+            </summary>
+            <param name="tenantId">The tenant ID as a string.</param>
+            <returns>JSON response indicating success or failure.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Helpers.OuputValidation.AiResponseValidatorHelper">
             <summary>
@@ -4827,7 +5591,7 @@
             Manages the creation and termination of AI sessions, along with logging related activities.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext,BoldBi.Ai.Base.CredentialManager)">
+        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.DatabaseContext.UsageLogDbContext,BoldBi.Ai.Base.CredentialManager)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.SessionManager"/> class.
             </summary>
@@ -4954,12 +5718,12 @@
             Represents a service for processing QnA widget queries.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.QnAWidget.#ctor(BoldBi.Ai.Base.Contracts.IUsageProcessor,Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+        <member name="M:BoldBi.Ai.Base.QnAWidget.#ctor(BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.QnAWidget"/> class.
             </summary>
             <param name="usageProcessor">An instance of <see cref="T:BoldBi.Ai.Base.Contracts.IUsageProcessor"/> to process usage metrics.</param>
-            <param name="memoryCache">An instance of <see cref="T:Microsoft.Extensions.Caching.Memory.IMemoryCache"/> for caching session-related data.</param>
+            <param name="memoryCache">An instance of <see cref="T:BoldBi.Ai.Base.CacheServices.IMemoryCacheService"/> for caching session-related data.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.QnAWidget.ProcessQnaQueryAsync(System.String,System.String)">
             <summary>
@@ -5382,16 +6146,32 @@
             based on developer and user input.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.TextualResponseProcess.Steps.TextualRunInputStep.RunForTextualResponseAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.TextualResponseProcess.Steps.TextualRunInputStep.RunForTextualResponseAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Executes the AI process to generate a response using the configured AI connection
             by utilizing the provided developer and user messages.
             </summary>
+            <param name="context">The execution context for the kernel step.</param>
             <param name="args">The input arguments containing the developer message, user question, and AI assistance request.</param>
             <returns>
             A task representing the asynchronous operation, returning a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> object
             that contains the AI assistance request and the generated response.
             </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.TextualResponseProcess.Steps.TextualRunInputStep.UpdateTokensAsync(Microsoft.SemanticKernel.KernelProcessStepContext,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Updates the token usage details based on metadata received from the AI response.
+            </summary>
+            <param name="context">The kernel step context.</param>
+            <param name="metaData">Metadata dictionary containing token usage data.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.TextualResponseProcess.Steps.TextualRunInputStep.GetIntMetadataValue(System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <summary>
+            Retrieves an integer value from the metadata dictionary using the specified key.
+            </summary>
+            <param name="metadata">The metadata dictionary.</param>
+            <param name="key">The key for the desired value.</param>
+            <returns>The integer value if successfully parsed; otherwise, 0.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.TextualResponseProcess.TextualResponseProcess">
             <summary>
@@ -5406,6 +6186,372 @@
             and various levels of SQL validation.
             </summary>
             <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the textual response process.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.ChatProcess">
+            <summary>
+            Handles chat query classification by managing kernel setup, request validation, and session-based configuration retrieval.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Contracts.IUsageProcessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.UnifiedAI.ChatProcess"/> class.
+            </summary>
+            <param name="memoryCache">The memory cache used for session-based data retrieval.</param>
+            <param name="usageProcessor">The usage processor used to update usage tokens.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.ClassifyChatQueryAsync(System.String,System.String)">
+            <summary>
+            Classifies the chat query by executing the unified classification pipeline.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The classification response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.DashboardQueryAsync(System.String,System.String)">
+            <summary>
+            Created JSON for dashboards.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.GenerateTextualSQLAsync(System.String,System.String)">
+            <summary>
+            Created JSON for textual response.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.VisualCreationAsync(System.String,System.String)">
+            <summary>
+            Created JSON for visualization charts.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.ValidateInput(System.String)">
+            <summary>
+            Validates and converts the input JSON string into an <see cref="T:BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest"/> object.
+            Retrieves session-based context from memory cache if necessary.
+            </summary>
+            <param name="jsonInput">The input JSON containing AI assistance context.</param>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest"/> with the validated and populated data.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.GetAICredentialsFromCache(System.String)">
+            <summary>
+            Retrieves AI credentials from the memory cache using the provided session ID.
+            </summary>
+            <param name="sessionId">The session ID used to retrieve credentials.</param>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.Models.CredentialsConfiguration.CustomAIConfiguration"/> containing AI credentials.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.GetAIConnectionFromCache(System.String)">
+            <summary>
+            Retrieves the AI connection from the memory cache using the session ID.
+            Falls back to a default connection if not found.
+            </summary>
+            <param name="sessionId">The session ID used to fetch the connection object.</param>
+            <returns>An instance of <see cref="T:BoldBi.Ai.Core.IAiConnection"/> representing the AI connection to use.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.Classification.ClassificationProcessFlow">
+            <summary>
+            Represents the classification process flow for handling AI classification steps using Semantic Kernel.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.ClassificationProcessFlow.CreateProcessAsync(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.Kernel)">
+            <summary>
+            Creates and runs the classification process asynchronously.
+            </summary>
+            <param name="input">The AI assistance request containing user query and table context.</param>
+            <param name="kernel">The Semantic Kernel instance used to execute the process.</param>
+            <returns>A task that returns the serialized classification response object.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationInputStep">
+            <summary>
+            A step that builds input for classification processing using the AI assistance request.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationInputStep.UnifiedAIClassificationBuildInputAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Builds the input needed for the classification process.
+            </summary>
+            <param name="context">The context of the current kernel process step.</param>
+            <param name="aiAssistanceRequest">The request containing the query and metadata needed for classification.</param>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object with populated message, question, and original request.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationInputStep.GetDeveloperMessage">
+            <summary>
+            Gets the base message that instructs the AI how to classify user questions.
+            </summary>
+            <returns>A developer-defined classification instruction prompt.</returns>
+        </member>
+        <member name="F:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.FunctionHandlers">
+            <summary>
+            Dictionary that maps ChatPlugin method names to their corresponding execution logic.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.UnifiedAIClassificationBuildOutputAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIResponseBuilder.ClassifyOutputArgs)">
+            <summary>
+            Builds and processes the output by classifying chat messages.
+            </summary>
+            <param name="context">The context of the current kernel process step.</param>
+            <param name="args">Arguments required for classification.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.UpdateUsageTokens(BoldBi.Ai.Core.Models.AIResponseBuilder.AIUsage)">
+            <summary>
+            Updates the usage token information in the classification response model.
+            </summary>
+            <param name="usage">The usage data to be updated.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.UpdateExceptionInformation(System.Object)">
+            <summary>
+            Updates the response to include exception details and mark it as an error.
+            </summary>
+            <param name="ex">The exception information.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.DeserializeFunctionCalls(System.Object)">
+            <summary>
+            Deserializes function call data from chat message content.
+            </summary>
+            <param name="content">Serialized chat message content.</param>
+            <returns>List of function call builders.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.DeserializeArguments(System.Object)">
+            <summary>
+            Deserializes function arguments from a JSON string.
+            </summary>
+            <param name="functionArgs">Serialized function arguments.</param>
+            <returns>Dictionary of argument key-value pairs.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.ParseFunctionName(System.String)">
+            <summary>
+            Parses the function name to extract class and method names.
+            </summary>
+            <param name="functionName">Function name in the format "Class-Method".</param>
+            <returns>Tuple containing class name and method name.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.CreateInstance(System.String)">
+            <summary>
+            Creates an instance of a specified class dynamically.
+            </summary>
+            <param name="className">The class name to instantiate.</param>
+            <returns>Instance of the specified class or null if the class is not found.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.InvokeMethod(System.Object,System.String,System.Object[])">
+            <summary>
+            Invokes a method on a given instance using reflection.
+            </summary>
+            <param name="instance">The object instance on which to invoke the method.</param>
+            <param name="methodName">The name of the method to invoke.</param>
+            <param name="parameters">The parameters to pass to the method.</param>
+            <returns>SemanticResponse object containing the method result.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationOutputStep.PopulateBuilder(BoldBi.Ai.Core.Models.UnifiedAI.ClassificationResponseModel,System.String,BoldBi.Ai.ConnectionManager.ChatPlugins.UnifiedAI.UnifiedAISemanticResponse,System.String)">
+            <summary>
+            Populates the ClassificationResponse with the response from function execution.
+            </summary>
+            <param name="responseBuilder">Instance of ClassificationResponse to populate.</param>
+            <param name="methodName">Executed method name.</param>
+            <param name="response">Response obtained from function execution.</param>
+            <param name="messageContent">Assistant Message.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationRunStep.UnifiedAIClassificationRunAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Executes the AI chat classification process by sending user input and system-generated messages to the AI model.
+            </summary>
+            <param name="context">Kernel step context.</param>
+            <param name="args">Contains the necessary parameters, including the AI assistance request and prompt message.</param>
+            <returns>
+            A task that represents the asynchronous operation. The task result contains the classification output arguments,
+            including the AI assistance request and function call builders.
+            </returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.DashboardClassificationBuilder">
+            <summary>
+            Represents the classification process flow for handling AI classification steps using Semantic Kernel.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.DashboardClassificationBuilder.CreateProcessAsync(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.Kernel)">
+            <summary>
+            Creates and runs the classification process asynchronously.
+            </summary>
+            <param name="input">The AI assistance request containing user query and table context.</param>
+            <param name="kernel">The Semantic Kernel instance used to execute the process.</param>
+            <returns>A task that returns the serialized classification response object.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationInputStep">
+            <summary>
+            A step that builds input for classification processing using the AI assistance request.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationInputStep.DashboardClassificationBuildInputAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Builds the input needed for the classification process.
+            </summary>
+            <param name="context">The context of the current kernel process step.</param>
+            <param name="aiAssistanceRequest">The request containing the query and metadata needed for classification.</param>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object with populated message, question, and original request.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationInputStep.GetDeveloperMessage">
+            <summary>
+            Gets the base message that instructs the AI how to classify user questions.
+            </summary>
+            <returns>A developer-defined classification instruction prompt.</returns>
+        </member>
+        <member name="F:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.FunctionHandlers">
+            <summary>
+            Dictionary that maps function names to their corresponding execution logic.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.DashboardClassificationBuildOutputAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIResponseBuilder.ClassifyOutputArgs)">
+            <summary>
+            Builds and processes the output by classifying chat messages.
+            </summary>
+            <param name="context">The context for the process step.</param>
+            <param name="args">Arguments required for classification.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.DeserializeFunctionCalls(System.Object)">
+            <summary>
+            Deserializes function call data from chat message content.
+            </summary>
+            <param name="content">Serialized chat message content.</param>
+            <returns>List of function call builders.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.DeserializeArguments(System.Object)">
+            <summary>
+            Deserializes function arguments from a JSON string.
+            </summary>
+            <param name="functionArgs">Serialized function arguments.</param>
+            <returns>Dictionary of argument key-value pairs.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.ParseFunctionName(System.String)">
+            <summary>
+            Parses the function name to extract class and method names.
+            </summary>
+            <param name="functionName">Function name in the format "Class-Method".</param>
+            <returns>Tuple containing class name and method name.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.CreateInstance(System.String)">
+            <summary>
+            Creates an instance of a specified class dynamically.
+            </summary>
+            <param name="className">The class name to instantiate.</param>
+            <returns>Instance of the specified class or null if the class is not found.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.InvokeMethod(System.Object,System.String,System.Object[])">
+            <summary>
+            Invokes a method on a given instance using reflection.
+            </summary>
+            <param name="instance">The object instance on which to invoke the method.</param>
+            <param name="methodName">The name of the method to invoke.</param>
+            <param name="parameters">The parameters to pass to the method.</param>
+            <returns>SemanticResponse object containing the method result.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationOutputStep.PopulateBuilder(BoldBi.Ai.Core.Models.AIInputBuilder.DashboardInputBuilder,System.String,BoldBi.Ai.ConnectionManager.ChatPlugins.UnifiedAI.DashboardPluginResponse)">
+            <summary>
+            Populates the InputDataBuilder with the response from function execution.
+            </summary>
+            <param name="builder">Instance of InputDataBuilder to populate.</param>
+            <param name="methodName">Executed method name.</param>
+            <param name="response">Response obtained from function execution.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardClassificationRunStep.DashboardClassificationRunAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Executes the AI chat classification process by sending user input and system-generated messages to the AI model.
+            </summary>
+            <param name="context">Kernel step context.</param>
+            <param name="args">Contains the necessary parameters, including the AI assistance request and prompt message.</param>
+            <returns>
+            A task that represents the asynchronous operation. The task result contains the classification output arguments,
+            including the AI assistance request and function call builders.
+            </returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse">
+            <summary>
+            Represents a process step responsible for handling and updating various AI responses.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse._state">
+            <summary>
+            Holds the current state of the response.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.UnifiedAI.DashboardQueryResponse})">
+            <summary>
+            Activates the process step and initializes the state.
+            </summary>
+            <param name="state">The current step state.</param>
+            <returns>A ValueTask representing the async operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse.UpdateDashboardCreateResponse(BoldBi.Ai.Core.Models.AIResponseBuilder.ChatResponse)">
+            <summary>
+            Updates the response with the result from creating a dashboard.
+            </summary>
+            <param name="response">The create widget response.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse.UpdateDashboardUpdateResponse(BoldBi.Ai.Core.Models.AIInputBuilder.UpdateDashboard)">
+            <summary>
+            Updates the response with the result from updating a dashboard.
+            </summary>
+            <param name="response">The update widget response.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse.UpdateDashboardDeleteResponse(BoldBi.Ai.Core.Models.AIInputBuilder.DeleteDashboard)">
+            <summary>
+            Updates the response with the result from deleting a dashboard.
+            </summary>
+            <param name="response">The update widget response.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse.UpdateUsageTokens(BoldBi.Ai.Core.Models.AIResponseBuilder.AIUsage)">
+            <summary>
+            Updates the usage token information in the classification response model.
+            </summary>
+            <param name="usage">The usage data to be updated.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.DashboardClassification.Steps.DashboardResponse.UpdateExceptionInformation(System.Object)">
+            <summary>
+            Updates the response to include exception details and mark it as an error.
+            </summary>
+            <param name="ex">The exception information.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess">
+            <summary>
+            Defines a contract for processing and classifying chat queries using AI.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess.ClassifyChatQueryAsync(System.String,System.String)">
+            <summary>
+            Classifies a user chat query by processing the provided input.
+            </summary>
+            <param name="jsonInput">A JSON string containing the AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>A task that returns the classification result as a serialized object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess.VisualCreationAsync(System.String,System.String)">
+            <summary>
+            Created JSON for visualization charts.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess.DashboardQueryAsync(System.String,System.String)">
+            <summary>
+            Created JSON for visualization dashboards.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess.GenerateTextualSQLAsync(System.String,System.String)">
+            <summary>
+            Created JSON for visualization dashboards.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualBuildInputStep">
             <summary>
@@ -5689,6 +6835,13 @@
             Updates the AI-generated greeting message.
             </summary>
             <param name="greetings">The greeting message.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Core.Models.AIResponseBuilder.AIResponse.UpdateExpressionFromAiAsync(BoldBi.Ai.Core.Models.AIResponseBuilder.ExpressionValidationResponse)">
+            <summary>
+            Updates the AI-generated greeting message.
+            </summary>
+            <param name="expression">The greeting message.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         </member>
         <member name="M:BoldBi.Ai.Core.Models.AIResponseBuilder.AIResponse.UpdateQuestionValidationTokensAsync(OpenAI.Chat.ChatTokenUsage)">

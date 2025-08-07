@@ -1,4 +1,4 @@
-﻿﻿var userAgent = navigator.userAgent;
+var userAgent = navigator.userAgent;
 var regexIe8 = new RegExp("Trident(\/4.0)|(Trident\/5.0)");
 var isSafari = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1;
 var selectedAdmins = [];
@@ -49,16 +49,13 @@ $(document).ready(function () {
                         listItem.classList.add('e-disabled');
                         tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateOracle;
                     }
-                    else if (!IsDefaultPrefixAndSchema && !IsReportsPrefixSchema)
-                    {
+                    else if (!IsDefaultPrefixAndSchema && !IsReportsPrefixSchema) {
                         listItem.classList.add('e-disabled');
                         tooltipContent = window.Server.App.LocalizationContent.ReportsSiteCannotCreateCustomSchemaAndPrefix;
                     }
                 }
-                else
-                {
-                    if (!IsDefaultPrefixAndSchema && !BIUmsPrefixSchema)
-                    {
+                else {
+                    if (!IsDefaultPrefixAndSchema && !BIUmsPrefixSchema) {
                         listItem.classList.add('e-disabled');
                         tooltipContent = window.Server.App.LocalizationContent.BISiteCannotCreateCustomSchemaAndPrefix;
                     }
@@ -279,8 +276,7 @@ $(document).ready(function () {
         $(".selector-icons").addClass("icon-alignment-for-single-database");
         $(".selector-content").addClass("content-alignment-for-single-database");
     }
-    else if (!useSingleTenantDb && actionType.toLowerCase() !== "edit")
-    {
+    else if (!useSingleTenantDb && actionType.toLowerCase() !== "edit") {
         $(".selector-icons").addClass("icon-alignment-for-database-per-tenant");
         $(".selector-content").addClass("content-alignment-for-database-per-tenant");
     }
@@ -377,8 +373,7 @@ $(document).ready(function () {
                         $(this).removeAttr("disabled");
                     }
                 }
-                else
-                {
+                else {
                     $("#details-next").removeClass("storage-config").addClass("data-security");
                     $("#details-next").click();
                 }
@@ -397,7 +392,7 @@ $(document).ready(function () {
                     nextToDataSecurityPage();
                 }
                 else {
-                    
+
                     if ($(".tenant-database-form #db-content-holder").valid()) {
                         var databaseType = getDropDownValue("database-type");
 
@@ -520,8 +515,7 @@ $(document).ready(function () {
                 }
             }
             else if (($(".tenant-user-form").hasClass("d-none") && $(this).hasClass("user")) && ($(".storage-form").find(".e-error").length == 0 || useSingleTenantDb)) {
-                if (useSingleTenantDb)
-                {
+                if (useSingleTenantDb) {
                     systemSettingsDetails.TenantIsolation.IsEnabled = $("#isolation-enable-switch").is(":checked");
                     systemSettingsDetails.TenantIsolation.IsolationCode = document.getElementById("site-isolation-code").ej2_instances[0].value;
                     systemSettingsDetails.TenantIsolation.IsRowLevelSecurityEnabled = $("#site-row-security-enable-switch").prop("checked");
@@ -537,8 +531,7 @@ $(document).ready(function () {
                     }
                     $(this).removeAttr("disabled");
                 }
-                else
-                {
+                else {
                     systemSettingsDetails.TenantIsolation.IsEnabled = $("#isolation-enable-switch").is(":checked");
                     systemSettingsDetails.TenantIsolation.IsolationCode = document.getElementById("site-isolation-code").ej2_instances[0].value;
                     systemSettingsDetails.TenantIsolation.IsRowLevelSecurityEnabled = $("#site-row-security-enable-switch").prop("checked");
@@ -557,8 +550,7 @@ $(document).ready(function () {
 
             }
             else if ($(".tenant-user-form").hasClass("d-none") && $(this).hasClass("update") && $(".tenant-database-form").find(".e-error").length == 0) {
-                if (useSingleTenantDb)
-                {
+                if (useSingleTenantDb) {
                     var tenantIdentifier = $("#tenant-identifier").val().trim();
                     var tenantName = $("#tenant-name").val().trim();
                     var canProceed = $("#tenant-registration-form").valid();
@@ -657,12 +649,10 @@ $(document).ready(function () {
                 $("#txt-password-db").parent().find(".tooltip").css("display", "none");
             }
 
-            if (useSingleTenantDb)
-            {
+            if (useSingleTenantDb) {
                 $("#details-next").removeClass("storage-config");
             }
-            else
-            {
+            else {
                 $("#details-next").removeClass("storage-config").addClass("database");
             }
         }
@@ -715,8 +705,7 @@ $(document).ready(function () {
             $("#search-area").hide();
         }
         else if ($("#details-next").hasClass("user")) {
-            if (useSingleTenantDb)
-            {
+            if (useSingleTenantDb) {
                 moveStepper("back", 1);
                 $("#details-back").show().addClass("back-button");
                 if (getDropDownValue("database-type").toLowerCase() === "postgresql" || getDropDownValue("database-type").toLowerCase() === "mysql") {
@@ -786,8 +775,7 @@ $(document).ready(function () {
             if (useSingleTenantDb) {
                 moveStepper("back", 2);
             }
-            else
-            {
+            else {
                 moveStepper("back", 3);
             }
             $("#dialog-body-container").removeClass("grid-alignment");
@@ -1164,8 +1152,7 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
                     } else {
                         $("#tenant-name").closest("div").removeClass("e-error");
                         $("#tenant-name-validation-error").css("display", "none");
-                        if (!(useSingleTenantDb && actionType.toLowerCase() == "edit"))
-                        {
+                        if (!(useSingleTenantDb && actionType.toLowerCase() == "edit")) {
                             nextToDatabasePage();
                         }
                         else {
@@ -1176,12 +1163,10 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
                     $("#tenant-name, #tenant-identifier").closest("div").removeClass("e-error");
                     $("#tenant-name-validation-error,#tenant-identifier-validation-error").css("display", "none");
                     $(".identifier-info").css("padding-top", "20px");
-                    if (!(useSingleTenantDb && actionType.toLowerCase() == "edit"))
-                    {
+                    if (!(useSingleTenantDb && actionType.toLowerCase() == "edit")) {
                         nextToDatabasePage();
                     }
-                    else
-                    {
+                    else {
                         updateTenant(waitingPopUpElement);
                     }
                 }
@@ -1206,8 +1191,7 @@ function tenantNameIdentiferCheck(tenantName, tenantIdentifier) {
 }
 
 function nextToDatabasePage() {
-    if (!useSingleTenantDb)
-    {
+    if (!useSingleTenantDb) {
         $("#dialog-header").css("display", "block");
         $("#header-logo").css("display", "none");
         $("#header-title").html(window.Server.App.LocalizationContent.SelectDatabaseTitle);
@@ -1247,14 +1231,12 @@ function nextToDatabasePage() {
         $('.auth-type').removeClass("d-none").addClass("d-block");
     }
 
-    if (useSingleTenantDb)
-    {
+    if (useSingleTenantDb) {
         $("#details-next").removeAttr("disabled").addClass("next-alignment");
         $("#details-next").removeClass('database').addClass("data-security");
         $("#details-next").click();
     }
-    else
-    {
+    else {
         $(".tenant-database-form #system-settings-db-selection-container").show();
         $(".tenant-database-form #db-content-holder").addClass("site-creation");
 
@@ -1409,7 +1391,7 @@ function nextToDataSecurityPage() {
             $(".storage-checkbox").hide("slow");
         }
         $(".tenant-registration-form, #step-1").removeClass("d-block").addClass("d-none");
-        
+
         $(".tenant-user-form, #step-3").removeClass("d-block").addClass("d-none");
         $(".tenant-database-form, #step-2").removeClass("d-block").addClass("d-none");
         $(".custom-endpoint-form-element, .file-storage-button, .content-value").hide();
@@ -1520,7 +1502,7 @@ $(document).on("click", "#enable-isolation-code-material", function () {
     enableIsolationCode();
 });
 
-$(document).on("mouseleave", 'input[type="text"], input[type="password"]', function() {
+$(document).on("mouseleave", 'input[type="text"], input[type="password"]', function () {
     if ($(this).val() === "") {
         $(this).closest('div').removeClass("e-valid-input");
     }

@@ -21,7 +21,12 @@
     var canShowForAdminGroup = globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable) || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable && ViewBag.groupId == ServerAppConfig.AdminGroupId && globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.ExcludeSysGroup);
     var groupDetails = JsonConvert.DeserializeObject<Group>(ViewBag.groupDetails);
     var groupDirectoryType = groupDetails.DirectoryType;
+    var sandboxAdminEmail = ServerAppConfig.Sandbox.BI.AdminEmail;
     bool isSingleDB = ViewBag.IsSingleDB;
+    var imageUrl = _globalAppSettings.SystemSettings.InternalAppIdpUrl;
+    ViewBag.GroupName = groupDetails.GroupName;
+    ViewBag.GroupLogo = groupDetails.GroupLogo;
+    var applicationUrl = _globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
 }
 
 @section scripts{
@@ -51,6 +56,7 @@
         var saveGroupSettingsUrl = "@Url.Action("SaveGroupSettings", "group")";
         var saveGroupSettingsUrl = "@Url.Action("SaveGroupSettings", "group")";
         var deleteGroupUserViewUrl = "@Url.Action("DeleteGroupUserView", "group")";
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
         var addUserInGroupUrl = "@Url.Action("AddUserInGroup", "group")";
         @{
         #pragma warning disable SCS0029
@@ -64,10 +70,12 @@
         var isPresentEmailId = "@Url.Action("IsPresentEmailId", "UserManagement")";
         var isUsernameExistsUrl = "@Url.Action("IsUsernameExists", "UserManagement")";
         var userCreationLimitCheckUrl = "@Url.Action("CheckUserCreationLimit", "UserManagement")";
+        var dashboardServerResourceUrl = "@dashboardServerResourceUrl";
         var isEmailRequired = "@isEmailRequired";
         var enableGroupEdit = @Json.Serialize(ViewBag.EnableGroupEdit);
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         var isSingleDB = @isSingleDB.ToString().ToLower();
+        var applicationUrl = "@applicationUrl";
         serverApp.controller('GroupEditController', function ($scope) {
             $scope.selectedRow = 1;
             $scope.page = 0;
@@ -253,7 +261,7 @@
     </script>
     <script type="text/x-jsrender" id="actionstemplate">
         {{if @ViewBag.groupId !=1}}
-        {{if @((int)groupDetails.DirectoryType) != DirectoryType || (@((int)groupDetails.DirectoryType) == DirectoryType && !CanSync) }}        
+        {{if UserId != @ViewBag.CurrentUserId && Email != "@sandboxAdminEmail" && (@((int)groupDetails.DirectoryType) != DirectoryType || (@((int)groupDetails.DirectoryType) == DirectoryType && !CanSync)) }}
         @if (showGroupModule)
         {
             <div>
@@ -261,7 +269,7 @@
             </div>
         }
         {{/if}}
-        {{else UserId != @ViewBag.CurrentUserId}}
+        {{else UserId != @ViewBag.CurrentUserId && Email != "@sandboxAdminEmail"}}
         @if (showGroupModule)
         {
             <div>
@@ -274,7 +282,7 @@
             <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
             </div>
         }
-            {{/if}}
+        {{/if}}
     </script>
     <script>
         var checkGroupnameUrl = "@Url.Action("CheckGroupname", "group")";
@@ -385,73 +393,80 @@
                 <div class="tab-content col-12 no-padding">
                     <div id="group-general-tab" role="tabpanel" class='tab-pane @isGeneralTab'>
                         <div class="col-12 bi-page-body active-directory-form">
-                            <div id="info-container" class="col-12 no-padding">
-                                <form class="col-12 group-form form-horizontal" autocomplete="off">
-                                    <div class="form-element-label">
-                                        <div class="show group-input-field group-name-input-field">
-                                            <label>@T["Name"]</label>
-                                            <span id="group-name" value="{{allGroupDetails.GroupName}}">{{allGroupDetails.GroupName}}</span>
-                                            <label id="group-edit-button" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">
-                                                @if (showGroupModule)
-                                                {
-                                                    @if (ViewBag.groupId != 1)
+                            <div class="float-start no-padding group-img-name">
+                                <div class="img-view-holder col-4 float-start no-padding" style="border: 0px; width: auto">
+                                    <div class="group-logo-tag profile-pic-tag" data-id="@ViewBag.groupId" data-group-logo="{{allGroupDetails.GroupLogo}}" data-type="user" data-display-name="{{allGroupDetails.GroupName}}" data-image-size="64" data-bs-toggle="tooltip" title="{{allGroupDetails.GroupName}}" data-bs-placement="top" data-url="@imageUrl"></div>
+                                    <span class="su su-edit-inverse group-logo-button" id="avatar-button-click" title="@T["Update Group Logo"]"></span>
+                                    <span class="su su-delete group-logo-button" id="avatar-delete-click" title="@T["Delete Group Logo"]"></span>
+                                </div>
+                                <div id="info-container" class="col-12 no-padding">
+                                    <form class="col-12 group-form form-horizontal" autocomplete="off">
+                                        <div class="form-element-label">
+                                            <div class="show group-input-field group-name-input-field">
+                                                <label>@T["Name"]</label>
+                                                <span id="group-name" value="{{allGroupDetails.GroupName}}">{{allGroupDetails.GroupName}}</span>
+                                                <label id="group-edit-button" ng-show="allGroupDetails.DirectoryType != @((int)DirectoryType.AzureAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.WindowsAD) && allGroupDetails.DirectoryType != @((int)DirectoryType.OAuth2) && allGroupDetails.DirectoryType != @((int)DirectoryType.OpenIDConnect)">
+                                                    @if (showGroupModule)
                                                     {
-                                                        <span class="bg-info" id="group-account-edit">
-                                                            <i class="su su-edit"></i>
-                                                            <input type="button" id="edit-group" value="@T["Edit"]" readonly>
-                                                        </span>
+                                                        @if (ViewBag.groupId != 1)
+                                                        {
+                                                            <span class="bg-info" id="group-account-edit">
+                                                                <i class="su su-edit"></i>
+                                                                <input type="button" id="edit-group" value="@T["Edit"]" readonly>
+                                                            </span>
+                                                        }
                                                     }
-                                                }
-                                            </label>
-                                        </div>
-                                        <div class="hide group-input-field-edit">
-                                            <label class="label-panel app-textbox-label">@T["Name"]<i class="mandatory">*</i> </label>
-                                            <div class="col-sm-5 col-12 group-list" id="group-name">
-                                                <input type="text" autocomplete="off" placeholder="@T["Group name"]" name="groupname" ng-bind="allGroupDetails.GroupName" ng-value="allGroupDetails.GroupName" class="form-control NotificationContent content-size" data-maxlength="255" id="group-info-name" @disabled />
-                                                <span id="invalid-groupname" class="error-message validation-message" title="@T["Please enter the group name"]" data-content=""></span>
+                                                </label>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-element-label">
-                                        <div class="show group-input-field group-name-input-field group-info-description-field">
-                                            <label>@T["Description"]</label>
-                                            <span id="group-description" ng-if="allGroupDetails.GroupDescription" value="{{allGroupDetails.GroupDescription}}">{{allGroupDetails.GroupDescription}}</span>
-                                            <span id="group-description" ng-if="!allGroupDetails.GroupDescription" value="--">--</span>
-                                        </div>
-                                        <div class="hide group-input-field-edit group-description-edit-field">
-                                            <label class="label-panel app-textbox-label">@T["Description"]</label>
-                                            <div class="col-sm-5 col-12 group-list">
-                                                <textarea class="form-control notification-content content-size" name="group-description" data-maxlength="1024" id="group-info-description" ng-bind="allGroupDetails.GroupDescription" @disabled></textarea>
-                                                <div id="required-content">
-                                                    @T["1024 characters maximum"]
+                                            <div class="hide group-input-field-edit">
+                                                <label class="label-panel app-textbox-label">@T["Name"]<i class="mandatory">*</i> </label>
+                                                <div class="col-sm-5 col-12 group-list" id="group-name">
+                                                    <input type="text" autocomplete="off" placeholder="@T["Group name"]" name="groupname" ng-bind="allGroupDetails.GroupName" ng-value="allGroupDetails.GroupName" class="form-control NotificationContent content-size" data-maxlength="255" id="group-info-name" @disabled />
+                                                    <span id="invalid-groupname" class="error-message validation-message" title="@T["Please enter the group name"]" data-content=""></span>
                                                 </div>
-                                                <div><span id="invalid-groupname" class="error-message float-start"></span></div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="form-element-label" style="display:none">
-                                        <div class="show group-input-field group-name-input-field">
-                                            <label>@T["Isolation Code"]</label>
-                                            <span id="group-name" value="{{allGroupDetails.IsolationCode}}">{{allGroupDetails.IsolationCode}}</span>
-                                        </div>
-                                        <div class="hide group-input-field-edit">
-                                            <label class="label-panel app-textbox-label" id="group-isolation-code">@T["Isolation Code"]<i class="mandatory">*</i> </label>
-                                            <div class="col-sm-5 col-12 group-list">
-                                                <input type="text" autocomplete="off" placeholder="@T["Group Isolation code"]" name="groupisolationcode" ng-bind="allGroupDetails.IsolationCode" ng-value="allGroupDetails.IsolationCode" class="form-control NotificationContent" maxlength="255" id="group-info-isolation-code" />
-                                                <span id="invalid-group-isolation-code" class="error-message validation-message" title="@T["Please enter the valid isolation code"]" data-content=""></span>
+                                        <div class="form-element-label">
+                                            <div class="show group-input-field group-name-input-field group-info-description-field">
+                                                <label>@T["Description"]</label>
+                                                <span id="group-description" ng-if="allGroupDetails.GroupDescription" value="{{allGroupDetails.GroupDescription}}">{{allGroupDetails.GroupDescription}}</span>
+                                                <span id="group-description" ng-if="!allGroupDetails.GroupDescription" value="--">--</span>
+                                            </div>
+                                            <div class="hide group-input-field-edit group-description-edit-field">
+                                                <label class="label-panel app-textbox-label">@T["Description"]</label>
+                                                <div class="col-sm-5 col-12 group-list">
+                                                    <textarea class="form-control notification-content content-size" name="group-description" data-maxlength="1024" id="group-info-description" ng-bind="allGroupDetails.GroupDescription" @disabled></textarea>
+                                                    <div id="required-content">
+                                                        @T["1024 characters maximum"]
+                                                    </div>
+                                                    <div><span id="invalid-groupname" class="error-message float-start"></span></div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="hide form-element-label group-input-field-edit save-button-field">
-                                        <div class="save-button">
-                                            <input type="button" class="secondary-button app-btn-secondary float-end popup-close" title="" id="group-edit-cancel-button" value="@T["Cancel"]">
-                                            <input id="group-title-container-save-button" title="" class="group-save-button float-end primary-button app-btn-primary small-inner-margin no-margin" type="button" value="@T["Save"]" name="save">
+                                        <div class="form-element-label" style="display:none">
+                                            <div class="show group-input-field group-name-input-field">
+                                                <label>@T["Isolation Code"]</label>
+                                                <span id="group-name" value="{{allGroupDetails.IsolationCode}}">{{allGroupDetails.IsolationCode}}</span>
+                                            </div>
+                                            <div class="hide group-input-field-edit">
+                                                <label class="label-panel app-textbox-label" id="group-isolation-code">@T["Isolation Code"]<i class="mandatory">*</i> </label>
+                                                <div class="col-sm-5 col-12 group-list">
+                                                    <input type="text" autocomplete="off" placeholder="@T["Group Isolation code"]" name="groupisolationcode" ng-bind="allGroupDetails.IsolationCode" ng-value="allGroupDetails.IsolationCode" class="form-control NotificationContent" maxlength="255" id="group-info-isolation-code" />
+                                                    <span id="invalid-group-isolation-code" class="error-message validation-message" title="@T["Please enter the valid isolation code"]" data-content=""></span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <span id="group-edit-confirmation"></span>
-                                </form>
-                            </div>
+                                        <div class="hide form-element-label group-input-field-edit save-button-field">
+                                            <div class="save-button">
+                                                <input type="button" class="secondary-button app-btn-secondary float-end popup-close" title="" id="group-edit-cancel-button" value="@T["Cancel"]">
+                                                <input id="group-title-container-save-button" title="" class="group-save-button float-end primary-button app-btn-primary small-inner-margin no-margin" type="button" value="@T["Save"]" name="save">
+                                            </div>
+                                        </div>
+                                        <span id="group-edit-confirmation"></span>
+                                    </form>
+                                </div>
                             <input type="hidden" name="hiddengroupId" id="hidden-group-id" value="@ViewBag.groupId" />
+                            </div>
                             @if (groupDirectoryType.ToString() != "Local")
                             {
                                 <div id="third-party-group-info" class="col-12 no-padding profile-note-sec">
@@ -544,4 +559,5 @@
     @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
     @await Html.PartialAsync("../Items/_SharePermission")
     @await Html.PartialAsync("../CustomAttribute/_CustomAttribute")
+    @await Html.PartialAsync("_GroupLogoUploadBox")
 }

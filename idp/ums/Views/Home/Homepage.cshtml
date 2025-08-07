@@ -18,8 +18,8 @@
     var copyrightInformation = HttpUtility.HtmlDecode(GlobalAppSettings.SystemSettings.CopyrightInformation);
     var isAllSitesTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "all-sites") ? "active" : string.Empty;
     var isFavoriteTab = (Context.Request.Query["view"] == "favorites") ? "active" : string.Empty;
-    var isMobile = DeviceDetection.IsMobile(Context);
-    var cardviewCookie = string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
+    var isMobile = DeviceDetection.IsMobile(Context); 
+    var cardviewCookie= string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
     var encodedCookieValue = new HtmlString(cardviewCookie);
 }
 
@@ -35,77 +35,77 @@
 </head>
 <body>
     <script nonce="@Context.Items["ScriptNonce"]" src="~/js/onpremiselocalizationcontent.js" asp-append-version="true"></script>
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
-    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
-    <script nonce="@Context.Items["ScriptNonce"]">
-                            var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
-        @{
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/homepage.js" asp-append-version="true"></script>
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" asp-append-version="true"></script>
+<script nonce="@Context.Items["ScriptNonce"]">
+            var isShowAlert = "@ViewBag.IsShowErrorAlert.ToString()";
+            @{
 #pragma warning disable SCS0029
-        }
-                            var allsites = @Html.Raw(JsonConvert.SerializeObject(Model));
-        @{
+            }
+            var allsites = @Html.Raw(JsonConvert.SerializeObject(Model));
+            @{
 #pragma warning restore SCS0029
-        }
-                            var userId = "@userId";
-                            var viewCookie="@cardviewCookie";
-                            var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
-                            var TenantFavoriteListurl = "@Url.Action("TenantFavoriteList", "TenantsManagement")";
-                            var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
-                            var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
-                            var isMobile = @isMobile.ToString().ToLower();
-                            var theme = "@GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower()";
-                            var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();
-                            var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
-                            var brokenImageForTiles = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorSquareImage)";
-    </script>
-    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-tenant-template">
-        ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
-            <span>@AppBranding.Bold.ProductName</span>
-        ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
-            <span>@AppBranding.BoldReports.ProductName</span>
-        ${/if}
-    </script>
-    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
-                            ${if (UseCustomBranding)}
-                            <div class="lazyload img-loader site-logo-container">
-                                <img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo" ]">
-                                <div class="tenant-name-container">
-                                    <div class="tenant-name"> ${TenantName}  </div>
-                                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
-                                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
-                                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
-                                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
-                                    ${/if}
-                                </div>
-                            </div>
-                            ${else}
-                            <div class="lazyload img-loader site-logo-container">
-        @{
+            }
+            var userId = "@userId";
+            var viewCookie="@cardviewCookie";
+            var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
+            var TenantFavoriteListurl = "@Url.Action("TenantFavoriteList", "TenantsManagement")";
+            var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
+            var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
+            var isMobile = @isMobile.ToString().ToLower();
+            var theme = "@GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower()";
+            var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
+            var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
+            var brokenImageForTiles = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorSquareImage)";
+       </script>
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-tenant-template">
+            ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                <span>@AppBranding.Bold.ProductName</span>
+            ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                <span>@AppBranding.BoldReports.ProductName</span>
+            ${/if}
+        </script>
+<script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
+            ${if (UseCustomBranding)}
+            <div class="lazyload img-loader site-logo-container">
+                <img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo" ]">
+                <div class="tenant-name-container">
+                    <div class="tenant-name"> ${TenantName}  </div>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+                    ${/if}
+                </div>
+            </div>
+            ${else}
+            <div class="lazyload img-loader site-logo-container">
+    @{
 #pragma warning disable SCS0029
-        }
-                                <img id="icon-logo" class="icon-logo sites-logo"  loading="lazy" src="${SiteUrl}/get-client-logo?logotype=headerlogo&theme=@Html.Raw(GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower())" ]">
-                                <div class="tenant-name-container">
-                                    <div class="tenant-name"> ${TenantName}  </div>
-                                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
-                                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
-                                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
-                                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
-                                    ${/if}
-                                </div>
-        @{
+    }
+                <img id="icon-logo" class="icon-logo sites-logo"  loading="lazy" src="${SiteUrl}/get-client-logo?logotype=headerlogo&theme=@Html.Raw(GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower())" ]">
+                <div class="tenant-name-container">
+                    <div class="tenant-name"> ${TenantName}  </div>
+                    ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
+                         <div class="tenant-logo">@AppBranding.Bold.ProductName</div>
+                    ${else if (TenantType == "@((int)TenantType.BoldReportsOnPremise)")}
+                       <div class="tenant-logo">@AppBranding.BoldReports.ProductName</div>
+                    ${/if}
+                </div>
+    @{
 #pragma warning disable SCS0029
-        }
-                             </div>
-                            ${/if}
-    </script>
-    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-url-template">
-        <a class="grid-content text-decoration-none" title="${SiteUrl}"  href="${SiteUrl}" target="_blank">${SiteUrl}</a>
-    </script>
-
+    }
+             </div>
+            ${/if}
+</script>
+        <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-url-template">
+            <a class="grid-content text-decoration-none" title="${SiteUrl}"  href="${SiteUrl}" target="_blank">${SiteUrl}</a>
+        </script>
+       
     <div id="site-down-alert"></div>
     @await Html.PartialAsync("_SiteDownAlert")
     <div id="header-container">
-        <img id="boldbi-logo" class="boldbi-logo" src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
+        <img id ="boldbi-logo" class="boldbi-logo" src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
         <div class="side-header">
             @if (adminType == AdminType.SuperAdmin)
             {
@@ -117,7 +117,7 @@
                             <span class="new-site">@T["Create new site"]</span>
                         </div>
                     </a>
-                }
+                }  
             }
             <div class="col-2 top-nav-sec">
                 @await Html.PartialAsync("Profile")
@@ -128,7 +128,7 @@
     <div id="main-body-container">
         <div id="body-container">
             <div class="admin-home">
-                <span title="@displayName" class=" user-name"> @string.Format(T["Welcome, {0} "].Value, displayName)  </span>
+                <span title="@displayName" class=" user-name"> @string.Format(T["Welcome, {0} "].Value,displayName)  </span>
                 <span class="grid-icon su su-wave-emoji wave-icon">
                     <img src="@Url.Content("~/images/wave-icon.svg")" alt="@T["wave Logo"]" class="wave-icon">
                 </span>
@@ -163,7 +163,7 @@
                                 <span class="sf-top-menu-separator"></span>
                                 <span class="dropdown-section-title order-by">@T["Order by"]</span>
                                 <input type="radio" id="order-ascending" name="order-by-sites" class="css-radio" value="ascending" checked>
-                                <label for="order-ascending" class="app-textbox-label radio-btn-label notransition asc">@T["Ascending"]</label>
+                                <label for="order-ascending" class="app-textbox-label radio-btn-label notransition asc" >@T["Ascending"]</label>
                                 <input type="radio" id="order-descending" name="order-by-sites" class="css-radio" value="descending">
                                 <label for="order-descending" class="app-textbox-label radio-btn-label notransition desc">@T["Descending"]</label>
 
@@ -176,14 +176,14 @@
                             <button id="sort-favorite-button" class="btn btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="su su-sort" aria-hidden="true"></i>
                             </button>
-                            <div id="sorting-options-favorites" class="dropdown-menu" aria-labelledby="sorting-sites">
+                            <div id="sorting-options-favorites" class="dropdown-menu" aria-labelledby="sorting-sites" >
                                 <span class="dropdown-section-title order-by">@T["Sort by"]</span>
                                 <input type="radio" id="site-alphabetical" name="sort-by-favorite" class="css-radio" value="alphabetical" checked="">
                                 <label for="site-alphabetical" class="app-textbox-label radio-btn-label notransition alphabetical">@T["Alphabetical"]</label>
                                 <span class="sf-top-menu-separator"></span>
                                 <span class="dropdown-section-title order-by">@T["Order by"]</span>
                                 <input type="radio" id="favorite-ascending" name="order-by-favorite" class="css-radio" value="ascending" checked>
-                                <label for="favorite-ascending" class="app-textbox-label radio-btn-label notransition asc">@T["Ascending"]</label>
+                                <label for="favorite-ascending" class="app-textbox-label radio-btn-label notransition asc" >@T["Ascending"]</label>
                                 <input type="radio" id="favorite-descending" name="order-by-favorite" class="css-radio" value="descending">
                                 <label for="favorite-descending" class="app-textbox-label radio-btn-label notransition desc">@T["Descending"]</label>
 
@@ -237,5 +237,5 @@
             </div>
         </div>
     </div>
-</body>
+    </body>
 </html>

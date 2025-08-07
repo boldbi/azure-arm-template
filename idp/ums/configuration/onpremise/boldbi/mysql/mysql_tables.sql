@@ -26,6 +26,7 @@ CREATE TABLE {database_name}.BOLDBI_Group(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(255) NOT NULL,
 	Description varchar(1026) NULL,
+	GroupLogo varchar(1026) NULL,
 	Color varchar(255) NOT NULL DEFAULT 'White',
 	IsolationCode varchar(4000) NULL,
 	ModifiedDate datetime NOT NULL,
@@ -113,6 +114,7 @@ CREATE TABLE {database_name}.BOLDBI_Item(
 	ModifiedById int NOT NULL,
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
+        PublishedDate datetime NULL,
 	IsSampleData tinyint NULL,
 	DataSource text null,
 	IsPublic tinyint NOT NULL DEFAULT 0,
@@ -1316,6 +1318,8 @@ INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('PPT', 1)
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('CSV', 1)
 ;
 INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('DashboardCache', 1)
+;
+INSERT into {database_name}.BOLDBI_ExportType (Name,IsActive) VALUES ('DatasourceCache', 1)
 ;
 
 INSERT into {database_name}.BOLDBI_RecurrenceType (Name,IsActive) VALUES ('Daily', 1)

@@ -1,4 +1,4 @@
-﻿import dlt
+import dlt
 import pandas as pd
 from google.cloud import bigquery
 
@@ -6,7 +6,7 @@ def load_standalone_table_resource() -> None:
     credentials_path = "{1}"
     project_id = "{2}"
     dataset = "{5}"
-    table_names = [{4}]  # Example: ["sales", "stores"]
+    table_names = [{4}]  
 
     pipeline = dlt.pipeline(
         pipeline_name="{0}_pipeline",

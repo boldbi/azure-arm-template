@@ -65,44 +65,47 @@
             }
         <div class="col-12 bi-page-body">
             <form id="acc-activate-setting" name="accActivationSettingsForm" class="col-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
-                <div class="account-activation-container col-12 no-padding">
-                    <div class="col-12 no-padding">
-                        <label class="account-field-label activation">@T["Account Activation Mode"]</label>
-                    </div>
-                    <div class="activation-mode" id="automatic">
-                        <input type="radio" id="automatic-account-activation" name="activation" class="css-radio" value=@ActivationType.AutomaticActivation @((int)ViewBag.ActivationType == (int)ActivationType.AutomaticActivation ? "checked" : string.Empty) />
-                        <label for="automatic-account-activation" class="radio-btn-label notransition" id="labelautomatic">@T["Automatic"]</label>
-                    </div>
-                    <div class="activation-mode" id="email">
-                        <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled" : string.Empty) />
-                        <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
-                    </div>
-                    @if (@ViewBag.EmailSettingResult == "failure")
-                    {
-                        <div class="bg-warning email-settings-validation validation-errors">
-                            @T["Activation emails cannot be sent until the email settings are configured. You can select 'Automatic Activation' to activate the user without configuring the email settings."]
+                @if (ServerAppConfig.IsSelfHosted)
+                {
+                    <div class="account-activation-container col-12 no-padding">
+                        <div class="col-12 no-padding">
+                            <label class="account-field-label activation">@T["Account Activation Mode"]</label>
                         </div>
-                    }
-                </div>
-                <div class="col-12 no-padding email-container">
-                    <div class="col-12 no-padding">
-                        <label class="account-field-label is-email-required">@T["User Email"]</label>
-                        <div class="info-message">@T["This setting controls whether an email address is required for creating new users or not."]</div>
+                        <div class="activation-mode" id="automatic">
+                            <input type="radio" id="automatic-account-activation" name="activation" class="css-radio" value=@ActivationType.AutomaticActivation @((int)ViewBag.ActivationType == (int)ActivationType.AutomaticActivation ? "checked" : string.Empty) />
+                            <label for="automatic-account-activation" class="radio-btn-label notransition" id="labelautomatic">@T["Automatic"]</label>
+                        </div>
+                        <div class="activation-mode" id="email">
+                            <input type="radio" id="email-account-activation" name="activation" class="css-radio" value=@ActivationType.EmailActivation @((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation ? "checked" : string.Empty) @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled" : string.Empty) />
+                            <label for="email-account-activation" class="radio-btn-label notransition @(ViewBag.EmailSettingResult == "failure" || disableEmailActivation ? "disabled-lable-color" : string.Empty)" id="labelemail">@T["Email"]</label>
+                        </div>
+                        @if (@ViewBag.EmailSettingResult == "failure")
+                        {
+                            <div class="bg-warning email-settings-validation validation-errors">
+                                @T["Activation emails cannot be sent until the email settings are configured. You can select 'Automatic Activation' to activate the user without configuring the email settings."]
+                            </div>
+                        }
                     </div>
-                    <div class="email-not-required activation-mode" id="not-required">
-                        <input type="radio" id="email-not-required" name="email-required" class="css-radio" value="false" @(!globalAppSettings.SystemSettings.IsEmailRequired ? "checked" : string.Empty) @(globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled" : string.Empty) />
-                        <label for="email-not-required" class="radio-btn-label notransition @(globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled-lable-color" : string.Empty)" id="label-email-not-required">@T["Not Required"]</label>
-                    </div>
-                    <div class="email-not-required activation-mode" id="required">
-                        <input type="radio" id="email-required" name="email-required" class="css-radio" value="true" @(((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation || globalAppSettings.SystemSettings.IsEmailRequired) ? "checked" : string.Empty) />
-                        <label for="email-required" class="radio-btn-label notransition" id="label-email-required">@T["Required"]</label>
-                    </div>
-                    <div class="col-12 no-padding">
-                        <div id="email-required-warning" class="bg-warning email-settings-validation validation-errors hide">
-                            @T["When the account activation preference is email, an email address is mandatory for activating the account."]
+                    <div class="col-12 no-padding email-container">
+                        <div class="col-12 no-padding">
+                            <label class="account-field-label is-email-required">@T["User Email"]</label>
+                            <div class="info-message">@T["This setting controls whether an email address is required for creating new users or not."]</div>
+                        </div>
+                        <div class="email-not-required activation-mode" id="not-required">
+                            <input type="radio" id="email-not-required" name="email-required" class="css-radio" value="false" @(!globalAppSettings.SystemSettings.IsEmailRequired ? "checked" : string.Empty) @(globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled" : string.Empty) />
+                            <label for="email-not-required" class="radio-btn-label notransition @(globalAppSettings.SystemSettings.ActivationType == ActivationType.EmailActivation ? "disabled-lable-color" : string.Empty)" id="label-email-not-required">@T["Not Required"]</label>
+                        </div>
+                        <div class="email-not-required activation-mode" id="required">
+                            <input type="radio" id="email-required" name="email-required" class="css-radio" value="true" @(((int)ViewBag.ActivationType == (int)ActivationType.EmailActivation || globalAppSettings.SystemSettings.IsEmailRequired) ? "checked" : string.Empty) />
+                            <label for="email-required" class="radio-btn-label notransition" id="label-email-required">@T["Required"]</label>
+                        </div>
+                        <div class="col-12 no-padding">
+                            <div id="email-required-warning" class="bg-warning email-settings-validation validation-errors hide">
+                                @T["When the account activation preference is email, an email address is mandatory for activating the account."]
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
                 <div class="user-default-group col-xs-12 no-padding">
                     <div class="col-xs-12 no-padding">
                         <label class="no-margin account-field-label is-email-required">@T["Default Group for New Users"]</label>

@@ -21,6 +21,7 @@
         userImport = customUI?.Profiles[0]?.UserImport != null ? customUI?.Profiles[0]?.UserImport[0] : new UserImport();
     }
     var passwordPolicy = ServerAppConfig.PasswordPolicy;
+    var sandboxAdminEmail = ServerAppConfig.Sandbox.BI.AdminEmail;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(permissions, _identityResponse.IsAdmin, _featureManager);
     var pageDescription = T["Add and manage your users."];
     var showGroupModule =  globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD == null  || (globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD != null && !globalAppSettings.SystemSettings.PreviewFeatures.DisableGroupCRUD.Enable);
@@ -153,24 +154,40 @@
                 <span class="su su-options"> </span>
             </span>
             <ul class="dropdown-menu" role="menu">
-        @if (isAdmin || permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions])
-        {
-                        <li class="menu-group">
-                            <a href="@Url.Action("userpermission", "permission")?userId={{:UserId}}" title="@T["Manage Permissions"]" data-bs-toggle="tooltip">
-                                <i class="su su-manage-permission"></i>
-                                <span class="menu-text">@T["Manage Permissions"]</span>
-                            </a>
-                        </li>
-        }
                 <li class="menu-group">
                     <a href="@Url.Action("ViewProfile", "UserManagement")?id={{:UserId}}" title="@T["View"]" data-bs-toggle="tooltip">
                         <i class="su su-eye"></i>
                         <span class="menu-text">@T["View"]</span>
                     </a>
                 </li>
+                {{if Email == "@sandboxAdminEmail"}}
+                <li class="menu-group">
+                    <a title="@T["Manage Permissions"]" data-bs-toggle="tooltip">
+                        <i class="su su-manage-permission disabled-icon-color"></i>
+                        <span class="menu-text disabled-icon-color">@T["Manage Permissions"]</span>
+                    </a>
+                </li>
+                {{else}}
+                @if (isAdmin || permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions])
+                {
+                    <li class="menu-group">
+                        <a href="@Url.Action("userpermission", "permission")?userId={{:UserId}}" title="@T["Manage Permissions"]" data-bs-toggle="tooltip">
+                            <i class="su su-manage-permission"></i>
+                            <span class="menu-text">@T["Manage Permissions"]</span>
+                        </a>
+                    </li>
+                }
+                {{/if}}
                 {{if Email == "@ViewBag.LoggedUser"}}
                 <li class="menu-group">
                     <a href="javascript:void(0);" title="@T["It's You"]" data-bs-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
+                        <i class="su su-delete disabled-icon-color"></i>
+                        <span class="menu-text disabled-icon-color">@T["Remove User"]</span>
+                    </a>
+                </li>
+                {{else Email == "@sandboxAdminEmail"}}
+                <li class="menu-group">
+                    <a href="javascript:void(0);" title="@T["Remove User"]" data-bs-toggle = "tooltip" data-content = "{{:UserId}}" data-email = "{{:Email}}" >
                         <i class="su su-delete disabled-icon-color"></i>
                         <span class="menu-text disabled-icon-color">@T["Remove User"]</span>
                     </a>
@@ -451,7 +468,7 @@
                          </button>
                          <ul class="dropdown-menu sync-user-dropdown multi-level" role="menu" id="dropdown-options">
                             <li id="user-delete-button-li">
-                                <a class="dropdown-toggle user-delete-button" data-bs-toggle="tooltip" data-placement="left" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" id="delete-user">
+                                <a class="dropdown-toggle user-delete-button" data-bs-toggle="tooltip" data-placement="left" title="@T["Remove selected users"]" data-log-user="@ViewBag.LoggedUser" data-sandbox-admin-user="@ServerAppConfig.Sandbox.BI.AdminEmail" id="delete-user">
                                     <i class="su su-delete"> </i>
                                     <span>@T["Remove User"]</span>
                                 </a>

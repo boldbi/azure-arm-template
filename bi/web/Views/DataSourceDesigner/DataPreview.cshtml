@@ -1,6 +1,7 @@
 ﻿@{
     Layout = null;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     var globalAppSettings = _globalAppSettings;
     var cdnLink = globalAppSettings.SystemSettings.CDNLink;
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
@@ -50,7 +51,8 @@
             }
         </style>
     }
-    @if (!isSelfHosted && isUrlInDnsList) {
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList))
+    {
         @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
     }
     <script>
@@ -105,5 +107,9 @@
     <environment exclude="Development,CloudDevelopment">
         <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/datapreview-designer.min.js"></script>
     </environment>
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
+    }
 </body>
 </html>

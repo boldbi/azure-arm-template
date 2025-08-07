@@ -43,7 +43,14 @@ if api_data:
     print(df.head())
 
     pipeline = dlt.pipeline("{0}_pipeline", destination="filesystem", dataset_name="{0}")
-    pipeline.run(df, table_name="{4}", loader_file_format="jsonl")
+    try:
+        pipeline.run(df, table_name="{4}", loader_file_format="jsonl")
+    except Exception as e:
+        if "_dlt_pipeline_state" in str(e) and "FileNotFoundError" in str(e):
+            print('')
+        else:
+            raise
+        
     dir_path = '{5}'
     try:
         if os.path.isdir(dir_path):

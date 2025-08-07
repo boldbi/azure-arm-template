@@ -130,6 +130,7 @@ function onChangePasswordClick() {
             }
             else {
                 SuccessAlert(window.Server.App.LocalizationContent.UpdatePassword, window.Server.App.LocalizationContent.PasswordSuccess, 7000);
+                window.location.reload();
             }
         }
     );
