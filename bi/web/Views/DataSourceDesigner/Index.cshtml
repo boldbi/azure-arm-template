@@ -3,6 +3,7 @@
 @{
     Layout = null;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     var globalAppSettings = _globalAppSettings;
     var isDebug = globalAppSettings.SystemSettings.IsDebug;
     var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
@@ -27,6 +28,7 @@
     var donotShowJourney = Context.Request.Cookies["syncfusion.dashboards.server.journey"] != null;
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var isUmsAdmin = ServerAppConfig.Sandbox.BI.Enabled && !string.IsNullOrWhiteSpace(ServerAppConfig.Sandbox.BI.AdminEmail) && emailAddress.ToLower() == ServerAppConfig.Sandbox.BI.AdminEmail.ToLower() ? true : _identityResponse.IsUmsAdmin;
     var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
     var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                          currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
@@ -175,15 +177,18 @@
         var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
         var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
         var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
-        var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
+        var isUmsAdmin = "@isUmsAdmin";
         var isDataSourceConnection = "@isDataSourceConnection";
         var appVersion = "@ServerAppConfig.ProductVersion";
         var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
         var canHideLogoAndProfile = @ServerAppConfig.CanHideLogoAndProfile.ToString().ToLower();
         var isSandBox = "@isSandBox";
         var isSingleDatabaseMode = "@isSingleDatabaseMode";
+        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+        var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
+        var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
     </script>
-    @if (!isSelfHosted && isUrlInDnsList) {
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList)) {
        @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
     }
     <script type="text/javascript">
@@ -299,6 +304,10 @@
             <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
         </environment>
 
+    }
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
     }
 
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")

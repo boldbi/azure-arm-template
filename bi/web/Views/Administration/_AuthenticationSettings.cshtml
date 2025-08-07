@@ -56,6 +56,15 @@
         var singleLogout = @Html.Raw(Json.Serialize(ViewBag.AzureAdB2CSettings.AzureADB2CSettings.IsSloEnabled));
         var oAuthEnableCreateAccount = @Html.Raw(Json.Serialize(ViewBag.OAuthSettings.OAuthAuthSettings.CanCreateAccount));
         var openIdEnableCreateAccount = @Html.Raw(Json.Serialize(ViewBag.OpenIDSettings.OIDCAuthSettings.CanCreateAccount));
+
+        var openIdEnableGroupClaim = @Html.Raw(Json.Serialize(ViewBag.OpenIDSettings?.OIDCAuthSettings?.GroupClaimsSettings != null ?ViewBag.OpenIDSettings.OIDCAuthSettings.GroupClaimsSettings.EnableGroupClaims : false));
+
+        var openIdEnableRemoveExistGroupMapping = @Html.Raw(Json.Serialize(ViewBag.OpenIDSettings?.OIDCAuthSettings?.GroupClaimsSettings != null ?ViewBag.OpenIDSettings.OIDCAuthSettings.GroupClaimsSettings.RemoveExistGroupMapping : false));
+
+         var oauthEnableGroupClaim = @Html.Raw(Json.Serialize(ViewBag.OAuthSettings?.OAuthAuthSettings?.GroupClaimsSettings != null ?ViewBag.OAuthSettings.OAuthAuthSettings.GroupClaimsSettings.EnableGroupClaims : false));
+
+        var oauthEnableRemoveExistGroupMapping = @Html.Raw(Json.Serialize(ViewBag.OAuthSettings?.OAuthAuthSettings?.GroupClaimsSettings != null ?ViewBag.OAuthSettings.OAuthAuthSettings.GroupClaimsSettings.RemoveExistGroupMapping : false));
+
         serverApp.controller("adSettingsController", ["$scope", function ($scope) {
             $scope.regex = '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
             $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_\s]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_\s]+)*$/;
@@ -70,6 +79,11 @@
             $scope.openIdCustomMailContentIsEnabled = isOpenIdCustomMailOptionEnabled;
             $scope.oauthCreateAccount = oAuthEnableCreateAccount;
             $scope.openidCreateAccount = openIdEnableCreateAccount;
+            $scope.openIdEnableGroupClaim = openIdEnableGroupClaim;
+            $scope.openIdEnableRemoveExistGroupMapping = openIdEnableRemoveExistGroupMapping;
+
+            $scope.oauthEnableGroupClaim = oauthEnableGroupClaim;
+            $scope.oauthEnableRemoveExistGroupMapping = oauthEnableRemoveExistGroupMapping;
         }]);
 
     </script>
@@ -484,10 +498,70 @@
                                                         @T["Enable User Account Creation"]
                                                     </span>
                                                 </label>
-                                                <span id="user-account-creation-info" class="su su-info info-popup" data-bs-toggle="popover" data-bs-placement="right" data-bs-html="true" data-bs-content="@T["Create a new user account if doesn't exist."]"></span>
+                                               <div class="info-message auth-fields-content">
+                                               @T["Create a new user account during login if one does not already exist."]
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
+
+
+                                    <div class="col-12 separator-margin">
+                                        <div class="col-12 auth-sub-title no-padding">
+                                            <div class="section-title">
+                                                <span>@T["Group Claim Settings"]</span>
+                                            </div>
+                                            <div class="col-12 info-message no-padding">
+                                                @T["Once passed the group or equivalent claim in the authentication token this settings allow automatic user and group mapping based on the received claim value. The claims are normally represented by a JSON object that contains a collection of name and value pairs for each claim. Fill JSON keys with respect to the required details to identify the exact values."]
+                                            </div>
+                                            <div class="col-12 info-message no-padding note-content">
+    @Html.Raw("<span class='note-text'>" + T["Note: "].Value + "</span>" + T["User and group will be mapped only if the same group name exists in the site."].Value)
+</div>
+                                        </div>
+
+                                        <div class="col-12 form-fields-top-margin no-padding">
+                                            <div class="col-12 no-padding ">
+                                                @Html.CheckBox("oauthEnableGroupClaim", new { @class = "material-checkbox", ng_model = "oauthEnableGroupClaim", ng_checked = "oauthEnableGroupClaim", ng_disabled = "!oauthIsEnabled" })
+                                                @Html.Hidden("oauthEnableGroupClaim")
+                                                <label for="oauthEnableGroupClaim">
+                                                    <span>
+                                                        @T["Enable User and Group mapping"]
+                                                    </span>
+                                                </label>
+                                                <div class="info-message auth-fields-content">
+                                               @T["Fetch group claim value and process the user and multi-group mapping dynamically during login."]
+                                            </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 form-fields-top-margin no-padding">
+                                            <div class="col-12 no-padding ">
+                                                @Html.CheckBox("oauthEnableRemoveExistGroupMapping", new { @class = "material-checkbox", ng_model = "oauthEnableRemoveExistGroupMapping", ng_checked = "oauthEnableRemoveExistGroupMapping", ng_disabled = "!oauthIsEnabled || !oauthEnableGroupClaim" })
+                                                @Html.Hidden("oauthEnableRemoveExistGroupMapping")
+                                                <label for="oauthEnableRemoveExistGroupMapping">
+                                                    <span>
+                                                        @T["Un-map Existing Groups of User and map to new group"]
+                                                    </span>
+                                                </label>
+                                                <div class="info-message auth-fields-content">
+                                               @T["When enabled, this option clears all previously assigned groups for the user and map to the group which is received in claim."]
+                                            </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 form-fields-top-margin no-padding">
+                                            <div class="col-md-12 no-padding">
+                                                <label class="app-textbox-label">@T["Group Claim Name"]</label>
+                                            </div>
+                                            <div class="col-md-12 no-padding">
+                                                <input type="text" class="form-control txt-holder validation-padding" name="oauthgroupclaimname" placeholder="@T["Group claim name (Optional)"]" ng-init="oauthgroupclaimname='@((ViewBag.OAuthSettings?.OAuthAuthSettings?.GroupClaimsSettings?.GroupClaimName ?? "").ToString())'" id="oauth-group-claim-name" ng-disabled="!oauthIsEnabled || !oauthEnableGroupClaim" ng-model="oauthgroupclaimname" />                                                
+                                            </div>
+                                            <div class="info-message no-padding">@T["Specify the claim name that contains group identifiers."]</div> 
+                                        </div>
+                                        </div>                                    
+
+                                        @if (ServerAppConfig.IsSelfHosted)
+                                    {
                                     <div class="col-12 separator-margin">
                                         <div class="col-12 auth-sub-title no-padding">
                                             <div class="section-title">
@@ -519,6 +593,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    }
 
                                     @if (ServerAppConfig.IsSelfHosted)
                                     {
@@ -724,15 +799,79 @@
                                                             @T["Enable User Account Creation"]
                                                         </span>
                                                     </label>
-                                                    <span id="user-account-creation-info" class="su su-info info-popup" data-bs-toggle="popover" data-bs-placement="right" data-bs-html="true" data-bs-content="@T["Create a new user account if doesn't exist."]"></span>
+                                                     <div class="info-message auth-fields-content">
+                                               @T["Create a new user account during login if one does not already exist."]
+                                            </div>
                                                 </div>
                                             </div>
                                         </div>
+
+
+                                        <div class="col-12 separator-margin">
+                                            <div class="col-12 auth-sub-title no-padding">
+                                                <div class="section-title">
+                                                    <span>@T["Group Claim Settings"]</span>
+                                                </div>
+                                                <div class="col-12 info-message no-padding">
+                                                    @T["Once passed the group or equivalent claim in the authentication token this settings allow automatic user and group mapping based on the received claim value. The claims are normally represented by a JSON object that contains a collection of name and value pairs for each claim. Fill JSON keys with respect to the required details to identify the exact values."]
+                                                </div>
+                                                <div class="col-12 info-message no-padding note-content">
+    @Html.Raw("<span class='note-text'>" + T["Note: "].Value + "</span>" + T["User and group will be mapped only if the same group name exists in the site."].Value)
+</div>
+                                            </div>
+
+                                            <div class="col-12 form-fields-top-margin no-padding">
+                                                <div class="col-12 no-padding ">
+                                                    @Html.CheckBox("openIdEnableGroupClaim", new { @class = "material-checkbox", ng_model = "openIdEnableGroupClaim", ng_checked = "openIdEnableGroupClaim", ng_disabled = "!openidIsEnabled" })
+                                                    @Html.Hidden("openIdEnableGroupClaim")
+                                                    <label for="openIdEnableGroupClaim">
+                                                        <span>
+                                                            @T["Enable User and Group mapping"]
+                                                        </span>
+                                                    </label>
+                                                   
+                                                    <div class="auth-fields-content info-message">
+                                               @T["Fetch group claim value and process the user and multi-group mapping dynamically during login."]
+                                            </div>
+                                                
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 form-fields-top-margin no-padding">
+                                                <div class="col-12 no-padding ">
+                                                    @Html.CheckBox("openIdEnableRemoveExistGroupMapping", new { @class = "material-checkbox", ng_model = "openIdEnableRemoveExistGroupMapping", ng_checked = "openIdEnableRemoveExistGroupMapping", ng_disabled = "!openidIsEnabled || !openIdEnableGroupClaim" })
+                                                    @Html.Hidden("openIdEnableRemoveExistGroupMapping")
+                                                    <label for="openIdEnableRemoveExistGroupMapping">
+                                                        <span>
+                                                            @T["Un-map Existing Groups of User and map to new group"]
+                                                        </span>
+                                                    </label>
+                                                    
+                                                    <div class="auth-fields-content info-message">
+                                               @T["When enabled, this option clears all previously assigned groups for the user and map to the group which is received in claim."]
+                                            </div>
+
+                                                    
+                                            </div>
+                                            </div>
+                                            <div class="col-12 form-fields-top-margin no-padding">
+                                                <div class="col-md-12 no-padding">
+                                                    <label class="app-textbox-label">@T["Group Claim Name"]</label>
+                                                </div>
+                                                <div class="col-md-12 no-padding">
+                                                    <input type="text" class="form-control txt-holder validation-padding" name="openidgroupclaimname" placeholder="@T["Group claim name (Optional)"]" ng-init="openidgroupclaimname='@((ViewBag.OpenIDSettings?.OIDCAuthSettings?.GroupClaimsSettings?.GroupClaimName ?? "").ToString())'" id="oauth-group-claim-name" ng-disabled="!openidIsEnabled || !openIdEnableGroupClaim" ng-model="openidgroupclaimname" />
+                                                </div>
+                                                <div class="info-message no-padding">@T["Specify the claim name that contains group identifiers."]
+                                                </div>                                               
+                                            </div>
+                                        </div>      
+                                    
                                         <div class="col-12 separator-margin">
                                             <div id="openid-group-import" class="group-import">
                                                 @await Html.PartialAsync("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OpenIDSettings.OIDCAuthSettings.GroupImportSettings, new ViewDataDictionary(ViewData) { { "AuthType", AuthType.OIDC } })
                                             </div>
                                         </div>
+                                       
                                         <feature name=@FeatureManagement.EnableNavigateToCustomUserDirectory>
                                             <div class="col-12 separator-margin yokogawa-top-margin">
                                                 <div class="col-12 no-padding ">

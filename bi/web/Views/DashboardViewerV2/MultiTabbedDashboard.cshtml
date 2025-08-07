@@ -43,6 +43,7 @@
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
     var canHideCommentIcon = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -193,8 +194,12 @@
             var custombrandName = "@ServerAppConfig.CustomBrandName";
             var dashboardId = "@ViewBag.ItemId";
             var getRenderDashboardDetailsUrl = "@Url.Action("GetRenderDashboardDetails", "FileRender")";
+            var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
+            var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+            var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
     </script>
-    @if (!isSelfHosted && canHideCommentIcon) {
+    @if (isSandbox || (!isSelfHosted && canHideCommentIcon))
+    {
         @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
     }
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
@@ -220,6 +225,11 @@
             <div id="multi-tab-mobile-menu" data-action="multi-tab-header">
                 <i class="su su-mobile-menu-icon"></i>
             </div>
+        }
+
+    @if (isSandbox || (!isSelfHosted && canHideCommentIcon))
+        {
+            @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
         }
 
         <div id="multi-tab-dashboard">

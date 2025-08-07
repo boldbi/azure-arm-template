@@ -25,6 +25,7 @@ CREATE TABLE SyncDS_Group(
 	Id SERIAL PRIMARY KEY NOT NULL,
 	Name varchar(255) NOT NULL,
 	Description varchar(1026) NULL,
+	GroupLogo varchar(1026) NULL,
 	Color varchar(255) NOT NULL DEFAULT 'White',
 	IsolationCode varchar(4000) NULL,
 	ModifiedDate timestamp NOT NULL,
@@ -105,6 +106,7 @@ CREATE TABLE SyncDS_Item(
 	ModifiedById int NOT NULL,
 	CreatedDate timestamp NOT NULL,
 	ModifiedDate timestamp NOT NULL,
+        PublishedDate timestamp NULL,
 	IsSampleData smallint NULL,
 	DataSource varchar(1026) null,
 	IsPublic smallint NOT NULL DEFAULT 0,
@@ -1225,6 +1227,8 @@ INSERT into SyncDS_ExportType (Name,IsActive) VALUES (N'CSV', 1)
 ;
 INSERT INTO SyncDS_ExportType (Name,  IsActive) VALUES (N'DashboardCache',1)
 ;
+INSERT INTO SyncDS_ExportType (Name,IsActive) VALUES (N'DatasourceCache',1)
+;		;
 
 INSERT into SyncDS_RecurrenceType (Name,IsActive) VALUES (N'Daily', 1)
 ;

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.card.all.js
-*  version : 12.1.5
+*  version : 13.1.10
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -6575,7 +6575,7 @@ var BoldBIDashboardSparkline;
             this._hideTooltip();
             this.singleTimer = setTimeout(function() {
                 var args = {};
-                if (that.model.selected) {
+                if (that.model && that.model.selected) {
                     args = { model: that.model, currentTarget: bbdesigner$('#' + that.element.attr('id')), PageX:evt.pageX, PageY:evt.pageY },
                         that._trigger("selected", args);
                     evt.stopPropagation();
@@ -6609,6 +6609,9 @@ var BoldBIDashboardSparkline;
             var that = this;
             var args = {};
             this.singleTimer = setTimeout( function() {
+                if (!that.model || !that.model.kpiValue || !that.model.leftValue || !that.model.rightValue) {
+                return;
+                }
                 var value = that.getFormattedValue(that.model.kpiValue.type, that.model.valueRepresentation);
                 var actualValueFormat = that.getFormattedValue(that.model.leftValue.type, that.model.valueRepresentation);
                 var targetValueFormat = that.getFormattedValue(that.model.rightValue.type, that.model.valueRepresentation);
@@ -6876,10 +6879,16 @@ var BoldBIDashboardSparkline;
             this._initializeMargins();
         },
         _initializeMargins: function () {
-            this.marginTop = this.model.alignment.vertical === 'Center' ? 0 : this.model.alignment.vertical === 'Bottom' ? 2 : window.screen.width < 1920 ? 8 : 12;
+            var width = this.model.size.width - 32;
+            width = this._isImagePresent() ? width * .8 - 16 : width;
+            var text = this._isNullOrEmptyOrUndefined(this.model.autoFontSize.measureText) ? this.model.measure.text : this.model.autoFontSize.measureText;
+            fontSize = this._getOptimumFontSize(this.model.size.height, width, text);
+            var wrapperHeight = fontSize * 1.25;
+            var remainSpace = (this.model.size.height - wrapperHeight) / 2;
+            this.marginTop = this.model.alignment.vertical === 'Center' ? 0 : this.model.alignment.vertical === 'Bottom' ? 2 : window.screen.width < 1920 ? remainSpace < 8 ? 0 : 8 : remainSpace < 12 ? 0 : 12;
             this.marginTopWithSparkline = this.model.alignment.vertical === 'Center' ? 0 : this.model.alignment.vertical === 'Bottom' ? 2 : window.screen.width < 1920 ? 8 : 12;
             this.inBetweenMargin = window.screen.width < 1920 ? 4 : 4;
-            this.bottomMargin = this.model.alignment.vertical === 'Center' ? 0 : this.model.alignment.vertical === 'Top' ? 2 : window.screen.width < 1920 ? 8 : 12;
+            this.bottomMargin = this.model.alignment.vertical === 'Center' ? 0 : this.model.alignment.vertical === 'Top' ? 2 : window.screen.width < 1920 ? remainSpace < 8 ? 0 : 8 : remainSpace < 12 ? 0 : 12;
             this.bottomMarginWithSparkline = this.model.alignment.vertical === 'Center' ? 0 : this.model.alignment.vertical === 'Top' ? 2 : window.screen.width < 1920 ? 8 : 12;
         },
         _wireEvents: function () {
@@ -7925,7 +7934,7 @@ var BoldBIDashboardSparkline;
             this._hideTooltipDescription();
             this.singleTimer = setTimeout(function() {
                 var args = {};
-                if (that.model.selected) {
+                if (that.model && that.model.selected) {
                     args = { model: that.model, currentTarget: bbdesigner$('#' + that.element.attr('id')), PageX:evt.pageX, PageY:evt.pageY },
                         that._trigger("selected", args);
                     evt.stopPropagation();
@@ -7960,6 +7969,9 @@ var BoldBIDashboardSparkline;
             var args = {};
             if(!bbdesigner$(evt.target).hasClass('e-number-card-description-text')) {
                 this.singleTimer = setTimeout(function() {    
+                    if (!that.model || !that.model.measure || !that.model.measure.text) {
+                        return;
+                    }
                     var value = that.formatting.applyFormat(that.model.measure.text, that.model.valueRepresentation);
                     args = { model: that.model, currentTarget: evt.target, PageX:evt.pageX, PageY:evt.pageY, currentText: evt.target.getAttribute('data-tooltip'), measureValue: value},
                     that._trigger("toolTipInitialize", args);

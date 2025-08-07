@@ -648,7 +648,10 @@ function initializeTooltip() {
     }, "#grid-tooltip");
 
     function beforeRender(args) {
-        tooltip.content = args.target.closest("td").innerText;
+        const rawContent = args.target.closest("td").innerText;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerText = rawContent;
+        tooltip.content = tempDiv.innerHTML;
     }
 }
 $(document).on('click',"[data-bs-toggle='tab']", function(){

@@ -2,6 +2,7 @@
 @{
     Layout = null;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     var globalAppSettings = _globalAppSettings;
     var isDebug = globalAppSettings.SystemSettings.IsDebug;
     var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
@@ -13,6 +14,7 @@
     var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
+    var isUmsAdmin = ServerAppConfig.Sandbox.BI.Enabled && !string.IsNullOrWhiteSpace(ServerAppConfig.Sandbox.BI.AdminEmail) && emailAddress.ToLower() == ServerAppConfig.Sandbox.BI.AdminEmail.ToLower() ? true : _identityResponse.IsUmsAdmin;
     var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
     var aiLogo = globalAppSettings.SystemSettings.AILogo;
@@ -152,8 +154,8 @@
         @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     }
     <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
-    @if (!isSelfHosted && isUrlInDnsList) {
-        @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList)) {
+       @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
     }
     
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
@@ -231,7 +233,7 @@
         var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
         var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
-        var isUmsAdmin = "@_identityResponse.IsUmsAdmin";
+        var isUmsAdmin = "@isUmsAdmin";
         var appVersion = "@ServerAppConfig.ProductVersion";
         var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
         var canHideLogoAndProfile = @ServerAppConfig.CanHideLogoAndProfile.ToString().ToLower();
@@ -239,6 +241,9 @@
         var faviconLogo = "@faviconLogo";
         var aiLogo = "@aiLogo";
         var isSingleDatabaseMode = "@isSingleDatabaseMode";
+        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+        var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
+        var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
     </script>
     <script type="text/javascript">
         window.addEventListener("beforeunload", function (e) {
@@ -254,137 +259,141 @@
     </script>
 </head>
 <body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
-<input type="hidden" id="embed-iframe" value="@ViewBag.isEmbed" />
-<div class="preloader-wrap" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: #fff; z-index : 2; ">
-    <div id="loader_image" align="center" style="position:relative;top:39%;">
-        <div class="loader-blue loader-icon" id="loader-icon">
-            <svg class="circular">
-                <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
-            </svg>
+    <input type="hidden" id="embed-iframe" value="@ViewBag.isEmbed" />
+    <div class="preloader-wrap" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: #fff; z-index : 2; ">
+        <div id="loader_image" align="center" style="position:relative;top:39%;">
+            <div class="loader-blue loader-icon" id="loader-icon">
+                <svg class="circular">
+                    <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                </svg>
+            </div>
         </div>
+        <div id="loader_text" align="center" style="font-family:@globalAppSettings.SystemSettings.FontPreference,Segoe UI,SegoeUI,Helvetica Neue,Helvetica,Arial,sans-serif;position:relative;top: 42%;font-size:21px;font-weight:400;">@T["Initializing Dashboard Designer"]</div>
     </div>
-    <div id="loader_text" align="center" style="font-family:@globalAppSettings.SystemSettings.FontPreference,Segoe UI,SegoeUI,Helvetica Neue,Helvetica,Arial,sans-serif;position:relative;top: 42%;font-size:21px;font-weight:400;">@T["Initializing Dashboard Designer"]</div>
-</div>
 
-<environment include="Development,CloudDevelopment">
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.css" />
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.min.css" />
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
-</environment>
-<script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+    </environment>
+    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 
-<script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol" async></script>
 
-@*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
-<script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
-<script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+    @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
 
-<environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.js"></script>
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.min.js"></script>
-</environment>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.min.js"></script>
+        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-designerpage.min.js"></script>
+    </environment>
 
-@await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
 
-<environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.js"></script>
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.min.js"></script>
-</environment>
+    <environment include="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-designer.min.js"></script>
+    </environment>
 
-@if (!isEmbed)
-{
-    <section id="menu-area" class="custom-bootstrap-styles">
-        @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
-    </section>
-}
-@*<div id="designer-header" class="custom-bootstrap-styles">
+    @if (!isEmbed)
+    {
+        <section id="menu-area" class="custom-bootstrap-styles">
+            @await Html.PartialAsync("../Shared/_Menu", globalAppSettings.SystemSettings.CDNLink, new ViewDataDictionary(ViewData) { { "helpSiteBaseUrl", helpSiteBaseUrl }, { "helpSiteUrl", GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerWalkThroughCreateDashboard) }, { "GlobalAppSettings", globalAppSettings } })
+        </section>
+    }
+    @*<div id="designer-header" class="custom-bootstrap-styles">
             <div class="dashboard-name">
                 <span class="edit-dashboard">@ViewBag.dashboardName</span>
                 <span class="dashboard-status">@T["(Edited)"]</span>
                 <span class="dashboard-unsave" style="display:none">Unsaved Changes</span>
             </div>
         </div>*@
-<div id="dashboardDesigner"></div>
+    <div id="dashboardDesigner"></div>
 
-<div id="messageBox">
-    <div class="message-header"></div>
-    <div class="message-box-close"></div>
-    <div class="message-content text-center"></div>
-    <div class="message-box-btn-holder"></div>
-</div>
-@if (showTour && ViewBag.isEmbed != "true")
-{
+    <div id="messageBox">
+        <div class="message-header"></div>
+        <div class="message-box-close"></div>
+        <div class="message-content text-center"></div>
+        <div class="message-box-btn-holder"></div>
+    </div>
+    @if (showTour && ViewBag.isEmbed != "true")
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-designer-tour.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-designer-tour.min.css" />
+        </environment>
+        await Html.RenderPartialAsync("~/Views/Shared/_DesignerTour.cshtml");
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-designer-tour.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-designer-tour.min.js"></script>
+        </environment>
+    }
     <environment include="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-designer-tour.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-designer-tour.min.css" />
-    </environment>
-    await Html.RenderPartialAsync("~/Views/Shared/_DesignerTour.cshtml");
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-designer-tour.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-designer-tour.min.js"></script>
-    </environment>
-}
-<environment include="Development,CloudDevelopment">
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.css" />
-</environment>
-<environment exclude="Development,CloudDevelopment">
-    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css" />
-</environment>
-
-@if (!ServerAppConfig.IsSelfHosted && (ViewBag.isEmbed != null && ViewBag.isEmbed.ToString().ToLower() != "true"))
-{
-    @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
-    <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
-    </environment>
-    <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-feedback.min.css" />
     </environment>
 
-}
-<script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-<div class="custom-bootstrap-styles custom-server-style">
-    <div id="success-alert">
-        <div id="image-container">
-            <div class="image-holder">
-                <span class="su su-tick" alt="Success Icon"></span>
+    @if (!ServerAppConfig.IsSelfHosted && (ViewBag.isEmbed != null && ViewBag.isEmbed.ToString().ToLower() != "true"))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
+        <environment include="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
+        </environment>
+
+    }
+    @if (isSandbox || (!isSelfHosted && isUrlInDnsList))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
+    }
+    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <div class="custom-bootstrap-styles custom-server-style">
+        <div id="success-alert">
+            <div id="image-container">
+                <div class="image-holder">
+                    <span class="su su-tick" alt="Success Icon"></span>
+                </div>
+            </div>
+            <div id="message">
+                <h1 id="message-header"></h1>
+                <span id="message-content"></span>
             </div>
         </div>
-        <div id="message">
-            <h1 id="message-header"></h1>
-            <span id="message-content"></span>
+        <div id="warning-alert">
+            <div id="image-container">
+                <span class="su su-warning-alt" alt="Warning Icon"></span>
+            </div>
+            <div id="message" class="div-close">
+                <h1 id="message-header"></h1>
+                <span id="message-content"></span>
+            </div>
+            <div class="close-div">
+                <span id="close-content">@T["Close"]</span>
+            </div>
         </div>
     </div>
-    <div id="warning-alert">
-        <div id="image-container">
-            <span class="su su-warning-alt" alt="Warning Icon"></span>
-        </div>
-        <div id="message" class="div-close">
-            <h1 id="message-header"></h1>
-            <span id="message-content"></span>
-        </div>
-        <div class="close-div">
-            <span id="close-content">@T["Close"]</span>
-        </div>
-    </div>
-</div>
 </body>
 
 

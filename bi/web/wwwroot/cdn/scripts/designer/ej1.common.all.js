@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 12.1.5
+*  version : 13.1.10
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -32877,12 +32877,24 @@ var BoldBIDashboardDateRangePicker = (function (_super) {
     };
 
     BoldBIDashboardDateRangePicker.prototype._setDatePickerPosition = function () {
+        var isRenderedLeftSide = false;
         var elementObj = this.element.is('input') ? this.wrapper : this.element;
         var pos = this._getOffset(elementObj), winLeftWidth, winRightWidth, winBottomHeight = bbdesigner$(document).scrollTop() + bbdesigner$(window).height() - (pos.top + bbdesigner$(elementObj).outerHeight()), winTopHeight = pos.top - bbdesigner$(document).scrollTop(), popupHeight = this.popup.outerHeight(), popupWidth = this.popup.outerWidth(), left = pos.left, totalHeight = elementObj.outerHeight(), border = (totalHeight - elementObj.height()) / 2, maxZ = this._getZindexPartial(this.element, this.popup), popupmargin = 3, topPos = (popupHeight < winBottomHeight || popupHeight > winTopHeight) ? pos.top + totalHeight + popupmargin : pos.top - popupHeight - popupmargin;
         winLeftWidth = bbdesigner$(document).scrollLeft() + bbdesigner$(window).width() - left;
-        if (popupWidth > winLeftWidth && (popupWidth < left + elementObj.outerWidth()))
+        if (popupWidth > winLeftWidth && (popupWidth < left + elementObj.outerWidth())) {
             left -= this.popup.outerWidth() - elementObj.outerWidth();
+            isRenderedLeftSide = true;
+        }
 
+        if(!isRenderedLeftSide && !BoldBIDashboard.isNullOrUndefined(this.model.ranges) && this.model.ranges.length > 0) {
+            var parentElement = bbdesigner$(".e-daterangepicker-popup.e-popup");
+            var datePickerElement = parentElement.find(".e-datepickers-popup");
+            var dateRnangeElement = parentElement.find(".e-custom-dateranges");
+            var widthOfDateAndRange = datePickerElement.width() + dateRnangeElement.width();
+            if (widthOfDateAndRange > winLeftWidth) {
+                left = left - ((widthOfDateAndRange - winLeftWidth) + 15);
+            }
+        }
         this.popup.css({
             "left": left + "px",
             "top": topPos + "px",

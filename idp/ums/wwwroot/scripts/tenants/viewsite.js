@@ -640,7 +640,10 @@ function getAttributes() {
     });
 
     function beforeRender(args) {
-        tooltip.content = args.target.closest("td").innerText;
+        const rawContent = args.target.closest("td").innerText;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerText = rawContent;
+        tooltip.content = tempDiv.innerHTML;
     }
 }
 
@@ -1104,13 +1107,15 @@ function enableIsolationCode() {
 
 var inputFields = [
     "#dashboards-limitation-textbox",
+    "#reports-limitation-textbox",
     "#schedule-limitation-textbox",
     "#data-source-limitation-textbox",
     "#slideshow-limitation-textbox",
-    "#user-limitation-textbox"
+    "#dataset-limitation-textbox",
+	"#user-limitation-textbox"
 ];
 function validateIntegerInput(inputElement, validationMessageElement) {
-    var value = $(inputElement).val().trim();
+    var value = $(inputElement).val() ? $(inputElement).val().trim() : '';
     var isValid = value === '' || value === null || /^\d+$/.test(value);
 
     if (!isValid) {
@@ -1169,9 +1174,11 @@ $("#update-resource-limitation").on("click", function () {
         var resourceLimitationSettings = {
             isEnabled: isEnabled,
             dashboardsLimitation: $("#dashboards-limitation-textbox").val() ? $("#dashboards-limitation-textbox").val().trim() : "",
+            reportsLimitation: $("#reports-limitation-textbox").val() ? $("#reports-limitation-textbox").val().trim() : "",
             scheduleLimitation: $("#schedule-limitation-textbox").val() ? $("#schedule-limitation-textbox").val().trim() : "",
             dataSourcesLimitation: $("#data-source-limitation-textbox").val() ? $("#data-source-limitation-textbox").val().trim() : "",
             slideShowLimitation: $("#slideshow-limitation-textbox").val() ? $("#slideshow-limitation-textbox").val().trim() : "",
+            datasetLimitation: $("#dataset-limitation-textbox").val() ? $("#dataset-limitation-textbox").val().trim() : "",
             userLimitation: $("#user-limitation-textbox").val() ? $("#user-limitation-textbox").val().trim() : "",
         };
         showWaitingPopup("content-area");
@@ -1385,3 +1392,13 @@ $(document).on("click", "#add-custom-attribute", function () {
     openCustomAttributeDialog();
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    var emailSettingsOption = document.getElementById("email-settings-inherit-option");
+
+    if (emailSettingsOption != null) {
+        emailSettingsOption.addEventListener("shown.bs.tooltip", function () {
+            var tooltipId = emailSettingsOption.getAttribute("aria-describedby");
+            document.getElementById(tooltipId).classList.add("custom-tooltip");
+        });
+    }
+});

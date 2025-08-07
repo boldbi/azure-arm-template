@@ -30,6 +30,7 @@
     var isUserAuthenticatedInCurrentTenant = ViewBag.IsUserAuthenticatedInCurrentTenant;
     bool isSlideshow = ViewBag.IsSlideshow == null ? false : Convert.ToBoolean(ViewBag.IsSlideshow);
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -252,8 +253,11 @@
         var isAiSummariesEnabledGlobally = @Html.Raw(Json.Serialize(isAiSummariesEnabledGlobally));
         var faviconLogo = "@faviconLogo";
         var aiLogo = "@aiLogo";
+        var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
         var isEmbedCode = embedConfig.IsEmbedCode;
         var knowDomainsList = @Json.Serialize(knowDomainsList);
+        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+        var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
 </script>
     <style>
         #warning-alert, #success-alert {
@@ -378,6 +382,10 @@
         @await Html.PartialAsync("~/Views/DashboardViewerV2/_DashboardViewerScripts.cshtml", new ViewDataDictionary(ViewData) {{ "PinWidget", pinWidget }})
     }
 
+    @if (isSandbox || (!isSelfHosted && canHideCommentIcon))
+    {
+        @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
+    }
 
 
     @if (itemDetail.IsSampleData && !isMobile && !isSlideshow && !embedConfig.IsEmbedDashboard && isUserAuthenticatedInCurrentTenant)

@@ -6,6 +6,7 @@
     var disableWidgetScheduleExport = ViewBag.DisableWidgetScheduleExport != null ? ViewBag.DisableWidgetScheduleExport : false;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
+    var canHideImageAndPDFExport = ServerAppConfig.IsAzureApplication;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -119,51 +120,54 @@
                 </div>
                 <div id="export-options-container">
                     <label class="export-format-info"> @T["Export"] </label>
-                    <div id="image-export-option">
-                        @Html.CheckBox("image-export", new { @class = "material-checkbox export-format-checkbox", @id = "image-export", @value = "image" })
-                        @Html.Label("image-export", T["Image"].Value)
-                        <div id="select-image-format">
-                            <select id="image-format" class="selectpicker" style="display: none;">
-                                <option value="jpg" selected="selected">JPEG (*.jpg)</option>
-                                <option value="png">PNG (*.png)</option>
-                                @*<option value="bmp">BMP (*.bmp)</option>*@
-                            </select>
-                        </div>
-                        <div id="image-resolution-value">
-                            <input type="text" id="image-dpi" value="96" class="form-control float-start change-event">
-                        </div>
-                        <span id="image-dpi-error" class="col-sm-12 col-12 image-validation-error" style="display:none;">@T["The resolution must be between 96 and 300 dpi."]</span>
-                        <span id="image-no-value-error" class="col-sm-12 col-12 image-validation-error" style="display:none;">@T["Please specify a resolution."]</span>
-                    </div>
-                    <div id="pdf-export-option">
-                        @Html.CheckBox("pdf-export", new { @class = "material-checkbox export-format-checkbox", @id = "pdf-export", @value = "pdf" })
-                        @Html.Label("pdf-export", T["PDF"].Value)
-                        <div id="pdf-format-container">
-                            <div id="select-pdf-format">
-                                <select id="pdf-format" class="selectpicker" title="" style="display: none;">
-                                    <option value="A3">A3</option>
-                                    <option value="A4" selected="selected">A4</option>
-                                    <option value="A5">A5</option>
-                                    <option value="Letter">Letter</option>
+                    @if (!canHideImageAndPDFExport)
+                     {
+                        <div id="image-export-option">
+                            @Html.CheckBox("image-export", new { @class = "material-checkbox export-format-checkbox", @id = "image-export", @value = "image" })
+                            @Html.Label("image-export", T["Image"].Value)
+                            <div id="select-image-format">
+                                <select id="image-format" class="selectpicker" style="display: none;">
+                                    <option value="jpg" selected="selected">JPEG (*.jpg)</option>
+                                    <option value="png">PNG (*.png)</option>
+                                    @*<option value="bmp">BMP (*.bmp)</option>*@
                                 </select>
                             </div>
-                            <div id="pdf-orientation" onclick="pdfActiveOrientation()">
-                                <div class="col-6 pdfOrientation-for-landscape selected-pdf-orientation pdf-orientation-format" id="pdf-landscape" data-toggle="tooltip" data-placement="bottom" title="Landscape">
-                                    <span class="su su-pdf-landscape">
-                                    </span>
+                            <div id="image-resolution-value">
+                                <input type="text" id="image-dpi" value="96" class="form-control float-start change-event">
+                            </div>
+                            <span id="image-dpi-error" class="col-sm-12 col-12 image-validation-error" style="display:none;">@T["The resolution must be between 96 and 300 dpi."]</span>
+                            <span id="image-no-value-error" class="col-sm-12 col-12 image-validation-error" style="display:none;">@T["Please specify a resolution."]</span>
+                        </div>
+                        <div id="pdf-export-option">
+                            @Html.CheckBox("pdf-export", new { @class = "material-checkbox export-format-checkbox", @id = "pdf-export", @value = "pdf" })
+                            @Html.Label("pdf-export", T["PDF"].Value)
+                            <div id="pdf-format-container">
+                                <div id="select-pdf-format">
+                                    <select id="pdf-format" class="selectpicker" title="" style="display: none;">
+                                        <option value="A3">A3</option>
+                                        <option value="A4" selected="selected">A4</option>
+                                        <option value="A5">A5</option>
+                                        <option value="Letter">Letter</option>
+                                    </select>
                                 </div>
-                                <div class="col-6 pdfOrientation-for-portrait  pdf-orientation-format" id="pdf-portrait" data-toggle="tooltip" data-placement="bottom" title="Portrait">
-                                    <span class="su su-pdf-portrait">
-                                    </span>
+                                <div id="pdf-orientation" onclick="pdfActiveOrientation()">
+                                    <div class="col-6 pdfOrientation-for-landscape selected-pdf-orientation pdf-orientation-format" id="pdf-landscape" data-toggle="tooltip" data-placement="bottom" title="Landscape">
+                                        <span class="su su-pdf-landscape">
+                                        </span>
+                                    </div>
+                                    <div class="col-6 pdfOrientation-for-portrait  pdf-orientation-format" id="pdf-portrait" data-toggle="tooltip" data-placement="bottom" title="Portrait">
+                                        <span class="su su-pdf-portrait">
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
+                            <div id="show-pdf-checkbox" style="display:none;">
+                                <input type="checkbox" id="export-current-view" class="material-checkbox" checked="checked" />
+                                <input name="export-current-view" type="hidden" value="false">
+                                <label for="export-current-view" data-container="#show-pdf-checkbox">@T["Only export current view."]</label>
+                            </div>
                         </div>
-                        <div id="show-pdf-checkbox" style="display:none;">
-                            <input type="checkbox" id="export-current-view" class="material-checkbox" checked="checked" />
-                            <input name="export-current-view" type="hidden" value="false">
-                            <label for="export-current-view" data-container="#show-pdf-checkbox">@T["Only export current view."]</label>
-                        </div>
-                    </div>
+                     }
                     <div id="excel-csv-export-option">
                         @Html.CheckBox("excel-csv-export", new { @class = "material-checkbox export-format-checkbox", @id = "excel-csv-export", @value = "excel" })
                         @Html.Label("excel-csv-export", T["Data"].Value)

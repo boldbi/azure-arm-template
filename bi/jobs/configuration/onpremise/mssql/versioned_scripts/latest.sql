@@ -1,21 +1,9 @@
-CREATE TABLE [BOLDBI_AI_REQUESTS] (
-    [MessageId] NVARCHAR(255) NOT NULL PRIMARY KEY,
-    [SearchDate] DATETIMEOFFSET,
-    [Message] NVARCHAR(MAX),
-    [DatasourceId] NVARCHAR(MAX),
-    [SessionId] NVARCHAR(MAX),
-    [HasError] BIT,
-    [Response] NVARCHAR(MAX),
-    [StatusMessage] NVARCHAR(MAX),
-    [AiModel] NVARCHAR(MAX),
-    [TenantId] NVARCHAR(MAX),
-    [UserEmail] NVARCHAR(MAX),
-    [Feedback] NVARCHAR(MAX),
-    [UserInfo] NVARCHAR(MAX),
-    [RequestType] NVARCHAR(MAX),
-    [Environment] NVARCHAR(MAX),
-    [IsValidResponse] BIT,
-    [IsWidgetRendered] BIT
-);
+ALTER TABLE [BOLDBI_Group] ADD [GroupLogo] [nvarchar](1026) NULL;
+ALTER TABLE [BOLDBI_Item] ADD PublishedDate DATETIME NULL;
 
-ALTER TABLE [BOLDBI_CustomEmailTemplate] ADD [CustomVisibilityOptions] NVARCHAR(MAX) NOT NULL CONSTRAINT DF_CustomVisibilityOptions DEFAULT '{}';
+INSERT INTO [BOLDBI_ExportType] (Name, IsActive) SELECT 'DatasourceCache', 1
+WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_ExportType] WHERE Name = 'DatasourceCache')
+;
+
+ALTER TABLE [BOLDBI_SystemSettings] ADD CONSTRAINT UK_BOLDBI_SystemSettings_Key_SiteId UNIQUE([Key], SiteId)
+;

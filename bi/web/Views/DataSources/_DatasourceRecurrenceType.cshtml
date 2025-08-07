@@ -8,9 +8,11 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var isSelfHosted = ServerAppConfig.IsSelfHosted;
     var minimumTime = ViewBag.MinimumTime;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DatasourceRefreshScheduleFailure);
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var isDataCache = ViewBag.IsDataCache != null && ViewBag.IsDataCache;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -51,6 +53,7 @@
         var getActiveInactiveGroupUrl = { "web": "@Url.Action("getallactivegroups", "scheduler")", "api": "/internal/items/getallactivegroups" };
         var timeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
         var isServer = @Json.Serialize(ViewBag.IsServer);
+        var isSandbox = @Json.Serialize(isSandbox);
         var actionType = "@ViewBag.ActionType";
         var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
         var editScheduleItem = "@isEdit.ToString().ToLower()" == "true" ? @Html.Raw(Json.Serialize(ViewBag.ScheduleItem)) : "";
@@ -66,22 +69,42 @@
         var clientTimeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
         var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var extractEngine = "@ViewBag.ExtractEngine";
+        var failureOccurenceCount = @Json.Serialize(ServerAppConfig.FailureOccurrence);
+        var dataCacheInterval = @ServerAppConfig.DataSourceDataCacheIntervalInMinutes;
+        var isDataSourceCache = @Json.Serialize(isDataCache);
     </script>
 </head>
 <body class="recurrence-view">
     <div id="recurrence-module" style="display:none;">
         <div class="modal-header no-margin col-sm-12">
             <div id="datasource-header">
-                <span><i class="su su-nav-schedule"></i></span>
-                @if (!string.IsNullOrWhiteSpace(itemName))
+                @if (!isDataCache)
                 {
-                    @string.Concat(itemName, " — ", T["Refresh Settings"].Value)
-                    <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
+                    <span><i class="su su-nav-schedule"></i></span>
+                    @if (!string.IsNullOrWhiteSpace(itemName))
+                    {
+                        @string.Concat(itemName, " — ", T["Refresh Settings"].Value)
+                        <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
+                    }
+                    else
+                    {
+                        <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
+                        @T["Refresh Settings"]
+                    }
                 }
                 else
                 {
-                    <span><i class="su su-close" id="refresh-schedule-close-icon" title="@T["Close"]"></i></span>
-                    @T["Refresh Settings"]
+                    <span><i class="su su-data-cache"></i></span>
+                    @if (!string.IsNullOrWhiteSpace(itemName))
+                    {
+                        @string.Concat(itemName, " — ", T["Data Cache Settings"].Value)
+                        <span><i class="su su-close" id="data-cache-close-icon" title="@T["Close"]"></i></span>
+                    }
+                    else
+                    {
+                        <span><i class="su su-close" id="data-cache-close-icon" title="@T["Close"]"></i></span>
+                        @T["Data Cache Settings"]
+                    }
                 }
                 <div id="datasource-description"></div>
             </div>
@@ -294,7 +317,7 @@
                     <div class="col-sm-1 col-1"></div>
                     <div class="col-10" id="time-zone">(@T["Application Time Zone"]: @globalAppSettings.SystemSettings.TimeZone)</div>
                 </div>
-             }
+            }
             <div class="col-sm-12 col-12 no-padding recurrence-field-row d-flex" id="no-view-end">
                 <div class="col-sm-1 col-1 no-padding ends-label align-center margin-issue refresh-label"><label>@T["Ends"]</label></div>
                 <div id="schedule-end-type" class="col-sm-10 col-10 no-padding no-margin">
@@ -352,13 +375,13 @@
                     else if (!isSelfHosted && isAdmin)
                     {
                         <span class="admin-refresh-interval-hours-warning-message" id="refresh-interval-warning-message" style="display:none">
-                             @Html.Raw(string.Format(T["Your minimum data refresh interval is {0} hour. Please {1}contact us{2} to reduce the data refresh interval."].Value, minimumTime[0], "<a class='request-concierge-support' target='_blank' href='https://www."+(GlobalAppSettings.BrandingDomain)+"/contact'>", "</a>"))
+                            @Html.Raw(string.Format(T["Your minimum data refresh interval is {0} hour. Please {1}contact us{2} to reduce the data refresh interval."].Value, minimumTime[0], "<a class='request-concierge-support' target='_blank' href='https://www."+(GlobalAppSettings.BrandingDomain)+"/contact'>", "</a>"))
                         </span>
                     }
                     else
                     {
                         <span class="refresh-interval-hours-warning-message" id="refresh-interval-warning-message" style="display:none">
-                             @string.Format(T["Your minimum data refresh interval is {0} hour. Please check with your administrator to reduce the data refresh interval."].Value, minimumTime[0])
+                            @string.Format(T["Your minimum data refresh interval is {0} hour. Please check with your administrator to reduce the data refresh interval."].Value, minimumTime[0])
                         </span>
                     }
                 }
@@ -367,7 +390,7 @@
                     if (isSelfHosted && isAdmin)
                     {
                         <span class="admin-refresh-interval-warning-message" id="refresh-interval-warning-message" style="display:none">
-                             @Html.Raw(string.Format(T["Your minimum data refresh interval is {0} minutes. Please {1}upgrade your plan{2} or {3}contact us{4} to reduce the data refresh interval."].Value, minimumTime[1],"<a href='"+manageLicenseSettingsUrl+"' target='_blank'>", "</a>", "<a target='_blank' href='https://www."+(GlobalAppSettings.BrandingDomain)+"/contact'>", "</a>"))
+                            @Html.Raw(string.Format(T["Your minimum data refresh interval is {0} minutes. Please {1}upgrade your plan{2} or {3}contact us{4} to reduce the data refresh interval."].Value, minimumTime[1],"<a href='"+manageLicenseSettingsUrl+"' target='_blank'>", "</a>", "<a target='_blank' href='https://www."+(GlobalAppSettings.BrandingDomain)+"/contact'>", "</a>"))
                         </span>
                     }
                     else if (!isSelfHosted && isAdmin)
@@ -379,42 +402,56 @@
                     else
                     {
                         <span class="refresh-interval-minutes-warning-message" id="refresh-interval-warning-message" style="display:none">
-                             @string.Format(T["Your minimum data refresh interval is {0} minutes. Please check with your administrator to reduce the data refresh interval."].Value, minimumTime[1])
+                            @string.Format(T["Your minimum data refresh interval is {0} minutes. Please check with your administrator to reduce the data refresh interval."].Value, minimumTime[1])
                         </span>
                     }
                 }
             </div>
-            <div id="schedule-failure">
-                <div id="failure-notification" class="col-sm-12 col-12 no-margin">
-                    <div id="enable-checkbox" class="pad-enable">
-                        @Html.CheckBox("enable-notification-to-owner", new { @class = "material-checkbox float-start", @id = "enable-notification-to-owner" })
-                        @Html.Label("enable-notification-to-owner", T["Send failure notification to data source owner"].Value)
+            @if (!isDataCache)
+            {
+                <div id="schedule-failure">
+                    <div id="failure-notification" class="col-sm-12 col-12 no-margin">
+                        <div id="enable-checkbox" class="pad-enable">
+                            @Html.CheckBox("enable-notification-to-owner", new { @class = "material-checkbox float-start", @id = "enable-notification-to-owner" })
+                            @Html.Label("enable-notification-to-owner", T["Send failure notification to data source owner"].Value)
+                        </div>
+                        <div id="enable-checkbox" class="pad-enable">
+                            @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox ", @id = "enable-notification-to-recipient", onchange = "showDialog(this)" })
+                            @Html.Label("enable-notification-to-recipient", T["Send failure notification to other application and external users"].Value)
+                        </div>
                     </div>
-                    <div id="enable-checkbox" class="pad-enable">
-                        @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox ", @id = "enable-notification-to-recipient", onchange = "showDialog(this)" })
-                        @Html.Label("enable-notification-to-recipient", T["Send failure notification to other application and external users"].Value)
+                    <div id="show-shared-user-group-container" class="col-sm-12 col-12 no-margin" style="display:none">
+                        <a class="show-shared-user-group-section">
+                            <div class="show-shared-user-group-label">@T["Notification to :"] </div>
+                            <div class="shared-user-group-name-section" style="display: inline;"></div>
+                            <span class="shared-user-group-count"></span>
+                        </a>
+                    </div>
+                    <div id="note-message" class="col-sm-12 col-12 note no-margin">
+                        <b>@T["Note: "]</b>
+                        @(String.Format(T["The application deactivates your refresh after {0} consecutive failures."].Value, ServerAppConfig.FailureOccurrence))
+                        @if (!@ServerAppConfig.IsHideHelpLink)
+                        {
+                            <span>@Html.Raw(string.Format(T["To learn more, click {0}here{1}."].Value, "<a href='" + (ServerAppConfig.AppSettings.Documentation.BaseUri + helpSiteUrl) + " title='help' target='_blank'>", "</a>")) </span>
+                        }
                     </div>
                 </div>
-                <div id="show-shared-user-group-container" class="col-sm-12 col-12 no-margin" style="display:none">
-                    <a class="show-shared-user-group-section">
-                        <div class="show-shared-user-group-label">@T["Notification to :"] </div>
-                        <div class="shared-user-group-name-section" style="display: inline;"></div>
-                        <span class="shared-user-group-count"></span>
-                    </a>
+            }
+
+            @if (!isDataCache)
+            {
+                <div id="submit-container" class="col-sm-12 col-4 no-margin">
+                    <input id="schedule-submit-cancel" title="@T["Cancel"]" type="button" value="@T["Cancel"]" tabindex="5" class="secondary-button app-btn-secondary leftmargin float-end button-right">
+                    <input id="schedule-submit" title="@T["Schedule"]" type="button" value="@T["Schedule"]" tabindex="4" class="primary-button app-btn-primary float-end button-right">
                 </div>
-                <div id="note-message" class="col-sm-12 col-12 note no-margin">
-                    <b>@T["Note: "]</b>
-                    @(String.Format(T["The application deactivates your refresh after {0} consecutive failures."].Value, ServerAppConfig.FailureOccurrence))
-                    @if (!@ServerAppConfig.IsHideHelpLink)
-                    {
-                        <span>@Html.Raw(string.Format(T["To learn more, click {0}here{1}."].Value, "<a href='"+(ServerAppConfig.AppSettings.Documentation.BaseUri + helpSiteUrl)+" title='help' target='_blank'>", "</a>")) </span>
-                    }
+            }
+            else
+            {
+                <div id="submit-container" class="col-sm-12 col-4 no-margin">
+                    <input id="data-cache-submit-cancel" title="@T["Cancel"]" type="button" value="@T["Cancel"]" tabindex="5" class="secondary-button app-btn-secondary leftmargin float-end button-right">
+                    <input id="data-cache-submit" title="@T["Schedule"]" type="button" value="@T["Schedule"]" tabindex="4" class="primary-button app-btn-primary float-end button-right">
                 </div>
-            </div>
-            <div id="submit-container" class="col-sm-12 col-4 no-margin">
-                <input id="schedule-submit-cancel" title="@T["Cancel"]" type="button" value="@T["Cancel"]" tabindex="5" class="secondary-button app-btn-secondary leftmargin float-end button-right">
-                <input id="schedule-submit" title="@T["Schedule"]" type="button" value="@T["Schedule"]" tabindex="4" class="primary-button app-btn-primary float-end button-right">
-            </div>
+            }
         </div>
         <div class="col-sm-12 col-12 no-padding subscribe-popup-body" id="subscribers-panel" style=" display :none">
             <div class="col-sm-12 subscribers-panel-dropdown col-12 bottom-margin no-padding">

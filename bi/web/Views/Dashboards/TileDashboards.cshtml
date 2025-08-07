@@ -67,6 +67,7 @@
     var dataSourceCreateLimitCount = !ServerAppConfig.IsSelfHosted && !string.IsNullOrWhiteSpace(ServerAppConfig.AppSettings.DataSourceCreateLimitCount) ? ServerAppConfig.AppSettings.DataSourceCreateLimitCount : string.Empty;
     var canHideUploadDashboard =  GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri) && !_identityResponse.IsAdmin;
     var isSingleDatabaseMode = globalAppSettings.SystemSettings.ConfigurationMode == ConfigurationMode.SingleDatabaseForAllTenants;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
 }
 
 <environment include="Development,CloudDevelopment">
@@ -260,7 +261,6 @@
                             <li class="category-item" id="upload-draft-items" ng-show="!isMobile && !isTablet && !samePagePreview && canCreateDashboard" ng-class="{active : activeMenu === @((int)DisplayCategory.UploadDrafts)}" ng-click="setActive(@((int)DisplayCategory.UploadDrafts), '@T["Upload Drafts"]', $event)">
                                 <span class="category-icon su su-clock"></span>
                                 <span class="category-bar-header">@T["Upload Drafts"]</span>
-                                <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
                             </li>
                             @if (!isSingleDatabaseMode)
                             {
@@ -559,7 +559,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="col-3 dashboard-filter-container no-padding no-margin ng-hide" ng-show="!showSearch && activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UploadDrafts)">
+                        <div class="col-3 dashboard-filter-container ng-scope no-padding no-margin ng-hide" ng-show="!showSearch && activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UploadDrafts)">
                             <div id="dashboard-filter-dropdown" class="col-10 dashboard-filter-sort listing-dropdown dropdown no-padding" ng-if="activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UsageAnalytics) && !hideFilterOverView">
                                 <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
                                     <span class="col-2 filter-icon" ng-if="activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
@@ -568,7 +568,7 @@
                                         </span>
                                     </span>
                                 </button>
-                                <ul class="dropdown-menu dashboard-sort-filter-menu">
+                                <ul class="dropdown-menu dashboard-sort-filter-menu dashboard-listing-type-list">
                                     <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.AllDashboards)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.AllDashboards))">
                                         <a class="dashboard-sort-options" href="javascript:void(0);">
                                             <i class="su su-tick"></i>
@@ -618,7 +618,6 @@
                         <li class="category-item" id="upload-draft-items" ng-show="!isMobile && !isTablet && !samePagePreview && canCreateDashboard" ng-class="{active : activeMenu === @((int)DisplayCategory.UploadDrafts)}" ng-click="setActive(@((int)DisplayCategory.UploadDrafts), '@T["Upload Drafts"]', $event)">
                             <span class="category-icon su su-clock clock-listing-icon"></span>
                             <span class="category-bar-header">@T["Upload Drafts"]</span>
-                            <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
                         </li>
                         @if (!isSingleDatabaseMode)
                         {
@@ -905,6 +904,27 @@
                             </div>
                         </div>
                     </div>
+                    @if (isSandbox)
+                    {
+                        <div class="col-12 recommended-content-container" id="recommended-content-container" style="display: none">
+                            <span class="card-title" id="recommended-section-title">@T["Recent"]</span>
+                            <div class="row card-row">
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-2 recommended-items" ng-repeat="item in recommendedItems">
+                                    <a class="recommended-item-link" href="{{viewDashboardUrl(item.Id, item.CategoryName, item.Name)}}" target="_blank">
+                                        <div class="recommended-card">
+                                            <div class="recommended-item-image">
+                                                <img ng-src="@dashboardServerResourceUrl/cdn/css/sample_dashboards/{{item.ImageName | lowercase}}" />
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="card-title">{{item.Name}}</p>
+                                                <p class="card-text">{{item.Description}}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     <div class="dashboard-action-container col-12" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
                         <span class="col-5 dashboards-header ng-hide" ng-show="isTablet && !isMobile">
                             <span class="col-12 no-padding dashboard-header-info">
@@ -933,7 +953,7 @@
                                 <span class="col-4 download-icon" ng-click="downloadBulkDashboard()" style="display:none">
                                     <span class="dashboard-select-options">
                                         <i class="su su-download"></i>
-                                        <span class="download-text">@T["Download"]</span> <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
+                                        <span class="download-text">@T["Download"]</span>
                                     </span>
                                 </span>
                                 <button class="btn btn-default upload-button" type="button" ng-show="activeMenu == @((int)DisplayCategory.UploadDrafts)" style="display:none" onclick="uploadBulkDashboard()">
@@ -999,7 +1019,7 @@
                                             </ul>
                                         </div>
                                     </div>
-                                <div class="col-3 dashboard-filter-container no-padding no-margin ng-hide" ng-show="!showSearch && !samePagePreview && activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UploadDrafts)">
+                                <div class="col-3 dashboard-filter-container ng-scope no-padding no-margin ng-hide" ng-show="!showSearch && !samePagePreview && activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UploadDrafts)">
                                         <span class="dashboard-dropdown-label" ng-if="isTablet || isMobile || samePagePreview">@T["Filter"]</span>
                                         <div id="dashboard-filter-dropdown" class="col-10 dashboard-filter-sort listing-dropdown dropdown no-padding" ng-if="activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UsageAnalytics) && !hideFilterOverView">
                                             <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
@@ -1118,10 +1138,10 @@
                                                             </span>
                                                         </a>
                                                     </div>
-                                                    <div class="col-2 no-padding icon-menu prevent-dashboard-navigation ng-hide" ng-show="!hideOptionMenu">
+                                                    <div id="prevent-dashboard-navigation" class="col-2 no-padding icon-menu prevent-dashboard-navigation ng-hide" ng-show="!hideOptionMenu">
                                                         <div class="no-padding options context-menu" ng-class="{'options-hide-author': (hideAuthorName && ((dashboardItem.IsMultiDashboard && hideMultitabText) || !dashboardItem.IsMultiDashboard)) && activeMenu !== 12}" ng-hide="hideContextMenu || (schemesDetails != null && !schemesDetails.ContextMenu) || (hideEdit && hideMakePublic && hideGetLink && hideGetEmbedCode && hideViews && hideViewSchedules && hideInfo && hideMove && hideCopy && hidePublish && hideDownload && hideCreateSchedule && hideVersionHistory && hideDelete && ((!dashboardItem.IsMultiDashboard && ((dashboardItem.CreatedById!=currentUserId && !isAdmin) || hideSecurity)) || (dashboardItem.IsMultiDashboard && (dashboardItem.CreatedById!=currentUserId || !isAdmin) && (hideTabSecurity && hideSecurity))))">
-                                                            <span class="dropdown-toggle su su-options-menu options-area" data-bs-toggle="dropdown"></span>
-                                                            <ul class="dropdown-menu dashboard-options" role="menu">
+                                                            <span class="dropdown-toggle su su-options-menu options-area" data-bs-display="static" data-bs-toggle="dropdown"></span>
+                                                            <ul class="dropdown-menu dashboard-options" data-bs-popper="none" role="menu">
                                                                 <li ng-if="!isTablet && samePagePreview" ng-hide="schemesDetails != null && !schemesDetails.Open">
                                                                     <a class="web-designer option-click" href="{{viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name)}}" target="_blank">
                                                                         <i class="su su-open"><i class="su su-open path1"></i></i>
@@ -1230,7 +1250,7 @@
                                                                 <li ng-if="(dashboardItem.CreatedById==currentUserId || dashboardItem.CanDownload) && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="hideDownload || activeMenu === @((int)DisplayCategory.UsageAnalytics)">
                                                                     <span title="" class="option-click" data-action="Download" ng-click="downloadDashboard()">
                                                                         <i class="su su-download"></i>
-                                                                        <span>@T["Download"]</span> <span class="badge preview-badge badge-secondary1 badge-secondary2">@T["PREVIEW"]</span>
+                                                                        <span>@T["Download"]</span>
                                                                     </span>
                                                                 </li>
                                                                 <li ng-if="((dashboardItem.ItemType == @((int)ItemType.Dashboard) && dashboardItem.CanSchedule) || dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" role="separator" class="divider" ng-hide="hideCreateSchedule || (schemesDetails != null && !schemesDetails.CreateSchedule) || activeMenu === @((int)DisplayCategory.UsageAnalytics)"></li>
@@ -1332,8 +1352,8 @@
                                                 </div>
                                                 <div class="no-padding float-end">
                                                     <div class="options context-menu" ng-class="{'options-hide-author': hideAuthorName }" ng-if="(dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet" ng-hide="schemesDetails != null && !schemesDetails.ContextMenu">
-                                                        <span class="dropdown-toggle su su-options-menu options-area" data-bs-toggle="dropdown"></span>
-                                                        <ul class="dropdown-menu dashboard-options" role="menu">
+                                                        <span class="dropdown-toggle su su-options-menu options-area" data-bs-display="static" data-bs-toggle="dropdown"></span>
+                                                        <ul class="dropdown-menu dashboard-options" data-bs-popper="none" role="menu">
                                                             <li ng-hide="schemesDetails != null && !schemesDetails.Edit">
                                                                 <span class="open-item option-click" ng-click="editDraftDashboard()">
                                                                     <i class="su su-edit"></i>
@@ -1377,8 +1397,8 @@
                                                     <div class="col-2 no-padding icon-menu ng-hide" ng-show="!hideOptionMenu">
                                                         <div class="no-padding float-end">
                                                         <div class="options context-menu" ng-class="{'options-hide-author': hideAuthorName }" ng-if="(dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet" ng-hide="schemesDetails != null && !schemesDetails.ContextMenu">
-                                                            <span class="dropdown-toggle su su-options-menu options-area" data-bs-toggle="dropdown"></span>
-                                                            <ul class="dropdown-menu dashboard-options" role="menu">
+                                                                <span class="dropdown-toggle su su-options-menu options-area" data-bs-display="static" data-bs-toggle="dropdown"></span>
+                                                                <ul class="dropdown-menu dashboard-options" data-bs-popper="none" role="menu">
                                                                 <li ng-hide="schemesDetails != null && !schemesDetails.Edit">
                                                                         <span class="open-item option-click" ng-click="uploadDialogOpen()">
                                                                         <i class="su su-upload"></i>
@@ -1583,7 +1603,6 @@
     <div id="remove_item_public" class="no-padding" style="display:none"></div>
 
     <div id="make_item_unlist" class="no-padding float-start" style="display:none"></div>
-
     @if (!isMobile)
     {
         @await Html.PartialAsync("../Items/_AddItems")

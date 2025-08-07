@@ -974,6 +974,16 @@ $(document).ready(function () {
                 };
                 break;
 
+            case "FusionAuth":
+                groupImportSettings = {
+                    KnownProviderType: providerType,
+                    FusionAuth: {
+                        ApiKey: groupImportDiv.find("input[name='fusionauthapikey']").val().trim(),
+                        TenantId: groupImportDiv.find("input[name='fusionauthtenantid']").val().trim(),
+                    }
+                };
+                break;
+
             default:
                 groupImportSettings = {
                     KnownProviderType: providerType,
@@ -1156,7 +1166,7 @@ function ongroupImportchange(args) {
     } else {
         var groupImportDiv = $(".group-import-provider-type-openid").parent(".e-input-group").closest(".group-import");
     }
-    groupImportDiv.find(".cognito-fields, .auth0-fields, .okta-fields, .onelogin-fields").addClass("display-none");
+    groupImportDiv.find(".cognito-fields, .auth0-fields, .okta-fields, .onelogin-fields, .fusion-auth-fields").addClass("display-none");
     switch (this.value) {
         case "CognitoAWS":
             groupImportDiv.find(".cognito-fields").removeClass("display-none");
@@ -1169,6 +1179,9 @@ function ongroupImportchange(args) {
             break;
         case "OneLogin":
             groupImportDiv.find(".onelogin-fields").removeClass("display-none");
+            break;
+        case "FusionAuth":
+            groupImportDiv.find(".fusion-auth-fields").removeClass("display-none");
             break;
 
         default:

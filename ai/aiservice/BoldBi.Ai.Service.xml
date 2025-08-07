@@ -159,11 +159,11 @@
             Implements <see cref="T:Microsoft.AspNetCore.Mvc.Filters.IAsyncAuthorizationFilter"/> to handle authorization asynchronously.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
+        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext,BoldBi.Ai.Base.Helpers.ErrorMessageProvider)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Authentication.RateLimitHelper"/> class.
             </summary>
-            <param name="cache">An instance of <see cref="T:Microsoft.Extensions.Caching.Memory.IMemoryCache"/> used for caching rate limit data.</param>
+            <param name="cache">An instance of <see cref="T:BoldBi.Ai.Base.CacheServices.IMemoryCacheService"/> used for caching rate limit data.</param>
             <param name="dbContext">An instance of <see cref="T:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext"/> used for db connection.</param>
             <param name="errorMessageProvider">The error message provider.</param>
         </member>
@@ -401,7 +401,7 @@
             </summary>
             <param name="configuration">The application configuration manager instance.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.UpdateInternalInforomation(Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.UpdateInternalInformation(Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Updates internal information using the provided application configuration.
             </summary>
@@ -431,6 +431,13 @@
         <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.SendRequestAsync(System.Object)">
             <summary>
             Sends a chat message to the AI and processes the response.
+            </summary>
+            <param name="jsonInput">The chat message input in JSON format.</param>
+            <returns>An asynchronous task containing the AI response.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.SendExpressionRequestAsync(System.Object)">
+            <summary>
+            Sends a expression message to the AI and processes the response.
             </summary>
             <param name="jsonInput">The chat message input in JSON format.</param>
             <returns>An asynchronous task containing the AI response.</returns>
@@ -615,35 +622,42 @@
             </summary>
             <param name="licenseManageHelper">The helper class for managing licenses.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.AddAiLicenseAsync(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.AddAiLicense(System.Object)">
             <summary>
             Adds a new AI license based on the provided license information.
             </summary>
             <param name="license">The license information to be added in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.UpdateAiLicenseAsync(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.UpdateAiLicense(System.Object)">
             <summary>
             Updates an existing AI license with the provided license information.
             </summary>
             <param name="license">The updated license information in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.RemoveAiLicenseAsync(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.RemoveAiLicense(System.Object)">
             <summary>
             Removes an AI license based on the provided tenant ID.
             </summary>
             <param name="tenantId">The ID of the tenant whose license is to be removed, provided in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.DeactivateAiLicenseAsync(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.DeactivateAiLicense(System.Object)">
             <summary>
             Deactivates an AI license based on the provided tenant ID.
             </summary>
             <param name="tenantId">The ID of the tenant whose license is to be deactivated, provided in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.GetLicenseDetailsAsync(System.Object)">
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.EnableAiLicense(System.Object)">
+            <summary>
+            Enables an AI license based on the provided tenant ID.
+            </summary>
+            <param name="tenantId">The ID of the tenant whose license is to be deactivated, provided in JSON format.</param>
+            <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.LicenseManageController.GetLicenseDetails(System.Object)">
             <summary>
             Retrieves details of an AI license based on the provided license key.
             </summary>
@@ -721,6 +735,53 @@
             </summary>
             <returns>A task that represents the asynchronous operation. The task result contains the generated token.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController">
+            <summary>
+            Controller for handling Unified AI assistance requests.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.#ctor(BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess,BoldBi.Ai.Base.Contracts.IAiSummarizationOperations)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController"/> class.
+            </summary>
+            <param name="chatProcess">The chat process service used for AI.</param>
+            <param name="aiSummarizationOperations">The ai summary process service used for AI.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.ClassifyRequestAsync(System.Object)">
+            <summary>
+            Handles the classification of a chat request by sending it to the AI classification process.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The classification response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.VisualCreationAsync(System.Object)">
+            <summary>
+            Handles the visual creation.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The classification response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.DashboardQueryAsync(System.Object)">
+            <summary>
+            Handles the visual creation.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The classification response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.DashboardSummaryAsync(System.Object)">
+            <summary>
+            Handles the dashboard summary.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The classification response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.TextualResponseAsync(System.Object)">
+            <summary>
+            Handles the textual response SQL query.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The classification response as an object.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Service.ExceptionMiddleware">
             <summary>
             Middleware to handle exceptions globally and log errors.
@@ -738,25 +799,6 @@
             </summary>
             <param name="context">The HTTP context of the current request.</param>
             <returns>A task that represents the completion of request processing.</returns>
-        </member>
-        <member name="T:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck">
-            <summary>
-            A health check class that checks the health of a PostgreSQL database connection.
-            </summary>
-        </member>
-        <member name="M:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)">
-            <summary>
-            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck"/> class.
-            </summary>
-            <param name="serviceScopeFactory">The service scope factory which contains scoped instances.</param>
-        </member>
-        <member name="M:BoldBi.Ai.Service.HealthChecks.PostgresHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext,System.Threading.CancellationToken)">
-            <summary>
-            Checks the health of the PostgreSQL database connection.
-            </summary>
-            <param name="context">The context for the health check.</param>
-            <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-            <returns>A task representing the asynchronous operation. The task result contains the health check result.</returns>
         </member>
     </members>
 </doc>

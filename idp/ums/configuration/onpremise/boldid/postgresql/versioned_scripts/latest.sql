@@ -1,18 +1,19 @@
-CREATE TABLE BOLDTC_TenantStorageDetails (
-    Id uuid NOT NULL,
-    TenantInfoId uuid NOT NULL,
-    StorageType INT NOT NULL,
-    ConnectionInfo VARCHAR(1026),
-    CreatedDate TIMESTAMP NOT NULL,
-    ModifiedDate TIMESTAMP NOT NULL,
-    IsActive smallint NOT NULL,
-    CONSTRAINT PK_BOLDTC_TenantStorageDetails PRIMARY KEY (Id)
+CREATE TABLE BOLDTC_TenantInactivity (
+    Id uuid PRIMARY KEY,
+    TenantId uuid NOT NULL,
+	TenantInfoId uuid NOT NULL,
+    TenantType int NOT NULL,
+	DNS VARCHAR(255) NOT NULL,
+	TenantIdentifier VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+	FirstName VARCHAR(255) NOT NULL,
+	LastName VARCHAR(255) NOT NULL,
+	LoggedInTime TIMESTAMP NOT NULL,
+    ReminderEmailCount INTEGER NOT NULL,
+    MarkedForSuspension SMALLINT NOT NULL,
+    DeletionReminderSentOn TIMESTAMP NULL,
+    IsPermanentlyDeleted SMALLINT NOT NULL,
+	IsRecordsDeletedInMetaTables SMALLINT NOT NULL,
+    IsActive SMALLINT NOT NULL
 );
-
-ALTER TABLE BOLDTC_TenantInfo ADD COLUMN IF NOT EXISTS StorageType INT NOT NULL DEFAULT 0;
-
-UPDATE BOLDTC_TenantInfo
-SET StorageType = 1
-WHERE StorageType = 0
-  AND BlobConnectionString IS NOT NULL
-  AND BlobConnectionString <> '';
+ALTER TABLE  BOLDTC_AuthSettings ALTER COLUMN Settings Type varchar(4000);

@@ -1,26 +1,18 @@
-CREATE TABLE [BOLDTC_TenantStorageDetails] (
-    Id uniqueidentifier NOT NULL,
-    TenantInfoId uniqueidentifier NOT NULL,
-    StorageType int NOT NULL,
-    ConnectionInfo nvarchar(1026),
-    CreatedDate datetime NOT NULL,
-    ModifiedDate datetime NOT NULL,
-    IsActive bit NOT NULL,
-    CONSTRAINT [PK_BOLDTC_TenantStorageDetails] PRIMARY KEY CLUSTERED
-  (
-  [Id] ASC
-  ) WITH (IGNORE_DUP_KEY = OFF)
-)
-
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BOLDTC_TenantInfo' AND COLUMN_NAME = 'StorageType')
-BEGIN
-ALTER TABLE [BOLDTC_TenantInfo] ADD [StorageType] INT NOT NULL DEFAULT 0
-END;
-
-IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BOLDTC_TenantInfo' AND COLUMN_NAME = 'StorageType') AND EXISTS (SELECT 1 FROM BOLDTC_TenantInfo WHERE StorageType = 0)
-BEGIN
-UPDATE BOLDTC_TenantInfo
-SET StorageType = 1
-WHERE BlobConnectionString IS NOT NULL AND BlobConnectionString <> ''
-END;
-
+CREATE TABLE [BOLDTC_TenantInactivity] (
+    Id uniqueidentifier PRIMARY KEY,
+    TenantId uniqueidentifier NOT NULL,
+	TenantInfoId uniqueidentifier NOT NULL,
+	TenantType int NOT NULL,
+	DNS nvarchar(255) NOT NULL,
+	TenantIdentifier nvarchar(255) NOT NULL,
+    Email nvarchar(255) NOT NULL,
+	FirstName nvarchar(255) NOT NULL,
+	LastName nvarchar(255) NOT NULL,
+	LoggedInTime datetime NOT NULL,
+    ReminderEmailCount int NOT NULL,
+    MarkedForSuspension bit NOT NULL,
+    DeletionReminderSentOn datetime NULL,
+    IsPermanentlyDeleted bit NOT NULL,
+	IsRecordsDeletedInMetaTables bit NOT NULL,
+    IsActive bit NOT NULL
+);

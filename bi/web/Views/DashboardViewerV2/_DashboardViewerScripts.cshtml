@@ -5,6 +5,7 @@
     var isMobile = new DeviceDetection(Context).IsMobile;
     var cdnLink = globalAppSettings.SystemSettings.CDNLink;
     var isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
@@ -148,7 +149,7 @@ else
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
 
 }
-@if (!isSelfHosted && canHideCommentIcon) { 
+@if (isSandbox || (!isSelfHosted && canHideCommentIcon)) {
     @await Html.PartialAsync("~/Views/Shared/_GoogleTag.cshtml")
 }
 @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")

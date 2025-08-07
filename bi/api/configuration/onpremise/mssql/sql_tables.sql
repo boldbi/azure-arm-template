@@ -32,6 +32,7 @@ CREATE TABLE [BOLDBI_Group](
 	[Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
 	[Name] [nvarchar](255) NOT NULL,
 	[Description] [nvarchar](1026) NULL,
+	[GroupLogo] [nvarchar](1026) NULL,
 	[Color] [nvarchar](255) NOT NULL DEFAULT 'White',
 	[IsolationCode] [nVarchar](4000) NULL,
 	[ModifiedDate] [datetime] NOT NULL,
@@ -112,6 +113,7 @@ CREATE TABLE [BOLDBI_Item](
 	[ModifiedById] [int] NOT NULL,
 	[CreatedDate] [datetime] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
+        [PublishedDate] [datetime] NULL,
 	[IsSampleData] [bit] NULL,
 	[DataSource] nvarchar(max) null,
 	[IsPublic] [bit] NOT NULL DEFAULT 0,
@@ -1221,6 +1223,8 @@ INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'PPT', 1)
 INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'CSV', 1)
 ;
 INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'DashboardCache', 1)
+;
+INSERT into [BOLDBI_ExportType] (Name,IsActive) VALUES (N'DatasourceCache', 1)
 ;
 
 INSERT into [BOLDBI_RecurrenceType] (Name,IsActive) VALUES (N'Daily', 1)

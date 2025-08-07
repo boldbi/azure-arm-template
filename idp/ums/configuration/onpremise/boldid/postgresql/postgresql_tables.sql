@@ -732,7 +732,7 @@ CREATE TABLE BOLDTC_AuthSettings (
     Id SERIAL NOT NULL,
     TenantInfoId uuid NULL,
     AuthProviderId int NOT NULL,
-    Settings varchar(1026),
+    Settings varchar(4000),
     EncryptionValues text,
     IsEnabled smallint NOT NULL,
     CreatedBy uuid NULL,
@@ -958,6 +958,25 @@ CREATE TABLE BOLDTC_TenantStorageDetails (
     ModifiedDate TIMESTAMP NOT NULL,
     IsActive smallint NOT NULL,
     CONSTRAINT PK_BOLDTC_TenantStorageDetails PRIMARY KEY (Id)
+);
+
+CREATE TABLE BOLDTC_TenantInactivity (
+    Id uuid PRIMARY KEY,
+    TenantId uuid NOT NULL,
+	TenantInfoId uuid NOT NULL,
+    TenantType int NOT NULL,
+	DNS VARCHAR(255) NOT NULL,
+	TenantIdentifier VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+	FirstName VARCHAR(255) NOT NULL,
+	LastName VARCHAR(255) NOT NULL,
+	LoggedInTime TIMESTAMP NOT NULL,
+    ReminderEmailCount INTEGER NOT NULL,
+    MarkedForSuspension SMALLINT NOT NULL,
+    DeletionReminderSentOn TIMESTAMP NULL,
+    IsPermanentlyDeleted SMALLINT NOT NULL,
+	IsRecordsDeletedInMetaTables SMALLINT NOT NULL,
+    IsActive SMALLINT NOT NULL
 );
 
 INSERT into BOLDTC_TenantLogType  ( Name , IsActive ) VALUES (N'Registration', 1);

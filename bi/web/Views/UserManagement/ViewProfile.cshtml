@@ -27,6 +27,7 @@
     ViewBag.BackIconRedirectionUrl = Url.Action("index", "UserManagement");
     ViewBag.BackIconTitle = T["Users"];
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(permissions, _identityResponse.IsAdmin, _featureManager);
+    var sandboxAdminEmail = !string.IsNullOrWhiteSpace(ServerAppConfig.Sandbox.BI.AdminEmail) ? ServerAppConfig.Sandbox.BI.AdminEmail.ToLower() : string.Empty;
 }
 
 @section scripts{
@@ -162,7 +163,7 @@
         <div class="col-12 bi-page-header tabs-header-padding top-nav-btn-secton">
             <div class="col-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">
-                    @if (userDetail.Email.ToLower() != ViewBag.LoggedUser.ToLower() && (isAdmin || (!isAdmin && !userDetail.IsAdmin && permissions[PermissionEntity.UsersandGroups])))
+                    @if (userDetail.Email.ToLower() != sandboxAdminEmail && userDetail.Email.ToLower() != ViewBag.LoggedUser.ToLower() && (isAdmin || (!isAdmin && !userDetail.IsAdmin && permissions[PermissionEntity.UsersandGroups])))
                     {
                         @*<input class="primary-button password-save-button float-end @showDeactivateButton" type="button" id="deactivate-button-click" value="@T["Deactivate User"]" title="" />
                 <input class="primary-button float-end @showResendButton" type="button" id="resend-button-click" value="@T["Resend Activation Code"]" title="" />
@@ -206,7 +207,7 @@
                     }
 
                     <input type="button" class="primary-button app-btn-primary float-end" id="add-custom-attribute" title="" value="@T["Add Attribute"]" data-id="@userDetail.UserId" onclick="addCustomAttribute('user')">
-                    @if (isAdmin || permissions[PermissionEntity.UsersandGroups] && (permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions]))
+                    @if (userDetail.Email.ToLower() != sandboxAdminEmail && (isAdmin || permissions[PermissionEntity.UsersandGroups] && (permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions])))
                     {
                         <a href="@Url.Action("userpermission", "permission")?userId=@userDetail.UserId" title="">
                             <input type="button" class="link-button app-btn-link float-end" value="@T["Manage Permissions"]">
@@ -239,7 +240,7 @@
                             </div>
                             <div class="col-xs-8 no-padding account-edit">
                                 <label id="display-name-field" class="display-name">@userDetail.DisplayName</label>
-                                @if ((userDetail.DirectoryType == DirectoryType.Local || isOAuthorOpenIdUser) && (isAdmin || (!isAdmin && !userDetail.IsAdmin)) && ServerAppConfig.IsSelfHosted)
+                                @if (userDetail.Email.ToLower() != sandboxAdminEmail && (userDetail.DirectoryType == DirectoryType.Local || isOAuthorOpenIdUser) && (isAdmin || (!isAdmin && !userDetail.IsAdmin)) && ServerAppConfig.IsSelfHosted)
                                 {
                                     <label id="edit-button">
                                         <span class="bg-info" id="id-account-link">

@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 12.1.5
+*  version : 13.1.10
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -563,6 +563,7 @@
                     break;
             }
             args.requestType = "refresh";
+            args.action = 'hidecolumnchooser';
             this._hideHeaderColumn(this[hidden], duparr);
             if (this.model.allowScrolling && this.model.scrollSettings.frozenColumns > 0) {
                 var bbdesigner$table = this._renderGridHeader();
@@ -14176,13 +14177,10 @@
             var checked = args.isChecked, displayedCheckBoxes = this._ccCheckBoxList.filter(this._displayFinder), checkedBoxes = this._ccCheckBoxList.filter(this._checkFinder),
                 totalChecks = displayedCheckBoxes.length, checkedLen = checkedBoxes.length;
             if (args.model.id == this._id + 'selectAll') {
-                if (!checked)
-                    checkedBoxes.BoldBIDashboardCheckBox({ checked: checked });                
-                else           
-                    displayedCheckBoxes.not(":checked").BoldBIDashboardCheckBox({ checked: checked });                
+                    this._ccCheckBoxList.BoldBIDashboardCheckBox({ checked: checked })
             }
             else {
-                this._columnChooserList.find('input.e-selectall').BoldBIDashboardCheckBox('model.checked', totalChecks == checkedLen);
+                this._columnChooserList.find('input.e-selectall').BoldBIDashboardCheckBox('model.checked', totalChecks === checkedLen);
                 checked = checkedLen != 0;
                 this.element[checked ? "attr" : "removeAttr"]("checked", true);
             }
@@ -14371,6 +14369,7 @@
             this._refreshColumnChooserList();
             this._ccVisibleColumns = this.getVisibleColumnNames();
             this._ccHiddenColumns = this.getHiddenColumnNames();
+             this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: this.model.columns.length === this._ccVisibleColumns.length });
             bbdesigner$("#" + this._id + "liScrollerDiv").BoldBIDashboardScroller({ height: '228', width: '228', buttonSize: 0 });
             bbdesigner$("#" + this._id + "liScrollerDiv").BoldBIDashboardScroller('refresh');
             if (this.getBrowserDetails().browser == 'chrome')
@@ -14384,18 +14383,18 @@
                 var ele = bbdesigner$(chbxs[i]), hTxt = ele.attr("ej-headertext"), field = ele.attr("ej-field"), flag = undefined, isDup = chbxs.filter("[ej-headertext='" + hTxt + "']").length;
                 if (this.model.allowGrouping && !this.model.groupSettings.showGroupedColumn && bbdesigner$.inArray(bbdesigner$(chbxs[i]).attr("ej-field"), this.model.groupSettings.groupedColumns) != -1) {
                     bbdesigner$(chbxs[i]).parents(".e-columnChooserListDiv").addClass("e-hide");
-                    chbxs[i].checked = false;
                 }
                 else {
                     bbdesigner$(chbxs[i]).parents(".e-columnChooserListDiv").removeClass("e-hide");
-                    chbxs[i].checked = true;
                 }
                 var colValue = duparr ? (field == "" ? hTxt : field) : hTxt;
 				flag = this[duparr ? "_hiddenColumnsField" : "_hiddenColumns"].indexOf(colValue) != -1;
                 ele[!flag ? "attr" : "removeAttr"]("checked", true);
                 ele.BoldBIDashboardCheckBox("model.checked", !flag);
             }
-            this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: chbxs.filter(this._displayFinder).length == chbxs.filter(this._checkFinder).length });
+            if (this.model.allowGrouping && !this.model.groupSettings.showGroupedColumn) {
+                this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: chbxs.filter(this._displayFinder).length == chbxs.filter(this._checkFinder).length });
+            }
         },
         _initDataSource: function () {
             this._isLocalData = (!(this._dataSource() instanceof BoldBIDashboard.DataManager) || (this._dataSource().dataSource.offline || this._isRemoteSaveAdaptor || this._dataSource().adaptor instanceof BoldBIDashboard.ForeignKeyAdaptor));
@@ -18407,7 +18406,7 @@
         },
         _getContentWidth: function (cellindx) {
             var contentWidth = 0;
-            proxy = this.gridInstance;
+            var proxy = this.gridInstance;
             if (!BoldBIDashboard.isNullOrUndefined(proxy._gridRows)) {
                 var rows = proxy._gridRows;
                 if (this.gridInstance.model.scrollSettings.frozenColumns && cellindx >= this.gridInstance.model.scrollSettings.frozenColumns) {
@@ -18415,35 +18414,28 @@
                     cellindx = cellindx - this.gridInstance.model.scrollSettings.frozenColumns;
                 }
                 const cellsArray = Array.from(bbdesigner$(rows).find("td.e-rowcell:nth-child(" + (cellindx + 1) + ")"));
-
+                const span = BoldBIDashboard.buildTag('span', {}, {});
                 const maxWidth = cellsArray.reduce((acc, td) => {
                     const tdelement = bbdesigner$(td);
-
-                    // Get computed font from the TD element
-                    const computedFont = tdelement.css("font");
-
-                    // Measure text width using Canvas API
-                    const content = tdelement.html().trim();
-                    const canvas = document.createElement("canvas");
-                    const context = canvas.getContext("2d");
-                    context.font = computedFont;
-                    let contentWidth = context.measureText(content).width;
-
-                    // Get padding values and ensure they are numbers
+                    const content = tdelement.html();
+                    if (proxy.model.columns[cellindx]["commands"]) {
+                        span.html($(content).children());
+                    } else if (tdelement.hasClass("e-validError")) {
+                        span.html($(content).attr("value"));
+                    } else {
+                        span.html(content);
+                    }
+                    tdelement.html(span);
+                    const spanElement = tdelement.find('span:first');
+                    const spanWidth = spanElement.width() || 0;
                     const paddingLeft = parseInt(tdelement.css("padding-left")) || 0;
                     const paddingRight = parseInt(tdelement.css("padding-right")) || 0;
-                    
-                    // Calculate total width
-                    let tdWidth = contentWidth + paddingLeft + paddingRight;
-
-                    // Ensure final width is at least as wide as content width
-                    const width = Math.max(tdWidth, contentWidth);
-
-                    return Math.max(acc, width); // Return the max width
-                }, 0); // Initialize max width as 0
-
+                    const totalWidth = spanWidth + paddingLeft + paddingRight;
+                    tdelement.html(content); // Restore original content
+                    return Math.max(acc, totalWidth);
+                }, 0);
                 contentWidth = Math.round(maxWidth);
-			}
+            }
             proxy._refreshUnboundTemplate(this.gridInstance.getContentTable());
             return contentWidth;
         },

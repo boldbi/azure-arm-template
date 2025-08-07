@@ -2,6 +2,8 @@
 @using Newtonsoft.Json
 @{
     var refreshDisabledContent = T["Refresh Disabled"];
+    var refreshDisabledDueToFailure = T["Refresh disabled due to {0} consecutive failures"].Value;
+    var refreshDisabledBy = T["Refresh disabled by {0}"].Value;
     var failureAttempt = T["Failure at "];
     var gridName = ViewBag.gridName;
     var permissionData = ViewBag.Permissions;
@@ -332,6 +334,46 @@
             {{/if}}
             {{/if}}
 
+            @* {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Live)" && !IsDraft}}
+            <li>
+                <a href="javascript:void(0);" title="" class="refresh-data-cache-menu" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
+                    <i class="su su-trigger-data-cache"></i>
+                    <span>@T["Refresh Data Cache"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Live)" && !IsDraft}}
+            <li>
+                <a href="javascript:void(0);" title="" class="data-cache-settings" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
+                    <i class="su su-data-cache"></i>
+                    <span>@T["Data Cache Settings"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if !IsDraft}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Live)"}}
+            <li class="@(canHideDataSourceOptions ? "hide" : string.Empty)">
+                <a href="javascript:void(0);" title="" class="data-cache-history" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}">
+                    <i class="su su-data-cache-history"></i>
+                    <span>@T["Data Cache History"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider @(canHideDataSourceOptions ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}} *@
+
             {{if ~checkMobile()}}
             {{if !IsDraft}}
             {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)"}}
@@ -494,9 +536,17 @@
         {{if ScheduleStatus=="@((int)ScheduleStatus.Success)"}}
         <div>
             {{if !IsScheduleEnabled}}
-                <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value,"{{:LastAttemptAt}}"))" data-status="success" title="@T["Refresh Disabled"]">
+                <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))" data-status="success" title= "@T["Refresh Disabled"]">
                     <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'success'}}"></span>
-                    <Span class="data-refresh">@T["Refresh Disabled"]</Span>
+                    {{if FailureOccurence >= @ServerAppConfig.FailureOccurrence }}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
+                       <span class="failure-history">
+                            <span class="su su-refresh-history"></span>
+                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                       </span>
+                    {{else}}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
+                    {{/if}}
                 </span>
                 <div class="success-refresh">
                     <Span class="lastsuccessful">@Html.Raw(String.Format(T["Last Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
@@ -513,17 +563,25 @@
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.Fail)"}}
         <div>
-            <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["Failure at {0}"].Value,"{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
+            <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
                 <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
                 {{if !IsScheduleEnabled}}
-                       <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                    {{if FailureOccurence >= @ServerAppConfig.FailureOccurrence }}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
+                       <span class="failure-history">
+                            <span class="su su-refresh-history"></span>
+                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                       </span>
+                    {{else}}
+                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
+                    {{/if}}
                   {{else}}
                        <span class="data-refresh">@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
                  {{/if}}
             </span>
             {{if LastSuccessfulAttemptAt != null}}
             <div>
-                <span class="last-successful" data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value,"{{:LastSuccessfulAttemptAt}}"))">
+                <span class="last-successful" data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))">
                     @Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))
                 </span>
             </div>
@@ -534,7 +592,15 @@
             <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["RateLimited - Failure at {0}"].Value, "{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
                 <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
                 {{if !IsScheduleEnabled}}
-                       <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                    {{if FailureOccurence >= @ServerAppConfig.FailureOccurrence }}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
+                       <span class="failure-history">
+                            <span class="su su-refresh-history"></span>
+                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                       </span>
+                    {{else}}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
+                    {{/if}}
                   {{else}}
                        <span class="data-refresh">@T["RateLimited"]</span>
                        <span class="last-attempt-fail">@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
@@ -549,7 +615,7 @@
             </span>
             {{if LastSuccessfulAttemptAt != null}}
             <div>
-                <span class="last-successful" data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value,"{{:LastSuccessfulAttemptAt}}"))">
+                <span class="last-successful" data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))">
                     @Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))
                 </span>
             </div>
@@ -572,7 +638,15 @@
             <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="not-refreshed" data-last-attempt="" data-status="notrefreshed" title="{{:!IsScheduleEnabled ? "@T["Refresh Disabled"]" : "@T["Not refreshed yet"]" }}">
                 <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'not-refreshed'}}"></span>
                 {{if !IsScheduleEnabled}}
-                     <Span class="data-refresh">@T["Refresh Disabled"]</span>
+                    {{if FailureOccurence >= @ServerAppConfig.FailureOccurrence }}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
+                       <span class="failure-history">
+                            <span class="su su-refresh-history"></span>
+                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                       </span>
+                    {{else}}
+                       <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
+                    {{/if}}
                 {{else}}
                      <span class="data-refresh">@T["Not refreshed yet"]</span>
                 {{/if}}
@@ -819,7 +893,7 @@
                 return inputString.replace(new RegExp("\"", 'g'), '&quot;');
             },
             refreshEncode: function (IsScheduleEnabled, LastAttemptAt) {
-                return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
+               return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
             }
         });
 
