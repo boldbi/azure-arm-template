@@ -132,8 +132,8 @@ log "Running install utility..."
 dotnet appdatafiles/installutils/installutils.dll
 
 # ---------- Prepare Upgrade Logs ----------
-log "Preparing upgrade logs..."
 upgrade_log() {
+  log "Preparing upgrade logs..."
   if [ -f "$config_xml_path" ]; then
     exclude_folders=("logs" "upgradelogs")
     [ ! -d "$app_data_location/upgradelogs" ] && mkdir -p "$app_data_location/upgradelogs"
@@ -157,7 +157,10 @@ upgrade_log() {
     log "Upgrade logs prepared for version: $version"
   fi
 }
-upgrade_log
+
+if [ "${upgrade_log_enabled:-false}" = true ]; then
+  upgrade_log
+fi
 
 # ---------- Puppeteer Installation ----------
 log "Checking Puppeteer installation..."

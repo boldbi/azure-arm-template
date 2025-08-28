@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 13.1.10
+*  version : 13.1.25
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -14726,8 +14726,8 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
             checkNull = BoldBIDashboard.util.isNullOrUndefined,
             points = currentseries.points,currentPoints,
             length = points.length,
-            point;
-        var isAccumulation = currentseries.type.toLowerCase() == ("pie" || "funnel" || "pyramid" || "doughnut");
+            point, type = currentseries.type.toLowerCase();
+        var isAccumulation = type == "pie" || type == "funnel" || type == "pyramid" || type == "doughnut";
 
         // calculate visible points
         for (var i = 0; i < length; i++) {

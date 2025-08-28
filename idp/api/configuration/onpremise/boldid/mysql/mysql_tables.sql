@@ -986,6 +986,8 @@ CREATE TABLE {database_name}.BOLDTC_TenantInactivity (
     DeletionReminderSentOn datetime NULL,
     IsPermanentlyDeleted tinyint(1) NOT NULL,
 	IsRecordsDeletedInMetaTables tinyint(1) NOT NULL,
+	CreatedDate datetime NOT NULL,
+	ModifiedDate datetime NOT NULL,
     IsActive tinyint(1) NOT NULL
 );
 

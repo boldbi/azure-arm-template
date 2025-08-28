@@ -1009,7 +1009,8 @@
 					showHeaderInfo: "This option allows the header to be shown in cases where no data is available for display."
 				},
 				interWidgetLinking:{
-					defaultInterWidgetLinking: "Configure how linking should behave with the tab widget. When default action is configured, the tab will be switched based on the index values in the current widget. This gives you the flexibility to switch between the tabs based on the value selected in the current widget. Custom action allows you to switch to a specific tab index so that any value selected in the current widget will switch the tab to the configured tab."
+					defaultInterWidgetLinking: "Configure how linking should behave with the tab widget. When default action is configured, the tab will be switched based on the index values in the current widget. This gives you the flexibility to switch between the tabs based on the value selected in the current widget. Custom action allows you to switch to a specific tab index so that any value selected in the current widget will switch the tab to the configured tab.",
+                    notificationIcon: "Multi-selection in ComboBoxes is not supported for inter-widget linking"
 				},
 				popSettings: {
 					popSettingsText: "PoP Settings",
@@ -2903,7 +2904,8 @@
         combineDsWithCustomQueryAlertMessage: "The append data sources feature does not support data sources in code view mode.",
         firstAndLastMessage: "The First and Last option is not supported for aggregate expressions.",
 				relativeDateFilterValidationMessage: "Please choose or enter a valid date. The date value cannot be empty.",
-				expressionValidationMessage: "Would you like to validate the expression while executing the query?"
+				expressionValidationMessage: "Would you like to validate the expression while executing the query?",
+				joinMessageClickhouse: 'ClickHouse does not support the not equal, less than or equal to, or greater than or equal to operators in JOIN conditions.'
             },
             parameterMessages: {
                 nameHasSpecialChar: "Name should not contain spaces and special characters",
@@ -8899,6 +8901,17 @@
 				aiExpressionSaveMessage : "Please wait a moment while the expression is being saved.",
 				visualWithExpressionMessage : "Your request is being processed to create a visual. Please wait a moment.",
             },
+			unifiedAiChat: {
+				selection1: 'Dashboard',
+				selection2: 'Data',
+				datasource: 'datasource',
+				dashboard: 'dashboard',
+				brandLogo: 'brandlogo',
+				unifiedAiSessionData: 'unifiedAiSessionData',
+				dashboards: 'dashboards',
+				placeHolder:'Type “@” to choose the dashboards.',
+				pleaseMessage: '<br><br>Please try these below questions<br>',
+			},
 			replaceValues: { 
 				applyBtnText: "Apply",
 				cancelBtnText: "Cancel",

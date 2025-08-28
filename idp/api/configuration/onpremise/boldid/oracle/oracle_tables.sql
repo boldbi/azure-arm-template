@@ -961,6 +961,8 @@ CREATE TABLE BOLDTC_TenantInactivity (
     DeletionReminderSentOn TIMESTAMP NULL,
     IsPermanentlyDeleted NUMBER(1) NOT NULL,
     IsRecordsDeletedInMetaTables NUMBER(1) NOT NULL,
+    CreatedDate TIMESTAMP NOT NULL,
+    ModifiedDate TIMESTAMP NOT NULL,
     IsActive NUMBER(1) NOT NULL
 );
 
