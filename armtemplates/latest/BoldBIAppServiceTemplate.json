@@ -58,11 +58,27 @@
   },
   "resources": [
     {
+      "name": "[toLower(parameters('storageAccountName'))]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2022-05-01",
+      "tags": {
+        "displayName": "storageaccount"
+      },
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "properties": {},
+      "dependsOn": []
+    },
+    {
       "name": "[variables('WebAppSvcPlanName')]",
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
       "apiVersion": "2022-03-01",
-      "dependsOn": [],
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+      ],
       "tags": {
         "displayName": "AppSvcPlan"
       },
@@ -82,7 +98,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2022-03-01",
       "dependsOn": [
-        "[concat('Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', variables('WebAppSvcPlanName'))]"
       ],
       "tags": {
         "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]": "Resource",
@@ -99,15 +115,44 @@
           ]
         },
         "clientAffinityEnabled": false,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('WebAppSvcPlanName'))]"
       },
       "resources": [
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2022-03-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('WebAppName'))]",
+            "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+          ],
+          "tags": {
+            "displayName": "WebAppSettings"
+          },
+          "properties": {
+            "IdP:AzureBlobStorageAccountName": "[toLower(parameters('storageAccountName'))]",
+            "IdP:AzureBlobServiceEndpoint": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:AzureBlobStorageAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName'))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
+            "IdP:AzureBlobContainerName": "boldbicontainer",
+            "IdP:AzureBlobConnectionType": "https",
+            "IdP:AzureBlobStorageUri": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:StorageType": "AzureBlob",
+            "StorageType": "AzureBlob",
+            "IsAzureApplication": "true",
+            "log4net.Config": "logs\\log4net.config",
+            "WEBSITE_DYNAMIC_CACHE": "0",
+            "WEBSITE_LOAD_USER_PROFILE": "1",
+            "ApplicationUrl": "[concat('https://', parameters('WebAppName'), '.azurewebsites.net')]",
+            "ServiceStartupOrder": "idp_web, idp_api, idp_ums, bi_web, bi_api, bi_jobs, bi_designer, etl_service, ai_service"
+          }
+        },
         {
           "apiVersion": "2022-03-01",
           "name": "web",
           "type": "config",
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('WebAppName'))]"
+            "[resourceId('Microsoft.Web/sites', parameters('WebAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('WebAppName'), 'appsettings')]"
           ],
           "tags": {
             "displayName": "WebAppConfig"
@@ -164,56 +209,17 @@
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', parameters('WebAppName'))]"
+            "[resourceId('Microsoft.Web/sites', parameters('WebAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('WebAppName'), 'appsettings')]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('WebAppName'), 'web')]"
           ],
           "properties": {
             "RepoUrl": "https://github.com/boldbi/azure-arm-template.git",
             "branch": "latest",
             "IsManualIntegration": true
           }
-        },
-        {
-          "name": "appsettings",
-          "type": "config",
-          "apiVersion": "2022-03-01",
-          "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('WebAppName'))]",
-            "web",
-            "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
-          ],
-          "tags": {
-            "displayName": "WebAppSettings"
-          },
-          "properties": {
-            "IdP:AzureBlobStorageAccountName": "[toLower(parameters('storageAccountName'))]",
-            "IdP:AzureBlobServiceEndpoint": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
-            "IdP:AzureBlobStorageAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName'))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
-            "IdP:AzureBlobContainerName": "boldbicontainer",
-            "IdP:AzureBlobConnectionType": "https",
-            "IdP:AzureBlobStorageUri": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
-            "IdP:StorageType": "AzureBlob",
-            "StorageType": "AzureBlob",
-            "IsAzureApplication": "true",
-            "log4net.Config": "logs\\log4net.config",
-            "WEBSITE_DYNAMIC_CACHE": "0",
-            "WEBSITE_LOAD_USER_PROFILE": "1",
-            "ApplicationUrl": "[concat('https://', parameters('WebAppName'), '.azurewebsites.net')]"
-          }
         }
       ]
-    },
-    {
-      "name": "[toLower(parameters('storageAccountName'))]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2022-05-01",
-      "tags": {
-        "displayName": "storageaccount"
-      },
-      "sku": {
-        "name": "[parameters('storageAccountType')]"
-      },
-      "properties": {}
     }
   ]
 }
