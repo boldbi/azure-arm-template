@@ -19,6 +19,7 @@
     }
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var activateTenantUrl = $"{dns}/bi/site/{globalAppSettings.SystemSettings.TenantIdentifier}/activate-suspended-tenant";
 }
 
 <!DOCTYPE html>
@@ -48,28 +49,46 @@
                     <img src="@themeBasedImageHelper.SuspendedErrorImage()" />
                 </div>
                 <div class="suspended-secondary-div">
-                    <div class="suspended-page-title">
-                        @T["Suspended"]
-                    </div>
-                    <div class="suspended-page-content">
-                        @T["Subscriptions to the dashboard have been suspended."]
-                        @if (!ServerAppConfig.IsSelfHosted)
-                        {
-                            <div>
-                                @{
-                                #pragma warning disable SCS0029
-                                }
-                                @Html.Raw(string.Format(T["If you are a subscription administrator for {0}, you can activate your suspended site {1}here{2}."].Value, globalAppSettings.SystemSettings.OrganizationName, "<a href='" + ServerAppConfig.AppSettings.EndPoints.TenantAppUrl.TrimEnd('/') + "/sites/" + _globalAppSettings.SystemSettings.TenantId + "/subscription' class='redirect-link' target='_blank'>", "</a>"))
-                                @{
-                                #pragma warning restore SCS0029
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div>@T["Please contact your System Administrator for more details."]</div>
-                        }
-                    </div>
+                    @if (ServerAppConfig.Sandbox.BI.Enabled)
+                    {
+                        <div class="suspended-page-title">
+                            @T["Your Dashboard Access is Inactive"]
+                        </div>
+                        <div class="suspended-page-content">
+                            @T["Your subscription was paused due to inactivity. Do not worry your data is safe and can be restored."]
+                        </div>
+                        <div class="suspended-page-content">
+                            @T["To continue using your dashboard, simply reactivate below."]
+                        </div>
+                        <div>
+                            <a href="@activateTenantUrl" class="e-control e-btn e-lib e-primary e-flat" id="activate-suspended-tenant">@T["Reactivate My Access"]</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="suspended-page-title">
+                            @T["Suspended"]
+                        </div>
+                        <div class="suspended-page-content">
+                            @T["Subscriptions to the dashboard have been suspended."]
+                            @if (!ServerAppConfig.IsSelfHosted)
+                            {
+                                <div>
+                                    @{
+#pragma warning disable SCS0029
+                                    }
+                                    @Html.Raw(string.Format(T["If you are a subscription administrator for {0}, you can activate your suspended site {1}here{2}."].Value, globalAppSettings.SystemSettings.OrganizationName, "<a href='" + ServerAppConfig.AppSettings.EndPoints.TenantAppUrl.TrimEnd('/') + "/sites/" + _globalAppSettings.SystemSettings.TenantId + "/subscription' class='redirect-link' target='_blank'>", "</a>"))
+                                    @{
+#pragma warning restore SCS0029
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div>@T["Please contact your System Administrator for more details."]</div>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
         </div>

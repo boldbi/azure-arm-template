@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 13.1.10
+*  version : 13.2.5
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -5086,7 +5086,8 @@ BoldBIDashboard.EjSvgRender.utils = {
     },
     _getBoundingClientRect: function (element, sender,series,invertedAxes) {
         var box = element.getBoundingClientRect();
-        var position = bbdesigner$("#" + (sender.svgObject.id))[0].getBoundingClientRect();
+        var svgElement = bbdesigner$("#" + sender.svgObject.id)[0];
+        var position = svgElement ? svgElement.getBoundingClientRect() : null;
         var xSeries, ySeries;
         if (invertedAxes) {
             xSeries = this._getTransform(series.xAxis, series.yAxis, true).x;
@@ -5095,8 +5096,8 @@ BoldBIDashboard.EjSvgRender.utils = {
             xSeries = this._getTransform(series.xAxis, series.yAxis, false).x;
             ySeries = this._getTransform(series.xAxis, series.yAxis, false).y;
         }
-        var x = box.left - (xSeries + position.left);
-        var y = box.top - (ySeries + position.top);
+        var x = position ? box.left - (xSeries + position.left) : box.left - xSeries;
+        var y = position ? box.top - (ySeries + position.top) : box.top - ySeries;
         return { x: x, y: y, width: (box.right - box.left), height: (box.bottom - box.top) };
     },
     _minMax: function (value, min, max) {
@@ -11895,7 +11896,8 @@ BoldBIDashboard.EjLegendRender.prototype =
                     }
                 }
                 var legendVal  = chart.legendContainer[0].offsetLeft;
-                var chartOffsetVal = bbdesigner$('#' + chart._id).offset();				
+                var chartElement = bbdesigner$('#' + chart._id);
+                var chartOffsetVal = chartElement.length > 0 ? chartElement.offset() : { left: 0, top: 0 };				
                 var offsetVal = (chart.vmlRendering) ? (legendVal <= 0) ? legendBounds.X : (legendVal  - chartOffsetVal.left) : 
                                 (bbdesigner$(chart.svgObject).offset().left - chartOffsetVal.left);
                 var legnTx = (chart.vmlRendering) ? offsetVal : legendBounds.X + (offsetVal <= 0 ? 0 : offsetVal);
@@ -11926,7 +11928,10 @@ BoldBIDashboard.EjLegendRender.prototype =
                                 }
                             }
                         } else {
-							bbdesigner$('#' + legendContainer[0].id).BoldBIDashboardScroller("instance").destroy();
+							var reqdInstance = bbdesigner$('#' + legendContainer[0].id).BoldBIDashboardScroller("instance");
+                            if (!BoldBIDashboard.util.isNullOrUndefined(reqdInstance) && reqdInstance.length > 0) {
+                                reqdInstance.destroy();
+                            }
                             legend._BoldBIDashboardScroller = false;
                         }
                     }
@@ -14726,8 +14731,8 @@ BoldBIDashboard.ejTMA = ejExtendClass(BoldBIDashboard.EjIndicatorRender, {
             checkNull = BoldBIDashboard.util.isNullOrUndefined,
             points = currentseries.points,currentPoints,
             length = points.length,
-            point;
-        var isAccumulation = currentseries.type.toLowerCase() == ("pie" || "funnel" || "pyramid" || "doughnut");
+            point, type = currentseries.type.toLowerCase();
+        var isAccumulation = type == "pie" || type == "funnel" || type == "pyramid" || type == "doughnut";
 
         // calculate visible points
         for (var i = 0; i < length; i++) {
@@ -23486,7 +23491,8 @@ var Gradient = function (colors) {
 
         var scrollerSize = this.model.scrollerSize,
             scrollObj, index,  
-            chartOffsetVal = bbdesigner$('#' + this._id).offset(),
+            chartElement = bbdesigner$('#' + this._id),
+            chartOffsetVal = chartElement.length > 0 ? chartElement.offset() : { left: 0, top: 0 },
             offsetVal = (bbdesigner$(this.svgObject).offset().left - chartOffsetVal.left),
             scrollerWidth, scrollerHeight, scrollerX,
             scrollerY, size;

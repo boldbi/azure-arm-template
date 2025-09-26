@@ -8,11 +8,15 @@
     var apprunning = Model.All(s => s.IsRunning);
     var tenantmanagementurl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.TrimEnd('/') + "/ums/startup";
     var querystringerror = @Context.Request.Query["error"];
+    var hasBIService = ViewBag.HasBIService;
+    var hasReportsService = ViewBag.HasReportsService;
+    var statusDescription = hasBIService && hasReportsService ? "This page shows the running status of all the internal services of Bold BI and Bold Reports applications." : hasBIService  ? "This page shows the running status of all the internal services of Bold BI application." : "This page shows the running status of all the internal services of Bold Reports application.";
 }
 
 <html>
 <head>
     <title>Application Healthcheck</title>
+    <meta name="description" content="@statusDescription">
     @await Html.PartialAsync("../Shared/_FontReference")
     @await Html.PartialAsync("../Shared/_ThemeReference")
     <link rel="stylesheet" href="~/bundles/css/statushealthcheck.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/statushealthcheck.css")" crossorigin="anonymous" asp-append-version="true" />

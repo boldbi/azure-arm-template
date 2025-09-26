@@ -27,6 +27,7 @@
     ViewBag.GroupName = groupDetails.GroupName;
     ViewBag.GroupLogo = groupDetails.GroupLogo;
     var applicationUrl = _globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    bool canShowAddUserDialog = false;
 }
 
 @section scripts{
@@ -314,6 +315,7 @@
                                 <feature name=@FeatureManagement.EnableGroupOwnerSupport>
                                     @if (ViewBag.IsLocalDirectory)
                                     {
+                                        canShowAddUserDialog = true;
                                         <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
                                             <a href="javascript:void(0)" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-user-add"> </i>
@@ -325,6 +327,7 @@
                                 <feature name=@FeatureManagement.EnableGroupOwnerSupport negate="true">
                                     @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                                     {
+                                        canShowAddUserDialog = true;
                                         <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
                                             <a href="javascript:void(0)" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-user-add"> </i>
@@ -556,7 +559,10 @@
     <div id="add-groupuser-area" class="no-padding">
         <iframe src="" style="border: 0;" id="add-groupuser-iframe" border="0" width="100%" height="100%"></iframe>
     </div>
-    @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
+    @if (canShowAddUserDialog)
+    {
+        @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
+    }
     @await Html.PartialAsync("../Items/_SharePermission")
     @await Html.PartialAsync("../CustomAttribute/_CustomAttribute")
     @await Html.PartialAsync("_GroupLogoUploadBox")

@@ -21,12 +21,16 @@
     var isMobile = DeviceDetection.IsMobile(Context); 
     var cardviewCookie= string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
     var encodedCookieValue = new HtmlString(cardviewCookie);
+    var hasBIService = ViewBag.HasBIService;
+    var hasReportsService = ViewBag.HasReportsService;
+    var statusDescription = hasBIService && hasReportsService ? "This page lists Bold BI and Bold Reports sites for quick access." : hasBIService ? "This page lists Bold BI sites for quick access." : "This page lists Bold Reports sites for quick access.";
 }
 
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+    <meta name="description" content="@statusDescription">
     <title>@T["Home"] - @GlobalAppSettings.SystemSettings.OrganizationName</title>
     @await Html.PartialAsync("../Shared/_Favicon")
     @await Html.PartialAsync("../Shared/_FontReference")

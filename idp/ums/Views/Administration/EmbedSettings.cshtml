@@ -9,12 +9,12 @@
     var branding = GlobalAppSettings.Branding;
 }
 
-@section styles{
+@section styles {
     <link rel="stylesheet" href="~/bundles/css/embed-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/embed-settings.css")" crossorigin="anonymous" asp-append-version="true" />
 }
-@section scripts{
+@section scripts {
     <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/embed-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/embed-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
-       <script nonce="@Context.Items["ScriptNonce"]">
+    <script nonce="@Context.Items["ScriptNonce"]">
         var embedEnabled = @Json.Serialize(embedEnabled);
         var embedSecretCode = "@embedSecretCode";
         var isResetEmbedSecretUrl = "@Url.Action("ResetEmbedSecret", "Administration")";
@@ -23,7 +23,7 @@
     </script>
 }
 
-@section MainSection{
+@section MainSection {
 
     @await Html.PartialAsync("_AdminMenu")
     <div class="col-12 float-start header-section no-padding no-margin width-alignment">
@@ -31,17 +31,33 @@
             <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
                 <hgroup class="col-12 float-start header-group">
                     <h1 class="page-title">
-                            @T["EMBED SETTINGS"]
-                        </h1>
+                        @T["EMBED SETTINGS"]
+                    </h1>
+                    @if (GlobalAppSettings.IsBoldBIOnPremise && GlobalAppSettings.IsBoldReportsOnPremise)
+                    {
                         <h5 class="page-description">
-                            @T[$"Configuration for {AppBranding.Bold.ProductName} sites"]
+                            @Html.Raw(string.Format(T["Configuration for {0} and {1} sites"].Value, AppBranding.Bold.ProductName, AppBranding.BoldReports.ProductName))
                         </h5>
-                    </hgroup>
-                </div>
-                <div class="col-4 top-nav-sec no-padding">
-                    @await Html.PartialAsync("../Shared/_TopMenu")
-                </div>
-             </div>
+                    }
+                    else if (GlobalAppSettings.IsBoldBIOnPremise)
+                    {
+                        <h5 class="page-description">
+                            @Html.Raw(string.Format(T["Configuration for {0} sites"].Value, AppBranding.Bold.ProductName))
+                        </h5>
+                    }
+                    else if (GlobalAppSettings.IsBoldReportsOnPremise)
+                    {
+                        <h5 class="page-description">
+                            @Html.Raw(string.Format(T["Configuration for {0} sites"].Value, AppBranding.BoldReports.ProductName))
+                        </h5>
+                    }
+                   
+                </hgroup>
+            </div>
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
     </div>
     <div id="embed-settings-container" class="col-12 float-start admin-page-content-container">
         <div class="admin-page-content col-12 float-start no-padding">
@@ -63,41 +79,45 @@
                     </div>
                 </div>
 
-                <form action="@Url.Action("PostEmbedSettings", "Administration")" method="post" enctype="multipart/form-data">
-                    @Html.AntiForgeryToken()
-                    <div class="col-12 float-start no-padding import-file">
-                        <label class="app-textbox-label activation embed-enabled">
-                            @T["Embed Configuration"]
-                        </label>
-                        <div class="no-padding">
-                            <div class="upload-box">
-                                <input type="text" class="form-control col-md-6 float-start no-margin @(embedEnabled ? string.Empty : "disabled")" id="filename" value="@(embedEnabled ? fileName : T["Browse file path (.json)"].Value)">
-                                <span id="trigger-file" class="input-group-addon btn popup no-left-border @(embedEnabled ? string.Empty : "disabled")">
-                                    ...
-                                </span>
-                                <input type="file" accept=".json" name="csfile" id="csfile" class="btn popup upload-btn">
+                @if (GlobalAppSettings.IsBoldBIOnPremise)
+                {
+
+                    <form action="@Url.Action("PostEmbedSettings", "Administration")" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div class="col-12 float-start no-padding import-file">
+                            <label class="app-textbox-label activation embed-enabled">
+                                @T["Embed Configuration"]
+                            </label>
+                            <div class="no-padding">
+                                <div class="upload-box">
+                                    <input type="text" class="form-control col-md-6 float-start no-margin @(embedEnabled ? string.Empty : "disabled")" id="filename" value="@(embedEnabled ? fileName : T["Browse file path (.json)"].Value)">
+                                    <span id="trigger-file" class="input-group-addon btn popup no-left-border @(embedEnabled ? string.Empty : "disabled")">
+                                        ...
+                                    </span>
+                                    <input type="file" accept=".json" name="csfile" id="csfile" class="btn popup upload-btn">
+                                </div>
+                                <input type="submit" class="primary-button" title="@T["Upload embed configuration file here"]" id="cs-upload" disabled="" value="@T["Upload"]" />
+
+                                <p>
+                                    <a href="@Url.Action("DownloadTemplate", "Administration")" class="download-template text-decoration-none" title="@T["Download sample template"]" style="@showDownloadLink">@T["Download Template"]</a>
+                                    @if (ViewBag.result.ToLower() == "error")
+                                    {
+                                        <span id="import-validation-msg">@T["Please upload a valid json file."]</span>
+                                    }
+                                    else if (ViewBag.result.ToLower() == "invalid")
+                                    {
+                                        <span id="import-validation-msg">@T["Please select a json file with a valid format."]</span>
+                                    }
+                                    else if (fileName.ToLower() == "success")
+                                    {
+                                        <span id=""></span>
+                                    }
+                                </p>
                             </div>
-                            <input type="submit" class="primary-button" title="@T["Upload embed configuration file here"]" id="cs-upload" disabled="" value="@T["Upload"]"/>
 
-                            <p>
-                                <a href="@Url.Action("DownloadTemplate", "Administration")" class="download-template text-decoration-none" title="@T["Download sample template"]" style="@showDownloadLink">@T["Download Template"]</a>
-                                @if (ViewBag.result.ToLower() == "error")
-                                {
-                                    <span id="import-validation-msg">@T["Please upload a valid json file."]</span>
-                                }
-                                else if (ViewBag.result.ToLower() == "invalid")
-                                {
-                                    <span id="import-validation-msg">@T["Please select a json file with a valid format."]</span>
-                                }
-                                else if (fileName.ToLower() == "success")
-                                {
-                                    <span id=""></span>
-                                }
-                            </p>
                         </div>
-
-                    </div>
-                </form>
+                    </form>
+                }
                 <div id="get-secret-code" class="col-12 float-start no-padding input-field-margin">
                     <label class="app-textbox-label activation">
                         @T["Embed secret"]
@@ -110,14 +130,28 @@
                         <button type="button" title="" id="get-embed-code" class="primary-button" @(embedEnabled ? string.Empty : "disabled")>
                             @if (string.IsNullOrWhiteSpace(embedSecretCode))
                             {
-                                @generateSecret;
+                                @generateSecret
+                                ;
                             }
                             else
                             {
-                                @resetSecret;
+                                @resetSecret
+                                ;
                             }
                         </button>
+                        @if (GlobalAppSettings.IsBoldBIOnPremise && GlobalAppSettings.IsBoldReportsOnPremise)
+                        {
+                            <div class="info-message">@T["Anyone with access to the secret key can impersonate and create a URL to access the dashboard and report. So, keep the embed authentication disabled when not in use."]</div>
+                        }
+                        else if (GlobalAppSettings.IsBoldBIOnPremise)
+                        {
                         <div class="info-message">@T["Anyone with access to the secret key can impersonate and create a URL to access the dashboard. So, keep the embed authentication disabled when not in use."]</div>
+                        }
+                        else if (GlobalAppSettings.IsBoldReportsOnPremise)
+                        {
+                        <div class="info-message">@T["Anyone with access to the secret key can impersonate and create a URL to access the report. So, keep the embed authentication disabled when not in use."]</div>
+                        }
+                        
                         <div class="secret-code-notification">
                             @T["Store the secret key somewhere safe. As soon as you navigate away from this page, you will not be able to retrieve or restore the generated secret key."]
                         </div>

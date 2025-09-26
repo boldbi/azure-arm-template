@@ -249,7 +249,7 @@ function showSavedAttributes() {
     customAttributeInfo = attributeGridObj.getCurrentViewRecords()[attributeGridObj.getSelectedRowIndexes()];
     document.getElementById("custom-attribute-name").ej2_instances[0].value = customAttributeInfo.Name;
     document.getElementById("custom-attribute-descrition").ej2_instances[0].value = customAttributeInfo.Description;
-    customAttributeInfo.CanEncrypt ? "" : document.getElementById("custom-attribute-value").ej2_instances[0].value = customAttributeInfo.Value;
+    customAttributeInfo.CanEncrypt ? "" : document.getElementById("custom-attribute-value").ej2_instances[0].value = $('<div/>').html(customAttributeInfo.Value).text();
     $("#encrypt-custom-attribute").prop("checked", customAttributeInfo.CanEncrypt);
     editCustomAttributeId = customAttributeInfo.CustomAttributeId;
 }

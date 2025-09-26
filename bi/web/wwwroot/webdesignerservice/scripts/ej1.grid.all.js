@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 13.1.10
+*  version : 13.2.5
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -4806,8 +4806,10 @@
                         break;
                     case "allowSelection":
                         if (options[prop]) {
-                            this._off(this.element, (bbdesigner$.isFunction(bbdesigner$.fn.tap) && this.model.enableTouch) ? "tap" : "click", this._clickHandler);
-                            this._on(this.element, "click", this._clickHandler);
+                            this._off(this.element, (bbdesigner$.isFunction(bbdesigner$.fn.tap) && this.model.enableTouch) ? "tap" : "click", this._clickHandler);							
+							this._off(this.element, (bbdesigner$.isFunction(bbdesigner$.fn.tap) && this.model.enableTouch) ? "tap" : "click", ".e-gridheader", this._mouseClickHandler);
+                            this._on(this.element, (bbdesigner$.isFunction(bbdesigner$.fn.tap) && this.model.enableTouch) ? "tap" : "click", this._clickHandler);
+							this._on(this.element, (bbdesigner$.isFunction(bbdesigner$.fn.tap) && this.model.enableTouch) ? "tap" : "click", ".e-gridheader", this._mouseClickHandler);
 							this._initSelection();
                         }
 						else
@@ -11924,7 +11926,8 @@
 					if (this._enableCheckSelect && deselection) {
                         target[0].checked = deselection;
                     }
-                    if (this._isMapSelection || !(target && target.hasClass("e-checkselectall") && target[0].checked) && !this._selectAllUnchecked || this._selectAllchecked) {
+					var isChecked = (e.type === 'click') ? !target.checked : target.checked; // Tab function works inversly
+                    if (this._isMapSelection || !(target && target.hasClass("e-checkselectall") && isChecked) && !this._selectAllUnchecked || this._selectAllchecked) {
                         if (this.model.scrollSettings.enableVirtualization && (target && !target.hasClass("e-checkselectall"))) {
                             var viewIndex = this._getSelectedViewData(toIndex, target).viewIndex;
                             var remain = toIndex % this._virtualRowCount;
@@ -11994,7 +11997,7 @@
                 this._selectedRow(bbdesigner$rowIndex);
             Data = this._virtualScrollingSelection || this.model.allowPaging || this._enableCheckSelect ? this._virtualSelectedRecords : Data;
 			var selectedIndex = this.model.scrollSettings.enableVirtualization ? bbdesigner$rowIndex : this._selectedRow();
-            var reqdData = this.element.attr('id').includes("_Chart_trendline_grid_col") && Data.hasOwnProperty("LineColor") && Data.hasOwnProperty("LineStyle") && Data.hasOwnProperty("LineType") && Data.hasOwnProperty("LineVisible") && Data.hasOwnProperty("LineWidth") ? Data : Object.values(Data);
+            var reqdData = (this.element.attr('id').includes("_Chart_trendline_grid_col") || this.element.attr('id').includes("_ComboChart_trendline_grid_col")) && Data.hasOwnProperty("LineColor") && Data.hasOwnProperty("LineStyle") && Data.hasOwnProperty("LineType") && Data.hasOwnProperty("LineVisible") && Data.hasOwnProperty("LineWidth") ? Data : Object.values(Data);
             var args = { rowIndex: selectedIndex, row: this.getRowByIndex(this._selectedRow()), data: reqdData, target: target, prevRow: bbdesigner$prevRow, prevRowIndex : bbdesigner$prevIndex, parentTarget: e, hasUnselectedRows: this.unSelectedRowsIndexes.length > 0, isSelectAllChecked: this._selectAllchecked };
             this._previousIndex = this.selectedRowsIndexes.length ? rowIndex :this._previousIndex;
 			if(this.model.scrollSettings.enableVirtualization){
@@ -16790,10 +16793,12 @@
 
         _mouseClickOnPage: function (evt) {
             var closestId = bbdesigner$(evt.target).closest('[id]').attr('id');
-            if (this.model.showColumnChooser && !bbdesigner$(evt.target)[0].classList.contains("e-ccButton") && 
-                bbdesigner$(evt.target).closest(".e-ccButton").find(".e-btn-span, .e-btntxt, .e-down-arrow").length === 0 && (closestId !== this._id + "ccDiv"
-                && closestId !== this._id + "liScrollerDiv" && closestId !== this._id +"_ccSearchBox")) {
-                    if (bbdesigner$(evt.target).closest(".e-columnChooserListDiv").length === 0) {                        
+            if (!BoldBIDashboard.isNullOrUndefined(this.model) && this.model.showColumnChooser && 
+                !bbdesigner$(evt.target)[0].classList.contains("e-ccButton") && 
+                bbdesigner$(evt.target).closest(".e-ccButton").find(".e-btn-span, .e-btntxt, .e-down-arrow").length === 0
+                && (closestId !== this._id + "ccDiv" && closestId !== this._id + "liScrollerDiv" && closestId !== this._id +"_ccSearchBox")) {
+                    var uniqueName = bbdesigner$(evt.target).attr("aria-describedby");
+                    if (bbdesigner$(evt.target).closest(".e-columnChooserListDiv").length === 0 && !bbdesigner$("#" + this._id + "ccDiv").find(`button[aria-describedby=${uniqueName}]`).hasClass('e-disable')) {                        
                         bbdesigner$("#" + this._id + "ccDiv").BoldBIDashboardDialog('close');
                         bbdesigner$(".e-columnChoosertailAlt").remove();
                         bbdesigner$(".e-columnChoosertail").remove();
@@ -17216,7 +17221,8 @@
         _clickHandler: function (e) {
             var bbdesigner$target = bbdesigner$(e.target),tempChooser = bbdesigner$("[id$='ccDiv'].e-grid.e-columnChooser"),fieldName, bbdesigner$form = bbdesigner$("#" + this._id + "EditForm"), index, columnIndex, rowIndex;
 			if(this._enableCheckSelect && bbdesigner$(e.target).hasClass('e-checkselectall')){
-			    if(e.target.checked) {
+			    var isChecked = (e.type === 'click') ? !e.target.checked : e.target.checked; // Tab function works inversly
+			    if(isChecked) {
 					this._selectAllUnchecked = true;
                     this._selectAllchecked = false;
                     this.model.deselection = false;
@@ -17282,7 +17288,7 @@
                     var checkBoxSelection = this._enableCheckSelect && bbdesigner$target.parent(".e-checkcelldiv").length ? true : false;
                     if (bbdesigner$target.hasClass("e-checkselectall")) {
 						var rows = this._gridRows.length;
-						this.selectRows(0, rows - 1, bbdesigner$target);
+						this.selectRows(0, rows - 1, bbdesigner$target, e);
                     }
                     if (this.model.selectionType == "multiple") {
                         if (e.ctrlKey || this._enableSelectMultiTouch) {
