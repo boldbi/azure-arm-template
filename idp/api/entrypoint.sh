@@ -76,7 +76,7 @@ elif [[ "${DEPLOY_MODE:-}" == "docker_multi_container" ]]; then
 EOF
 )
 
-elif [ "$BOLD_SERVICES_HOSTING_ENVIRONMENT" = "k8s" ]; then
+elif [ "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" == "k8s" ]; then
     if [ "$SUB_APP" = "true" ] && [ -n "$sub_path" ]; then
       json_content=$(cat <<EOF
 {
@@ -125,6 +125,19 @@ EOF
     fi
 else
   log "No matching DEPLOY_MODE or BOLD_SERVICES_HOSTING_ENVIRONMENT value for JSON content."
+fi
+
+# ---------- Conditionally Write JSON ----------
+if [[ -n "${DEPLOY_MODE:-}" || -n "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" ]]; then
+  log "Writing service URLs to $local_service_json_file"
+  echo "$json_content" > "$local_service_json_file" || fatal "Failed to write JSON content."
+  if command -v jq >/dev/null 2>&1; then
+    jq empty "$local_service_json_file" && log "JSON is valid." || fatal "Invalid JSON format!"
+  else
+    log "jq not available. Skipping validation."
+  fi
+else
+  log "Deployment environment is not defined. Set DEPLOY_MODE or BOLD_SERVICES_HOSTING_ENVIRONMENT. Skipping JSON creation."
 fi
 
 echo "Executing ID-API service..."
