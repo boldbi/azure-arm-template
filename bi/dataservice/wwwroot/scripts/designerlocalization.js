@@ -6635,7 +6635,9 @@ var Designer = {
 					previousValueDesc: "Returns the value from a specified previous row in the result set relative to the current row.",
 					previousValueEx: "PREVIOUSVALUE(expression, offset)",
 					nextValueDesc: "Returns the value from a specified subsequent row in the result set relative to the current row.",
-					nextValueEx: "NEXTVALUE(expression, offset)"
+                    nextValueEx: "NEXTVALUE(expression, offset)",
+                    percentileCountDesc: "Computes continuous percentile values using linear interpolation over ordered data.",
+                    percentileCountEx: "PERCENTILECOUNT(fraction, expression)"
                 }
             },
             queryJoiner: {
