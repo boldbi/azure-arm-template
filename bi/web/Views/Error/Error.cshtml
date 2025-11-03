@@ -18,19 +18,38 @@
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/css/error-page/error-page..css" />
-        <script asp-append-version="true" src="~/Scripts/jQuery/jquery-1.10.2.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/Scripts/jQuery/jquery-1.10.2.min.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.min.css" />
-        <script asp-append-version="true" src="~/Scripts/jQuery/jquery-1.10.2.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/Scripts/jQuery/jquery-1.10.2.min.js"></script>
     </environment>
-    <script>
-        $(document).ready(function () {
-            $(".base-container-bg").css("display", "");
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            // Show base container background
+            var bgElements = document.getElementsByClassName("base-container-bg");
+            for (var i = 0; i < bgElements.length; i++) {
+                bgElements[i].style.display = "";
+            }
+
+            // Favicon fallback
+            var initialFaviconPath = "@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var fallbackFaviconPath = "@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+
+            var faviconLink = document.getElementById("favicon-link");
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    var currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== initialFaviconPath.toLowerCase()) {
+                        faviconLink.setAttribute("href", fallbackFaviconPath);
+                    }
+                });
+            }
         });
+
     </script>
-    <link rel="icon" href="@favicon" onerror="if (this.href != '@cdnLink/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="icon" href="@favicon" id="favicon-link" />
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 </head>
 <body>

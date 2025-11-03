@@ -27,21 +27,20 @@
     ViewBag.GroupName = groupDetails.GroupName;
     ViewBag.GroupLogo = groupDetails.GroupLogo;
     var applicationUrl = _globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
-    bool canShowAddUserDialog = false;
 }
 
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewgroup.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/groups.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewgroup.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewgroup.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/viewgroup.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/groups.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewgroup.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/viewgroup.min.js"></script>
     </environment>
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         @{
         #pragma warning disable SCS0029
         }
@@ -89,6 +88,14 @@
             if (isSingleDB && groupNameInput.value === "System Administrator") {
                 groupNameInput.setAttribute('disabled', 'disabled');
             }
+
+
+        $("#group-manage-permissions").on("click", function (e) {
+                e.preventDefault(); // Prevents default anchor behavior
+                window.location.href = '@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId';
+            });
+            $(document).on("click", "#edit-group-attribute", editCustomAttribute);
+            $(document).on("click", "#remove-group-attribute", deleteConfirmation);
 
             $("#search-group-users").val("");
             $("#group-info-name").removeAttr("placeholder");
@@ -207,7 +214,7 @@
     </script>
     @if (isSelfHosted)
     {
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             var minimumLength = "@passwordPolicy.MinimumLength";
             var lowerCaseRequired = "@passwordPolicy.LowerCaseRequired";
             var upperCaseRequired = "@passwordPolicy.UpperCaseRequired";
@@ -266,7 +273,7 @@
         @if (showGroupModule)
         {
             <div>
-            <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            <span><a href="#" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
             </div>
         }
         {{/if}}
@@ -274,18 +281,18 @@
         @if (showGroupModule)
         {
             <div>
-            <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            <span><a href="#" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
             </div>
         }
         else if (canShowForAdminGroup)
         {
             <div>
-            <span><a href="javascript:void(0);" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+            <span><a href="#" class="delete-user" title="" data-username="{{:DisplayName}}" data-userid="{{:UserId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
             </div>
         }
         {{/if}}
     </script>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var checkGroupnameUrl = "@Url.Action("CheckGroupname", "group")";
         var addGroupUrl = "@Url.Action("AddGroup", "group")";
         var deleteGroupViewUrl = "@Url.Action("DeleteGroupView", "group")";
@@ -304,7 +311,7 @@
             <div id="group-header" class="col-12 bi-page-header tabs-header-padding top-nav-btn-secton">
                 <div class="col-12 no-padding">
                     <div class="col-xs-6 no-padding button-section group-buttons float-end">
-                        <input type="button" class="primary-button app-btn-primary float-end" id="add-custom-attribute" title="" value="@T["Add Attribute"]" data-id="@ViewBag.groupId" onclick="addCustomAttribute('group')">
+                        <input type="button" class="primary-button app-btn-primary float-end add-group-custom-attribute" id="add-custom-attribute" title="" value="@T["Add Attribute"]" data-id="@ViewBag.groupId">
                         @if (canShowForAdminGroup)
                         {                       
                             <button class="dropdown-toggle primary-button app-btn-primary float-end" data-bs-toggle="dropdown" title="@T["Manage"]">
@@ -315,9 +322,8 @@
                                 <feature name=@FeatureManagement.EnableGroupOwnerSupport>
                                     @if (ViewBag.IsLocalDirectory)
                                     {
-                                        canShowAddUserDialog = true;
-                                        <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
-                                            <a href="javascript:void(0)" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
+                                        <li id="add-user-button" title="@T["Add user"]">
+                                            <a href="#" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-user-add"> </i>
                                                 <span>@T["Add User"]</span>
                                             </a>
@@ -327,9 +333,8 @@
                                 <feature name=@FeatureManagement.EnableGroupOwnerSupport negate="true">
                                     @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]))
                                     {
-                                        canShowAddUserDialog = true;
-                                        <li id="add-user-button" title="@T["Add user"]" onclick="onUserAddDialogOpen()">
-                                            <a href="javascript:void(0)" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
+                                        <li id="add-user-button" title="@T["Add user"]">
+                                            <a href="#" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-user-add"> </i>
                                                 <span>@T["Add User"]</span>
                                             </a>
@@ -339,8 +344,8 @@
                                 <feature name=@FeatureManagement.EnableGroupOwnerSupport>
                                     @if (ViewBag.IsLocalDirectory && ViewBag.groupId != 1)
                                     {
-                                        <li id="add-owner-button" title="@T["Add Owner"]" onclick="addGroupOwnerDialogOpen()" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
-                                            <a href="javascript:void(0)" title="@T["Add Owner"]" data-bs-toggle="tooltip" data-placement="top">
+                                        <li id="add-owner-button" title="@T["Add Owner"]" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
+                                            <a href="#" title="@T["Add Owner"]" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-add-owner"> </i>
                                                 <span>@T["Add Owner"]</span>
                                             </a>
@@ -359,7 +364,7 @@
                                 @if ((isAdmin || granularPermissions[PermissionEntity.UsersandGroups]|| granularPermissions[PermissionEntity.SpecificGroup]) && ViewBag.groupId != 1)
                                 {
                                     <li id="delete-button" class="delete" title="@T["Delete Group"]" data-groupid="@ViewBag.groupId" data-groupname="{{allGroupDetails.GroupName}}">
-                                        <a href="javascript:void(0)" title="@T["Delete Group"]" data-bs-toggle="tooltip" data-placement="top">
+                                        <a href="#" title="@T["Delete Group"]" data-bs-toggle="tooltip" data-placement="top">
                                             <i class="su su-delete"></i>
                                             <span>@T["Delete Group"]</span>
                                         </a>
@@ -372,7 +377,7 @@
 
                             @if (isAdmin || granularPermissions[PermissionEntity.AllPermissions] || granularPermissions[PermissionEntity.SpecificPermissions])
                             {
-                                <button class="primary-button app-btn-primary float-end" onclick="location.href='@Url.Action("grouppermission", "permission")?groupId=@ViewBag.groupId'" title="@T["Manage Permissions"]" data-bs-toggle="tooltip" data-placement="top">
+                            <button class="primary-button app-btn-primary float-end" id="group-manage-permissions" title="@T["Manage Permissions"]" data-bs-toggle="tooltip" data-placement="top">
                                     <span>@T["Manage Permissions"]</span>
                                 </button>
                             }
@@ -533,17 +538,17 @@
                         <script type="text/x-jsrender" id="options">
                             <div class="user-hover-options">
                                 {{if AttributeType ==  @((int)AttributeType.Group)}}
-                                <a href="javascript:void(0);" id="edit-group-attribute" title="@T["Edit"]" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="group" onclick="editCustomAttribute(this)">
+                                <a href="#" id="edit-group-attribute" title="@T["Edit"]" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="group">
                                     <i class="su su-edit"></i>
                                 </a>
-                                <a class="delete-class" href="javascript:void(0);" id="remove-group-attribute" title="@T["Remove"]" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="group" onclick="deleteConfirmation(this)">
+                                <a class="delete-class" href="#" id="remove-group-attribute" title="@T["Remove"]" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="group">
                                     <i class="su su-delete"></i>
                                 </a>
                                 {{else}}
-                                <a href="javascript:void(0);" title="@T["Edit"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
+                                <a href="#" title="@T["Edit"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
                                     <i class="su su-edit disabled-icon-color"></i>
                                 </a>
-                                <a class="delete-class" href="javascript:void(0);" title="@T["Remove"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
+                                <a class="delete-class" href="#" title="@T["Remove"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
                                     <i class="su su-delete disabled-icon-color"></i>
                                 </a>
                                 {{/if}}
@@ -559,10 +564,7 @@
     <div id="add-groupuser-area" class="no-padding">
         <iframe src="" style="border: 0;" id="add-groupuser-iframe" border="0" width="100%" height="100%"></iframe>
     </div>
-    @if (canShowAddUserDialog)
-    {
-        @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
-    }
+    @await Html.PartialAsync("../UserManagement/_UserAddDialog", globalAppSettings)
     @await Html.PartialAsync("../Items/_SharePermission")
     @await Html.PartialAsync("../CustomAttribute/_CustomAttribute")
     @await Html.PartialAsync("_GroupLogoUploadBox")

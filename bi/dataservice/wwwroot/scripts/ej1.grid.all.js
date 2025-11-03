@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 13.2.5
+*  version : 14.1.11
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -2419,7 +2419,7 @@
                     this.element.width(this.model.scrollSettings.width || this.model.width);
             }
 
-            var bbdesigner$content = this.getContent().attr("tabindex", "0"), staticWidth, direction, gridRows = this.getRows();
+            var bbdesigner$content = this.getContent().attr("tabindex", "-1"), staticWidth, direction, gridRows = this.getRows();
 
             if (this.model.scrollSettings.frozenColumns > 0) {
                 for (var i = 0 ; i < this.getRows().length ; i++) {
@@ -2523,7 +2523,7 @@
         },
           refreshScrollerEvent: function () {
             var proxy = this;
-            var bbdesigner$content = this.getContent().attr("tabindex", "0");
+            var bbdesigner$content = this.getContent().attr("tabindex", "-1");
             var scroller = bbdesigner$content.data("BoldBIDashboardScroller");
             if (!BoldBIDashboard.isNullOrUndefined(scroller) && scroller.model.scroll == null) {
                 bbdesigner$content.BoldBIDashboardScroller({

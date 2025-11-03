@@ -1241,10 +1241,26 @@ CREATE TABLE [BOLDTC_TenantInactivity] (
     MarkedForSuspension bit NOT NULL,
     DeletionReminderSentOn datetime NULL,
     IsPermanentlyDeleted bit NOT NULL,
-	IsRecordsDeletedInMetaTables bit NOT NULL,
+	IsImdbTablesDeleted bit NOT NULL,
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
     IsActive bit NOT NULL
+);
+
+CREATE TABLE [BOLDTC_UmsConfiguration] (
+    Id int IDENTITY(1,1) NOT NULL,
+	SystemKey nvarchar(255) NOT NULL UNIQUE,
+	SystemValue nvarchar(4000),
+	ModifiedDate datetime NOT NULL,
+	CONSTRAINT PK_BOLDTC_UmsConfiguration PRIMARY KEY (Id)
+);
+
+CREATE TABLE [BOLDTC_BiConfiguration] (
+    Id int IDENTITY(1,1) NOT NULL,
+	SystemKey nvarchar(255) NOT NULL UNIQUE,
+	SystemValue nvarchar(4000),
+	ModifiedDate datetime NOT NULL,
+	CONSTRAINT PK_BOLDTC_BiConfiguration PRIMARY KEY (Id)
 );
 
 INSERT [BOLDTC_TenantLogType] ([Name], [IsActive]) VALUES (N'Registration', 1)

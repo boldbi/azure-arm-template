@@ -5,8 +5,16 @@
 @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
 
-<script>
+<script nonce="@ViewBag.ScriptNonce" type="text/javascript">
     $(document).ready(function () {
+     $(document).on("click", "#item-link", function () {
+        if (this.setSelectionRange) {
+            this.setSelectionRange(0, this.value.length);
+        } else if (this.select) {
+            this.select(); // fallback for older browsers
+        }
+    });
+
         $("#item-link-copy").removeClass("focusdiv");
         $("#item-link").on("focusin", function () {
             $("#item-link-copy").addClass("focusdiv");
@@ -35,7 +43,7 @@
     }
 </script>
 
-<body onload="load()">
+<body>
     <div id="get_item_link" class="col-12 no-padding dialog custom-bootstrap-styles" style="display:none">
         <div class="dialog-body col-12 no-padding">
                 <div class="get-link-body">
@@ -55,7 +63,7 @@
                     </div>
 
                     <span class="update-link small" style="float:right;margin-right:14px;margin-bottom:2px;color: green;visibility: hidden">@T["Link updated."]</span>
-                    <input onClick="this.setSelectionRange(0, this.value.length)" id="item-link" class="form-control" readonly />
+                    <input id="item-link" class="form-control" readonly />
                 <div class="form-control su su-copy text focus" id="item-link-copy" readonly="" data-bs-toggle="get-link-tooltip" data-bs-placement="top" data-bs-container="#get_item_link" data-bs-original-title="@T["Click to copy"]"></div>
 
                     <div class="col-sm-12 col-12 file-link no-padding" style="margin-top:15px;display:none">

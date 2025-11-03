@@ -81,6 +81,7 @@
     var boldaiservice = GlobalAppSettings.GetDescription(AIModel.BoldAIService);
     var openai = GlobalAppSettings.GetDescription(AIModel.OpenAI);
     var azureai = GlobalAppSettings.GetDescription(AIModel.AzureAI);
+    var nonce = Context.Items["ScriptNonce"]?.ToString();
 }
 @{
     var preloadScriptsFiles = new string[]
@@ -164,7 +165,7 @@
     }
 
     @RenderSection("meta", false)
-    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
@@ -207,14 +208,28 @@
     }
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
-    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="icon" href="@faviconLogo" />
 
     <!--Prefetch viewer & designer resources-->
     @if (!isSelfHosted)
     {
         <link rel="prefetch" href="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/health-check">
     }
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function () {
+                var initialFaviconPath = "@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+                var fallbackFaviconPath = "@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+
+                var faviconLink = document.getElementById("favicon-link");
+                if (faviconLink) {
+                    faviconLink.addEventListener("error", function () {
+                        if (faviconLink.href && faviconLink.href.toLowerCase() !== initialFaviconPath.toLowerCase()) {
+                            faviconLink.href = fallbackFaviconPath;
+                        }
+                    });
+                }
+            });
+        var nonce = @Json.Serialize(nonce);
         var createItemMenuStyle = @Json.Serialize(createItemMenuStyle);
         var addSampleItemStyle = @Json.Serialize(addSampleItemStyle);
         var addCategoryStyle = @Json.Serialize(addCategoryStyle);
@@ -240,7 +255,7 @@
         var azureai = @Json.Serialize(azureai);
         var updateAISettingsUrl = "@Url.Action("AddOrUpdateAiCredentialsSettings", "Administration")";
     </script>
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var canHideLogoAndProfile = @ServerAppConfig.CanHideLogoAndProfile.ToString().ToLower();
@@ -249,12 +264,13 @@
         var knowDomainsList = @Json.Serialize(knowDomainsList);
 
         window.onload = function () {
-        var preloadStyles = @Json.Serialize(preloadStylesFiles);
-        var preloadScripts = @Json.Serialize(preloadScriptsFiles);
-        PreloadResources(preloadStyles, "style");
-        PreloadResources(preloadScripts, "script");
-        }
+            var preloadStyles = @Json.Serialize(preloadStylesFiles);
+            var preloadScripts = @Json.Serialize(preloadScriptsFiles);
+            PreloadResources(preloadStyles, "style");
+            PreloadResources(preloadScripts, "script");
+        };
     </script>
+
 </head>
 
 <body ng-app="serverApp" class="clearfix" id="body">
@@ -270,7 +286,7 @@
     {
         @await Html.PartialAsync("~/Views/Shared/_GoogleTagBody.cshtml")
     }
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
     </environment>
@@ -284,28 +300,28 @@
         if (isExludeEjDialog)
         {
             <environment include="Development,CloudDevelopment">
-                <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connector-page-layout.js"></script>
+                 <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connector-page-layout.js"></script>
             </environment>
             <environment exclude="Development,CloudDevelopment">
-                <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connector-page-layout.min.js"></script>
+                 <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connector-page-layout.min.js"></script>
             </environment>
         }
         else
         {
             <environment include="Development,CloudDevelopment">
-                <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout.js"></script>
+                 <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout.js"></script>
             </environment>
             <environment exclude="Development,CloudDevelopment">
-                <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout.min.js"></script>
+                 <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout.min.js"></script>
             </environment>
 
             @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1)
             {
                 <environment include="Development,CloudDevelopment">
-                    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
+                     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
                 </environment>
                 <environment exclude="Development,CloudDevelopment">
-                    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
+                     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
                 </environment>
             }
         }
@@ -313,17 +329,17 @@
     else
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout-mobile.js"></script>
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout-mobile.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout-mobile.min.js"></script>
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/layout-mobile.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/itemaction.min.js"></script>
         </environment>
     }
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dropdowntree.min.js"></script>
-    <script type="text/javascript">
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dropdowntree.min.js"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $.extend(ej, Syncfusion);
         var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
         var isAdmin = "@isAdmin";
@@ -370,12 +386,15 @@
 
         $(document).ready(function () {
         generateProfileAvatar();
+         $(document).on('click', 'a[href="#"]', function (e) {
+          e.preventDefault();
+        });
         });
         var canCheckSession = @Json.Serialize(ServerAppConfig.IsSelfHosted);
     </script>
     @if (isMobile)
     {
-        <script type="text/javascript">
+        <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(document).ready(function () {
             GetGridName();
 
@@ -443,7 +462,7 @@
     }
     @if (includeMessageBox)
     {
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(document).ready(function () {
             $("#messageBox").ejDialog({
             width: (window.innerWidth > 460) ? "450px" : (window.innerWidth - 10),
@@ -578,7 +597,7 @@
     <div id="alert-notification">
     </div>
     <div id="collapse-menu-backdrop" style="display: none;"></div>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var showFeedbackDialog = "@showFeedback";
     </script>
 
@@ -592,10 +611,10 @@
         </environment>
         @await Html.PartialAsync("~/Views/Shared/_ServerTour.cshtml")
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-server-tour.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-server-tour.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-server-tour.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-server-tour.min.js"></script>
         </environment>
     }
 
@@ -612,10 +631,10 @@
     {
         @await Html.PartialAsync("~/Views/Shared/_GeneralFeedback.cshtml")
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-feedback.min.js"></script>
         </environment>
     }
     @if (!isMobile)

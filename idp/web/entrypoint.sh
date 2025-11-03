@@ -76,7 +76,7 @@ elif [[ "${DEPLOY_MODE:-}" == "docker_multi_container" ]]; then
 EOF
 )
 
-elif [ "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" == "k8s" ]; then   
+elif [ "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" == "k8s" ]; then
     if [ "$SUB_APP" = "true" ] && [ -n "$sub_path" ]; then
      json_content=$(cat <<EOF
 {

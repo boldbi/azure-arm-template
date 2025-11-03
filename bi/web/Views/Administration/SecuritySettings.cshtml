@@ -16,6 +16,7 @@
     var connectSources = contentSecurityPolicySettings.ConnectSource != null ? contentSecurityPolicySettings.ConnectSource.Split(',') : contentSecurityPolicySettings.ConnectSource;
     var frameSources = contentSecurityPolicySettings.FrameSource != null ? contentSecurityPolicySettings.FrameSource.Split(',') : contentSecurityPolicySettings.FrameSource;
     var frameAncestor = contentSecurityPolicySettings.FrameAncestor != null ? contentSecurityPolicySettings.FrameAncestor.Split(',') : contentSecurityPolicySettings.FrameAncestor;
+    var isCspEnabled = (bool)contentSecurityPolicySettings.EnableCSP || ServerAppConfig.EnableCSPByDefault;
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var CSPHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy);
     var pageDescription = T["Configure security-related settings for your site."];
@@ -33,12 +34,12 @@
 
 @section scripts{
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var updateCSPSettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
         var updateXFrameHeaderSettingsUrl= "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
         var updateNetworkSettingsUrl = "@Url.Action("UpdateNetworkSettings", "Administration")";
@@ -106,7 +107,7 @@
                             <div class="col-12 no-padding enable-csp settings-page-fields">
                                 <div class="col-12 no-padding">
                                     <div class="info-label">
-                                        @Html.CheckBox("enable-csp", (bool)contentSecurityPolicySettings.EnableCSP, new { @class = "material-checkbox" })
+                                        @Html.CheckBox("enable-csp", isCspEnabled, new { @class = "material-checkbox" })
                                         @Html.Hidden("enable-csp")
                                         <label for="enable-csp">
                                             @string.Format(T["Enable {0}"].Value, "Content-Security-Policy")
@@ -222,10 +223,10 @@
         @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
     </div>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.min.js"></script>
     </environment>
 
 }

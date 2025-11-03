@@ -23,9 +23,12 @@
     var downloadPermissionAccessId = (int)PermissionAccess.Download;
     var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
     var generateEmbedSignatureUrl = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
+    var nonce = !string.IsNullOrEmpty(ViewBag.ScriptNonce as string)
+         ? ViewBag.ScriptNonce as string
+         : Context.Items["ScriptNonce"] as string;
 }
 
-<script>
+<script nonce="@nonce" type="text/javascript">
     var makeItemPublicUrl = "@Url.Action("MakePublicItem", "items")";
     var removeItemPublicUrl = "@Url.Action("RemoveItemPublic", "items")";
     var makeItemUnlistedUrl = "@Url.Action("MakeUnlistItem", "items")";
@@ -84,7 +87,7 @@
                 </div>
                 <div class="col-2 public-private-change-section">
                     <div class="public-private-change-action">
-                        <a href="javascript:void(0)" onclick="changeAccessMode()" id="access-mode-change-link" class="app-hyperlink">@T["Change"]</a>
+                        <a href="#" id="access-mode-change-link" class="app-hyperlink">@T["Change"]</a>
                     </div>
                 </div>
             </div>
@@ -103,16 +106,16 @@
                 </div>
                 <div class="col-2 public-private-change-section">
                     <div class="public-private-change-action">
-                        <a href="javascript:void(0)" onclick="changeAccessMode()" id="access-mode-change-link" class="app-hyperlink">@T["Change"]</a>
+                        <a href="#" id="access-mode-change-link" class="app-hyperlink">@T["Change"]</a>
                     </div>
                 </div>
             </div>
             <div class="get-item-link-section" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType !=@userManagement">
-                <input onClick="this.setSelectionRange(0, this.value.length)" id="item-url" class="form-control" readonly />
+                <input id="item-url" class="form-control" readonly />
                 <div class="form-control text focus" id="item-url-copy" readonly="" data-original-title="@T["Click to copy"]">@T["Copy link"]</div>
             </div>
             <div class="get-item-embed-link-section col-12 no-padding" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType != @slideShowType && currentItemType !=@userManagement && getDashboardEmbedCode">
-                <a class="get-embed-link app-hyperlink float-start" href="javascript:void(0)" onclick="getEmbedCode()">&lt;/&gt; @T["Get Embed code"]</a>
+                <a class="get-embed-link app-hyperlink float-start" href="#">&lt;/&gt; @T["Get Embed code"]</a>
             </div>
             <div class="share-with-label slideshow-note" ng-if="currentItemType == @slideShowType">@Html.Raw("<b>" + T["Note: "].Value + "</b>" + T["Anyone can navigate to this link, but only users with appropriate permissions to access dashboards used in the slideshow will be able to view the items in the slideshow."].Value)</div>
             <div class="sf-nav-separator share-permisssion-separator mobile-hidden" ng-show="currentItemType != @categoryType && currentItemType != @datasourceType && currentItemType != @userManagement">
@@ -137,7 +140,7 @@
                 </div>
             </div>
             <div id="show-shared-user-group-container" style="display:none;">
-                <a href="javascript:void(0)" onclick="showManageAccessContainer()" id="show-shared-user-group-link">
+                <a href="#" id="show-shared-user-group-link">
                     <div class="show-shared-user-group-section">
                         <div class="show-shared-user-group-label">@T["Shared with "]:</div>
                         <div class="shared-user-group-name-section"></div>
@@ -619,8 +622,8 @@
             <button type="button" id="manage-access-back-button" class="app-button app-secondary-button app-btn-secondary float-start" style="display: none;">@T["Back"]</button>
             <button type="button" id="share-done-popup-button" class="app-button app-secondary-button app-btn-secondary float-end">@T["Done"]</button>
             <button type="button" id="manage-access-cancel-button" class="app-button app-secondary-button app-btn-secondary float-end" style="display: none;">@T["Cancel"]</button>
-            <button type="button" id="share-permission-button" class="app-button app-primary-button app-btn-primary float-end" onclick="saveItemPermission()" style="display: none;">@T["Share"]</button>
-            <button type="button" id="add-owner-permission-button" class="app-button app-primary-button app-btn-primary float-end" onclick="addGroupOwnerPermission()" style="display: none;">@T["Add Owner"]</button>
+            <button type="button" id="share-permission-button" class="app-button app-primary-button app-btn-primary float-end" style="display: none;">@T["Share"]</button>
+            <button type="button" id="add-owner-permission-button" class="app-button app-primary-button app-btn-primary float-end" style="display: none;">@T["Add Owner"]</button>
             <button type="button" id="manage-access-save-button" class="app-button app-primary-button app-btn-primary float-end" style="display: none;">@T["Save"]</button>
             <button type="button" id="access-mode-cancel-button" class="app-button app-secondary-button app-btn-secondary float-end" style="display: none;">@T["Cancel"]</button>
             <button type="button" id="access-mode-change-button" class="app-button app-primary-button app-btn-primary float-end" style="display: none;" disabled="disabled">@T["Change"]</button>

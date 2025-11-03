@@ -86,10 +86,15 @@ try:
 
             result = cur.fetchone()
 
-            if result:
-                # Drop the table if it exists
-                drop_table_query = f"DROP TABLE {teradata_table_name};"
-                cur.execute(drop_table_query)
+            if isDropTable:
+                try:
+                    if result:
+                        # Drop the table if it exists
+                        drop_table_query = f"DROP TABLE {teradata_table_name};"
+                        cur.execute(drop_table_query)
+                except Exception as ex:
+                    print(f"Error dropping table: {ex}")
+   
          
             try:
                 cur.execute(create_query)

@@ -84,11 +84,13 @@ firebolt_connection = firebolt.db.connect(auth=ClientCredentials(f'{firebolt_cli
 cursor = firebolt_connection.cursor()
 duck_query = f"SELECT * FROM {duck_table_name}"
 df = duck_connection.execute(duck_query).fetchdf()
-try:
-    stmt = cursor.execute(f"DROP TABLE IF EXISTS {firebolt_table_name}")
-except Exception as e:
-    print(f"Error in drop table: {e}")
-    # Optionally, print more details about the row and columns involved
+
+if isDropTable:
+    try:
+        stmt = cursor.execute(f"DROP TABLE IF EXISTS {firebolt_table_name}")
+    except Exception as e:
+        print(f"Error in drop table: {e}")
+
 try:
     stmt = cursor.execute(create_query)
 except Exception as e:

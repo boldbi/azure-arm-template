@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 13.2.5
+*  version : 14.1.11
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -11897,7 +11897,7 @@ BoldBIDashboard.EjLegendRender.prototype =
                 }
                 var legendVal  = chart.legendContainer[0].offsetLeft;
                 var chartElement = bbdesigner$('#' + chart._id);
-                var chartOffsetVal = chartElement.length > 0 ? chartElement.offset() : { left: 0, top: 0 };				
+                var chartOffsetVal = chartElement.length > 0 ? chartElement.offset() : { left: 0, top: 0 };			
                 var offsetVal = (chart.vmlRendering) ? (legendVal <= 0) ? legendBounds.X : (legendVal  - chartOffsetVal.left) : 
                                 (bbdesigner$(chart.svgObject).offset().left - chartOffsetVal.left);
                 var legnTx = (chart.vmlRendering) ? offsetVal : legendBounds.X + (offsetVal <= 0 ? 0 : offsetVal);
@@ -11928,7 +11928,7 @@ BoldBIDashboard.EjLegendRender.prototype =
                                 }
                             }
                         } else {
-							var reqdInstance = bbdesigner$('#' + legendContainer[0].id).BoldBIDashboardScroller("instance");
+                            var reqdInstance = bbdesigner$('#' + legendContainer[0].id).BoldBIDashboardScroller("instance");
                             if (!BoldBIDashboard.util.isNullOrUndefined(reqdInstance) && reqdInstance.length > 0) {
                                 reqdInstance.destroy();
                             }
@@ -23490,7 +23490,7 @@ var Gradient = function (colors) {
     _renderScrollbar: function () {
 
         var scrollerSize = this.model.scrollerSize,
-            scrollObj, index,  
+            scrollObj, index,
             chartElement = bbdesigner$('#' + this._id),
             chartOffsetVal = chartElement.length > 0 ? chartElement.offset() : { left: 0, top: 0 },
             offsetVal = (bbdesigner$(this.svgObject).offset().left - chartOffsetVal.left),

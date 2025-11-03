@@ -28,6 +28,8 @@
     }
     var lightThemeIntergrity = IntegrityTagHelper.GetIntegrity("bundles/css/lighttheme.css");
     var darkThemeIntergrity = IntegrityTagHelper.GetIntegrity("bundles/css/darktheme.css");
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var isJWTUserBasedThemeApplied = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) || !string.IsNullOrWhiteSpace(customThemeClaims.ApplicationTheme) || !string.IsNullOrWhiteSpace(customThemeClaims.DashboardTheme);
 }
 
 @section styles{
@@ -48,6 +50,7 @@
         var selectedDashboardThemeValue = "@selecteddashboardTheme.Value";
         var applicationThemes = "@applicationThemes";
         var dashboardThemes = "@dashboardThemes";
+        var isJWTUserBasedThemeApplied = @Json.Serialize(isJWTUserBasedThemeApplied);
         var baseRootUrl = "@Url.Content("~/")";
         @{
 #pragma warning disable SCS0029
@@ -96,7 +99,15 @@
 </div>
 
     <div id="look-and-feel-container" class="col-12 float-start admin-page-content-container">
-        <div class="admin-page-content col-12 float-start no-padding"> 
+        <div class="admin-page-content col-12 float-start no-padding">
+            @if (isJWTUserBasedThemeApplied)
+            {
+                <div class="col-lg-12 no-margin inherit-description">
+                    <span class="su su-info inherit-info"></span>
+                    <label>@T["Look and feel settings cannot be modified when inherited from JWT user claims."]</label>
+                </div>
+            }
+
             <div class="col-lg-12 col-md-12 col-sm-12 float-start admin-page-body">
                 @await Html.PartialAsync("_FontSection")
                 @await Html.PartialAsync("_ThemeSection", "", new ViewDataDictionary(ViewData) { { "hasBoldBIOnPremise", GlobalAppSettings.IsBoldBIOnPremise }, { "hasBoldReportsOnPremise", GlobalAppSettings.IsBoldReportsOnPremise }, { "isCommonDeployment", GlobalAppSettings.IsCommonDeployment } })

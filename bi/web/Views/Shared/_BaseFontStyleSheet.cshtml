@@ -8,6 +8,9 @@
     var dns = url.GetLeftPart(UriPartial.Authority);
     var allowedCookies = ServerAppConfig.AllowedCookies;
     var keyValuePairs = new Dictionary<string, string>();
+    var nonce = !string.IsNullOrEmpty(ViewBag.ScriptNonce as string)
+     ? ViewBag.ScriptNonce as string
+     : Context.Items["ScriptNonce"] as string;
     foreach (var cookie in Context.Request.Cookies)
     {
         if (allowedCookies.Contains(cookie.Key))
@@ -17,7 +20,7 @@
         }
     }
 }
-<script>
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     @{
 #pragma warning disable SCS0029
     }

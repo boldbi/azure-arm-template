@@ -15,20 +15,21 @@
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-datasource.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-datasource.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-datasource.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-datasource.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-datasource.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-datasource.min.js"></script>
     </environment>
 
 
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
 
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(document).ready(function () {
             parent.$("#create-datasource-popup_wrapper").ejWaitingPopup("hide");
+            $(document).on("click", ".close-create-datasource-dialog", onCreateDataSourceDialogClose);
         });
     </script>
 </head>
@@ -40,7 +41,7 @@
                 <span class="PopupTitle extendedTitle" title="@T["Create Data Source"]">@T["Create Data Source"]</span>
             </div>
             <div class="no-padding">
-                <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="parent.onCreateDataSourceDialogClose()"><span class="su su-close"></span></a>
+                <a href="#" title="@T["Close"]" class="PopupClose close-create-datasource-dialog"><span class="su su-close"></span></a>
             </div>
         </div>
         <form></form>

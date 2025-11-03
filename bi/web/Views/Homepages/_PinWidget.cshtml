@@ -22,28 +22,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
-    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-viewer-page.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/homepage-viewer-page.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/homepage-viewer-page.min.js"></script>
     </environment>
     @*@if (isDebug)
         {
-            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.ejcommon.all.min.js")"></script>
-            <script asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.viewer.all.min.js")"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.ejcommon.all.min.js")"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@(dashboardServiceResourceUrl + "/scripts/ej.dashboard.viewer.all.min.js")"></script>
         }*@
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var pinWidgetUrl = "@Url.Action("pinitemtohomepage", "boards")";
         var addHomepageUrl = "@Url.Action("addhomepage", "boards")";
         var checkHomepageNameExistUrl = "@Url.Action("checkhomepagenameexist", "boards")";
         var cdnLink = "@cdnLink";
         $(document).ready(function () {
             var widgetName = parent.$("#pin-widget-popup").attr("data-widget-name");
+            $(document).on("click", ".close-pin-widget-popup", closePinWidgetPopup);
+            $(document).on("click", "#version-Alert-button", onAlertDialogClose);
             parent.$("#pin-widget-popup-iframe").contents().find("#widget-name").val(widgetName);
             $("#filter-info").popover();
             parent.$('#success-alert, #warning-alert').fadeOut();
@@ -71,7 +73,7 @@
         <div class="col-md-12 header-menu">
             <span class="su su-pin head-icon"></span>
               <span class="popup-title"></span>
-            <a href="javascript:void(0);" title="@T["Close"]" class="popup-close" onclick="closePinWidgetPopup()"><span class="su su-close"></span></a>
+            <a href="#" title="@T["Close"]" class="popup-close close-pin-widget-popup"><span class="su su-close"></span></a>
             @if (isCurrentVersion)
             {
                 <div id="homepage-name"><div id="sub-title" data-bs-toggle="tooltip" data-placement="bottom" data-original-title="">@T["Select an existing pinboard or add a new one."]</div></div>
@@ -93,7 +95,7 @@
             <div class="col-12 dialog-footer rightAlign no-right-padding no-left-padding">
                 <div class="float-end"></div>
                 <div class="no-padding centerAlign validationArea" id="close">
-                    <input title="" type="button" id="version-Alert-button" class="btn secondary-button app-btn-secondary PopupClose" value="@T["OK"]" onclick="onAlertDialogClose()" />
+                    <input title="" type="button" id="version-Alert-button" class="btn secondary-button app-btn-secondary PopupClose" value="@T["OK"]"/>
                 </div>
             </div>
         }
@@ -143,17 +145,17 @@
                 <div id="pin-widget-button">
                     <div id="button-container">
                         <input type="button" id="save-button" class="btn primary-button app-btn-primary" value="@T["Pin"]">
-                        <input type="button" id="cancel-button" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" onclick="closePinWidgetPopup()">
+                        <input type="button" id="cancel-button" class="btn secondary-button app-btn-secondary close-pin-widget-popup" value="@T["Cancel"]">
                     </div>
                 </div>
             </div>
         }
     </form>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     </environment>
 </body>
 </html>

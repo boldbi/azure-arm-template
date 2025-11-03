@@ -9,7 +9,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
-    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings, _identityResponse);
     ViewBag.PageHeader = itemType == ItemType.Dashboard ? @T["Dashboards"] : itemType == ItemType.Schedule ? @T["Schedules"] : itemType == ItemType.Datasource ? @T["Data Sources"] : @T["Slideshow"];
 }
 <environment include="Development,CloudDevelopment">
@@ -18,7 +18,7 @@
 <environment exclude="Development,CloudDevelopment">
     <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/default-pages.min.css" />
 </environment>
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var dashboardItemCount = "@itemsCount[ItemType.Dashboard]";
 </script>
 <link href="https://fonts.googleapis.com/css?family=Bitter:400,700" rel="stylesheet">

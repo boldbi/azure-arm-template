@@ -2,8 +2,13 @@
     var hasBoldBIOnPremise = ViewData["hasBoldBIOnPremise"].ToString() == "True";
     var hasBoldReportsOnPremise = ViewData["hasBoldReportsOnPremise"].ToString() == "True";
     var isCommonDeployment = ViewData["isCommonDeployment"].ToString() == "True";
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var themeAppearance = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) ? customThemeClaims.Appearance
+                                            : GlobalAppSettings.SystemSettings.Theme.Appearance;
+    var isJWTUserBasedThemeApplied = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) || !string.IsNullOrWhiteSpace(customThemeClaims.ApplicationTheme) || !string.IsNullOrWhiteSpace(customThemeClaims.DashboardTheme);
+    var manageLinkDisabledClass = isJWTUserBasedThemeApplied ? "manage-link-disabled" : "";
 }
-<div class=" @(@isCommonDeployment || @hasBoldBIOnPremise ? "d-block" : "d-none")">
+<div class=" @(@isCommonDeployment || true ? "d-block" : "d-none")">
     <div class="sub-section last-sub-section col-12 float-start no-padding theme-section">
         <h3 class="title sub-section-heading">@T["Theme"]</h3>
 
@@ -11,11 +16,11 @@
             @Html.Label("appearance", T["Mode"].Value, new { @class = "app-textbox-label" })
             <div id="appearance-container">
                 <div class="light-theme radio-button-section" id="light">
-                    <input type="radio" id="light-theme" name="appearance" class="css-radio" value="light" @(GlobalAppSettings.SystemSettings.Theme.Appearance == AppearanceTheme.Light.ToString().ToLower() ? "checked" : string.Empty) />
+                    <input type="radio" id="light-theme" name="appearance" class="css-radio" value="light" @(themeAppearance == AppearanceTheme.Light.ToString().ToLower() ? "checked" : string.Empty) />
                     <label for="light-theme" class="app-textbox-label radio-btn-label notransition">@T["Light"]</label>
                 </div>
                 <div class="dark-theme radio-button-section" id="dark">
-                    <input type="radio" id="dark-theme" name="appearance" class="css-radio" value="dark" @(GlobalAppSettings.SystemSettings.Theme.Appearance == AppearanceTheme.Dark.ToString().ToLower() ? "checked" : string.Empty) />
+                    <input type="radio" id="dark-theme" name="appearance" class="css-radio" value="dark" @(themeAppearance == AppearanceTheme.Dark.ToString().ToLower() ? "checked" : string.Empty) />
                     <label for="dark-theme" class="app-textbox-label radio-btn-label notransition">@T["Dark"]</label>
                 </div>
             </div>
@@ -23,10 +28,10 @@
         <div class="form-group">
             @Html.Label("application-theme", T["Custom Theme"].Value, new { @class = "app-textbox-label" })
             <p class="upload-link-btn">
-                <a href="#" class="text-decoration-none" id="woff-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
+                <a href="#" class="text-decoration-none @manageLinkDisabledClass" id="woff-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
             </p>
             <div class="admin-settings-drop-down col-lg-12 no-padding section-dropdown-content-first">
-                @Html.DropDownList("application-theme", ViewBag.ApplicationTheme as IEnumerable<SelectListItem>, new { id = "application-theme", @class = "admin-settings-drop-down", data_none_results_text = T["No results match"].Value, data_size = "5", data_live_search = "false" })
+                @Html.DropDownList("application-theme", ViewBag.ApplicationTheme as IEnumerable<SelectListItem>, new { id = "application-theme", @class = "admin-settings-drop-down", data_none_results_text = T["No results match"].Value, data_size = "5", data_live_search = "false", disabled = isJWTUserBasedThemeApplied ? "disabled" : "" })
                 <div class="info-message no-padding">@T["A custom theme can use either a dark or light mode. It is not possible to utilize a single custom theme for both mode. Please choose a custom theme based on the mode of your application. To remove the custom theme, please select the default theme."]</div>
             </div>
             
@@ -34,10 +39,10 @@
         <div class="form-group">
             @Html.Label("dashboard-theme", T["Dashboard Theme"].Value, new { @class = "app-textbox-label" })
             <p class="upload-link-btn">
-                <a href="#" class="text-decoration-none" id="woff-dashboard-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
+                <a href="#" class="text-decoration-none @manageLinkDisabledClass" id="woff-dashboard-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
             </p>
             <div class="admin-settings-drop-down col-lg-12 no-padding">
-                @Html.DropDownList("dashboard-theme", ViewBag.DashboardTheme as IEnumerable<SelectListItem>, new { id = "dashboard-theme", @class = "admin-settings-drop-down", data_none_results_text = T["No results match"].Value, data_size = "5", data_live_search = "false" })
+                @Html.DropDownList("dashboard-theme", ViewBag.DashboardTheme as IEnumerable<SelectListItem>, new { id = "dashboard-theme", @class = "admin-settings-drop-down", data_none_results_text = T["No results match"].Value, data_size = "5", data_live_search = "false", disabled = isJWTUserBasedThemeApplied ? "disabled" : "" })
             </div>
         </div>
     </div>

@@ -35,14 +35,14 @@
 
 
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var getActiveandInactiveUserWebUrl = "@Url.Action("getallactivegroupsandusers", "scheduler")";
         var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceTypeForDatasourceSchedule", "DataSources")";
         var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "Scheduler")";
@@ -97,14 +97,15 @@
                     <span><i class="su su-data-cache"></i></span>
                     @if (!string.IsNullOrWhiteSpace(itemName))
                     {
-                        @string.Concat(itemName, " — ", T["Data Cache Settings"].Value)
+                        @string.Concat(itemName, " — ", T["Hybrid Data Cache Settings"].Value)
                         <span><i class="su su-close" id="data-cache-close-icon" title="@T["Close"]"></i></span>
                     }
                     else
                     {
                         <span><i class="su su-close" id="data-cache-close-icon" title="@T["Close"]"></i></span>
-                        @T["Data Cache Settings"]
+                        @T["Hybrid Data Cache Settings"]
                     }
+                    <span class="beta-icon badge badge-secondary1 badge-secondary2 datacache-beta">Beta</span>
                 }
                 <div id="datasource-description"></div>
             </div>
@@ -355,6 +356,26 @@
                     <span class="validation-message"></span>
                 </div>
             </div>
+            @if (!isDataCache)
+            {
+                <div class="col-sm-12 col-12 no-padding enabled-div d-flex">
+                    <div class="col-sm-1 col-1 no-padding align-center margin-issue">
+                        @Html.Label("data-cache-enable", T["Hybrid Data Cache Enabled"].Value, new { @class = "enabled-label" })
+                        <span class="beta-icon badge badge-secondary1 badge-secondary2 datacache-beta">Beta</span>
+                    </div>
+                    <div class="col-sm-10 col-10 float-start no-margin enabled-label-div line-removal">
+                        <span class="material-switch text-left">
+                            <input type="checkbox" name="Enabled" id="enable-datacache" />
+                            <label class="label-primary" for="enable-datacache"></label>
+                        </span>
+                        <span class="validation-message"></span>
+                    </div>
+                </div>
+            }
+@*             <div class="col-sm-12 col-12 no-padding d-flex time-zone @( !isDataCache ? "datacache-extract-content" : "")">
+                <div class="col-sm-1 col-1"></div>
+                <div class="col-10" id="time-zone">@(!isDataCache ? T["(After refreshing the data source, encrypted data can be cached. The cache duration is customizable based on the data volume, helping to optimize server resources and enhance dashboard responsiveness.)"] : T["(Encrypted data is stored securely with a configurable cache duration, determined by the data size. This reduces server load, enables quicker data access, and boosts dashboard performance.)"])</div>
+            </div> *@
             <div class="col-sm-1 col-1 margin-issue d-flex"></div>
             <div class="col-sm-10 col-10" id="schedule-message-container"><span class="su su-info"></span><span id="schedule-message"></span></div>
             <div class="col-sm-12 col-12" id="refresh-interval-message">
@@ -416,7 +437,7 @@
                             @Html.Label("enable-notification-to-owner", T["Send failure notification to data source owner"].Value)
                         </div>
                         <div id="enable-checkbox" class="pad-enable">
-                            @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox ", @id = "enable-notification-to-recipient", onchange = "showDialog(this)" })
+                            @Html.CheckBox("enable-notification-to-recipient", new { @class = "material-checkbox ", @id = "enable-notification-to-recipient" })
                             @Html.Label("enable-notification-to-recipient", T["Send failure notification to other application and external users"].Value)
                         </div>
                     </div>
@@ -493,10 +514,10 @@
         </div>
      </div>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencepage.min.js"></script>
     </environment>
 </body>
 </html>

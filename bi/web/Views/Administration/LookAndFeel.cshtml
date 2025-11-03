@@ -5,7 +5,7 @@
     ViewBag.Title = T["Look and Feel"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var loginDisclaimerObject = string.Empty;
-    var themeMode = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance;
+    var themeMode = _identityResponse.ThemeAppearance;
     var isDebug = globalAppSettings.SystemSettings.IsDebug;
     var pageDescription = T["Customize the look and feel of the application."].Value;
     var themeAppearanceUms = string.Empty;
@@ -27,7 +27,9 @@
     var noMatchText = T["No results matched"].Value;
     var isDefaultMainLogo = globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.MainLogo);
     var isDefaultFooterLogo = globalAppSettings.SystemSettings.FooterLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.FooterLogo);
-    var isUMSLookAndFeelSettingsInherited = globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.LookAndFeel);
+    var isUMSLookAndFeelSettingsInherited = isSelfHosted && !ViewBag.IsJWTUserBasedThemeApplied && globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.LookAndFeel);
+    var isJWTUserBasedThemeApplied = isSelfHosted && ViewBag.IsJWTUserBasedThemeApplied;
+    var IsInheritFromGlobalLookAndFeelSettings = isSelfHosted && !ViewBag.IsJWTUserBasedThemeApplied &&  ViewBag.IsInheritFromGlobalLookAndFeelSettings;
 }
 
 @section styles{
@@ -92,14 +94,14 @@
 
 @section scripts{
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/look-and-feel.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/look-and-feel.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/look-and-feel.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/look-and-feel.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var updateCustomThemeSettingsUrl = "@Url.Action("UpdateLookAndFeelSettings", "Administration")";
         var lookAndFeelSettingsUrl = "@Url.Action("LookAndFeel", "Administration")";
         var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
@@ -120,6 +122,7 @@
         var mainLogo = "@ServerAppConfig.BrandingJson.BrandingImages.MainLogo";
         var footerLogo = "@ServerAppConfig.BrandingJson.BrandingImages.FooterLogo";
         var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
+         var isJWTUserBasedThemeApplied = @Json.Serialize(isJWTUserBasedThemeApplied);
     </script>
 }
 
@@ -147,8 +150,16 @@
         @if (isUMSLookAndFeelSettingsInherited)
         {
             <div class="col-12 no-margin inherit-description">
-                <span class="su su-info"></span>
+                <span class="su su-info inherit-info"></span>
                 <label>@T["Look and Feel settings have been inherited from the UMS settings. Please contact the UMS admin to disable the inheritance."]</label>
+            </div>
+        }
+
+        @if (isJWTUserBasedThemeApplied)
+        {
+            <div class="col-12 no-margin inherit-description">
+                <span class="su su-info inherit-info"></span>
+                <label>@T["Look and feel settings cannot be modified when inherited from JWT user claims."]</label>
             </div>
         }
         <div id="organization-block" class="bi-page-content col-12 no-padding">
@@ -157,7 +168,7 @@
                     @if (ServerAppConfig.IsSelfHosted)
                     {
                         <div class="col-12 no-padding inherit-from-global-app-theme-div">
-                            @Html.CheckBox("inherit-from-global-app-theme", ViewBag.IsInheritFromGlobalLookAndFeelSettings, new { @class = "material-checkbox ums-inherit-lookandfeel", @autocomplete = "off" })
+                            @Html.CheckBox("inherit-from-global-app-theme", IsInheritFromGlobalLookAndFeelSettings, new { @class = "material-checkbox ums-inherit-lookandfeel", @autocomplete = "off" })
                             <label for="inherit-from-global-app-theme">
                                 <span>
                                     @T["Inherit from Global Settings"]
@@ -173,7 +184,7 @@
                     @if (!ServerAppConfig.IsSelfHosted)
                     {
                         <p class="manage-font-box">
-                            <a href="javascript:void(0)" onclick="onUploadFontDialogOpen()" id="woff-upload" title="@T["Upload the font file here."]">@T["Add a new font"]</a>
+                            <a href="#" id="woff-upload-font" title="@T["Upload the font file here."]">@T["Add a new font"]</a>
                         </p>
                     }
                     <div id="app-font-customize" class="col-lg-12  no-padding app-font-customize ums-inherit-look-and-feel">
@@ -198,7 +209,7 @@
                         @if (!ServerAppConfig.IsSelfHosted)
                         {
                             <p class="manage-theme-box">
-                                <a href="javascript:void(0)" onclick="onUploadApplicationThemeDialogOpen()" id="woff-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
+                                <a href="#" id="woff-upload" title="@T["Upload the theme file here."]">@T["Manage"]</a>
                             </p>
                         }
                         <div class="col-lg-12 no-padding dropdown-look-and-feel ums-inherit-look-and-feel">
@@ -211,7 +222,7 @@
                         {
                             @Html.Label("dashboard-theme", T["Dashboard Theme"].Value, new { @class = "app-textbox-label dashboard-theme-label" })
                             <p class="manage-theme-box">
-                                <a href="javascript:void(0)" onclick="onUploadDashboardThemeDialogOpen()" id="woff-upload-dashboard" title="@T["Upload the theme file here."]">@T["Manage"]</a>
+                                <a href="#" id="woff-upload-dashboard" title="@T["Upload the theme file here."]">@T["Manage"]</a>
                             </p>
                         }
                         else

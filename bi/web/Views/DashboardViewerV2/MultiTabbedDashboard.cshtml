@@ -39,11 +39,14 @@
     var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
     var aiLogo = globalAppSettings.SystemSettings.AILogo;
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
-    var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
+    var themeInViewer = ViewBag.ThemeInViewer;
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
     var canHideCommentIcon = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
+    var customThemeAppearance = _identityResponse.ThemeAppearance != null ? _identityResponse.ThemeAppearance : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance);
+    var customApplicationTheme = _identityResponse.CustomApplicationTheme != null ? _identityResponse.CustomApplicationTheme : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme);
+    var nonce = Context.Items["ScriptNonce"]?.ToString();
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -51,16 +54,14 @@
     }
     else
     {
-        dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
+        dashboardCutomTheme = _identityResponse.CustomDashboardTheme;
     }
 }
 <html>
 <head>
     <title>@ViewBag.Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8" />
-    <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
-
-    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
 
     <meta name="designer_service:url" content="@(!string.IsNullOrWhiteSpace(ServerAppConfig.ViewerServiceUrl) ? ServerAppConfig.ViewerServiceUrl : ServerAppConfig.InternalAppDataServiceUrl)" />
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
@@ -72,13 +73,13 @@
     <meta name="user:culture" content="@ViewBag.Culture" />
     <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
     <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
-    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" id="favicon-link" />
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-tab.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-tab.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-tab.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-tab.min.js"></script>
     </environment>
 
     @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
@@ -97,7 +98,21 @@
             }
         </style>
     }
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            var initialFaviconPath = "@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var fallbackFaviconPath = "@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+
+            var faviconLink = document.getElementById("favicon-link");
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    var currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== initialFaviconPath.toLowerCase()) {
+                        faviconLink.setAttribute("href", fallbackFaviconPath);
+                    }
+                });
+            }
+        });
             @{
                 if (Context.User.Identity.IsAuthenticated && Context.User != null && Context.User.Identity != null && isUserAuthenticatedInCurrentTenant || (embedConfig.IsEmbedCode && !isPublic))
                 {
@@ -111,6 +126,8 @@
                     isUserAuthenticated = "false";
                 }
             }
+
+            var scriptNonce = @Json.Serialize(nonce);
             var userName = "@userName";
             var isAdmin = @Json.Serialize(isAdmin);
             var selectedId = "@selectedId";
@@ -171,8 +188,8 @@
             var cdnLink = "@dashboardServerResourceUrl";
             var theming = @(!ServerAppConfig.IsSelfHosted ? "false" : themeInViewer ? Json.Serialize(globalAppSettings.SystemSettings.Theming) : "false");
             var dashboardCustomThemename = "@dashboardCutomTheme";
-            var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
-            var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+            var customThemeAppearance = "@customThemeAppearance";
+            var applicationTheme = "@customApplicationTheme";
             var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
             var appVersion = "@ServerAppConfig.ProductVersion";
             var canCheckSessionInActive = @Html.Raw(Json.Serialize(canShowSession));
@@ -340,14 +357,14 @@
                     <div class="container-fluid">
                         <ul class="nav navbar-nav col-12 no-padding no-margin">
                             <li class="@(enableComment.ToLower() == "true" && embedConfig.HasViews && embedConfig.HasDashboardComments ? "col-4":"col-xs-6") icon">
-                                <a href="javascript:void(0)" class="su su-nav-dashboard active">
+                                <a href="#" class="su su-nav-dashboard active">
                                     <span class="nav-menu-label">@T["Dashboard"]</span>
                                 </a>
                             </li>
                             @if (enableComment.ToLower() == "true" && (!embedConfig.IsEmbedDashboard || embedConfig.HasDashboardComments))
                             {
                                 <li class="@(embedConfig.HasViews ? "col-4":"col-xs-6") icon" id="comment-li">
-                                    <a href="javascript:void(0)" class="su su-without-comment server-comment">
+                                    <a href="#" class="su su-without-comment server-comment">
                                         <span class="nav-menu-label">@T["Comment"]</span>
                                     </a>
                                 </li>
@@ -356,7 +373,7 @@
                             @if (!embedConfig.IsEmbedDashboard || embedConfig.HasViews)
                             {
                                 <li class="@(embedConfig.HasDashboardComments && enableComment.ToLower() == "true" ? "col-4":"col-xs-6") icon" id="view-li">
-                                    <a href="javascript:void(0)" class="su-view">
+                                    <a href="#" class="su-view">
                                         <span class="nav-menu-label">@T["Views"]</span>
                                     </a>
                                 </li>
@@ -369,11 +386,11 @@
         @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/multi-tabbed-dashboard.css" />
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-dashboard-options.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-dashboard-options.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/multi-tabbed-dashboard.min.css" />
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-dashboard-options.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/multitab-dashboard-options.min.js"></script>
         </environment>
 
     </body>

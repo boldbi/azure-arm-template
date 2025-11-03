@@ -23,7 +23,7 @@
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var pageDescription = T["Configure external user directories."];
 }
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var defaultAuthentication = "";
 </script>
 @section styles{
@@ -37,14 +37,14 @@
     </environment>
 }
 @section scripts{
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         serverApp.controller("adSettingsController", ["$scope", function ($scope) {
             $scope.regex = '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
             $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_\s]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_\s]+)*$/;
         }]);
 
     </script>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var itemInfoCtrl = angular.element('[ng-controller=adSettingsController]').scope();
         var defaultAuthentication = "";
         var updateAdSettingsUrl = "@Url.Action("UpdateActiveDirectorySettings", "Administration")";
@@ -66,7 +66,7 @@
         var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
         var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
     </script>
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
 
         $(document)
             .ready(function () {
@@ -138,10 +138,10 @@
         }
     </script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
     </environment>
 }
 
@@ -277,7 +277,7 @@
                         </div>
                         <div class="col-12 no-padding">
                             <div class="col-12 no-padding">
-                                <input type="button" onclick="ActiveDirectoryFormValidate()" class="primary-button app-btn-primary test-connection" data-container="body" title="@string.Format(T["Test {0} Connection"].Value, "Active Directory")" value="@T["Test Connection"]" ng-disabled="windowsAdSettingsForm.$invalid" />
+                                <input type="button" id="active-directory-import" class="primary-button app-btn-primary test-connection" data-container="body" title="@string.Format(T["Test {0} Connection"].Value, "Active Directory")" value="@T["Test Connection"]" ng-disabled="windowsAdSettingsForm.$invalid" />
                             </div>
                             <div class="col-12 no-padding validation-bottom error-message" style="display: none"></div>
                             <div class="col-12 no-padding validation-bottom success-message" style="display: none"></div>
@@ -335,7 +335,7 @@
                         {
                             <div class="col-12 no-padding">
                                 <div class="col-12 no-padding">
-                                    <input type="button" id="testAzureConnection" ng-disabled="azureAdSettingsForm.$invalid" onclick="AzureADFormValidate()" class="primary-button app-btn-primary test-connection" title="@string.Format(T["Test {0} Connection"].Value, "Azure Active Directory")" value="@T["Test Connection"]" />
+                                    <input type="button" id="testAzureConnection" ng-disabled="azureAdSettingsForm.$invalid" class="primary-button app-btn-primary test-connection" title="@string.Format(T["Test {0} Connection"].Value, "Azure Active Directory")" value="@T["Test Connection"]" />
                                 </div>
                                 <div class="col-12 no-padding validation-bottom error-message" style="display: none"></div>
                                 <div class="col-12 no-padding validation-bottom success-message" style="display: none"></div>

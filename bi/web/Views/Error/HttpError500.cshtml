@@ -31,7 +31,7 @@
     var organisationName = globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.OrganizationName : string.Empty;
     var errorandDebugHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ErrorAndDebugLogs);
     var language = globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.Language : System.Globalization.CultureInfo.CurrentCulture.ToString();
-    var loginLogo = globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.LoginLogo : cdnLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.LoginLogo;
+    var loginLogo = globalAppSettings.SystemSettings != null ? _identityResponse.LoginLogo : cdnLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.LoginLogo;
     var isDeploymentError = !string.IsNullOrWhiteSpace(ViewBag.TenantErrorMessage);
     var errorMessage = string.IsNullOrWhiteSpace(ViewBag.TenantErrorMessage) ? ViewBag.ErrorMessage : ViewBag.TenantErrorMessage;
     var canShowOrgName = !isDeploymentError || !string.IsNullOrWhiteSpace(organisationName);
@@ -46,21 +46,51 @@
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@language"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@language"></script>
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/error-page.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/error-page.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/error-page.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/error-page.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var setPermissionUrl = "@Url.Action("SetCookieStoragePermission", "Accounts")";
+                document.addEventListener("DOMContentLoaded", function () {
+            // Favicon fallback
+            var initialFaviconPath = "@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var fallbackFaviconPath = initialFaviconPath;
+
+            var faviconLink = document.getElementById("favicon-link");
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    var currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== fallbackFaviconPath.toLowerCase()) {
+                        faviconLink.setAttribute("href", fallbackFaviconPath);
+                    }
+                });
+            }
+
+            // Login logo fallback
+            var initialLogoPath = "@globalAppSettings.SystemSettings.LoginLogo";
+            var fallbackLogoPath = "@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo";
+
+            var loginLogo = document.getElementById("login-logo");
+            if (loginLogo) {
+                loginLogo.addEventListener("error", function () {
+                    var currentSrc = loginLogo.getAttribute("src");
+                    if (currentSrc && currentSrc.toLowerCase() !== fallbackLogoPath.toLowerCase()) {
+                        loginLogo.setAttribute("src", fallbackLogoPath);
+                    }
+                });
+            }
+        });
+
     </script>
-    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="icon" href="@faviconLogo" id="favicon-link" />
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 </head>
 <body class="error-full-content">
@@ -68,7 +98,7 @@
         <div class="error-page-content">
             <div class="error-inside">
                 <div class="error-image-center-1">
-                    <img src="@loginLogo" onerror="if (this.src != '@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo') this.src = '@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo';" class="error-image-1">
+                    <img src="@loginLogo" id="login-logo" class="error-image-1">
                 </div>
                 <div class="error-image-center-2">
                     <img src="@internalServerLogo" class="error-image-2">
@@ -89,7 +119,7 @@
                     @{
                     #pragma warning disable SCS0029
                     }
-                   @if (isDeploymentError)
+                    @if (isDeploymentError)
                     {
                         @if (isAdminUser && ServerAppConfig.IsSelfHosted && !ServerAppConfig.IsHideHelpLink)
                         {
@@ -122,7 +152,7 @@
                     }
                     else
                     {
-                       @if (isAdminUser && ServerAppConfig.IsSelfHosted && !ServerAppConfig.IsHideHelpLink)
+                        @if (isAdminUser && ServerAppConfig.IsSelfHosted && !ServerAppConfig.IsHideHelpLink)
                         { 
                             @Html.Raw(string.Format(T["{0}Go to home page{1} or {2}Create a support{3} ticket with application logs by referring to this {4}link{5}."].Value,
                                 "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + homePageUrl + "'>",

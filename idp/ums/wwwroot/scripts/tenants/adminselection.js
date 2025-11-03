@@ -98,7 +98,10 @@ $(document).on("change", ".checkbox-row", function () {
     var gridObj = document.getElementById('add_admins_grid').ej2_instances[0];
     var checkboxHeader = $("#admin-checkbox-header");
     $(".modal-dialog").addClass("fixed-pos");
-    window.setTimeout('$(".modal-dialog").removeClass("fixed-pos");', 1);
+    window.setTimeout(function () {
+        $(".modal-dialog").removeClass("fixed-pos");
+    }, 1);
+
     var currentUsername = $(this).attr("data-username");
     var UserIdValue = $(this).attr("data-checked-id");
 
@@ -158,10 +161,22 @@ function fnOnAddAdminGridActionComplete(args) {
             checkboxHeader.prop("checked", false);
             checkboxHeader.prop("disabled", true);
             $(".no-user-warning").css("display", "block");
-            window.setTimeout('$("#admin-account-submit-container").css("margin-top", $("#add_admins_grid").height() + $(".no-user-warning").height() + 155);');
+            window.setTimeout(function () {
+                const gridHeight = $("#add_admins_grid").height() || 0;
+                const warningHeight = $(".no-user-warning").height() || 0;
+                const totalMargin = gridHeight + warningHeight + 155;
+
+                $("#admin-account-submit-container").css("margin-top", totalMargin);
+            }, 1);
+
         } else {
             $(".no-user-warning").css("display", "none");
-            window.setTimeout('$("#admin-account-submit-container").css("margin-top", $("#add_admins_grid").height() + 135);');
+            window.setTimeout(function () {
+                const gridHeight = $("#add_admins_grid").height() || 0;
+                const totalMargin = gridHeight + 135;
+
+                $("#admin-account-submit-container").css("margin-top", totalMargin);
+            }, 1);
         }
         if (typeof gridObj.currentViewData != 'undefined') {
             for (var i = 0; i < gridObj.currentViewData.length; i++) {
@@ -191,7 +206,9 @@ function fnOnAddAdminGridActionComplete(args) {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    window.setTimeout('hideWaitingPopup("add-admin-element");', 500);
+    window.setTimeout(function () {
+        hideWaitingPopup("add-admin-element");
+    }, 500);
 }
 
 function refreshTemplateForAdmin() {

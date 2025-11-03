@@ -14,13 +14,13 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/import-database-users-sync.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/import-database-users-sync.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/synchronize-users.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var synchronizeSelectedDbUsersUrl = "@Url.Action("SynchronizeSelectedImportedUsers", "UserManagement")";
     </script>
     <script type="text/x-jsrender" id="user-profile-template">
@@ -71,7 +71,7 @@
         {{/if}}
     </script>
 
-    <script type="text/javascript" language="javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript" language="javascript">
         ej.support.stableSort = false;
         $("#search-ad-users").val("");
         var data = @Html.Raw(Json.Serialize(ViewBag.DatabaseUsers));
@@ -181,7 +181,7 @@
     <div class="col-12 bi-page-header tabs-header-padding top-nav-btn-secton" id="user-title">
         <div class="col-12 no-padding">
             <div class="col-xs-6 no-padding button-section hide" id="synchronize-users">
-                <span class="primary-button app-btn-primary float-end" title="@T["Synchronize Users with Existing Database"]" onclick="SynchronizeDatabaseUsers()">@T["Synchronize"]</span>
+                    <span class="primary-button app-btn-primary float-end" id="synchronize-database-users" title="@T["Synchronize Users with Existing Database"]">@T["Synchronize"]</span>
             </div>
             <div id="search-area" class="float-start col-4">
                 <input type="text" id="search-ad-users" class="float-start no-margin" placeholder="@T["Search database users"]" autocomplete="off" />

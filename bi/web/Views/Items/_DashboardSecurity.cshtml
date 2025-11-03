@@ -4,6 +4,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardSecurityHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.PublicDashboards);
     var dashboardSecurityScript = string.Empty;
+    var scriptNonce = ViewBag.ScriptNonce;
 }
 
 <!DOCTYPE html>
@@ -18,24 +19,28 @@
             dashboardSecurityScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/dashboard-security.min.js");
         }
     </environment>
-    <script>
+    <script nonce="@scriptNonce" type="text/javascript">
         var getItemSettingsUrl = "@Url.Action("getitemsettings", "dashboards")";
         var dashboardUrl = "@Url.Action("Dashboards", "Dashboards")";
         var dashboardSecurityScript = @Json.Serialize(dashboardSecurityScript);
+        var scriptNonce = @Json.Serialize(scriptNonce);
 
         var preloadScripts = [];
         preloadScripts.push(dashboardSecurityScript);
 
-        function DashboarDelayResources(resourceLinkArray, resourceType) {
+        function DashboarDelayResources(resourceLinkArray, resourceType, nonceValue) {
             for (var resource = 0; resource < resourceLinkArray.length; resource++) {
                 var preloadLink = document.createElement(resourceType);
                 preloadLink.type = "text/javascript";
                 preloadLink.src = resourceLinkArray[resource];
+                if (nonceValue) {
+                    preloadLink.setAttribute("nonce", nonceValue); // ✅ Add nonce
+                }
                 document.head.appendChild(preloadLink);
             }
         }
 
-        DashboarDelayResources(preloadScripts, "script");
+        DashboarDelayResources(preloadScripts, "script", scriptNonce);
     </script>
 </head>
 <body>

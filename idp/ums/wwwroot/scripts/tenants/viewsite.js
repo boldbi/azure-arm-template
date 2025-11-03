@@ -1355,7 +1355,7 @@ function onChangeGlobalSettings(args) {
     document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
     if (this.element.id == "all-settings" && args.checked) {
         $(".enable-disable").each(function () {
-            if (this.id !== "email" || (this.id === "email" && !canDisableEmailSettingsOption)) {
+            if ((this.id !== "email" && this.id != "look-and-feel") || (this.id === "email" && !canDisableEmailSettingsOption) || (this.id === "look-and-feel" && !isJWTUserBasedThemeApplied)) {
                 document.getElementById(this.id).ej2_instances[0].checked = true;
             }
         });
@@ -1363,7 +1363,7 @@ function onChangeGlobalSettings(args) {
     else if (this.element.id == "all-settings" && !args.checked) {
         document.getElementById("all-settings").ej2_instances[0].indeterminate = false;
         $(".enable-disable").each(function () {
-            if (this.id !== "email" || (this.id === "email" && !canDisableEmailSettingsOption)) {
+            if ((this.id !== "email" && this.id != "look-and-feel") || (this.id === "email" && !canDisableEmailSettingsOption) || (this.id === "look-and-feel" && !isJWTUserBasedThemeApplied)) {
                 document.getElementById(this.id).ej2_instances[0].checked = false;
             }
         });
@@ -1394,10 +1394,18 @@ $(document).on("click", "#add-custom-attribute", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     var emailSettingsOption = document.getElementById("email-settings-inherit-option");
+    var lookAndFeelSettingsOption = document.getElementById("look-and-feel-inherit-option");
 
     if (emailSettingsOption != null) {
         emailSettingsOption.addEventListener("shown.bs.tooltip", function () {
             var tooltipId = emailSettingsOption.getAttribute("aria-describedby");
+            document.getElementById(tooltipId).classList.add("custom-tooltip");
+        });
+    }
+
+    if (lookAndFeelSettingsOption != null) {
+        lookAndFeelSettingsOption.addEventListener("shown.bs.tooltip", function () {
+            var tooltipId = lookAndFeelSettingsOption.getAttribute("aria-describedby");
             document.getElementById(tooltipId).classList.add("custom-tooltip");
         });
     }

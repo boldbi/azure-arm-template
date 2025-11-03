@@ -124,6 +124,11 @@
             Checks if the provided API key is valid and active.
             </summary>
         </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.IsAllowedTenantId(System.String)">
+            <summary>
+            Checks if the provided API key is valid and active.
+            </summary>
+        </member>
         <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.IsAllowedToken(System.String,System.String)">
             <summary>
             Checks if the provided API key is valid and active.
@@ -190,25 +195,35 @@
             <param name="context">The authorization filter context for the current request.</param>
             <param name="licenseKey">The license key of the user.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.IsRequestAllowed(System.String)">
+        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.HandleSiteBasedCredit(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext,System.String)">
+            <summary>
+            Handles site based requests for paid plan users, checking for rate limit and balance.
+            </summary>
+            <param name="context">The authorization filter context for the current request.</param>
+            <param name="siteId">The siteId for which the remaining balance amount is being fetched.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.IsRequestAllowed(System.String,System.String)">
             <summary>
             Determines if the request is allowed based on the rate limit.
             </summary>
             <param name="licenseKey">The license key for which the request limit is being checked.</param>
+            <param name="siteId">The siteId for which the remaining balance amount is being fetched.</param>
             <returns>A tuple containing a boolean indicating if the request is allowed, and an integer for the maximum allowed requests per minute.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.FetchRequestLimit(System.String)">
+        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.FetchRequestLimit(System.String,System.String)">
             <summary>
             Fetches the request limit for a given license key from the cache.
             </summary>
             <param name="licenseKey">The license key for which the request limit is being fetched.</param>
+            <param name="siteId">The siteId for which the remaining balance amount is being fetched.</param>
             <returns>The maximum number of allowed requests per minute.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.FetchRemainingAmount(System.String)">
+        <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.FetchRemainingAmount(System.String,System.String)">
             <summary>
             Fetches the remaining balance amount for a given license key from the database.
             </summary>
             <param name="licenseKey">The license key for which the remaining balance amount is being fetched.</param>
+            <param name="siteId">The siteId for which the remaining balance amount is being fetched.</param>
             <returns>The remaining balance amount for the license key.</returns>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.RateLimitHelper.SetRateLimitExceeded(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext,System.Int32,System.Nullable{System.Double},System.Nullable{System.Int32})">
@@ -381,19 +396,53 @@
             </summary>
             <param name="configuration">The configuration manager instance.</param>
         </member>
-        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAppConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.EnsureJsonFileExists(System.String,System.String,System.String)">
             <summary>
-            Initializes application configuration.
+            Verifies that a JSON configuration file exists at the specified path and logs the result.
             </summary>
-            <param name="configuration">The configuration manager instance.</param>
-            <param name="appConfiguration">The application configuration.</param>
+            <param name="path">The absolute file path to check.</param>
+            <param name="fileName">The display name of the file (used for logging).</param>
+            <param name="methodName">The method name used for contextual logging.</param>
+            <returns>
+            True if the file exists (and a loading message is logged); otherwise, false and an error is logged.
+            </returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAzureAppConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.LogBlobDownloadStatus(System.Boolean,System.String,System.String)">
+            <summary>
+            Logs the outcome of downloading a file from Azure Blob Storage.
+            </summary>
+            <param name="success">Indicates whether the download succeeded.</param>
+            <param name="fileName">The name of the file that was downloaded.</param>
+            <param name="methodName">The name of the method requesting the log entry.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAppConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
             <summary>
             Initializes application configuration.
             </summary>
             <param name="configuration">The configuration manager instance.</param>
             <param name="appConfiguration">The application configuration.</param>
+            <param name="localServiceUrls">The local service urls.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAzureAppConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Initializes application configuration.
+            </summary>
+            <param name="configuration">The configuration manager instance.</param>
+            <param name="appConfiguration">The application configuration.</param>
+            <param name="localServiceUrls">The local service urls.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeLocalServiceUrlConfiguration(System.String)">
+            <summary>
+            Initializes LocalServiceUrl configuration.
+            </summary>
+            <param name="localServiceUrlPath">The Local Service Url path</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.ReadStreamAsStringAsync(System.IO.Stream)">
+            <summary>
+            Returns the stream’s UTF-8 content without disposing the stream.
+            </summary>
+            <param name="stream">The stream to read; rewound before and after reading.</param>
+            <returns>The full contents of the stream as a string.</returns>
         </member>
         <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetAzurePrivateKey(Microsoft.Extensions.Configuration.ConfigurationManager)">
             <summary>
@@ -670,12 +719,13 @@
             license activation, and sandbox user management.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.#ctor(BoldBi.Ai.Base.Helpers.SandboxUsersHelper,BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb)">
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.#ctor(BoldBi.Ai.Base.Helpers.SandboxUsersHelper,BoldBi.Ai.Base.Helpers.DatabaseHelpers.FetchFromDb,BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.TenantController"/> class.
             </summary>
             <param name="sandboxUsersHelper">The helper class for managing tenant.</param>
             <param name="fetchFromDb">The helper class for managing DB.</param>
+            <param name="tenantBasedCreditsHelper">The helper class for managing tenant.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Controllers.TenantController.IsAllowedTenantAsync(System.Object)">
             <summary>
@@ -717,6 +767,41 @@
             Returns a response structure indicating the success or failure of the insertion operation.
             </returns>
         </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.IsAITenantExists(System.Object)">
+            <summary>
+            Checks AI tenant exists in the database.
+            </summary>
+            <param name="license">The license object containing AI tenant details in JSON format.</param>
+            <returns>An object indicating success or failure of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.AddAiTenant(System.Object)">
+            <summary>
+            Adds a new AI tenant to the database.
+            </summary>
+            <param name="license">The license object containing AI tenant details in JSON format.</param>
+            <returns>An object representing the API response, indicating success or failure of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.UpdateAiTenant(System.Object)">
+            <summary>
+            Updates an existing AI tenant's details in the database.
+            </summary>
+            <param name="license">The license object containing updated AI tenant details in JSON format.</param>
+            <returns>An object representing the API response, indicating success or failure of the update operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.DeleteAiTenant(System.Object)">
+            <summary>
+            Deactivates an AI tenant in the database.
+            </summary>
+            <param name="license">The license object containing AI tenant details in JSON format for deactivation.</param>
+            <returns>An object representing the API response, indicating success or failure of the deactivation operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.TenantController.GetDetailsOfTenant(System.Object)">
+            <summary>
+            Retrieves the details of an AI tenant from the database.
+            </summary>
+            <param name="license">The license object containing AI tenant details in JSON format for retrieval.</param>
+            <returns>An object containing the AI tenant details or an API response indicating failure.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Service.Controllers.TokenController">
             <summary>
             Controller for handling token-related operations.
@@ -740,12 +825,14 @@
             Controller for handling Unified AI assistance requests.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.#ctor(BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess,BoldBi.Ai.Base.Contracts.IAiSummarizationOperations)">
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.#ctor(BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess,BoldBi.Ai.Base.Contracts.IAiSummarizationOperations,BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper,BoldBi.Ai.Base.Contracts.ISessionManager)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController"/> class.
             </summary>
             <param name="chatProcess">The chat process service used for AI.</param>
             <param name="aiSummarizationOperations">The ai summary process service used for AI.</param>
+            <param name="chatHistoryHelper">The chat history instance.</param>
+            <param name="sessionManager">The session manager instance.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.ClassifyRequestAsync(System.Object)">
             <summary>
@@ -781,6 +868,62 @@
             </summary>
             <param name="jsonInput">The input object containing the chat query in JSON format.</param>
             <returns>The classification response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.DashboardQuestionsAsync(System.Object)">
+            <summary>
+            Handles dashboard questions based on user input.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The AI response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.ToggleWidgetAsync(System.Object)">
+            <summary>
+            Handles widget toggle request based on user input.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The AI response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.RetrieveSessionNames(System.Object)">
+            <summary>
+            Retrieves the name of the session.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.StoreSessionHistory(System.Object)">
+            <summary>
+            Store the history of the session.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.RetrieveSessionHistory(System.Object)">
+            <summary>
+            Retrieves the history of the session.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.UpdateSessionName(System.Object)">
+            <summary>
+            Rename the session.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.DeleteSessionHistory(System.Object)">
+            <summary>
+            Delete the history of the session.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The response as an object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.UnifiedAIAssistanceController.RestartExistingSession(System.Object)">
+            <summary>
+            Restart the existing session.
+            </summary>
+            <param name="jsonInput">The input object containing the chat query in JSON format.</param>
+            <returns>The response as an object.</returns>
         </member>
         <member name="T:BoldBi.Ai.Service.ExceptionMiddleware">
             <summary>

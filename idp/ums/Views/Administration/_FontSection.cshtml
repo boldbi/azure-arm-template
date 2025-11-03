@@ -1,13 +1,18 @@
-﻿<div>
+﻿@{
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var isJWTUserBasedThemeApplied = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) || !string.IsNullOrWhiteSpace(customThemeClaims.ApplicationTheme) || !string.IsNullOrWhiteSpace(customThemeClaims.DashboardTheme);
+    var manageLinkDisabledClass = isJWTUserBasedThemeApplied ? "manage-link-disabled" : "";
+}
+<div>
     <div class="sub-section col-12 float-start no-padding font-section">
         <h3 class="title sub-section-heading">@T["Fonts"]</h3>
         <div class="form-group section-content-first">
             @Html.Label("font-style", T["Font Style"].Value, new { @class = "app-textbox-label" })
             <p class="upload-link-btn">
-                <a href="#" id="uploadFontLink" class="text-decoration-none" title="@T["Upload the font file here."]">@T["Add a new font"]</a>
+                <a href="#" id="uploadFontLink" class="text-decoration-none @manageLinkDisabledClass" title="@T["Upload the font file here."]">@T["Add a new font"]</a>
             </p>
             <div class="admin-settings-drop-down col-lg-12 no-padding section-dropdown-content-first">
-                @Html.DropDownList("fontfamily", ViewBag.FontList as IEnumerable<SelectListItem>, new { id = "fontfamily", @class = "form-control", data_none_results_text = T["No results match"].Value, data_size = "5", data_live_search = "false" })
+                @Html.DropDownList("fontfamily", ViewBag.FontList as IEnumerable<SelectListItem>, new { id = "fontfamily", @class = "form-control", data_none_results_text = T["No results match"].Value, data_size = "5", data_live_search = "false", disabled = isJWTUserBasedThemeApplied ? "disabled" : "" })
             </div>
         </div>
     </div>

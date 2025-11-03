@@ -17,7 +17,7 @@
 }
 
     <environment include="Development,CloudDevelopment">
-        <script>
+    <script nonce="@ViewBag.ScriptNonce" type="text/javascript">
         var permissionScript = "@dashboardServerResourceUrl/cdn/scripts/share-permission.js?v=@ServerAppConfig.ProductVersion";
         var permissionStyle = "@dashboardServerResourceUrl/cdn/css/share-permission.css?v=@ServerAppConfig.ProductVersion";
         var dashboardOptionScript = "@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-options.js?v=@ServerAppConfig.ProductVersion";
@@ -26,7 +26,7 @@
         </script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script>
+    <script nonce="@ViewBag.ScriptNonce" type="text/javascript">
         var permissionScript = "@dashboardServerResourceUrl/cdn/scripts/share-permission.min.js?v=@ServerAppConfig.ProductVersion";
         var permissionStyle = "@dashboardServerResourceUrl/cdn/css/share-permission.min.css?v=@ServerAppConfig.ProductVersion";
         var dashboardOptionScript = "@dashboardServerResourceUrl/cdn/scripts/designer/dashboard-options.min.js?v=@ServerAppConfig.ProductVersion";
@@ -35,7 +35,7 @@
         </script>
     </environment>
 <head>
-    <script>
+    <script nonce="@ViewBag.ScriptNonce" type="text/javascript">
         var preloadScripts = [];
 
         var preloadStyles = [];
@@ -47,12 +47,15 @@
         preloadScripts.push(dashboardOptionScript);
         preloadStyles.push(dashboardOptionStyle);
 
-        function DashboarDelayResources(resourceLinkArray, resourceType) {
+        function DashboarDelayResources(resourceLinkArray, resourceType, nonceValue) {
             for (var resource = 0; resource < resourceLinkArray.length; resource++) {
                 if (resourceType == "script") {
                     var preloadLink = document.createElement(resourceType);
                     preloadLink.type = "text/javascript";
                     preloadLink.src = resourceLinkArray[resource];
+                    if (nonceValue) {
+                                preloadLink.setAttribute("nonce", nonceValue); // ✅ Add nonce
+                            }
                 } else {
                     var preloadLink = document.createElement("link");
                     preloadLink.rel = "stylesheet";
@@ -62,7 +65,7 @@
             }
         }
 
-        DashboarDelayResources(preloadScripts, "script");
+        DashboarDelayResources(preloadScripts, "script", nonce);
         DashboarDelayResources(preloadStyles, "style");
         var angularManualBootstrap = true;
         var itemDetail = @Json.Serialize(itemDetail);

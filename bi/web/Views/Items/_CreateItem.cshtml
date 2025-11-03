@@ -15,7 +15,7 @@
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
 }
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var isDraftExistUrl = "@Url.Action("IsDraftExist", "items")";
     var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
     var userDashboardsCount = "@userdashboardsCount";
@@ -100,7 +100,7 @@
 
                         @if (!ServerAppConfig.IsSelfHosted && isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard] && showUpload)
                         {
-                            <li onclick="openNewDashboardPopup()">
+                            <li class="open-new-dashboard-popup">
                                 <div class="create-item-list-section">
                                     <div class="create-item-list-icon" style="float: left;">
                                         <img id="templates-img" class="smiley" src="@(GlobalAppSettings.CdnDomain)/static/sidebar/v1/upload-dashboard.svg">
@@ -220,8 +220,8 @@
     </form>
 </div>
 <environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/draft-item.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/draft-item.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/draft-item.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/draft-item.min.js"></script>
 </environment>

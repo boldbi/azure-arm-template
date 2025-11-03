@@ -17,11 +17,11 @@
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var pageHeader = T["SLIDESHOWS"];
     var pageDescription = T["Create and manage slideshows to present a collection of dashboards that switch at regular intervals."];
-    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Slideshow;
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Slideshow + "&nonce=" + Context.Items["ScriptNonce"];
 }
 
 @section scripts{
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var partialViewsUrl = @Json.Serialize(partialViewsUrl);
         var isMobile = @Json.Serialize(isMobile)
         var buildVersion = "@ServerAppConfig.ProductVersion";
@@ -39,20 +39,20 @@
     </script>
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/slideshow-listing.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow-listing.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow-listing.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/slideshow-listing.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow-listing.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/slideshow-listing.min.js"></script>
     </environment>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var deleteConfirmationUrl = "@Url.Action("deleteconfirmation", "items")";
         var deleteItemUrl = "@Url.Action("DeleteItem", "Slideshow")";
         var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
         var editSlideShowUrl = "@Url.Action("EditSlideshow", "Slideshow")";
     </script>
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(document)
             .ready(function () {
                 $("#search-slideshows").val("");
@@ -105,7 +105,7 @@
                             });
                         },
                         dataBound: function (args) {
-                            ocument.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
+                            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
                                 new bootstrap.Tooltip(element, {
                                     animation: true,
                                     container: 'body',
@@ -163,7 +163,8 @@
                 preloadScripts.push(createCategoryScript);
                 preloadScripts.push(userGroupSuggestion);
 
-                function DashboarDelayResources(resourceLinkArray, resourceType) {
+
+                function DashboarDelayResources(resourceLinkArray, resourceType, nonceValue) {
                     for (var resource = 0; resource < resourceLinkArray.length; resource++) {
                         var isScriptAppended = false;
                         if (resourceType == "script") {
@@ -172,6 +173,9 @@
                                 var preloadLink = document.createElement(resourceType);
                                 preloadLink.type = "text/javascript";
                                 preloadLink.src = resourceLinkArray[resource];
+                                if (nonceValue) {
+                                preloadLink.setAttribute("nonce", nonceValue); // ✅ Add nonce
+                            }
                                 document.head.appendChild(preloadLink);
                             }
                         }
@@ -187,7 +191,7 @@
                     }
                 }
                 DashboarDelayResources(preloadStyles, "style");
-                DashboarDelayResources(preloadScripts, "script");
+                DashboarDelayResources(preloadScripts, "script", nonce);
 
                 $.views.helpers({
                     slideshowUrl: function (id, name) {
@@ -224,20 +228,20 @@
                         </a>
                     </li>
                     <li class="menu-group @(schemes != null && !schemes.Info ? "hide" : string.Empty)">
-                        <a href="javascript:void(0);" class="item-info" title="@T["Info"]">
+                        <a href="#" class="item-info" title="@T["Info"]">
                             <i class="su su-info"></i>
                             <span class="menu-text">@T["Info"]</span>
                         </a>
                     </li>
                     <li class="menu-group @(schemes != null && !schemes.GetLink ? "hide" : string.Empty)">
-                        <a href="javascript:void(0);" class="get-slideshow-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~slideshowUrl(Id, Name)}}" title="@T["Get Link"]">
+                        <a href="#" class="get-slideshow-link option-click" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-url="{{:~slideshowUrl(Id, Name)}}" title="@T["Get Link"]">
                             <i class="su su-link"></i>
                             <span class="menu-text">@T["Get Link"]</span>
                         </a>
                     </li>
                     {{if CanWrite}}
                     <li title="@T["Edit"]" class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
-                        <a href="javascript:void(0);" class="edit-slideshow" data-item-id="{{:Id}}" title="@T["Edit"]">
+                        <a href="#" class="edit-slideshow" data-item-id="{{:Id}}" title="@T["Edit"]">
                             <i class="su su-edit"></i>
                             <span class="menu-text">@T["Edit"]</span>
                         </a>
@@ -245,7 +249,7 @@
                     {{/if}}
                     {{if CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Slideshow].ToString().ToLower()) == true}}
                     <li class="menu-group @(schemes != null && !schemes.Share ? "hide" : string.Empty)">
-                        <a href="javascript:void(0);" class="item-permissions" data-item-id="{{:Id}}" title="@T["Sharing Permissions"]">
+                        <a href="#" class="item-permissions" data-item-id="{{:Id}}" title="@T["Sharing Permissions"]">
                             <i class="su su-manage-permission"></i>
                             <span class="menu-text">@T["Sharing Permissions"]</span>
                         </a>
@@ -253,7 +257,7 @@
                     {{/if}}
                     {{if CanDelete}}
                     <li title="@T["Delete"]" class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
-                        <a href="javascript:void(0);" class="slideshow-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" title="@T["Delete"]">
+                        <a href="#" class="slideshow-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" title="@T["Delete"]">
                             <i class="su su-delete"></i>
                             <span class="menu-text">@T["Delete"]</span>
                         </a>

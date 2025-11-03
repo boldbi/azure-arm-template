@@ -60,6 +60,7 @@
                     rangeNavigator: "Range Navigator",
                     numberCard: "Number Card",
                     bingMap: "Bing Maps",
+					azureMap: "Azure Maps",
                     richTextEditor: "Text",
                     customwidget: "Custom Widget",
                     pop: "Period Over Period",
@@ -84,7 +85,8 @@
                     choroplethMapDesc: "Showcase quantitative values encoded through color scale.",
                     mapDesc: "Showcase quantitative values encoded through color scale.",
                     bingmapsDesc: "Showcase markers encoded through latitude and longitude.",
-                    treeMapDesc: "Visualize large amounts of data as clustered rectangles with a color scale.",
+                    azuremapsDesc: "Showcase markers encoded through latitude and longitude.",
+					treeMapDesc: "Visualize large amounts of data as clustered rectangles with a color scale.",
                     cardDesc: "Measure trends through key performance indicators like values and goals.",
                     pieChartDesc: "Showcase the proportions of each item's contribution to the total in the form of pie slices.",
                     doughnutChartDesc: "Showcase the proportions of each item's contribution to the total in the form of doughnut slices.",
@@ -141,7 +143,8 @@
                     rangeSliderDataRequiredMessage: "Range Slider requires at least 1 Column to render",
                     treeMapDataRequiredMessage: "TreeMap requires at least 1 Value and 1 Column to render",
                     bingMapDataRequiredMessage: "Bing Map requires at least 1 Marker Latitude and 1 Marker Longitude or 1 Address or 1 Postal Code to render",
-                    bubbleScatterDataRequiredMessage: "Scatter Chart requires at least 1 X-Axis and 1 Y-Axis to render",
+                    azureMapDataRequiredMessage: "Azure Map requires at least 1 Value and Shape or 1 Marker Latitude and 1 Marker Longitude or 1 Address or 1 Postal Code to render",
+					bubbleScatterDataRequiredMessage: "Scatter Chart requires at least 1 X-Axis and 1 Y-Axis to render",
 					scatterAlertMessage: "Remove Label data section field to display x and y axis pairs or set a summarization for x and y axis."
                 },
                 widgetDataRequirements: {
@@ -151,7 +154,8 @@
                     choroplethMapDataReq: "1 value and 1 shape ID.",
                     mapDataReq: "1 value and 1 shape ID.",
                     bingMapsDataReq: "1 latitude and 1 longitude or 1 Address or 1 Postal Code.",
-                    treeMapDataReq: "1 or more values and 1 or more group-by fields.",
+                    azureMapsDataReq: "1 Value and 1 Shape or 1 latitude and 1 longitude or 1 Address or 1 Postal Code.",
+					treeMapDataReq: "1 or more values and 1 or more group-by fields.",
                     cardDataReq: "1 actual/target value and 0 or 1 series.",
                     filtersDataReq: "1 column.",
                     labelDataReq: "Text",
@@ -243,6 +247,7 @@
 					heatMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Size or X-Axis or Y-Axis section",
 					map: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
 					bingMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
+					azureMap: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Location Name section",
 					bubbleSactterChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the X-Axis or Label or Size or Row section",
 					circularGauge: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Series section",
 					comboChart: "The field bind in this section should not be a lower hierarchy compared to the field bind in the Column section"
@@ -315,6 +320,7 @@
                 imagePaddingSettingsText: "Padding Settings",
 				widgetTitleLengthErrorText: "The name should not exceed 255 characters",
                 persistVirtualSelectionText: "Disabling this property will clear virtually selected filter values",
+                persistAppliedFilterText: "Enabling this property applies the filters from the configured field in the ComboBox widget to its listener widgets.",
 				showAxisBorder: "Show Axis Border",
 				pageSettings: {
 					pageSettingsText: "Page Settings",
@@ -356,10 +362,13 @@
                 },
                 filter: {
                     actAsMasterWidget: "Act As Master Widget",
+                    showFilter: "Show Filter",
+                    showFilterInfo: "This option toggles the Filter icon visibility for widgets when 'Act as Master Widget' is enabled.",
                     ignoreFilterActions: "Ignore Filter Actions",
                     hierarchicalFilter: "Enable Hierarchical Filtering",
                     allowFiltering: "Allow Filter",
                     persistVirtualSelection: "Persist Virtual Selection",
+                    persistAppliedFilter: "Apply Field Filters",
 					filterType: "FilterType",
 					allowFilterType: {
 						allowBarFilter: "Bar",
@@ -465,7 +474,9 @@
                     foregroundColor: "Foreground Color",
                     enableForegroundColor: "Enable Foreground Color",
 					usePaletteColor: "Use Palette Color",
-					usePaletteColorInfo: "Enable this property to apply widget colors based on index. By default, colors are applied based on data."
+					usePaletteColorInfo: "Enable this property to apply widget colors based on index. By default, colors are applied based on data.",
+                    mobileHeightFactor: "Mobile Height Factor",
+                    mobileHeightFactorInfo: "This option allows you to resize widgets specifically for mobile view."
                 },
                 containerActions: {
                     showMaximizeText: "Allow Maximize View",
@@ -557,10 +568,12 @@
                     range: "Range",
 					chooseDefault: "Select Today as Default",
                     selectLatestDateAsDefault: "Select Latest Date As Default",
+                    selectLatestDateAsDefaultInfo: "Selecting this option sets the latest date as the default for list-type DashboardParameter filters with single date selection.",
 					defaultDateInfo: "Selecting this option will automatically set today's date as the default value for the Date Picker widget. This is useful for filtering the dashboard based on the current day. Once enabled, you won't be able to choose another date as the default selection.",
                     limitDates: "Limit Dates",
                     highlightAvailableDates: "Highlight Available Dates",
                     showLatestDate: "Show Latest Date",
+                    showLatestDateInfo: "Enabling this option will display the latest date's month from the datasource in the date picker widget. It shows the latest date's month if the 'Limit Dates' option is enabled; otherwise, it shows the current month.",
 					limitDateSelection: "Limit Date Selection",
                     maximumDateSelection: "Date Selection Mode",
 					customDateSelection: "Custom Limit Days",
@@ -630,6 +643,8 @@
 					chartSeriesShapeText: "Series Shape",
 					fixedCalendarSelectionText: "Fixed Calendar Selection",
 					widgetOrderText: "Widgets Order",
+                    applyStackOrder: "Apply Stack Order",
+                    applyStackOrderInfo: "Enable this option to stack entire widgets on top of each other. By default, only the content inside each widget will stack sequentially.",
 					tabWidgetOrderText: "Tab Order",
 					tabWidgetHideTabText: "Hide Tab",
 					headerColorText: "Header Color",
@@ -642,7 +657,8 @@
                     columnChooser: "Enable Column Chooser",
 					enableRTL: "Enable RTL",
                     allowReorder: "Allow Column Reorder",
-                    allowReorderInfo: "Columns can be rearranged with this option, but it only works when paging is turned on."
+                    allowReorderInfo: "Columns can be rearranged with this option, but it only works when paging is turned on.",
+                    tabLoaderInfo: "When enabled, the entire tab will load instead of loading individual widgets.",
                 },
                 pivotChartSettings: {
                     enablePivotChart: "Enable Pivot Chart",
@@ -1032,6 +1048,7 @@
                 updateTextEditor: "Update",
                 editTextEditor: "Edit",
                 widgetNotConfigured: "This widget has not been configured.",
+                widgetTooltipCells: "Cells",
                 noWidgetToPreview: "No Widgets to Preview",
                 noDataToBeDisplay: "There is no data to be displayed.",
 				customWidgetNotAvailable: "CustomWidget is not available to render with GUID",
@@ -1164,7 +1181,7 @@
                 appendDsFailurePopupText: "The process of appending the file(s) was unsuccessful",
                 appendDsReadyToAppend: "file(s) ready to append",
                 appendDsFilesNeedsAttention: "file(s) needs attention",
-                serverNameText: "Server name",
+                serverNameText: "Server Name",
                 commandTimeoutText: "Command Timeout (in seconds)",
                 commandTimeoutMessage: "Max command timeout upto 550 sec",
 				masterDataBaseMessage: ". Please manually enter the database name in the dropdown and then reconnect",
@@ -1177,7 +1194,7 @@
                 catalogNameText: "Catalog Name",
                 connectionTimeoutText: "Connection Timeout (in seconds)",
                 port: "Port",
-                authenticationTypeText: "Authentication mechanism",
+                authenticationTypeText: "Authentication Mechanism",
                 selfSignedText: "Allow Self-Signed Certificates",
                 clientCertificate: "Client Certificate",
                 clientCertificatePwd: "Client Certificate Password",
@@ -1200,6 +1217,8 @@
                 amazonRDSAmazonAuroraMySQLText: "Amazon Aurora MySQL",
                 amazonRDSAmazonAuroraPostgreSQLText: "Amazon Aurora PostgreSQL",
                 basicText: "Basic HTTP Authentication",
+				keyPairText: "Key Pair Authentication",
+				pemCertificateText: "PEM Certificate Authentication",
 				sqlaccess: "Elasticsearch SQL",
                 opendistro :"Open Distro",
 				presto : "Presto",
@@ -1209,6 +1228,7 @@
 				elasticsearchTypeText :"Connection Type",
                 authenticationText: "Authentication Type",
                 refreshSettingsText: "Refresh Settings",
+                refreshScheduleText: "Refresh Schedule",
                 finishBtnText: "Finish",
                 saveBtnText: "Save",
                 saveExitBtnText: "Save and Exit",
@@ -1234,11 +1254,13 @@
                 parameterHeaderText: "Dashboard Parameter",
 				dataSamplingHeaderText: "Data Sampling",
 				dataCacheHeaderText: "Data Cache",
-                refreshScheduleText: "Refresh Schedule",
+				hybriddataCacheHeaderText: "Hybrid Data Cache",
+				relationSelfTableText: "Self-referencing table relationships are not supported.",
                 authentication: "Authentication",
                 promptText: "Prompt",
                 noneText: "None",
                 dataBaseText: "Database",
+				warehouseText: "Warehouse",
                 dataBaseCollectionText: "Collections",
                 databaseText: "Database (Optional)",
                 useCurrentWindowsUser: "Use current windows user",
@@ -1255,7 +1277,7 @@
                 specifyOutputLocation: "Output location cannot be empty.",
                 athenaOutputLocationTooltip: "Example: S3://foldername/",
                 specifyRegion: "Region cannot be empty.",
-                advancedSettings: "Additional connection parameters (Optional)",
+                advancedSettings: "Additional Connection Parameters (Optional)",
                 dynamicConnectionString: "Dynamic Connection String",
                 dynamicConnectionStringTitle: "Dynamic Connection String Configuration",
                 dynamicConnectionStringTooltipInfo: "Know more",
@@ -1295,6 +1317,7 @@
 				specifyServiceName: "Service instance name cannot be empty.",
                 specifyConnectionTimeout: "Connection Timeout cannot be empty.",
                 specifyDatabaseName: "Database name cannot be empty.",
+				specifyWarehouseName: "Warehouse name cannot be empty.",
 				specifyCollectionName: "Collection name cannot be empty.",
                 specifyCatalogName: "Catalog Name cannot be empty",
                 specifyDataSourceName: "Data source name cannot be empty.",
@@ -1484,7 +1507,7 @@
                         }
                     },
                     chargify: {
-                        name: "Chargify",
+                        name: "Maxio",
                         templates: {
                             subscr: {
                                 name: "Most recent 200 subscriptions",
@@ -1711,7 +1734,7 @@
                         ]
                 },
                 pipelineDeals: {
-                    name: "PipelineDeals",
+                    name: "Pipeline CRM",
                         templates: [
                             {
                                 projects: {
@@ -2162,7 +2185,7 @@
                         ]
                 },
                 appAnnie: {
-                    name: "App Annie",
+                    name: "Data AI",
                         templates: [
                             {
                                 projects: {
@@ -4936,7 +4959,7 @@
                 fileSizeAlert:"The selected file size is very large at ",
                 fileUploadBrowseText: "Browse File",
                 fileUploaddragAndDropText: "Drop files here or ",
-                fileuploadEstimatedFileSize: "Files up to 200 MB can be uploaded directly in Bold BI. For larger files, use direct Data Hub UI",
+                fileuploadEstimatedFileSize: "(up to 200 MB)",
                 uploadedSuccessfully: "Uploaded successfully",
                 ofText: " OF ",
                 invalidFileText: "Uploaded failed",
@@ -6638,8 +6661,38 @@
 					previousValueDesc: "Returns the value from a specified previous row in the result set relative to the current row.",
 					previousValueEx: "PREVIOUSVALUE(expression, offset)",
 					nextValueDesc: "Returns the value from a specified subsequent row in the result set relative to the current row.",
-					nextValueEx: "NEXTVALUE(expression, offset)"
-                }
+					nextValueEx: "NEXTVALUE(expression, offset)",
+					countPartitionDesc: "Returns the count of rows for the given column or expression within a partition. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					countPartitionEx: "COUNTPARTITION(expression, PartitionBy := columns)",
+					sumPartitionDesc: "Returns the sum of values for the given column or expression within a partition. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					sumPartitionEx: "SUMPARTITION(expression, PartitionBy := columns)",
+					avgPartitionDesc: "Returns the average of rows for the given column or expression within a partition. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					avgPartitionEx: "AVGPARTITION(expression, PartitionBy := columns)",
+					minPartitionDesc: "Returns the minimum value of the given column or expression within a partition. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					minPartitionEx: "MINPARTITION(expression, PartitionBy := columns)",
+					maxPartitionDesc: "Returns the maximum value of the given column or expression within a partition. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					maxPartitionEx: "MAXPARTITION(expression, PartitionBy := columns)",
+					rowNumerDesc: "Returns the sequential number of a row within a partition, based on the specified OrderBy. Rows can be grouped using PartitionBy and ordered with OrderBy, and each row receives a unique number starting from 1.",
+					rowNumerex: "ROWNUMBER(PartitionBy := columns,OrderBy:= columns)",
+					denseRankDesc: "Returns the rank of a row within a partition, based on the specified OrderBy. Rows can be grouped using PartitionBy and ordered with OrderBy. Equal values receive the same rank, but no gaps are left in the ranking sequence.",
+					denseRankEx: "DENSERANK(PartitionBy:= columns, OrderBy:= columns)",
+					rankDesc: "Returns the rank of a row within a partition, based on the specified OrderBy. Rows can be grouped using PartitionBy and ordered with OrderBy. Equal values receive the same rank, and gaps are left in the ranking sequence.",
+					rankEx: "RANK(PartitionBy := columns,OrderBy:= columns)",
+					ntileDesc: "Distributes the rows within a partition into a specified number of groups (tiles), based on the specified OrderBy. Rows can be grouped using PartitionBy and ordered with OrderBy, and each row is assigned a group number starting from 1.",
+					ntileEx: "NTILE(bugets, PartitionBy := columns, OrderBy:= columns)",
+					firstValueDesc: "Returns the first value of the given column or expression within a partition, based on the specified OrderBy. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					firstValueEx: "FIRSTVALUE(expression, PartitionBy := columns, OrderBy:= columns)",
+					lastValueDesc: "Returns the last value of the given column or expression within a partition, based on the specified OrderBy. Rows can be grouped using PartitionBy, ordered with OrderBy, and restricted to a specific range using Frame.",
+					lastValueEx: "LASTVALUE(expression, PartitionBy := columns, OrderBy:= columns)",
+					percentileCountDesc: "Computes continuous percentile values using linear interpolation over ordered data.",
+                    percentileCountEx: "PERCENTILE_CONT(fraction, expression)",
+					fixedEx: "FIXED(AGG: expression, DIMENSIONS: Column1, Column2, ..)",
+					fixedDesc: "Returns the result of the aggregation at the specified dimension level, ignoring dimensions in the view. Useful for calculating values consistently regardless of the current visualization granularity.",
+					includeEx: "INCLUDE(AGG: expression, DIMENSIONS: Column1, Column2, ..)",
+					includeDesc: "Adds specified dimensions to the view level when computing the aggregation, then rolls up the result. Useful for detailed calculations without changing the visual level of detail.",
+					excludeEx: "EXCLUDE(AGG: expression, DIMENSIONS: Column1, Column2, ..)",
+					excludeDesc: "Removes specified dimensions from the view level when computing the aggregation. Useful for calculating higher-level values by omitting certain detail levels."
+				}
             },
             queryJoiner: {
                 merge: "Merge",
@@ -6774,6 +6827,7 @@
 				gradientText: "Gradient",
 				ruleText: "Rule",
 				individualText: "Individual",
+				inheritDrillColor: "Inherit Drill Color",
 				gradient: {
 					nullFormatZero: "As zero",
 					nullFormatSpecific: "Specific",
@@ -6869,10 +6923,18 @@
                 themeLight: "Light",
                 themeDark: "Dark",
                 dashboardParameterTooltip: "Dashboard Parameters",
+				parameterMappingTooltip: "Parameter Mapping",
+                parameterMappingTargeWidget: "Target Widget",
+                parameterMappingTargeColumn: "Target column",
+                parameterWidgetMapping: "Specific Widget Mapping",
+				parameterWidgetMappingTitle: "Parameter Mapping Configuration",
+				parameterWidgetMappingInfoContent: "No parameters found. Configure dashboard parameters before using parameter mapping.",
+				parameterWidgetMappingError: "This widget field is already mapped. Proceeding will replace the existing mapping.",
                 enableCommentDisplayText: "Enable Comment",
 				performanceMetricsPopText:"Metrics",
 				enableMetrics: "Enable Metrics",
 				enableMobileView: "Restrict Mobile View On Desktop",
+                showWidgetCellCount: "Show Widget Cell Count",
 				enableRTL: "Enable RTL",
 				widgetInteractionValues: {
                     reorder: "Column reorder applied",
@@ -6926,6 +6988,8 @@
                 includeFilterInfoTooltipForImage: "When Include filter information is switched on, the dashboard exported Image will contain the applied filter(s) information.",
                 includeFilterInfoTooltipForPdf: "When Include filter information is switched on, the dashboard exported PDF will contain the applied filter(s) information.",
                 includeFilterInfoTooltipForPpt: "When Include filter information is switched on, the dashboard exported PPT will contain the applied filter(s) information.",
+				includeFilterInfoTooltipForExcel: "When Include filter information is switched on, the dashboard exported Excel will contain the applied filter(s) information.",
+				includeFilterInfoTooltipForCsv: "When Include filter information is switched on, the dashboard exported CSV will contain the applied filter(s) information.",
                 includeFilterInfoText: "Include filter information",
                 reset: "Reset",
                 apiExportErrMsg: "Invalid export parameter (widgetName)",
@@ -6943,6 +7007,8 @@
 				pdfPageA4: "A4",
 				pdfPageA5: "A5",
 				pdfPageLetter: "Letter",
+				sameFile: "Same file",
+                separateFile: "Separate file",
             },
             maximize: {
                 maximize: "Maximize",
@@ -7204,6 +7270,7 @@
                 updateParameterMessage: "The parameter has been updated successfully.",
                 datasourceNotification: "Do not use this parameter to current data source. It will execute cyclically and result will be infinite but you can use this parameter in another data source.",
 				tableAlertMessage: 'Table field is not supported in web live mode',
+				infoIcon: 'Iterative is applicable only for WebAPI data source cases',
 				ignoreFilterQueryNotification: "Ignore where query when DisableWhereForSelectAll option is enabled in config file",
                 nameText: "name",
                 descText: "description",
@@ -7302,6 +7369,7 @@
                 dataSourcesRemovedMsg: "The mapping data source used is no longer available in the server. Please reconfigure the settings.",
                 showDataToUnmappedUserText: "Show all data for unmapped users & groups",
                 clear: "Clear",
+				futureItemCheckboxTooltip: "This option is only checked when selecting all records for any user or group.",
                 showDataToUnmappedUserInfoText: "Checking this option will allow all users and groups without any mapping configured to see all records in the data source. Unchecking this option will prevent unmapped users from seeing any records from the data source.",
                 mappingDataSource: "Mapping Data Source",
                 waterMarkSelectDataSource: "Select Data Source",
@@ -8907,7 +8975,7 @@
             },
 			unifiedAiChat: {
 				selection1: 'Dashboards',
-				selection2: 'Datasources',
+				selection2: 'Data Sources',
 				datasource: 'datasource',
 				dashboard: 'dashboard',
 				brandLogo: 'brandlogo',
@@ -8922,6 +8990,11 @@
 				prepareWidgetData: "Preparing the required data for the widget's data...",
 				fetchWidgetData: 'Fetching and binding data to create the widget...',
 				summarize: 'Summarizing...',
+				authorizationErrorMessage: "Access denied to the service. Please check if your authorization key is correct and hasn’t expired.",
+				newSession: 'New Session',
+				history: 'History',
+				welcomeMessage: 'Welcome! I’m your assistant—ask me any question about your sales',
+				embedFooterPlaceholer: 'Ask your question...',
 			},
 			replaceValues: { 
 				applyBtnText: "Apply",
@@ -9031,6 +9104,7 @@
 				dataSourceRefreshStatus: "Refresh Status",
 				dataSourceGroupID: "DataSource",
 				dataSourceGroupName: "Data Source Info",
+				IsHybridDataCache: "Hybrid Data Cache",
                 wigdetMetricsConatiner:{
                     widgetDatafetch:"Data Fetching",
                     widgetQueryProcess:"- Querying",
@@ -9075,7 +9149,13 @@
                 applyAndSave: "Apply & Save",
 				cellMarigin: "Cell Margin",
 				columnAlertMessage: "You are decreasing the layout size, which will impact the widgets located after Column 48. Please adjust the size of your widgets or remove some to ensure they fit properly."
-            }
+            },
+			azureMap:{
+				choroplethIndicator:{
+					title: "Fetching Geographic Data",
+					description: "Fetching boundaries from Azure Maps APIs"
+				}
+			}
 		}
     }
 }

@@ -1,9 +1,7 @@
-ALTER TABLE [BOLDBI_Group] ADD [GroupLogo] [nvarchar](1026) NULL;
-ALTER TABLE [BOLDBI_Item] ADD PublishedDate DATETIME NULL;
+ALTER TABLE [BOLDBI_Item] ADD [DashboardLogo] [nvarchar](1026) NULL;
 
-INSERT INTO [BOLDBI_ExportType] (Name, IsActive) SELECT 'DatasourceCache', 1
-WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_ExportType] WHERE Name = 'DatasourceCache')
-;
+ALTER TABLE [BOLDBI_ScheduleDetail] ALTER COLUMN [AIInsightSummaryEnabled] [bit] NOT NULL DEFAULT 0;
 
-ALTER TABLE [BOLDBI_SystemSettings] ADD CONSTRAINT UK_BOLDBI_SystemSettings_Key_SiteId UNIQUE([Key], SiteId)
-;
+ALTER TABLE [BOLDBI_AI_SESSIONS] ADD [RequestType] NVARCHAR(MAX),[SessionName] NVARCHAR(MAX),[IsActive] [bit] NOT NULL DEFAULT (0),[HistoryContent] NVARCHAR(MAX),[SessionModifiedTime] DATETIMEOFFSET;
+
+ALTER TABLE [BOLDBI_ItemLog] ADD [IPAddress] [nvarchar](255) NULL;

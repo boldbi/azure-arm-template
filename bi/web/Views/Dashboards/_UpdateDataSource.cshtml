@@ -19,20 +19,20 @@
 
         @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             var updatedatasource = "@Url.Action("updatedatasource", "dashboards")";
         </script>
         @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.css" />
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.min.css" />
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.min.js"></script>
         </environment>
 
-        <script type="text/javascript">
+        <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(function () {
             $("#new-datasource-tab-content").css("height", window.innerHeight - 132 + "px");
             if((@Json.Serialize(isDataSourceUpdated))){
@@ -58,13 +58,13 @@
             <span class="su su-nav-datasource Head-icon"></span>
             <span class="PopupTitle modal-title">@T["Update Data Source(s)"]</span>
             <div class="dashboard-name report-name">@Html.Raw("<div class='float-left'>" + string.Format(T["Update data sources connected to the Dashboard - {0}"].Value,"</div><span class='item-name' data-bs-toggle='tooltip' data-placement='bottom' data-original-title=" + ViewBag.FullItemName + ">" + ViewBag.FullItemName + "</span>"))</div>
-            <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="closeUpdateDataSourcePopup()"><span class="su su-close"></span></a>
+            <a href="#" title="@T["Close"]" class="PopupClose close-update-datasource"><span class="su su-close"></span></a>
         </div>
         <div id="datasource-popup-module">
             <div class="datasource-btns dialog-footer">
                 <div class="float-end">
                     <input type='button' title='' id="share-datasource" value="@T["Update"]" class='primary-button app-btn-primary' data-item-id=@ViewData["ItemId"] data-mapid="name" tabindex="17">
-                    <input type='button' title='' value="@T["Cancel"]" class='secondary-button  app-btn-secondary' onclick="closeUpdateDataSourcePopup()" tabindex="18">
+                    <input type='button' title='' value="@T["Cancel"]" class='secondary-button  app-btn-secondary close-update-datasource' tabindex="18">
                 </div>
             </div>
             <form id='new-datasource-tab-content' class='col-md-12 update-datasource-tab-contents' autocomplete="off">
@@ -112,15 +112,16 @@ else
         @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
         <environment include="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.css" />
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
             <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/update-datasource.min.css" />
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-datasource.min.js"></script>
         </environment>
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(document).ready(function () {
                 closeUpdateDataSourcePopup();
+                $(document).on("click", ".close-update-datasource", closeUpdateDataSourcePopup);
                 parent.messageBox("su-update-data-source", "@T["Update Data Source(s)"]", "@T["Internal server error. Please try again."]", "success", function () {
                     parent.onCloseMessageBox();
                 });

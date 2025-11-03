@@ -133,6 +133,7 @@ CREATE TABLE [BOLDBI_Item](
 	[CreatedDate] [datetime] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
 	[PublishedDate] [datetime] NULL,
+    [DashboardLogo] [nvarchar](1026) NULL,
 	[IsSampleData] [bit] NULL,
 	[DataSource] nvarchar(max) null,
 	[IsPublic] [bit] NOT NULL DEFAULT 0,
@@ -206,6 +207,7 @@ CREATE TABLE [BOLDBI_ItemLog](
 	[UpdatedUserId] [int] NOT NULL,	
 	[ModifiedDate] [datetime] NOT NULL,
     [AnonymousUsername] [nvarchar](255) NULL,
+	[IPAddress] [nvarchar](255) NULL,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -268,6 +270,7 @@ CREATE TABLE [BOLDBI_ScheduleDetail](
 	[EmailContent] [nvarchar](4000) NULL,
 	[IsDataChanges] [bit] NOT NULL DEFAULT 0,
 	[IsTimeInterval] [bit] NOT NULL DEFAULT 0,
+	[AIInsightSummaryEnabled] [bit] NOT NULL DEFAULT 0,
 	[StartDate] [datetime] NULL,
 	[EndDate] [datetime] NULL,
 	[EndAfter] [int] NULL DEFAULT 0,
@@ -1096,7 +1099,12 @@ CREATE TABLE [BOLDBI_AI_SESSIONS] (
     [TotalTokensCost] FLOAT,
     [UserInfo] NVARCHAR(MAX),
     [TenantID] NVARCHAR(MAX),
-    [Environment] NVARCHAR(MAX)
+    [Environment] NVARCHAR(MAX),
+	[RequestType] NVARCHAR(MAX),
+	[SessionName] NVARCHAR(MAX),
+	[IsActive] [bit] NOT NULL DEFAULT (0),
+	[HistoryContent] NVARCHAR(MAX),
+	[SessionModifiedTime] DATETIMEOFFSET
     );
 
 CREATE TABLE [BOLDBI_AI_CHAT] (

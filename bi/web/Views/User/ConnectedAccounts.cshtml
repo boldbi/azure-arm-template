@@ -16,13 +16,13 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-accounts.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-accounts.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-accounts.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/connected-accounts.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-accounts.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/connected-accounts.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var editConnectedAccountUrl = "@Url.Action("UpdateConnectedAccount", "User")";
         var deleteConnectedAccountUrl = "@Url.Action("DeleteConnectedAccount", "User")";
         var getConnectedAccountsUrl = "@Url.Action("GetConnectedAccounts", "User")";
@@ -81,20 +81,20 @@
             </span>
             <ul class="dropdown-menu" role="menu">
                 <li>
-                    <a href="javascript:void(0);" class="re-authorize-account" data-content="{{:Id}}" data-reauthorize-url="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/v1.0/oauth/re-authorize?token=@ViewBag.AccessToken&id={{:Id}}&server=@serverApiUrl{{:OrganizationUrl ? '&resourceurl=' + OrganizationUrl : ''}}">
+                    <a href="#" class="re-authorize-account" data-content="{{:Id}}" data-reauthorize-url="@ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings)/v1.0/oauth/re-authorize?token=@ViewBag.AccessToken&id={{:Id}}&server=@serverApiUrl{{:OrganizationUrl ? '&resourceurl=' + OrganizationUrl : ''}}">
                         <i class="su su-re-authorize"></i>
                         <span>@T["Reauthorize"]</span>
                     </a>
                 </li>
                 <li class="divider" role="separator"></li>
                 <li>
-                    <a href="javascript:void(0);" class="edit-connected-account" data-content="{{:Id}}" data-account-name="{{:Name}}">
+                    <a href="#" class="edit-connected-account" data-content="{{:Id}}" data-account-name="{{:Name}}">
                         <i class="su su-edit"></i>
                         <span>@T["Edit"]</span>
                     </a>
                 </li>
                 <li>
-                    <a class="delete-class delete-connected-account" data-content="{{:Id}}" data-account-name="{{:Name}}" href="javascript:void(0);">
+                    <a class="delete-class delete-connected-account" data-content="{{:Id}}" data-account-name="{{:Name}}" href="#">
                         <i class="su su-delete"></i>
                         <span>@T["Delete"]</span>
                     </a>
@@ -103,7 +103,7 @@
         </div>
     </script>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(function () {
             GridLocalization(window.Server.App.Localization.ConnectedAccountsEmpty);
             $("#search-linked-accounts").val("");

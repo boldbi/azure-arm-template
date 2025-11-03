@@ -6,7 +6,7 @@
     var permissions = Model as Dictionary<ItemType, bool>;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
-    var themeAppearanceName = globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.ThemeAppearance : "light";
+    var themeAppearanceName = _identityResponse.ThemeAppearance;
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
     var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
@@ -32,7 +32,7 @@
             display: none !important;
         }
     </style>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var rootBaseUrl = "@Url.Content("~/")";
         var tenantInfoId = "@tenantInfoId";
         var getTemplateDashboardStatusUrl = "@Url.Action("GetTemplateDashboardStatus", "Dashboards")";
@@ -52,10 +52,10 @@
     </script>
 
     <environment include="Development,CloudDevelopment">  
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
     </environment>
 
     @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) == -1)

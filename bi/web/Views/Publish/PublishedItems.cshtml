@@ -13,13 +13,13 @@
 @section MainSection{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/published-items.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/published-items.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/published-items.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         @{
 #pragma warning disable SCS0029
         }
@@ -95,14 +95,14 @@
                                         <ul class="dropdown-menu" role="menu">
                                             {{if (IsPublishedSiteActive != null && !IsPublishedSiteActive) || (!IsPublishedUserActive && IsPublishedUserDeleted)}}
                                             <li class="menu-group">
-                                                <a href="javascript:void(0);" title="@T["Deleted"]" data-bs-toggle="tooltip">
+                                                <a href="#" title="@T["Deleted"]" data-bs-toggle="tooltip">
                                                     <i class="su su-synchronize disabled-icon-color"></i>
                                                     <span class="menu-text disabled-icon-color">@T["Synchronize"]</span>
                                                 </a>
                                             </li>
                                             {{else LastPublishedStatus == "Failed" || LastPublishedStatus == "Success"}}
                                             <li class="menu-group">
-                                                <a href="javascript:void(0);" title="@T["Synchronize"]" onclick="onConfirmSynchronizeDialog()">
+                                                <a id="on-confirm-sync-dialog" href="#" title="@T["Synchronize"]">
                                                     <i class="su su-synchronize"></i>
                                                     <span class="menu-text">@T["Synchronize"]</span>
                                                 </a>
@@ -111,12 +111,12 @@
                                             {{if DestinationItemId != "@Guid.Empty"}}
                                             <li class="menu-group">
                                                 {{if !IsLocked}}
-                                                <a href="javascript:void(0);" title="@T["Lock Edit"]" onclick="lockOrUnlockEditDialog(true)">
+                                                <a id="lock-unlock-edit-dialog" href="#" title="@T["Lock Edit"]">
                                                     <i class="su su-edit-lock"></i>
                                                     <span class="menu-text">@T["Lock Edit"]</span>
                                                 </a>
                                                 {{else}}
-                                                <a href="javascript:void(0);" title="@T["Unlock Edit"]" onclick="lockOrUnlockEditDialog(false)">
+                                                <a id="lock-or-unlock-edit-dialog" href="#" title="@T["Unlock Edit"]">
                                                     <i class="su su-edit-unlock"></i>
                                                     <span class="menu-text">@T["Unlock Edit"]</span>
                                                 </a>
@@ -124,20 +124,20 @@
                                             </li>
                                             {{/if}}
                                             <li class="menu-group">
-                                                <a href="javascript:void(0);" title="@T["Info"]" onclick="openPublishInfo()">
+                                                <a id="open-publish-info-dialog" href="#" title="@T["Info"]">
                                                     <i class="su su-info"></i>
                                                     <span class="menu-text">@T["Info"]</span>
                                                 </a>
                                             </li>
                                             <li class="menu-group">
-                                                <a href="javascript:void(0);" title="@T["Publish History"]" onclick="publishHistoryDialog()">
+                                                <a id="publish-history-dialog" href="#" title="@T["Publish History"]">
                                                     <i class="su su-versions"></i>
                                                     <span class="menu-text">@T["Publish History"]</span>
                                                 </a>
                                             </li>
                                             <li role="separator" class="divider"></li>
                                             <li class="menu-group">
-                                                <a href="javascript:void(0);" title="@T["Remove"]" onclick="showRemoveConfirmation()">
+                                                <a id="show-remove-confirmation" href="#" title="@T["Remove"]">
                                                     <i class="su su-delete"></i>
                                                     <span class="menu-text">@T["Remove"]</span>
                                                 </a>
@@ -197,7 +197,7 @@
 
                                 <script id="grouping-synchronize-template" type="text/x-jsrender">
                                     {{:key}}
-                                    <button class="btn display-none synchronize-button" onclick="onConfirmSynchronizeAllDialog(event)"><i class="su su-synchronize synchronize-icon-container"></i>@T["Synchronize"]</button>
+                                    <button class="btn display-none synchronize-button"><i class="su su-synchronize synchronize-icon-container"></i>@T["Synchronize"]</button>
                                 </script>
                                 <div id="PublishItemGrid"></div>
                                 @await Html.PartialAsync("_PublishHistory")
@@ -209,7 +209,7 @@
                                             <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-11 col-xs-11 col-sm-11 col-md-11 no-padding" data-bs-toggle="tooltip" data-placement="bottom" data-container="body"><b>@T["Remove Published Dashboard"]</b></span>
                                         </div>
                                         <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1 no-padding">
-                                            <a href="javascript:void(0);" title="@T["Close"]" class="popup-close float-end" onclick="hideRemoveConfirmation()"><span class="su su-close"></span></a>
+                                            <a href="#" id="publish-remove-container-close" title="@T["Close"]" class="popup-close float-end"><span class="su su-close"></span></a>
                                         </div>
                                     </div>
                                     <div class="col-12 modal-body">
@@ -220,8 +220,8 @@
                                         </p>
                                     </div>
                                     <div class="col-12 modal-footer">
-                                        <input type="button" class="app-button app-secondary-button app-btn-secondary float-end popup-close" value="@T["No"]" onclick="hideRemoveConfirmation()" tabindex="-1" />
-                                        <input type="button" class="app-button app-critical-action-button app-btn-danger float-end popup-close" value="@T["Yes"]" onclick="removePublishedItem()" tabindex="-1" />
+                                        <input type="button" id="hide-remove-dialog" class="app-button app-secondary-button app-btn-secondary float-end popup-close" value="@T["No"]" tabindex="-1" />
+                                        <input type="button" id="remove-published-item" class="app-button app-critical-action-button app-btn-danger float-end popup-close" value="@T["Yes"]" tabindex="-1" />
                                     </div>
                                 </div>
                                 <div class='col-12 mt-2' id='ignore-sync-section' style="display: none;">

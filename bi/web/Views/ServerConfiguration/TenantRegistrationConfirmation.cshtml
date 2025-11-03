@@ -46,18 +46,18 @@
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
     <link rel="icon" href="@favLogo" />
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.js"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tenant-registration-page.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tenant-registration.min.js"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tenant-registration-page.min.css" />
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var statusTracker;
         var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
         var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
@@ -112,19 +112,28 @@
 
         $(window).on("load", function () {
             $('.lazyload').each(function () {
-                if ($(this).attr("data-id") == "footerlogo") {
-                    $(this).parent().find("p#poweredbysyncfusion").append($("<img>").attr({
+                if ($(this).attr("data-id") === "footerlogo") {
+                    var $img = $("<img>").attr({
                         "src": $(this).attr("data-src"),
                         "alt": $(this).attr("data-alt"),
-                        "id": $(this).attr("data-id"),
-                        "onerror": $(this).attr("data-default")
-                    }));
+                        "id": $(this).attr("data-id")
+                    });
 
+                    // Attach error handler programmatically
+                    var fallbackSrc = $(this).attr("data-default");
+                    $img.on("error", function () {
+                        if (fallbackSrc && this.src.toLowerCase() !== fallbackSrc.toLowerCase()) {
+                            this.src = fallbackSrc;
+                        }
+                    });
+
+                    $(this).parent().find("#poweredbysyncfusion").append($img);
                 }
 
                 $(this).remove();
             });
         });
+
 
         function IsSentRequest() {
             $.ajax({

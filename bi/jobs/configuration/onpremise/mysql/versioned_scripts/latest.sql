@@ -1,6 +1,7 @@
-ALTER TABLE {database_name}.BOLDBI_Group ADD COLUMN GroupLogo varchar(1026) NULL;
-ALTER TABLE {database_name}.BOLDBI_Item ADD COLUMN PublishedDate datetime NULL;
+ALTER TABLE {database_name}.BOLDBI_Item ADD COLUMN DashboardLogo varchar(1026) NULL;
 
-INSERT INTO {database_name}.BOLDBI_ExportType (Name, IsActive) SELECT 'DatasourceCache', 1 FROM DUAL
-WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_ExportType WHERE Name='DatasourceCache' LIMIT 1)
-;
+ALTER TABLE {database_name}.BOLDBI_ScheduleDetail ADD AIInsightSummaryEnabled tinyint(1) NOT NULL default 0;
+
+ALTER TABLE {database_name}.BOLDBI_AI_SESSIONS ADD RequestType TEXT,ADD SessionName TEXT,ADD IsActive tinyint NOT NULL DEFAULT 0,ADD HistoryContent TEXT,ADD SessionModifiedTime DATETIME;
+
+ALTER TABLE {database_name}.BOLDBI_ItemLog ADD COLUMN IPAddress varchar(255) NULL;

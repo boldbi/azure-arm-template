@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
-    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/save-view.css" />
     </environment>
@@ -28,24 +28,24 @@
     @if (ViewBag.ViewerType == "v2")
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view-v2.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view-v2.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view-v2.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view-v2.min.js"></script>
         </environment>
 
     }
     else
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/save-view.min.js"></script>
         </environment>
 
     }
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var rootUrlAction = "@rootUrl";
         var addViewUrl = { "web": "@Url.Action("onfiltersave", "DashboardViews")", "api": "/items/views/add" };
         var getSavedViewUrl = { "web": "@Url.Action("GetViews", "DashboardViews")", "api": "/items/views/get-by-item-id" };
@@ -66,11 +66,11 @@
         <div class="col-md-12 dialog-header">
             <span class="su su-view Head-icon"></span>
             <span class="PopupTitle">@T["Save View"]</span>
-            <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" onclick="closeSaveViewPopup()"><span class="su su-close"></span></a>
+            <a href="#" title="@T["Close"]" class="PopupClose" id="close-save-view-popup"><span class="su su-close"></span></a>
         </div>
         <span id="user-name" type="hidden" value="@ViewBag.userName"></span>
         <span id="user-id" type="hidden" value="@ViewBag.userId"></span>
-        <form name="save-view-form" id="save-view-form" class="dialog-body col-12 no-padding" onsubmit="$('#save-button').trigger('click'); return false;">
+        <form name="save-view-form" id="save-view-form" class="dialog-body col-12 no-padding">
             <div>
                 <div class="col-12 padding20 no-bottom-padding" id="item-name-division">
                     <div class="col-3 no-padding text-right text-label">@T["Name"]<span class="mandatory">*</span></div>
@@ -89,7 +89,7 @@
                             <span class="material-switch text-left">
                                 @if (isDefaultView)
                                 {
-                                    <input type="checkbox" id="default-view" checked onchange="notifyAlert()" />
+                                    <input type="checkbox" id="default-view" checked />
                                     <label for="default-view" class="label-primary"></label>
                                 }
                                 else
@@ -182,17 +182,17 @@
         <div class="col-12 dialog-footer no-right-padding no-left-padding" id="action-button-division">
             <div class="rightAlign">
                 <input type="button" title="" id="save-button" class="btn primary-button app-btn-primary" value=@T["Save"] />
-                <input type="button" id="cancel-button" title="" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" onclick="closeSaveViewPopup()" />
+                <input type="button" id="cancel-button" title="" class="btn secondary-button app-btn-secondary" value="@T["Cancel"]" id="close-save-view-popup" />
             </div>
         </div>
     </div>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(document).ready(function () {
             var dashboardViewWaitingPopupTemplateId = createLoader("dashboard-view-toogle");
             parent.$("#dashboard-view-toogle").BoldBIDashboardWaitingPopup({ template: $("#" + dashboardViewWaitingPopupTemplateId) });
             parent.$("#save-view-popup_wrapper").BoldBIDashboardWaitingPopup("hide");
         });
     </script>
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 </body>
 </html>

@@ -27,7 +27,7 @@
     var partialViewsPageUrl = Url.Action("LoadPartialViews", "PartialView");
 }
 
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var requestedUrl = @Json.Serialize(requestUrl);
     var dataSourcePageUrl = @Json.Serialize(dataSourcePageUrl);
     var partialViewsPageUrl = @Json.Serialize(partialViewsPageUrl);
@@ -52,7 +52,7 @@
     var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
 </script>
 <!--[if LT IE  10]>
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             i_am_ie9 = true;
         </script>
     <![endif]-->
@@ -88,7 +88,7 @@
     <div class="item-header">@T["Row Level Security"]</div>
 </script>
 <script type="text/x-jsrender" id="description">
-    <div class="item-description grid-content" title="{{:~renderDoubleQuotes(Description)}}" data-bs-toggle="tooltip" data-placement="top">
+    <div class="item-description grid-content" title="{{:~htmlEncode(Description)}}" data-bs-toggle="tooltip" data-placement="top">
         <span>
             {{:Description}}
         </span>
@@ -201,7 +201,7 @@
             {{if ~checkMobile()}}
             {{if ItemType=="@((int)ItemType.File)"}}
             <li>
-                <a href="javascript:void(0);" title="" ispublic="{{:IsPublic}}" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" class="get-link option-click" data-url="{{:~fileUrlEncode(Id)}}">
+                <a href="#" title="" ispublic="{{:IsPublic}}" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-item-type="@(gridName)" data-name="{{:Name}}" class="get-link option-click" data-url="{{:~fileUrlEncode(Id)}}">
                     <i class="su su-link"></i>
                     <span>@T["Get Link"]</span>
                 </a>
@@ -232,7 +232,7 @@
             {{if ~checkMobile()}}
             {{if @(permissionData[ItemType.Dashboard].ToString().ToLower()) == true && !IsDraft}}
             <li class="@(schemes != null && !schemes.CreateDashboard ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" class="create-dashboard-using-datasource" title="@T["Create dashboard using this Data Source"]" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                <a href="#" class="create-dashboard-using-datasource" title="@T["Create dashboard using this Data Source"]" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-nav-dashboard"></i>
                     <span>@T["Create Dashboard"]</span>
                 </a>
@@ -258,7 +258,7 @@
             {{/if}}
 
             <li class="@(schemes != null && !schemes.Info ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="item-info">
+                <a href="#" title="" class="item-info">
                     <i class="su su-info"></i>
                     <span>@T["Info"]</span>
                 </a>
@@ -269,7 +269,7 @@
 
             {{if ItemType == "@((int)ItemType.Datasource)" && !IsDraft}}
             <li class="@(schemes != null && !schemes.Preview ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" id="item-preview" data-item-id="{{:Id}}">
+                <a href="#" title="" id="item-preview" data-item-id="{{:Id}}">
                     <i class="su su-data-preview" style="padding: 0px 8px;">
                         <span class="su su-data-preview path1" style="font-size:14px"></span>
                     </i>
@@ -278,7 +278,7 @@
             </li>
             <li role="separator" class="divider @(schemes != null && !schemes.Preview ? "hide" : string.Empty)"></li>
             @*<li class="@(schemes != null && !schemes.RowLevelSecurity ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" id="item-row-level-security" data-item-id="{{:Id}}">
+                <a href="#" title="" id="item-row-level-security" data-item-id="{{:Id}}">
                     <i class="su su-row-level-security-1"></i>
                     <span>@T["Setup Row Level Security"]</span>
                 </a>
@@ -289,7 +289,7 @@
             @if (ServerAppConfig.IsSelfHosted)
             {
                 <li class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
-                    <a href="javascript:void(0);" title="" id="edit-table-column" data-item-id="{{:Id}}">
+                    <a href="#" title="" id="edit-table-column" data-item-id="{{:Id}}">
                         <i class="su su-update-schema" style="padding: 0px 8px;">
                         </i>
                         <span>@T["Update Schema"]</span>
@@ -300,7 +300,7 @@
             {{/if}}*@
             {{if ItemType == "@((int)ItemType.Datasource)"}}
             <li class="@(canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" class="get-embed-code-option-click">
+                <a href="#" class="get-embed-code-option-click">
                     <i class="su su-embed"></i>
                     <span>@T["Get Embed code"]</span>
                 </a>
@@ -313,7 +313,7 @@
             {{if ~checkMobile()}}
             {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
             <li class="@((schemes != null && !schemes.RefreshData) || canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="refresh-data-menu" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
+                <a href="#" title="" class="refresh-data-menu" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
                     <i class="su su-refresh"></i>
                     <span>@T["Refresh Data"]</span>
                 </a>
@@ -325,9 +325,37 @@
             {{if ~checkMobile()}}
             {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)" && !IsDraft}}
             <li class="@((schemes != null && !schemes.RefreshSetting) || canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="edit-schedule" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
+                <a href="#" title="" class="edit-schedule" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
                     <i class="su su-nav-schedule"></i>
                     <span>@T["Refresh Settings"]</span>
+                </a>
+            </li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if ~checkMobile()}}
+            {{if !IsDraft}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)"}}
+            <li class="@(canHideDataSourceOptions ? "hide" : string.Empty)">
+                <a href="#" title="" class="refresh-history" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">
+                    <i class="su su-refresh-history"></i>
+                    <span>@T["Refresh History"]</span>
+                </a>
+            </li>
+            <li role="separator" class="divider @(canHideDataSourceOptions ? "hide" : string.Empty)"></li>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+
+            {{if CanWrite}}
+            {{if ~checkMobile()}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && IsDataCacheEnabled && !IsDraft}}
+            <li>
+                <a href="#" title="" class="refresh-data-cache-menu" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
+                    <i class="su su-trigger-data-cache"></i>
+                    <span>@T["Refresh Hybrid Data Cache"]</span>
+                    <span class="beta-icon badge badge-secondary1 badge-secondary2 datacache-beta">Beta</span>
                 </a>
             </li>
             {{/if}}
@@ -338,35 +366,10 @@
             {{if ~checkMobile()}}
             {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Live)" && !IsDraft}}
             <li>
-                <a href="javascript:void(0);" title="" class="refresh-data-cache-menu" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
-                    <i class="su su-trigger-data-cache"></i>
-                    <span>@T["Refresh Data Cache"]</span>
-                </a>
-            </li>
-            {{/if}}
-            {{/if}}
-            {{/if}}
-
-            {{if CanWrite}}
-            {{if ~checkMobile()}}
-            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Live)" && !IsDraft}}
-            <li>
-                <a href="javascript:void(0);" title="" class="data-cache-settings" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
+                <a href="#" title="" class="data-cache-settings" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-item-extract-engine="{{:ExtractEngine}}">
                     <i class="su su-data-cache"></i>
-                    <span>@T["Data Cache Settings"]</span>
-                </a>
-            </li>
-            {{/if}}
-            {{/if}}
-            {{/if}}
-
-            {{if ~checkMobile()}}
-            {{if !IsDraft}}
-            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Live)"}}
-            <li class="@(canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="data-cache-history" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}">
-                    <i class="su su-data-cache-history"></i>
-                    <span>@T["Data Cache History"]</span>
+                    <span>@T["Hybrid Data Cache Settings"]</span>
+                    <span class="beta-icon badge badge-secondary1 badge-secondary2 datacache-beta">Beta</span>
                 </a>
             </li>
             <li role="separator" class="divider @(canHideDataSourceOptions ? "hide" : string.Empty)"></li>
@@ -374,25 +377,25 @@
             {{/if}}
             {{/if}} *@
 
-            {{if ~checkMobile()}}
+            @* {{if ~checkMobile()}}
             {{if !IsDraft}}
-            {{if ItemType == "@((int)ItemType.Datasource)" && DatasourceType =="@((int)ConnectionMode.Extract)"}}
+            {{if ItemType == "@((int)ItemType.Datasource)" && (DatasourceType =="@((int)ConnectionMode.Live)" || IsDataCacheEnabled)}}
             <li class="@(canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="refresh-history" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">
-                    <i class="su su-refresh-history"></i>
-                    <span>@T["Refresh History"]</span>
+                <a href="#" title="" class="data-cache-history" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}">
+                    <i class="su su-data-cache-history"></i>
+                    <span>@T["Hybrid Data Cache History"]</span>
                 </a>
             </li>
             <li role="separator" class="divider @(canHideDataSourceOptions ? "hide" : string.Empty)"></li>
             {{/if}}
             {{/if}}
-            {{/if}}
+            {{/if}} *@
 
             {{if !IsDraft}}
             {{if ~checkMobile()}}
             {{if ItemType == "@((int)ItemType.Datasource)"}}
             <li>
-                <a href="javascript:void(0)" title="" class="view-linked-dashboard" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                <a href="#" title="" class="view-linked-dashboard" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-view-linked-dashboard"></i>
                     <span>@T["View Linked Dashboards"]</span>
                 </a>
@@ -407,7 +410,7 @@
             {{if CanCopy}}
             {{if !IsDraft}}
             <li class="@((schemes != null && !schemes.Copy) ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="copyItem" data-action='Copy' data-itemId="{{:Id}}" data-itemname="{{:Name}}">
+                <a href="#" title="" class="copyItem" data-action='Copy' data-itemId="{{:Id}}" data-itemname="{{:Name}}">
                     <i class="su su-copy"></i>
                     <span>@T["Copy Data Source"]</span>
                 </a>
@@ -421,7 +424,7 @@
             {{if ~checkMobile()}}
             {{if (CreatedById==@(userId) || @(Convert.ToBoolean(Context.Session.GetString("IsAdmin")).ToString().ToLower()) == true || @(granularPermissions[ItemType.Datasource].ToString().ToLower()) == true) && !IsDraft}}
             <li class="@((schemes != null && !schemes.Publish) || canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" class="publish-datasource">
+                <a href="#" class="publish-datasource">
                     <i class="su su-publish"></i>
                     <span>@T["Publish"]</span>
                 </a>
@@ -436,7 +439,7 @@
             <li role="separator" class="divider @((schemes != null && !schemes.Share) || canHideDataSourceOptions ? "hide" : string.Empty)"></li>
             {{/if}}
             <li class="@((schemes != null && !schemes.Share) || canHideDataSourceOptions ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" class="item-permissions" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                <a href="#" class="item-permissions" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-manage-permission"></i>
                     <span>@T["Sharing Permissions"]</span>
                 </a>
@@ -453,7 +456,7 @@
             {{if ~checkMobile()}}
             {{if !IsDraft}}
             <li class="@(schemes != null && !schemes.VersionHistory ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" class="version-button" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
+                <a href="#" class="version-button" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}">
                     <i class="su su-versions"></i>
                     <span>@T["Version History"]</span>
                 </a>
@@ -470,14 +473,14 @@
             {{if ItemType=="@((int)ItemType.Dashboard)"}}
             <li role="separator" class="divider @(schemes != null && !schemes.UpdateDashboard ? "hide" : string.Empty)"></li>
             <li class="@(schemes != null && !schemes.UpdateDashboard ? "hide" : string.Empty)">
-                <a href="javascript:void(0);" title="" class="item-edit" data-item-id="{{:Id}}">
+                <a href="#" title="" class="item-edit" data-item-id="{{:Id}}">
                     <i class="su su-edit"></i>
                     <span>@T["Update Dashboard"]</span>
                 </a>
             </li>
             @*{{else}}
         <li>
-            <a href="javascript:void(0);" title="" class="item-edit" data-item-id="{{:Id}}">
+            <a href="#" title="" class="item-edit" data-item-id="{{:Id}}">
                 <i class="su su-edit"></i>
                 <span>@T["Update"]</span>
             </a>
@@ -489,7 +492,7 @@
         {{if ~checkMobile()}}
         {{if ItemType=="@((int)ItemType.Dashboard)"}}
         <li>
-            <a href="javascript:void(0);" title="" class="update-datasource" data-item-id="{{:Id}}">
+            <a href="#" title="" class="update-datasource" data-item-id="{{:Id}}">
                 <i class="su su-datasource"></i>
                 <span>@T["Update Data Source(s)"]</span>
             </a>
@@ -503,12 +506,12 @@
             <li role="separator" class="divider @(schemes != null && !schemes.Delete ? "hide" : string.Empty)"></li>
             <li class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
                 {{if ItemType=="@((int)ItemType.Datasource)"}}
-                <a href="javascript:void(0);" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-datasource-type="{{:DatasourceType}}" linked-dashboard-count="{{:LinkedDashboardsCount}}">
+                <a href="#" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}" data-datasource-type="{{:DatasourceType}}" linked-dashboard-count="{{:LinkedDashboardsCount}}">
                     <i class="su su-delete"></i>
                     <span>@T["Delete"]</span>
                 </a>
                 {{else}}
-                <a href="javascript:void(0);" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                <a href="#" title="" class="item-delete" data-itemtype="{{:ItemType}}" data-item-id="{{:Id}}" data-name="{{:Name}}">
                     <i class="su su-delete"></i>
                     <span>@T["Delete"]</span>
                 </a>
@@ -542,7 +545,7 @@
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
                        <span class="failure-history">
                             <span class="su su-refresh-history"></span>
-                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                            <a href="#" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
                        </span>
                     {{else}}
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
@@ -570,7 +573,7 @@
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
                        <span class="failure-history">
                             <span class="su su-refresh-history"></span>
-                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                            <a href="#" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
                        </span>
                     {{else}}
                         <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
@@ -596,7 +599,7 @@
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
                        <span class="failure-history">
                             <span class="su su-refresh-history"></span>
-                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                            <a href="#" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
                        </span>
                     {{else}}
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
@@ -642,7 +645,7 @@
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
                        <span class="failure-history">
                             <span class="su su-refresh-history"></span>
-                            <a href="javascript:void(0);" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
+                            <a href="#" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
                        </span>
                     {{else}}
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
@@ -680,7 +683,7 @@
 <div><iframe id="hiddeniframe" src="" style="display:none"></iframe></div>
 <input type="hidden" id="applauncherinputhidden" style="width:0;margin:0;border:0;height:0; display:inherit" />
 
-<script type="text/javascript" language="javascript">
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript" language="javascript">
     var gridName = $('#item-grid-container').attr("data-grid-name");
     var toolbarItems = [{ templateID: "#openTemplate" }, { templateID: "#openwithdashboarddesignerTemplate" }, { templateID: "#DownloadTemplate" }, { templateID: "#Separator1" }, { templateID: "#can-edit-template" }, { templateID: "#can-delete-template" }, { templateID: "#separator2" }, { templateID: "#move-template" }, { templateID: "#copy-template" }, { templateID: "#clone-template" }, { templateID: "#separator3" }, { templateID: "#schedule-template" }, { templateID: "#Separator4" }, { templateID: "#VersionTemplate" }];
     var categoryName = "@Context.Request.Query["categoryName"]".toString();
@@ -846,7 +849,7 @@
             preloadScripts.push(userGroupSuggestion);
             preloadScripts.push(itemActionScript);
 
-            function DashboarDelayResources(resourceLinkArray, resourceType) {
+            function DashboarDelayResources(resourceLinkArray, resourceType, nonceValue) {
                 for (var resource = 0; resource < resourceLinkArray.length; resource++) {
                     var isScriptAppended = false;
                     if (resourceType == "script") {
@@ -855,6 +858,9 @@
                             var preloadLink = document.createElement(resourceType);
                             preloadLink.type = "text/javascript";
                             preloadLink.src = resourceLinkArray[resource];
+                                                        if (nonceValue) {
+                                preloadLink.setAttribute("nonce", nonceValue); // ✅ Add nonce
+                            }
                             document.head.appendChild(preloadLink);
                         }
                     }
@@ -870,7 +876,7 @@
                 }
             }
             DashboarDelayResources(preloadStyles, "style");
-            DashboarDelayResources(preloadScripts, "script");
+            DashboarDelayResources(preloadScripts, "script", nonce);
         }
 
         $.views.helpers({
@@ -894,6 +900,11 @@
             },
             refreshEncode: function (IsScheduleEnabled, LastAttemptAt) {
                return (!IsScheduleEnabled ? "@refreshDisabledContent" : "@failureAttempt" + LastAttemptAt);
+            },
+            htmlEncode: function (input) {
+               const div = document.createElement('div');
+               div.textContent = input || '';
+               return div.innerHTML;
             }
         });
 

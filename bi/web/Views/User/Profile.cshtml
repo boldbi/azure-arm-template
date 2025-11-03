@@ -58,13 +58,13 @@
 @section scripts {
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.min.js"></script>
     </environment>
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
         var updateprofilepictureUrl = "@Url.Action("updateprofilepicture", "User")";
         var isAdmin = @Html.Raw(Json.Serialize(ViewBag.IsAdminAccount));
@@ -365,7 +365,7 @@
                     <div class="bi-page-footer col-12">
                         <div class="bi-page-actions col-12 col-md-12">
                             <a href="@Url.Action("dashboards", "dashboards")" class="secondary-button app-btn-secondary float-end" id="cancel-button" title="">@T["Cancel"]</a>
-                            <input type="button" class="primary-button app-btn-primary float-end" id="save-button" title="" onclick="SaveProfileSettings()" value="@T["Save"]">
+                            <input type="button" class="primary-button app-btn-primary float-end" id="save-button" title="" value="@T["Save"]">
                         </div>
                     </div>
                 </div>
@@ -393,7 +393,7 @@
                         </div>
                         <div class="col-md-7 access-token-container no-padding">
                             <div id="access-token-link" class="col-5" style="display:none">
-                                <input type="text" id="access-token" name="" class="form-control" placeholder="@T["Authentication token"]" disabled="disabled" autocomplete="off" onClick="this.setSelectionRange(0, this.value.length)" readonly>
+                                <input type="text" id="access-token" name="" class="form-control" placeholder="@T["Authentication token"]" disabled="disabled" autocomplete="off" readonly>
                                 <div class="form-control su su-copy text focus" id="access-token-copy" disabled="disabled" data-original-title="@T["Click to copy"]"></div>
                             </div>
                             <div class="col-lg-5 bg-warning no-margin access-token-notification">

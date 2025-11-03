@@ -21,6 +21,7 @@
                 var imageUrl = idpUrl + "/User/Avatar?id=" + id;
                 var image = $('<img id="default-profile-image">');
                 image.attr("src", imageUrl);
+                image.attr("alt", "Profile Logo");
                 image.css("position", "absolute");
                 image.css("border-radius", "50%");
                 if (imageSize === "120") {

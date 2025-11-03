@@ -16,7 +16,7 @@ def load_standalone_table_resource() -> None:
     isincremental = {11}
     query = ""
     if isincremental:
-       start_date = pendulum.parse('{5}', tz='{8}')
+       start_date = pendulum.parse('{5}')
     
        # Add days to the start date (e.g., add 1 day)
        end_date = {6}
@@ -24,9 +24,9 @@ def load_standalone_table_resource() -> None:
        # Format the dates for SQL
        start_date_str = start_date.to_datetime_string()  # '2023-01-01 00:00:00'
        end_date_str = end_date.to_datetime_string()      # '2023-01-02 00:00:00'
-       query = f"""{9} WHERE {2} """
+       query = f""" {9} """
     else:
-        query = f'''{9}'''
+        query = f""" {9} """
     with engine.connect() as conn:
     # Select genome table, stream data in batches of 100 {2} elements
         rows = conn.execution_options(yield_per=100).exec_driver_sql(query)

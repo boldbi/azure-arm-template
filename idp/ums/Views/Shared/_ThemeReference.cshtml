@@ -1,4 +1,14 @@
-﻿@if (GlobalAppSettings.SystemSettings.Theme?.Appearance == "light")
+﻿@{
+    var user = Context.User as ServerPrincipals;
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var themeAppearance = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) ? customThemeClaims.Appearance
+                                            : GlobalAppSettings.SystemSettings.Theme.Appearance;
+    var applicationTheme = !string.IsNullOrWhiteSpace(customThemeClaims.ApplicationTheme)
+                                          ? customThemeClaims.ApplicationTheme : !string.IsNullOrWhiteSpace(customThemeClaims.Appearance)
+                                          ? customThemeClaims.Appearance
+                                          : GlobalAppSettings.SystemSettings.Theme.ApplicationTheme;
+}
+@if (themeAppearance == "light")
 {
     <link rel="stylesheet" class="theme-ref" href="~/bundles/css/lighttheme.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/lighttheme.css")" crossorigin="anonymous" asp-append-version="true" />
 }
@@ -6,4 +16,4 @@ else
 {
     <link rel="stylesheet" class="theme-ref" href="~/bundles/css/darktheme.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/darktheme.css")" crossorigin="anonymous" asp-append-version="true" />
 }
-<link rel="stylesheet" class="application-theme-ref" href="~/theme/styles/application?theme=@GlobalAppSettings.SystemSettings.Theme.ApplicationTheme" crossorigin="anonymous" asp-append-version="true" />
+<link rel="stylesheet" class="application-theme-ref" href="~/theme/styles/application?theme=@applicationTheme" crossorigin="anonymous" asp-append-version="true" />

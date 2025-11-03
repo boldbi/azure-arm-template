@@ -26,7 +26,7 @@
 
     var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
     var isMobile = new DeviceDetection(Context).IsMobile;
-    var themeAppearance = globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance;
+    var themeAppearance = _identityResponse.ThemeAppearance;
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + themeAppearance + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
     var isDefaultLogo = globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.MainLogo);
     var appLogo = (globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.MainLogo) || globalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : globalAppSettings.SystemSettings.MainScreenLogo;
@@ -77,14 +77,16 @@
     var showSideNavMenu = absolutePath.ToLower().Contains("/dashboard-designer") || absolutePath.ToLower().Contains("/datasource-designer");
     var isUMSLogoInherited = globalAppSettings.GlobalUMSSettings != null && globalAppSettings.GlobalUMSSettings.UseGlobalSettings && globalAppSettings.GlobalUMSSettings.GlobalSettingsInfo.Contains(GlobalSettingsInfo.Branding);
     var showLicenseWarningIcon = ServerAppConfig.ShowLicenseWarning;
+    var canHideLicenseWarningIcon = ServerAppConfig.CanHideLicenseWarningIcon;
+    var isUnifiedAIAgentEnabled = globalAppSettings.SystemSettings?.IsUnifiedAIAgentEnabled ?? true;
     var isShowDataHub = ServerAppConfig.IsSelfHosted ? ServerAppConfig.ShowDataHub : true;
 }
 
 <environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.min.js"></script>
 </environment>
 
 <aside class="menu-bar" id="app-navigation" ng-controller="CustomMenuCtrl">
@@ -116,7 +118,7 @@
             @if (!ServerAppConfig.IsSelfHosted || (ServerAppConfig.IsSelfHosted && isItemPageRequested && itemPermissions != null && itemPermissions.ContainsKey(ItemType.Dashboard) && itemPermissions[ItemType.Dashboard]))
             {
                 <li class="sf-nav-item mobile-hidden" id="create-item" data-action="create-items">
-                    <a class="sf-nav-link" href="javascript:void(0)">
+                    <a class="sf-nav-link" href="#">
                         <span class="menu-icon-container create-menu-icon">
                             <i class="su su-add"></i>
                         </span>
@@ -185,7 +187,7 @@
     {
         <nav id="sub-nav" class="sf-nav-group mobile-hidden">
             <ul>
-                @if (showLicenseWarningIcon)
+                @if (!canHideLicenseWarningIcon && showLicenseWarningIcon)
                 {
                     <li class="sub-menu-action help-icon-list-item" id="license-warning-designer">
                         <span class="menu-icon-container">
@@ -196,7 +198,7 @@
                 @if (showNotifications)
                 {
                     <li class="sub-menu-action">
-                        <span id="user-system-notification" class="menu-icon-container" onclick="openUserNotification()">
+                        <span id="user-system-notification" class="menu-icon-container">
                             <i class="su su-notification-alert"></i>
                         </span>
                     </li>
@@ -218,7 +220,7 @@
                                         <div>@T["Explore"]</div>
                                     </li>
                                     <li class="sub-menu-item">
-                                        <a class="add-sample-button" href="javascript:void(0)">
+                                        <a class="add-sample-button" href="#">
                                             @T["Sample Dashboards"]
                                         </a>
                                     </li>
@@ -391,7 +393,7 @@
         </nav>
     }
 </aside>
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var userTenantsUrl = "@Url.Action("GetUserTenants", "User")";
     var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
     var idpUrl = "@idPUrl";
@@ -433,4 +435,5 @@
     var isUMSLogoInherited = @Json.Serialize(isUMSLogoInherited);
     var headerLogo = "@globalAppSettings.SystemSettings.MainScreenLogo";
     var hideMenusAndOptions = @Json.Serialize(hideMenusAndOptions);
+    var isUnifiedAIAgentEnabled = @Json.Serialize(isUnifiedAIAgentEnabled);
 </script>

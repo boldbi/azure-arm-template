@@ -21,6 +21,9 @@
     var isMobile = DeviceDetection.IsMobile(Context); 
     var cardviewCookie= string.IsNullOrWhiteSpace(Context.Request.Cookies["home_card_view"]) ? string.Empty : Context.Request.Cookies["home_card_view"];
     var encodedCookieValue = new HtmlString(cardviewCookie);
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var themeAppearance = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) ? customThemeClaims.Appearance
+                                            : GlobalAppSettings.SystemSettings.Theme.Appearance;
     var hasBIService = ViewBag.HasBIService;
     var hasReportsService = ViewBag.HasReportsService;
     var statusDescription = hasBIService && hasReportsService ? "This page lists Bold BI and Bold Reports sites for quick access." : hasBIService ? "This page lists Bold BI sites for quick access." : "This page lists Bold Reports sites for quick access.";
@@ -57,7 +60,7 @@
             var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
             var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
             var isMobile = @isMobile.ToString().ToLower();
-            var theme = "@GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower()";
+        var theme = @themeAppearance.ToLower();
             var enableSameTabLinkTarget = @GlobalAppSettings.SystemSettings.EnableSameTabLinkTarget.ToString().ToLower();      
             var defaultErrorImageSrc = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorRectangleImage)";
             var brokenImageForTiles = "@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/" + IconFileNames.DefaultErrorSquareImage)";
@@ -72,7 +75,7 @@
 <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-name-template">
             ${if (UseCustomBranding)}
             <div class="lazyload img-loader site-logo-container">
-                <img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo" ]">
+                <img id="icon-logo" class="icon-logo-container"  loading="lazy" alt="@T["Login Logo"]" src="@GlobalAppSettings.SystemSettings.LoginLogo" ]">
                 <div class="tenant-name-container">
                     <div class="tenant-name"> ${TenantName}  </div>
                     ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
@@ -87,7 +90,7 @@
     @{
 #pragma warning disable SCS0029
     }
-                <img id="icon-logo" class="icon-logo sites-logo"  loading="lazy" src="${SiteUrl}/get-client-logo?logotype=headerlogo&theme=@Html.Raw(GlobalAppSettings.SystemSettings.Theme.Appearance.ToLower())" ]">
+                <img id="icon-logo" class="icon-logo sites-logo"  loading="lazy" alt="@T["Site Logo"]" src="${SiteUrl}/get-client-logo?logotype=headerlogo&theme=@Html.Raw(themeAppearance.ToLower())" ]">
                 <div class="tenant-name-container">
                     <div class="tenant-name"> ${TenantName}  </div>
                     ${if (TenantType == "@((int)TenantType.BoldBIOnPremise)")}
@@ -105,11 +108,13 @@
         <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-url-template">
             <a class="grid-content text-decoration-none" title="${SiteUrl}"  href="${SiteUrl}" target="_blank">${SiteUrl}</a>
         </script>
+
+    <h1 style="display: none">@T["Home"] - @GlobalAppSettings.SystemSettings.OrganizationName</h1>
        
     <div id="site-down-alert"></div>
     @await Html.PartialAsync("_SiteDownAlert")
     <div id="header-container">
-        <img id ="boldbi-logo" class="boldbi-logo" src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
+        <img id="boldbi-logo" class="boldbi-logo" alt="@T["Branding Logo"]"  src="@Url.Content("~/logos?type=login")" alt="@T[$"{AppBranding.Bold.ProductName} Logo"]">
         <div class="side-header">
             @if (adminType == AdminType.SuperAdmin)
             {

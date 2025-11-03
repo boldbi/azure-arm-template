@@ -779,7 +779,9 @@ $(document).ready(function () {
                         Logo: $("input[name='oauthLogo']").val().trim(),
                         LogoutEndPoint: $("input[name='oauthLogoutEndpoint']").val().trim(),
                         GroupImportSettings: getGroupImportSettings("oauth"),
-                        CanCreateAccount: $("#enable-oauth-account-creation").is(":checked")
+                        CanCreateAccount: $("#enable-oauth-account-creation").is(":checked"),
+                        IssuerEndPoint: $("input[name='oauthIssuerEP']").val().trim(),
+                        JwksEndPoint: $("input[name='oauthJwksEP']").val().trim(),
                     }
                 };
             }

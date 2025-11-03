@@ -503,6 +503,33 @@ plugins:
     </yaml>
   </extractor>
   <extractor>
+    <name>Google SheetsInc</name>
+    <yaml>
+      <![CDATA[
+version: 1.0.1
+destination: 
+plugins:
+  extractors:
+    - name: GoogleSheets
+      connectorname: Google Sheets
+      config:
+        project_id: 
+        client_email: 
+        private_key: 
+        type: Service
+      properties:
+        spreadsheet_url_or_id: 
+        # range_names value should be range_names: "range_name1", "range_name2"
+        range_names: 
+	  metadata:
+        sheetname:
+          replication_method: INCREMENTAL
+          replication_key: replication_key
+          replication_value: replication-value
+      ]]>
+    </yaml>
+  </extractor>
+  <extractor>
     <name>Hubspot</name>
     <yaml>
       <![CDATA[
@@ -1310,7 +1337,7 @@ plugins:
         type: excel
         # sheetname is required for excel type
         sheetname: sheetname
-        include_header: true
+        include_header: false
         filePath: <Uploaded filename>
       ]]>
     </yaml>
@@ -1506,4 +1533,103 @@ plugins:
       ]]>
 		</yaml>
 	</extractor>
-</Connector>
+	<extractor>	
+	<name>Sybase</name>
+	<yaml>
+		<![CDATA[
+version: 1.0.1
+destination: 
+plugins:
+  extractors:
+    - name: Sybase
+      connectorname: Sybase
+      config:
+        dsn: <>
+        username: <>
+        password: <>
+      select:
+        - tablename
+      ]]>
+	</yaml>
+	</extractor>
+<extractor>
+		<name>IBMDb2</name>
+		<yaml>
+			<![CDATA[
+version: 1.0.1
+destination: 
+plugins:
+  extractors:
+    - name: IBMDb2
+      connectorname: IBMDb2
+      schemaname: public
+      config:
+        host: hostname
+        port: 50000 
+        username: user
+        password: password
+        database: database
+        client_lib_path: file_path
+      select:
+        - tablename
+      ]]>
+		</yaml>
+	</extractor>
+<extractor>
+		<name>Bing Ads</name>
+		<yaml>
+			<![CDATA[
+version: 1.0.1
+destination: 
+plugins:
+  extractors:
+    - name: Bingads
+      connectorname: Bing Ads
+      config:
+        client_id: <>
+        client_secret: <>
+		developer_token: <>
+        customer_id: <>
+        account_id: <>
+	  properties:
+        type: reports
+		report: 
+		# atleast one dimensional column should be included
+		columns: 
+		aggregation: 'Daily'
+        PredefinedTime: 'LastSevenDays',
+        ReportTimeZone: 'PacificTimeUSCanadaTijuana'
+		CustomDateRangeStart: optional
+		CustomDateRangeEnd: optional
+      ]]>
+		</yaml>
+	</extractor>
+	<extractor>
+		<name>Bing AdsAuth</name>
+		<yaml>
+			<![CDATA[
+version: 1.0.1
+destination: 
+plugins:
+  extractors:
+    - name: Bingads
+      connectorname: Bing Ads
+      config:
+        client_id: {0}
+        client_secret: {1}
+		developer_token: <>
+		customer_id: <>
+		account_id: <>
+      properties:
+        type: reports
+		report: 
+		# atleast one dimensional column should be included
+		columns: 
+		aggregation: 'Daily'
+        PredefinedTime: 'LastSevenDays',
+        ReportTimeZone: 'PacificTimeUSCanadaTijuana'
+		CustomDateRangeStart: optional
+		CustomDateRangeEnd: optional
+      ]]>
+		</yaml>
+	</extractor></Connector>

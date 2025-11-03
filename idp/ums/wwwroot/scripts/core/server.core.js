@@ -1189,6 +1189,7 @@ function profileDisplayNameSelection() {
             var imageUrl = idpUrl + "/User/Avatar?id=" + id;
             var image = $('<img id="default-profile-image">');
             image.attr("src", imageUrl);
+            image.attr("alt", "Profile Logo");
             image.attr("width", imageSize);
             image.attr("height", imageSize);
             image.appendTo($(this));

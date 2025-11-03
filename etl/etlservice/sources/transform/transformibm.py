@@ -76,12 +76,21 @@ db2_connection = ibm_db.connect(db2_connection_string, "", "")
 
 duck_query = f"SELECT * FROM {duck_table_name}"
 df = duck_connection.execute(duck_query).fetchdf()
-try:
-    stmt = ibm_db.prepare(db2_connection, f"DROP TABLE {db2_table_name} IF EXISTS ")
-    ibm_db.execute(stmt)
-except Exception as e:
-    print(f"Error creating table: {e}")
-    # Optionally, print more details about the row and columns involved
+
+if isDropTable:
+    try:
+        # First check if the table exists
+        check_stmt = ibm_db.exec_immediate(db2_connection,
+            f"SELECT COUNT(*) FROM SYSCAT.TABLES WHERE TABNAME = '{db2_table_name.upper()}'")
+        result = ibm_db.fetch_tuple(check_stmt)
+        
+        if result and result[0] > 0:
+            drop_stmt = ibm_db.exec_immediate(db2_connection, f"DROP TABLE {db2_table_name}")
+            print(f"Table {db2_table_name} dropped successfully.")
+    except Exception as e:
+        print(f"Error dropping table: {e}")
+        # Optionally, print more details about the row and columns involved
+
 try:
     stmt = ibm_db.prepare(db2_connection, create_query)
     ibm_db.execute(stmt)
