@@ -20,6 +20,7 @@
     var ConfiguredStorageType = ViewBag.ConfiguredStorageType != null ? ViewBag.ConfiguredStorageType : '0';
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var requestUrlPath = requestUrl.AbsolutePath.ToString().ToLower();
+    var siteDefaultText = String.Empty;
     var canDisableEmailSettingsOption = 
         ViewBag.MailSettings == null || 
         string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsHost) || 
@@ -35,6 +36,7 @@
         siteDomain = biUrl.Authority;
         siteProtocol = biUrl.Scheme;
         boldBIPath = biUrl != null ? biUrl.LocalPath.ToString() : "/bi";
+        siteDefaultText = @boldBIPath + "/" + @CloudAppConfig.TenantIdentifierPrefix + "/";
     }
     else if (!ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
     {
@@ -43,6 +45,7 @@
         siteDomain = reportUrl.Authority;
         siteProtocol = reportUrl.Scheme;
         boldReportPath = reportUrl != null ? reportUrl.LocalPath.ToString() : "/reporting";
+        siteDefaultText = @boldReportPath + "/" + @CloudAppConfig.TenantIdentifierPrefix + "/";
     }
     else if (ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
     {
@@ -52,6 +55,7 @@
         reportDomain = reportUrl.Authority;
         boldBIPath = biUrl.LocalPath.ToString();
         boldReportPath = reportUrl.LocalPath.ToString();
+        siteDefaultText = @boldBIPath + "/" + @CloudAppConfig.TenantIdentifierPrefix + "/";
     }
 
     var protocolTypes = new List<SelectListItem>
@@ -146,6 +150,7 @@
         var IsReportsPrefixSchema = ("@ViewBag.IsReportsPrefixSchema".toLowerCase() === "true");
         var BIUmsPrefixSchema = ("@ViewBag.BIUmsPrefixSchema".toLowerCase() === "true");
         var isUmsStartupWithOracle = ("@ViewBag.IsUmsStartupWithOracle".toLowerCase() === "true");
+        var defaultTenantIdentifier = ("@ViewBag.DefaultTenantIdentifier".toLowerCase());
         var canDisableEmailSettingsOption =  "@canDisableEmailSettingsOption".toLowerCase() === "true";
         var tenantSchema = "@tenantSchema";
         var ConfiguredStorageType = "@ConfiguredStorageType";
@@ -294,7 +299,7 @@
                                     <div class="col-lg-12 col-sm-12 col-12 float-start col-md-12 no-padding site-url-identifier d-none">
 
                                         <div class="col-lg-12 col-sm-12 col-md-12 col-12 float-start txt-holder site-identifier-div center-align input-alignment no-padding">
-                                            <input type="text" id="tenant-identifier" name="tenantidentifier" class="form-text no-margin" placeholder="@T["Site identifier"]" />
+                                            <input type="text" id="tenant-identifier" name="tenantidentifier" class="form-text no-margin" placeholder="@T["Site identifier"]" value="@ViewBag.DefaultTenantIdentifier" />
                                             <div id="site-identifier-check" class="selfhosted center-align site-identifier-check d-none">
                                                 @Html.CheckBox("identifier", new { @class = "material-checkbox" })
                                                 @Html.Hidden("identifier")
@@ -307,8 +312,8 @@
                                                     <span>@T["i.e "]</span>
                                                     <span class="site-url no-padding" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-html="true" data-bs-placement="top" data-bs-container="body" data-bs-content="">
                                                         <span class="site-domain">@GlobalAppSettings.SystemSettings.BaseUrl</span>
-                                                        <span class="site-default-text text-content"></span>
-                                                        <span class="site-id-name"></span>
+                                                        <span class="site-default-text text-content">@siteDefaultText</span>
+                                                        <span class="site-id-name">@ViewBag.DefaultTenantIdentifier</span>
                                                     </span>
                                                 </div>
                                             </span>

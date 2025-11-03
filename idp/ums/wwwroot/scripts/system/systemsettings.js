@@ -616,7 +616,6 @@ function checkingExistingDB(element) {
                             }
                             html += "</ol>";
                             errorContent = html;
-                            $(".database-error").html(databaseValidationMessage).show();
                             $(".server-schema-prefix-hide").removeClass("d-block").addClass("visually-hidden");
 
                         } else if (!result.Data.key && items.length <= 0) {
@@ -635,7 +634,6 @@ function checkingExistingDB(element) {
                             $('#details-next').removeAttr("disabled");
                             parent.hideWaitingPopup(element);
                             errorContent = result.Data.value;
-                            $(".database-error").html(databaseValidationMessage).show();
                         }
                     }
                 });
@@ -644,7 +642,6 @@ function checkingExistingDB(element) {
                 parent.hideWaitingPopup(element);
                 $('#details-next').removeAttr("disabled");
                 errorContent = result.Data.value;
-                $(".database-error").html(databaseValidationMessage).show();
             }
         }
     });
@@ -705,7 +702,6 @@ function checkingNewDBConnection(element, actionType) {
         if (result.Data != undefined) {
             errorContent = result.Data.value;
         }
-        $(".database-error").html(databaseMessage).show();
     }
 }
 
@@ -755,6 +751,7 @@ function connectDatabase(element, actionType) {
                 window.connectionString = serverResult.Data.connectionResponse.ServerConnectionString;
                 window.tenantServerConnectionString = serverResult.Data.connectionResponse.TenantServerConnectionString;
                 window.intermediateServerConnectionString = serverResult.Data.connectionResponse.IntermediateServerConnectionString;
+                isDatabaseErrorDialogOpen = false;
                 if (actionType != undefined && actionType == "edit") {
                     result = { "Data": { "key": true, "value": "connected successfully" } };
                 }
@@ -766,7 +763,10 @@ function connectDatabase(element, actionType) {
                 if (serverResult.Data != undefined) {
                     errorContent = serverResult.Data.value;
                 }
-                $(".database-error").html(ValidationMessage).show();
+                messageBox("su-login-error", window.Server.App.LocalizationContent.DatabaseError, errorContent, "success", function () {
+                    onCloseMessageBox();
+                });
+                isDatabaseErrorDialogOpen = true;
             }
         }
     });

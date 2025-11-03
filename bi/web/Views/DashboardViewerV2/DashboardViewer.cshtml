@@ -21,7 +21,7 @@
     var parentId = ViewBag.ParentId;
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && itemDetail.IsPublic;
     var canEdit = itemDetail.CanWrite;
-    var loginImage = globalAppSettings.SystemSettings.LoginLogo;
+    var loginImage = _identityResponse.LoginLogo;
     var dataServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings).TrimEnd('/');
     var provider = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : ViewBag.DataSourceProviders[0].Provider) : string.Empty;
     var service = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : (ViewBag.DataSourceProviders[0] == null ? string.Empty : ViewBag.DataSourceProviders[0].Service[0])) : string.Empty;
@@ -38,6 +38,7 @@
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
     var filterQuery = ViewBag.FilterQuery;
     var isBingMapRequired = ViewBag.IsBingMapRequired;
+    var isAzureMapRequired = ViewBag.IsAzureMapRequired;
     ViewBag.ViewId = ViewBag.ViewDetails.ViewId != Guid.Empty ? ViewBag.ViewDetails.ViewId : string.Empty;
     var widgetId = ViewBag.WidgetId;
     var pinWidget = ViewBag.IsPinWidgetMode;
@@ -60,10 +61,12 @@
     var aiLogo = globalAppSettings.SystemSettings.AILogo;
     var knowDomainsList = KnownDomainList.AllowedDomainList;
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
-    var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
+    var themeInViewer = ViewBag.ThemeInViewer;
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
     var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
+    var customApplicationTheme = _identityResponse.CustomApplicationTheme != null ? _identityResponse.CustomApplicationTheme : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme);
+    var customThemeAppearance = _identityResponse.ThemeAppearance != null ? _identityResponse.ThemeAppearance : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance);
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
@@ -71,8 +74,9 @@
     }
     else
     {
-        dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
+        dashboardCutomTheme = _identityResponse.CustomDashboardTheme == null ? _identityResponse.CustomDashboardTheme : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme);
     }
+    var nonce = Context.Items["ScriptNonce"]?.ToString();
 }
 <!DOCTYPE html>
 
@@ -105,9 +109,9 @@
     <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
     <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
 
-    <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
 
-    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href != '@faviconFallbackUrl') this.href = '@faviconFallbackUrl';" />
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" id="favicon-link" />
 
     @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
     {
@@ -127,7 +131,7 @@
     }
 
     @await Html.PartialAsync("_OGPContent", new ViewDataDictionary(ViewData) { { "PageTitle", ViewBag.Title }, { "OrganizationName", globalAppSettings.SystemSettings.OrganizationName }, { "Logo", loginImage }, { "Description", itemDetail.Description } })
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         @{
             var userName = "";
             if (Context.User.Identity.IsAuthenticated && Context.User != null && Context.User.Identity != null && isUserAuthenticatedInCurrentTenant || (embedConfig.IsEmbedCode && !isPublic))
@@ -142,7 +146,21 @@
                 isUserAuthenticated = "false";
             }
         }
-        
+        document.addEventListener("DOMContentLoaded", function () {
+            const faviconLink = document.getElementById("favicon-link");
+
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    const currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== faviconFallbackUrl.toLowerCase()) {
+                        faviconLink.setAttribute("href", faviconFallbackUrl);
+                    }
+                });
+            }
+        });
+
+        var scriptNonce = @Json.Serialize(nonce);
+        var nonce = @Json.Serialize(nonce);
         var viewId = "@ViewBag.ViewId";
         var isDebug = "@isDebug";
         var idpreferenceId = "@idpreferenceId";
@@ -235,12 +253,13 @@
         var isCommentNotFound = @Html.Raw(Json.Serialize(isCommentNotFound));
         var isInvalidComment = @Html.Raw(Json.Serialize(isInvalidComment));
         var dashboardCustomThemename = "@dashboardCutomTheme";
-        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
-        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var customThemeAppearance = "@customThemeAppearance";
+        var applicationTheme = "@(_identityResponse.CustomApplicationTheme)";
         var getWidgetEmbedCode = @Json.Serialize(getWidgetEmbedCode);
         var enableApplicationEmbed = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var appVersion = "@ServerAppConfig.ProductVersion";
         var isBingMapRequired = @Json.Serialize(isBingMapRequired);
+        var isAzureMapRequired = @Json.Serialize(isAzureMapRequired);
         var embedThemeEnabled = @Json.Serialize(embedThemeEnabled);
         var canCheckSessionInActive = @Html.Raw(Json.Serialize(canShowSession));
         var isAuthenticated = @Html.Raw(Json.Serialize(isAuthenticated));
@@ -301,7 +320,7 @@
                 <div class="container-fluid">
                     <ul class="nav navbar-nav col-12 no-padding no-margin">
                         <li class="@(enableComment.ToLower() == "true" && embedConfig.HasViews && embedConfig.HasDashboardComments ? "col-4":"col-xs-6") icon">
-                            <a href="javascript:void(0)" class="su su-nav-dashboard active">
+                            <a href="#" class="su su-nav-dashboard active">
                                 <span class="nav-menu-label">@T["Dashboard"]</span>
                             </a>
                         </li>
@@ -310,13 +329,13 @@
                             <li class="@(embedConfig.HasViews ? "col-4":"col-xs-6") icon" id="comment-li">
                                 @if (ViewBag.IsDashboardCommented == "true")
                                 {
-                                    <a href="javascript:void(0)" class="su su-with-comment server-comment">
+                                    <a href="#" class="su su-with-comment server-comment">
                                         <span class="nav-menu-label">@T["Comment"]</span>
                                     </a>
                                 }
                                 else
                                 {
-                                    <a href="javascript:void(0)" class="su su-without-comment server-comment">
+                                    <a href="#" class="su su-without-comment server-comment">
                                         <span class="nav-menu-label">@T["Comment"]</span>
                                     </a>
                                 }
@@ -326,7 +345,7 @@
                         @if (!embedConfig.IsEmbedDashboard || embedConfig.HasViews)
                         {
                             <li class="@(embedConfig.HasDashboardComments && enableComment.ToLower() == "true" ? "col-4":"col-xs-6") icon" id="view-li">
-                                <a href="javascript:void(0)" class="su-view">
+                                <a href="#" class="su-view">
                                     <span class="nav-menu-label">@T["Views"]</span>
                                 </a>
                             </li>
@@ -362,7 +381,7 @@
         <div class="col-lg-12 no-padding" id="PopupContainer">
             <div class="col-md-12">
                 <div class="col-12 no-padding" style="float:right">
-                    <a href="javascript:void(0);" onclick="commentImageDialogClose()" class="PopupClose closePopupImage"><span class="su su-close"></span></a>
+                    <a href="#" class="PopupClose closePopupImage"><span class="su su-close"></span></a>
                 </div>
             </div>
             <div class="dialogBody col-12 no-padding">
@@ -391,10 +410,10 @@
     @if (itemDetail.IsSampleData && !isMobile && !isSlideshow && !embedConfig.IsEmbedDashboard && isUserAuthenticatedInCurrentTenant)
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/update-template-dashboard.min.js"></script>
         </environment>
 
         <div class="float-end" id="sample-data-notification" style="display:none">

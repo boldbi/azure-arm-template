@@ -5,20 +5,20 @@
 
 <environment include="Development,CloudDevelopment">
     <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/custom-domain.css" />
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-domain.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-domain.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
     <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/custom-domain.min.css" />
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-domain.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-domain.min.js"></script>
 </environment>
 
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var addCustomDomainUrl = "@Url.Action("AddCustomDomain", "CustomDomain")";
     var createSubscriptionCardUrl = "@Url.Action("AddPaymentDetail", "Payment")";
     var isCardExist = "@(GlobalAppSettings.Branding == AppBranding.BoldBI.Identifier && ViewBag.SaasPlan != (int)SaaSPlan.SingleUserPlan ? true : ViewBag.IsCardExist)";
     var deleteCustomDomainUrl = "@Url.Action("DeleteCustomDomain", "CustomDomain")";
 </script>
-<script src="https://js.stripe.com/v3/"></script>
+<script nonce="@Context.Items["ScriptNonce"]" src="https://js.stripe.com/v3/"></script>
 <div id="stripePublicKey" style="display:none">
     @ServerAppConfig.AppSettings.Subscription.StripeKey
 </div>
@@ -44,7 +44,7 @@
                 <a class="app-hyperlink" href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomDomain))" target="_blank">@T["Learn how to do it."]</a>
             </label>
             <div class="input-group custom-domain-link-div">
-                <input onClick="this.setSelectionRange(0, this.value.length)" value="@ServerAppConfig.AppSettings.EndPoints.CustomDomainMapping" type="text" class="form-control text-center custom-domain-link" readonly />
+                <input id="custom-domain-link" value="@ServerAppConfig.AppSettings.EndPoints.CustomDomainMapping" type="text" class="form-control text-center custom-domain-link" readonly />
                 <span class="input-group-btn">
                     <button class="btn btn-default su su-copy custom-domain-link-copy" type="button" readonly="" data-original-title="@T["Click to copy"]"></button>
                 </span>
@@ -91,7 +91,7 @@
                     <span class="modal-title">@T["Delete Custom Domain"]</span>
                 </div>
                 <div class="col-4 no-padding">
-                    <a href="javascript:void(0);" onclick="OnDeleteCustomDomainClose()" class="close">
+                    <a id="custom-domain-element" href="#" class="close">
                         <i class="su su-close"></i>
                     </a>
                 </div>
@@ -105,7 +105,7 @@
                 <div class="col-4"><input type="hidden" id="hiddenId" /></div>
                 <div class="col-xs-8 no-padding">
                     <input type="button" id="delete-custom-domain-confirmation" class="app-button app-critical-action-button app-btn-danger" value="@T["Yes"]" tabindex="1" autofocus />
-                    <input type="button" onclick="OnDeleteCustomDomainClose()" class="app-button app-secondary-button app-btn-secondary popup-close" value="@T["No"]" tabindex="2" />
+                    <input type="button" id="delete-custom-domain-confirmation-option" class="app-button app-secondary-button app-btn-secondary popup-close" value="@T["No"]" tabindex="2" />
                 </div>
             </div>
         </div>

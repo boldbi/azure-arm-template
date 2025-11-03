@@ -3,7 +3,7 @@
     ViewBag.Title = T["ContentSecurityPolicy"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
     var isCSPTab = (!string.IsNullOrWhiteSpace(Context.Request.Query["view"]) && Context.Request.Query["view"] == "csp-settings") ? "active" : string.Empty;
     var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
-
+    var isCspEnabled = (bool)contentSecurityPolicySettings.EnableCSP || CloudAppConfig.EnableCSPByDefault;
 }
 
 <div role="tabpanel" class="tab-pane col-12 float-start col-lg-12 col-md-12 col-sm-12 admin-page-body @isCSPTab" id="csp">
@@ -12,7 +12,7 @@
         <div class="col-12 float-start no-padding enable-csp ">
             <div class="col-12 float-start no-padding">
                 <div class="info-label">
-                    @Html.CheckBox("enable-csp", (bool)contentSecurityPolicySettings.EnableCSP, new { @class = "material-checkbox" })
+                    @Html.CheckBox("enable-csp", isCspEnabled, new { @class = "material-checkbox" })
                     @Html.Hidden("enable-csp")
                     <label for="enable-csp">
                         @T["Enable Content-Security-Policy"]

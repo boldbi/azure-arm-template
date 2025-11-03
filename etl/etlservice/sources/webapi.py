@@ -8,6 +8,8 @@ import base64
 import os
 import posixpath
 from typing import Iterator
+from datetime import datetime, timedelta
+import re
 
 import dlt
 from dlt.sources import TDataItem, TDataItems
@@ -23,8 +25,45 @@ except ImportError:
         read_jsonl,
         read_parquet,
     )
+
+def replace_none_with_string(data):
+    if isinstance(data, dict):
+        return {{k: replace_none_with_string(v) for k, v in data.items()}}
+    elif isinstance(data, list):
+        return [replace_none_with_string(item) for item in data]
+    elif data is None:
+        return 0
+    else:
+        return data
+        
+
     
 api_endpoint = '{8}'
+
+match = re.search(r"since=(today\(\)\.adddays\(-1\)\.start)&until=(today\(\)\.adddays\(-1\)\.end)", api_endpoint)
+if match:
+    start_param = match.group(1)
+    end_param = match.group(2)
+    
+    # Check if the parameters match the expected pattern
+    if start_param == "today().adddays(-1).start" and end_param == "today().adddays(-1).end":
+        # Get yesterday's date
+        yesterday = datetime.now() - timedelta(days=1)
+
+        # Start of yesterday (midnight)
+        start_of_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day)
+
+        # End of yesterday (last second before midnight of today)
+        end_of_yesterday = start_of_yesterday + timedelta(days=1) - timedelta(seconds=1)
+
+        # Convert to Unix timestamps
+        start_timestamp = int(start_of_yesterday.timestamp())
+        end_timestamp = int(end_of_yesterday.timestamp())
+        api_endpoint = re.sub(r"today\(\)\.adddays\(-1\)\.start", str(start_timestamp), api_endpoint)
+        api_endpoint = re.sub(r"today\(\)\.adddays\(-1\)\.end", str(end_timestamp), api_endpoint)
+        print("Parsed Start Timestamp:", start_timestamp)
+        print("Parsed End Timestamp:", end_timestamp)
+
 {1}
 
 
@@ -40,6 +79,7 @@ else:
 # Create DataFrame if data is available
 if api_data:
     df = pd.json_normalize(api_data)
+    {11}
     print(df.head())
 
     pipeline = dlt.pipeline("{0}_pipeline", destination="filesystem", dataset_name="{0}")

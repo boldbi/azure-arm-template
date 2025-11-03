@@ -14,8 +14,9 @@
     var cdnLink = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var nonce = Context.Items["ScriptNonce"]?.ToString();
     var pageDescription = T["Create and manage dashboard schedules to send out dashboard reports either at a specific date and time interval or when data changes."];
-    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Schedule;
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Schedule + "&nonce=" + Context.Items["ScriptNonce"];
 }
 @model List<ScheduleViewModel>
 
@@ -32,7 +33,7 @@
 }
 
 @section scripts{
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var partialViewsUrl = @Json.Serialize(partialViewsUrl);
         var isMobile = @Json.Serialize(isMobile)
                 var buildVersion = "@ServerAppConfig.ProductVersion";
@@ -48,7 +49,7 @@
             });
         });
     </script>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
         var scheduleRangeDateFormat = "@_clientDateTimeInfo.ClientDateTime.DateFormat";
         var scheduleRangeTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
@@ -67,18 +68,19 @@
         var cdnLink = "@cdnLink";
         var appVersion = "@ServerAppConfig.ProductVersion";
         var scheduleExist = "@ViewBag.ScheduleExist";
+        var nonce = @Json.Serialize(nonce);
     </script>
 
     @if (!isMobile)
     {
         @await Html.PartialAsync("../Scheduler/_ScheduleHistory")
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting.min.js"></script>
         </environment>
-        <script type="text/javascript">
+        <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(document)
                 .ready(function () {
                     $("#search-schedules").val("");
@@ -253,7 +255,7 @@
                     preloadScripts.push(editCategoryScript);
                     preloadScripts.push(createCategoryScript);
 
-                    function DashboarDelayResources(resourceLinkArray, resourceType) {
+                    function DashboarDelayResources(resourceLinkArray, resourceType, nonceValue) {
                         for (var resource = 0; resource < resourceLinkArray.length; resource++) {
                             var isScriptAppended = false;
                             if (resourceType == "script") {
@@ -262,6 +264,9 @@
                                     var preloadLink = document.createElement(resourceType);
                                     preloadLink.type = "text/javascript";
                                     preloadLink.src = resourceLinkArray[resource];
+                                    if (nonceValue) {
+                                preloadLink.setAttribute("nonce", nonceValue); // ✅ Add nonce
+                            }
                                     document.head.appendChild(preloadLink);
                                 }
                             }
@@ -277,17 +282,17 @@
                         }
                     }
                     DashboarDelayResources(preloadStyles, "style");
-                    DashboarDelayResources(preloadScripts, "script");
+                    DashboarDelayResources(preloadScripts, "script", nonce);
                 });
         </script>
     }
     else
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting-mobile.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting-mobile.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting-mobile.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/scheduleslisting-mobile.min.js"></script>
         </environment>
     }
 
@@ -347,7 +352,7 @@
                 @Html.Raw(String.Format(T["Schedule disabled due to {0} consecutive failures"].Value, @ServerAppConfig.FailureOccurrence))
                 <span class="failure-history">
                     <span class="su su-run-history"></span>
-                    <a href="javascript:void(0);" class="schedule-history" title="" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}")'>@T["Check Schedule History"]</a>
+                    <a href="#" class="schedule-history" title="" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}">@T["Check Schedule History"]</a>
                 </span>
                 {{else}}
                 @Html.Raw(String.Format(T["Schedule disabled by {0}"].Value, "{{:ModifiedByFullName}}"))
@@ -382,7 +387,7 @@
                     <ul class="dropdown-menu" role="menu">
                         {{if !IsScheduledItemDeleted  && !(IsWidgetDeleted && DashboardWidgetId != "@Guid.Empty") && !(IsViewDeleted && DashboardViewId != "@Guid.Empty")}}
                         <li class="menu-group @(schemes != null && !schemes.RunNow ? "hide" : string.Empty)">
-                            <a href="javascript:void(0);" title="@T["Run now"]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                            <a href="#" title="@T["Run now"]" class="on-demand-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}">
                                 <i class="su su-play" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
                                 <span class="menu-text">@T["Run Now"]</span>
                             </a>
@@ -390,14 +395,14 @@
                         <li class="divider @(schemes != null && !schemes.RunNow ? "hide" : string.Empty)"></li>
                         {{/if}}
                         <li class="menu-group">
-                            <a href="javascript:void(0);" title="@T["Schedule-History"]" class="schedule-history" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}")'>
+                            <a href="#" title="@T["Schedule-History"]" class="schedule-history" id="schedule-run-history" {{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}">
                                 <i class="su su-run-history" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
                                 <span class="menu-text">@T["Run History"]</span>
                             </a>
                         </li>
                         <li class="divider"></li>
                         <li class="menu-group @(schemes != null && !schemes.Info ? "hide" : string.Empty)">
-                            <a href="javascript:void(0);" title="@T["Info"]" class="item-info">
+                            <a href="#" title="@T["Info"]" class="item-info">
                                 <i class="su su-info"></i>
                                 <span class="menu-text">@T["Info"]</span>
                             </a>
@@ -407,7 +412,7 @@
                         {{if Status=="Active"}}
                         {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != "@Guid.Empty") && !(IsViewDeleted && DashboardViewId != "@Guid.Empty")}}
                         <li class="menu-group @(schemes != null && !schemes.Disable ? "hide" : string.Empty)">
-                            <a href="javascript:void(0);" title="@T["Disable"]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                            <a href="#" title="@T["Disable"]" class="disable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}">
                                 <i class="su su-disable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
                                 <span class="menu-text">@T["Disable"]</span>
                             </a>
@@ -417,7 +422,7 @@
                         {{else Status=="Inactive"}}
                         {{if !IsScheduledItemDeleted && !(IsWidgetDeleted && DashboardWidgetId != "@Guid.Empty") && !(IsViewDeleted && DashboardViewId != "@Guid.Empty")}}
                         <li class="menu-group @(schemes != null && !schemes.Enable ? "hide" : string.Empty)">
-                            <a href="javascript:void(0);" title="@T["Enable"]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                            <a href="#" title="@T["Enable"]" class="enable-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"  data-multiitem-name="{{:MultiDashboardName}}">
                                 <i class="su su-enable" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
                                 <span class="menu-text">@T["Enable"]</span>
                             </a>
@@ -430,7 +435,7 @@
                         {{if CanWrite}}
                         <li title="@T["Edit"]" class="@(schemes != null && !schemes.Edit ? "hide" : string.Empty)">
 
-                            <a href="javascript:void(0);" title="@T["Edit"]" class="edit-schedule" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className, "{{:MultiDashboardName}}", "{{:IsScheduledItemDeleted}}")'>
+                            <a href="#" title="@T["Edit"]" class="edit-schedule" data-category-name="{{:ItemCategoryName}}" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" data-multiitem-name="{{:MultiDashboardName}}" data-isscheduleditem-deleted="{{:IsScheduledItemDeleted}}">
                                 <i class="su su-edit" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
                                 <span class="menu-text">@T["Edit"]</span>
                             </a>
@@ -441,7 +446,7 @@
                         {{if ~checkMobile()}}
                         {{if CanDelete}}
                         <li title="@T["Delete"]" class="@(schemes != null && !schemes.Delete ? "hide" : string.Empty)">
-                            <a href="javascript:void(0);" title="@T["Delete"]" class="remove-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}" onclick='manageSchedule("{{:Id}}", "{{:ItemId}}", this.className,"{{:MultiDashboardName}}")'>
+                            <a href="#" title="@T["Delete"]" class="remove-schedule" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}">
                                 <i class="su su-delete" data-scheduleid="{{:Id}}" data-itemname="{{:ItemName}}" data-itemid="{{:ItemId}}"></i>
                                 <span class="menu-text">@T["Delete"]</span>
                             </a>
@@ -516,5 +521,5 @@
         <iframe id="permission-iframe"></iframe>
     </div>
 
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 }

@@ -1,9 +1,9 @@
 ﻿@{
     Layout = null;
     var globalAppSettings = _globalAppSettings;
-    var isDefaultLoginLogo = globalAppSettings.SystemSettings.LoginLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.LoginLogo);
+    var isDefaultLoginLogo = _identityResponse != null && _identityResponse.LoginLogo != null ? _identityResponse.LoginLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.LoginLogo) : false;
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.LoginLogo;
-    var appLogo = isDefaultLoginLogo ? defaultAppLogo : globalAppSettings.SystemSettings.LoginLogo;
+    var appLogo = isDefaultLoginLogo ? defaultAppLogo : _identityResponse.LoginLogo;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var LoginDescription = (string)Context.Items["LoginDescription"];
     var showContainer = (ViewBag.HasSSO ?? ViewBag.HasSSO == true && !string.IsNullOrWhiteSpace(ViewBag.ExternalLogin)) ? "none" : "block";
@@ -14,24 +14,39 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>@T["Embed"] - @globalAppSettings.SystemSettings.OrganizationName</title>
-    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href !== null && this.href.toLowerCase() !== '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
-    <script>
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" id="favicon-link" />
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var idLogin = '@globalAppSettings.SystemSettings.IDPUrl';
         var serverUrl = '@globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/')';
         var showContainer = '@showContainer';
         var loginProvider = '@loginProvider';
+        document.addEventListener("DOMContentLoaded", function () {
+            var initialFaviconPath = "@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var fallbackFaviconPath = "@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+
+            var faviconLink = document.getElementById("favicon-link");
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    var currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== initialFaviconPath.toLowerCase()) {
+                        faviconLink.setAttribute("href", fallbackFaviconPath);
+                    }
+                });
+            }
+        });
+
     </script>
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-login.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-login.js"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/embed-login.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-login.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-login.min.js"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/embed-login.min.css" />
     </environment>
 
-    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" onerror="if (this.href != '@globalAppSettings.SystemSettings.CDNLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@globalAppSettings.SystemSettings.CDNLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" id="favicon-link" />
 </head>
 <body>
     <div class="container" style="display: @showContainer">

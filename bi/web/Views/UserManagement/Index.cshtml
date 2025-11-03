@@ -30,14 +30,14 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
     </environment>
 
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
         var postactionUrl = "@Url.Action("postaction", "UserManagement")";
         var isPresentEmailId = "@Url.Action("IsPresentEmailId", "UserManagement")";
@@ -61,7 +61,7 @@
     </script>
     @if (isSelfHosted)
     {
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             var minimumLength = "@passwordPolicy.MinimumLength";
             var lowerCaseRequired = "@passwordPolicy.LowerCaseRequired";
             var upperCaseRequired = "@passwordPolicy.UpperCaseRequired";
@@ -69,10 +69,10 @@
             var specialCharactersRequired = "@passwordPolicy.SpecialCharactersRequired";
         </script>
     }
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         window.data = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.users)));
     </script>
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         function selectItems(e) {
             var parentRow = $(e.event.currentTarget.parentNode).parents(".user-row-details");
             $(parentRow).hasClass('user-table-row-selected') ? $(parentRow).removeClass('user-table-row-selected') : $(parentRow).addClass("user-table-row-selected");
@@ -180,28 +180,28 @@
                 {{/if}}
                 {{if Email == "@ViewBag.LoggedUser"}}
                 <li class="menu-group">
-                    <a href="javascript:void(0);" title="@T["It's You"]" data-bs-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
+                    <a href="#" title="@T["It's You"]" data-bs-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
                         <i class="su su-delete disabled-icon-color"></i>
                         <span class="menu-text disabled-icon-color">@T["Remove User"]</span>
                     </a>
                 </li>
                 {{else Email == "@sandboxAdminEmail"}}
                 <li class="menu-group">
-                    <a href="javascript:void(0);" title="@T["Remove User"]" data-bs-toggle = "tooltip" data-content = "{{:UserId}}" data-email = "{{:Email}}" >
+                    <a href="#" title="@T["Remove User"]" data-bs-toggle = "tooltip" data-content = "{{:UserId}}" data-email = "{{:Email}}" >
                         <i class="su su-delete disabled-icon-color"></i>
                         <span class="menu-text disabled-icon-color">@T["Remove User"]</span>
                     </a>
                 </li>
                 {{else IsAdmin && ~isAdmin() == false}}
                 <li class="menu-group">
-                    <a href="javascript:void(0);" title="@T["You cannot delete the system administrator"]" data-bs-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
+                    <a href="#" title="@T["You cannot delete the system administrator"]" data-bs-toggle="tooltip" data-content="{{:UserId}}" data-email="{{:Email}}">
                         <i class="su su-delete disabled-icon-color"></i>
                         <span class="menu-text disabled-icon-color">@T["You cannot delete the system administrator"]</span>
                     </a>
                 </li>
                 {{else}}
                 <li class="menu-group">
-                    <a class="delete-class" href="javascript:void(0);" title="@T["Remove User"]" data-bs-toggle="tooltip" data-email="{{:Email}}" data-content="{{:UserId}}">
+                    <a class="delete-class" href="#" title="@T["Remove User"]" data-bs-toggle="tooltip" data-email="{{:Email}}" data-content="{{:UserId}}">
                         <i class="su su-delete"></i>
                         <span class="menu-text">@T["Remove User"]</span>
                     </a>
@@ -211,7 +211,7 @@
         </div>
     </script>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(function () {
             $("#search-users").val("");
             var data = ej.DataManager({
@@ -336,7 +336,7 @@
                     <li class="dropdown no-padding float-end">
                         @if (new DeviceDetection(Context).IsMobile)
                         {
-                            <button class="primary-button app-btn-primary" id="new-user-dropdown" title="@T["Add new user"]" onclick="onUserAddDialogOpen()">
+                            <button class="primary-button app-btn-primary add-new-user-dialog" id="new-user-dropdown" title="@T["Add new user"]">
                                 @T["New User"]
                             </button>
                         }
@@ -351,8 +351,8 @@
                                 <ul class="dropdown-menu add-user-dropdown multi-level" role="menu" id="dropdown-options">
                                     @if (!userImport.HideAddUser)
                                     {
-                                        <li id="create-user" title="@T["Add new user"]" onclick="onUserAddDialogOpen()">
-                                            <a href="javascript:void(0)" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
+                                        <li id="create-user" title="@T["Add new user"]">
+                                            <a href="#" title="@T["Add user"]" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-user-add"> </i>
                                                 <span>@T["Add User"]</span>
                                             </a>

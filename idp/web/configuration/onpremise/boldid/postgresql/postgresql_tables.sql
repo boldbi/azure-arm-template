@@ -975,10 +975,26 @@ CREATE TABLE BOLDTC_TenantInactivity (
     MarkedForSuspension SMALLINT NOT NULL,
     DeletionReminderSentOn TIMESTAMP NULL,
     IsPermanentlyDeleted SMALLINT NOT NULL,
-	IsRecordsDeletedInMetaTables SMALLINT NOT NULL,
+	IsImdbTablesDeleted SMALLINT NOT NULL,
 	CreatedDate TIMESTAMP NOT NULL,
 	ModifiedDate TIMESTAMP NOT NULL,
     IsActive SMALLINT NOT NULL
+);
+
+CREATE TABLE BOLDTC_UmsConfiguration (
+    Id SERIAL,
+    SystemKey varchar(255) NOT NULL UNIQUE,
+	SystemValue varchar(4000),
+	ModifiedDate timestamp NOT NULL,
+	CONSTRAINT PK_BOLDTC_UmsConfiguration PRIMARY KEY (Id)
+);
+
+CREATE TABLE BOLDTC_BiConfiguration (
+    Id SERIAL,
+    SystemKey varchar(255) NOT NULL UNIQUE,
+	SystemValue varchar(4000),
+	ModifiedDate timestamp NOT NULL,
+	CONSTRAINT PK_BOLDTC_BiConfiguration PRIMARY KEY (Id)
 );
 
 INSERT into BOLDTC_TenantLogType  ( Name , IsActive ) VALUES (N'Registration', 1);

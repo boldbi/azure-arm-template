@@ -1,9 +1,7 @@
-ALTER TABLE SyncDS_Group ADD COLUMN GroupLogo varchar(1026) NULL;
-ALTER TABLE SyncDS_Item ADD COLUMN PublishedDate timestamp NULL
-;
+ALTER TABLE SyncDS_Item ADD COLUMN DashboardLogo varchar(1026) NULL;
 
-INSERT INTO SyncDS_exporttype (Name, IsActive) SELECT N'DatasourceCache', 1
-WHERE NOT EXISTS (SELECT Name FROM SyncDS_exporttype WHERE Name = N'DatasourceCache')
-;
+ALTER TABLE SyncDS_ScheduleDetail ADD COLUMN AIInsightSummaryEnabled SMALLINT DEFAULT 0 NOT NULL;
 
-ALTER TABLE SyncDS_SystemLog  ADD CONSTRAINT UK_SyncDS_SystemSettings_Key_SiteId UNIQUE (Key, SiteId);
+ALTER TABLE SyncDS_AI_SESSIONS ADD COLUMN RequestType TEXT,ADD COLUMN SessionName TEXT,ADD COLUMN IsActive BOOLEAN,ADD COLUMN HistoryContent TEXT,ADD COLUMN SessionModifiedTime TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE SyncDS_ItemLog ADD COLUMN IPAddress varchar(255) NULL;

@@ -26,16 +26,41 @@
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page-new.min.css" />
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+                var initialFaviconPath = "@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+                var fallbackFaviconPath = "@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
 
+                // Favicon fallback
+                var faviconLink = document.getElementById("favicon-link");
+                if (faviconLink) {
+                    faviconLink.addEventListener("error", function () {
+                        var currentHref = faviconLink.getAttribute("href");
+                        if (currentHref && currentHref.toLowerCase() !== fallbackFaviconPath.toLowerCase()) {
+                            faviconLink.setAttribute("href", fallbackFaviconPath);
+                        }
+                    });
+                }
+
+                // Login logo fallback
+                var loginLogo = document.getElementById("login-logo");
+                if (loginLogo) {
+                    loginLogo.addEventListener("error", function () {
+                        OnLoginLogoLoadError();
+                    });
+                }
+
+                // Modular fallback handler (define globally or inline)
         function OnLoginLogoLoadError() {
             var alternateImage = "@cdnLink/static/company/@ServerAppConfig.AppSettings.AppBranding.Identifier/logo/v1/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo"
             if (document.getElementsByClassName('error-image-1').src != alternateImage) {
                 document.getElementsByClassName("error-image-1")[0].src = alternateImage;
             }
         }
+            });
+
     </script>
-    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@cdnLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
+    <link rel="icon" href="@faviconLogo" id="favicon-link" />
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 </head>
 <body class="error-full-content" id="banned-country-page">
@@ -43,7 +68,7 @@
         <div class="error-page-content">
             <div class="error-inside">
                 <div class="error-image-center-1">
-                    <img src="@globalAppSettings.SystemSettings.LoginLogo" onerror="OnLoginLogoLoadError()" class="error-image-1">
+                    <img src="@_identityResponse.LoginLogo" id="login-logo" class="error-image-1">
                 </div>
                 <div class="error-image-center-2">
                     <img src="@themeBasedImageHelper.AccessDeniedImage()" class="error-image-2">

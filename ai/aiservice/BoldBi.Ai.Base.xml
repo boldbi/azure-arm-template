@@ -840,6 +840,21 @@
             excessive memory usage. The updated history is then saved back to the memory cache.
             </remarks>
         </member>
+        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.LogRelevantQuestionStats(BoldBi.Ai.Core.Models.AIResponseBuilder.ReleventQuestionResponse,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,System.String)">
+            <summary>
+            Logs the usage metrics and activity details for the AI-generated relevant question response.
+            </summary>
+            <param name="relevantQuestionResponse">The deserialized response containing AI output and token usage information.</param>
+            <param name="aiAssistanceRequest">The original AI assistance request containing session and context data.</param>
+            <param name="tenantId">The tenant identifier used for tracking and logging purposes.</param>
+            <remarks>
+            This method performs the following:
+            - Updates the request with metadata such as query ID and request type.
+            - Constructs and logs an <see cref="T:BoldBi.Ai.Core.Models.AIInputBuilder.AiResponse"/> and <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse"/>.
+            - Processes token usage for billing or analytics.
+            - Adds an activity log entry for auditing or monitoring.
+            </remarks>
+        </member>
         <member name="T:BoldBi.Ai.Base.AiSampleQuestion.Builder.Concrete.DefaultPromptStrategy">
             <summary>
             Implements the default prompt generation strategy for non-specific modes.
@@ -1162,11 +1177,13 @@
             Provides operations for widget and dashboard summarization using AI.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiSummarization.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
+        <member name="M:BoldBi.Ai.Base.AiSummarization.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.CredentialManager)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.AiSummarization"/> class.
             </summary>
             <param name="memoryCache">The memory cache used for session-based data retrieval.</param>
+            <param name="usageProcessor">Processor to calculate and log AI usage metrics.</param>
+            <param name="credentialManager">The credential manager instance.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.AiSummarization.WidgetSummarizationProcessAsync(System.String,System.String)">
             <summary>
@@ -1183,6 +1200,14 @@
             <param name="jsonInput">The input JSON containing dashboard and widget-related data.</param>
             <param name="tenantId">The license key used for validating AI service access.</param>
             <returns>A task that represents the asynchronous operation. The task result contains the summarization output from the AI.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiSummarization.DashboardQuestionsProcessAsync(System.String,System.String)">
+            <summary>
+            Processes dashboard-level questions and generates an AI-based answer based on the dashboard data.
+            </summary>
+            <param name="jsonInput">The input JSON containing the question, dashboard context, and required metadata.</param>
+            <param name="licenseKey">The license key used for validating AI service access.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the AI-generated answer for the dashboard question.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.AiSummarization.ValidateInput(System.String)">
             <summary>
@@ -1669,6 +1694,14 @@
             <param name="licenseKey">The license key required for processing the request.</param>
             <returns>A task representing the asynchronous operation, with an object containing the result of processing the relevant question query.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IAiSummarizationOperations.DashboardQuestionsProcessAsync(System.String,System.String)">
+            <summary>
+            Generates an AI-driven answer for dashboard-related questions based on the provided input.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Contracts.IBoldAiProcess">
             <summary>
             Defines processes for AI-based operations, including input building, output generation, and message execution.
@@ -1783,6 +1816,13 @@
             </summary>
             <param name="jsonInput">The input data in JSON format used to end the session.</param>
             <returns>A task that represents the asynchronous operation. The task result contains an object representing the result of the session end process.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.ISessionManager.RestartExistingSessionAsync(System.String)">
+            <summary>
+            Restarts existing session based on the provided JSON input and logs relevant details.
+            </summary>
+            <param name="jsonInput">The JSON string containing session details.</param>
+            <returns>A JSON string representing the restarted assistant and session details.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Contracts.ISummarizationProcessor">
             <summary>
@@ -3439,6 +3479,76 @@
             <param name="tokens">The complete token usage data.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.DashboardQuestionsProcess.DashboardQuestionsFormattedProcess">
+            <summary>
+            Creates the dashboard-questions process similar to RecordAnalysisFormattedProcess.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.DashboardQuestionsFormattedProcess.CreateProcess">
+            <summary>
+            Creates a process builder with BuildInput, RunInput, and BuildOutput steps.
+            </summary>
+            <returns>Configured ProcessBuilder instance.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildInputStep">
+            <summary>
+            Prepares dashboard-questions process input, system prompt and binds the connection/credentials.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildInputStep.BuildInputForDashboardQuestions(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Builds the system message and attaches credentials/connection for dashboard questions.
+            </summary>
+            <param name="args">Run context including AiAssistanceRequest.</param>
+            <returns>RunProcessArgs enriched with Message, AICredentials, and Connection.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildOutputStep">
+            <summary>
+            Builds a SummarizationResponse from the AI output for dashboard questions.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildOutputStep.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.AIResponseBuilder.SummarizationResponse})">
+            <summary>
+            Initializes and activates the step with the provided state.
+            </summary>
+            <param name="state">The kernel process step state.</param>
+            <returns>A ValueTask representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildOutputStep.BuildOutputForDashboardQuestionsAsync(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Builds the output for dashboard questions using the AI response.
+            </summary>
+            <param name="args">The build output arguments containing the AI response.</param>
+            <returns>A Task representing the asynchronous operation.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">Thrown if there is a connection issue.</exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an AI-related error.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildOutputStep.ExtractUsage(BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Extracts usage tokens from the AI response metadata.
+            </summary>
+            <param name="args">The build output arguments containing metadata.</param>
+            <returns>A Task representing the asynchronous operation that returns the UsageTokens.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsBuildOutputStep.FormatAssistantMessage(System.String)">
+            <summary>
+            Formats the assistant message by converting newlines and Markdown bold syntax to HTML.
+            </summary>
+            <param name="message">The raw message string to format.</param>
+            <returns>The formatted message string with HTML tags.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsRunInputStep">
+            <summary>
+            Executes a single AI call for dashboard questions using developer/system + user message.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DashboardQuestionsProcess.Steps.DashboardQuestionsRunInputStep.RunDashboardQuestionsAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Calls AI connection once with developer and user messages.
+            </summary>
+            <param name="args">Arguments containing question, connection, and credentials.</param>
+            <returns>BuildOutputArgs with OpenAiResponse.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.DeleteVisual.DeleteVisualProcess">
             <summary>
             Represents the process responsible for handling the deletion of a widget.
@@ -3732,9 +3842,39 @@
             Gets or sets the AI licenses in the database.
             </summary>
         </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.RequesterProfiles">
+            <summary>
+            Gets or sets the Employee Database.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.CreditTransactions">
+            <summary>
+            Gets or sets the CreditTransactions.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.CreditApprovals">
+            <summary>
+            Gets or sets the CreditApprovals.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.CreditRequests">
+            <summary>
+            Gets or sets the CreditRequests.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.RequesterRoles">
+            <summary>
+            Gets or sets the Employee Database.
+            </summary>
+        </member>
         <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.ai_credits_updates">
             <summary>
             Gets or sets the AI credits in the database.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.ai_tenant_credits">
+            <summary>
+            Gets or sets the AI licenses in the database.
             </summary>
         </member>
         <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.bold_ai_chat">
@@ -4927,6 +5067,33 @@
             <param name="license">The license details as an object.</param>
             <returns>JSON response indicating success or failure.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.GetSubscriptionId(BoldBi.Ai.Base.Models.AILicense.AiLicense)">
+            <summary>
+            Retrieves the subscription (tenant) ID based on the AI license category.
+            </summary>
+            <param name="aiLicense">An instance of <see cref="T:BoldBi.Ai.Base.Models.AILicense.AiLicense"/> containing license details.</param>
+            <returns>
+            The corresponding tenant ID for the specified license category.
+            If the category is not recognized, returns the existing <c>TenantId</c> from the <paramref name="aiLicense"/>.
+            </returns>
+            <remarks>
+            Supported categories:
+            - FreeTier: Returns tenant ID "667b9fb8-d3da-42d8-9382-c67db627421b"
+            - PreSale: Returns tenant ID "50be085a-a364-414f-ba62-7aa8f61cd9e7"
+            - DemoSite: Returns tenant ID "ac07ca11-f5c1-4dd7-bb14-43ecd392bc9e".
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.UpdateEmployeeInfo(BoldBi.Ai.Base.Models.AILicense.AiLicense)">
+            <summary>
+            Updates the employee information in the database based on the provided AI license details.
+            </summary>
+            <param name="aiLicense">An instance of <see cref="T:BoldBi.Ai.Base.Models.AILicense.AiLicense"/> containing requester details such as name, email, and role.</param>
+            <remarks>
+            This method retrieves the budget limit associated with the requester's role from the <c>RequesterRoles</c> table,
+            then creates a new <c>RequesterProfiles</c> entry with the retrieved budget and requester information.
+            Finally, it saves the new profile to the database.
+            </remarks>
+        </member>
         <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.DeactivateAiLicense(System.String)">
             <summary>
             Deactivates AI licenses for a given tenant.
@@ -4954,6 +5121,122 @@
             </summary>
             <param name="tenantId">The tenant ID as a string.</param>
             <returns>JSON response indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.UpdateCreditLimit(BoldBi.Ai.Base.Models.AILicense.AiLicense,BoldBi.Ai.Core.Models.CreditManagement.CreditRequest,BoldBi.Ai.Core.Models.CustomerCreditManagement.RequesterProfiles)">
+            <summary>
+            Updates the credit limit and license details for a given AI license and requester.
+            </summary>
+            <param name="aiLicense">An instance of <see cref="T:BoldBi.Ai.Base.Models.AILicense.AiLicense"/> containing updated license and credit information.</param>
+            <param name="request">The <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditRequest"/> object containing the credit request details.</param>
+            <param name="employeeCreditProfile">The <see cref="T:BoldBi.Ai.Core.Models.CustomerCreditManagement.RequesterProfiles"/> object representing the requester's current credit profile.</param>
+            <returns>
+            A JSON-formatted string indicating the result of the operation.
+            Returns a success message if the license is found and updated; otherwise, returns an error message.
+            </returns>
+            <remarks>
+            - If the license exists, updates the plan, rate limit, and credit amount.
+            - Adds a credit approval and updates the AI credits.
+            - Deducts the requested credit from the employee's remaining credits.
+            - If the license is not found, logs the request and adds a declined credit approval.
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.GetCreditRequestDetails(BoldBi.Ai.Base.Models.AILicense.AiLicense)">
+            <summary>
+            Retrieves the credit request details based on the provided AI license information.
+            </summary>
+            <param name="aiLicense">An instance of <see cref="T:BoldBi.Ai.Base.Models.AILicense.AiLicense"/> containing the tenant and requester details.</param>
+            <returns>
+            A <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditRequest"/> object populated with relevant data such as subscription ID, requester name, email, and requested credit amount.
+            </returns>
+            <remarks>
+            This method is typically used to construct a credit request record before initiating approval or update workflows.
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.GetApprovedCreditDetails(BoldBi.Ai.Core.Models.CreditManagement.CreditRequest,System.Double)">
+            <summary>
+            Generates a <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditApproval"/> object representing an approved credit request.
+            </summary>
+            <param name="request">The <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditRequest"/> containing details of the credit request.</param>
+            <param name="amount">The current credit amount associated with the license.</param>
+            <returns>
+            A populated <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditApproval"/> object with approval status, requester details, and approved credit amount.
+            </returns>
+            <remarks>
+            This method is typically used when a credit request is successfully validated and approved.
+            It records the approval along with metadata such as subscription ID, requester name, and the approved amount.
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.GetDeclinedCreditApprovalDetails(BoldBi.Ai.Core.Models.CreditManagement.CreditRequest,System.String,System.Double)">
+            <param name="requests">The <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditRequest"/> containing the original request details.</param>
+            <param name="statusMessage">An optional message describing the reason for the decline. Defaults to an empty string.</param>
+            <param name="amount">An optional amount associated with the declined request. Defaults to 0.</param>
+            <returns>
+            A <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditApproval"/> object populated with decline status, requester details, and the provided status message.
+            </returns>
+            <remarks>
+            This method is typically used when a credit request cannot be approved due to validation failures or missing license information.
+            It records the decline reason and relevant metadata for auditing and user feedback.
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.GetCreditTransactionDetails(BoldBi.Ai.Core.Models.CreditManagement.CreditRequest,BoldBi.Ai.Base.Models.AILicense.AiLicense)">
+            <summary>
+            Generates a <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditTransaction"/> record based on the provided credit request and AI license information.
+            </summary>
+            <param name="request">The <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditRequest"/> containing details of the requested credit, requester, and subscription.</param>
+            <param name="aiLicense">An instance of <see cref="T:BoldBi.Ai.Base.Models.AILicense.AiLicense"/> containing license-specific data such as tenant ID and credit amount.</param>
+            <returns>
+            A <see cref="T:BoldBi.Ai.Core.Models.CreditManagement.CreditTransaction"/> object populated with transaction metadata, including requester details, subscription ID, and credit values.
+            </returns>
+            <remarks>
+            This method is typically used to log a credit transaction after a successful credit update or approval.
+            It helps maintain a historical record of credit operations for auditing and tracking purposes.
+            </remarks>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper">
+            <summary>
+            Provides helper methods to manage tenant-based AI credits, including adding, updating, deactivating, and retrieving tenant credit details.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper"/> class.
+            </summary>
+            <param name="dbContext">The database context used for interacting with the AI credits database.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper.IsAITenantExists(System.String)">
+            <summary>
+            Checks AI tenant exists in the database based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON string containing the AI tenant details.</param>
+            <returns>An object indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper.AddAITenant(System.String)">
+            <summary>
+            Asynchronously adds a new AI tenant to the database based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON string containing the AI tenant details.</param>
+            <returns>An object representing the API response, serialized as JSON, indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper.UpdateAITenant(System.String)">
+            <summary>
+            Updates the AI tenant's token count in the database based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON string containing the AI tenant details with updated token count.</param>
+            <returns>A JSON-serialized <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiApiResponse"/> indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper.DeleteAITenant(System.String)">
+            <summary>
+            Deactivates an AI tenant in the database based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON string containing the AI tenant details to deactivate.</param>
+            <returns>A JSON-serialized <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiApiResponse"/> indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.TenantBasedCreditsHelper.GetAITenantDetails(System.String)">
+            <summary>
+            Retrieves the details of an AI tenant from the database based on the provided JSON input.
+            </summary>
+            <param name="jsonInput">The JSON string containing the AI tenant details to retrieve.</param>
+            <returns>A JSON-serialized <see cref="T:BoldBi.Ai.Core.Models.AILicense.AiTenantCredits"/> object with tenant details or an <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiApiResponse"/> indicating failure.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.Helpers.OuputValidation.AiResponseValidatorHelper">
             <summary>
@@ -5846,6 +6129,13 @@
             <param name="jsonInput">The JSON string containing session and user details.</param>
             <returns>A JSON string representing the created assistant and session details.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.RestartExistingSessionAsync(System.String)">
+            <summary>
+            Restarts existing session based on the provided JSON input and logs relevant details.
+            </summary>
+            <param name="jsonInput">The JSON string containing session details.</param>
+            <returns>A JSON string representing the restarted assistant and session details.</returns>
+        </member>
         <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.EndSessionAsync(System.String)">
             <summary>
             Ends an AI session based on the provided JSON input, logs the termination, and updates the session end time in the database.
@@ -5853,7 +6143,7 @@
             <param name="jsonInput">The JSON string containing session termination details.</param>
             <returns>An object indicating the result of the session termination.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.LogSessionUsage(System.String,System.Int32,System.Int32,System.Int32,System.Double,System.Double,System.Double,BoldBi.Ai.Core.Models.AIInputBuilder.LoggingAssistance,System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset})">
+        <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.LogSessionUsage(System.String,System.Int32,System.Int32,System.Int32,System.Double,System.Double,System.Double,BoldBi.Ai.Core.Models.AIInputBuilder.LoggingAssistance,System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset},System.String,System.String,System.Boolean,System.String)">
             <summary>
             Logs the session usage details, including token counts and associated costs.
             </summary>
@@ -5867,6 +6157,10 @@
             <param name="loggingAssistance">An object containing logging information.</param>
             <param name="startTime">The optional start time of the session.</param>
             <param name="endTime">The optional end time of the session.</param>
+            <param name="requestType">The type of the request.</param>
+            <param name="sessionName">The name of the session.</param>
+            <param name="isActive">The active state of the session.</param>
+            <param name="historyContent">The history content of the session.</param>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.SessionManager.LogSearchUsage(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,System.DateTimeOffset,System.Int32,System.Int32,System.Int32,System.Double,System.Double,System.Double)">
             <summary>
@@ -6032,6 +6326,12 @@
             <returns>
             A string representing the system prompt.
             </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.FormatOutputStep.UpdateTokensAsync(BoldBi.Ai.Core.Models.AIResponseBuilder.UsageTokens)">
+            <summary>
+            Updates the full token usage information.
+            </summary>
+            <param name="tokens">The complete token usage data.</param>
         </member>
         <member name="T:BoldBi.Ai.Base.NlgProcesses.SystemFactory.HtmlFormatterFactory">
             <summary>
@@ -6319,6 +6619,13 @@
             This method deserializes the "Usage" metadata from the AI output and maps it to a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.UsageTokens"/> instance.
             </remarks>
         </member>
+        <member name="M:BoldBi.Ai.Base.RecordAnalysisProcess.Steps.RecordAnalysisBuildOutputStep.FormatAssistantMessage(System.String)">
+            <summary>
+            Formats the assistant message by converting newlines and Markdown bold syntax to HTML.
+            </summary>
+            <param name="message">The raw message string to format.</param>
+            <returns>The formatted message string with HTML tags.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.RecordAnalysisProcess.Steps.RecordAnalysisRunInputStep">
             <summary>
             A kernel process step that runs an AI process to generate a Record Analysis
@@ -6565,6 +6872,134 @@
             </summary>
             <returns>A fully configured <see cref="T:Microsoft.SemanticKernel.ProcessBuilder"/> for the textual response process.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetInputStep">
+            <summary>
+            A step that builds input for toggle widget process using the AI assistance request.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetInputStep.ToggleWidgetBuildInput(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Builds the input needed for the process.
+            </summary>
+            <param name="context">The context of the current kernel process step.</param>
+            <param name="aiAssistanceRequest">The request containing the query and metadata needed for classification.</param>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object with populated message, question, and original request.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetInputStep.GetDeveloperMessage(System.String)">
+            <summary>
+            Gets the base message that instructs the AI how to classify user questions.
+            </summary>
+            <returns>A developer-defined classification instruction prompt.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep">
+            <summary>
+            Represents a processing step in the kernel pipeline responsible for constructing the final output response.
+            </summary>
+            <remarks>
+            This step uses the processed data and generates a structured <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Response"/> object that can be returned to the client or next step.
+            </remarks>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.ActivateAsync(Microsoft.SemanticKernel.KernelProcessStepState{BoldBi.Ai.Core.Models.AIResponseBuilder.Response})">
+            <summary>
+            Activates the process step by capturing and assigning the current state,
+            then invokes the base implementation asynchronously.
+            </summary>
+            <param name="state">The current kernel process step state containing the response.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.ValueTask"/> that represents the asynchronous activation operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.ToggleWidgetBuildOutputStepAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Handles the build output process for visual creation by constructing the AI assistance response
+            and preparing the field information template for widget creation.
+            </summary>
+            <param name="context">The context of the current kernel process step.</param>
+            <param name="args">The arguments required to build the output, including AI request and response details.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.ConnectionException">
+            Thrown when a connection-related issue occurs. The AI-generated message is attached to the exception.
+            </exception>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">
+            Thrown when an AI-specific error occurs. The AI-generated message is attached to the exception.
+            </exception>
+            <exception cref="T:System.Exception">
+            Thrown when a general exception occurs and is wrapped in an <see cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException"/> with additional context.
+            </exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.UpdateExceptionInformation(System.Object)">
+            <summary>
+            Updates the response to include exception details and mark it as an error.
+            </summary>
+            <param name="ex">The exception information.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.UpdateUsageTokens(BoldBi.Ai.Core.Models.AIResponseBuilder.UsageTokens)">
+            <summary>
+            Updates the usage token information in the classification response model.
+            </summary>
+            <param name="usage">The usage data to be updated.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.UpdateCreateVisualResponse(BoldBi.Ai.Core.Models.AIResponseBuilder.CreateWidgetResponse)">
+            <summary>
+            Updates the response with the result from creating a visual.
+            </summary>
+            <param name="response">The create widget response.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.BuildAssistanceResponseAsync(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent)">
+            <summary>
+            Builds the AI assistance response based on the given output text and table information.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request containing metadata such as table information.</param>
+            <param name="aiOutput">The AI-generated output text to process.</param>
+            <returns>
+            A task that represents the asynchronous operation. The task result contains the constructed <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiAssistanceResponse"/>.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetOutputStep.ModifyWidgetResponse(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent)">
+            <summary>
+            Method to modify the aiResponse when toggle widget is triggered.
+            </summary>
+            <param name="aiAssistanceRequest">The AI assistance request containing the aiResponse to be modified.</param>
+            <param name="aiOutput">The ai response having the description for modified widget.</param>
+            <returns>Returns a string format of aiResponse.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetRunStep.ToggleWidgetRunStepAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Executes the AI chat classification process by sending user input and system-generated messages to the AI model.
+            </summary>
+            <param name="context">Kernel step context.</param>
+            <param name="args">Contains the necessary parameters, including the AI assistance request and prompt message.</param>
+            <returns>
+            A task that represents the asynchronous operation. The task result contains the classification output arguments,
+            including the AI assistance request and function call builders.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetRunStep.UpdateTokensAsync(Microsoft.SemanticKernel.KernelProcessStepContext,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Updates the token usage details based on metadata received from the AI response.
+            </summary>
+            <param name="context">The kernel step context.</param>
+            <param name="metaData">Metadata dictionary containing token usage data.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetRunStep.GetIntMetadataValue(System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <summary>
+            Retrieves an integer value from the metadata dictionary using the specified key.
+            </summary>
+            <param name="metadata">The metadata dictionary.</param>
+            <param name="key">The key for the desired value.</param>
+            <returns>The integer value if successfully parsed; otherwise, 0.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.ToggleWidgetProcess.ToggleWidgetProcessFlow">
+            <summary>
+            Represents the toggle widget process flow.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.ToggleWidgetProcessFlow.CreateProcessAsync(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,Microsoft.SemanticKernel.Kernel)">
+            <summary>
+            Creates and runs the toggle widget process asynchronously.
+            </summary>
+            <param name="input">The AI assistance request containing user query and table context.</param>
+            <param name="kernel">The Semantic Kernel instance used to execute the process.</param>
+            <returns>A task that returns the serialized response object.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.UnifiedAI.ChatProcess">
             <summary>
             Handles chat query classification by managing kernel setup, request validation, and session-based configuration retrieval.
@@ -6604,6 +7039,14 @@
         <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.VisualCreationAsync(System.String,System.String)">
             <summary>
             Created JSON for visualization charts.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.ChatProcess.ToggleWidgetProcessAsync(System.String,System.String)">
+            <summary>
+            Created JSON for widgets after toggle.
             </summary>
             <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
             <param name="licenseKey">The license key of the tenant.</param>
@@ -6702,7 +7145,7 @@
             <param name="aiAssistanceRequest">The request containing the query and metadata needed for classification.</param>
             <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object with populated message, question, and original request.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationInputStep.GetDeveloperMessage">
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Classification.Steps.ClassificationInputStep.GetDeveloperMessage(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Gets the base message that instructs the AI how to classify user questions.
             </summary>
@@ -6938,6 +7381,138 @@
             </summary>
             <param name="ex">The exception information.</param>
         </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper">
+            <summary>
+            A helper class for managing chat history operations using the application database context.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper.#ctor(BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper"/> class.
+            </summary>
+            <param name="dbContext">The application database context used for chat history operations.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper.RetrieveChatHistoryContentAsync(System.String)">
+            <summary>
+            Retrieves the chat history content for a specific session based on the provided SessionID.
+            </summary>
+            <param name="jsonInput">A JSON string containing the SessionID.</param>
+            <returns>An AiApiResponse object with the history content or an error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper.RetrieveChatHistoryNamesAsync(System.String)">
+            <summary>
+            Retrieves a list of session names filtered by TenantID, UserEmail, and UserID.
+            </summary>
+            <param name="jsonInput">A JSON string containing TenantID, UserEmail, and UserID.</param>
+            <returns>An AiApiResponse object with the list of session names or an error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper.StoreChatHistoryContentAsync(System.String)">
+            <summary>
+            Stores or updates the chat history content for a specific session.
+            </summary>
+            <param name="jsonInput">A JSON string containing SessionID and HistoryContent.</param>
+            <returns>An object with status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper.DeleteChatHistoryAsync(System.String)">
+            <summary>
+            Marks a session as inactive (deletes its active state) based on the SessionID.
+            </summary>
+            <param name="jsonInput">A JSON string containing the SessionID.</param>
+            <returns>An object with status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.ChatHistoryHelper.UpdateNameOfSessionAsync(System.String)">
+            <summary>
+            Updates the name of a session, limiting it to the first three words if more are provided.
+            </summary>
+            <param name="jsonInput">A JSON string containing SessionID and SessionName.</param>
+            <returns>An object with status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper">
+            <summary>
+            An interface for managing chat history operations.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper.RetrieveChatHistoryContentAsync(System.String)">
+            <summary>
+            Retrieves the chat history content for a specific session based on the provided SessionID.
+            </summary>
+            <param name="jsonInput">A JSON string containing the SessionID.</param>
+            <returns>An object with the history content or an error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper.RetrieveChatHistoryNamesAsync(System.String)">
+            <summary>
+            Retrieves a list of session names filtered by TenantID, UserEmail, and UserID.
+            </summary>
+            <param name="jsonInput">A JSON string containing TenantID, UserEmail, and UserID.</param>
+            <returns>An object with the list of session names or an error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper.StoreChatHistoryContentAsync(System.String)">
+            <summary>
+            Stores or updates the chat history content for a specific session.
+            </summary>
+            <param name="jsonInput">A JSON string containing SessionID and HistoryContent.</param>
+            <returns>An object with status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper.DeleteChatHistoryAsync(System.String)">
+            <summary>
+            Marks a session as inactive (deletes its active state) based on the SessionID.
+            </summary>
+            <param name="jsonInput">A JSON string containing the SessionID.</param>
+            <returns>An object with status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper.UpdateNameOfSessionAsync(System.String)">
+            <summary>
+            Updates the name of a session, limiting it to the first three words if more are provided.
+            </summary>
+            <param name="jsonInput">A JSON string containing SessionID and SessionName.</param>
+            <returns>An object with status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper">
+            <summary>
+            Provides functionality for managing on-premise chat history operations, implementing the <see cref="T:BoldBi.Ai.Base.UnifiedAI.Helpers.IChatHistoryHelper"/> interface.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper.#ctor(BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper"/> class.
+            </summary>
+            <param name="memoryCache">The memory cache service used for caching chat history operations.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper.RetrieveChatHistoryContentAsync(System.String)">
+            <summary>
+            Retrieves the chat history content for a specific session based on the provided SessionID.
+            </summary>
+            <param name="jsonInput">A JSON string containing the SessionID.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous operation, with an object containing the history content or an error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper.RetrieveChatHistoryNamesAsync(System.String)">
+            <summary>
+            Retrieves a list of session names filtered by TenantID, UserEmail, and UserID.
+            </summary>
+            <param name="jsonInput">A JSON string containing TenantID, UserEmail, and UserID.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous operation, with an object containing the list of session names or an error message.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper.StoreChatHistoryContentAsync(System.String)">
+            <summary>
+            Stores or updates the chat history content for a specific session.
+            </summary>
+            <param name="jsonInput">A JSON string containing SessionID and HistoryContent.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous operation, with an object containing status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper.DeleteChatHistoryAsync(System.String)">
+            <summary>
+            Marks a session as inactive (deletes its active state) based on the SessionID.
+            </summary>
+            <param name="jsonInput">A JSON string containing the SessionID.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous operation, with an object containing status and message indicating the result of the operation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Helpers.OnPremiseChatHistoryHelper.UpdateNameOfSessionAsync(System.String)">
+            <summary>
+            Updates the name of a session, limiting it to the first three words if more are provided.
+            </summary>
+            <param name="jsonInput">A JSON string containing SessionID and SessionName.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous operation, with an object containing status and message indicating the result of the operation.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess">
             <summary>
             Defines a contract for processing and classifying chat queries using AI.
@@ -6970,6 +7545,14 @@
         <member name="M:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess.GenerateTextualSQLAsync(System.String,System.String)">
             <summary>
             Created JSON for visualization dashboards.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>The visual creation response as a serialized JSON object.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UnifiedAI.Interfaces.IChatProcess.ToggleWidgetProcessAsync(System.String,System.String)">
+            <summary>
+            Created JSON for widgets after toggle.
             </summary>
             <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
             <param name="licenseKey">The license key of the tenant.</param>

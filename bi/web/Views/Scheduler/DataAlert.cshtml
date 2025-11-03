@@ -3,6 +3,7 @@
     var canEdit = Convert.ToBoolean(ViewBag.CanWrite);
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var dashboardServerResourceUrl = _globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var customThemeAppearance = _identityResponse.ThemeAppearance;
 }
 
 <body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
@@ -28,13 +29,13 @@
     }
 </body>
 
-<script>
+<script nonce="@ViewBag.ScriptNonce" type="text/javascript">
         var sharedDataSources = @Html.Raw(ViewBag.SharedDatasources);
         var itemId = "@ViewBag.ItemId";
         var version = "@ViewBag.Version";
         var designerToken = "@ViewBag.AccessToken";
         var canEdit = @Json.Serialize(canEdit);
-        var dashboardCustomThemename = "@(ServerAppConfig.IsSelfHosted && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : _globalAppSettings.SystemSettings.CustomDashboardTheme)";
-        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : _globalAppSettings.SystemSettings.ThemeAppearance)";
-        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : _globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var dashboardCustomThemename = "@(_identityResponse.CustomDashboardTheme)";
+    var customThemeAppearance = "@customThemeAppearance";
+        var applicationTheme = "@(_identityResponse.CustomApplicationTheme)";
 </script>

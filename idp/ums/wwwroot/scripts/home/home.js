@@ -106,8 +106,9 @@ $(document).ready(function () {
         var middleScrollThreshold = scrollHeight / 2;
         onScroll= false;
         $(".no-records").hide();
+
         if(!fetchCard) {
-            if (document.getElementById('tenant-cards-container-all').style.display !== 'none') {
+            if ($('#tenant-cards-container-all').is(':visible')) {
                 if (scrollTop + containerHeight >= scrollHeight - 50) {
                     if (skipAll + take < totalRecordsAll) {
                         skipAll += take;
@@ -115,7 +116,7 @@ $(document).ready(function () {
                         loadTenantCards(TenantSites + "?userId=" + userId, skipAll, take);
                     }
                 }
-            } else if (document.getElementById('tenant-cards-container-favorite').style.display !== 'none') {
+            } else if ($('#tenant-cards-container-favorite').is(':visible')) {
                 if (scrollTop + containerHeight >= scrollHeight - 50) {
                     if (skipFavorite + take < totalRecordsFavorite) {
                         skipFavorite += take;
@@ -550,8 +551,8 @@ function loadTenantCards(baseUrl, skip, take) {
                 allTenants.forEach(function (tenant) {
                     var useCustomBranding = tenant.UseCustomBranding;
                     var brandingHtml = useCustomBranding
-                        ? `<img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
-                        : `<img id="icon-logo" class="icon-logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`; 
+                        ? `<img id="icon-logo" class="icon-logo-container" alt="Site Logo" loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
+                        : `<img id="icon-logo" class="icon-logo" alt="Site Logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`; 
                     
                     var cardHtml = `<div class="tenant-card card">
                                            <div class="icon-container">${brandingHtml}</div>
@@ -569,6 +570,7 @@ function loadTenantCards(baseUrl, skip, take) {
                 document.querySelectorAll('.icon-logo').forEach(function(img) {
                     img.addEventListener('error', function() {
                         this.src = brokenImageForTiles;
+                        this.alt = "Broken Logo";
                     });
                 });
             }
@@ -611,8 +613,8 @@ function loadFavoriteCards(baseUrl, skip, take) {
                 allTenants.forEach(function (tenant) {
                     var useCustomBranding = tenant.UseCustomBranding;
                     var brandingHtml = useCustomBranding
-                        ? `<img id="icon-logo" class="icon-logo-container"  loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
-                        : `<img id="icon-logo" class="icon-logo"  loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`;
+                        ? `<img id="icon-logo" class="icon-logo-container"  alt="Site Logo" loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
+                        : `<img id="icon-logo" class="icon-logo"  alt="Site Logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`;
 
 
                     var cardHtml = `<div class="tenant-card card">
@@ -631,6 +633,7 @@ function loadFavoriteCards(baseUrl, skip, take) {
                 document.querySelectorAll('.icon-logo').forEach(function(img) {
                     img.addEventListener('error', function() {
                         this.src = brokenImageForTiles;
+                        this.alt = "Broken Logo";
                     });
                 });
             }

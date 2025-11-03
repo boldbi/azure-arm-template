@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
-    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true)" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/comments-page.css" />
     </environment>
@@ -25,7 +25,7 @@
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 
 
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var rootUrl = "@rootUrl";
     var getAllCommentsUrl = { "web": "@Url.Action("GetAllComments","comments")", "api": "/comments/operation" };
     var addCommentUrl = { "web": "@Url.Action("AddComment", "comments")", "api": "/comments/operation" };
@@ -50,15 +50,15 @@
     </script>
 
     <!--[if LT IE  10]>
-        <script>
+         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             i_am_ie9 = true;
         </script>
     <![endif]-->
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.js"></script>
+        <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.min.js"></script>
+        <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/comments-page.min.js"></script>
     </environment>
 </head>
 <body class="displayNone">
@@ -79,7 +79,7 @@
                     </span>
                 </div>
                 <div class="col-2 no-padding" id="close-comment">
-                    <a href="javascript:void(0);" title="@T["Close"]" class="PopupClose" style="display: none"><span class="su su-close"></span></a>
+                    <a href="#" title="@T["Close"]" class="PopupClose" style="display: none"><span class="su su-close"></span></a>
                 </div>
             </div>
         }
@@ -123,6 +123,6 @@
             <input type="text" id="autocomplete-input" />
         </div>
     </div>
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 </body>
 </html>

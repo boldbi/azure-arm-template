@@ -14,14 +14,14 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
     </environment>
 
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var deleteImportUserJobs = "@Url.Action("DeleteBulkImportResult", "UserManagement")";
         var suspendImportUserJobs = "@Url.Action("SuspendBulkImportResult", "UserManagement")";
         var userCreationLimitCheckUrl = "@Url.Action("CheckUserCreationLimit", "UserManagement")";
@@ -93,14 +93,14 @@
         }
         {{if ImportJobStatus == "Yet to start" || ImportJobStatus == "In progress"}}
                 <li class="menu-group">
-                    <a href="javascript:void(0);" class="suspend-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Suspend"]" data-bs-toggle="tooltip">
+                    <a href="#" class="suspend-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Suspend"]" data-bs-toggle="tooltip">
                         <i class="su su-disable"></i>
                         <span class="menu-text">@T["Suspend"]</span>
                     </a>
                 </li>
                 {{else ImportJobStatus == "Completed" || ImportJobStatus == "Suspended"}}
                 <li class="menu-group">
-                    <a href="javascript:void(0);" class="delete-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Delete"]" data-bs-toggle="tooltip">
+                    <a href="#" class="delete-job" data-id="{{:JobId}}" data-import-type="{{:ImportSource}}" title="@T["Delete"]" data-bs-toggle="tooltip">
                         <i class="su su-delete"></i>
                         <span class="menu-text">@T["Delete"]</span>
                     </a>
@@ -111,7 +111,7 @@
         </div>
     </script>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var data = @Html.Raw(Json.Serialize(ViewBag.ImportResult));
         $(function () {
             data = ej.parseJSON(data);

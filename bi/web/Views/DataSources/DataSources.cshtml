@@ -9,7 +9,7 @@
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
     var pageDescription = T["Create and manage data sources to connect your data with a dashboard. They can be databases, web services, or flat files."];
-    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Datasource;
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Datasource + "&nonce=" + Context.Items["ScriptNonce"];
     var isAdmin = _identityResponse.IsAdmin;
     var isSelfHosted = ServerAppConfig.IsSelfHosted;
     var isDataSourceCreateDenied = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
@@ -40,7 +40,7 @@
 }
 
 @section scripts{
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var partialViewsUrl = @Json.Serialize(partialViewsUrl);
         var isMobile = @Json.Serialize(isMobile)
         var buildVersion = "@ServerAppConfig.ProductVersion";
@@ -55,7 +55,7 @@
             });
         });
     </script>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var refreshHistory = "@ViewBag.RefreshHistory";
         var refreshHistoryItemName = "@ViewBag.ItemName";
         var refreshHistoryItemId = "@ViewBag.ItemId";
@@ -65,26 +65,26 @@
     @if (!isMobile)
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page.min.js"></script>
         </environment>
     }
     else
     {
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page-mobile.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page-mobile.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page-mobile.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasource-page-mobile.min.js"></script>
         </environment>
     }
 
-    @*<script>
+    @* <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             var getDataSourceDetailsUrl = "@Url.Action("GetDataSourceDetails", "DataSources")";
         </script>*@
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var createDatasourceIframeUrl = "@Url.Action("Connection", "DataSourceDesigner")";
         var dataPreviewIframeUrl = "@Url.Action("DataPreview", "DataSourceDesigner")";
         var edittableorcolumnUrl = "@Url.Action("EditTableOrColumn", "DataSourceDesigner")";

@@ -30,7 +30,7 @@
     var dashboardSettingsPageDescription = T["Configuration for the Dashboards."];
     var deploymentDashboardPageDescription = T["Dashboards created in this site can be published to other site deployment."];
     var attributesPageDescription = T["Configure site-level attributes."];
-    var themeInViewer = await _featureManager.IsEnabledAsync(FeatureManagement.ThemeInViewer);
+    var themeInViewer = ViewBag.ThemeInViewer;
     var defaultDashboard = _globalAppSettings.SystemSettings.DefaultDashboardId ?? string.Empty;
     var isSingleDatabaseMode = _globalAppSettings.SystemSettings.ConfigurationMode == ConfigurationMode.SingleDatabaseForAllTenants;
 }
@@ -38,13 +38,13 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-settings.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/dashboard-settings.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/dashboard-settings.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var isSelfHosted =  @Json.Serialize(isSelfHosted);
         var usageAnalytics= @Json.Serialize(usageAnalytics);
         var dashboardSettingsUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DashboardSiteSettings)";
@@ -86,7 +86,7 @@
             <div class="col-12 bi-page-header @((!isSelfHosted || isMaster) ? "tabs-header-padding" : string.Empty) top-nav-btn-secton">
                 <div class="col-12 no-padding">
                     <div id="add-attribute-button" class="col-xs-6 no-padding button-section">
-                        <button class="primary-button app-btn-primary float-end" id="add-custom-attribute" title="@T["Add Attribute"]" onclick="addCustomAttribute('site')">
+                        <button class="primary-button app-btn-primary float-end add-site-custom-attribute" id="add-custom-attribute" title="@T["Add Attribute"]">
                             <span>@T["Add Attribute"] </span>
                         </button>
                     </div>

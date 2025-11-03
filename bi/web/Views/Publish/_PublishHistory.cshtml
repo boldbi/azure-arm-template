@@ -5,7 +5,7 @@
             <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-10 col-xs-10 col-sm-10 col-md-10 no-padding" data-bs-toggle="tooltip" data-placement="bottom" data-container="body" style="font-size:16px;">@T["Publish History"]</span>
         </div>
         <div class="col-lg-1 col-xs-1 col-sm-1 col-md-1 no-padding">
-            <a href="javascript:void(0);" title="@T["Close"]" class="popup-close float-end"><span class="su su-close"></span></a>
+            <a href="#" title="@T["Close"]" class="popup-close float-end"><span class="su su-close"></span></a>
         </div>
     </div>
     <div class="col-lg-12 modal-body">
@@ -19,7 +19,7 @@
     <script type="text/x-jsrender" id="job-status-template">
         {{if Status == "Failed"}}
         <div class="item-dashboard grid-content" title="@T["Failed"]">
-            <span><a class="grid-content" href="javascript:void(0);" onclick="onFailureStatusClick()">@T["Failed"]</a></span>
+            <span><a id="failure-status-click" class="grid-content" href="#">@T["Failed"]</a></span>
         </div>
         {{else Status == "InProgress"}}
         <div class="item-dashboard grid-content">
@@ -41,7 +41,7 @@
         <h4 class="popup-title">
             <span class="su su-info"></span>
             <span id="info-dialog-header">@T["Failure Info"]</span>
-            <button id="close-info-dialog" type="button" title="@T["Close"]" data-bs-toggle="tool-tip" data-container="body" class="btn-close popup-close" onclick="closeFailureInfo()" aria-label="Close">
+            <button id="close-info-dialog" type="button" title="@T["Close"]" data-bs-toggle="tool-tip" data-container="body" class="btn-close popup-close" aria-label="Close">
                 <span class="su su-close"></span>
             </button>
         </h4>
@@ -51,12 +51,12 @@
     </div>
     <div class="fluent-popup-footer col-12">
         <div class="col-12 no-padding">
-            <button class="app-button app-secondary-button app-btn-secondary fluent" onclick="copyPublishHistoryToClipboard()" title=@T["Copy to Clipboard"]>@T["Copy to Clipboard"]</button>
-            <button class="close-fluent app-button app-secondary-button app-btn-secondary" onclick="closeFailureInfo()" title="@T["Close"]">@T["Close"]</button>
+            <button id="copy-publish-history" class="app-button app-secondary-button app-btn-secondary fluent" title=@T["Copy to Clipboard"]>@T["Copy to Clipboard"]</button>
+            <button id="close-failure-info" class="close-fluent app-button app-secondary-button app-btn-secondary" title="@T["Close"]">@T["Close"]</button>
         </div>
     </div>
 </div>
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     $(document).ready(function () {
         $("#PublishHistoryGrid").ejGrid({
             dataSource: window.publishedItemDetails,

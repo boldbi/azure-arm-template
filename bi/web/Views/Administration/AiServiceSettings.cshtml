@@ -27,6 +27,7 @@
     var azureAI = ViewBag.aiCredentials != null && ViewBag.aiCredentials.AIModel == (int)AIModel.AzureAI ? ViewBag.aiCredentials.AzureAI : new AzureAI();
     var enableAiFeature = ViewBag.aiCredentials?.EnableAIFeature ?? true;
     var isAiSummariesEnabledGlobally = ViewBag.aiCredentials != null ? ViewBag.aiCredentials.IsAISummariesEnabledGlobally : false;
+    var isUnifiedAIAgentEnabled = globalAppSettings.SystemSettings?.IsUnifiedAIAgentEnabled ?? true;
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -49,12 +50,12 @@
 }
 @section scripts{
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var boldaiservice = "@boldaiservice";
     var openai = "@openai";
     var azureai = "@azureai";
@@ -92,7 +93,7 @@
                                         <label for="aimodel-enable-switch">@T["Enable AI Agent"]</label>
                                     </div>
                                     <div class="enable-ai-info-message col-12 float-start">
-                                        @T["The AI assistant processes your queries using metadata while ensuring your data remains private and secure."]
+                                        @T["The AI assistant processes your queries using metadata while ensuring your data remains private and secure. This assistant will be accessible from the dashboard page, allowing users to interact with it seamlessly for contextual guidance."]
                                     </div>
                                 </div>
                             </div>
@@ -105,11 +106,23 @@
                                         <label for="ai-concent">@T["Enable widget insights and dashboard summary"]</label>
                                     </div>
                                     <div class="enable-ai-info-message col-12 float-start">
-                                        @T[$"By enabling this feature, you consent to {AppBranding.BoldBI.CompanyName} processing both metadata and summarized data using the configured AI services. This allows {AppBranding.BoldBI.CompanyName} to provide contextual insights, helping you make data-driven decisions."]
+                                        @T[$"By enabling this feature, you consent to {AppBranding.BoldBI.CompanyName} processing both metadata and summarized data using the configured AI services. This allows {AppBranding.BoldBI.CompanyName} to provide contextual insights, helping you make data-driven decisions. This will be visible on the dashboard page, offering users direct access to AI-powered insights."]
                                     </div>
                                 </div>
                             </div>
 
+                            <div class="col-12 float-start no-padding enable-ai">
+                                <div class="col-12 float-start no-padding">
+                                    <div class="info-label">
+                                        @Html.CheckBox("enable-unified-ai", isUnifiedAIAgentEnabled, new { @class = "material-checkbox" })
+                                        @Html.Hidden("enable-unified-ai")
+                                        <label for="enable-unified-ai">@T["Enable Unified AI Agent"]</label>
+                                    </div>
+                                    <div class="enable-ai-info-message col-12 float-start">
+                                        @T[$"When enabled, an AI menu will appear in the left panel of the {AppBranding.BoldBI.CompanyName}'s page, giving users access to a professional AI chat window for interactive data exploration and assistance. {AppBranding.BoldBI.CompanyName}'s Unified AI Agent will also analyze metadata and summarized data using your configured AI services, enabling contextual insights, smart summaries, and enhanced decision-making support across dashboards and data sources."]
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="col-12 float-start app-font-div form-group">
                                 <div class="col-12 float-start no-padding ai-service-dropdown">

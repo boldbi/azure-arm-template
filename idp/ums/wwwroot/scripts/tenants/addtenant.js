@@ -19,6 +19,7 @@ var validateTimer;
 var validateInterval = 1000;
 var tooltip;
 var emailTooltip = null;
+var isDatabaseErrorDialogOpen = false;
 
 $(document).ready(function () {
     if (isCommonLogin) {
@@ -131,10 +132,14 @@ $(document).ready(function () {
         }
 
         if (isBoldReportsTenantType()) {
-            $(".site-default-text").html("").html(boldReportsPath);
+            $(".site-default-text").html(
+                $("#tenant-identifier").val() === "" ? boldReportsPath : boldReportsUrl
+            );
         }
         else {
-            $(".site-default-text").html("").html(boldBiPath);
+            $(".site-default-text").html(
+                $("#tenant-identifier").val() === "" ? boldBiPath : boldBIUrl
+            );
         }
         $(".site-domain").html($("#enable-ssl").val() + "://" + inputDomain);
         $(".site-url").attr("data-content", $(".site-domain").html() + $(".site-default-text").text());
@@ -348,7 +353,7 @@ $(document).ready(function () {
                             saveDefaultAttributes(databaseType, getDropDownValue("tenant-type"));
                         }
 
-                        if (!$(".database-error").is(":visible")) {
+                        if (!isDatabaseErrorDialogOpen) {
                             if ($("#txt-password-db").is(":text")) {
                                 $("#txt-password-db").parent().find(".show-hide-password").click();
                                 $("#txt-password-db").parent().find(".tooltip").css("display", "none");
@@ -402,7 +407,7 @@ $(document).ready(function () {
                             newDbConfiguration(waitingPopUpElement);
                         }
 
-                        if (!$(".database-error").is(":visible")) {
+                        if (!isDatabaseErrorDialogOpen) {
                             if (systemSettingsDetails) {
                                 systemSettingsDetails.StorageType = getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type");
                             }

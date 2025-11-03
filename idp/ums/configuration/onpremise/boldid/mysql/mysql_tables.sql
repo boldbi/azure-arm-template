@@ -985,10 +985,26 @@ CREATE TABLE {database_name}.BOLDTC_TenantInactivity (
     MarkedForSuspension tinyint(1) NOT NULL,
     DeletionReminderSentOn datetime NULL,
     IsPermanentlyDeleted tinyint(1) NOT NULL,
-	IsRecordsDeletedInMetaTables tinyint(1) NOT NULL,
+	IsImdbTablesDeleted tinyint(1) NOT NULL,
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
     IsActive tinyint(1) NOT NULL
+);
+
+CREATE TABLE {database_name}.BOLDTC_UmsConfiguration (
+    Id int NOT NULL AUTO_INCREMENT,
+	SystemKey nvarchar(255) NOT NULL UNIQUE,
+	SystemValue nvarchar(4000),
+	ModifiedDate datetime NOT NULL,
+	CONSTRAINT PK_BOLDTC_UmsConfiguration PRIMARY KEY (Id)
+);
+
+CREATE TABLE {database_name}.BOLDTC_BiConfiguration (
+    Id int NOT NULL AUTO_INCREMENT,
+	SystemKey nvarchar(255) NOT NULL UNIQUE,
+	SystemValue nvarchar(4000),
+	ModifiedDate datetime NOT NULL,
+	CONSTRAINT PK_BOLDTC_BiConfiguration PRIMARY KEY (Id)
 );
 
 INSERT {database_name}.BOLDTC_TenantLogType (Name, IsActive) VALUES (N'Registration', 1);

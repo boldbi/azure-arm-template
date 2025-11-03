@@ -14,11 +14,11 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/webhooks.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/webhooks.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/webhooks.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/webhooks.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/webhooks.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/webhooks.min.js"></script>
     </environment>
 
     <script type="text/x-jsrender" id="webhook-name-template">
@@ -44,19 +44,19 @@
                 </li>
                 <li>
                     {{if IsEnable}}
-                    <a href="javascript:void(0);" class="deactivate-webhook" data-item-id="{{:Id}}">
+                    <a href="#" class="deactivate-webhook" data-item-id="{{:Id}}">
                         <i class="su su-enable"></i>
                         <span>@T["Deactivate"]</span>
                     </a>
                     {{else}}
-                    <a href="javascript:void(0);" class="activate-webhook" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                    <a href="#" class="activate-webhook" data-item-id="{{:Id}}" data-name="{{:Name}}">
                         <i class="su su-disable"></i>
                         <span>@T["Activate"]</span>
                     </a>
                     {{/if}}
                 </li>
                 <li>
-                    <a id="delete-webhook" class="delete-class delete-webhook" href="javascript:void(0);" data-item-id="{{:Id}}" data-name="{{:Name}}">
+                    <a id="delete-webhook" class="delete-class delete-webhook" href="#" data-item-id="{{:Id}}" data-name="{{:Name}}">
                         <i class="su su-delete"></i>
                         <span>@T["Delete"]</span>
                     </a>
@@ -74,7 +74,7 @@
         {{/if}}
     </script>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var isEdit = false;
         var deleteWebhookConfirmationUrl = "@Url.Action("DeleteWebhook", "User")";
         var deleteWebhookDetailsUrl = "@Url.Action("DeleteWebhookDetails", "User")";

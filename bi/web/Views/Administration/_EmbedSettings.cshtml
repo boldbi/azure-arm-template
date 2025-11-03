@@ -24,16 +24,16 @@
 
 @section scripts{
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-settings.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-settings.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-settings.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/embed-settings.min.js"></script>
     </environment>
 }
 
 
 @section MainSection{
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var isGenerate = "@isGenerate";
         var isResetEmbedSecretUrl = "@Url.Action("ResetEmbedSecret", "Administration")";
         var updateSystemSettingsValueUrl = "@Url.Action("UpdateSystemSettingValue", "Administration")";
@@ -68,10 +68,10 @@
                 <div class="info-message">@string.Format(T["Anyone with access to the secret key may create a {0} to access the dashboard, as any user, with any options. Keep embed authentication disabled if you are not using it."].Value, "URL")</div>
                 <div class="secret-code-container">
                     <div id="secret-code-link">
-                        <input type="text" id="secret-code" name="" class="form-control" placeholder="@T["Embed secret"]" autocomplete="off" disabled="disabled" onClick="this.setSelectionRange(0, this.value.length)" readonly>
+                        <input type="text" id="secret-code" name="" class="form-control" placeholder="@T["Embed secret"]" autocomplete="off" disabled="disabled" readonly>
                         <div class="form-control su su-copy text focus" id="secret-code-copy" disabled="disabled" data-bs-original-title="@T["Click to copy"]"></div>
                     </div>
-                    <button type="button" title="" id="get-embed-code" onclick="getEmbedSecret();" class="primary-button app-btn-primary" @(embedEnabled ? string.Empty : "disabled")>
+                    <button type="button" title="" id="get-embed-code" class="primary-button app-btn-primary" @(embedEnabled ? string.Empty : "disabled")>
                         @if (isGenerate)
                         {
                             @T["Generate Secret"]

@@ -115,6 +115,7 @@ CREATE TABLE {database_name}.BOLDBI_Item(
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,
         PublishedDate datetime NULL,
+	DashboardLogo varchar(1026) NULL,
 	IsSampleData tinyint NULL,
 	DataSource text null,
 	IsPublic tinyint NOT NULL DEFAULT 0,
@@ -193,6 +194,7 @@ CREATE TABLE {database_name}.BOLDBI_ItemLog(
 	UpdatedUserId int NOT NULL,	
 	ModifiedDate datetime NOT NULL,
     AnonymousUsername varchar(255) NULL,
+	IPAddress varchar(255) NULL,
 	IsActive tinyint NOT NULL,
 	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
@@ -260,6 +262,7 @@ CREATE TABLE {database_name}.BOLDBI_ScheduleDetail(
 	EmailContent varchar(4000) NULL,
 	IsDataChanges tinyint NOT NULL DEFAULT 0,
 	IsTimeInterval tinyint NOT NULL DEFAULT 0,
+	AIInsightSummaryEnabled tinyint NOT NULL DEFAULT 0,
 	StartDate datetime NULL,
 	EndDate datetime NULL,
 	EndAfter int NULL DEFAULT 0,
@@ -1159,7 +1162,12 @@ CREATE TABLE {database_name}.BOLDBI_AI_SESSIONS (
     TotalTokensCost DOUBLE,
     UserInfo TEXT,
     TenantID TEXT,
-    Environment TEXT) ROW_FORMAT=DYNAMIC
+    Environment TEXT,
+	RequestType TEXT,
+	SessionName TEXT,
+	IsActive tinyint NOT NULL DEFAULT 0,
+	HistoryContent TEXT,
+	SessionModifiedTime DATETIME) ROW_FORMAT=DYNAMIC
 ;
 
 CREATE TABLE {database_name}.BOLDBI_AICredentials(

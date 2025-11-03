@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 13.2.5
+*  version : 14.1.11
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -19977,8 +19977,7 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
         },
 
         _focusOnTab: function (e) {
-            var focusEle = this._BoldBIDashboardDialog.find("a, button, :input, select, [tabindex]:not('-1')");
-            focusEle = bbdesigner$(focusEle).find("a, button, :input, select, [tabindex]:not('')");
+            var focusEle = this._BoldBIDashboardDialog.find("a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1']):not([tabindex=''])");
             if (e.shiftKey) {
                 if (!focusEle[focusEle.index(e.target) - 1]) {
                     e.preventDefault();
@@ -21454,7 +21453,7 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
         },
 
         _renderDropdown: function () {
-            this.wrapper = BoldBIDashboard.buildTag("span.e-ddl e-widget " + this.model.cssClass + "#" + this._id + "_wrapper", "", {}, { "tabindex": "0", "accesskey": this.element.attr("accesskey") });
+            this.wrapper = BoldBIDashboard.buildTag("span.e-ddl e-widget " + this.model.cssClass + "#" + this._id + "_wrapper", "", {}, { "tabindex": "-1", "accesskey": this.element.attr("accesskey") });
             this.container = BoldBIDashboard.buildTag("span.e-in-wrap e-box " + this.model.cssClass + "#" + this._id + "_container");
             this.element.removeAttr('accesskey');            
             this._setAttr(this.element[0], { "type":"hidden","role": "combobox", "aria-expanded": false, "aria-autocomplete": "list", "aria-haspopup": true, "aria-owns": this._id + "_popup" }).element.hide();

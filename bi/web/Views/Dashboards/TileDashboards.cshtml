@@ -57,7 +57,7 @@
     bool hideDashboardInfoSection = samePagePreview ? hideAuthorName && hideCategoryName : hideAuthorName && hideCategoryName && hideModifiedDate;
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var itemAddPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
-    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Dashboard;
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Dashboard + "&nonce=" + Context.Items["ScriptNonce"];
     var canCreateCategory = itemAddPermissions[ItemType.Category];
     var hacCreateDataSourcePermission = itemAddPermissions.ContainsKey(ItemType.Datasource) && itemAddPermissions[ItemType.Datasource];
     var itemsPartialScript = string.Empty;
@@ -68,6 +68,7 @@
     var canHideUploadDashboard =  GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri) && !_identityResponse.IsAdmin;
     var isSingleDatabaseMode = globalAppSettings.SystemSettings.ConfigurationMode == ConfigurationMode.SingleDatabaseForAllTenants;
     var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
+    var applicationUrl = _globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
 }
 
 <environment include="Development,CloudDevelopment">
@@ -81,11 +82,12 @@
     }
 </environment>
 @section scripts{
-    <script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var partialViewsUrl = @Json.Serialize(partialViewsUrl);
         var itemsPartialScript = @Json.Serialize(itemsPartialScript);
         var isMobile = @Json.Serialize(isMobile);
         var buildVersion = "@ServerAppConfig.ProductVersion";
+
         $(function () {
             $.ajax({
                 type: "GET",
@@ -94,38 +96,43 @@
                 success: function (response) {
                     $('#server-app-container #content-area').append(response);
 
+                    var nonceValue = nonce; // Inject nonce into JS
+
                     var preloadLink = document.createElement("script");
                     preloadLink.type = "text/javascript";
                     preloadLink.src = itemsPartialScript;
+                    preloadLink.setAttribute("nonce", nonceValue);
                     document.head.appendChild(preloadLink);
 
                     var preloadLink1 = document.createElement("script");
                     preloadLink1.type = "text/javascript";
                     preloadLink1.src = createSlideshowScript;
+                    preloadLink1.setAttribute("nonce", nonceValue);
                     document.head.appendChild(preloadLink1);
-                    
+
                     var preloadLink2 = document.createElement("script");
                     preloadLink2.type = "text/javascript";
                     preloadLink2.src = itemActionScript;
+                    preloadLink2.setAttribute("nonce", nonceValue);
                     document.head.appendChild(preloadLink2);
-
                 },
             });
         });
     </script>
+
 }
 
 @section MainSection{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tile-dashboards-page.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tile-dashboards-page.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.min.js"></script>
     </environment>
 
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var searchKey = '@Html.Raw(ViewBag.searchKey)';
         var getItemUrl = "@Url.Action("GetItems", "Dashboards")";
         var favoriteItemUrl = "@Url.Action("MakeFavorite", "items")";
@@ -157,6 +164,9 @@
         var checkCategoriesExistUrl = "@Url.Action("CheckCategoriesExist", "Dashboards")";
         var validateDataSourceCountUrl = "@Url.Action("ValidateDataSourceCreateLimit", "Items")";
         var resourceLimitationCountUrl = "@Url.Action("ResourceCreateLimit", "Items")";
+        var updateDashboardLogoUrl = "@Url.Action("UpdateDashboardLogo", "Dashboards")";
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        var applicationUrl = "@applicationUrl";
         var currentUserId = @currentUserId;
         var isMaster = @Json.Serialize(globalAppSettings.SystemSettings.IsMaster);
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
@@ -286,37 +296,37 @@
                                             </button>
                                             <ul class="dropdown-menu category-sort-filter-menu">
                                                 <li ng-class="{selected : categorySelectedSort === 'Name' && categorySortDirection == 'descending'}" ng-click="setCategorySelectedSort($event, 'Name', 'descending')">
-                                                    <a class="category-sort-options" href="javascript:void(0);">
+                                                    <a class="category-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Name - Descending"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : categorySelectedSort === 'Name' && categorySortDirection == 'ascending'}" ng-click="setCategorySelectedSort($event, 'Name', 'ascending')">
-                                                    <a class="category-sort-options" href="javascript:void(0);">
+                                                    <a class="category-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Name - Ascending"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : categorySelectedSort === 'ModifiedDate' && categorySortDirection == 'descending'}" ng-click="setCategorySelectedSort($event, 'ModifiedDate', 'descending')">
-                                                    <a class="category-sort-options" href="javascript:void(0);">
+                                                    <a class="category-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Modified - Descending"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : categorySelectedSort === 'ModifiedDate' && categorySortDirection == 'ascending'}" ng-click="setCategorySelectedSort($event, 'ModifiedDate', 'ascending')">
-                                                    <a class="category-sort-options" href="javascript:void(0);">
+                                                    <a class="category-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Modified - Ascending"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : categorySelectedSort === 'Count' && categorySortDirection == 'descending'}" ng-click="setCategorySelectedSort($event, 'Count', 'descending')">
-                                                    <a class="category-sort-options" href="javascript:void(0);">
+                                                    <a class="category-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Count - Descending"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : categorySelectedSort === 'Count' && categorySortDirection == 'ascending'}" ng-click="setCategorySelectedSort($event, 'Count', 'ascending')">
-                                                    <a class="category-sort-options" href="javascript:void(0);">
+                                                    <a class="category-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Count - Ascending"]</span>
                                                     </a>
@@ -351,26 +361,26 @@
                                                                     </span>
                                                                     <ul class="dropdown-menu" role="menu">
                                                                         <li ng-if="categoryItem.CanWrite">
-                                                                            <a class="EditCategory" href="javascript:void(0)" title="" ng-click="addSubCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description)">
+                                                                            <a class="EditCategory" href="#" title="" ng-click="addSubCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description)">
                                                                                 <i class="su su-sub-category"></i>
                                                                                 <span>@T["Add Sub Category"]</span>
                                                                             </a>
                                                                         </li>
                                                                         <li ng-if="!isSharePublishAllowed && (categoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                            <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(categoryItem)">
+                                                                            <a href="#" class="item-permissions" title="" ng-click="sharePermission(categoryItem)">
                                                                                 <i class="su su-manage-permission"></i>
                                                                                 <span>@T["Sharing Permissions"]</span>
                                                                             </a>
                                                                             <hr ng-if="categoryItem.CanWrite || categoryItem.CanDelete" class="no-margin" />
                                                                         </li>
                                                                         <li ng-if="categoryItem.CanWrite">
-                                                                            <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description, categoryItem.Id)">
+                                                                            <a class="EditCategory" href="#" title="" ng-click="editCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description, categoryItem.Id)">
                                                                                 <i class="su su-edit"></i>
                                                                                 <span>@T["Update"]</span>
                                                                             </a>
                                                                         </li>
                                                                         <li ng-if="categoryItem.CanDelete">
-                                                                            <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(categoryItem)">
+                                                                            <a class="DeleteCategory" href="#" ng-click="deleteCategory(categoryItem)">
                                                                                 <i class="su su-delete"></i>
                                                                                 <span>@T["Delete"]</span>
                                                                             </a>
@@ -395,26 +405,26 @@
                                                                             </span>
                                                                             <ul class="dropdown-menu" role="menu">
                                                                                 <li ng-if="subCategoryItem.CanWrite">
-                                                                                    <a class="EditCategory" href="javascript:void(0)" title="" ng-click="addSubCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description)">
+                                                                                    <a class="EditCategory" href="#" title="" ng-click="addSubCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description)">
                                                                                         <i class="su su-sub-category"></i>
                                                                                         <span>@T["Add Sub Category"]</span>
                                                                                     </a>
                                                                                 </li>
                                                                                 <li ng-if="!isSharePublishAllowed && (subCategoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                                    <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(subCategoryItem)">
+                                                                                    <a href="#" class="item-permissions" title="" ng-click="sharePermission(subCategoryItem)">
                                                                                         <i class="su su-manage-permission"></i>
                                                                                         <span>@T["Sharing Permissions"]</span>
                                                                                     </a>
                                                                                     <hr ng-if="subCategoryItem.CanWrite || subCategoryItem.CanDelete" class="no-margin" />
                                                                                 </li>
                                                                                 <li ng-if="subCategoryItem.CanWrite">
-                                                                                    <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description, categoryItem.Id)">
+                                                                                    <a class="EditCategory" href="#" title="" ng-click="editCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description, categoryItem.Id)">
                                                                                         <i class="su su-edit"></i>
                                                                                         <span>@T["Update"]</span>
                                                                                     </a>
                                                                                 </li>
                                                                                 <li ng-if="subCategoryItem.CanDelete">
-                                                                                    <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(subCategoryItem)">
+                                                                                    <a class="DeleteCategory" href="#" ng-click="deleteCategory(subCategoryItem)">
                                                                                         <i class="su su-delete"></i>
                                                                                         <span>@T["Delete"]</span>
                                                                                     </a>
@@ -439,26 +449,26 @@
                                                                                     </span>
                                                                                     <ul class="dropdown-menu" role="menu">
                                                                                         <li ng-if="subCategoryItemTree.CanWrite">
-                                                                                            <a class="EditCategory" href="javascript:void(0)" title="" ng-click="addSubCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description)">
+                                                                                            <a class="EditCategory" href="#" title="" ng-click="addSubCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description)">
                                                                                                 <i class="su su-sub-category"></i>
                                                                                                 <span>@T["Add Sub Category"]</span>
                                                                                             </a>
                                                                                         </li>
                                                                                         <li ng-if="!isSharePublishAllowed && (subCategoryItemTree.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                                            <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTree)">
+                                                                                            <a href="#" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTree)">
                                                                                                 <i class="su su-manage-permission"></i>
                                                                                                 <span>@T["Sharing Permissions"]</span>
                                                                                             </a>
                                                                                             <hr ng-if="subCategoryItemTree.CanWrite || subCategoryItemTree.CanDelete" class="no-margin" />
                                                                                         </li>
                                                                                         <li ng-if="subCategoryItemTree.CanWrite">
-                                                                                            <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description, subCategoryItem.Id)">
+                                                                                            <a class="EditCategory" href="#" title="" ng-click="editCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description, subCategoryItem.Id)">
                                                                                                 <i class="su su-edit"></i>
                                                                                                 <span>@T["Update"]</span>
                                                                                             </a>
                                                                                         </li>
                                                                                         <li ng-if="subCategoryItemTree.CanDelete">
-                                                                                            <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(subCategoryItemTree)">
+                                                                                            <a class="DeleteCategory" href="#" ng-click="deleteCategory(subCategoryItemTree)">
                                                                                                 <i class="su su-delete"></i>
                                                                                                 <span>@T["Delete"]</span>
                                                                                             </a>
@@ -482,20 +492,20 @@
                                                                                             </span>
                                                                                             <ul class="dropdown-menu" role="menu">
                                                                                                 <li ng-if="!isSharePublishAllowed && (subCategoryItemTreelast.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                                                    <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTreelast)">
+                                                                                                    <a href="#" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTreelast)">
                                                                                                         <i class="su su-manage-permission"></i>
                                                                                                         <span>@T["Sharing Permissions"]</span>
                                                                                                     </a>
                                                                                                     <hr ng-if="subCategoryItemTreelast.CanWrite || subCategoryItemTreelast.CanDelete" class="no-margin" />
                                                                                                 </li>
                                                                                                 <li ng-if="subCategoryItemTreelast.CanWrite">
-                                                                                                    <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(subCategoryItemTreelast.Id, subCategoryItemTreelast.Name, subCategoryItemTreelast.Description, subCategoryItemTree.Id)">
+                                                                                                    <a class="EditCategory" href="#" title="" ng-click="editCategory(subCategoryItemTreelast.Id, subCategoryItemTreelast.Name, subCategoryItemTreelast.Description, subCategoryItemTree.Id)">
                                                                                                         <i class="su su-edit"></i>
                                                                                                         <span>@T["Update"]</span>
                                                                                                     </a>
                                                                                                 </li>
                                                                                                 <li ng-if="subCategoryItemTreelast.CanDelete">
-                                                                                                    <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(subCategoryItemTreelast)">
+                                                                                                    <a class="DeleteCategory" href="#" ng-click="deleteCategory(subCategoryItemTreelast)">
                                                                                                         <i class="su su-delete"></i>
                                                                                                         <span>@T["Delete"]</span>
                                                                                                     </a>
@@ -533,25 +543,25 @@
                                 </button>
                                 <ul class="dropdown-menu dashboard-sort-filter-menu">
                                         <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'Name', 'descending')">
-                                            <a class="dashboard-sort-options" href="javascript:void(0);">
+                                            <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                                 <span class="search-option">@T["Name - Descending"]</span>
                                             </a>
                                         </li>
                                         <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'Name', 'ascending')">
-                                            <a class="dashboard-sort-options" href="javascript:void(0);">
+                                            <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                                 <span class="search-option">@T["Name - Ascending"]</span>
                                             </a>
                                         </li>
                                         <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'descending')">
-                                            <a class="dashboard-sort-options" href="javascript:void(0);">
+                                            <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                                 <span class="search-option">@T["Modified - Descending"]</span>
                                             </a>
                                         </li>
                                         <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'ascending')">
-                                            <a class="dashboard-sort-options" href="javascript:void(0);">
+                                            <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                                 <span class="search-option">@T["Modified - Ascending"]</span>
                                             </a>
@@ -570,31 +580,31 @@
                                 </button>
                                 <ul class="dropdown-menu dashboard-sort-filter-menu dashboard-listing-type-list">
                                     <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.AllDashboards)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.AllDashboards))">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                             <span class="search-option">@T["All"]</span>
                                         </a>
                                     </li>
                                     <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.FavouriteItems)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.FavouriteItems))">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                             <span class="search-option">@T["Favorites"]</span>
                                         </a>
                                     </li>
                                     <li ng-class="{selected : selectedFilter ===@((int)DisplayCategory.PublicItems)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.PublicItems))">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                             <span class="search-option">@T["Public"]</span>
                                         </a>
                                     </li>
                                     <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.OwnedByMe)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.OwnedByMe))">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                             <span class="search-option">@T["Owned by me"]</span>
                                         </a>
                                     </li>
                                     <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.SharedWithMe)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.SharedWithMe))">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                             <i class="su su-tick"></i>
                                             <span class="search-option">@T["Shared with me"]</span>
                                         </a>
@@ -643,37 +653,37 @@
                                         </button>
                                         <ul class="dropdown-menu category-sort-filter-menu">
                                             <li ng-class="{selected : categorySelectedSort === 'Name' && categorySortDirection == 'descending'}" ng-click="setCategorySelectedSort($event, 'Name', 'descending')">
-                                                <a class="category-sort-options" href="javascript:void(0);">
+                                                <a class="category-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Name - Descending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : categorySelectedSort === 'Name' && categorySortDirection == 'ascending'}" ng-click="setCategorySelectedSort($event, 'Name', 'ascending')">
-                                                <a class="category-sort-options" href="javascript:void(0);">
+                                                <a class="category-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Name - Ascending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : categorySelectedSort === 'ModifiedDate' && categorySortDirection == 'descending'}" ng-click="setCategorySelectedSort($event, 'ModifiedDate', 'descending')">
-                                                <a class="category-sort-options" href="javascript:void(0);">
+                                                <a class="category-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Modified - Descending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : categorySelectedSort === 'ModifiedDate' && categorySortDirection == 'ascending'}" ng-click="setCategorySelectedSort($event, 'ModifiedDate', 'ascending')">
-                                                <a class="category-sort-options" href="javascript:void(0);">
+                                                <a class="category-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Modified - Ascending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : categorySelectedSort === 'Count' && categorySortDirection == 'descending'}" ng-click="setCategorySelectedSort($event, 'Count', 'descending')">
-                                                <a class="category-sort-options" href="javascript:void(0);">
+                                                <a class="category-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Count - Descending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : categorySelectedSort === 'Count' && categorySortDirection == 'ascending'}" ng-click="setCategorySelectedSort($event, 'Count', 'ascending')">
-                                                <a class="category-sort-options" href="javascript:void(0);">
+                                                <a class="category-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Count - Ascending"]</span>
                                                 </a>
@@ -708,26 +718,26 @@
                                                                 </span>
                                                                 <ul class="dropdown-menu" role="menu">
                                                                     <li ng-if="categoryItem.CanWrite">
-                                                                        <a class="EditCategory" href="javascript:void(0)" title="" ng-click="addSubCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description)">
+                                                                        <a class="EditCategory" href="#" title="" ng-click="addSubCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description)">
                                                                             <i class="su su-sub-category"></i>
                                                                             <span>@T["Add Sub Category"]</span>
                                                                         </a>
                                                                     </li>
                                                                     <li ng-if="!isSharePublishAllowed && (categoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                        <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(categoryItem)">
+                                                                        <a href="#" class="item-permissions" title="" ng-click="sharePermission(categoryItem)">
                                                                             <i class="su su-manage-permission"></i>
                                                                             <span>@T["Sharing Permissions"]</span>
                                                                         </a>
                                                                         <hr ng-if="categoryItem.CanWrite || categoryItem.CanDelete" class="no-margin" />
                                                                     </li>
                                                                     <li ng-if="categoryItem.CanWrite">
-                                                                        <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description, categoryItem.Id)">
+                                                                        <a class="EditCategory" href="#" title="" ng-click="editCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description, categoryItem.Id)">
                                                                             <i class="su su-edit"></i>
                                                                             <span>@T["Update"]</span>
                                                                         </a>
                                                                     </li>
                                                                     <li ng-if="categoryItem.CanDelete">
-                                                                        <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(categoryItem)">
+                                                                        <a class="DeleteCategory" href="#" ng-click="deleteCategory(categoryItem)">
                                                                             <i class="su su-delete"></i>
                                                                             <span>@T["Delete"]</span>
                                                                         </a>
@@ -752,26 +762,26 @@
                                                                         </span>
                                                                         <ul class="dropdown-menu" role="menu">
                                                                             <li ng-if="subCategoryItem.CanWrite">
-                                                                                <a class="EditCategory" href="javascript:void(0)" title="" ng-click="addSubCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description)">
+                                                                                <a class="EditCategory" href="#" title="" ng-click="addSubCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description)">
                                                                                     <i class="su su-sub-category"></i>
                                                                                     <span>@T["Add Sub Category"]</span>
                                                                                 </a>
                                                                             </li>
                                                                             <li ng-if="!isSharePublishAllowed && (subCategoryItem.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                                <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(subCategoryItem)">
+                                                                                <a href="#" class="item-permissions" title="" ng-click="sharePermission(subCategoryItem)">
                                                                                     <i class="su su-manage-permission"></i>
                                                                                     <span>@T["Sharing Permissions"]</span>
                                                                                 </a>
                                                                                 <hr ng-if="subCategoryItem.CanWrite || subCategoryItem.CanDelete" class="no-margin" />
                                                                             </li>
                                                                             <li ng-if="subCategoryItem.CanWrite">
-                                                                                <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description, categoryItem.Id)">
+                                                                                <a class="EditCategory" href="#" title="" ng-click="editCategory(subCategoryItem.Id, subCategoryItem.Name, subCategoryItem.Description, categoryItem.Id)">
                                                                                     <i class="su su-edit"></i>
                                                                                     <span>@T["Update"]</span>
                                                                                 </a>
                                                                             </li>
                                                                             <li ng-if="subCategoryItem.CanDelete">
-                                                                                <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(subCategoryItem)">
+                                                                                <a class="DeleteCategory" href="#" ng-click="deleteCategory(subCategoryItem)">
                                                                                     <i class="su su-delete"></i>
                                                                                     <span>@T["Delete"]</span>
                                                                                 </a>
@@ -796,26 +806,26 @@
                                                                                 </span>
                                                                                 <ul class="dropdown-menu" role="menu">
                                                                                     <li ng-if="subCategoryItemTree.CanWrite">
-                                                                                        <a class="EditCategory" href="javascript:void(0)" title="" ng-click="addSubCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description)">
+                                                                                        <a class="EditCategory" href="#" title="" ng-click="addSubCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description)">
                                                                                             <i class="su su-sub-category"></i>
                                                                                             <span>@T["Add Sub Category"]</span>
                                                                                         </a>
                                                                                     </li>
                                                                                     <li ng-if="!isSharePublishAllowed && (subCategoryItemTree.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                                        <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTree)">
+                                                                                        <a href="#" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTree)">
                                                                                             <i class="su su-manage-permission"></i>
                                                                                             <span>@T["Sharing Permissions"]</span>
                                                                                         </a>
                                                                                         <hr ng-if="subCategoryItemTree.CanWrite || subCategoryItemTree.CanDelete" class="no-margin" />
                                                                                     </li>
                                                                                     <li ng-if="subCategoryItemTree.CanWrite">
-                                                                                        <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description, subCategoryItem.Id)">
+                                                                                        <a class="EditCategory" href="#" title="" ng-click="editCategory(subCategoryItemTree.Id, subCategoryItemTree.Name, subCategoryItemTree.Description, subCategoryItem.Id)">
                                                                                             <i class="su su-edit"></i>
                                                                                             <span>@T["Update"]</span>
                                                                                         </a>
                                                                                     </li>
                                                                                     <li ng-if="subCategoryItemTree.CanDelete">
-                                                                                        <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(subCategoryItemTree)">
+                                                                                        <a class="DeleteCategory" href="#" ng-click="deleteCategory(subCategoryItemTree)">
                                                                                             <i class="su su-delete"></i>
                                                                                             <span>@T["Delete"]</span>
                                                                                         </a>
@@ -839,20 +849,20 @@
                                                                                         </span>
                                                                                         <ul class="dropdown-menu" role="menu">
                                                                                             <li ng-if="!isSharePublishAllowed && (subCategoryItemTreelast.CreatedById== currentUserId || isAdmin || hasCategorySharePermission)">
-                                                                                                <a href="javascript:void(0);" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTreelast)">
+                                                                                                <a href="#" class="item-permissions" title="" ng-click="sharePermission(subCategoryItemTreelast)">
                                                                                                     <i class="su su-manage-permission"></i>
                                                                                                     <span>@T["Sharing Permissions"]</span>
                                                                                                 </a>
                                                                                                 <hr ng-if="subCategoryItemTreelast.CanWrite || subCategoryItemTreelast.CanDelete" class="no-margin" />
                                                                                             </li>
                                                                                             <li ng-if="subCategoryItemTreelast.CanWrite">
-                                                                                                <a class="EditCategory" href="javascript:void(0)" title="" ng-click="editCategory(subCategoryItemTreelast.Id, subCategoryItemTreelast.Name, subCategoryItemTreelast.Description, subCategoryItemTree.Id)">
+                                                                                                <a class="EditCategory" href="#" title="" ng-click="editCategory(subCategoryItemTreelast.Id, subCategoryItemTreelast.Name, subCategoryItemTreelast.Description, subCategoryItemTree.Id)">
                                                                                                     <i class="su su-edit"></i>
                                                                                                     <span>@T["Update"]</span>
                                                                                                 </a>
                                                                                             </li>
                                                                                             <li ng-if="subCategoryItemTreelast.CanDelete">
-                                                                                                <a class="DeleteCategory" href="javascript:void(0)" ng-click="deleteCategory(subCategoryItemTreelast)">
+                                                                                                <a class="DeleteCategory" href="#" ng-click="deleteCategory(subCategoryItemTreelast)">
                                                                                                     <i class="su su-delete"></i>
                                                                                                     <span>@T["Delete"]</span>
                                                                                                 </a>
@@ -956,7 +966,7 @@
                                         <span class="download-text">@T["Download"]</span>
                                     </span>
                                 </span>
-                                <button class="btn btn-default upload-button" type="button" ng-show="activeMenu == @((int)DisplayCategory.UploadDrafts)" style="display:none" onclick="uploadBulkDashboard()">
+                                <button class="btn btn-default upload-button" type="button" ng-show="activeMenu == @((int)DisplayCategory.UploadDrafts)" style="display:none">
                                     <span class="col-2 upload-icon no-padding">
                                         <span class="dashboard-select-options">
                                             <i class="su su-upload"></i>
@@ -981,37 +991,37 @@
 
                                             <ul class="dropdown-menu dashboard-sort-filter-menu">
                                             <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'Name', 'descending')">
-                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                <a class="dashboard-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Name - Descending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : selectedSort === 'Name' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'Name', 'ascending')">
-                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                <a class="dashboard-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Name - Ascending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'descending')">
-                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                <a class="dashboard-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Modified - Descending"]</span>
                                                 </a>
                                             </li>
                                             <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'ModifiedDate', 'ascending')">
-                                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                <a class="dashboard-sort-options" href="#">
                                                     <i class="su su-tick"></i>
                                                     <span class="search-option">@T["Modified - Ascending"]</span>
                                                 </a>
                                             </li>
                                                 @*<li ng-class="{selected : selectedSort === 'CreatedByDisplayName' && sortDirection == 'ascending'}" ng-click="setSelectedSort($event, 'CreatedByDisplayName', 'ascending')">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                         <i class="su su-tick"></i>
                                         <span class="search-option">@T["Owner Name (A-Z)"]</span>
                                         </a>
                                         </li>
                                         <li ng-class="{selected : selectedSort === 'CreatedByDisplayName' && sortDirection == 'descending'}" ng-click="setSelectedSort($event, 'CreatedByDisplayName', 'descending')">
-                                        <a class="dashboard-sort-options" href="javascript:void(0);">
+                                        <a class="dashboard-sort-options" href="#">
                                         <i class="su su-tick"></i>
                                         <span class="search-option">@T["Owner Name (Z-A)"]</span>
                                         </a>
@@ -1033,31 +1043,31 @@
                                             </button>                                   
                                             <ul class="dropdown-menu dashboard-sort-filter-menu">
                                                 <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.AllDashboards)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.AllDashboards))">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <a class="dashboard-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["All"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.FavouriteItems)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.FavouriteItems))">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <a class="dashboard-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Favorites"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : selectedFilter ===@((int)DisplayCategory.PublicItems)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.PublicItems))">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <a class="dashboard-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Public"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.OwnedByMe)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.OwnedByMe))">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <a class="dashboard-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Owned by me"]</span>
                                                     </a>
                                                 </li>
                                                 <li ng-class="{selected : selectedFilter === @((int)DisplayCategory.SharedWithMe)}" ng-click="setSelectedFilter($event, @((int)DisplayCategory.SharedWithMe))">
-                                                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                                                    <a class="dashboard-sort-options" href="#">
                                                         <i class="su su-tick"></i>
                                                         <span class="search-option">@T["Shared with me"]</span>
                                                     </a>
@@ -1185,13 +1195,13 @@
                                                                     </span>
                                                                 </li>
                                                                 <li ng-if="dashboardItem.ItemType == @((int)ItemType.Dashboard) && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="hideViews || (schemesDetails != null && !schemesDetails.Views) || activeMenu === @((int)DisplayCategory.UsageAnalytics)" class="dropdown dashboard-views no-padding" data-load="true">
-                                                                    <span href="javascript:void(0);" class="dropdown-toggle views" data-bs-toggle="dropdown" ng-mouseenter="getDashboardViews($event)">
+                                                                    <span href="#" class="dropdown-toggle views" data-bs-toggle="dropdown" ng-mouseenter="getDashboardViews($event)">
                                                                         <i class="su su-filter"></i>
                                                                         <span>@T["Views"]</span>
                                                                     </span>
                                                                     <ul class="dropdown-menu item-views no-padding" role="menu">
                                                                         <li>
-                                                                            <span class="view-name" href="javascript:void(0);">
+                                                                            <span class="view-name" href="#">
                                                                                 @T["Loading..."]
                                                                             </span>
                                                                         </li>
@@ -1255,7 +1265,7 @@
                                                                 </li>
                                                                 <li ng-if="((dashboardItem.ItemType == @((int)ItemType.Dashboard) && dashboardItem.CanSchedule) || dashboardItem.CreatedById==currentUserId || isAdmin) && !isTablet && !dashboardItem.IsMultiDashboard" role="separator" class="divider" ng-hide="hideCreateSchedule || (schemesDetails != null && !schemesDetails.CreateSchedule) || activeMenu === @((int)DisplayCategory.UsageAnalytics)"></li>
                                                                 <li ng-if="dashboardItem.ItemType == @((int)ItemType.Dashboard) && dashboardItem.CanSchedule && !isTablet && !dashboardItem.IsMultiDashboard" ng-hide="hideCreateSchedule || (schemesDetails != null && !schemesDetails.CreateSchedule)">
-                                                                    <span href="javascript:void(0);" class="schedule-dashboards option-click" title="" ng-click="scheduleDashboard()">
+                                                                    <span href="#" class="schedule-dashboards option-click" title="" ng-click="scheduleDashboard()">
                                                                         <i class="su su-nav-schedule"></i>
                                                                         <span>@T["Create Schedule"]</span>
                                                                     </span>
@@ -1275,7 +1285,7 @@
                                                                     </span>
                                                                 </li>
                                                                 <li ng-if="dashboardItem.ItemType == @((int)ItemType.Dashboard) && dashboardItem.Extension == '.sydx' && dashboardItem.CanWrite && !isTablet && !dashboardItem.IsMultiDashboard">
-                                                                    <span href="javascript:void(0);" title="" class="update-datasource option-click" ng-click="updateDashboardDataSource()">
+                                                                    <span href="#" title="" class="update-datasource option-click" ng-click="updateDashboardDataSource()">
                                                                         <i class="su su-nav-datasource"></i>
                                                                         <span>@T["Update Data Source(s)"]</span>
                                                                     </span>
@@ -1285,6 +1295,12 @@
                                                                         <i class="su su-delete"></i>
                                                                         <span>@T["Delete"]</span>
                                                                     </span>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="option-click" id="dashboard-logo-upload" ng-show="activeMenu !== @((int)DisplayCategory.UsageAnalytics) && activeMenu !== @((int)DisplayCategory.DraftItems) && activeMenu !== @((int)DisplayCategory.UploadDrafts)" data-name="{{dashboardItem.Name}}" data-display-name="{{dashboardItem.Name}}" data-item-id="{{dashboardItem.Id}}" data-dashboard-logo="{{dashboardItem.DashboardLogo}}" target="_blank">
+                                                                        <i class="su su-upload"><i class="su su-open path1"></i></i>
+                                                                        <span>@T["Upload Logo"]</span>
+                                                                    </a>
                                                                 </li>
                                                             </ul>
                                                         </div>
@@ -1300,7 +1316,7 @@
                                                         </div>
                                                         <div class="no-padding dashboard-open">
                                                             <span class="open-link-icon no-margin" title="" ng-show="!isTablet && !isMobile && !samePagePreview && activeMenu !== @((int)DisplayCategory.UsageAnalytics)">
-                                                                <a class="web-designer option-click"ng-click="redirectToDashboard(viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name))" href="javascript:void(0);" target="_blank">
+                                                                <a class="web-designer option-click"ng-click="redirectToDashboard(viewDashboardUrl(dashboardItem.Id, dashboardItem.CategoryName, dashboardItem.Name))" href="#" target="_blank">
                                                                     <i class="items view-item su su-external-link"></i>
                                                                 </a>
 
@@ -1530,37 +1546,37 @@
                     <div class="modal-body no-padding">
                         <ul class="dashboard-sort-filter-menu no-padding">
                             @*<li ng-class="{selected : selectedSort === 'CreatedDate' && sortDirection === 'descending'}" ng-click="updateSortSelection($event, 'CreatedDate', 'descending')">
-                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                    <a class="dashboard-sort-options" href="#">
                     <i class="su su-tick"></i>
                     <span class="search-option">@T["Recently Added"]</span>
                     </a>
                     </li>*@
                             <li ng-class="{selected : selectedSort === 'ModifiedDate' && sortDirection === 'descending'}" ng-click="updateSortSelection($event, 'ModifiedDate', 'descending')">
-                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                <a class="dashboard-sort-options" href="#">
                                     <i class="su su-tick"></i>
                                     <span class="search-option">@T["Recently Updated"]</span>
                                 </a>
                             </li>
                             <li ng-class="{selected : selectedSort === 'Name' && sortDirection === 'ascending'}" ng-click="updateSortSelection($event, 'Name' , 'ascending')">
-                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                <a class="dashboard-sort-options" href="#">
                                     <i class="su su-tick"></i>
                                     <span class="search-option">@T["Dashboard Name (A-Z)"]</span>
                                 </a>
                             </li>
                             <li ng-class="{selected : selectedSort === 'Name' && sortDirection === 'descending'}" ng-click="updateSortSelection($event, 'Name', 'descending')">
-                                <a class="dashboard-sort-options" href="javascript:void(0);">
+                                <a class="dashboard-sort-options" href="#">
                                     <i class="su su-tick"></i>
                                     <span class="search-option">@T["Dashboard Name (Z-A)"]</span>
                                 </a>
                             </li>
                             @*<li ng-class="{selected : selectedSort === 'CreatedByDisplayName' && sortDirection === 'ascending'}" ng-click="updateSortSelection($event, 'CreatedByDisplayName', 'ascending')">
-                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                    <a class="dashboard-sort-options" href="#">
                     <i class="su su-tick"></i>
                     <span class="search-option">@T["Owner Name (A-Z)"]</span>
                     </a>
                     </li>
                     <li ng-class="{selected : selectedSort === 'CreatedByDisplayName' && sortDirection === 'descending'}" ng-click="updateSortSelection($event, 'CreatedByDisplayName', 'descending')">
-                    <a class="dashboard-sort-options" href="javascript:void(0);">
+                    <a class="dashboard-sort-options" href="#">
                     <i class="su su-tick"></i>
                     <span class="search-option">@T["Owner Name (Z-A)"]</span>
                     </a>
@@ -1609,6 +1625,7 @@
         @await Html.PartialAsync("../Items/_SharePermission")
         @await Html.PartialAsync("../Items/_PublishDashboard")
         @await Html.PartialAsync("../Items/_GetExternalSites")
+        @await Html.PartialAsync("../Dashboards/_DashboardLogoUploadBox")
     }
 
     @if (samePagePreview && !isMobile)
@@ -1618,7 +1635,7 @@
 
     @await Html.PartialAsync("../Items/_ItemInfo")
 
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(document).ready(function () {
             $('#user-group-search-input_suggestion').addClass("hide-suggesstion");
         });

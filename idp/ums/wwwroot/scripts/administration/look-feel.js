@@ -18,6 +18,11 @@ $(document).ready(function () {
         });
     }
 
+    if (isJWTUserBasedThemeApplied) {
+        $("#update-lookandfeel-settings,  .css-radio").attr('disabled', true);
+        $(".section-dropdown-content-first .btn").addClass("disabled");
+    }
+
     var uploadDashboardFile = $("#upload-dashboard-fileform");
 
     if (uploadDashboardFile.length) {

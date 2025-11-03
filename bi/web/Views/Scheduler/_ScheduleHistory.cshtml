@@ -1,7 +1,7 @@
 ﻿
 <!DOCTYPE html>
 <head>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var scheduleHistoryUrl = "@Url.Action("ScheduleHistory", "items")";
     </script>
 
@@ -17,7 +17,7 @@
                             <span class="modal-title popup-title schedule-popup-title ellipsis col-lg-10 col-10 col-sm-10 col-md-10 no-padding" data-bs-toggle="tooltip" data-placement="bottom" data-container="body" style="font-size:16px;"></span>
                         </div>
                         <div class="col-lg-1 col-1 col-sm-1 col-md-1 no-padding">
-                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-placement="left" data-container="body" title="@T["Close"]" class="popup-close float-end"><span class="su su-close"></span></a>
+                            <a href="#" data-bs-toggle="tooltip" data-placement="left" data-container="body" title="@T["Close"]" class="popup-close float-end"><span class="su su-close"></span></a>
                         </div>
                     </div>
                     <div class="modal-body col-lg-12">
@@ -44,7 +44,7 @@
             <h4 class="popup-title">
                 <span class="su su-info"></span>
                 <span id="info-dialog-header">@T["Failure Info"]</span>
-                <button id="close-info-dialog" type="button" title="@T["Close"]" data-bs-toggle="tool-tip" data-container="body" class="btn-close popup-close" onclick="closeFailureInfo()" aria-label="Close">
+                <button id="close-info-dialog" type="button" title="@T["Close"]" data-bs-toggle="tool-tip" data-container="body" class="btn-close popup-close" id="close-info-dialog" aria-label="Close">
                     <span class="su su-close"></span>
                 </button>
             </h4>
@@ -54,8 +54,8 @@
         </div>
         <div class="fluent-popup-footer col-12">
             <div class="col-12 no-padding">
-                <button class="app-button app-secondary-button app-btn-secondary fluent" onclick="copyScheduleHistoryToClipboard()" title=@T["Copy to Clipboard"]>@T["Copy to Clipboard"]</button>
-                <button class="close-fluent app-button app-secondary-button app-btn-secondary" onclick="closeFailureInfo()" title=@T["Close"]>@T["Close"]</button>
+                <button class="app-button app-secondary-button app-btn-secondary fluent" id="copy-schedule-history" title=@T["Copy to Clipboard"]>@T["Copy to Clipboard"]</button>
+                <button class="close-fluent app-button app-secondary-button app-btn-secondary" id="close-info-dialog" title=@T["Close"]>@T["Close"]</button>
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
 </script>
 <script type="text/x-jsrender" id="schedule_status">
         {{if ScheduleStatus =="@((int)ScheduleStatus.Fail)"}}
-        <span><a class="grid-content" href="javascript:void(0);" onclick="onFailureStatusClick()">{{:Status}}</a></span>
+        <span><a class="grid-content" href="#" id="failure-status">{{:Status}}</a></span>
         {{else}}
     <div class="grid-content" title="{{:Status}}" data-bs-toggle="tooltip">{{:Status}}</div>
         {{/if}}
@@ -79,7 +79,7 @@
 <script type="text/x-jsrender" id="log_details">
     <div class="grid-content" title="{{:Details}}" data-bs-toggle="tooltip">{{:Details}}</div>
 </script>
-<script type="text/javascript">
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     $(document).ready(function () {
         GridLocalization(window.Server.App.Localization.ScheduleHistoryEmpty);
         $("#historygrid").ejGrid({

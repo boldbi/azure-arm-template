@@ -10,6 +10,7 @@
     var canCreateCategory = itemAddPermissions[ItemType.Category];
     var appFontStyle = globalAppSettings != null && globalAppSettings.SystemSettings != null && !globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? globalAppSettings.SystemSettings.FontPreference : ServerAppConfig.FontFamily;
     var enableManualOverWrite = ViewData["EnableManualOverWrite"] != null ? Convert.ToBoolean(ViewData["EnableManualOverWrite"]) : false;
+    var nonce = Context.Items["ScriptNonce"]?.ToString();
 }
 <head>
     <meta name="designer_service:url" content="@ServerAppConfig.InternalAppDataServiceUrl" />
@@ -26,7 +27,8 @@
 </head>
 <html class="upload-iframe-server">
 <head>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var scriptNonce = @Json.Serialize(nonce);
         var loadUploadDialogUrl = "@Url.Action("DataSourceMapping", "Dashboards")";
         var isSelfHosted = @Json.Serialize(isSelfHosted);
         var isHideHelpLink = @Json.Serialize(ServerAppConfig.IsHideHelpLink);
@@ -36,38 +38,38 @@
         var canCreateCategory = @Json.Serialize(canCreateCategory);
         var enableManualOverWrite = @Json.Serialize(enableManualOverWrite);
     </script>
-    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
 </head>
 <body class="upload-iframe-body">
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/upload-iframe.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/upload-iframe.min.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
     </environment>
 
-    <script asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 
     @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
 
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
 
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-upload.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-upload.min.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-upload.min.js"></script>
     </environment>
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
     <div id="Upload_Item"></div>
@@ -80,12 +82,12 @@
             <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl)" />
         </environment>
     }
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/upload-dashboard.min.js"></script>
     </environment>
 </body>
 </html>

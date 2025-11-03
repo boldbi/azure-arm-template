@@ -132,13 +132,6 @@
         highlight: function (element) {
             $(element).closest('div').addClass("e-error");
             $(element).closest(".e-outline").siblings(".startup-validation").show();
-            if (element.id === "txt-dbname") {
-                $(".database-error").html("").hide();
-            }
-
-            if (element.id === "database-name") {
-                $(".database-error").html("").hide();
-            }
         },
         unhighlight: function (element) {
             $(element).closest('div').removeClass('e-error');
@@ -459,7 +452,6 @@ function databaseConfiguration(clickedButton) {
                                 else {
                                     $("#db-config-submit").prop("disabled", false);
                                     errorContent = result.Data.value;
-                                    $(".database-error").html(databaseValidationMessage).show();
                                 }
                                 changeFooterPostion();
                             }
@@ -485,7 +477,6 @@ function databaseConfiguration(clickedButton) {
                                     var id = result.Data.isServerError ? "#server-existing-dbname" : "#database-name";
                                     $(id).closest(".txt-holder").addClass("has-error");
                                     $(id).parent().find(">.startup-validation").html(databaseValidationMessage).show();
-                                    $(".database-error").html(databaseValidationMessage).show();
                                     $("#sql-existing-db-submit").prop("disabled", false);
                                 } else if (!result.Data.key && items.length <= 0) {
                                     doAjaxPost("POST", generateSQLTablesUrl,
@@ -501,7 +492,6 @@ function databaseConfiguration(clickedButton) {
                                                 $("#sql-existing-db-submit").prop("disabled", false);
                                                 $("#db_loader").hide();
                                                 errorContent = result.Data.value;
-                                                $(".database-error").html(databaseValidationMessage).show();
                                             }
                                         }
                                     );
@@ -513,7 +503,6 @@ function databaseConfiguration(clickedButton) {
                                     $("#db_config_generate, #db-config-submit").hide();
                                     $("#sql-existing-db-submit").show().prop("disabled", false);
                                     errorContent = result.Data.value;
-                                    $(".database-error").html(databaseValidationMessage).show();
                                 }
                             });
                     }
@@ -532,8 +521,9 @@ function databaseConfiguration(clickedButton) {
                     }
 
                     errorContent = result.Data.value;
-                    $("#additional-parameter").closest('div').addClass("e-error");
-                    $("#additional-parameter").closest(".e-outline").siblings(".startup-validation").html(databaseValidationMessage).show();
+                    messageBox("su-login-error", window.Server.App.LocalizationContent.DatabaseError, errorContent, "success", function () {
+                        onCloseMessageBox();
+                    });
                 }
             }
         );
@@ -1494,7 +1484,6 @@ function showDataStore() {
 function removeError() {
     $(".e-error").removeClass("e-error");
     $(".validation-txt-errors").hide();
-    $(".database-error").hide();
 }
 
 $(document).on("change", "#existing-db", function () {

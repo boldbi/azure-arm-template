@@ -31,24 +31,38 @@
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
-    <link rel="icon" href="@faviconLogo" onerror="if (this.href !== null && this.href.toLowerCase() !== '@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon') this.href = '@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon';" />
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+    <link rel="icon" href="@faviconLogo" id="favicon-link" />
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/license-activation.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/license-activation.js"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/license-activation.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/license-activation.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/license-activation.min.js"></script>
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/license-activation.min.css" />
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var lisenceValidationUrl = "@Url.Action("LicenseValidation", "ServerConfiguration")";
         var lisenceActivationUrl = "@Url.Action("ActivateLicense", "ServerConfiguration")";
         var offlineSetupImageUrl = "@Url.Content("~/images/static/default-pages/offline-setup.png")";
         var startupHome = "@Url.Content("~/images/static/default-pages/login-to-activate.png")";
         var redirectUrl = "@redirectUrl";
+        document.addEventListener("DOMContentLoaded", function () {
+            var initialFaviconPath = "@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var fallbackFaviconPath = "@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+
+            var faviconLink = document.getElementById("favicon-link");
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    var currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== initialFaviconPath.toLowerCase()) {
+                        faviconLink.setAttribute("href", fallbackFaviconPath);
+                    }
+                });
+            }
+        });
     </script>
 </head>
 

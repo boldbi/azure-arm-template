@@ -7,12 +7,15 @@
     var url = new Uri(Context.Request.GetDisplayUrl());
     var requestUrl = url.AbsolutePath.ToString().ToLower();
     var partialViewPageUrl = Url.Action("LoadPartialViews", "PartialView");
+    var nonce = !string.IsNullOrEmpty(ViewBag.ScriptNonce as string)
+     ? ViewBag.ScriptNonce as string
+     : Context.Items["ScriptNonce"] as string;
 }
 
 <!DOCTYPE html>
 <head>
     <title>@T["Create Slideshow"]</title>
-    <script>
+    <script nonce="@nonce" type="text/javascript">
         var partialViewPageUrl = @Json.Serialize(partialViewPageUrl);
         var requestUrl = @Json.Serialize(requestUrl);
         var checkSlideshowNameExistUrl = "@Url.Action("IsslideshowNameExist", "Slideshow")";
@@ -39,10 +42,10 @@
         </environment>
 
         <environment include="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.js"></script>
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.min.js"></script>
+             <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-slideshow.min.js"></script>
         </environment>
     }
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
@@ -58,7 +61,7 @@
                         <span class="modal-title popup-title slideshow-popup-title ellipsis col-10" data-container='presentation-container'>@T["Create Slideshow"]</span>
                     </div>
                     <div class="col-1 no-padding float-end">
-                        <a href="javascript:void(0);" title="@T["Close"]" data-bs-toggle='tooltip' data-placement="left" class="create-presentation-popup-close float-end popup-close">
+                        <a href="#" title="@T["Close"]" data-bs-toggle='tooltip' data-placement="left" class="create-presentation-popup-close float-end popup-close">
                             <span class="su su-close"></span>
                         </a>
                     </div>
@@ -105,7 +108,7 @@
                             <div class="col-12 no-padding display-dashboard">
                                 <div id="add-dashboard-widgets" class="col-12 no-padding">
                                     <div class="col-12 add-dashboard-widgets-button">
-                                        <a class="add-button-content" href="javascript:void(0)" tabindex="3">
+                                        <a class="add-button-content" href="#" tabindex="3">
                                             <span class="su su-add"></span>
                                             <span class="add-btn-text">@T["Add Dashboards"]</span>
                                         </a>
@@ -115,7 +118,7 @@
                                             <div class="form-field col-3 item-type-dropdown">
                                                 <select class="selectpicker" id="select_type" style="width: 100%; margin-bottom: 15px;">
                                                     <option value="@((int)ItemType.Dashboard)" selected="selected">@T["Dashboards"]</option>
-                                                    @*<option value="@((int)ItemType.Widget)">@T["Widgets"]</option>*@
+                                                    @* <option value="@((int)ItemType.Widget)">@T["Widgets"]</option> *@
                                                 </select>
                                             </div>
                                             <div class="form-field col-4 slide-category-dropdown">
@@ -131,14 +134,14 @@
                                                     <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select tab"]</option>
                                                 </select>
                                             </div>
-                                            <div class="form-field slide-view-dropdown col-4" style="display: none">
-                                                <select id="select_view" data-live-search="true" title='@T["Select view"]' name="childdashboardId" class="selectpicker" data-size="5" data-none-results-text="@T["No results match"]">
-                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select view"]</option>
-                                                </select>
-                                            </div>
                                             <div class="form-field slide-widget-dropdown col-5" style="display: none">
                                                 <select class="selectpicker" id="select_widget" data-size="5" data-live-search="true" title='@T["Select widget"]' style="width: 100%; margin-bottom: 15px;" data-none-results-text="@T["No results match"]">
                                                     <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select widget"]</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-field slide-view-dropdown col-4" style="display: none">
+                                                <select id="select_view" data-live-search="true" title='@T["Select view"]' name="childdashboardId" class="selectpicker" data-size="5" data-none-results-text="@T["No results match"]">
+                                                    <option value="" selected="selected" class="hide-option" disabled="disabled">@T["Select view"]</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -158,8 +161,8 @@
                 </div>
                 <div class="modal-footer col-12 no-padding">
                     <div class="col-lg-12 margin-top">
-                        <input type="button" title="" class="btn primary-button app-btn-primary" style="display:none" id="edit-slideshow" disabled onclick="editSlideshowMethod()" tabindex="4" value="@T["Save"]">
-                        <input type="button" title="" class="btn primary-button app-btn-primary" id="create-slideshow" disabled onclick="createSlideshowMethod()" tabindex="4" value="@T["Create"]">
+                        <input type="button" title="" class="btn primary-button app-btn-primary" style="display:none" id="edit-slideshow" disabled tabindex="4" value="@T["Save"]">
+                        <input type="button" title="" class="btn primary-button app-btn-primary" id="create-slideshow" disabled tabindex="4" value="@T["Create"]">
                         <input type="button" title="" class="btn secondary-button app-btn-secondary" id="cancel-slideshow" value="@T["Cancel"]" tabindex="5">
                     </div>
                 </div>

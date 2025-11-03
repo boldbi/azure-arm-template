@@ -1,11 +1,32 @@
 ﻿@{
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') : ServerAppConfig.IsSelfHosted ? GlobalAppSettings.HttpPathBase + ServerAppConfig.AppSettings.EndPoints.CdnLink : ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
-    var themeAppearanceName = ServerAppConfig.IsSelfHosted ? (globalAppSettings != null && globalAppSettings.SystemSettings != null && !globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? globalAppSettings.SystemSettings.ThemeAppearance : ServerAppConfig.Theme.Appearance) : globalAppSettings != null && globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.ThemeAppearance : "light";
-    var themeCss = themeAppearanceName + ".css";
-    var themeMinCss = themeAppearanceName + ".min.css";
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var themeAppearanceName = string.Empty;
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        if (_identityResponse != null && !string.IsNullOrWhiteSpace(_identityResponse.ThemeAppearance))
+        {
+            themeAppearanceName = _identityResponse.ThemeAppearance;
+        }
+        else if (globalAppSettings?.SystemSettings != null &&
+                 !globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings)
+        {
+            themeAppearanceName = globalAppSettings.SystemSettings.ThemeAppearance;
+        }
+        else
+        {
+            themeAppearanceName = ServerAppConfig.Theme.Appearance;
+        }
+    }
+    else
+    {
+        themeAppearanceName = globalAppSettings?.SystemSettings?.ThemeAppearance ?? "light";
+    }
+
+    var themeCss = themeAppearanceName + ".css";
+    var themeMinCss = themeAppearanceName + ".min.css";
 }
 
 <environment include="Development,CloudDevelopment">

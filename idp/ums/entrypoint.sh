@@ -11,7 +11,7 @@ configuration_path="$app_data_location/configuration"
 local_service_json_file="$configuration_path/local_service_url.json"
 
 sub_path=$(echo "$APP_BASE_URL" | sed 's|.*://[^/]*\(/.*\)$|\1|' || echo "")
-
+ 
 # ---------- Logging Helpers ----------
 log() { echo -e "[INFO] $1"; }
 error() { echo -e "[ERROR] $1" >&2; }

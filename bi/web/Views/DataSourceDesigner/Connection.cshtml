@@ -28,15 +28,17 @@
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
     var isConnectorsToolTipEnable = globalAppSettings.SystemSettings.IsConnectorsToolTipEnable;
+    var customThemeAppearance = _identityResponse.ThemeAppearance;
     if (isEmbedTrue)
     {
         dashboardCutomTheme = Context.Request.Query["embed_theme"];
     }
     else
     {
-        dashboardCutomTheme = ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.DashboardTheme : globalAppSettings.SystemSettings.CustomDashboardTheme;
+        dashboardCutomTheme = _identityResponse.CustomDashboardTheme;
     }
     var isSandBox = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var nonce = Context.Items["ScriptNonce"]?.ToString();
 }
 <!DOCTYPE html>
 
@@ -84,15 +86,16 @@
     }
     @if (isEmbedTrue)
     {
-        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
     }
     else
     {
         @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
-        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+        <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
         @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     }
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var scriptNonce = @Json.Serialize(nonce);
         var rootUrlAction = "@rootUrl";
         var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
         var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
@@ -107,9 +110,9 @@
         var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
         var isEmbed = "@isEmbed";
         var dashboardCustomThemename = "@dashboardCutomTheme";
-        var customThemeAppearance = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance)";
+        var customThemeAppearance = "@customThemeAppearance";
         var isConnectorsToolTipEnable = @Json.Serialize(isConnectorsToolTipEnable);
-        var applicationTheme = "@(ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme)";
+        var applicationTheme = "@(_identityResponse.CustomApplicationTheme)";
         var appVersion = "@ServerAppConfig.ProductVersion";
         var isSandBox = "@isSandBox";
     </script>
@@ -123,43 +126,43 @@
     }
 </head>
 
-<body ng-app="serverApp" id="body" onload="openDatasource()" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/connection-designer.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/connection-designer.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
     </environment>
 
-    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 
     @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
 
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-connection.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-connection.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-connection.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-connection.min.js"></script>
     </environment>
 
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
 
     <div id="connectionDesigner"></div>
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/connection-designer.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/connection-designer.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/connection-designer.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/designer/connection-designer.min.js"></script>
     </environment>
 </body>
 </html>

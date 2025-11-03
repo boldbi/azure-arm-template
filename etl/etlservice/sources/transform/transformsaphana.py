@@ -92,22 +92,24 @@ con = dbapi.connect(
 try:
     with con.cursor() as cur:
         # Check if the table exists
-        cur.execute(f"""
-            SELECT 1 
-            FROM SYS.TABLES 
-            WHERE SCHEMA_NAME = '{SAP_HANA_USER}' 
-            AND TABLE_NAME = '{saphana_table_name.upper()}';
-        """)
-        result = cur.fetchone()
-        if result:
-            # Drop the table if it exists
-            drop_table_query = f"DROP TABLE \"{SAP_HANA_USER}\".\"{saphana_table_name.upper()}\";"
-            cur.execute(drop_table_query)
-        try:
-            cur.execute(create_query)
-            print("Table created in saphana")
-        except Exception as e:
-            print(f"Error creating table: {e}")
+
+        if isDropTable:
+            cur.execute(f"""
+                SELECT 1 
+                FROM SYS.TABLES 
+                WHERE SCHEMA_NAME = '{SAP_HANA_USER}' 
+                AND TABLE_NAME = '{saphana_table_name.upper()}';
+            """)
+            result = cur.fetchone()
+            if result:
+                # Drop the table if it exists
+                drop_table_query = f"DROP TABLE \"{SAP_HANA_USER}\".\"{saphana_table_name.upper()}\";"
+                cur.execute(drop_table_query)
+            try:
+                cur.execute(create_query)
+                print("Table created in saphana")
+            except Exception as e:
+                print(f"Error creating table: {e}")
 
         data_to_insert = []
         for index, row in df.iterrows():

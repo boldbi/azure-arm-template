@@ -9,9 +9,12 @@
     var schedulePageUrl = Url.Action("Schedules", "Scheduler");
     var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     bool isRequestFromDashboardListing = (requestUrl.Length == dashboardsPageUrl.Length) && (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == 0);
+    var nonce = !string.IsNullOrEmpty(ViewBag.ScriptNonce as string)
+     ? ViewBag.ScriptNonce as string
+     : Context.Items["ScriptNonce"] as string;
 }
 
-<script>
+<script nonce="@nonce" type="text/javascript">
     var shareItemSuggestionListUrl = "@Url.Action("ShareItemSuggestionList", "items")";
 </script>
 <input type="text" id="user-group-search-hidden-input" hidden />
@@ -20,21 +23,22 @@
 @if ( !isRequestFromDashboardListing && requestUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
 {
     <environment include="Development,CloudDevelopment">
-        <script>
+        <script nonce="@nonce" type="text/javascript">
             var userGroupSuggestion = "@dashboardServerResourceUrl/cdn/scripts/item-user-group-suggestion.js?v=@ServerAppConfig.ProductVersion";
         </script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script>
+        <script nonce="@nonce" type="text/javascript">
             var userGroupSuggestion = "@dashboardServerResourceUrl/cdn/scripts/item-user-group-suggestion.min.js?v=@ServerAppConfig.ProductVersion";
         </script>
     </environment>
 
     <head>
-        <script>
+        <script nonce="@nonce" type="text/javascript">
             var preloadLink = document.createElement("script");
             preloadLink.type = "text/javascript";
             preloadLink.src = userGroupSuggestion;
+            preloadLink.setAttribute("nonce", nonce);
             document.head.appendChild(preloadLink);
         </script>
     </head>

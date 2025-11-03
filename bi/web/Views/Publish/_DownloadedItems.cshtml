@@ -5,7 +5,7 @@
 }
 <!DOCTYPE html>
 <head>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         @{
 #pragma warning disable SCS0029
         }
@@ -19,10 +19,10 @@
     
     </script>
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/download-items.min.js"></script>
     </environment>
 </head>
 
@@ -81,15 +81,15 @@
                 </div>
                 {{else Status == "InProgress"}}
                 <div class="item-dashboard grid-content" title="@T["In Progress"]">
-                    <span><a class="grid-content" href="javascript:void(0);" onclick="onStatusClick()">@T["In Progress"]</a></span>
+                    <span><a id="inprogress-item-dashboard" class="grid-content" href="#">@T["In Progress"]</a></span>
                 </div>
                 {{else Status == "Success"}}
                 <div class="item-dashboard grid-content" title="@T["Success"]">
-                    <span><a class="grid-content" href="javascript:void(0);" onclick="onStatusClick()">@T["Success"]</a></span>
+                    <span><a id="success-item-dashboard" class="grid-content" href="#">@T["Success"]</a></span>
                 </div>
                 {{else}}
                 <div class="item-dashboard grid-content" title="@T["Failed"]">
-                    <span><a class="grid-content" href="javascript:void(0);" onclick="onStatusClick()">@T["Failed"]</a></span>
+                    <span><a id="failed-item-dashboard" class="grid-content" href="#">@T["Failed"]</a></span>
                 </div>
                 {{/if}}
             </script>
@@ -108,7 +108,7 @@
                 {{if Status == "Success"}}
                 <div class="item-dashboard grid-content" title="{{:ItemName}}">
                     <span>
-                        <a class="grid-content enable-color download-icon-offline-tab" href="javascript:void(0);">
+                        <a class="grid-content enable-color download-icon-offline-tab" href="#">
                             <i class="su su-download"></i>
                         </a>
                     </span>
@@ -116,7 +116,7 @@
                 {{else}}
                 <div class="item-dashboard grid-content disable-color download-icon-offline-tab" title="{{:ItemName}}">
                     <span>
-                        <a class="grid-content disable-color" href="javascript:void(0);">
+                        <a class="grid-content disable-color" href="#">
                             <i class="su su-download"></i>
                         </a>
                     </span>
@@ -125,7 +125,7 @@
             </script>
             <script type="text/x-jsrender" id="actionstemplate">
                 <div>
-                <span><a href="javascript:void(0);" class="delete-download-dashboard" title="" data-itemName="{{:ItemName}}" data-jobId ="{{:JobId}}" data-itemId="{{:ItemId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
+                <span><a href="#" class="delete-download-dashboard" title="" data-itemName="{{:ItemName}}" data-jobId ="{{:JobId}}" data-itemId="{{:ItemId}}"><i class="su su-close"></i> @T["Remove"]</a></span>
             </div>
             </script>
             <div id="DownloadItemGrid"></div>
@@ -136,7 +136,7 @@
         </div>
     </div>
 </div>
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     GridLocalization(window.Server.App.Localization.DownloadedResourcesEmpty);
     $("#DownloadItemGrid").ejGrid({
         dataSource: downloadedItemDetails,

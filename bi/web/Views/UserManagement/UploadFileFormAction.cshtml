@@ -15,13 +15,13 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-module.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management.min.js"></script>
     </environment>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
         var postactionUrl = "@Url.Action("postaction", "UserManagement")";
         var isPresentEmailId = "@Url.Action("IsPresentEmailId", "UserManagement")";
@@ -71,14 +71,14 @@
             --
         {{/if}}
     </script>
-    <script>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(document).ready(function () {
             $("a").click(function () {
                 return checkUserImported(this);
             });
         });
     </script>
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var data1 = @Html.Raw(ViewBag.ser);
         var csvImportGridColumn = [
             { field: "Username", templateID: "#csv-user-name", cssClass: "user-name", headerText: "@T["Username"]", width: 50, visible: isSelfHosted },
@@ -150,7 +150,7 @@
         <div class="col-12 bi-page-header tabs-header-padding top-nav-btn-secton import-users">
             <div class="col-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">
-                    <input type="button" value="@T["Import Users"]" title="@T["Import users from the list below"]" onclick="SaveUserListFromCSV()" id="import-button" class="primary-button app-btn-primary float-end bi-header-btn" disabled />
+                    <input type="button" value="@T["Import Users"]" title="@T["Import users from the list below"]" id="import-button" class="primary-button app-btn-primary float-end bi-header-btn" disabled />
                 </div>
             </div>
         </div>
@@ -158,7 +158,7 @@
     <div class="container-fluid bi-page-container col-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="bi-page-content col-12 no-padding">
             <div class="content-section bi-page-body">
-                <form id="csv-form" action="@Url.Action("UploadFileFormAction", "UserManagement")" method="post" onsubmit="" enctype="multipart/form-data">
+                <form id="csv-form" action="@Url.Action("UploadFileFormAction", "UserManagement")" method="post" enctype="multipart/form-data">
                     <div class="col-md-12 col-12 import-file no-padding">
                         <div class="col-md-10 col-xs-10 no-padding">
                             <div class="no-padding browse-file">

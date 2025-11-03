@@ -33,14 +33,14 @@
 @section scripts{
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-profile.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management-profile.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management-profile.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/user-management-profile.min.css" />
-        <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management-profile.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/user-management-profile.min.js"></script>
     </environment>
 
-    <script type="text/javascript">
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
         var checkMailSettingUrl = "@Url.Action("checkmailsettingsexist", "Administration")";
         var activateDeactivateUserUrl = "@Url.Action("ActivateDeactivateUser", "UserManagement")";
@@ -174,28 +174,28 @@
                                 <span class="su su-options-menu"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu" id="profile-action-menus">
-                                <li class="deactivate-user-option dropdown-submenu float-start @showDeactivateButton" onclick="activateDeactivateUser(false)">
+                                <li class="deactivate-user-option dropdown-submenu float-start @showDeactivateButton">
                                     <a class="dropdown-option">
                                         <span>
                                             @T["Deactivate User"]
                                         </span>
                                     </a>
                                 </li>
-                                <li class="activate-user-option dropdown-submenu float-start @showActivationButton" onclick="activateDeactivateUser(true)">
+                                <li class="activate-user-option dropdown-submenu float-start @showActivationButton">
                                     <a class="dropdown-option">
                                         <span>
                                             @T["Activate User"]
                                         </span>
                                     </a>
                                 </li>
-                                <li class="dropdown-submenu float-start @showResendButton" onclick="onResendActivationClick()">
+                                <li class="dropdown-submenu float-start resend-activation @showResendButton">
                                     <a class="dropdown-option">
                                         <span>
                                             @T["Resend Activation Code"]
                                         </span>
                                     </a>
                                 </li>
-                                <li class="dropdown-submenu float-start" onclick="onDeleteDialogOpen()">
+                                <li class="dropdown-submenu float-start delete-open-dialog">
                                     <a class="dropdown-option">
                                         <span>
                                             @T["Remove User"]
@@ -206,7 +206,7 @@
                         </div>
                     }
 
-                    <input type="button" class="primary-button app-btn-primary float-end" id="add-custom-attribute" title="" value="@T["Add Attribute"]" data-id="@userDetail.UserId" onclick="addCustomAttribute('user')">
+                    <input type="button" class="primary-button app-btn-primary float-end add-user-custom-attribute" id="add-custom-attribute" title="" value="@T["Add Attribute"]" data-id="@userDetail.UserId">
                     @if (userDetail.Email.ToLower() != sandboxAdminEmail && (isAdmin || permissions[PermissionEntity.UsersandGroups] && (permissions[PermissionEntity.AllPermissions] || permissions[PermissionEntity.SpecificPermissions])))
                     {
                         <a href="@Url.Action("userpermission", "permission")?userId=@userDetail.UserId" title="">
@@ -401,7 +401,7 @@
                                     {
                                         <div id="edit-button">
                                             <input type="button" class="secondary-button app-btn-secondary float-end popup-close" title="" id="cancel-button" value="@T["Cancel"]">
-                                            <input type="button" class="primary-button app-btn-primary float-end inactive-content" id="save-button" title="" onclick="SaveUserdetails()" data-userId="@userDetail.UserId" value="@T["Save"]">
+                                            <input type="button" class="primary-button app-btn-primary float-end inactive-content" id="save-button" title="" data-userId="@userDetail.UserId" value="@T["Save"]">
                                         </div>
                                     }
                                 </div>
@@ -415,11 +415,11 @@
                         <div id="edit-user-isolation-form-div" class="col-12 col-md-12 col-sm-12 col-12 no-padding validation">
                             <form class="form-horizontal edit-user-isolation-form" autocomplete="off">
                                 <div id="edit-isolation">
-                                    <input type="button" class="link-button app-btn-link float-end" title="" onclick="editIsolationMethod()" value="@T["Edit Isolation Code"]">
+                                    <input type="button" class="link-button app-btn-link float-end edit-isolation-code" title="" value="@T["Edit Isolation Code"]">
                                 </div>
                                 <div id="save-cancel-buttons" style="display: none;">
-                                    <input type="button" class="secondary-button app-btn-secondary float-end popup-close" title="" id="cancel-isolation-button" onclick="cancelIsolationCode()" value="@T["Cancel"]">
-                                    <input type="button" class="primary-button app-btn-primary float-end inactive-content" id="save-isolation-button" title="" onclick="saveIsolationCode()" value="@T["Save"]">
+                                    <input type="button" class="secondary-button app-btn-secondary float-end popup-close" title="" id="cancel-isolation-button" value="@T["Cancel"]">
+                                    <input type="button" class="primary-button app-btn-primary float-end inactive-content" id="save-isolation-button" title="" value="@T["Save"]">
                                 </div>
                                 <div class="form-group no-padding line-spacing" id="isolation-div">
                                     <label class="label-panel text-right app-textbox-label">@T["Isolation Code"]<span class="mandatory"></span> </label>
@@ -441,17 +441,17 @@
                     <script type="text/x-jsrender" id="options">
                         <div class="user-hover-options">
                             {{if AttributeType ==  @((int)AttributeType.User)}}
-                            <a href="javascript:void(0);" title="@T["Edit"]" id="edit-user-attribute" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="user" onclick="editCustomAttribute(this)">
+                            <a href="#" title="@T["Edit"]" id="edit-user-attribute" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="user">
                                 <i class="su su-edit"></i>
                             </a>
-                            <a class="delete-class" href="javascript:void(0);" title="@T["Remove"]" id="remove-user-attribute" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="user" onclick="deleteConfirmation(this)">
+                            <a class="delete-class" href="#" title="@T["Remove"]" id="remove-user-attribute" data-bs-toggle="tooltip" data-id="{{:Id}}" data-name="user">
                                 <i class="su su-delete"></i>
                             </a>
                             {{else}}
-                            <a href="javascript:void(0);" title="@T["Edit"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
+                            <a href="#" title="@T["Edit"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
                                 <i class="su su-edit disabled-icon-color"></i>
                             </a>
-                            <a class="delete-class" href="javascript:void(0);" title="@T["Remove"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
+                            <a class="delete-class" href="#" title="@T["Remove"]" data-bs-toggle="tooltip" data-content="{{:Id}}">
                                 <i class="su su-delete disabled-icon-color"></i>
                             </a>
                             {{/if}}

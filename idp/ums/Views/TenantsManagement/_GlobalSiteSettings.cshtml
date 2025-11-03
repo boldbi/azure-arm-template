@@ -4,11 +4,14 @@
     var globalSettingsOptionCount = Enum.GetNames(typeof(GlobalSettingsOptions)).Length;
     var canDisableEmailSettingsOption =  ViewBag.MailSettings == null || string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsHost) || ViewBag.MailSettings.MailSettingsPort <= 0 || string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsSenderName) ||
                                          string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsAddress) || string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsUserName) || string.IsNullOrWhiteSpace(ViewBag.MailSettings.MailSettingsPassword);
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var isJWTUserBasedThemeApplied = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) || !string.IsNullOrWhiteSpace(customThemeClaims.ApplicationTheme) || !string.IsNullOrWhiteSpace(customThemeClaims.DashboardTheme);
 }
 <script type="text/javascript" nonce="@Context.Items["ScriptNonce"]">
     var tenantInfoId = "@Model.TenantInfoId";
     var updateTenantSettingsUrl = "@Url.Action("UpdateTenantSettings", "TenantsManagement")";
     var canDisableEmailSettingsOption =  "@canDisableEmailSettingsOption".toLowerCase() === "true";
+    var isJWTUserBasedThemeApplied =  "@isJWTUserBasedThemeApplied".toLowerCase() === "true";
 </script>
 
 <div role="tabpanel" class="tab-pane @activeTab" id="site-settings-tab">
@@ -36,8 +39,8 @@
 
             </div>
             <div class="col-12 float-start switch-padding">
-                <div>
-                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.LookAndFeel.ToString())" id="look-and-feel" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.LookAndFeel.ToString()))" />
+                <div id="look-and-feel-inherit-option" title="@(isJWTUserBasedThemeApplied ? T["Look and feel settings cannot be modified when inherited from JWT user claims."] : "")">
+                    <input type="checkbox" class="enable-disable" value="@(GlobalSettingsOptions.LookAndFeel.ToString())" id="look-and-feel" checked="@(Model.GlobalSettings.GlobalSettingsInfo != null && Model.GlobalSettings.GlobalSettingsInfo.Contains(GlobalSettingsOptions.LookAndFeel.ToString()) && !isJWTUserBasedThemeApplied)" @(isJWTUserBasedThemeApplied ? "disabled" : "") />
                     <label for="look-and-feel" class="settings-label"> @EnumHelper.GetDescription(GlobalSettingsOptions.LookAndFeel)</label>
                 </div>
                 <div class="settings-info">@T["The font family and theme preference will be inherited from UMS."]</div>

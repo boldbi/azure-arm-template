@@ -23,6 +23,9 @@
     var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
     bool canShowViewDropDown = ViewBag.CanShowViewDropDown != null ? ViewBag.CanShowViewDropDown : false;
     bool IsViewDeleted = Context.Request.Query["actionType"].ToString().ToLower() == "edit" && ViewBag.IsViewDeleted != null ? ViewBag.IsViewDeleted : false;
+    var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
+    var enableAiFeature = ViewBag.aiCredentials?.EnableAIFeature ?? true;
+    var isAiSummariesEnabledGlobally = ViewBag.aiCredentials != null ? ViewBag.aiCredentials.IsAISummariesEnabledGlobally : false;
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -31,7 +34,7 @@
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
     <meta name="data_service:url" content="@designerServiceUrl" />
-    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings)" />
+    <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
@@ -65,29 +68,29 @@
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/scheduleiframe.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerdialog.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/scheduleiframe.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/schedulerdialog.min.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-designer-bundle.min.css" />
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/dashboard-designer-dependency.min.js"></script>
     </environment>
 
-    <script asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.calendars.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.richtexteditor.all.min.js"></script>
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dropdowntree.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@designerServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.calendars.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.richtexteditor.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dropdowntree.min.js"></script>
 
     <environment include="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
-        <script asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-data-alert.min.js"></script>
     </environment>
 
     @if (!isSelfHosted)
@@ -119,7 +122,7 @@
             <div class="modal-content col-lg-12" id="popup-container" data-spy="scroll">
                 <div class="modal-header no-margin col-sm-12">
                     <div class="col-sm-10 col-xs-10 no-padding float-start nav-top"><span title="@T["Schedule"]" class="su su-nav-schedule col-lg-1 col-xs-1 col-sm-1 col-md-1 header-icon"></span><span class="popup-title schedule-popup-title ellipsis col-lg-9 col-xs-9 col-sm-9 col-md-9 no-padding"></span><span class="dashboard-schedule"></span></div>
-                    <div class="col-sm-2 col-xs-2 title no-padding"><a href="javascript:void(0);" class="popup-close" title="@T["Close"]"><span id="schedule-popup" class="su su-close float-end"></span></a></div>
+                    <div class="col-sm-2 col-xs-2 title no-padding"><a href="#" class="popup-close" title="@T["Close"]"><span id="schedule-popup" class="su su-close float-end"></span></a></div>
                     <div id="windowCaption" class="report-name no-padding col-12 link-item-name ellipsis" style="font-size: 12px;padding-top: 2px !important;">
                         @T["Create a data driven or a time based schedule"]
                     </div>
@@ -290,6 +293,21 @@
                                 <span class="validation-message"></span>
                             </div>
                         </div>
+                        <div class="col-sm-12 col-12 no-padding alert-type" id = "ai-container">
+                            <div class="col-sm-2 col-xs-2 no-padding"><label>@T["Enable AI Summary"]</label></div>
+                            <div class="col-sm-3 col-xs-3 line-removal">
+                                    <span class="material-switch ai-summary-section">
+                                    <input type="checkbox" id="ai-summary" />
+                                    <label for="ai-summary" class="label-primary"></label>
+                                </span>
+                                <div class="col-sm-1 col-xs-1 no-padding ai-summaryt-info">
+                                    <span class="dropdown-toggle cursor-type float-start" data-bs-toggle="dropdown"><span class="su su-info" title=""></span></span>
+                                    <div class="col-xs-2 dropdown-menu ai-summary-description">
+                                            @Html.Raw(string.Format(T["Enable this option to include AI-generated summary insights in the email body. If using a custom email template, add the expression {0} in mail body where you want the insights to appear."].Value, "{:AIInsightSummary}"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer col-12">
@@ -307,18 +325,19 @@
             </div>
         </div>
     </div>
-    <script asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 </body>
 </html>
 
 <environment include="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerdialog.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerdialog.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
-    <script asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerdialog.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/schedulerdialog.min.js"></script>
 </environment>
 
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+      var nonce = "@Context.Items["ScriptNonce"]";
    var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
    var actionType = "@Context.Request.Query["actionType"].ToString()";
     var itemId = "@Context.Request.Query["itemId"].ToString()";
@@ -365,6 +384,10 @@
     var getwidgetsDetailUrl = "@Url.Action("GetWidgetsDetails", "scheduler")";
     var getViewsByItemIdUrl = "@Url.Action("GetViewsByItemId","Items")";
     var dashboardServerApiUrlForServerEmbed = "@dashboardServerApiUrlForServerEmbed";
+    var embedConfig = @Html.Raw(Json.Serialize(embedConfig));
+    var isEmbedCode = embedConfig.IsEmbedCode;
+    var enableAiFeature = @Json.Serialize(enableAiFeature);
+    var isAiSummariesEnabledGlobally = @Json.Serialize(isAiSummariesEnabledGlobally);
    
     $("#selected_dashboard").selectpicker();
     $("#selected_childdashboard").attr("disabled", true);

@@ -106,7 +106,8 @@ CREATE TABLE SyncDS_Item(
 	ModifiedById int NOT NULL,
 	CreatedDate timestamp NOT NULL,
 	ModifiedDate timestamp NOT NULL,
-        PublishedDate timestamp NULL,
+	PublishedDate timestamp NULL,
+	DashboardLogo varchar(1026) NULL,
 	IsSampleData smallint NULL,
 	DataSource varchar(1026) null,
 	IsPublic smallint NOT NULL DEFAULT 0,
@@ -179,6 +180,7 @@ CREATE TABLE SyncDS_ItemLog(
 	UpdatedUserId int NOT NULL,	
 	ModifiedDate timestamp NOT NULL,
     AnonymousUsername varchar(255) NULL,
+	IPAddress varchar(255) NULL,
 	IsActive smallint NOT NULL)
 ;
 
@@ -240,6 +242,7 @@ CREATE TABLE SyncDS_ScheduleDetail(
 	EmailContent varchar(4000) NULL,
 	IsDataChanges smallint NOT NULL DEFAULT 0,
 	IsTimeInterval smallint NOT NULL DEFAULT 0,
+	AIInsightSummaryEnabled smallint NOT NULL DEFAULT 0,
 	StartDate timestamp NULL,
 	EndDate timestamp NULL,
 	EndAfter int NULL DEFAULT 0,
@@ -1083,7 +1086,12 @@ CREATE TABLE SyncDS_AI_SESSIONS (
     TotalTokensCost DOUBLE PRECISION,
     UserInfo TEXT,
     TenantID TEXT,
-    Environment TEXT
+    Environment TEXT,
+	RequestType TEXT,
+	SessionName TEXT,
+	IsActive BOOLEAN,
+	HistoryContent TEXT,
+	SessionModifiedTime TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE SyncDS_AI_REQUESTS (

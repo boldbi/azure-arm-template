@@ -5,7 +5,7 @@
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
     var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
     var showSyncfusionBrand = globalAppSettings.SystemSettings.IsShowPoweredBySyncfusion ? "form-group" : "form-group hide";
-    var themeAppearance = globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance;
+    var themeAppearance = _identityResponse.ThemeAppearance;
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + themeAppearance + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
     var appLogo = (globalAppSettings.SystemSettings.MainScreenLogo.EndsWith(ServerAppConfig.BrandingJson.BrandingImages.MainLogo) || globalAppSettings.SystemSettings.MainScreenLogo.EndsWith("main_logo.png")) ? defaultAppLogo : globalAppSettings.SystemSettings.MainScreenLogo;
     var helpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DomainBinding);
@@ -24,7 +24,7 @@
                                 (isUMSLanguageSettingsInherited ? 1 : 0);
     var inheritContent = inheritSettingsCount == 1 ? String.Format("{0} settings have been inherited from the UMS settings. Please contact the UMS admin to disable the inheritance.", isUMSBrandingSettingsInherited ? "Branding" : isUMSDateTimeSettingsInherited ? "Date and Time" : "Application Language") : string.Empty;
 }
-<script>
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var isSitesPage = "true";
     var isEnableCopyrightInfo = @Json.Serialize(isEnableCopyrightInfo);
     var isShowEmailLogo = @Json.Serialize(isShowEmailLogo);
@@ -134,7 +134,7 @@
                             @if (ViewBag.IsCustomDomain)
                             {
                                 <div class="dropdown updatessl col-4">
-                                    <a id="delete-custom-domain" href="javascript:void(0)" data-bs-toggle="tooltip" data-placement="top" title="@T["Delete custom domain"]">
+                                    <a id="delete-custom-domain" href="#" data-bs-toggle="tooltip" data-placement="top" title="@T["Delete custom domain"]">
                                         <i class="su su-delete"></i>
                                     </a>
                                 </div>
@@ -400,7 +400,7 @@
                         <div class="form-group blur-whitelable-content">
                             <label class="app-textbox-label col-12 no-padding">@T["Message"]</label>
                             <div class="col-8 no-margin form-input-field no-padding" id="login-temp-container">
-                                <textarea id="login-disclaimer-temp" name="login-disclaimer-temp" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") onclick="EnableDisclaimerMessage()">@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
+                                <textarea id="login-disclaimer-temp" name="login-disclaimer-temp" autocomplete="off" class="form-control" placeholder="@T["Enter the login disclaimer message"]" maxlength="4000" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled")>@(ViewBag.SystemSettings.LoginDisclaimer.Message)</textarea>
                                 <span class="validation-errors"></span>
                             </div>
                             <div class="col-12 no-margin form-input-field no-padding" id="login-disclaimer-container" style="display: none">
