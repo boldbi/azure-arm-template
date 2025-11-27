@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 14.1.20
+*  version : 14.2.4
 *  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -7964,7 +7964,16 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
                 data = this._scrollXdata;
             if (e.wheelDeltaX == 0) this._wheelx = e.wheelDeltaX;
             if (e.wheelDelta) {
-                delta = navigator.platform.indexOf("Mac") == 0 ? ((Math.abs(e.wheelDelta) !== 120) ? -e.wheelDelta / 3: -e.wheelDelta / 80) : -e.wheelDelta / 120;
+                if (navigator.platform.indexOf("Mac") === 0) { 
+                    if ((Math.abs(e.wheelDelta) !== 120)) {
+                        delta = -e.wheelDelta / 240;
+                        delta = delta / 2;
+                    } else {
+                        delta = -e.wheelDelta / 80;
+                    }
+                } else {
+                    delta = -e.wheelDelta / 120;
+                }
                 if (window.opera) {
                     if (parseFloat(window.opera.version, 10) < 10)
                         delta = -delta;

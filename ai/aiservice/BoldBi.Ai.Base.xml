@@ -1209,6 +1209,14 @@
             <param name="licenseKey">The license key used for validating AI service access.</param>
             <returns>A task that represents the asynchronous operation. The task result contains the AI-generated answer for the dashboard question.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.AiSummarization.DataSummarizationProcessAsync(System.String,System.String)">
+            <summary>
+            Processes data to generate AI-based summarization.
+            </summary>
+            <param name="jsonInput">The raw JSON payload containing only the customer-provided data to summarize.</param>
+            <param name="licenseKey">The license key or tenant identifier used for authorization and usage tracking.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the summarization output from the AI.</returns>
+        </member>
         <member name="M:BoldBi.Ai.Base.AiSummarization.ValidateInput(System.String)">
             <summary>
             Validates and converts the input JSON string into an <see cref="T:BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest"/> object.
@@ -1702,6 +1710,14 @@
             <param name="licenseKey">The license key of the tenant.</param>
             <returns>The visual creation response as a serialized JSON object.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IAiSummarizationOperations.DataSummarizationProcessAsync(System.String,System.String)">
+            <summary>
+            Retrieves responses for summarization of data.
+            </summary>
+            <param name="jsonInput">The input string in JSON format containing AI assistance request data.</param>
+            <param name="licenseKey">The license key of the tenant.</param>
+            <returns>A task representing the asynchronous operation, with an object containing the result of processing the relevant question query.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Contracts.IBoldAiProcess">
             <summary>
             Defines processes for AI-based operations, including input building, output generation, and message execution.
@@ -1874,6 +1890,13 @@
             <param name="licenseKey">The license key used to validate the usage of AI services.</param>
             <param name="modelId">The ID of the AI model being used in the operation.</param>
             <param name="request">The request object that contains additional information related to the AI operation, such as the context and the operation type.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IUsageProcessor.ProcessUsage(System.Int32,System.String)">
+            <summary>
+            Processes and updates the usage information for a specified AI operation.
+            </summary>
+            <param name="totalToken">Total Token.</param>
+            <param name="licenseKey">The license key used to validate the usage of AI services.</param>
         </member>
         <member name="T:BoldBi.Ai.Base.CreateVisualResponse.Abstract.IAIChatAction">
             <summary>
@@ -2393,7 +2416,7 @@
             This class interacts with the AI connection to generate an expression based on user input and system prompts.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.CreatesExpression.CreateExpression(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.CreateExpressionProcess.Step.CreatesExpression.CreateExpressionAsync(Microsoft.SemanticKernel.Kernel,Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Asynchronously sends an SQL expression based on the provided arguments.
             </summary>
@@ -3549,6 +3572,18 @@
             <param name="args">Arguments containing question, connection, and credentials.</param>
             <returns>BuildOutputArgs with OpenAiResponse.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.DataSummarizationProcess.DataSummaryBuildOutputStep.UpdateTokensAsync(BoldBi.Ai.Core.Models.AIResponseBuilder.UsageTokens)">
+            <summary>
+            Updates the full token usage information.
+            </summary>
+            <param name="tokens">The complete token usage data.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.DataSummarizationProcess.DataSummaryBuildOutputStep.HandleException(BoldBi.Ai.Core.Models.AIResponseBuilder.DataSummaryResponse)">
+            <summary>
+            Updates the Exception information.
+            </summary>
+            <param name="dataSummaryResponse">The complete exception details.</param>
+        </member>
         <member name="T:BoldBi.Ai.Base.DeleteVisual.DeleteVisualProcess">
             <summary>
             Represents the process responsible for handling the deletion of a widget.
@@ -3729,6 +3764,13 @@
             <param name="aiModel">The AI model used (e.g., GPT-3, GPT-4).</param>
             <param name="aiAssistanceRequest">The assistance request containing session and query details.</param>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.AmountUpdateHelper.ProcessUsage(System.Int32,System.String)">
+            <summary>
+            Processes the token usage details and updates the cost for each request based on the AI model.
+            </summary>
+            <param name="totalToken">The total number of tokens used (input + output).</param>
+            <param name="licenseKey">The license key associated with the request.</param>
+        </member>
         <member name="M:BoldBi.Ai.Base.Helpers.AmountUpdateHelper.UpdateTokenPerRequest(System.Int32,System.Int32,System.Int32,System.String,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Calculates the cost of a single request based on token usage and the AI model.
@@ -3890,6 +3932,11 @@
         <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.bold_ai_sandbox_users">
             <summary>
             Gets or sets the AI sandbox users data in the database.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.bold_ai_datasummarize_requests">
+            <summary>
+            Gets or sets the DbSet representing search activities for Bold AI Data Summary requests.
             </summary>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.DatabaseContext.AppDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
@@ -4277,6 +4324,13 @@
             <param name="message">Serialized JSON message containing AI key details.</param>
             <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudPricingLogHelper.LogDataSummarizeRequestsToDB(System.String)">
+            <summary>
+            Logs AI Data Summarize Usage requests to the database.
+            </summary>
+            <param name="message">Serialized JSON message containing request data.</param>
+            <returns>Returns true if the operation is successful, otherwise false.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Helpers.DatabaseHelpers.Cloud.CloudUsageLogHelper">
             <summary>
             Helper class for logging various AI usage data into the cloud database.
@@ -4573,6 +4627,13 @@
             On premise Db operations.
             </summary>
             <param name="memoryCache">The memory cache instance.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremisePricingLogHelper.LogDataSummarizeRequestsToDB(System.String)">
+            <summary>
+            Logs AI Data Summarize Usage requests to the database currently not implemented.
+            </summary>
+            <param name="message">Serialized JSON message containing request data.</param>
+            <returns> representing the asynchronous operation.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.DatabaseHelpers.OnPremise.OnPremisePricingLogHelper.LogSearchUsageToDB(System.String)">
             <summary>
@@ -5120,6 +5181,13 @@
             Enables AI licenses for a given tenant.
             </summary>
             <param name="tenantId">The tenant ID as a string.</param>
+            <returns>JSON response indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.GetAllSitesOfLicense(System.String)">
+            <summary>
+            Gets all sites for a given tenant.
+            </summary>
+            <param name="subscriptionId">The tenant ID as a string.</param>
             <returns>JSON response indicating success or failure.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.Helpers.ManageLicense.LicenseManageHelper.UpdateCreditLimit(BoldBi.Ai.Base.Models.AILicense.AiLicense,BoldBi.Ai.Core.Models.CreditManagement.CreditRequest,BoldBi.Ai.Core.Models.CustomerCreditManagement.RequesterProfiles)">
@@ -6241,6 +6309,13 @@
             <param name="modelId">The ID of the AI model used for processing.</param>
             <param name="request">The AI assistance request object containing additional metadata.</param>
         </member>
+        <member name="M:BoldBi.Ai.Base.Implementations.UsageProcessor.ProcessUsage(System.Int32,System.String)">
+            <summary>
+            Processes the token usage and updates the relevant information using the provided details.
+            </summary>
+            <param name="totalToken">The total number of tokens used (input + output).</param>
+            <param name="licenseKey">The encrypted license key for the tenant.</param>
+        </member>
         <member name="T:BoldBi.Ai.Base.NlgProcesses.Builder.concrete.DashboardHtmlFormatter">
             <summary>
             Provides a default implementation of the <see cref="T:BoldBi.Ai.Base.NlgProcesses.Builder.Interfaces.IHtmlFormatter"/> interface,
@@ -6327,11 +6402,76 @@
             A string representing the system prompt.
             </returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.DashboardPromptFactory">
+            <summary>
+            Static factory holding the ordered list of available strategies and providing
+            a single method to build the prompt without branching logic in the caller.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.DashboardPromptFactory.Strategies">
+            <summary>
+            Ordered strategies. The first strategy whose <see cref="M:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.IPromptStrategy.IsUnifiedAIDashboardSummary(System.Collections.Generic.Dictionary{System.String,System.Object})"/> returns true will be used.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.DashboardPromptFactory.BuildPrompt(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Builds the appropriate system prompt string for the given input.
+            </summary>
+            <param name="dict">The input context containing request type, query, and other values.</param>
+            <returns>The selected strategy's built system prompt.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.DefaultInsightsPromptStrategy">
+            <summary>
+            Default strategy used when no specialized strategy applies.
+            Produces generalized insight-oriented prompt instructions based on widget info only.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.IPromptStrategy">
+            <summary>
+            Strategy interface for creating the appropriate system prompt based on the provided input context.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.IPromptStrategy.IsUnifiedAIDashboardSummary(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Determines whether the current strategy is applicable for the given input dictionary.
+            </summary>
+            <param name="dict">The input context containing request type, query, and other values.</param>
+            <returns><c>true</c> if the strategy can handle the input; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.IPromptStrategy.BuildPrompt(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Builds the dashboard summarization system prompt for the given input context.
+            </summary>
+            <param name="dict">The input context containing request type, query, and other values.</param>
+            <returns>The constructed system prompt string.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.NlgProcesses.DashboardSummarizationProcess.Prompts.UnifiedAIPromptStrategy">
+            <summary>
+            Strategy for building a prompt when the request is a unified AI dashboard summary
+            and a non-empty user query is provided.
+            </summary>
+        </member>
         <member name="M:BoldBi.Ai.Base.NlgProcesses.FormatOutputStep.UpdateTokensAsync(BoldBi.Ai.Core.Models.AIResponseBuilder.UsageTokens)">
             <summary>
             Updates the full token usage information.
             </summary>
             <param name="tokens">The complete token usage data.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.FormatOutputStep.UpdateExceptionInformation(System.Object)">
+            <summary>
+            Updates the response to include exception details and mark it as an error.
+            </summary>
+            <param name="ex">The exception information.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.FormatOutputStep.GetInsightLines(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.String)">
+            <summary>
+            Extracts insight lines from the AI summary based on request type.
+            For 'UnifiedAIDashboardSummary', groups content by h4 sections without removing the tags.
+            </summary>
+            <param name="dict">The dictionary containing request metadata, including "RequestType".</param>
+            <param name="summary">The summary string after bold markdown replacement and newline normalization.</param>
+            <param name="insights">The cleaned insights text with bullet markers removed.</param>
+            <returns>List of insight lines or section blocks.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.NlgProcesses.SystemFactory.HtmlFormatterFactory">
             <summary>
@@ -6632,11 +6772,12 @@
             based on developer and user input.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.RecordAnalysisProcess.Steps.RecordAnalysisRunInputStep.RunRecordAnalysisAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.RecordAnalysisProcess.Steps.RecordAnalysisRunInputStep.RunRecordAnalysisAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Executes the AI process to generate a response using the configured AI connection
             by utilizing the provided developer and user messages.
             </summary>
+            <param name="context">The kernel process context.</param>
             <param name="args">The input arguments containing the developer message, user question, and AI assistance request.</param>
             <returns>
             A task representing the asynchronous operation, returning a <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> object
@@ -6768,10 +6909,11 @@
             from the provided run process arguments.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.TextualResponseProcess.Steps.TextualBuildInputStep.BuildInputForTextualResponse(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.TextualResponseProcess.Steps.TextualBuildInputStep.BuildInputForTextualResponse(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Constructs and prepares an input string for textual based on the operation, table information, and a previous question.
             </summary>
+            <param name="context">The kernel process context.</param>
             <param name="args">The input which contains parameters required for the input building.</param>
             <returns>A formatted string ready for AI processing.</returns>
         </member>
@@ -7634,10 +7776,11 @@
             Represents a process step that classifies an AI-driven visual update.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualClassificationStep.ClassifyQueryUpdateVisualAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualClassificationStep.ClassifyQueryUpdateVisualAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Executes the AI chat classification process for updating visual properties.
             </summary>
+            <param name="context">The kernel process context.</param>
             <param name="args">The arguments required for executing the process.</param>
             <returns>
             A <see cref="T:Microsoft.SemanticKernel.TextContent"/> instance containing the AI-generated response
@@ -7649,10 +7792,11 @@
             Represents a process step that executes an AI-driven visual update.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualExecuteStep.ExecuteForUpdateVisualAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualExecuteStep.ExecuteForUpdateVisualAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Executes the AI chat classification process for updating visual properties.
             </summary>
+            <param name="context">The kernel process context.</param>
             <param name="args">The arguments required for executing the process.</param>
             <returns>
             A <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent"/> instance containing the AI-generated response
@@ -7664,10 +7808,11 @@
             Represents a process step that executes an AI-driven visual update.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualRegenerateStep.ReExecuteForUpdateVisualAsync(BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualRegenerateStep.ReExecuteForUpdateVisualAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
             <summary>
             Executes the AI chat classification process for updating visual properties.
             </summary>
+            <param name="context">The kernel process context.</param>
             <param name="args">The arguments required for executing the process.</param>
             <returns>
             A <see cref="T:Microsoft.SemanticKernel.TextContent"/> instance containing the AI-generated response
@@ -7754,6 +7899,34 @@
             <param name="summaryContent">AI response for widget summary.</param>
             <returns> A html formatted response for widget summary.</returns>
             <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown if there is an error in general AI processing.</exception>
+        </member>
+        <member name="T:BoldBi.Ai.Core.ExceptionHandler.AiExceptionAndErrorHandler">
+            <summary>
+            Handles the AI exception and errors.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Core.ExceptionHandler.AiExceptionAndErrorHandler.MapExceptionAndErrors(System.Exception)">
+            <summary>
+            Maps the AI exception and errors based on the provided exception details.
+            </summary>
+            <param name="exception">The exception containing the error messages to analyze.</param>
+            <returns>The mapped <see cref="T:Syncfusion.Dashboard.Core.Widget.ErrorCodeType"/>.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Core.ExceptionHandler.AiExceptionAndErrorHandler.CreateException(System.String,Syncfusion.Dashboard.Core.Widget.ErrorCodeType,System.String)">
+            <summary>
+            Creates and logs a new <see cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException"/> instance with the specified message, error code, and method name.
+            </summary>
+            <param name="message">The error message describing the exception.</param>
+            <param name="errorCode">The error code associated with the exception.</param>
+            <param name="methodName">The name of the method where the exception occurred.</param>
+            <returns>A new <see cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException"/> instance.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Core.ExceptionHandler.AiExceptionAndErrorHandler.CollectExceptionMessages(System.Exception)">
+            <summary>
+            Collects all messages and data keys from the exception chain, normalized to lowercase and joined.
+            </summary>
+            <param name="ex">The exception to process.</param>
+            <returns>The concatenated lowercase message string.</returns>
         </member>
         <member name="T:BoldBi.Ai.Core.Contracts.AgentProcess.IProcessInstanceBuilder">
             <summary>

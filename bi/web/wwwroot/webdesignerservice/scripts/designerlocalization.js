@@ -659,6 +659,8 @@ var Designer = {
                     allowReorder: "Allow Column Reorder",
                     allowReorderInfo: "Columns can be rearranged with this option, but it only works when paging is turned on.",
                     tabLoaderInfo: "When enabled, the entire tab will load instead of loading individual widgets.",
+                    textfilterPlaceHolder: "Place Holder",
+                    textfilterSearch: "Search"
                 },
                 pivotChartSettings: {
                     enablePivotChart: "Enable Pivot Chart",
@@ -697,7 +699,8 @@ var Designer = {
                     longDashDotDot: "LongDashDotDot"
                 },
                 datePicker: {
-                    placeholder: "Select Date"  
+                    placeholder: "Select Date",
+                    placeHolderText: "Place Holder"
                   },
                 imageTooltipSettings: {
                     showTooltip: "Show Tooltip",
@@ -2883,7 +2886,8 @@ var Designer = {
                 tableRemoveMessage: "Removing this table will affect the filter/parameters/expression columns referring to it. Do you still want to continue?",
                 createCategoryMessage: "*Please create a category to save the dashboard",
                 differentSchema: "The new schema is different from the existing one. If you click 'Yes,' you will lose the previous widget and data, and the new connection table data will be displayed. If you click 'No,' the data source will be reconnected with new credentials, and the widget data will depend on the availability of the table and fields in the target connection. Alternatively, click the 'x' icon to close the popup without taking any action.",
-                columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
+                differentExtractSchema: "The new schema is different from the existing one. If you click 'Yes,' the previous widget and its data will be removed, and the new connection’s table data will be displayed. If you click 'No,' or close the popup using the 'x' icon, no changes will be applied.",
+				columnNotExist: "Some columns do not exist in the new schema, and this affects the dashboard. Would you like to proceed with the schema changes?",
 				dataTypeMismatch: "Changing the data type may result in data loss and this affects the dashboard. Do you want to continue?",
 				invalidSchemaAlertMessage: "Invalid Fields in Expression - There is an invalid expression in the data source. Please click the \'RUN\' button to resolve the invalid expression. If you click \'YES\', the data source will be saved with the invalid expression. If you choose \'NO\', the Query Designer page will remain open until the expression is resolved.",
                 doYouWant: "will be deleted. Do you want to continue",
@@ -6691,7 +6695,9 @@ var Designer = {
 					includeEx: "INCLUDE(AGG: expression, DIMENSIONS: Column1, Column2, ..)",
 					includeDesc: "Adds specified dimensions to the view level when computing the aggregation, then rolls up the result. Useful for detailed calculations without changing the visual level of detail.",
 					excludeEx: "EXCLUDE(AGG: expression, DIMENSIONS: Column1, Column2, ..)",
-					excludeDesc: "Removes specified dimensions from the view level when computing the aggregation. Useful for calculating higher-level values by omitting certain detail levels."
+					excludeDesc: "Removes specified dimensions from the view level when computing the aggregation. Useful for calculating higher-level values by omitting certain detail levels.",
+                    modeDesc: "Computes the statistical mode, returning the most frequently occurring value in the input set.",
+                    modeEx: "MODE(expression)"
 				}
             },
             queryJoiner: {
@@ -8949,7 +8955,7 @@ var Designer = {
 				configureAi: "Please ensure the AI configuration is completed on the ",
 				UnauthorizedMessage1 : "AI service access is denied due to authentication failure",
 				UnauthorizedMessage2: " or inactive service activation.",
-				configurationMessage : "Please verify the AI configuration on the ",
+				configurationMessage : "Please verify the AI configuration on the AI Settings Page.",
 				configurationUnauthorized : "The AI credentials provided are either invalid or expired.",
 				updateCredentials : " Please check and update them on the ",
 				widgetInsightError: "Unable to generate widget insights.",
@@ -8972,6 +8978,38 @@ var Designer = {
 				aiExpressionSaveMessage : "Please wait a moment while the expression is being saved.",
 				visualWithExpressionMessage : "Your request is being processed to create a visual. Please wait a moment.",
 				manageLicensePage: " Manage License Page.",
+				ConfigurationUnauthorized : "AI service access is denied due to authentication failure or inactive service activation. Please verify the AI configuration on the Ai settings page.",
+				TokenLimitExceeded : "The request has exceeded the maximum allowed token limit.",
+				RequestTimeout : "The request took too long to complete and has timed out. Please try again later or check your network connection.",
+				DnsResolutionFailed : "Unable to resolve the domain name for the requested service. This may be due to network issues or incorrect configuration.",
+				ConnectionFailed : "Unable to connect to the server. This may be due to network issues or the service being temporarily unavailable.",
+				JsonParseError : "Failed to parse the response as JSON. The data may be malformed or in an unexpected format.",
+				DeserializationError : "Failed to convert the response into the expected format.",
+				NullReferenceError : "An unexpected issue occurred because a required object was not initialized.",
+				RateLimitExceeded : "You have hit your assigned rate limit. This means you are sending too many requests in a given time frame.",
+				QuotaExceeded : "You have exceeded your assigned quota. Please check your plan and usage limits.",
+				BadRequest : "Indicates that the service is temporarily unavailable. This could be due to maintenance or high traffic on servers.",
+				SessionNotFound : "Session ID is not found. The session ID is expired or does not exist.",
+				OpenAIInvalidKey : "Your API key or token is invalid, expired, or revoked. Ensure that you are using a valid API key.",
+				OpenAIInvalidAuth : "Your API key or token is invalid, expired, or revoked. Ensure that you are using a valid API key.",
+				OpenAIOrgOrganizationRequired : "Your API key or token is invalid, expired, or revoked. Ensure that you are using a valid API key.",
+				OpenAIIPNotAllowed : "Your API key or token is invalid, expired, or revoked. Ensure that you are using a valid API key.",
+				OpenAICountryNotSupported : "Your API key or token lacks the required permissions for the requested action. Verify your API key's permissions.",
+				OpenAIRateLimit : "You have hit your assigned rate limit. This means you are sending too many requests in a given time frame. Consider pacing your requests or upgrading your plan.",
+				OpenAIQuotaExceeded : "You exceeded your current quota, please check your plan and billing details.",
+				OpenAIServerError : "AI service is temporarily unavailable due to an upstream issue. Please try again later.",
+				OpenAIOverloaded : "AI service is temporarily unavailable due to an upstream issue. Please try again later.",
+				OpenAISlowDown : "AI service is temporarily unavailable due to an upstream issue. Please try again later.",
+				AzureInvalidKey : "Your API key or token is invalid, expired, or revoked. Ensure that you are using a valid API key.",
+				AzureInvalidEndpoint : "The endpoint does not match your Azure resource. Please check your endpoint URL.",
+				AzureInvalidSubscription : "The Azure subscription key not found or inactive. Verify your Azure resource status in the portal.",
+				AzureRegionNotSupported : "Your Azure subscription lacks the required permissions for the requested action. Verify your Azure subscription has the necessary permissions for the operations you are attempting.",
+				AzureRateLimitExceeded : "You have hit your assigned rate limit. This means you are sending too many requests in a given time frame.",
+				AzureQuotaExceeded : "You have exceeded your assigned quota. Please check your plan and usage limits.",
+				AzureOperationConflict : "There is a conflict operation on resource, please try later.",
+				AzureSessionNotFound : "Session ID is not found. The session ID is expired or does not exist.",
+				AzureGeneralBadRequest : "AI service is temporarily unavailable due to an upstream issue. Please try again later.",
+				AzureServerError : "AI service is temporarily unavailable due to an upstream issue. Please try again later.",
             },
 			unifiedAiChat: {
 				selection1: 'Dashboards',
@@ -8995,6 +9033,8 @@ var Designer = {
 				history: 'History',
 				welcomeMessage: 'Welcome! I’m your assistant—ask me any question about your sales',
 				embedFooterPlaceholer: 'Ask your question...',
+				summarizeNotAllowed: 'Summarization is not supported when viewing past conversations.',
+				unifiedAITitle: 'AI Assistant',
 			},
 			replaceValues: { 
 				applyBtnText: "Apply",

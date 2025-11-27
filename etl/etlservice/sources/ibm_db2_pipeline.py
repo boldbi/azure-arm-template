@@ -1,7 +1,17 @@
 import os
-
-# Add the clidriver\bin path to the DLL search path
-os.add_dll_directory("{9}")
+import sys
+if sys.platform.startswith("win"):
+    os.add_dll_directory("{9}")
+else:
+    ibm_home = "/opt/ibm/clidriver"
+    if os.path.isdir(ibm_home):
+        os.environ.setdefault("IBM_DB_HOME", ibm_home)
+        os.environ["LD_LIBRARY_PATH"] = (
+            f"{{os.path.join(ibm_home, 'lib')}}:" + os.environ.get("LD_LIBRARY_PATH", "")
+        )
+        os.environ["PATH"] = (
+            f"{{os.path.join(ibm_home, 'bin')}}:" + os.environ.get("PATH", "")
+        )
 
 import dlt
 import duckdb
