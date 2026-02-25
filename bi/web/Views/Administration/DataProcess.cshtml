@@ -35,7 +35,7 @@
     var isSingleDataBaseMode = ServerAppConfig.TenantConfigurationMode == ConfigurationMode.SingleDatabaseForAllTenants;
     var isDataCacheSettingsTab = isSingleDataBaseMode || (Context.Request.Query["tab"].ToString().ToLower() == "data-cache") ? "active" : string.Empty;
     var isDatastoreSettingsTab = !isSingleDataBaseMode && (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "data-store" || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isDataCacheSettingsTab))) ? "active" : string.Empty; var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
-    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var pageHeader = T["Data Process Settings"];
     var pageDescription = T["Configure the database for storing extracted data and the settings for data caching."];

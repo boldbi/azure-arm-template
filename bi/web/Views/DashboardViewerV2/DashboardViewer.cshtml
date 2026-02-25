@@ -10,7 +10,7 @@
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
-    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    var idPUrl = ServerAppConfig.GetClientServiceUrl(_globalAppSettings.SystemSettings.IDPUrl, Context);
     var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
     var enableComment = "false";
@@ -22,7 +22,7 @@
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && itemDetail.IsPublic;
     var canEdit = itemDetail.CanWrite;
     var loginImage = _identityResponse.LoginLogo;
-    var dataServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings).TrimEnd('/');
+    var dataServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context).TrimEnd('/');
     var provider = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : ViewBag.DataSourceProviders[0].Provider) : string.Empty;
     var service = itemDetail.IsSampleData ? (ViewBag.DataSourceProviders == null ? string.Empty : (ViewBag.DataSourceProviders[0] == null ? string.Empty : ViewBag.DataSourceProviders[0].Service[0])) : string.Empty;
     var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
@@ -46,6 +46,7 @@
     var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var multiTabUrl = ViewBag.MultiTabDashboardDetails != null ? Url.Action("Dashboards", "Dashboards") + "/" + ViewBag.MultiTabDashboardDetails.Id + "/" + ViewBag.MultiTabDashboardDetails.CategoryName + "/" + ViewBag.MultiTabDashboardDetails.Name : string.Empty;
     var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var featurePermissionSettings = ViewBag.FeaturePermissionSettings;
     var isUsageAnalytics = ViewBag.IsUsageAnalytics != null;
     var getWidgetEmbedCode = globalAppSettings.SystemSettings.GetWidgetEmbedCode;
     var isViewNotFound = (ViewBag.ViewNotFound != null && ViewBag.ViewNotFound ) ? true : false;
@@ -60,11 +61,12 @@
     var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
     var aiLogo = globalAppSettings.SystemSettings.AILogo;
     var knowDomainsList = KnownDomainList.AllowedDomainList;
+    var baseUrl = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.BaseUrl, Context);
     var isEmbedSignature = requestUrl.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var themeInViewer = ViewBag.ThemeInViewer;
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true) && !isSlideshow;
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
-    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
+    var navigateETLUrl = ServerAppConfig.GetClientServiceUrl(etlEndpointPrefix, Context) + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     var customApplicationTheme = _identityResponse.CustomApplicationTheme != null ? _identityResponse.CustomApplicationTheme : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme);
     var customThemeAppearance = _identityResponse.ThemeAppearance != null ? _identityResponse.ThemeAppearance : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance);
     if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
@@ -90,7 +92,7 @@
     {
         <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     }
-    <meta name="designer_service:url" content="@(!string.IsNullOrWhiteSpace(ServerAppConfig.ViewerServiceUrl) ? ServerAppConfig.ViewerServiceUrl : ServerAppConfig.InternalAppDataServiceUrl)" />
+    <meta name="designer_service:url" content="@(!string.IsNullOrWhiteSpace(ServerAppConfig.ViewerServiceUrl) ? ServerAppConfig.ViewerServiceUrl : ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context))" />
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="designer_service:url" content="@dataServiceUrl" />
     <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
@@ -111,7 +113,7 @@
 
     <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
 
-    <link rel="icon" href="@globalAppSettings.SystemSettings.FavIcon" id="favicon-link" />
+    <link rel="icon" href="@ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.FavIcon, Context)" id="favicon-link" />
 
     @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))
     {
@@ -148,7 +150,7 @@
         }
         document.addEventListener("DOMContentLoaded", function () {
             const faviconLink = document.getElementById("favicon-link");
-
+        
             if (faviconLink) {
                 faviconLink.addEventListener("error", function () {
                     const currentHref = faviconLink.getAttribute("href");
@@ -167,7 +169,7 @@
         var idpUrl = "@idPUrl";
         var displayName = "@displayName";
         var commentPageUrl = "@Url.Action("CommentPartialView", "Comments")";
-        var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl";
+        var baseUrl = "@baseUrl";
         var userId = "@userId";
         var userName = "@userName";
         var enableComment = "@enableComment";
@@ -248,6 +250,7 @@
         var serverAppPathBase = "@GlobalAppSettings.HttpPathBase";
         var isUsageAnalytics = @Json.Serialize(isUsageAnalytics);
         var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+        var featurePermissionSettings =  @Html.Raw(JsonConvert.SerializeObject(featurePermissionSettings));
         var parentItemId = "@ViewBag.ParentItemId";
         var isViewNotFound = @Html.Raw(Json.Serialize(isViewNotFound));
         var isCommentNotFound = @Html.Raw(Json.Serialize(isCommentNotFound));

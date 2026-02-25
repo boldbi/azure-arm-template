@@ -1,7 +1,7 @@
 ﻿@{
     Layout = null;
     var displayName = GlobalAppSettings.BrandingDisplayName;
-    var redirectUrl = ServerAppConfig.InternalAppIdpUrl;
+    var redirectUrl =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context);
     var subscriptionUrl = ViewBag.SubscriptionUrl;
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
     var setupHelpLink = helpSiteBaseUrl + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SetupHelp);
@@ -13,7 +13,7 @@
     if (ServerAppConfig.IsSelfHosted)
     {
         cdnLink = (GlobalAppSettings.HttpPathBase.ToString().Equals("/") ? string.Empty : GlobalAppSettings.HttpPathBase.ToString()) + ServerAppConfig.AppSettings.EndPoints.CdnLink + "/cdn/images";
-        faviconLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon";
+        faviconLogo =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/logos?type=favicon";
     }
     else
     {
@@ -111,7 +111,7 @@
                                     <hr class="connect-line-left"><div class="content text-body">@T["or"]</div><hr class="connect-line-right">
                                 </div>
                                 <div class="col-xs-12 align-center">
-                                    <a id="skip-license-activation" class="link-decoration" href="@ServerAppConfig.InternalAppIdpUrl ">@T["Proceed with 30 days trial"]</a>
+                                    <a id="skip-license-activation" class="link-decoration" href="@redirectUrl">@T["Proceed with 30 days trial"]</a>
                                 </div>
                             }
                             else

@@ -551,7 +551,7 @@ $(document).ready(function () {
             "copy_right_info": {
                 isRequired: true,
                 isValidCopyRightInfo: true,
-                maxlength: 255
+                maxlength: 100
             }
         },
         highlight: function (element) {

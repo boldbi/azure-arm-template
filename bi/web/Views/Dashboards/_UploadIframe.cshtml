@@ -11,9 +11,10 @@
     var appFontStyle = globalAppSettings != null && globalAppSettings.SystemSettings != null && !globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? globalAppSettings.SystemSettings.FontPreference : ServerAppConfig.FontFamily;
     var enableManualOverWrite = ViewData["EnableManualOverWrite"] != null ? Convert.ToBoolean(ViewData["EnableManualOverWrite"]) : false;
     var nonce = Context.Items["ScriptNonce"]?.ToString();
+    var internalAppDataServiceUrl = ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppDataServiceUrl, Context);
 }
 <head>
-    <meta name="designer_service:url" content="@ServerAppConfig.InternalAppDataServiceUrl" />
+    <meta name="designer_service:url" content="@internalAppDataServiceUrl" />
     <meta name="dashboard_service:url" content="@dashboardServerApiUrl" />
     <meta name="access:token" content="@ViewBag.AccessToken" />
     @if (ViewBag.DashboardIds != null)
@@ -54,7 +55,7 @@
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/ej2-dialog.min.js"></script>
     </environment>
 
-     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@ServerAppConfig.InternalAppDataServiceUrl/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context)/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
 
     @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
 
@@ -76,10 +77,10 @@
     @if (isSelfHosted)
     {
         <environment include="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl)" />
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl, httpContext: Context)" />
         </environment>
         <environment exclude="Development,CloudDevelopment">
-            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl)" />
+            <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.CustomFontUrl(appFontStyle, dashboardServerResourceUrl, httpContext: Context)" />
         </environment>
     }
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>

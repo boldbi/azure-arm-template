@@ -256,6 +256,7 @@ function onLocalizationDialogOpen() {
 function closeLocalizationDialog() {
     localizationGrid.clearSelection();
     localizationGrid.refresh();
+    document.getElementById("search-languages").value = "";
     document.getElementById("localization-container").ej2_instances[0].hide();
     count = 0;
     if (isNewLanguageAdded || isdeleteLanguages) {
@@ -338,6 +339,8 @@ function fnActionBeginLocalization(args) {
         fileName = [];
     }
     $("#delete-language").hide();
+    $("#add-language").attr("disabled", false);
+    $(".su-add").removeClass('su-disable');
     count = 0;
     if (this.properties.query.params.length > 0) {
         this.properties.query.params = [];
@@ -494,6 +497,8 @@ function deleteLanguages() {
 $("#search-languages").on("keyup keydown", function () {
     fileName.length = 0;
     $("#delete-language").hide();
+    $("#add-language").attr("disabled", false);
+    $(".su-add").removeClass('su-disable');
     count = 0;
 });
 

@@ -1,7 +1,7 @@
 ﻿@{
     var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
 
-    var idPUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+    var idPUrl = await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp, Context);
 
     var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
 
@@ -36,6 +36,7 @@
     var imageUrl = idPUrl;
     var healthCheckUrl = idPUrl + "/status";
     var showLicenseWarningIcon = GlobalAppSettings.SystemSettings.ShowLicenseWarning;
+    var isConsoleLogEnabled = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(BoldServicesEnvironmentVariables.IsConsoleLogEnabled)) ? Convert.ToBoolean(Environment.GetEnvironmentVariable(BoldServicesEnvironmentVariables.IsConsoleLogEnabled)): false;
 }
 
 <script nonce="@Context.Items["ScriptNonce"]">
@@ -66,12 +67,14 @@
                         <ul class="dropdown-menu top-menu no-margin" role="menu">
                             <li class="top-menu-item-title">
                                 <div>@T["Help"]</div>
-                            </li>
+                            </li>                      
+                            
                             <li class="top-menu-item">
                                 <a id="download-log" class="text-decoration-none">
                                     @T["Get diagnostic logs"]
                                 </a>
                             </li>
+                            
                             <li class="top-menu-item">
                                 <a href="@healthCheckUrl" class="text-decoration-none">
                                     @T["Health check"]

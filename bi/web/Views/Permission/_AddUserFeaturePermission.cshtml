@@ -1,0 +1,44 @@
+﻿
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+}
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+@await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+<environment include="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/adduserpermission.css" />
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/adduserpermission.js"></script>
+</environment>
+<environment exclude="Development,CloudDevelopment">
+    <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/adduserpermission.min.css" />
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/adduserpermission.min.js"></script>
+</environment>
+
+@await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+ <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var getPermissionEntityUrl = "@Url.Action("GetPermissionEntity", "permission")";
+        var getItemScopeUrl = "@Url.Action("GetItemScope", "permission")";
+        var getFeatureItemScopeAccessUrl = "@Url.Action("GetResourceFeatureScopeAccess", "permission")";
+        var getFeatureItemAccessModesUrl = "@Url.Action("GetResourceFeatureAccessModes", "permission")";
+        var addnewuserFeaturepermissionUrl = "@Url.Action("AddResourceFeatureUserPermission", "permission")";
+        var deleteuserFeaturePermissionUrl = "@Url.Action("DeleteResourceFeatureUserPermission", "permission")";
+        var addnewgroupFeaturepermissionUrl = "@Url.Action("AddResourceFeatureGroupPermission", "permission")";
+        var deletegroupFeaturePermissionUrl = "@Url.Action("DeleteResourceFeatureGroupPermission", "permission")";
+        $(document).ready(function () {
+            $("#add-permission_wrapper").ejWaitingPopup("hide");
+        });
+        var entityObj = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.PermissionEntity)));
+        var accessObj = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.FeaturePermissionAccess)));
+</script>
+
+<div class="add-permissions" id="add-user-feature-permission">
+    @await Html.PartialAsync("_AddFeaturePermission")
+    <input type="hidden" id="user-id-hidden" value="@ViewBag.userId" />
+</div>

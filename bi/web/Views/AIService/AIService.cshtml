@@ -9,13 +9,14 @@
     var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
-    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
-    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var idPUrl = ServerAppConfig.GetClientServiceUrl(_globalAppSettings.SystemSettings.IDPUrl, Context);
+    var faviconLogo = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.FavIcon, Context);
     var aiLogo = globalAppSettings.SystemSettings.AILogo;
     var currentUrl = Context.Request.GetEncodedUrl();
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var baseUrl = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.BaseUrl, Context);
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
@@ -23,8 +24,8 @@
     var cdnLink = globalAppSettings.SystemSettings.CDNLink;
     var profilePictureUrl = idPUrl + Url.Content("/User/Avatar?id=" + idpreferenceId + "&ImageSize=64");
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
-    var serverApiUrl = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
-    var dataServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings).TrimEnd('/');
+    var serverApiUrl = ServerAppConfig.GetClientServiceUrl(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl(), Context);
+    var dataServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context).TrimEnd('/');
     var permissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
@@ -34,7 +35,7 @@
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
     var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var url = new Uri(Context.Request.GetDisplayUrl());
-    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
     var isSingleDatabaseMode = _globalAppSettings.SystemSettings.ConfigurationMode ==
                                ConfigurationMode.SingleDatabaseForAllTenants;
     var nonce = Context.Items["ScriptNonce"]?.ToString();
@@ -58,7 +59,7 @@
     <meta name="globalization:date_format" content="@_clientDateTimeInfo.ClientDateTime.DateFormat" />
     <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
 
-    <title>@T["AI Agent"] - @globalAppSettings.SystemSettings.OrganizationName</title>
+    <title>@T["AI Assistant"] - @globalAppSettings.SystemSettings.OrganizationName</title>
     @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
     <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
     @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
@@ -90,7 +91,7 @@
      <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var scriptNonce = @Json.Serialize(nonce);
         var dashboardDesignerUrl = "@Url.Action("DashboardDesigner", "Designer")";
-        var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var baseUrl = "@baseUrl"; // If you are working on local developemnt change the baseurl as localsource url
         var isAIFeatureEnabled =  @Json.Serialize(globalAppSettings.SystemSettings.IsAiServiceEnabled);
         var isWidgetSummarizationFeatureEnabled = @Json.Serialize(globalAppSettings.SystemSettings.IsWidgetSummarizationEnabled);
         var isDashboardInsightFeatureEnabled = @Json.Serialize(globalAppSettings.SystemSettings.IsDashboardInsightEnabled);

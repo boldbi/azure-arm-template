@@ -58,7 +58,7 @@ try:
     
     data = df.to_dict(orient="records")
     
-    pipeline = dlt.pipeline(pipeline_name="{0}_pipeline", destination='duckdb',staging={10} , dataset_name="{0}")
+    pipeline = dlt.pipeline(pipeline_name="{0}_pipeline", destination='duckdb',staging={11} , dataset_name="{0}")
     load_info = pipeline.run(data, table_name="{4}")
     print(load_info)
 except NoCredentialsError:

@@ -8,7 +8,7 @@
     var isDebug = globalAppSettings.SystemSettings.IsDebug;
     var tenantAppConfig = new TenantAppConfiguration(globalAppSettings);
     var licenseSettings = globalAppSettings.GetLicenseSettings(_clientDateTimeInfo);
-    var siteUrl = globalAppSettings.SystemSettings.BaseUrl;
+    var siteUrl = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.BaseUrl, Context);
     var cdnLink = globalAppSettings.SystemSettings.CDNLink;
     var displayName = Context.Session.GetString("displayname") != null ? Context.Session.GetString("displayname") : string.Empty;
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
@@ -17,8 +17,8 @@
     var appLogo = globalAppSettings.SystemSettings.MainScreenLogo;
     var defaultAppLogo = cdnLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
-    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
-    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var idPUrl = ServerAppConfig.GetClientServiceUrl(_globalAppSettings.SystemSettings.IDPUrl, Context);
+    var faviconLogo = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.FavIcon, Context);
     var currentUrl = Context.Request.GetEncodedUrl();
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
     var feedbackCookie = Context.Request.Cookies["feedback.visible"];
@@ -49,13 +49,13 @@
     var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var url = new Uri(Context.Request.GetDisplayUrl());
     var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
-    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isDataSourceConnection = string.Empty;
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
-    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
+    var navigateETLUrl =  ServerAppConfig.GetClientServiceUrl(etlEndpointPrefix, Context) + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     if((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature)
     { 
         isDataSourceConnection = ViewBag.isDataSourceConnection;
@@ -167,7 +167,7 @@
         var dataStoreSettingUrl = "@Url.Action("DataStoreSettings", "Administration")";
         var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
         var licenseSettings =@Html.Raw(JsonConvert.SerializeObject(licenseSettings));
-		var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+        var baseUrl = "@siteUrl"; // If you are working on local developemnt change the baseurl as localsource url
         var currentUrl = "@currentUrl";
         var organizationName = "@globalAppSettings.SystemSettings.OrganizationName";
         var isDebug = "@isDebug";

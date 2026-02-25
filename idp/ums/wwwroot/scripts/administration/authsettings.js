@@ -1143,10 +1143,13 @@ $("#enable-jwt").change(function () {
 
 function jwtSigningKeyShowHide() {
     if ($("#enable-jwt").is(":checked")) {
-        $("#jwt-signing-key,#show-signing-key,#jwt-encryption-key,#show-encryption-key,#enable-jwt-encryption").prop("disabled", false);
+        $("#jwt-signing-key,#jwt-encryption-key,#enable-jwt-encryption").prop("disabled", false);
+        $("#show-signing-key,#show-encryption-key,#copy-signing-key,#generate-signing-key,#copy-encryption-key,#generate-encryption-key").removeAttr("disabled").tooltip("enable").css("cursor", "pointer");
     }
     else {
-        $("#jwt-signing-key,#show-signing-key,#jwt-encryption-key,#show-encryption-key,#enable-jwt-encryption").prop("disabled", true);
+        $("#jwt-signing-key,#jwt-encryption-key,#enable-jwt-encryption").prop("disabled", true);
+        $("#show-signing-key,#show-encryption-key,#copy-signing-key,#generate-signing-key,#copy-encryption-key,#generate-encryption-key").attr("disabled", true).tooltip("disable").css("cursor", "default");
+       
     }
 }
 

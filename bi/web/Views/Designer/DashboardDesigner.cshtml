@@ -15,8 +15,8 @@
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId") : string.Empty;
     var isUmsAdmin = ServerAppConfig.Sandbox.BI.Enabled && !string.IsNullOrWhiteSpace(ServerAppConfig.Sandbox.BI.AdminEmail) && emailAddress.ToLower() == ServerAppConfig.Sandbox.BI.AdminEmail.ToLower() ? true : _identityResponse.IsUmsAdmin;
-    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
-    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var idPUrl = ServerAppConfig.GetClientServiceUrl(_globalAppSettings.SystemSettings.IDPUrl, Context);
+    var faviconLogo = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.FavIcon, Context);
     var aiLogo = globalAppSettings.SystemSettings.AILogo;
     var currentUrl = Context.Request.GetEncodedUrl();
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
@@ -38,7 +38,7 @@
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
     var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
-
+    var baseUrl = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.BaseUrl, Context);
     var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                          currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                          currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
@@ -64,7 +64,7 @@
     var isAiSummariesEnabledGlobally = ViewBag.AICredentials != null ? ViewBag.AICredentials.IsAISummariesEnabledGlobally : ServerAppConfig.IsAiSummariesEnabledGlobally;
     var isBoldAISelected = isSelfHosted ? (ViewBag.AICredentials != null ? ViewBag.AICredentials.IsAIModel : ServerAppConfig.IsAiModel) : true ;
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
-    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
+    var navigateETLUrl =  ServerAppConfig.GetClientServiceUrl(etlEndpointPrefix, Context) + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     var isHttps = Context.Request.Scheme == "https";
     Context.Response.Cookies.Append(ServerAppConfig.DesignerLanguageCookieName, ViewBag.Culture, new CookieOptions()
     {
@@ -83,7 +83,7 @@
     }
     var hasDashboardSettingsPermission = hasDashboardSettingsPermissionFlag.ToString();
     var url = new Uri(Context.Request.GetDisplayUrl());
-    var designerServiceUrl = ServerAppConfig.GetServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings);
+    var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
@@ -210,7 +210,7 @@
         @{
         #pragma warning restore SCS0029
         }
-		var baseUrl = "@globalAppSettings.SystemSettings.BaseUrl"; // If you are working on local developemnt change the baseurl as localsource url
+		var baseUrl = "@baseUrl"; // If you are working on local developemnt change the baseurl as localsource url
         var isAIFeatureEnabled =  @Json.Serialize(globalAppSettings.SystemSettings.IsAiServiceEnabled);
         var isWidgetSummarizationFeatureEnabled = @Json.Serialize(globalAppSettings.SystemSettings.IsWidgetSummarizationEnabled);
         var isDashboardInsightFeatureEnabled = @Json.Serialize(globalAppSettings.SystemSettings.IsDashboardInsightEnabled);

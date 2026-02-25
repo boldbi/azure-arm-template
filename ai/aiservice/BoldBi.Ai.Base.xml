@@ -369,11 +369,11 @@
             <param name="aiAssistanceRequest">The AI assistance request containing the query and table information.</param>
             <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object that encapsulates the message, question, and AI assistance request.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiAgentProcess.Classification.Steps.DesignerChatPreparation.GetInteractionPrompt(System.String)">
+        <member name="M:BoldBi.Ai.Base.AiAgentProcess.Classification.Steps.DesignerChatPreparation.GetInteractionPrompt(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Generates an interaction prompt based on the provided table information.
             </summary>
-            <param name="tableInfoContent">The table information used to generate the interaction prompt.</param>
+            <param name="request">The table information used to generate the interaction prompt.</param>
             <returns>A formatted string representing the interaction prompt.</returns>
             <remarks>
             The interaction prompt is designed to guide the AI assistant on how to respond to questions related to designing visuals from the table information.
@@ -394,12 +394,11 @@
             <param name="aiAssistanceRequest">The AI assistance request containing the query, table information, and AI summaries enablement setting.</param>
             <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object that encapsulates the message, question, and AI assistance request.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiAgentProcess.Classification.Steps.ViewChatPreparation.GetViewPrompt(System.String,System.Boolean)">
+        <member name="M:BoldBi.Ai.Base.AiAgentProcess.Classification.Steps.ViewChatPreparation.GetViewPrompt(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Generates a view prompt based on the provided table information and AI summaries setting.
             </summary>
-            <param name="tableInfoContent">The table information used to generate the view prompt.</param>
-            <param name="isAiSummariesEnabled">Indicates whether AI summaries are enabled globally.</param>
+            <param name="request">It contains data to generate the view prompt.</param>
             <returns>A formatted string representing the view prompt.</returns>
             <remarks>
             The view prompt guides the AI assistant on how to answer questions related to table views, with different behavior based on whether AI summaries are enabled.
@@ -695,7 +694,7 @@
             generating AI responses, validating JSON, and logging activities.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.#ctor(BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.AiSampleQuestion.Interfaces.ISampleQuestionBuilder,BoldBi.Ai.Base.AiAnswerTextualResponse.Builder.Interfaces.IAiRecordAnalysisBuilder,BoldBi.Ai.Base.CacheServices.IMemoryCacheService)">
+        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.#ctor(BoldBi.Ai.Base.Contracts.IUsageProcessor,BoldBi.Ai.Base.AiSampleQuestion.Interfaces.ISampleQuestionBuilder,BoldBi.Ai.Base.AiAnswerTextualResponse.Builder.Interfaces.IAiRecordAnalysisBuilder,BoldBi.Ai.Base.CacheServices.IMemoryCacheService,BoldBi.Ai.Base.CredentialManager)">
             <summary>
             Initializes a new instance of the <see cref="T:BoldBi.Ai.Base.AiChatAssistantProcess"/> class.
             </summary>
@@ -703,6 +702,17 @@
             <param name="sampleQuestionBuilder">Builder to construct sample question.</param>
             <param name="aiRecordAnalysisBuilder">Builder to construct response Builder.</param>
             <param name="memoryCache">Memory cache to store items.</param>
+            <param name="credentialManager">The credential manager instance.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.GenerateSynonymsAsync(System.String,System.String)">
+            <summary>
+            Generates synonyms for the provided input by orchestrating the AI process flow.
+            </summary>
+            <param name="jsonInput">A JSON string representing the AiAssistanceRequest payload.</param>
+            <param name="licenseKey">The license key used for usage tracking and billing.</param>
+            <returns>
+            An object containing the AI response with synonyms on success, or an error payload if an exception occurs.
+            </returns>
         </member>
         <member name="M:BoldBi.Ai.Base.AiChatAssistantProcess.ReleventQuestionProcessAsync(System.String,System.String)">
             <summary>
@@ -854,6 +864,20 @@
             - Processes token usage for billing or analytics.
             - Adds an activity log entry for auditing or monitoring.
             </remarks>
+        </member>
+        <member name="T:BoldBi.Ai.Base.AiSampleQuestion.Builder.Concrete.DashboardSuggestionRunStrategy">
+            <summary>
+            Implements the default run strategy for UnifiedAI response suggestion request.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.AiSampleQuestion.Builder.Concrete.DashboardSuggestionRunStrategy.RunStrategy(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs,System.String)">
+            <summary>
+            Defines the default run strategy.
+            </summary>
+            <param name="request">The assistance request containing configuration details.</param>
+            <param name="args">An instance of <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> that contains necessary execution parameters such as license key or context data.</param>
+            <param name="prompt">Suggestion prompt.</param>
+            <returns>A task representing the asynchronous operation, with a result of type <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent"/> containing the AI response.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.AiSampleQuestion.Builder.Concrete.DefaultPromptStrategy">
             <summary>
@@ -1681,6 +1705,16 @@
             <param name="licenseKey">The license key required for processing the request.</param>
             <returns>A task representing the asynchronous operation, with an object containing the result of dashboard question or not.</returns>
         </member>
+        <member name="M:BoldBi.Ai.Base.Contracts.IAiChatAssistanceOperations.GenerateSynonymsAsync(System.String,System.String)">
+            <summary>
+            Generates synonyms for the provided input by orchestrating the AI process flow.
+            </summary>
+            <param name="jsonInput">A JSON string representing the AiAssistanceRequest payload.</param>
+            <param name="licenseKey">The license key used for usage tracking and billing.</param>
+            <returns>
+            An object containing the AI response with synonyms on success, or an error payload if an exception occurs.
+            </returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Contracts.IAiSummarizationOperations">
             <summary>
             Defines the contract for AI-based summarization operations, including widget-level and dashboard-level summarizations.
@@ -1937,14 +1971,13 @@
             <param name="args">The input which contains parameters required for the input building.</param>
             <returns>A formatted string ready for AI processing.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.CreateVisualResponse.Builder.BuildInputStep.PrepareSystemMessage(System.String,System.Collections.Generic.List{System.String})">
+        <member name="M:BoldBi.Ai.Base.CreateVisualResponse.Builder.BuildInputStep.PrepareSystemMessage(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Generates a system message for an AI assistant based on the type of operation and provided details.
             For `DataConfiguration` operations, the message instructs the assistant to provide chart fields from the given table schema and includes previous questions for context.
             For other operations, the message details rules for creating Bold BI charts, specifying required key names, their order, and constraints for the `Name` field.
             </summary>
-            <param name="tableInfoContent">The content of the table schema used for visualization.</param>
-            <param name="expressionColumns">list of Column name of the expression.</param>
+            <param name="request">The content of the table schema used for visualization.</param>
             <returns>A formatted string containing the instructions and rules for the AI assistant based on the operation type.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.CoreProcesses.CreateDashboardVisualProcess">
@@ -3368,13 +3401,14 @@
             <param name="context">Context.</param>
             <returns>A formatted string ready for AI processing.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep.PrepareSystemMessage(System.String)">
+        <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep.PrepareSystemMessage(System.String,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
             <summary>
             Generates a system message for an AI assistant based on the type of operation and provided details.
             For `DataConfiguration` operations, the message instructs the assistant to provide chart fields from the given table schema and includes previous questions for context.
             For other operations, the message details rules for creating Bold BI charts, specifying required key names, their order, and constraints for the `Name` field.
             </summary>
             <param name="tableInfoContent">The content of the table schema used for visualization.</param>
+            <param name="aiAssistanceRequest">The AI request for generating response.</param>
             <returns>A formatted string containing the instructions and rules for the AI assistant based on the operation type.</returns>
         </member>
         <member name="M:BoldBi.Ai.Base.DashboardProcess.GenerateDashboard.Processes.DashboardResponseGeneration.Steps.ResponseGenerationBuildInputStep.GetTableInfoContent(System.String)">
@@ -3712,6 +3746,143 @@
             <param name="queueName">The name of the queue from which the message was dequeued.</param>
             <param name="message">The dequeued message.</param>
             <returns>A task that represents the asynchronous operation.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.FileStorage.AmazonS3Response">
+            <summary>
+            Represents the configuration required to access an Amazon S3 bucket,
+            including credentials, bucket details, and region information.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AmazonS3Response.Region">
+            <summary>
+            Gets or sets the AWS region system name.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AmazonS3Response.BucketName">
+            <summary>
+            Gets or sets the S3 bucket name.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AmazonS3Response.AccessKeyId">
+            <summary>
+            Gets or sets the AWS access key ID used for authentication.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AmazonS3Response.AccessKeySecret">
+            <summary>
+            Gets or sets the AWS secret access key used for authentication.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AmazonS3Response.RootFolderName">
+            <summary>
+            Gets or sets the logical root folder.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AmazonS3Response.RegionEndpoint">
+            <summary>
+            Gets the region endpoint.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.FileStorage.AzureBlobResponse">
+            <summary>
+            Represents configuration details required to access Azure Blob Storage.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AzureBlobResponse.AzureBlobStorageContainerName">
+            <summary>
+            Gets or sets the name of the Azure Blob Storage container.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AzureBlobResponse.AzureBlobStorageUri">
+            <summary>
+            Gets or sets the name of the Azure Blob Storage uri container.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AzureBlobResponse.ConnectionString">
+            <summary>
+            Gets or sets the connection string used to authenticate with Azure Blob Storage.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AzureBlobResponse.ConnectionType">
+            <summary>
+            Gets or sets the connection type or mode used to connect to Azure Blob Storage.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AzureBlobResponse.AzureBlobStorageAccountName">
+            <summary>
+            Gets or sets the Azure Blob Storage account name.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.AzureBlobResponse.AzureBlobStorageAccessKey">
+            <summary>
+            Gets or sets the Azure Blob Storage access key.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.FileStorage.OCIResponse">
+            <summary>
+            Represents configuration details required to access Oracle Cloud Infrastructure (OCI) Object Storage.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.OCIResponse.Region">
+            <summary>
+            Gets or sets the OCI region.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.OCIResponse.BucketName">
+            <summary>
+            Gets or sets the OCI Object Storage bucket name.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.OCIResponse.AccessKey">
+            <summary>
+            Gets or sets the OCI access key.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.OCIResponse.SecretKey">
+            <summary>
+            Gets or sets the OCI secret key associated with the access key.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.OCIResponse.OCINameSpace">
+            <summary>
+            Gets or sets the OCI namespace for the Object Storage account.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.OCIResponse.RootFolderName">
+            <summary>
+            Gets or sets the logical root folder (prefix) within the bucket for storing resources.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Base.FileStorage.StorageDetails">
+            <summary>
+            Represents storage configuration details for a tenant, including the selected storage type
+            and provider-specific settings (Azure Blob, Amazon S3, or OCI).
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.StorageDetails.TenantId">
+            <summary>
+            Gets or sets the tenant identifier associated with this storage configuration.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.StorageDetails.StorageType">
+            <summary>
+            Gets or sets the storage provider type used to persist resources.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.StorageDetails.AzureBlob">
+            <summary>
+            Gets or sets the Azure Blob Storage configuration details.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.StorageDetails.AmazonS3">
+            <summary>
+            Gets or sets the Amazon S3 configuration details.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.FileStorage.StorageDetails.OCI">
+            <summary>
+            Gets or sets the Oracle Cloud Infrastructure (OCI) Object Storage configuration details.
+            </summary>
         </member>
         <member name="T:BoldBi.Ai.Base.Helpers.AiInputPreparationHelper">
             <summary>
@@ -6157,6 +6328,25 @@
             <param name="jsonFields">List of dictionaries containing field properties.</param>
             <returns>Returns a JSON string representing the serialized fields.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.Helpers.PromptHelper.PromptCatalogHelper">
+            <summary>
+            Loads and manages prompt templates from configuration.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.PromptHelper.PromptCatalogHelper.InitializeFromConfiguration(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes the prompt catalog from configuration.
+            </summary>
+            <param name="configuration">Configuration instance.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Helpers.PromptHelper.PromptCatalogHelper.Get(System.String,System.Object)">
+            <summary>
+            Gets a prompt by key, optionally formatting it with parameters.
+            </summary>
+            <param name="key">Key in format "ProcessName:Type" (case-insensitive).</param>
+            <param name="parameters">Parameters for formatting.</param>
+            <returns>Formatted prompt or null if not found.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.Helpers.SandboxUsersHelper">
             <summary>
             Helper class for managing AI sandbox users.
@@ -6347,10 +6537,11 @@
             Represents a building class for generating the prompt.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.NlgProcesses.Builder.concrete.DefaultSystemPromptProvider.GetSystemPrompt">
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.Builder.concrete.DefaultSystemPromptProvider.GetSystemPrompt(System.String)">
             <summary>
             Builds the input prompt for the AI model to generate widget summary based on widget data.
             </summary>
+            <param name="languageCode">Locale code (e.g., "fr-FR").</param>
             <returns>A string prompt instructing the AI model to generate summary.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.NlgProcesses.Builder.concrete.UnifiedAiHtmlFormatter">
@@ -6371,10 +6562,11 @@
             Represents a building class for generating the prompt.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.NlgProcesses.Builder.concrete.UnifiedAiSystemPromptProvider.GetSystemPrompt">
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.Builder.concrete.UnifiedAiSystemPromptProvider.GetSystemPrompt(System.String)">
             <summary>
             Builds the input prompt for the AI model to generate widget summary based on widget data.
             </summary>
+            <param name="languageCode">Locale code (e.g., "fr-FR").</param>
             <returns>A string prompt instructing the AI model to generate summary.</returns>
         </member>
         <member name="T:BoldBi.Ai.Base.NlgProcesses.Builder.Interfaces.IHtmlFormatter">
@@ -6394,10 +6586,11 @@
             Defines the contract for building a <see cref="T:BoldBi.Ai.Base.NlgProcesses.SystemFactory.SystemPromptProviderFactory"/> using the builder pattern.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Base.NlgProcesses.Builder.Interfaces.ISystemPromptProvider.GetSystemPrompt">
+        <member name="M:BoldBi.Ai.Base.NlgProcesses.Builder.Interfaces.ISystemPromptProvider.GetSystemPrompt(System.String)">
             <summary>
             Gets the system prompt used for AI assistance in the current process.
             </summary>
+            <param name="languageCode">Optional locale code (e.g., "en-US", "fr-FR") to enforce response language.</param>
             <returns>
             A string representing the system prompt.
             </returns>
@@ -6784,6 +6977,71 @@
             that contains the AI assistance request and the generated response.
             </returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.Synonyms.Steps.SynonymsBuildInputStep">
+            <summary>
+            Builds the input prompt and request payload for the synonyms generation flow.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsBuildInputStep.SynonymsBuildInputAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Creates the process arguments by composing the developer prompt and user query.
+            </summary>
+            <param name="context">The current process step context for emitting events.</param>
+            <param name="aiAssistanceRequest">The AI assistance request containing the query and culture info.</param>
+            <returns>RunProcessArgs containing the prompt, question, and request details.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown when prompt creation fails or an internal error occurs.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsBuildInputStep.GetDeveloperMessage(BoldBi.Ai.Core.Models.AIInputBuilder.AiAssistanceRequest)">
+            <summary>
+            Builds the developer-facing message by combining the base prompt and optional language prompt.
+            </summary>
+            <param name="assistanceRequest">The assistance request used to determine culture-specific prompts.</param>
+            <returns>A composed prompt string for synonyms generation.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsBuildOutputStep.SynonymsBuildOutputAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs)">
+            <summary>
+            Builds the final synonyms output by extracting text from the AI response and storing it in state.
+            </summary>
+            <param name="context">The process step context used for emitting events.</param>
+            <param name="args">The output arguments containing the AI response payload.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">
+            Thrown when processing the AI response fails; the exception is emitted to the pipeline.
+            </exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsBuildOutputStep.UpdateUsageTokens(BoldBi.Ai.Core.Models.AIResponseBuilder.AIUsage)">
+            <summary>
+            Updates the usage token information in the classification response model.
+            </summary>
+            <param name="usage">The usage data to be updated.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsBuildOutputStep.UpdateExceptionInformation(System.Object)">
+            <summary>
+            Updates the response to include exception details and mark it as an error.
+            </summary>
+            <param name="ex">The exception information.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Base.Synonyms.Steps.SynonymsExecuteStep">
+            <summary>
+            Executes the AI call to generate synonyms and builds the output payload.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsExecuteStep.SynonymsExecuteAsync(Microsoft.SemanticKernel.KernelProcessStepContext,BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs)">
+            <summary>
+            Sends the composed prompt and user query to the AI service and returns the response.
+            </summary>
+            <param name="context">The process step context used for emitting events.</param>
+            <param name="args">The run-time arguments containing the prompt, query, and credentials.</param>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.BuildOutputArgs"/> with the AI response and request details.</returns>
+            <exception cref="T:BoldBi.Ai.Core.ExceptionHandler.AiException">Thrown when the AI execution fails.</exception>
+        </member>
+        <member name="M:BoldBi.Ai.Base.Synonyms.Steps.SynonymsExecuteStep.UpdateUsageTokensAsync(Microsoft.SemanticKernel.KernelProcessStepContext,System.String)">
+            <summary>
+            Emits an event to update usage token metrics from the AI response.
+            </summary>
+            <param name="context">The process context to publish usage updates.</param>
+            <param name="usage">The JSON string containing usage information.</param>
+        </member>
         <member name="T:BoldBi.Ai.Base.TextualResponseProcess.Steps.InitiateTextualResponseStep">
             <summary>
             Represents a step in the kernel process that initiates the textual response generation.
@@ -7027,7 +7285,7 @@
             <param name="aiAssistanceRequest">The request containing the query and metadata needed for classification.</param>
             <returns>A <see cref="T:BoldBi.Ai.Core.Models.CoreProcesses.RunProcessArgs"/> object with populated message, question, and original request.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetInputStep.GetDeveloperMessage(System.String)">
+        <member name="M:BoldBi.Ai.Base.ToggleWidgetProcess.Steps.ToggleWidgetInputStep.GetDeveloperMessage(System.String,System.String)">
             <summary>
             Gets the base message that instructs the AI how to classify user questions.
             </summary>
@@ -7700,6 +7958,268 @@
             <param name="licenseKey">The license key of the tenant.</param>
             <returns>The visual creation response as a serialized JSON object.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.AxisSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updateaxissettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.AxisSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.AxisSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updateaxissettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.AxisSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.AxisSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.ColorSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updatecolorsettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.ColorSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.ColorSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updatecolorsettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.ColorSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.ColorSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.ExportSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updateexportsettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.ExportSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.ExportSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updateexportsettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.ExportSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.ExportSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.GreetingsHandler">
+            <summary>
+            Special handler responsible for recognizing and processing the "greetings-getmessage" function name.
+            When matched, creates a new <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object with <see cref="P:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings.IsGreetingMessage"/> set to true.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.GreetingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "greetings-getmessage" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.GreetingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched greeting function by creating and returning a new <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object.
+            The <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object is prepared with <see cref="P:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings.IsGreetingMessage"/> set to true.
+            Additional properties (Message, Question, AiResponse) are expected to be filled later by the calling code.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types (not modified by this handler).</param>
+            <param name="greeting">Output parameter containing the newly created <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object.</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.Interfaces.IUpdateVisualClassifierHandler">
+            <summary>
+            Defines a handler in the Chain of Responsibility pattern used for classifying
+            update-visual widget requests based on the function name returned by the AI model.
+            Each implementation is responsible for recognizing a specific function name
+            (e.g., "updatewidgetplugin-updatetitlesettings") and adding the corresponding
+            setting type to the list, or handling the special "greetings-getmessage" case.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.Interfaces.IUpdateVisualClassifierHandler.Next">
+            <summary>
+            Gets or sets the next handler in the chain.
+            Allows building a linked chain of responsibility at runtime.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.Interfaces.IUpdateVisualClassifierHandler.Handle(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Attempts to handle the specified function name.
+            If this handler recognizes the function name, it processes it (adds the appropriate Type
+            to the list or creates a Greetings object) and returns true.
+            If it does not recognize the name, it passes the request to the next handler in the chain.
+            </summary>
+            <param name="functionName">The function name returned by the AI (e.g., "updatewidgetplugin-updatetitlesettings").</param>
+            <param name="types">The list of setting types identified so far. Handlers add their corresponding Type here.</param>
+            <param name="greeting">Outputs a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object if the function name is "greetings-getmessage"; otherwise null.</param>
+            <returns>true if the function name was handled by this handler or any subsequent handler; false if no handler recognized it.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.LabelSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updatelabelsettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.LabelSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.LabelSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updatelabelsettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.LabelSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.LabelSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.LegendSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updatelegendsettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.LegendSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.LegendSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updatelegendsettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.LegendSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.LegendSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.MiscellaneousSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updatemiscellaneoussettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.MiscellaneousSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.MiscellaneousSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updatemiscellaneoussettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.MiscellaneousSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.MiscellaneousSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.TitleSettingsHandler">
+            <summary>
+            Handler responsible for recognizing and processing the "updatewidgetplugin-updatetitlesettings" function name.
+            When matched, adds <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.TitleSettings"/> to the list of identified setting types.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.TitleSettingsHandler.CanHandle(System.String)">
+            <summary>
+            Determines if this handler can process the given function name.
+            Returns true if the function name matches "updatewidgetplugin-updatetitlesettings" (case-insensitive).
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <returns>true if the function name matches; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.TitleSettingsHandler.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the matched function name by adding the <see cref="T:BoldBi.Ai.Core.Models.VisualUpdation.TitleSettings"/> type to the list.
+            Sets greeting to null since this is not a greeting request.
+            </summary>
+            <param name="functionName">The matched function name.</param>
+            <param name="types">The list of setting types to update.</param>
+            <param name="greeting">Output parameter set to null (not used for this handler).</param>
+            <returns>Always returns true to indicate successful processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase">
+            <summary>
+            Base class for all handlers in the Chain of Responsibility pattern used to classify
+            update-visual widget function calls returned by the AI model.
+            Provides default chaining behavior: checks if the current handler can process the request,
+            otherwise passes it to the next handler in the chain.
+            </summary>
+        </member>
+        <member name="P:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase.Next">
+            <summary>
+            Gets or sets the next handler in the chain.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase.Handle(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Attempts to handle the given function name.
+            If this handler can process it, calls <see cref="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)"/>.
+            Otherwise, forwards the call to the next handler in the chain.
+            </summary>
+            <param name="functionName">The function name returned by the AI.</param>
+            <param name="types">The list of setting types to populate.</param>
+            <param name="greeting">Outputs a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object if handled by a greeting handler; otherwise null.</param>
+            <returns>true if the function name was handled by this or a subsequent handler; false if no handler matched.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase.CanHandle(System.String)">
+            <summary>
+            Determines whether this handler is responsible for the given function name.
+            Must be implemented by derived classes.
+            </summary>
+            <param name="functionName">The function name to check.</param>
+            <returns>true if this handler can process the function name; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase.Process(System.String,System.Collections.Generic.List{System.Type},BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings@)">
+            <summary>
+            Processes the function name when <see cref="M:BoldBi.Ai.Base.UpdateVisualProcess.Handlers.UpdateVisualClassifierHandlerBase.CanHandle(System.String)"/> returns true.
+            Derived classes should add the appropriate Type to the list or create a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object.
+            </summary>
+            <param name="functionName">The function name being processed.</param>
+            <param name="types">The list of setting types to modify.</param>
+            <param name="greeting">Output parameter for a <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.Greetings"/> object (used only by the greeting handler).</param>
+            <returns>true to indicate successful processing.</returns>
+        </member>
         <member name="T:BoldBi.Ai.Base.UpdateVisualProcess.Steps.UpdateVisualBuildInputStep">
             <summary>
             Represents a step in the update visual process that builds input for textual responses.
@@ -7783,7 +8303,7 @@
             <param name="context">The kernel process context.</param>
             <param name="args">The arguments required for executing the process.</param>
             <returns>
-            A <see cref="T:Microsoft.SemanticKernel.TextContent"/> instance containing the AI-generated response
+            A <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.TextContent"/> instance containing the AI-generated response
             after processing the update request.
             </returns>
         </member>

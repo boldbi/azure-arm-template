@@ -1,7 +1,7 @@
 ﻿@{
     var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
 
-    var idPUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+    var idPUrl = await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp, Context);
 
     var userId = Context.User.GetUserId();
 
@@ -45,7 +45,7 @@
         <ul id="items-menu">
             <li class="mobile-hidden">
                 <a href="@redirectUrl" class="home-link text-decoration-none" style="background-color:transparent;" title=@GlobalAppSettings.SystemSettings.OrganizationName>
-                    <img alt="@T["Application Logo"]" id="application-logo" src="@GlobalAppSettings.SystemSettings.MainScreenLogo" />
+                    <img alt="@T["Application Logo"]" id="application-logo" src="@await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.MainScreenLogo, Context)" />
                 </a>
             </li>
             <li class="sf-nav-separator logo-separator mobile-hidden"></li>

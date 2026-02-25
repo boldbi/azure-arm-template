@@ -51,15 +51,6 @@
             </summary>
             <returns>An instance of <see cref="T:log4net.ILog"/> configured for on-premise logging.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.AiLogsManager.OnPremiseAiLogsConfigurator.CreateRollingFileAppender(System.String,System.String,log4net.Core.Level)">
-            <summary>
-            Creates a rolling file appender for logging.
-            </summary>
-            <param name="name">The name of the appender.</param>
-            <param name="filePath">The file path where logs will be stored.</param>
-            <param name="logLevel">The log level for filtering messages.</param>
-            <returns>A configured instance of <see cref="T:log4net.Appender.RollingFileAppender"/>.</returns>
-        </member>
         <member name="T:BoldBi.Ai.Service.AiServiceConfigManager.GeneralAiServiceConfigurator">
             <summary>
             Provides configuration and initialization methods for AI-related services.
@@ -104,6 +95,16 @@
             </summary>
             <param name="configuration">The configuration instance containing the application settings.</param>
         </member>
+        <member name="M:BoldBi.Ai.Service.AiServiceConfigManager.OnPremiseAiServiceConfigurator.GetSubApps(System.Uri)">
+            <summary>
+            Asynchronously extracts sub-application path segments from the given URI.
+            </summary>
+            <param name="uri">The URI to process. If null or without segments, an empty list is returned.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous operation.
+            The result contains a list of sub-application segments in lowercase.
+            </returns>
+        </member>
         <member name="T:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication">
             <summary>
             An authorization filter that validates API requests based on a license key.
@@ -118,6 +119,7 @@
             <summary>
             Asynchronously checks if the request contains a valid license key.
             </summary>
+            <param name="context">The authorization filter context for the current request.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.Authentication.AILicenseKeyAuthentication.IsAllowedAPIKey(System.String)">
             <summary>
@@ -157,6 +159,22 @@
             This method checks if the AI connection is valid and prevents execution if the validation fails.
             </summary>
             <param name="context">The context for the action being executed.</param>
+        </member>
+        <member name="T:BoldBi.Ai.Service.Authentication.OnPremiseInitializationServiceFilter">
+            <summary>
+            Service-based action filter that performs on-premise initialization.
+            Register this filter in DI and use with `[TypeFilter(typeof(OnPremiseInitializationServiceFilter))]`.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.OnPremiseInitializationServiceFilter.#ctor">
+            <summary>
+            Service-based action filter that performs on-premise initialization.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Authentication.OnPremiseInitializationServiceFilter.OnActionExecutionAsync(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext,Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate)">
+            <summary>
+            Executes initialization logic before the action runs when compiled for on-premise.
+            </summary>
         </member>
         <member name="T:BoldBi.Ai.Service.Authentication.RateLimitHelper">
             <summary>
@@ -294,28 +312,8 @@
             Downloads a blob to a stream.
             </summary>
             <param name="sourceBlobName">The name of the source blob.</param>
-            <returns>A <see cref="T:BoldBi.Ai.Service.AzureBlobStorage.Status"/> object indicating the success or failure of the operation.</returns>
+            <returns>A <see cref="T:BoldBi.Ai.Core.Contracts.StorageHelper.Status"/> object indicating the success or failure of the operation.</returns>
             <exception cref="T:System.ArgumentException">Thrown if <paramref name="sourceBlobName"/> is null or empty.</exception>
-        </member>
-        <member name="T:BoldBi.Ai.Service.AzureBlobStorage.Status">
-            <summary>
-            Represents the status of an operation.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Service.AzureBlobStorage.Status.Message">
-            <summary>
-            Gets or sets the status message.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Service.AzureBlobStorage.Status.Success">
-            <summary>
-            Gets or sets a value indicating whether the operation was successful.
-            </summary>
-        </member>
-        <member name="P:BoldBi.Ai.Service.AzureBlobStorage.Status.Value">
-            <summary>
-            Gets or sets the value returned from the operation.
-            </summary>
         </member>
         <member name="T:BoldBi.Ai.Service.AzureBlobStorage.GlobalAppSettings">
             <summary>
@@ -347,11 +345,12 @@
             Gets or sets the proxy settings.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.AzureBlobStorage.GlobalAppSettings.InitializeAppSettingKeys(Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:BoldBi.Ai.Service.AzureBlobStorage.GlobalAppSettings.InitializeAppSettingKeys(Microsoft.Extensions.Configuration.IConfiguration,BoldBi.Ai.Base.FileStorage.AzureBlobResponse)">
             <summary>
             Initializes application settings from the configuration.
             </summary>
             <param name="configuration">The application configuration.</param>
+            <param name="azureBlobResponse">The application blob response.</param>
             <exception cref="T:System.ArgumentNullException">Thrown if configuration is null.</exception>
         </member>
         <member name="M:BoldBi.Ai.Service.AzureBlobStorage.GlobalAppSettings.GetAzureBlobStorage">
@@ -372,40 +371,136 @@
             <returns>A formatted connection string.</returns>
             <exception cref="T:System.ArgumentException">Thrown if account name or access key is null or empty.</exception>
         </member>
+        <member name="T:BoldBi.Ai.Service.BoldServicesEnvironmentVariables">
+            <summary>
+            Defines the environment variable names used by Bold services for hosting and storage configuration.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.HostingEnvironment">
+            <summary>
+            The environment variable name that specifies the hosting environment.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.StorageType">
+            <summary>
+            The environment variable name that specifies the resource storage provider type.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.AmazonRegion">
+            <summary>
+            The environment variable name for the AWS region.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.AmazonBucketName">
+            <summary>
+            The environment variable name for the Amazon S3 bucket name used by Bold services.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.AmazonAccessKeyId">
+            <summary>
+            The environment variable name for the AWS access key ID.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.AmazonAccessKeySecret">
+            <summary>
+            The environment variable name for the AWS secret access key.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.AmazonRootFolderName">
+            <summary>
+            The environment variable name for the root folder (prefix) within the Amazon S3 bucket.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.OCIAccessKey">
+            <summary>
+            The environment variable name for the OCI access key.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.OCISecretKey">
+            <summary>
+            The environment variable name for the OCI secret key.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.OCIRegion">
+            <summary>
+            The environment variable name for the OCI region.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.OCIBucketName">
+            <summary>
+            The environment variable name for the OCI Object Storage bucket name used by Bold services.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.OCIRootFolderName">
+            <summary>
+            The environment variable name for the root folder (prefix) within the OCI bucket.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.BoldServicesEnvironmentVariables.OCINameSpace">
+            <summary>
+            The environment variable name for the OCI Object Storage namespace.
+            </summary>
+        </member>
         <member name="T:BoldBi.Ai.Service.ConfigManager.FileConfigReader">
             <summary>
             Handles configuration initialization from either Azure Blob Storage or a local file.
             </summary>
         </member>
-        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAsync(Microsoft.Extensions.Configuration.ConfigurationManager)">
+        <member name="F:BoldBi.Ai.Service.ConfigManager.FileConfigReader._ociCredentials">
+            <summary>
+            Store OCI storage credentials.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.ConfigManager.FileConfigReader._amazonS3Credentials">
+            <summary>
+            Store Amazon S3 storage credentials.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.ConfigManager.FileConfigReader._azureBlobCredentials">
+            <summary>
+            Store Amazon S3 storage credentials.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.ConfigManager.FileConfigReader._storageType">
+            <summary>
+            Store the storage type.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAsync(Microsoft.Extensions.Configuration.ConfigurationManager,System.Boolean)">
             <summary>
             Initializes the configuration settings.
             </summary>
             <param name="configuration">The configuration manager instance.</param>
+            <param name="isFromSessionCreation">To determine its came from session creation. </param>
             <returns>A task representing the asynchronous operation.</returns>
         </member>
-        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeFromAzureBlobAsync(Microsoft.Extensions.Configuration.ConfigurationManager)">
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetStorage(Microsoft.Extensions.Configuration.ConfigurationManager,System.Boolean)">
+            <summary>
+            Retrieves storage configuration details from the ID API service and updates
+            </summary>
+            <param name="configuration">Provides access to application configuration values used to determine. </param>
+            <param name="isFromSessionCreation">To determine its came from session creation. </param>
+            <returns>
+            A task that represents the asynchronous operation.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetConfigData(Microsoft.Extensions.Configuration.ConfigurationManager)">
+            <summary>
+            Retrieves config json details from the ID API service.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeFromAzureBlobAsync(Microsoft.Extensions.Configuration.ConfigurationManager,BoldBi.Ai.Base.FileStorage.AzureBlobResponse)">
             <summary>
             Initializes the configuration from Azure Blob Storage.
             </summary>
             <param name="configuration">The configuration manager instance.</param>
+            <param name="_azureBlobCredentials">Connection string details.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeFromLocalFile(Microsoft.Extensions.Configuration.ConfigurationManager)">
             <summary>
             Initializes the configuration from a local file.
             </summary>
             <param name="configuration">The configuration manager instance.</param>
-        </member>
-        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.EnsureJsonFileExists(System.String,System.String,System.String)">
-            <summary>
-            Verifies that a JSON configuration file exists at the specified path and logs the result.
-            </summary>
-            <param name="path">The absolute file path to check.</param>
-            <param name="fileName">The display name of the file (used for logging).</param>
-            <param name="methodName">The method name used for contextual logging.</param>
-            <returns>
-            True if the file exists (and a loading message is logged); otherwise, false and an error is logged.
-            </returns>
         </member>
         <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.LogBlobDownloadStatus(System.Boolean,System.String,System.String)">
             <summary>
@@ -424,6 +519,22 @@
             <param name="localServiceUrls">The local service urls.</param>
         </member>
         <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAzureAppConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Initializes application configuration.
+            </summary>
+            <param name="configuration">The configuration manager instance.</param>
+            <param name="appConfiguration">The application configuration.</param>
+            <param name="localServiceUrls">The local service urls.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeAmazonS3Configuration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Initializes application configuration.
+            </summary>
+            <param name="configuration">The configuration manager instance.</param>
+            <param name="appConfiguration">The application configuration.</param>
+            <param name="localServiceUrls">The local service urls.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.InitializeOciConfiguration(Microsoft.Extensions.Configuration.ConfigurationManager,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
             <summary>
             Initializes application configuration.
             </summary>
@@ -450,11 +561,64 @@
             </summary>
             <param name="configuration">The application configuration manager instance.</param>
         </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetOciPrivateKey(Microsoft.Extensions.Configuration.ConfigurationManager)">
+            <summary>
+            Downloads the private key file (privatekeys.dat) from OCI Object Storage and returns its content as a string.
+            </summary>
+            <param name="configuration">The application configuration manager instance.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetAmazonS3PrivateKey(Microsoft.Extensions.Configuration.ConfigurationManager)">
+            <summary>
+            Downloads the private key file (privatekeys.dat) from Amazon S3 and returns its content as a string.
+            </summary>
+            <param name="configuration">The application configuration manager instance.</param>
+            <returns>Private key content as a string, or null if download fails.</returns>
+        </member>
         <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.UpdateInternalInformation(Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Updates internal information using the provided application configuration.
             </summary>
             <param name="appConfiguration">An instance of <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/> that provides application settings.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.UpdateConfigDetails(System.String)">
+            <summary>
+            Retrieves the details of an AI tenant from the provided JSON input and updates the in-memory configuration.
+            </summary>
+            <param name="jsonInput">The JSON string containing the configuration details to apply.</param>
+            <returns>A task that resolves to an <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiApiResponse"/> indicating success or failure.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.UpdateStorageCredentials(System.String)">
+            <summary>
+            Updates storage details based on the provided API payload. Supports FileStorage and OCIObjectStorage.
+            </summary>
+            <param name="jsonInput">API response JSON containing data.storage_type and storage credentials.</param>
+            <returns>Status-only response.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetOciStorage">
+            <summary>
+            Returns the current Oracle Cloud Infrastructure (OCI) Storage configuration.
+            If credentials were previously updated via UpdateOCiStorageDetails(), 
+            returns those values. Otherwise returns an object with empty/default values.
+            </summary>
+            <returns>
+            An <see cref="T:BoldBi.Ai.Base.FileStorage.OCIResponse"/> containing the OCI storage configuration.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetAmazonS3Storage">
+            <summary>
+            Builds an Amazon S3 storage configuration by reading required values from global variable.
+            </summary>
+            <returns>
+            An <see cref="T:BoldBi.Ai.Base.FileStorage.AmazonS3Response"/> populated from environment variables.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.ConfigManager.FileConfigReader.GetAzureBlobStorage">
+            <summary>
+            Builds an Azure blob storage configuration by reading required values from global variable.
+            </summary>
+            <returns>
+            An <see cref="T:BoldBi.Ai.Base.FileStorage.AmazonS3Response"/> populated from environment variables.
+            </returns>
         </member>
         <member name="T:BoldBi.Ai.Service.Controllers.AiAssistanceController">
             <summary>
@@ -581,6 +745,15 @@
             </summary>
             <param name="jsonInput">The query had data sources input in JSON format.</param>
             <returns>An asynchronous task containing the AI response.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.AiAssistanceController.GenerateSynonyms(System.Object)">
+            <summary>
+            HTTP POST endpoint that triggers synonyms generation using the provided JSON payload.
+            </summary>
+            <param name="jsonInput">The request body containing the input required for synonyms generation.</param>
+            <returns>
+            An object representing the AI-generated synonyms response, or an error payload if processing fails.
+            </returns>
         </member>
         <member name="T:BoldBi.Ai.Service.Controllers.AiPricingLoggerController">
             <summary>
@@ -739,6 +912,18 @@
             </summary>
             <param name="license">The updated license information in JSON format.</param>
             <returns>An asynchronous task containing a result that indicates the success or failure of the operation.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Service.Controllers.ServerController">
+            <summary>
+            Controller for server-level configuration endpoints.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.Controllers.ServerController.UpdateConfig(System.Object)">
+            <summary>
+            Updates AI Service configuration using the supplied JSON payload.
+            </summary>
+            <param name="jsonInput">Config data in JSON format for update.</param>
+            <returns>An <see cref="T:BoldBi.Ai.Core.Models.AIResponseBuilder.AiApiResponse"/> indicating success or failure.</returns>
         </member>
         <member name="T:BoldBi.Ai.Service.Controllers.TenantController">
             <summary>
@@ -952,6 +1137,31 @@
             <param name="jsonInput">The input object containing the chat query in JSON format.</param>
             <returns>The response as an object.</returns>
         </member>
+        <member name="T:BoldBi.Ai.Service.DashboardConstants">
+            <summary>
+            Provides constant folder and service names used throughout the dashboard application.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.DashboardConstants.AppData">
+            <summary>
+            The root application data folder name.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.DashboardConstants.Bi">
+            <summary>
+            The BI segment.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.DashboardConstants.DataService">
+            <summary>
+            The data service segment/folder name.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.DashboardConstants.DesignTimeCache">
+            <summary>
+            The design-time cache folder name.
+            </summary>
+        </member>
         <member name="T:BoldBi.Ai.Service.ExceptionMiddleware">
             <summary>
             Middleware to handle exceptions globally and log errors.
@@ -969,6 +1179,254 @@
             </summary>
             <param name="context">The HTTP context of the current request.</param>
             <returns>A task that represents the completion of request processing.</returns>
+        </member>
+        <member name="T:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper">
+            <summary>
+            Provides Amazon S3 file storage operations such as upload, download, delete, and metadata queries.
+            Wraps an <see cref="T:Amazon.S3.IAmazonS3"/> client and implements <see cref="T:BoldBi.Ai.Core.Contracts.StorageHelper.IStorageHelper"/>.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.#ctor(BoldBi.Ai.Base.FileStorage.AmazonS3Response)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper"/> class using the given configuration.
+            </summary>
+            <param name="configuration">The S3 configuration (credentials, bucket, region, root folder).</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.#ctor(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper"/> class with explicit parameters.
+            </summary>
+            <param name="accessKey">AWS access key ID.</param>
+            <param name="accessKeySecret">AWS secret access key.</param>
+            <param name="bucketName">S3 bucket name.</param>
+            <param name="regionEndpoint">AWS region system name (e.g., "us-east-1").</param>
+            <param name="rootFolder">Logical root folder (prefix) inside the bucket.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.ValidateConnectionAsync">
+            <summary>
+            Validates the S3 connection by querying the bucket location.
+            </summary>
+            <returns>True if the bucket is reachable (HTTP 200); otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.GetAllFilesAsync(System.String)">
+            <summary>
+            Lists all file keys under the specified directory (prefix).
+            </summary>
+            <param name="directoryName">The directory/prefix to search (uses forward slashes).</param>
+            <returns>A list of object keys found under the prefix.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.GetFileUrl(System.String)">
+            <summary>
+            Gets the canonical key for an S3 object if it exists.
+            </summary>
+            <param name="filePath">The object key (path) to check.</param>
+            <returns>The object key if it exists; otherwise null.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.UploadFromStreamAsync(System.IO.Stream,System.String,System.String)">
+            <summary>
+            Uploads content from a stream to the specified S3 object key.
+            </summary>
+            <param name="stream">The source stream.</param>
+            <param name="filePath">The destination object key.</param>
+            <param name="modifiedDate">Optional last-modified metadata value.</param>
+            <returns>True if upload succeeds; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.UploadTextAsync(System.String,System.String,System.String)">
+            <summary>
+            Uploads the provided text as an object to S3 at the specified key.
+            </summary>
+            <param name="text">The content to upload.</param>
+            <param name="filePath">The destination object key.</param>
+            <param name="modifiedDate">Optional last-modified metadata value.</param>
+            <returns>True if upload succeeds; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.DownloadToStreamAsync(System.String)">
+            <summary>
+            Downloads an S3 object into a memory stream.
+            </summary>
+            <param name="filePath">The object key to download.</param>
+            <returns>A stream positioned at the beginning with the downloaded content.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.DeleteFileAsync(System.String)">
+            <summary>
+            Deletes an S3 object at the specified key.
+            </summary>
+            <param name="filePath">The object key to delete.</param>
+            <returns>True if delete succeeds; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.DownloadToTextAsync(System.String)">
+            <summary>
+            Downloads an S3 object and returns its contents as a UTF-8 string.
+            </summary>
+            <param name="filePath">The object key to download.</param>
+            <returns>The object content as text, or null if the operation fails.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.FileExistsAsync(System.String)">
+            <summary>
+            Determines whether an S3 object exists at the specified key.
+            </summary>
+            <param name="filePath">The object key to check.</param>
+            <returns>True if the object exists; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.UpdatePathIfRequired(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Prepends the configured root, app_data, bi, and optional segments (dataservice, designtimecache) to a relative file path.
+            </summary>
+            <param name="filePath">The relative file path.</param>
+            <param name="ignoreDesignTimeCache">If true, omits the design-time cache folder from the path.</param>
+            <param name="ignoreDataService">If true, omits the dataservice folder from the path.</param>
+            <returns>The updated file path with required prefixes.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.GetLastModifiedTimeAsync(System.String)">
+            <summary>
+            Gets the last modified date of the most recently changed object under a prefix.
+            </summary>
+            <param name="filePath">The object key or prefix to query.</param>
+            <returns>The most recent <see cref="T:System.DateTime"/> for matching objects, or <see cref="F:System.DateTime.MinValue"/> if not found.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.CreateDirectory(System.String)">
+            <summary>
+            Creates a directory placeholder if needed. For S3, returns true (folders are virtual).
+            </summary>
+            <param name="directoryName">The directory name or prefix.</param>
+            <returns>Always true unless an exception occurs.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.AmazonS3Helper.Dispose">
+            <summary>
+            Releases the underlying <see cref="T:Amazon.S3.IAmazonS3"/> client and suppresses finalization.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Service.FileStorageHelper.OCIHelper">
+            <summary>
+            Provides Oracle Cloud Infrastructure (OCI) Object Storage operations using the S3-compatible API.
+            Implements <see cref="T:BoldBi.Ai.Core.Contracts.StorageHelper.IStorageHelper"/> to perform common file operations such as upload, download, list, and delete.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.#ctor(BoldBi.Ai.Base.FileStorage.OCIResponse)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BoldBi.Ai.Service.FileStorageHelper.OCIHelper"/> class using the provided OCI configuration.
+            </summary>
+            <param name="configuration">The OCI configuration containing namespace, region, credentials, and bucket details.</param>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.GetAllFilesAsync(System.String)">
+            <summary>
+            Lists all file keys under a specified directory (prefix).
+            </summary>
+            <param name="directoryName">The directory/prefix to list. If null or empty, lists the bucket root.</param>
+            <returns>A list of object keys found under the given prefix.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.UploadFromStreamAsync(System.IO.Stream,System.String,System.String)">
+            <summary>
+            Uploads content from a stream to the specified object key.
+            </summary>
+            <param name="stream">The source stream to upload.</param>
+            <param name="filePath">The object key (path) to write to.</param>
+            <param name="modifiedDate">Optional last-modified metadata value (not used by OCI helper).</param>
+            <returns>True if the upload succeeds; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.UploadTextAsync(System.String,System.String,System.String)">
+            <summary>
+            Uploads the provided text to the specified object key.
+            </summary>
+            <param name="text">The text content to upload.</param>
+            <param name="filePath">The object key (path) to write to.</param>
+            <param name="modifiedDate">Optional last-modified metadata value (not used by OCI helper).</param>
+            <returns>True if the upload succeeds; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.GetFileUrl(System.String)">
+            <summary>
+            Gets the public URL (object address) for a given object key.
+            </summary>
+            <param name="fileName">The object key (file name) to address.</param>
+            <returns>A URL string pointing to the object in OCI Object Storage.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.DownloadToStreamAsync(System.String)">
+            <summary>
+            Downloads an object into a stream.
+            </summary>
+            <param name="filePath">The object key to download.</param>
+            <returns>A readable stream of the object content.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.DownloadToTextAsync(System.String)">
+            <summary>
+            Downloads an object and returns its contents as a UTF-8 string.
+            </summary>
+            <param name="filePath">The object key to download.</param>
+            <returns>The object content as text.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.DeleteFileAsync(System.String)">
+            <summary>
+            Deletes an object from the bucket.
+            </summary>
+            <param name="filePath">The object key to delete.</param>
+            <returns>True if the delete operation returns HTTP 204 (NoContent); otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.FileExistsAsync(System.String)">
+            <summary>
+            Checks whether an object exists at the specified key.
+            </summary>
+            <param name="filePath">The object key to check.</param>
+            <returns>True if the object exists; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.UpdatePathIfRequired(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Updates a path if required. For OCI, this is a pass-through unless additional logic is needed.
+            </summary>
+            <param name="filePath">The input file path or key.</param>
+            <param name="ignoreDesignTimeCache">Ignored in OCI helper.</param>
+            <param name="ignoreDataService">Ignored in OCI helper.</param>
+            <returns>The unchanged file path.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.GetLastModifiedTimeAsync(System.String)">
+            <summary>
+            Gets the last modified date/time for the specified object.
+            </summary>
+            <param name="filePath">The object key to inspect.</param>
+            <returns>The last modified <see cref="T:System.DateTime"/> value.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.CreateDirectory(System.String)">
+            <summary>
+            Creates a directory placeholder. For OCI (S3-compatible), creates a zero-byte object ending with '/'.
+            </summary>
+            <param name="directoryName">The directory name to create.</param>
+            <returns>True if the creation succeeds; otherwise false.</returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.FileStorageHelper.OCIHelper.Dispose">
+            <summary>
+            Releases resources associated with the underlying S3-compatible client.
+            </summary>
+        </member>
+        <member name="T:BoldBi.Ai.Service.LocalServiceUrlHelper">
+            <summary>
+            Returns the effective Local Service URL or, if none is set via environment,
+            the path to the local_service_url.json under a given base folder.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.LocalServiceUrlHelper.IDUrlEnvKey">
+            <summary>
+            Environment variable name for the base Identity (IdP) web service URL.
+            </summary>
+        </member>
+        <member name="F:BoldBi.Ai.Service.LocalServiceUrlHelper.IDApiUrlEnvKey">
+            <summary>
+            Environment variable name for the Identity API base URL.
+            </summary>
+        </member>
+        <member name="M:BoldBi.Ai.Service.LocalServiceUrlHelper.GetLocalServiceUrlPath">
+            <summary>
+            Determines whether both IdP environment variables are present and non-empty.
+            </summary>
+            <returns>
+            True if both <see cref="F:BoldBi.Ai.Service.LocalServiceUrlHelper.IDUrlEnvKey"/> and <see cref="F:BoldBi.Ai.Service.LocalServiceUrlHelper.IDApiUrlEnvKey"/> are set (non-whitespace);
+            otherwise, false.
+            </returns>
+        </member>
+        <member name="M:BoldBi.Ai.Service.LocalServiceUrlHelper.GetEnvironmentLocalServiceUrlsJson">
+            <summary>
+            Builds the LocalServiceUrls JSON string from environment variables (Idp and IdpApi).
+            Assumes both environment variables are present. Use <see cref="M:BoldBi.Ai.Service.LocalServiceUrlHelper.GetLocalServiceUrlPath"/> to check first.
+            </summary>
+            <returns>A JSON string representing { "Idp": "...", "IdpApi": "..." }.</returns>
         </member>
     </members>
 </doc>

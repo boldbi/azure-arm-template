@@ -1,7 +1,7 @@
 ﻿@{
     var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
 
-    var idPUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp;
+    var idPUrl = await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp, Context);
 
     var userId = Guid.Parse(Context.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
 

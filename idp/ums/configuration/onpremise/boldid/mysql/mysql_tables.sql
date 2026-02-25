@@ -79,11 +79,13 @@ CREATE TABLE {database_name}.BOLDTC_SqlElasticPool (
 CREATE TABLE {database_name}.BOLDTC_Tenant (
 	Id char(38) NOT NULL,
 	DNS nvarchar(255) NOT NULL,
+	ProxyFullPathUrl nvarchar(255) NULL,
 	Subdomain nvarchar(255) NULL,
 	TenantIdentifier nvarchar(255) NULL,
 	TenantName nvarchar(255)NOT NULL,
 	CustomDomain nvarchar(255) NULL,
 	UseSiteIdentifier tinyint NOT NULL DEFAULT 1,
+	PreventProxyDomainAutoUpdate tinyint(1) NOT NULL DEFAULT 0,
 	UserId char(38) NOT NULL,
 	CreatedDate datetime NOT NULL,
 	ModifiedDate datetime NOT NULL,

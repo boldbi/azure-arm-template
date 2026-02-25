@@ -4,12 +4,12 @@
     var baseUrl = CloudAppConfig.InternalAppBIUrl + "/" + CloudAppConfig.TenantIdentifierPrefix + "/";
     var boldBIPath = "/bi";
     var boldReportPath = "/reporting";
-    var baseUri = new Uri(GlobalAppSettings.SystemSettings.BaseUrl);
+    var baseUri = string.IsNullOrWhiteSpace(ViewBag.TenantDomain) ? new Uri(GlobalAppSettings.SystemSettings.BaseUrl) : new Uri(ViewBag.TenantDomain);
     var url = baseUri.Authority;
     var storageType = ViewBag.StorageType != null ? ViewBag.StorageType : 0;
     var siteDomain = url;
     var siteProtocol = baseUri.Scheme;
-    var biUrl = !string.IsNullOrWhiteSpace(CloudAppConfig.InternalAppBIUrl) ? new Uri(CloudAppConfig.InternalAppBIUrl) : new Uri(baseUri + "bi");
+    var biUrl = !string.IsNullOrWhiteSpace(CloudAppConfig.InternalAppBIUrl) ? new Uri(await GlobalAppSettings.GetClientServiceUrl(CloudAppConfig.InternalAppBIUrl, Context)) : new Uri(baseUri + "bi");
     var reportUrl = !string.IsNullOrWhiteSpace(CloudAppConfig.InternalAppReportUrl) ? new Uri(CloudAppConfig.InternalAppReportUrl) : new Uri(baseUri + "reporting");
     var biScheme = baseUri.Scheme;
     var reportScheme = baseUri.Scheme;
@@ -35,7 +35,11 @@
         baseUrl = CloudAppConfig.InternalAppBIUrl + "/" + CloudAppConfig.TenantIdentifierPrefix + "/";
         siteDomain = biUrl.Authority;
         siteProtocol = biUrl.Scheme;
-        boldBIPath = biUrl != null ? biUrl.LocalPath.ToString() : "/bi";
+        var basePath = biUrl != null
+                                ? (await GlobalAppSettings.GetSubApps(Context)).SubAppUrl?.TrimEnd('/')
+                                : string.Empty;
+
+        boldBIPath = $"{basePath}/bi";
         siteDefaultText = @boldBIPath + "/" + @CloudAppConfig.TenantIdentifierPrefix + "/";
     }
     else if (!ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)
@@ -293,6 +297,14 @@
                                                 <input type="text" id="input-domain" name="domainname" class="" placeholder="@T["Domain"]" value="@siteDomain" />
                                             </div>
                                             <span class="startup-validation validation-txt-errors" id="domain-validation-error"></span>
+                                            <div class="col-lg-12 col-sm-12 col-12 float-start col-md-12 no-padding proxy-url-auto-update">
+                                                @Html.CheckBox("prevent-proxy-url-auto-update", false, new { @class = "material-checkbox  prevent-proxy-url-auto-update" })
+                                                @Html.Hidden("prevent-proxy-url-auto-update")
+                                                <label for="prevent-proxy-url-auto-update" class="">@T["Lock site URL and prevent automatic updates from reverse proxy requests"]</label>
+                                                <div id="prevent-proxy-url-auto-update-description" class="info-content check-box-info">
+                                                    @T["When enabled, the proxy URL configured above becomes the fixed source of truth. Site domains will change only when updated manually."]
+                                                </div>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -311,7 +323,7 @@
                                                 <div class="url-part">
                                                     <span>@T["i.e "]</span>
                                                     <span class="site-url no-padding" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-html="true" data-bs-placement="top" data-bs-container="body" data-bs-content="">
-                                                        <span class="site-domain">@GlobalAppSettings.SystemSettings.BaseUrl</span>
+                                                        <span class="site-domain">@await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.BaseUrl, Context)</span>
                                                         <span class="site-default-text text-content">@siteDefaultText</span>
                                                         <span class="site-id-name">@ViewBag.DefaultTenantIdentifier</span>
                                                     </span>

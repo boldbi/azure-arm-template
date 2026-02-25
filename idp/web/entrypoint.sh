@@ -4,7 +4,6 @@ set -euo pipefail
 
 # ---------- Constants ----------
 app_data_location="/application/app_data"
-puppeteer_location="$app_data_location/bi/dataservice/puppeteer"
 product_json_path="$app_data_location/configuration/product.json"
 config_xml_path="$app_data_location/configuration/config.xml"
 configuration_path="$app_data_location/configuration"
@@ -76,30 +75,7 @@ elif [[ "${DEPLOY_MODE:-}" == "docker_multi_container" ]]; then
 EOF
 )
 
-elif [ "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" == "k8s" ]; then
-    if [ "$SUB_APP" = "true" ] && [ -n "$sub_path" ]; then
-     json_content=$(cat <<EOF
-{
-  "Idp": "http://id-web-service:6000$sub_path",
-  "IdpApi": "http://id-api-service:6001$sub_path/api",
-  "Ums": "http://id-ums-service:6002$sub_path/ums",
-  "Bi": "http://bi-web-service:6004$sub_path/bi",
-  "BiApi": "http://bi-api-service:6005$sub_path/bi/api",
-  "BiJob": "http://bi-jobs-service:6006$sub_path/bi/jobs",
-  "BiDesigner": "http://bi-dataservice-service:6007$sub_path/bi/designer",
-  "BiDesignerHelper": "http://bi-dataservice-service:6007$sub_path/bi/designer/helper",
-  "Etl": "http://bold-etl-service:6009$sub_path",
-  "EtlBlazor": "http://bold-etl-service:6009$sub_path/framework/blazor.server.js",
-  "Ai": "http://bold-ai-service:6010$sub_path/aiservice",
-  "Reports": "http://reports-web-service:6550$sub_path/reporting",
-  "ReportsApi": "http://reports-api-service:6551$sub_path/reporting/api",
-  "ReportsJob": "http://reports-jobs-service:6552$sub_path/reporting/jobs",
-  "ReportsService": "http://reports-reportservice-service:6553$sub_path/reporting/reportservice",
-  "ReportsViewer": "http://reports-viewer-service:6554$sub_path/reporting/viewer"
-}
-EOF
-)
- else
+elif [[ "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" == "k8s" ]]; then
       # Original URLs without sub-path
       json_content=$(cat <<EOF
 {
@@ -122,29 +98,26 @@ EOF
 }
 EOF
 )
-    fi
+
 else
   log "No matching DEPLOY_MODE or BOLD_SERVICES_HOSTING_ENVIRONMENT value for JSON content."
 fi
 
-# ---------- Conditionally Write JSON ----------
-if [[ -n "${DEPLOY_MODE:-}" || -n "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" ]]; then
-  log "Writing service URLs to $local_service_json_file"
-  echo "$json_content" > "$local_service_json_file" || fatal "Failed to write JSON content."
-  if command -v jq >/dev/null 2>&1; then
-    jq empty "$local_service_json_file" && log "JSON is valid." || fatal "Invalid JSON format!"
+if [[ ! -f "$local_service_json_file" ]]; then
+  # ---------- Conditionally Write JSON ----------
+  if [[ -n "${DEPLOY_MODE:-}" || -n "${BOLD_SERVICES_HOSTING_ENVIRONMENT:-}" ]]; then
+    log "Writing service URLs to $local_service_json_file"
+    echo "$json_content" > "$local_service_json_file" || fatal "Failed to write JSON content."
+    if command -v jq >/dev/null 2>&1; then
+      jq empty "$local_service_json_file" && log "JSON is valid." || fatal "Invalid JSON format!"
+    else
+      log "jq not available. Skipping validation."
+    fi
   else
-    log "jq not available. Skipping validation."
+    log "Deployment environment is not defined. Set DEPLOY_MODE or BOLD_SERVICES_HOSTING_ENVIRONMENT. Skipping JSON creation."
   fi
-else
-  log "Deployment environment is not defined. Set DEPLOY_MODE or BOLD_SERVICES_HOSTING_ENVIRONMENT. Skipping JSON creation."
 fi
 
-# ---------- Run Installation Utility ----------
-log "Running install utility..."
-dotnet appdatafiles/installutils/installutils.dll
-
-# ---------- Prepare Upgrade Logs ----------
 upgrade_log() {
   log "Preparing upgrade logs..."
   if [ -f "$config_xml_path" ]; then
@@ -171,21 +144,16 @@ upgrade_log() {
   fi
 }
 
-if [ "${upgrade_log_enabled:-false}" = true ]; then
-  upgrade_log
-fi
 
-# ---------- Puppeteer Installation ----------
-log "Checking Puppeteer installation..."
-if [ ! -d "$puppeteer_location/Linux-901912" ]; then
-  mkdir -p "$puppeteer_location"
-  log "Installing Puppeteer..."
-  dotnet "/application/utilities/adminutils/Syncfusion.Server.Commands.Utility.dll" "installpuppeteer" -path "$puppeteer_location"
-fi
-
-if [ -d "$puppeteer_location/Linux-901912" ]; then
-  [ -f "$app_data_location/bi/dataservice/phantomjs" ] && rm -rf "$app_data_location/bi/dataservice/phantomjs"
-  log "Old PhantomJS binary removed."
+if [[ ${BOLD_SERVICES_PV_USED:-} == false ]]; then
+  cp /application/idp/web/appdatafiles/installutils/app_data/configuration/product.json $product_json_path
+  sed -i "s|http://localhost:5000|${APP_BASE_URL}|g" $product_json_path
+else
+  log "Running install utility..."
+  dotnet appdatafiles/installutils/installutils.dll
+  if [ "${upgrade_log_enabled:-false}" = true ]; then
+    upgrade_log
+  fi
 fi
 
 # ---------- Start ID-Web Service ----------

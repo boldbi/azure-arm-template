@@ -25,15 +25,6 @@ function ValidateConfigurationMode() {
             hideDataStore();
         }
 
-        $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-        if (!IsBiPrefixSchema) {
-            $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-        }
-
-        if (IsReportsPrefixSchema && !isBoldBI) {
-            $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-        }
-
         var obj = document.getElementById("database-type");
         var dropDownList = obj.ej2_instances[0];
         var itemsList = obj.ej2_instances[0].list.querySelectorAll('.e-list-item');
@@ -60,21 +51,6 @@ function ValidateConfigurationMode() {
         prefillDbNames();
         if (!isBoldBI) {
             hideDataStore();
-        }
-
-        $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-        if (!IsBiPrefixSchema) {
-            $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-        }
-
-        if (IsReportsPrefixSchema && !isBoldBI) {
-            $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-        }
-
-        var configurationModeType = getRadioButtonValue('ConfigurationMode');
-        if (configurationModeType !== undefined && configurationModeType === "0")
-        {
-            $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
         }
 
         var obj = document.getElementById("database-type");

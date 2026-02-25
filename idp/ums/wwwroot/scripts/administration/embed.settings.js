@@ -77,7 +77,7 @@ $(function () {
 
     $(document).on('click', '#restrict-embed-enabled', function () {
         if (!$('#restrict-embed-enabled').is(":checked")) {
-            $("#secret-code-copy").attr("disabled", true).tooltip("enable").css("cursor", "pointer");
+            $("#secret-code-copy").attr("disabled", true).tooltip("disable").css("cursor", "default");
         }
     });
 
@@ -112,7 +112,7 @@ function getEmbedSecret() {
                 if (data.status) {
                     secretCodeChange(data);
                     $("#get-embed-code").html(window.Server.App.LocalizationContent.ResetHeader);
-                    $("#secret-code-copy").removeAttr("disabled");
+                    $("#secret-code-copy").removeAttr("disabled").tooltip("enable").css("cursor", "pointer");
                 }
             }
         });

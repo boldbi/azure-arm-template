@@ -1,7 +1,7 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 14.2.4
-*  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
+*  version : 15.1.65
+*  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
 *  licensing@syncfusion.com. Any infringement will be prosecuted under
@@ -4596,7 +4596,7 @@
                         break;
                     case "dataSource":
                         var bbdesigner$content = this.element.find(".e-gridcontent").first();
-                        if (!bbdesigner$.isFunction(options["dataSource"]) && !(this._requestType == 'filtering' && this.model.filterSettings.filterType == "excel" && this._isExcelFilter && (this._excelFilter.filteredColumns.length > 0 || (!BoldBIDashboard.isNullOrUndefined(this._excelFilter.filteredColumn) && this._excelFilter.filteredColumn.length > 0))))
+                        if (!bbdesigner$.isFunction(options["dataSource"]) && (!(this._requestType == 'filtering' && this.model.filterSettings.filterType == "excel" && this._isExcelFilter && (this._excelFilter.filteredColumns.length > 0 || (!BoldBIDashboard.isNullOrUndefined(this._excelFilter.filteredColumn) && this._excelFilter.filteredColumn.length > 0))) && ((this._requestType == 'filtering' && this.model.filterSettings.filterType == "filterbar" && ((!BoldBIDashboard.isNullOrUndefined(this.model.filterSettings.filteredColumns) && this.model.filterSettings.filteredColumns.length > 0)))) && ((this._requestType == 'filtering' && this.model.filterSettings.filterType == "menu" && (!BoldBIDashboard.isNullOrUndefined(this.model.filterSettings.filteredColumns) && this.model.filterSettings.filteredColumns.length > 0)))))
                             this.resetModelCollections();
 						if(this._gridRecordsCount == 1 && !BoldBIDashboard.isNullOrUndefined(this._cDeleteData) && bbdesigner$.inArray(this._cDeleteData[0], this._dataSource()) == -1 && this.model.editSettings.allowDeleting)
                             this._gridRecordsCount =this._dataSource().length;
@@ -16798,7 +16798,7 @@
                 bbdesigner$(evt.target).closest(".e-ccButton").find(".e-btn-span, .e-btntxt, .e-down-arrow").length === 0
                 && (closestId !== this._id + "ccDiv" && closestId !== this._id + "liScrollerDiv" && closestId !== this._id +"_ccSearchBox")) {
                     var uniqueName = bbdesigner$(evt.target).attr("aria-describedby");
-                    if (bbdesigner$(evt.target).closest(".e-columnChooserListDiv").length === 0 && !bbdesigner$("#" + this._id + "ccDiv").find(`button[aria-describedby=${uniqueName}]`).hasClass('e-disable')) {                        
+                    if (bbdesigner$(evt.target).closest(".e-columnChooser").length === 0 && !bbdesigner$("#" + this._id + "ccDiv").find(`button[aria-describedby=${uniqueName}]`).hasClass('e-disable')) {                        
                         bbdesigner$("#" + this._id + "ccDiv").BoldBIDashboardDialog('close');
                         bbdesigner$(".e-columnChoosertailAlt").remove();
                         bbdesigner$(".e-columnChoosertail").remove();

@@ -166,6 +166,9 @@
         var resourceLimitationCountUrl = "@Url.Action("ResourceCreateLimit", "Items")";
         var updateDashboardLogoUrl = "@Url.Action("UpdateDashboardLogo", "Dashboards")";
         var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        var bulkMoveDashboards = "@Url.Action("movebulkdashboard", "items")";
+        var downloadFailedMovesCsv = "@Url.Action("downloadfailedmovescsv", "items")";
+        var moveDashboardNamesAreValid = "@Url.Action("dashboardnamevalidation", "items")";
         var applicationUrl = "@applicationUrl";
         var currentUserId = @currentUserId;
         var isMaster = @Json.Serialize(globalAppSettings.SystemSettings.IsMaster);
@@ -372,6 +375,12 @@
                                                                                 <span>@T["Sharing Permissions"]</span>
                                                                             </a>
                                                                             <hr ng-if="categoryItem.CanWrite || categoryItem.CanDelete" class="no-margin" />
+                                                                        </li>
+                                                                        <li ng-if="categoryItem.CanWrite && hasDashboardCreatePermission">
+                                                                            <a class="bulk-move-dashboards" href="#" title="" ng-click="bulkMoveDashboards(categoryItem.Id, categoryItem.Name, categoryItem.Description)">
+                                                                                <i class="su su-move-dashboards"></i>
+                                                                                <span>@T["Move Dashboards"]</span>
+                                                                            </a>
                                                                         </li>
                                                                         <li ng-if="categoryItem.CanWrite">
                                                                             <a class="EditCategory" href="#" title="" ng-click="editCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description, categoryItem.Id)">
@@ -729,6 +738,12 @@
                                                                             <span>@T["Sharing Permissions"]</span>
                                                                         </a>
                                                                         <hr ng-if="categoryItem.CanWrite || categoryItem.CanDelete" class="no-margin" />
+                                                                    </li>
+                                                                    <li ng-if="categoryItem.CanWrite && hasDashboardCreatePermission" ng-style="categoryItem.ReportsCount == 0 && {'opacity':'0.5','pointer-events':'none','cursor':'not-allowed'}">
+                                                                        <a class="bulk-move-dashboards" href="#" title="" ng-click="categoryItem.ReportsCount > 0 && bulkMoveDashboards(categoryItem.Id, categoryItem.Name, categoryItem.Description)" ng-attr-aria-disabled="{{ categoryItem.ReportsCount == 0 ? 'true' : 'false' }}" ng-attr-tabindex="{{ categoryItem.ReportsCount == 0 ? '-1' : '0' }}">
+                                                                            <i class="su su-move"></i>
+                                                                            <span>@T["Move Dashboards"]</span>
+                                                                        </a>
                                                                     </li>
                                                                     <li ng-if="categoryItem.CanWrite">
                                                                         <a class="EditCategory" href="#" title="" ng-click="editCategory(categoryItem.Id, categoryItem.Name, categoryItem.Description, categoryItem.Id)">

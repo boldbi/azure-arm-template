@@ -4,7 +4,7 @@
 @{
     Layout = null;
     var tenantIdentifierPrefix = CloudAppConfig.TenantIdentifierPrefix;
-    var idPUrl = GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    var idPUrl = await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.BaseUrl.TrimEnd('/'), Context);
     var userId = Context.User.GetUserId();
     var profilePicture = idPUrl + "/User/Avatar?id=" + ViewBag.UserId + "&ImageSize=64";
     var displayName = ViewBag.UserDetails.DisplayName;
@@ -58,6 +58,7 @@
             var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
             var TenantFavoriteListurl = "@Url.Action("TenantFavoriteList", "TenantsManagement")";
             var UpdateFavoriteUrl = "@Url.Action("UpdateTenantFavorite", "TenantsManagement")";
+            var ValidateSiteUrl = "@Url.Action("ValidateSiteUrl", "TenantsManagement")";
             var TenantSites = "@Url.Action("GetSites", "TenantsManagement")";
             var isMobile = @isMobile.ToString().ToLower();
         var theme = @themeAppearance.ToLower();
@@ -108,7 +109,7 @@
         <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="application-url-template">
             <a class="grid-content text-decoration-none" title="${SiteUrl}"  href="${SiteUrl}" target="_blank">${SiteUrl}</a>
         </script>
-
+       
     <h1 style="display: none">@T["Home"] - @GlobalAppSettings.SystemSettings.OrganizationName</h1>
        
     <div id="site-down-alert"></div>

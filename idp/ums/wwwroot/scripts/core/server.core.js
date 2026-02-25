@@ -275,9 +275,10 @@ $(document).on("click", ".dropdown-backdrop", function () {
 
 $(document).on("click", "#download-logs-dialog-proceed", function () {
     downloadLogsDialog.hide();
-    var val = document.getElementById("download-logs-dialog-dropdown").ej2_instances[0].value;
-    var isIncludeConfiguration = $("#is-include-configuration").is(":checked");
-    window.location = getDiagnosticLogsUrl + "?span=" + val + "&isIncludeConfiguration=" + isIncludeConfiguration;
+    var dropdownElement = document.getElementById("download-logs-dialog-dropdown");
+    var spanArgument = dropdownElement != null ? ("span=" + dropdownElement.ej2_instances[0].value + "&") : "";
+    var isIncludeConfiguration = dropdownElement != null ? $("#is-include-configuration").is(":checked") : true;
+    window.location = getDiagnosticLogsUrl + "?" + spanArgument + "isIncludeConfiguration=" + isIncludeConfiguration;
 });
 
 $(document).on("click", "#notification-link, #account-profile, #upload-item-section", function (e) {

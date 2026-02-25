@@ -16,29 +16,6 @@
     });
 });
 
-$(document).on("change", "input[name='activation']", function () {
-    var checkedVal = $("input[name='activation']:checked").val().toLowerCase();
-    var emailValidationMsg = $(".email-settings-validation");
-
-    if (checkedVal === "emailactivation") {
-        $.ajax({
-            type: "POST",
-            url: window.checkMailSettingUrl,
-            success: function (result) {
-                if (result.result) {
-                    emailValidationMsg.addClass("d-none");
-                }
-                else if (!result.result && result.isAdmin === true) {
-                    emailValidationMsg.html(window.Server.App.LocalizationContent.ActivationMode).removeClass("d-none");
-                }
-            }
-        });
-    }
-    else {
-        emailValidationMsg.addClass("d-none");
-    }
-});
-
 $(document).on("click", "#update-user-settings", function () {
     $(".confirmationMessage").html("");
     var isSystemUserEnabled= $("#system-user-switch").is(":checked");

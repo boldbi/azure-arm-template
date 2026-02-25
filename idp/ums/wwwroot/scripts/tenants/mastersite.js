@@ -33,7 +33,7 @@ $(document).ready(function () {
             getMasterSite(tenantType);
         }
         else {
-            onMasterDialog();
+            onMasterDialogClose();
         }
     });
 

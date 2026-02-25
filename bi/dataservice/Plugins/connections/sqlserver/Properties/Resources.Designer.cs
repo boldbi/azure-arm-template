@@ -108,6 +108,18 @@ namespace Syncfusion.Dashboard.Connection.SQLServer.Model.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Custom_SUMD_Table.
+        /// </summary>
+        internal static string CustomSUMDTableAliasName
+        {
+            get
+            {
+                return ResourceManager.GetString("CustomSUMDTableAliasName", resourceCulture);
+            }
+        }
+
+
+        /// <summary>
         ///   Looks up a localized string similar to ENDS WITH.
         /// </summary>
         internal static string EndsWith {

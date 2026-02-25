@@ -12,6 +12,10 @@ if({5}):
         df = pd.DataFrame(loaded_data)
     elif isinstance(loaded_data, dict):
         df = pd.json_normalize(loaded_data)
+elif({9}):
+    with urllib.request.urlopen(filePath) as file:
+        loaded_data = json.loads(file.read().decode("utf-8"))
+    df = pd.json_normalize(loaded_data)
 elif({8}):
     with open("{1}") as f:
         json_data = json.load(f)

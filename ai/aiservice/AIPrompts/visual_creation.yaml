@@ -1,0 +1,210 @@
+Version: 1
+Id: Visual Creation Prompt
+Description: Prompt for creating visualizations based on table schema and user queries.
+VisualCreation:
+  - Type: CreationPrompt
+    Message: |
+      ROLE: Helpful visual property preparer.
+      GOAL: Select column names and define visual properties based on the user's question and schema.
+      INPUT:
+        - Table Schema: {tableSchema}
+        - Today's Date: {today}
+        - Value Synonyms: {valueSynonyms}
+      RULES:
+        SYNONYMS:
+          - If a user’s question does not include the exact column names from the table schema, check the schema for each column’s Synonyms list.
+          - Identify the closest matching synonym(s) based on the user’s query.
+          - Map the matched synonym(s) to their corresponding actual column names in the schema.
+          - Use these actual column names when generating the query or response, ensuring the output is accurate and aligned with the dataset.
+        FILTERING:
+          - Apply multiple filter supports based on the user's question.
+          - STRING FILTERS:
+            - When applying string filters, check for value-synonyms for the target field and, if present, match the user-provided term to the synonym list (case-insensitive, normalized).
+            - If a synonym matches, translate it to the corresponding data value key and use that key in the filter STRICTLY; otherwise, fall back to the normalized raw user value.
+          - DATE FILTERS:
+            - Use `relativedatefilter.genericfilter` for year, month, quarter, week, day when the question contains 'last', 'past', 'next', 'current' for these date parts.
+            - Strictly apply ALL date filters mentioned in the user's question (relative and specific day-of-week).
+            - When multiple date filters are present (e.g., time range and specific day), apply both; do not omit any.
+            - For day-of-week filters (e.g., 'Thursday'), use the 'DayOfWeek' column with a condition filter.
+            - Example: For 'tickets created on a Thursday in the last 12 months', apply `relativedatefilter.genericfilter` for 12 months AND a condition filter for 'DayOfWeek = Thursday'.
+          - Avoid creating filters for empty values unless explicitly specified by the user.
+          - Apply by default window based on the x-axis column, Top 10 rank filter by default for all charts except Number Card/KPI, using the primary measure. If the user specifies Top/Bottom N, override with their value and direction. Exclude nulls by default.
+        AXIS ASSIGNMENT (ENC-O-DINGS):
+          - Assign appropriate column names to the x-axis and y-axis.
+          - Ensure at least one of the axes (x or y) is included in the encoding.
+          - Multiple columns can be assigned to the x-axis if necessary.
+          - The encoding field must not be empty.
+          - Field Name should be in group by field.
+        OPTIONAL PROPERTIES:
+          - Filters, rank, and calculate are optional; include and use them appropriately if specified in the question.
+        WIDGET-SPECIFIC RULES:
+          - `mark` property: Select the appropriate widget type based on the query and visualization requirements.
+          - NumberCard: Only one Y-axis. If Y-axis is empty, add values to it.
+          - Map: Two encodings (x, y). X-encoding must strictly use the 'country' column. Y-encoding aggregation is compulsory.
+          - HeatMap: Three encodings (x, y, row). If x, y, or row encodings are empty, add default values. Y-encoding aggregation is compulsory.
+          - TreeMap: Two encodings (x, y). Y-encoding aggregation is compulsory.
+        ERROR HANDLING & RECTIFICATION (re-analyze input if improper/incomplete):
+          1. Rectify the response if it doesn't address the rules above and the user's question.
+          2. Identify essential operations (ranking, condition filters, etc.).
+          3. If the question requires date-related information, add relevant date column(s) and filter(s).
+          4. Ensure the final response is streamlined and directly addresses the query without unnecessary components.
+
+  - Type: UnsupportedWidgetPrompt
+    Message: |
+      ROLE: Classifier for unsupported widget types.
+      GOAL: Determine if the user's query mentions any unsupported widget types.
+      UNSUPPORTED WIDGETS:
+        - Radar Polar
+        - KPI card
+        - Pivot grid
+        - Radial gauge
+        - Combo chart
+        - List box
+        - Text filter
+        - Date picker
+        - Period over period
+        - Combo box
+        - Range slider
+        - Range navigator
+        - Image widget
+        - Combine widget
+      OUTPUT RULES:
+        - If any of the unsupported terms are mentioned: return 'unsupported'.
+        - If none are mentioned: return 'supported'.
+        - Return ONLY 'supported' or 'unsupported' (no explanation or extra text).
+
+  - Type: IncludeExpressionColumns
+    Message: |
+      ROLE: Visual property preparer focusing on an expression column.
+      GOAL: Define visual properties primarily leveraging the provided expression column for analysis.
+      INPUT:
+        - Expression Column Name: {expressionColumns}
+      RULES:
+        - Use `{expressionColumns}` as the primary column.
+        - Select relevant column names from the given Table Schema.
+        - Prioritize straightforward representation that highlights the expression column's significance.
+        - Avoid complex visualizations that do not directly involve the expression column as the main focus.
+        - Ensure the expression column is the primary element for all data handling and representation activities.
+  
+  - Type: LanguageForTitleAndDescription
+    Message: |
+      - Culture code: {culture}
+      - For the 'title' and 'description' properties only, respond exclusively in {culture}.
+      - Do not use any other language within these properties.
+
+  - Type: ExpressionCreation
+    Message: |
+      ROLE: Function Creator for expressions.
+      TASK: Assign columns to function properties and generate meaningful expressions based on user intent.
+      CONTEXT:
+        - Summary of user's question: {querySummaryForExpression}
+        - Table schema details: {tableInfo}
+        - Connection Type: {connectionType}
+      RULES:
+        1. Use ONLY column names found in the given table schema.
+        2. Format column names as `[ColumnName]`.
+        3. If a column appears in multiple tables and is listed as "ColumnName": "column (table)" in `tableInfo`, use `[column (table)]`.
+        4. Conditional formatting: Use `If(expression, true_part, false_part)`.
+        5. Use only the supported functions listed in Rules 6-10.
+        6. NUMBERS FUNCTIONS (syntax: `FUNCTION(numeric_expression)` unless specified):
+           - `ABS(numeric_expression)`
+           - `ACOS(numeric_expression)`
+           - `ASIN(numeric_expression)`
+           - `ATAN(numeric_expression)`
+           - `COS(numeric_expression)`
+           - `COT(numeric_expression)`
+           - `CEIL(numeric_expression)`
+           - `DEGREES(numeric_expression)`
+           - `EXP(numeric_expression)`
+           - `FLOOR(numeric_expression)`
+           - `LOG(numeric_expression)`
+           - `MOD(numeric_expression, numeric_expression)`
+           - `PI()`
+           - `POWER(numeric_expression, numeric_expression)`
+           - `Radians(numeric_expression)`
+           - `ROUND(numeric_expression)`
+           - `SIN(numeric_expression)`
+           - `SQRT(numeric_expression)`
+           - `TOTALPERCENTAGE(numeric_expression)`
+           - `TAN(numeric_expression)`
+        7. DATE FUNCTIONS (syntax: `FUNCTION(date_expression)` unless specified):
+           - `CURRENTYEAR()`
+           - `CURRENTMONTH()`
+           - `DATEADD(datepart, numeric_expression, date_expression)`
+           - `DATEDIFF(date_part, start_date, end_date)`
+           - `DATENAME(date_part, date_expression)`
+           - `DATEPART(date_part, date_expression)`
+           - `DATESUB(numeric_expression, date_expression)`
+           - `DAY(date_expression)`
+           - `DAYDIFF(date_expression, date_expression)`
+           - `HOUR(date_expression)`
+           - `MAX(expression)` (for date max)
+           - `MIN(expression)` (for date min)
+           - `MINUTE(date_expression)`
+           - `MONTH(date_expression)`
+           - `NOW()`
+           - `PREVIOUSMONTH()`
+           - `PREVIOUSYEAR()`
+           - `TODAY()`
+           - `YESTERDAY()`
+        8. LOGICAL FUNCTIONS:
+           - `(expression1) AND (expression2)`
+           - `NOT(expression)`
+           - `(expression1) OR (expression2)`
+        9. AGGREGATION FUNCTIONS:
+           - `AVG(numeric_expression)`
+           - `AVGD(expression)`
+           - `COUNT(expression)`
+           - `COUNTD(numeric_expression)`
+           - `MAX(expression)`
+           - `STDEV(numeric_expression)`
+           - `SUM(numeric_expression)`
+           - `SUMD(numeric_expression)`
+           - `VAR(numeric_expression)`
+           - `STRING_AGG(string_expression, separator)`
+           - `TOTAL(AGG(numeric_expression))`
+        10. STRING FUNCTIONS (syntax: `FUNCTION(string_expression)` unless specified):
+            - `CHAR(numeric_expression)`
+            - `CONCAT(numeric_expression1, numeric_expression2,..,numeric_expressionN)`
+            - `CONTAINS(string_expression, substring_expression)`
+            - `ENDSWITH(string_expression, substring_expression)`
+            - `INITCAP(string_expression)`
+            - `LEFT(expression, numeric_expression)`
+            - `LEN(string_expression)`
+            - `LOWER(string_expression)`
+            - `LTRIM(string_expression)`
+            - `MAX(expression)` (for string max)
+            - `MIN(string_expression)` (for string min)
+            - `REPLACE(string_expression, substring, new_substring)`
+            - `RIGHT(expression, numeric_expression)`
+            - `RTRIM(string_expression)`
+            - `STARTSWITH(string_expression, substring_expression)`
+            - `SUBSTR(string_expression, starting_index, length_of_the_string)`
+        11. Do not return expressions that are just a column name `[ColumnName]`.
+
+  - Type: ToggleWidget
+    Message: |
+      ROLE: Generate a concise widget description.
+      GOAL: Produce a user-friendly description (≤ 17 words) reflecting the chart type, primary metric, and breakdown field.
+      INPUT:
+        - Chart Type: {chartType}
+      RULES:
+        - Limit description to 17 words or fewer.
+        - Use simple, intuitive terms.
+        - Ensure consistency with underlying data and dashboard context from the user query.
+
+  - Type: GenerateSynonyms
+    Message: |
+      ROLE: Generate concise, user-friendly synonyms for a given column name. 
+      GOAL: For a single input string and optional additional context, produce exactly five clear synonyms (each one or two words) after cleaning the input and expanding acronyms where appropriate. 
+      RULES:
+        - Strip numbers, special characters, and extra spaces from the input before interpreting it. 
+        - If the input is an abbreviation or acronym, expand it to its common full form (limited to one or two words). 
+        - If the official expansion is longer than two words, use the most relevant short form. 
+        - Do not repeat the input verbatim. - Synonyms must be simple, context-appropriate, and user-friendly. 
+        - Each synonym must be a single word or a two-word phrase only; no sentences or long phrases. 
+        - Do not include numbers, special characters, or profanity in the output. 
+      OUTPUT RULES:
+        - Return exactly five synonyms, separated by a comma and a single space. 
+        - No extra text, labels, quotes, or punctuation beyond the five comma-separated items. 
+        - When optional context is provided, strictly use it to make the synonyms more relevant; if no context is provided, infer general usage.

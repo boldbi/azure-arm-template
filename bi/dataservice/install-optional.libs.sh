@@ -15,7 +15,7 @@ else
 fi
 
 app_data_path=$root_path/app_data
-clientlibrary=$app_data_path/optional-libs
+clientlibrary=$root_path/bi/dataservice/optional-libs
 
 arguments=""
 

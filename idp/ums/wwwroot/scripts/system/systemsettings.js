@@ -4,6 +4,8 @@ var isKeyUp = false;
 var ruleName;
 var rules;
 var errorContent = "";
+var biPrefix = "";
+var reportsPrefix = "";
 var systemSettingsDetails, intermediateDbDetails;
 var isNewServerDB = true, isNewIntermediateDB = true;
 var storagetype = window.storageType;
@@ -61,23 +63,11 @@ $(document).ready(function () {
         removeError();
         var obj = document.getElementById("database-type");
         var itemsList = obj.ej2_instances[0].list.querySelectorAll('.e-list-item');
-        if (isSiteCreation) {
-            if (!isBoldReportsTenantType() && (IsBiPrefixSchema)) {
-                $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-            }
-
-            if (isBoldReportsTenantType() && (IsReportsPrefixSchema)) {
-                $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-            }
-        }
         var configurationModeType = getRadioButtonValue('ConfigurationMode');
         if ($(this).attr("id") == "advanced-tab") {
             var databaseType = getDropDownValue("database-type");
                 $("#default-tab").removeClass("active");
                 $("#advanced-tab").addClass("active");
-                $("#simple-tenant-prefix").hide();
-                $("#simple-server-prefix").hide();
-                /*$('.server-schema-prefix-hide').removeClass("d-block").addClass("visually-hidden");*/
                 if (!isSiteCreation) {
                     $("#label_txt-dbname").html(window.Server.App.LocalizationContent.IDDatabaseName);
                     $("#label_database-name").html(window.Server.App.LocalizationContent.IDDatabaseName);
@@ -102,40 +92,24 @@ $(document).ready(function () {
                     showDataStore();
                 }
 
-                $(".simple-tab").removeClass("d-block").addClass("visually-hidden");
                 if (!isSiteCreation) {
                     $("#simple_tab_db_name").show();
                     $(".db-name-info").html(window.Server.App.LocalizationContent.DatabaseInfo);
                     $(".db-schema-info").html(window.Server.App.LocalizationContent.SchemaInfo);
                     prefillDbNames();
-                    /*$('.simple-id-schema-prefix-hide').removeClass("visually-hidden").addClass("d-block");*/
                 }
                 else {
                     $(".db-schema-info").html(window.Server.App.LocalizationContent.SchemaInfo);
                     $(".db-prefix-info").html(window.Server.App.LocalizationContent.PrefixInfo);
                 }
 
-                if (!isSiteCreation) {
-                    $('.id-schema-prefix-hide').removeClass("visually-hidden").addClass("d-block");
-                }
-                else {
-                    $('.id-schema-prefix-hide').removeClass("d-block").addClass("visually-hidden");
-                }
-
                 if ($("input[name='databaseType']:checked").val() === "1") {
                     $(".old-db").removeClass("visually-hidden").addClass("d-block");
                     $(".new-smp-db").removeClass("d-block").addClass("visually-hidden");
-                    $(".simple-exist-schema-prefix-hide").removeClass("d-block").addClass("visually-hidden");
                 }
                 else {
                     $(".old-db").removeClass("d-block").addClass("visually-hidden");
                     $(".new-smp-db").removeClass("visually-hidden").addClass("d-block");
-                    $('.server-schema-prefix-hide').removeClass("d-block").addClass("visually-hidden");
-                }
-                var databaseType = getDropDownValue("database-type").toLowerCase();;
-                if (databaseType == "oracle") {
-                    $(".advance-schema-prefix-hide").removeClass("d-block").addClass("visually-hidden");
-                    $(".ser-schema-prefix-hide").removeClass("visually-hidden").addClass("d-block");
                 }
 
                 isSimpleModeValue = "false";
@@ -147,62 +121,26 @@ $(document).ready(function () {
             if (isSiteCreation) {
                 ResizeHeightForDOM();
             }
-            if (isSiteCreation) {
-                if (!isBoldReportsTenantType() && (!IsBiPrefixSchema)) {
-                    $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-                }
-
-                if (isBoldReportsTenantType() && (!IsReportsPrefixSchema)) {
-                    $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-                }
-            }
-            else {
-                if (!IsBiPrefixSchema) {
-                    $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-                }
-
-                if (IsReportsPrefixSchema && !isBoldBI) {
-                    $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-                }
-            }
         }
         else {
             $("#default-tab").addClass("active");
             $("#advanced-tab").removeClass("active");
             $("#simple_tab_db_name").show();
-            $("#simple-tenant-prefix").show();
-            $("#simple-server-prefix").show();
-            if (document.getElementById("existing-db").checked) {
-                $("#simple-server-prefix").hide();
-            }
             if (!isSiteCreation) {
                 $("#label_txt-dbname").html(window.Server.App.LocalizationContent.DatabaseName);
                 $("#label_database-name").html(window.Server.App.LocalizationContent.DatabaseName); 
             }
-            else {
-                $("#table-prefix-ums").hide();
-                $("#table-prefix-name").hide();
-            }
 
-            $('.advance-tab').removeClass("d-block").addClass("visually-hidden");
             $(".db-name-info").html(isBoldBI ? window.Server.App.LocalizationContent.DatabaseInfoBI.format(biProductname) : window.Server.App.LocalizationContent.DatabaseInfoReports.format(reportsProductname));
             if (!isSiteCreation) {
                 $(".db-name-info").html(isBoldBI ? window.Server.App.LocalizationContent.DatabaseInfoBI3 : window.Server.App.LocalizationContent.DatabaseInfoReports2.format(reportsProductname, "report"));
                 prefillDbNames();
-                //$('.simple-tab').removeClass("d-block").addClass("visually-hidden");
             }
             else {
                 $(".db-schema-info").html(window.Server.App.LocalizationContent.SchemaInfo);
                 $(".db-prefix-info").html(window.Server.App.LocalizationContent.PrefixInfo);
             }
             $("#advanced_tab_db_name").hide();
-            if (!isSiteCreation) {
-                $('.id-schema-prefix-hide').removeClass("visually-hidden").addClass("d-block");
-            }
-            else {
-                $('.id-schema-prefix-hide').removeClass("d-block").addClass("visually-hidden");
-            }
-
             if ($("input[name='databaseType']:checked").val() === "1") {
                 $(".old-db").removeClass("visually-hidden").addClass("d-block");
                 $(".new-smp-db").removeClass("d-block").addClass("visually-hidden");
@@ -215,7 +153,6 @@ $(document).ready(function () {
             isSimpleModeValue = "true";
             if (itemsList && itemsList.length > 3) {
                 if (isSiteCreation) {
-                    $(".id-schema-prefix-hide").removeClass("d-block").addClass("visually-hidden");
                     if (isBoldReportsTenantType() && !IsOracleSupportReports) {
                         itemsList[3].style.display = "none";
                     }
@@ -249,29 +186,6 @@ $(document).ready(function () {
             
             if (isSiteCreation) {
                 ResizeHeightForDOM();
-            }
-            if (isSiteCreation) {
-                if (!isBoldReportsTenantType() && (!IsBiPrefixSchema)) {
-                    $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-                }
-
-                if (isBoldReportsTenantType() && (!IsReportsPrefixSchema)) {
-                    $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-                }
-            }
-            else {
-                if (!IsBiPrefixSchema) {
-                    $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
-                }
-
-                if (IsReportsPrefixSchema && !isBoldBI) {
-                    $(".schema-prefix-hide").removeClass("d-none").addClass("d-block");
-                }
-            }
-
-            if (configurationModeType !== undefined && configurationModeType === "0")
-            {
-                $(".schema-prefix-hide").removeClass("d-block").addClass("d-none");
             }
         }
 
@@ -321,6 +235,13 @@ function getFormData() {
     var prefix = getPrefix(serverType === "Oracle" ? $("#ums-table-prefix").val() : $("#new-db").is(":checked") ? $("#txt-ums-prefix").val() : $("#ums-table-prefix").val());
     var isAdvancedTab = window.getComputedStyle(document.getElementById("advanced_tab_db_name")).display !== "none";
     var tenantPrefix = getTenantPrefix(serverType === "Oracle" ? $("#tenant-table-prefix").val() : isAdvancedTab ? ($("#new-db").is(":checked") ? $("#server-prefix-name").val() : $("#server-table-prefix").val()) : ($("#new-db").is(":checked") ? $("#txt-server-prefix").val() : $("#tenant-table-prefix").val()));
+    if (isBoldBI) {
+        biPrefix = tenantPrefix;
+    }
+    else {
+        reportsPrefix = tenantPrefix;
+    }
+
     switch (database) {
         case "mssql":
             var databaseName = $("#new-db").is(":checked") ? $("#txt-dbname").val() : $("#database-name").val();
@@ -371,7 +292,7 @@ function getFormData() {
             AdditionalParameters: additionalParameters,
             SchemaName: schemaName,
             Prefix: prefix,
-            TenantPrefix: tenantPrefix
+            TablePrefix: { BoldBI: biPrefix, BoldReports: reportsPrefix }
         },
         StorageType: getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type")
     };
@@ -577,13 +498,22 @@ function checkingExistingDB(element) {
     window.prefix = getPrefix($("#new-db").is(":checked") ? $("#txt-ums-prefix").val() : $("#ums-table-prefix").val());
     window.tenantPrefix = getTenantPrefix(databaseType === "Oracle" ? $("#tenant-table-prefix").val() : isAdvancedTab ? ($("#new-db").is(":checked") ? $("#server-prefix-name").val() : $("#server-table-prefix").val()) : ($("#new-db").is(":checked") ? $("#txt-server-prefix").val() : $("#tenant-table-prefix").val()));
     window.schemaName = getSchema($("#schema-name").val());
-   
+
+    if (window.tenantPrefix !== "" && window.tenantPrefix !== undefined) {
+        if (getTenantType() == "BoldBIOnPremise") {
+            window.boldbiPrefix = window.tenantPrefix
+        }
+        else {
+            window.window.boldreportsPrefix = window.tenantPrefix
+        }
+    }
+
     $.ajax({
         type: "POST",
         url: connectDatabaseUrl,
         async: false,
         data: {
-            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, MaintenanceDatabase: window.maintenanceDb, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, ServerDatabaseName: window.serverDatabaseName, IntermediateDatabaseName: window.intermediateDatabaseName, sslEnabled: window.sslEnabled, IsNewDatabase: false, TenantType: getTenantType(), additionalParameters: window.additionalParameters, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TenantPrefix: window.tenantPrefix }),
+            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, MaintenanceDatabase: window.maintenanceDb, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, ServerDatabaseName: window.serverDatabaseName, IntermediateDatabaseName: window.intermediateDatabaseName, sslEnabled: window.sslEnabled, IsNewDatabase: false, TenantType: getTenantType(), additionalParameters: window.additionalParameters, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TablePrefix: { BoldBI: window.boldbiPrefix, BoldReports: window.boldreportsPrefix } }),
             isSimpleMode: isSimpleModeSelction(),
             isSiteCreation: true
         },
@@ -598,7 +528,7 @@ function checkingExistingDB(element) {
                     url: checkTableExistsUrl,
                     async: false,
                     data: {
-                        data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, MaintenanceDatabase: window.maintenanceDb, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, ServerDatabaseName: window.serverDatabaseName, IntermediateDatabaseName: window.intermediateDatabaseName, sslEnabled: window.sslEnabled, TenantType: getTenantType(), IsNewDatabase: false, additionalParameters: window.additionalParameters, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TenantPrefix: window.tenantPrefix }),
+                        data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, MaintenanceDatabase: window.maintenanceDb, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, ServerDatabaseName: window.serverDatabaseName, IntermediateDatabaseName: window.intermediateDatabaseName, sslEnabled: window.sslEnabled, TenantType: getTenantType(), IsNewDatabase: false, additionalParameters: window.additionalParameters, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TablePrefix: { BoldBI: window.boldbiPrefix, BoldReports: window.boldreportsPrefix } }),
                         isSimpleMode: isSimpleModeSelction(),
                         isSiteCreation: true
                     },
@@ -616,8 +546,10 @@ function checkingExistingDB(element) {
                             }
                             html += "</ol>";
                             errorContent = html;
-                            $(".server-schema-prefix-hide").removeClass("d-block").addClass("visually-hidden");
-
+                            messageBox("su-login-error", window.Server.App.LocalizationContent.DatabaseError, errorContent, "success", function () {
+                                onCloseMessageBox();
+                            });
+                            isDatabaseErrorDialogOpen = true;
                         } else if (!result.Data.key && items.length <= 0) {
                             delete window.serverName;
                             delete window.portNumber;
@@ -634,6 +566,10 @@ function checkingExistingDB(element) {
                             $('#details-next').removeAttr("disabled");
                             parent.hideWaitingPopup(element);
                             errorContent = result.Data.value;
+                            messageBox("su-login-error", window.Server.App.LocalizationContent.DatabaseError, errorContent, "success", function () {
+                                onCloseMessageBox();
+                            });
+                            isDatabaseErrorDialogOpen = true;
                         }
                     }
                 });
@@ -642,6 +578,10 @@ function checkingExistingDB(element) {
                 parent.hideWaitingPopup(element);
                 $('#details-next').removeAttr("disabled");
                 errorContent = result.Data.value;
+                messageBox("su-login-error", window.Server.App.LocalizationContent.DatabaseError, errorContent, "success", function () {
+                    onCloseMessageBox();
+                });
+                isDatabaseErrorDialogOpen = true;
             }
         }
     });
@@ -663,7 +603,7 @@ function checkingNewDBConnection(element, actionType) {
             type: "POST",
             url: checkValidDatabaseUrl,
             async: false,
-            data: { tenantId: tenantId, connectionString: window.connectionString, updateSchema: window.schemaName, updatePrefix: window.tenantPrefix, TenantPrefix: window.tenantPrefix },
+            data: { tenantId: tenantId, connectionString: window.connectionString, updateSchema: window.schemaName, updatePrefix: window.tenantPrefix },
             success: function (response) {
                 if (response.Status) {
                     isValidDBDetail = true;
@@ -702,6 +642,11 @@ function checkingNewDBConnection(element, actionType) {
         if (result.Data != undefined) {
             errorContent = result.Data.value;
         }
+        messageBox("su-login-error", window.Server.App.LocalizationContent.DatabaseError, errorContent, "success", function () {
+            onCloseMessageBox();
+        });
+        isDatabaseErrorDialogOpen = true;
+        
     }
 }
 
@@ -741,7 +686,7 @@ function connectDatabase(element, actionType) {
         url: connectDatabaseUrl,
         async: false,
         data: {
-            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, MaintenanceDatabase: window.maintenanceDb, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, ServerDatabaseName: window.serverDatabaseName, IntermediateDatabaseName: window.intermediateDatabaseName, sslEnabled: window.sslEnabled, IsNewDatabase: isNewDatabase, TenantType: getTenantType(), additionalParameters: window.additionalParameters, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TenantPrefix: window.tenantPrefix, ActionType: actionType }),
+            data: JSON.stringify({ ServerType: databaseType, serverName: window.serverName, Port: window.portNumber, MaintenanceDatabase: window.maintenanceDb, userName: window.login, password: window.password, IsWindowsAuthentication: window.IsWindowsAuthentication, databaseName: window.databaseName, ServerDatabaseName: window.serverDatabaseName, IntermediateDatabaseName: window.intermediateDatabaseName, sslEnabled: window.sslEnabled, IsNewDatabase: isNewDatabase, TenantType: getTenantType(), additionalParameters: window.additionalParameters, ServiceInstance: window.ServiceInstance, SchemaName: window.schemaName, Prefix: window.prefix, TablePrefix: { BoldBI: window.boldbiPrefix, BoldReports: window.boldreportsPrefix }, ActionType: actionType }),
             isSimpleMode: isSimpleModeSelction(),
             isSiteCreation: true
         },
@@ -790,6 +735,13 @@ function getDatabaseFormValues() {
     var prefix = getPrefix(serverType === "Oracle" ? $("#ums-table-prefix").val() : $("#new-db").is(":checked") ? $("#txt-ums-prefix").val() : $("#ums-table-prefix").val());
     var isAdvancedTab = window.getComputedStyle(document.getElementById("advanced_tab_db_name")).display !== "none";
     var tenantPrefix = getTenantPrefix(serverType === "Oracle" ? $("#tenant-table-prefix").val() : isAdvancedTab ? ($("#new-db").is(":checked") ? $("#server-prefix-name").val() : $("#server-table-prefix").val()) : ($("#new-db").is(":checked") ? $("#txt-server-prefix").val() : $("#tenant-table-prefix").val()));
+    if (isBoldBI) {
+        biPrefix = tenantPrefix;
+    }
+    else {
+        reportsPrefix = tenantPrefix;
+    }
+
     if (!(getRadioButtonValue("checkWindows") == "windows"))
         authenticationType = 1;
         formData = {
@@ -807,7 +759,7 @@ function getDatabaseFormValues() {
                 AdditionalParameters: additionalParameters,
                 SchemaName: schemaName,
                 Prefix: prefix,
-                TenantPrefix: tenantPrefix
+                TablePrefix: { BoldBI: biPrefix, BoldReports: reportsPrefix }
             },
             StorageType: getDropDownValue("storage-type") == "2" ? "4" : getDropDownValue("storage-type"),
             TenantIsolation:

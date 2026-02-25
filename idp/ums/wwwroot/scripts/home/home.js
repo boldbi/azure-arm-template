@@ -69,6 +69,22 @@ $(document).ready(function () {
             }
         }
     });
+
+    $(document).on("click", ".site-link", function (e) {
+        e.preventDefault();
+
+        const siteUrl = $(this).data("url");
+
+        $.ajax({
+            url: ValidateSiteUrl,
+            type: "POST",
+            data: { siteUrl: siteUrl },
+            success: function (response) {
+                window.open(response.SiteUrl, '_blank');
+            }
+        });
+    });
+
     $('#card-view-button').on('click', function () {
         onScroll=true;
         if (!$(this).hasClass('active')) {
@@ -187,7 +203,7 @@ function initializePage() {
 
     $(document).on('click', '.tenant-card', function (event) {
         if (!$(event.target).is('a')) {
-            var siteUrl = $(this).find('.sites-card a').attr('href');
+            var siteUrl = $(this).find('.sites-card a').data('url');
             window.open(siteUrl, '_blank');
         }
     });
@@ -557,8 +573,8 @@ function loadTenantCards(baseUrl, skip, take) {
                     var cardHtml = `<div class="tenant-card card">
                                            <div class="icon-container">${brandingHtml}</div>
                                                     <div class="tenant-card-header card-header">
-                                                        <div class="card-header-title">${tenant.TenantName}</div>
-                                                         <div class="sites-card card-sub-title"> <a class="text-decoration-none" href="${tenant.SiteUrl}" target="_blank" data-toggle="tooltip" title="${tenant.SiteUrl}">${tenant.SiteUrl}</a></div>
+                                                        <div class="card-header-title">${tenant.TenantName}</div>                                                        
+                                                         <div class="sites-card card-sub-title"> <a class="text-decoration-none site-link" href="javascript:void(0);" data-url="${tenant.SiteUrl}" data-toggle="tooltip" title="${tenant.SiteUrl}">${tenant.SiteUrl}</a></div>
                                                            <div class="data-card card-content"> ${tenant.CreatedDateString}</div>
                                                     </div> 
                                                       <div class="fav-card-icon"> ${favoriteButtonTemplate(tenant.IsFavorite, tenant.Id, tenant.UserId)}</div>

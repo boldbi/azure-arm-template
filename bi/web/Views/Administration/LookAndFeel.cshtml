@@ -13,6 +13,7 @@
     var themeDashboardThemeUms = string.Empty;
     var fontUms = string.Empty;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var internalAppIdpUrl =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context);
     if (ServerAppConfig.IsSelfHosted)
     {
         themeAppearanceUms = ServerAppConfig.Theme.Appearance.Trim();
@@ -51,7 +52,7 @@
             <environment exclude="Development,CloudDevelopment">
                 <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/dark.min.css">
             </environment>
-            <link rel="prefetch" class="application-theme-ref" href="@ServerAppConfig.InternalAppIdpUrl/ums/theme/styles/application?theme=dark" />
+            <link rel="prefetch" class="application-theme-ref" href="@internalAppIdpUrl/ums/theme/styles/application?theme=dark" />
         }
         else
         {
@@ -61,7 +62,7 @@
             <environment exclude="Development,CloudDevelopment">
                 <link rel="prefetch" href="@dashboardServerResourceUrl/cdn/css/theme/light.min.css">
             </environment>
-            <link rel="prefetch" class="application-theme-ref" href="@ServerAppConfig.InternalAppIdpUrl/ums/theme/styles/application?theme=light" />
+            <link rel="prefetch" class="application-theme-ref" href="@internalAppIdpUrl/ums/theme/styles/application?theme=light" />
         }
     }
     else
@@ -109,7 +110,7 @@
         var dashboardServerResourceUrl = "@dashboardServerResourceUrl";
         var isDebug = @Json.Serialize(isDebug);
         var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
-        var InternalAppIdpUrl = @Html.Raw(Json.Serialize(ServerAppConfig.InternalAppIdpUrl));
+        var InternalAppIdpUrl = @Html.Raw(Json.Serialize(internalAppIdpUrl));
         var themeAppearanceUms = @Html.Raw(Json.Serialize(themeAppearanceUms));
         var themeApplicationThemeUms = @Html.Raw(Json.Serialize(themeApplicationThemeUms));
         var themeDashboardThemeUms = @Html.Raw(Json.Serialize(themeDashboardThemeUms));

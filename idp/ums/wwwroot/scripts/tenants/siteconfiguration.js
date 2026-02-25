@@ -333,6 +333,7 @@ function changeTenantType(args) {
         var obj = document.getElementById("database-type");
         var itemsList = obj.ej2_instances[0].list.querySelectorAll('.e-list-item');
         if (isBoldReportsTenantType()) {
+            $(".proxy-url-auto-update").hide();
             item = "reports";
             $("#enable-ssl").val(reportScheme);
             $("#input-domain").val(reportDomain);
@@ -383,6 +384,7 @@ function changeTenantType(args) {
             }
         }
         else {
+            $(".proxy-url-auto-update").show();
             item = "dashboards";
             $("#enable-ssl").val(biScheme);
             $("#input-domain").val(biDomain);

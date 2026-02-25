@@ -24,7 +24,7 @@
                  currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                  currentUrl.IndexOf(".svg", StringComparison.CurrentCultureIgnoreCase) > 0;
 
-    var idPUrl = _globalAppSettings.SystemSettings.IDPUrl;
+    var idPUrl = ServerAppConfig.GetClientServiceUrl(_globalAppSettings.SystemSettings.IDPUrl, Context);
     var isMobile = new DeviceDetection(Context).IsMobile;
     var themeAppearance = _identityResponse.ThemeAppearance;
     var defaultAppLogo = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/') + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + themeAppearance + "/" + ServerAppConfig.BrandingJson.BrandingImages.MainLogo;
@@ -57,7 +57,7 @@
     var isAzureAppService = GlobalAppSettings.GetRunTimeEnvironMent() == BoldServiceEnvironment.AzureAppService;
     var ishideDashboardMenu = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri) && !identityResponse.IsAdmin;
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
-    var navigateETLUrl = etlEndpointPrefix + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
+    var navigateETLUrl = ServerAppConfig.GetClientServiceUrl(etlEndpointPrefix, Context) + (ServerAppConfig.IsSelfHosted ? $"/etlservice/{globalAppSettings.SystemSettings.TenantId.ToString()}" : $"/{globalAppSettings.SystemSettings.TenantId.ToString()}");
     var iscustomUIProfile = customUI?.Profiles != null && customUI.Profiles[0].Dashboards != null;
     var isAdmin = _identityResponse.IsAdmin;
     var hideMenusAndOptions = iscustomUIProfile ? !isAdmin && customUI.Profiles[0].Dashboards.HideMenusAndOptions : false;
@@ -83,10 +83,10 @@
 }
 
 <environment include="Development,CloudDevelopment">
-     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.js"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
-     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.min.js"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.min.js"></script>
 </environment>
 
 <aside class="menu-bar" id="app-navigation" ng-controller="CustomMenuCtrl">
@@ -305,7 +305,7 @@
                                     <li id="more-sites-id">
                                     </li>
                                 }
-                                
+
                                 @if ((ServerAppConfig.Sandbox.BI.Enabled && !string.IsNullOrWhiteSpace(ServerAppConfig.Sandbox.BI.AdminEmail) && emailAddress.ToLower() == ServerAppConfig.Sandbox.BI.AdminEmail.ToLower()) || (showManageSite && !ServerAppConfig.Sandbox.BI.Enabled))
                                 {
                                     @if (showYourSites)
@@ -393,47 +393,47 @@
         </nav>
     }
 </aside>
- <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
-    var userTenantsUrl = "@Url.Action("GetUserTenants", "User")";
-    var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
-    var idpUrl = "@idPUrl";
-    var dashboardPageUrl = "@Url.Action("Dashboards", "Dashboards")";
-    var dataSourcesPageUrl = "@Url.Action("DataSources", "DataSources")";
-    var linkedDashboardsPageUrl = "@Url.Action("ViewLinkedDashboards", "DataSources")";
-    var schedulePageUrl = "@Url.Action("Schedules", "Scheduler")";
-    var publishPageUrl = "@Url.Action("GetPublishedItems", "Publish")";
-    var profilePageUrl = "@Url.Action("Profilepage", "User")";
-    var homepagePageUrl = "@System.Net.WebUtility.UrlDecode(Url.Action("Homepages", "Boards"))";
-    var slideshowPageUrl = "@Url.Action("Slideshows", "Slideshow")";
-    var adminPageUrl = "@Url.Action("Administration", "Administration")";
-    var userPageurl = "@Url.Action("Index", "UserManagement")";
-    var groupPageurl = "@Url.Action("Group", "Group")";
-    var groupPermissionUrl = "@Url.Action("grouppermission", "permission")";
-    var userPermissionUrl = "@Url.Action("userpermission", "permission")";
-    var currentUrlLocalPath = "@requestUrl.LocalPath.ToLower()";
-    var boldETLUrl = @Json.Serialize(navigateETLUrl);
-    var aiAgentPageUrl = @Json.Serialize(aiAgentPageUrl);
-    var isMobile = @Json.Serialize(isMobile);
-    var isImageRequest = @Json.Serialize(isImageRequest);
-    var isAdmin = @Json.Serialize(Convert.ToBoolean(Context.Session.GetString("IsAdmin")));
+<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var userTenantsUrl = "@Url.Action("GetUserTenants", "User")";
+        var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
+        var idpUrl = "@idPUrl";
+        var dashboardPageUrl = "@Url.Action("Dashboards", "Dashboards")";
+        var dataSourcesPageUrl = "@Url.Action("DataSources", "DataSources")";
+        var linkedDashboardsPageUrl = "@Url.Action("ViewLinkedDashboards", "DataSources")";
+        var schedulePageUrl = "@Url.Action("Schedules", "Scheduler")";
+        var publishPageUrl = "@Url.Action("GetPublishedItems", "Publish")";
+        var profilePageUrl = "@Url.Action("Profilepage", "User")";
+        var homepagePageUrl = "@System.Net.WebUtility.UrlDecode(Url.Action("Homepages", "Boards"))";
+        var slideshowPageUrl = "@Url.Action("Slideshows", "Slideshow")";
+        var adminPageUrl = "@Url.Action("Administration", "Administration")";
+        var userPageurl = "@Url.Action("Index", "UserManagement")";
+        var groupPageurl = "@Url.Action("Group", "Group")";
+        var groupPermissionUrl = "@Url.Action("grouppermission", "permission")";
+        var userPermissionUrl = "@Url.Action("userpermission", "permission")";
+        var currentUrlLocalPath = "@requestUrl.LocalPath.ToLower()";
+        var boldETLUrl = @Json.Serialize(navigateETLUrl);
+        var aiAgentPageUrl = @Json.Serialize(aiAgentPageUrl);
+        var isMobile = @Json.Serialize(isMobile);
+        var isImageRequest = @Json.Serialize(isImageRequest);
+        var isAdmin = @Json.Serialize(Convert.ToBoolean(Context.Session.GetString("IsAdmin")));
     @{
 #pragma warning disable SCS0029
     }
-    var customUI = @Html.Raw(Json.Serialize(globalAppSettings.SystemSettings.CustomUI));
-    var isMaster = @Json.Serialize(globalAppSettings.SystemSettings.IsMaster);
-    var userPermissionItem = @Html.Raw(userPermissionItem);
-    var isUserBasedMenu = @Json.Serialize(isUserBasedMenu);
-    var isAzureAppService = @Json.Serialize(isAzureAppService);
-    var ishideDashboardMenu = @Json.Serialize(ishideDashboardMenu);
-    var enablePublishModule = @Json.Serialize(@ServerAppConfig.IsSelfHosted) ? @Json.Serialize(ServerAppConfig.EnablePublishModule) : @Json.Serialize(globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule);
-    var allItemsCount = @Html.Raw(JsonConvert.SerializeObject(allItemsCount));
-    var isShowDataHub = @Json.Serialize(isShowDataHub);
+        var customUI = @Html.Raw(Json.Serialize(globalAppSettings.SystemSettings.CustomUI));
+        var isMaster = @Json.Serialize(globalAppSettings.SystemSettings.IsMaster);
+        var userPermissionItem = @Html.Raw(userPermissionItem);
+        var isUserBasedMenu = @Json.Serialize(isUserBasedMenu);
+        var isAzureAppService = @Json.Serialize(isAzureAppService);
+        var ishideDashboardMenu = @Json.Serialize(ishideDashboardMenu);
+        var enablePublishModule = @Json.Serialize(@ServerAppConfig.IsSelfHosted) ? @Json.Serialize(ServerAppConfig.EnablePublishModule) : @Json.Serialize(globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule);
+        var allItemsCount = @Html.Raw(JsonConvert.SerializeObject(allItemsCount));
+        var isShowDataHub = @Json.Serialize(isShowDataHub);
     @{
 #pragma warning restore SCS0029
     }
-    var hasOwnedDashboard = @Json.Serialize(hasOwnedDashboard);
-    var isUMSLogoInherited = @Json.Serialize(isUMSLogoInherited);
-    var headerLogo = "@globalAppSettings.SystemSettings.MainScreenLogo";
-    var hideMenusAndOptions = @Json.Serialize(hideMenusAndOptions);
-    var isUnifiedAIAgentEnabled = @Json.Serialize(isUnifiedAIAgentEnabled);
+        var hasOwnedDashboard = @Json.Serialize(hasOwnedDashboard);
+        var isUMSLogoInherited = @Json.Serialize(isUMSLogoInherited);
+        var headerLogo = "@globalAppSettings.SystemSettings.MainScreenLogo";
+        var hideMenusAndOptions = @Json.Serialize(hideMenusAndOptions);
+        var isUnifiedAIAgentEnabled = @Json.Serialize(isUnifiedAIAgentEnabled);
 </script>

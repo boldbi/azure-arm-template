@@ -25,7 +25,7 @@
     var isMobile = new DeviceDetection(Context).IsMobile;
     var menuClass = isMobile ? "collapse width" : "collapse in";
     var includeMessageBox = ViewBag.MessageBox == null || ViewBag.MessageBox == true;
-    var faviconLogo = globalAppSettings.SystemSettings.FavIcon;
+    var faviconLogo = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.FavIcon, Context);
     var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var tourCookie = Context.Request.Cookies["syncfusion.dashboards.server.tour"];
     var isEmbed = (ViewBag.isEmbed != null && ViewBag.isEmbed == "true") ? true : false;
@@ -63,6 +63,7 @@
     var createItemMenuStyle = string.Empty;
     var addSampleItemStyle = string.Empty;
     var addCategoryStyle = string.Empty;
+    var bulkMoveDashboardsStyle = string.Empty;
     var publishDashboardStyle = string.Empty;
     var dashboardSecurityStyle = string.Empty;
     var itemVersionStyle = string.Empty;
@@ -72,6 +73,7 @@
     var createSlideshowScript = string.Empty;
     var createCategoryScript = string.Empty;
     var editCategoryScript = string.Empty;
+    var bulkMoveDashboardsScript = string.Empty;
     var createItemMenuScript = string.Empty;
     var userGroupSuggestion = string.Empty;
     var itemActionScript = string.Empty;
@@ -120,6 +122,7 @@
             createItemMenuStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-item-menu.css");
             addSampleItemStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/addsampleitem.css");
             addCategoryStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/add-category.css");
+            bulkMoveDashboardsStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/move-bulk-dashboard.css");
             publishDashboardStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/publish-dashboard.css");
             dashboardSecurityStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/dashboard-security.css");
             itemVersionStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/itemversion.css");
@@ -129,6 +132,7 @@
             createSlideshowScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-slideshow.js");
             createCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/add-category.js");
             editCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/edit-category.js");
+            bulkMoveDashboardsScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/move-bulk-dashboard.js");
             createItemMenuScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-item-menu.js");
             userGroupSuggestion = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/item-user-group-suggestion.js");
             itemActionScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/itemaction.js");
@@ -139,6 +143,7 @@
             createItemMenuStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/create-item-menu.min.css");
             addSampleItemStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/addsampleitem.min.css");
             addCategoryStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/add-category.min.css");
+            bulkMoveDashboardsStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/move-bulk-dashboard.min.css");
             publishDashboardStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/publish-dashboard.min.css");
             dashboardSecurityStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/dashboard-security.min.css");
             itemVersionStyle = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/css/itemversion.min.css");
@@ -148,6 +153,7 @@
             createSlideshowScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-slideshow.min.js");
             createCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/add-category.min.js");
             editCategoryScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/edit-category.min.js");
+            bulkMoveDashboardsScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/move-bulk-dashboard.min.js");
             createItemMenuScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/create-item-menu.min.js");
             userGroupSuggestion = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/item-user-group-suggestion.min.js");
             itemActionScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/itemaction.min.js");
@@ -233,6 +239,7 @@
         var createItemMenuStyle = @Json.Serialize(createItemMenuStyle);
         var addSampleItemStyle = @Json.Serialize(addSampleItemStyle);
         var addCategoryStyle = @Json.Serialize(addCategoryStyle);
+        var bulkMoveDashboardsStyle = @Json.Serialize(bulkMoveDashboardsStyle);
         var publishDashboardStyle = @Json.Serialize(publishDashboardStyle);
         var dashboardSecurityStyle = @Json.Serialize(dashboardSecurityStyle);
         var itemVersionStyle = @Json.Serialize(itemVersionStyle);
@@ -242,6 +249,7 @@
         var createSlideshowScript = @Json.Serialize(createSlideshowScript);
         var createCategoryScript = @Json.Serialize(createCategoryScript);
         var editCategoryScript = @Json.Serialize(editCategoryScript);
+        var bulkMoveDashboardsScript = @Json.Serialize(bulkMoveDashboardsScript);
         var createItemMenuScript = @Json.Serialize(createItemMenuScript);
         var userGroupSuggestion = @Json.Serialize(userGroupSuggestion);
         var validateDashboardCountUrl = "@Url.Action("ValidateDashboardCreateLimit", "Items")";

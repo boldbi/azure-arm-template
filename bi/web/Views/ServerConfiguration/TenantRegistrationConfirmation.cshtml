@@ -7,11 +7,12 @@
     var orgName = string.Empty;
     var headerLogo = string.Empty;
     var footerlogo = string.Empty;
+    var idpUrl =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context);
     if ((bool)(ViewBag.appsettings.SystemSettings.UseCustomBranding))
     {
-        headerLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=login";
-        favLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon" + "&ramd=" + Syncfusion.Server.Base.Helpers.DateTimeHelper.DateTimeToUnixTimeStamp(DateTime.Now);
-        footerlogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=poweredby";
+        headerLogo = idpUrl + "/ums/logos?type=login";
+        favLogo = idpUrl + "/ums/logos?type=favicon" + "&ramd=" + Syncfusion.Server.Base.Helpers.DateTimeHelper.DateTimeToUnixTimeStamp(DateTime.Now);
+        footerlogo = idpUrl + "/ums/logos?type=poweredby";
         orgName = ViewBag.appsettings.SystemSettings.OrganizationName;
     }
     else if (!string.IsNullOrWhiteSpace(ViewBag.appsettings.SystemSettings.LoginLogo))
@@ -61,7 +62,7 @@
         var statusTracker;
         var setSystemSettingsUrl = "@Url.Action("SetSystemSettings", "ServerConfiguration")";
         var progressStatusUrl = "@Url.Action("ProgressStatus", "ServerConfiguration")";
-        var idpUrl = "@ServerAppConfig.InternalAppIdpUrl";
+        var idpUrl = "@idpUrl";
         var drmValue = "@ServerAppConfig.DRM";
         var isFirstTenant = @Json.Serialize(isFirstTenant);
         var siteRegistrationCompleted = false;
@@ -201,7 +202,7 @@
                 </div>
                 <div class="user-name">@Html.Raw(string.Format(T["Hello, {0}Welcome to {1} Enterprise Dashboards"].Value, "<span></span></div><div class='welcome-content'>", @ServerAppConfig.BrandingJson.BrandingName))</div>
                 <div class="tenant-parent-container">
-                    <a class="admin-link-container" rel="alternate" hreflang="en" href="@ServerAppConfig.InternalAppIdpUrl/@ServerAppConfig.TenantManagementHostName/sites">
+                    <a class="admin-link-container" rel="alternate" hreflang="en" href="@idpUrl/@ServerAppConfig.TenantManagementHostName/sites">
                         <table class="admin-options">
                             <tr>
                                 <td class="action-logo" rowspan="2">

@@ -10,12 +10,15 @@
 
     var isAppLogin = controller.Equals("authorization", StringComparison.OrdinalIgnoreCase) && action.Equals("login", StringComparison.OrdinalIgnoreCase);
 
-    if (isServerLogin || isAppLogin)
+    if (string.IsNullOrWhiteSpace(GlobalAppSettings.StorageValidation.ValidationMessage))
     {
-        Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+        if (isServerLogin || isAppLogin)
+        {
+            Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+        }
     }
-    else
-    {
-        Layout = "~/Views/Shared/_Layout.cshtml";
     }
-}

@@ -348,15 +348,16 @@ $(document).on("change", "#dashboardtheme-file", function (e) {
     var themeName = fileName.substring(0, fileName.indexOf('.'));
     $("#dashboard-theme-file-name").val(fileName);
     $('#upload-dashboardtheme').attr("disabled", "disabled");
-
+    $(".validation-message").html("");
     var fileInput = document.getElementById('dashboardtheme-file');
     var filePath = fileInput.value;
     var allowedExtensions = /(\.css)$/i;
+
     if (!allowedExtensions.exec(filePath)) {
-        $('#applicationtheme-name').closest('div').addClass("has-error");
-        $("#invalid-applicationtheme-name").html(window.Server.App.LocalizationContent.AvoidSpecailCharacters);
-        $('.upload-theme').attr("disabled", "disabled");
-        $(".validation-message").html("");
+        $('#dashboardtheme-file').closest('div').addClass("has-error");
+        $("#invalid-dashboardthemefile-name").html(window.Server.App.LocalizationContent.CssFile);
+        $('#upload-dashboardtheme, #dashboardtheme-name').attr("disabled", "disabled");
+       
     }
     else if (!specialChar.test(themeName)) {
         $('#dashboardtheme-file').closest('div').addClass("has-error");

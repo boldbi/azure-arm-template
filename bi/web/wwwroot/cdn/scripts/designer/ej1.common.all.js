@@ -1,7 +1,7 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 14.2.4
-*  Copyright Syncfusion Inc. 2001 - 2025. All rights reserved.
+*  version : 15.1.65
+*  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
 *  licensing@syncfusion.com. Any infringement will be prosecuted under
@@ -959,7 +959,7 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
             var fn = null, returnValue, args, clientProp = {};
             bbdesigner$.extend(clientProp, eventProp)
 
-            if (eventName in this.model)
+            if (this.model && eventName in this.model)
                 fn = this.model[eventName];
 
             if (fn) {
@@ -6068,7 +6068,7 @@ window.BoldBIDashboard = window.SyncfusionBoldBIDashboard = window.SyncfusionBol
 
                     // ONLY trigger a 'tap' event if the startPoint target is
                     // the same as the stopPoint target.
-                    if (origTarget === e.currentTarget) {
+                    if (origTarget === e.currentTarget && bbdesigner$(e.currentTarget).find('.e-cloneproperties.e-dragclone').length === 0) {
                         initiateCustomEvent(thisObj, "tap", bbdesigner$.extend(_getBaseOptions(e), {
                             time: getTimeSpan() - d.startTime
                         }));
@@ -22855,8 +22855,10 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
             else {
                 this._showResult();
                 this.wrapper.focus();
-                if (!BoldBIDashboard.isNullOrUndefined(this.inputSearch)) {
+                if (!BoldBIDashboard.isNullOrUndefined(this.inputSearch) && !BoldBIDashboard.isMobile()) {
                     this.inputSearch.focus();
+                } else {
+                    this._seachTextBoxBlur();
                 }
             }
         },

@@ -8,6 +8,9 @@
     ViewBag.BackIconTitle = T["Users"];
     var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
     var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    //Need to add this after including API's
+    var isResourcePermissionTab = (Context.Request.Query["tab"].ToString().ToLower() == "" || Context.Request.Query["tab"].ToString().ToLower() == "resource-permission") ? "active" : string.Empty;
+    var isResourceFeaturePermissionTab = (Context.Request.Query["tab"].ToString().ToLower() == "resource-feature-permission") ? "active" : string.Empty;
 }
 
 @model List<ItemDetail>
@@ -27,6 +30,8 @@
         var addnewuserpermissionUrl = "@Url.Action("addnewpermission", "permission")";
         var deleteuserPermissionUrl = "@Url.Action("DeleteUserPermission", "permission")";
         var resourceManagePermissionUrl = "@Url.Action("IsUserHasResourceManagePermission", "permission")";
+        // var resourcePermissionUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ResourcePermission)";
+        // var resourceFeaturePermissionUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ResourceFeaturePermission)";
     </script>
     <environment include="Development,CloudDevelopment">
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/permissionpage.js"></script>
@@ -45,7 +50,26 @@
         <div id="user-header" class="col-12 bi-page-header tabs-header-padding top-nav-btn-secton">
             <div class="col-12 no-padding">
                 <div class="col-xs-6 no-padding button-section">
-                    <input type="button" title="@T["Add Permission to the user"]" id="add-permission-button-top" value="@T["Add Permission"]" class="primary-button app-btn-primary float-end" />
+                    <li class="dropdown no-padding float-end">
+                        <button class="dropdown-toggle primary-button app-btn-primary" data-bs-toggle="dropdown" id="new-user-permission-dropdown" title="@T["Add user permission"]">
+                            <span>@T["Add Permission"] </span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu add-user-permission-dropdown multi-level" role="menu" id="permission-dropdown-options">
+	                        <li id="add-resource-permission-option" title="@T["Resource Permission"]">
+                                <a href="#" title="@T["Resource Permission"]" data-bs-toggle="tooltip" data-placement="top">
+			                        <span>@T["Resource Permission"]</span>
+                                </a>
+                            </li>
+
+                            <li id="add-feature-permission-option" title="@T["Resource Feature Permission"]">
+                                <a href="#" title="@T["Resource Feature Permission"]" data-bs-toggle="tooltip" data-placement="top">
+			                        <span>@T["Resource Feature Permission"]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     @if (!ViewBag.IsAdUser)
                     {
                         <a type="button" class="link-button app-btn-link float-end margin-right" href="@Url.Action("ViewProfile", "UserManagement")?id=@ViewBag.UserId">@T["View Profile"]</a>
@@ -53,17 +77,42 @@
                 </div>
             </div>
         </div>
+         <div class="col-12 no-padding bi-page-nav-bar">
+            <ul id="dashboards-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isResourcePermissionTab">
+                    <a href="#resource-permission" id="resource-permission-tab" aria-controls="resource-permission-tab" role="tab" data-user-id="@ViewBag.UserId" data-bs-toggle="tab">@T["Resource Permission"]</a>
+                </li>
+                <li role="presentation" class="@isResourceFeaturePermissionTab">
+                    <a href="#resource-feature-permission" id="resource-feature-permission-tab" aria-controls="resource-feature-permission-tab" data-user-id="@ViewBag.UserId" role="tab" data-bs-toggle="tab">@T["Resource Feature Permission"]</a>
+                </li>
+            </ul>
+        </div>
     </div>
-    <div id="base-container" class="bi-page-container user-permission col-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+    <div id="base-container" role="tabpanel" class="bi-page-container user-permission col-12 @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="bi-page-content col-12 no-padding">
-            <div class="active-directory-form col-12 bi-page-body">
-                <div class="col-md-12 col-12 col-sm-12 permission-grid">@await Html.PartialAsync("_PermissionGrid", Model)</div>
-                <div class="col-md-3">
-                    <div id="add-permission" class="no-padding" style="display:none">
-                        @await Html.PartialAsync("_AddUserPermission")
+
+            <div class="tab-content col-12 no-padding">
+                <div id="resource-permission" role="tabpanel" class="tab-pane active-directory-form col-12 bi-page-body @isResourcePermissionTab">
+                    <div class="col-md-12 col-12 col-sm-12 permission-grid">@await Html.PartialAsync("_PermissionGrid", Model)</div>
+                    <div class="col-md-3">
+                        <div id="add-permission" class="no-padding" style="display:none">
+                            @await Html.PartialAsync("_AddUserPermission")
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="tab-content col-12 no-padding">
+                <div id="resource-feature-permission" role="tabpanel" class="tab-pane active-directory-form col-12 bi-page-body @isResourceFeaturePermissionTab">
+                    <div class="col-md-12 col-12 col-sm-12 feature-permission-grid">@await Html.PartialAsync("_FeaturePermissionGrid", model)</div>
+                    <div class="col-md-3">
+                        <div id="add-feature-permission" class="no-padding" style="display:none">
+                            @await Html.PartialAsync("_AddUserFeaturePermission")
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <input type="hidden" id="user-id-hidden" value="@Context.Request.Query["userid"]" />
     </div>
@@ -79,6 +128,26 @@
             {{/if}}
         </div>
     </script>
+
+    <script type="text/x-jsrender" id="featurecommandstemplate">
+        <div>
+            {{if IsUserPermission && CanDelete}}
+            <span><a href="#" class="delete-feature-permission" data-permission-id="{{:PermissionId}}">@T["Remove"]</a></span>
+            {{else}}
+            <span title="{{:GroupName}}" data-bs-toggle="tooltip"><a href="@Url.Action("grouppermission","permission")?groupId={{:TargetId}}">{{:GroupName}}</a></span>
+            {{/if}}
+        </div>
+    </script>
+
+    <script type="text/x-jsrender" id="featureaccessmodetemplate">
+        <div class="access-mode-container">
+            <div class="item-name access-mode-element" title="{{:PermissionAccessDescription}}" data-bs-toggle="tooltip">{{:PermissionAccessDescription}}</div>
+            {{if HasMoreAccess}}
+            <div class="item-name access-mode-link" data-permission-id="{{:PermissionId}}" entity-name="{{:PermissionEntityDescription}}" scope-name="{{:ItemName}}" access-list="{{:AccessModesInfo}}" entity-id="{{:PermissionEntity}}">+ more</div>
+            {{/if}}
+        </div>
+    </script>
+
     <script type="text/x-jsrender" id="accessmodetemplate">
         <div class="item-name" title="{{:PermissionAccessDescription}}" data-bs-toggle="tooltip">{{:PermissionAccessDescription}}</div>
     </script>
@@ -186,7 +255,93 @@
                     ]
 
                 });
+
+                // Resource Feature Permissions
+                $("#add-feature-permission").ejDialog({
+                    width: "800px",
+                    showOnInit: false,
+                    allowDraggable: true,
+                    enableResize: false,
+                    showHeader: false,
+                    height: "537px",
+                    title: "@T["Add New Permission"]",
+                    enableModal: true,
+                    closeOnEscape: true,
+                    close: ''
+                });
+                var addPermissionWaitingPopupTemplateId = createLoader("add-feature-permission_wrapper");
+                $("#add-feature-permission_wrapper").ejWaitingPopup({ template: $("#" + addPermissionWaitingPopupTemplateId) });
+                $("#Feature_Grid").ejGrid({
+                    dataSource: ej.DataManager({ url: "@Url.Action("GetAllResourceFeatureUserPermission", "permission")?userId=" + userId + "&&requiresCounts=true", adaptor: "UrlAdaptor" }),
+                    gridLines: ej.Grid.GridLines.None,
+                    allowPaging: true,
+                    allowSorting: true,
+                    enableAltRow: false,
+                    allowSearching: true,
+                    allowSelection: true,
+                    rowHover: "HoverEf",
+                    pageSettings: { pageSize: 10 },
+                    actionBegin: "fnOnUserFeaturePermissionActionBegin",
+                    actionComplete: function (args) {
+                        $('[data-bs-toggle="tooltip"]').tooltip({ container: $('body') });
+                        if (args.model.currentViewData.length == 0) {
+                            featureGridRowBound();
+                        }
+
+                        showOrHideGridPager("#Feature_Grid");
+                    },
+                    rowDataBound: function () {
+                        var height = $(".e-gridcontent").height();
+                        if (height != null) {
+                            featureGridRowBound();
+                        }
+                    },
+                    dataBound: function (args) {
+                        $('[data-bs-toggle="tooltip"]').tooltip({ container: $('body') });
+                    },
+                    enableRowHover: true,
+                    columns: [
+                        {
+                            allowSorting: true,
+                            headerText: "@T["Access Mode"]",
+                            width: 80,
+                            field: "PermissionAccessDescription",
+                            templateID: "#featureaccessmodetemplate",
+                            headerTemplateID: "#accessmodeheader"
+                        },
+                        {
+                            field: "PermissionEntityDescription",
+                            allowSorting: true,
+                            headerText: "@T["Entity"]",
+                            templateID: "#entitytemplate",
+                            headerTemplateID: "#entityheader",
+                            width: 80
+                        },
+
+                        {
+                            field: "ItemName",
+                            allowSorting: true,
+                            headerText: "@T["Scope"]",
+                            templateID: "#scopetemplate",
+                            headerTemplateID: "#scopeheader",
+                            width: 80
+                        },
+                        {
+
+                            template: true,
+                            allowSorting: false,
+                            headerText: "@T["Actions"]",
+                            templateID: "#featurecommandstemplate",
+                            headerTemplateID: "#actionsheader",
+                            width: (window.innerWidth > 1024) ? 40 : 80
+                        }
+                    ]
+
+                });
+
             });
     </script>
     @await Html.PartialAsync("../Permission/_DeletePermission")
+    @await Html.PartialAsync("../Permission/_DeleteFeaturePermission")
+    @await Html.PartialAsync("../Permission/_FeaturePermissionInfo")
 }

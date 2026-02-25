@@ -20,35 +20,14 @@ REFRESH_TOKEN='{4}'
 # The maximum amount of time (in milliseconds) that you want to wait for the report download.
 TIMEOUT_IN_MILLISECONDS=3600000
 
-def main(authorization_data):
-    try:
-        # You can submit one of the example reports, or build your own.
 
-        report_request=get_report_request(authorization_data.account_id)
-        reporting_download_parameters = ReportingDownloadParameters(
-            report_request=report_request, 
-            overwrite_result_file = True, # Set this value true if you want to overwrite the same file.
-            timeout_in_milliseconds=TIMEOUT_IN_MILLISECONDS # You may optionally cancel the download after a specified time interval.
-        )
-
-        #Download the report in memory with ReportingServiceManager.download_report
-        #The download_report helper function downloads the report and summarizes results.
-        output_status_message("-----\nAwaiting download_report...")
-        download_report(reporting_download_parameters)
-    except WebFault as ex:
-        output_webfault_errors(ex)
-    except Exception as ex:
-        output_status_message(ex)
-
-
-def download_report(reporting_download_parameters):
+def download_report(reporting_download_parameters, reporting_service_manager):
     """ You can get a Report object by submitting a new download request via ReportingServiceManager. 
     Although in this case you will not work directly with the file, under the covers a request is 
     submitted to the Reporting service and the report file is downloaded to a local directory.  """
-    
-    global reporting_service_manager
 
     report_container = reporting_service_manager.download_report(reporting_download_parameters)
+
 
     if(report_container == None):
         output_status_message("There is no report data for the submitted report request parameters.")
@@ -73,7 +52,7 @@ def download_report(reporting_download_parameters):
     # file_path = reporting_download_parameters.result_file_directory + reporting_download_parameters.result_file_name
     # df = pd.read_csv(file_path, header=9, skipfooter=2, engine='python')
     pipelinef = dlt.pipeline(pipeline_name="{0}_pipeline",destination='{9}',staging={10} ,dataset_name="{0}",)
-    load_info = pipelinef.run(df.to_dict(orient="records"), table_name=report_container.report_name)
+    load_info = pipelinef.run(df.to_dict(orient="records"), table_name="{11}")
     # print(df)
     
     #Be sure to close the report.
@@ -202,11 +181,13 @@ if __name__ == '__main__':
     print("Loading the web service client proxies...")
 
     authorization_data=AuthorizationData(
-        account_id=None,
-        customer_id=None,
+        account_id={12},
+        customer_id={13},
         developer_token=DEVELOPER_TOKEN,
         authentication=None,
     )
+
+    authenticate(authorization_data, CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
 
     reporting_service_manager=ReportingServiceManager(
         authorization_data=authorization_data, 
@@ -223,9 +204,21 @@ if __name__ == '__main__':
         authorization_data=authorization_data, 
         environment=ENVIRONMENT,
     )
+    try:
+        report_request = get_report_request({12})
+    
+        params = ReportingDownloadParameters(
+            report_request=report_request,
+            overwrite_result_file=True,
+            timeout_in_milliseconds=TIMEOUT_IN_MILLISECONDS
+        )
+        output_status_message("-----\nAwaiting download_report...")
+    except WebFault as ex:
+        output_webfault_errors(ex)
+    except Exception as ex:
+        output_status_message(ex)
 
-    authenticate(authorization_data, CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
+    download_report(params, reporting_service_manager)
 
-    main(authorization_data)
 
 

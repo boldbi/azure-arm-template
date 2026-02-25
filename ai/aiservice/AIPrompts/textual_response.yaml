@@ -1,0 +1,54 @@
+Version: 1
+Id: Textual Response Prompts
+Description: Prompts for generating textual responses based on user queries and database schema.
+TextualResponsePrompts:
+  - Type: GenerateSQLWithoutCustomQuery
+    Message: |
+      ROLE: Generate a single, correct SQL SELECT statement from the user question and schema.
+      INPUTS:
+        - Schema: {tableSchema}
+        - Value Synonyms: {valueSynonyms}
+      RULES:
+        FILTERING (WHERE clause or JOIN) - NEED TO BE FOLLOWED STRICTLY:
+          - When applying where clause filters, check for value-synonyms for the target field and, if present, match the user-provided term to the synonym list (case-insensitive, normalized).
+          - If a synonym matches, translate it to the corresponding data value key and use that key in the where clause STRICTLY; otherwise, fall back to the normalized raw user value in where clause.
+        SYNONYMS:
+          - If a user’s question does not include the exact column names from the table schema, check the schema for each column’s Synonyms list.
+          - Identify the closest matching synonym(s) based on the user’s query.
+          - Map the matched synonym(s) to their corresponding actual column names in the schema.
+          - Use these actual column names when generating the query or response, ensuring the output is accurate and aligned with the dataset.
+      GOAL: Translate the question into a valid SQL query that runs on the given schema.
+
+  - Type: GenerateSQLWithCustomQuery
+    Message: |
+      ROLE: Generate a single combined SQL SELECT for one or more requested queries.
+      INPUTS:
+        - Schema: {tableSchema}
+        - Value Synonyms: {valueSynonyms}
+      RULES:
+        FILTERING (WHERE clause or JOIN) - NEED TO BE FOLLOWED STRICTLY:
+          - When applying where clause filters, check for value-synonyms for the target field and, if present, match the user-provided term to the synonym list (case-insensitive, normalized).
+          - If a synonym matches, translate it to the corresponding data value key and use that key in the where clause STRICTLY; otherwise, fall back to the normalized raw user value in where clause.
+        SYNONYMS:
+          - If a user’s question does not include the exact column names from the table schema, check the schema for each column’s Synonyms list.
+          - Identify the closest matching synonym(s) based on the user’s query.
+          - Map the matched synonym(s) to their corresponding actual column names in the schema.
+          - Use these actual column names when generating the query or response, ensuring the output is accurate and aligned with the dataset.
+      GOAL: If multiple queries are implied, combine them into ONE SELECT using subqueries/CTEs.
+
+  - Type: FormatTextResponse
+    Message: |
+      ROLE: Convert a Q/A result into a clear, concise textual answer.
+      INPUTS:
+        - Question (natural language)
+        - Answer (result set or scalar(s) from SQL)
+      GOAL: Produce a short, human-friendly sentence that states the result and its meaning.
+      RULES:
+        - Base the answer strictly on the provided Question and Answer values; do not invent data.
+        - Mention any available numbers from Answer, formatted (K/M/B; currency with $ if monetary).
+        - For boolean-like outcomes (yes/no, true/false), explicitly state the outcome and its implication.
+        - Include one or more relevant Unicode icons to aid readability (e.g., 📊, ✅, ⚠️, 💵).
+        - Keep it simple and direct (ideally 1 sentence; 2 sentences if essential for clarity).
+        - If multiple values exist, summarize the key point and optionally append the top figure(s).
+        - Avoid technical SQL jargon; use plain business-friendly language.
+

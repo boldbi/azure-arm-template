@@ -14,7 +14,7 @@
     {
         cdnLink = GlobalAppSettings.HttpPathBase.ToString().Equals("/") ? string.Empty : !string.IsNullOrWhiteSpace(GlobalAppSettings.HttpPathBase) ? GlobalAppSettings.HttpPathBase.ToString() : new Uri(ServerAppConfig.InternalAppBiUrl).AbsolutePath.TrimEnd('/') + "/";
         dashboardServerResourceUrl = !string.IsNullOrWhiteSpace(GlobalAppSettings.HttpPathBase) ? GlobalAppSettings.HttpPathBase.ToString() : new Uri(ServerAppConfig.InternalAppBiUrl).AbsolutePath.TrimEnd('/') + "/";
-        faviconLogo = ServerAppConfig.InternalAppIdpUrl + "/ums/logos?type=favicon";
+        faviconLogo =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/logos?type=favicon";
     }
     else
     {
@@ -25,7 +25,7 @@
 
     if (homePageUrl == string.Empty)
     {
-        homePageUrl = ServerAppConfig.InternalAppIdpUrl + "/ums/homepage";
+        homePageUrl =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/homepage";
     }
     var isAdminUser = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
     var organisationName = globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.OrganizationName : string.Empty;
@@ -125,7 +125,7 @@
                         {
 
                             @Html.Raw(string.Format(T["{0}Go to sites page{1} or {2}Create a support{3} ticket with application logs by referring to this {4}link{5}."].Value,
-                                "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + ServerAppConfig.InternalAppIdpUrl + "/ums/sites'>",
+                                     "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/sites'>",
                                 "</a></span><span class='error-text-color'>",
                                 "</span><span class='error-page-cursor'><a class='error-to-beck-text-color' href='https://www." + (GlobalAppSettings.BrandingDomain) + "/support' target='_blank'>",
                                 "</a></span><span class='error-text-color'>",
@@ -136,7 +136,7 @@
                         {
 
                             @Html.Raw(string.Format(T["{0}Go to sites page{1} or {2}Create a support{3} ticket."].Value,
-                                "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + ServerAppConfig.InternalAppIdpUrl + "/ums/sites'>",
+                                     "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/sites'>",
                                 "</a></span><span class='error-text-color'>",
                                 "</span><span class='error-page-cursor'><a class='error-to-beck-text-color' href='https://www." + (GlobalAppSettings.BrandingDomain) + "/support' target='_blank'>",
                                 "</a></span><span class='error-text-color'>"));
@@ -144,7 +144,7 @@
                         @if (!ServerAppConfig.IsSelfHosted)
                         {
                             @Html.Raw(string.Format(T["{0}Go to sites page{1} or {2}Create a support ticket{3}"].Value,
-                            "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='"+ ServerAppConfig.InternalAppIdpUrl + "/ums/sites'>",
+                                     "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/sites'>",
                             "</a></span><span class='error-text-color'>",
                             "</span><span class='error-page-cursor'><a class='error-to-beck-text-color' href='https://www." +(GlobalAppSettings.BrandingDomain)+ "/support' target='_blank'>",
                             "</a></span>"));

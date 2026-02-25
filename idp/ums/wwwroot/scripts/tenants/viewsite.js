@@ -113,6 +113,21 @@ $(document).ready(function () {
         onAddUsersDialogOpen();
     });
 
+    $(document).on("click", ".site-link", function (e) {
+        e.preventDefault();
+
+        const siteUrl = $(this).data("url");
+
+        $.ajax({
+            url: ValidateSiteUrl,
+            type: "POST",
+            data: { siteUrl: siteUrl },
+            success: function (response) {
+                window.open(response.SiteUrl, '_blank');
+            }
+        });
+    });
+
     var removeUserAccessDialog = new ej.popups.Dialog({
         header: window.Server.App.LocalizationContent.RevokeAccess,
         content: document.getElementById("user-remove-confirmation-dialog-content"),
