@@ -1,0 +1,404 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "WebAppName": {
+      "type": "string",
+      "maxLength": 24,
+      "minLength": 3,
+      "metadata": {
+        "description": "App name for Bold BI Server. The name must be between 3 and 24 characters long, and can contain only numbers and lowercase letters."
+      }
+    },
+    "appServicePlanSize": {
+      "type": "string",
+      "allowedValues": [
+        "P1V3_2Core_8GB_DEV",
+        "P2V3_4Core_16GB_PROD",
+        "P3V3_8Core_32GB_PROD"
+      ],
+      "defaultValue": "P1V3_2Core_8GB_DEV",
+      "metadata": {
+        "description": "The pricing tier size for the App Service Plan."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "maxLength": 24,
+      "minLength": 3,
+      "metadata": {
+        "description": "Storage account name for Bold BI Server. The name must be between 3 to 24 characters long, and can contain only numbers and lowercase letters."
+      },
+      "defaultValue": "boldbistorage"
+    },
+    "storageAccountType": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS"
+      ],
+      "metadata": {
+        "description": "Type of the storage account created"
+      },
+      "defaultValue": "Standard_LRS"
+    },
+    "siteName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Site name for Bold BI (Idp:SiteName)"
+      }
+    },
+    "siteIdentifier": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Site identifier for Bold BI (Idp:SiteIdentifier)"
+      }
+    },
+    "mainLogo": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL for main logo (Idp:MainLogo)"
+      }
+    },
+    "loginLogo": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL for login logo (Idp:LoginLogo)"
+      }
+    },
+    "emailLogo": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL for email logo (Idp:EmailLogo)"
+      }
+    },
+    "favIcon": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL for favicon (Idp:FavIcon)"
+      }
+    },
+    "aiLogo": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL for AI logo (Idp:AILogo)"
+      }
+    },
+    "poweredByLogo": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL for powered-by logo (Idp:PoweredByLogo)"
+      }
+    },
+    "unlockKey": {
+      "type": "secureString",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Bold BI unlock/license key (Idp:UnlockKey)"
+      }
+    },
+    "UserEmail": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Initial admin user email (Idp:UserEmail)"
+      }
+    },
+    "UserPassword": {
+      "type": "secureString",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Initial admin user password (Idp:UserPassword)"
+      }
+    },
+    "databaseServerType": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Database server type, e.g., PostgreSQL (Idp:DatabaseServerType)"
+      }
+    },
+    "databasePort": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Database port (Idp:DatabasePort)"
+      }
+    },
+    "postgresMaintenanceDatabase": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "PostgreSQL maintenance database (Idp:PostgresMaintenanceDatabase)"
+      }
+    },
+    "databaseHost": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Database host (Idp:DatabaseHost)"
+      }
+    },
+    "databaseUser": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Database user (Idp:DatabaseUser)"
+      }
+    },
+    "databasePassword": {
+      "type": "secureString",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Database password (Idp:DatabasePassword)"
+      }
+    },
+    "databaseName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Database name (Idp:DatabaseName)"
+      }
+    },
+    "databaseAdditionalParameters": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Additional connection string parameters (Idp:DatabaseAdditionalParameters)"
+      }
+    },
+    "useSingleTenantDb": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [ true, false ],
+      "metadata": {
+        "description": "Use single tenant database (Idp:BoldUseSingleTenantDb)"
+      }
+    },
+    "showPoweredBySyncfusion": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [ true, false ],
+      "metadata": {
+        "description": "Show 'Powered by Syncfusion' branding (Idp:ShowPoweredBySyncfusion)"
+      }
+    },
+    "showCopyrightInfo": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [ true, false ],
+      "metadata": {
+        "description": "Show copyright information (Idp:ShowCopyrightInfo)"
+      }
+    }
+  },
+  "variables": {
+    "sizeMapping": {
+      "P1V3_2Core_8GB_DEV": "P1v3",
+      "P2V3_4Core_16GB_PROD": "P2v3",
+      "P3V3_8Core_32GB_PROD": "P3v3"
+    },
+    "WebAppSvcPlanWorkerSize": "0",
+    "WebAppSvcPlanSKU": "PremiumV3",
+    "WebAppSvcPlanName": "BoldBIAppSvcPlan",
+    "WebAppSvcPlanSize": "[variables('sizeMapping')[parameters('appServicePlanSize')]]",
+    "WebAppSvcPlanCapacity": 1
+  },
+  "resources": [
+    {
+      "name": "[toLower(parameters('storageAccountName'))]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2022-05-01",
+      "tags": {
+        "displayName": "storageaccount"
+      },
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "properties": {},
+      "dependsOn": []
+    },
+    {
+      "name": "[variables('WebAppSvcPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2022-03-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+      ],
+      "tags": {
+        "displayName": "AppSvcPlan"
+      },
+      "sku": {
+        "name": "[variables('WebAppSvcPlanSize')]",
+        "tier": "[variables('WebAppSvcPlanSKU')]",
+        "size": "[variables('WebAppSvcPlanSize')]",
+        "capacity": "[variables('WebAppSvcPlanCapacity')]"
+      },
+      "properties": {
+        "reserved": false
+      }
+    },
+    {
+      "name": "[parameters('WebAppName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2022-03-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('WebAppSvcPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('WebAppSvcPlanName'))]": "Resource",
+        "displayName": "WebApp"
+      },
+      "properties": {
+        "name": "[parameters('WebAppName')]",
+        "siteConfig": {
+          "metadata": [
+            {
+              "name": "CURRENT_STACK",
+              "value": "dotnetcore"
+            }
+          ]
+        },
+        "clientAffinityEnabled": false,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('WebAppSvcPlanName'))]"
+      },
+      "resources": [
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2022-03-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('WebAppName'))]",
+            "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+          ],
+          "tags": {
+            "displayName": "WebAppSettings"
+          },
+          "properties": {
+            "IdP:AzureBlobStorageAccountName": "[toLower(parameters('storageAccountName'))]",
+            "IdP:AzureBlobServiceEndpoint": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:AzureBlobStorageAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName'))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
+            "IdP:AzureBlobContainerName": "boldbicontainer",
+            "IdP:AzureBlobConnectionType": "https",
+            "IdP:AzureBlobStorageUri": "[concat('https://', toLower(parameters('storageAccountName')), '.blob.core.windows.net/')]",
+            "IdP:StorageType": "AzureBlob",
+            "StorageType": "AzureBlob",
+            "IsAzureApplication": "true",
+            "log4net.Config": "logs\\log4net.config",
+            "WEBSITE_DYNAMIC_CACHE": "0",
+            "WEBSITE_LOAD_USER_PROFILE": "1",
+            "ApplicationUrl": "[concat('https://', parameters('WebAppName'), '.azurewebsites.net')]",
+            "ServiceStartupOrder": "idp_web, idp_api, idp_ums, bi_web, bi_api, bi_jobs, bi_designer, etl_service, ai_service",
+            "Idp:SiteName": "[parameters('siteName')]",
+            "Idp:SiteIdentifier": "[parameters('siteIdentifier')]",
+            "Idp:MainLogo": "[parameters('mainLogo')]",
+            "Idp:LoginLogo": "[parameters('loginLogo')]",
+            "Idp:EmailLogo": "[parameters('emailLogo')]",
+            "Idp:FavIcon": "[parameters('favIcon')]",
+            "Idp:AILogo": "[parameters('aiLogo')]",
+            "Idp:PoweredByLogo": "[parameters('poweredByLogo')]",
+            "Idp:UnlockKey": "[parameters('unlockKey')]",
+            "Idp:UserEmail": "[parameters('UserEmail')]",
+            "Idp:UserPassword": "[parameters('UserPassword')]",
+            "Idp:DatabaseServerType": "[parameters('databaseServerType')]",
+            "Idp:DatabasePort": "[parameters('databasePort')]",
+            "Idp:PostgresMaintenanceDatabase": "[parameters('postgresMaintenanceDatabase')]",
+            "Idp:DatabaseHost": "[parameters('databaseHost')]",
+            "Idp:DatabaseUser": "[parameters('databaseUser')]",
+            "Idp:DatabasePassword": "[parameters('databasePassword')]",
+            "Idp:DatabaseName": "[parameters('databaseName')]",
+            "Idp:DatabaseAdditionalParameters": "[parameters('databaseAdditionalParameters')]",
+            "Idp:BoldUseSingleTenantDb": "[parameters('useSingleTenantDb')]",
+            "Idp:ShowPoweredBySyncfusion": "[parameters('showPoweredBySyncfusion')]",
+            "Idp:ShowCopyrightInfo": "[parameters('showCopyrightInfo')]"
+          }
+        },
+        {
+          "apiVersion": "2022-03-01",
+          "name": "web",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('WebAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('WebAppName'), 'appsettings')]"
+          ],
+          "tags": {
+            "displayName": "WebAppConfig"
+          },
+          "properties": {
+            "netFrameworkVersion": "v8.0",
+            "use32BitWorkerProcess": true,
+            "webSocketsEnabled": true,
+            "alwaysOn": true,
+            "remoteDebuggingEnabled": false,
+            "virtualApplications": [
+              {
+                "virtualPath": "/",
+                "physicalPath": "site\\wwwroot\\idp\\web"
+              },
+              {
+                "virtualPath": "/api",
+                "physicalPath": "site\\wwwroot\\idp\\api"
+              },
+              {
+                "virtualPath": "/ums",
+                "physicalPath": "site\\wwwroot\\idp\\ums"
+              },
+              {
+                "virtualPath": "/bi",
+                "physicalPath": "site\\wwwroot\\bi\\web"
+              },
+              {
+                "virtualPath": "/bi/api",
+                "physicalPath": "site\\wwwroot\\bi\\api"
+              },
+              {
+                "virtualPath": "/bi/jobs",
+                "physicalPath": "site\\wwwroot\\bi\\jobs"
+              },
+              {
+                "virtualPath": "/bi/designer",
+                "physicalPath": "site\\wwwroot\\bi\\dataservice"
+              },
+              {
+                "virtualPath": "/etlservice",
+                "physicalPath": "site\\wwwroot\\etl\\etlservice"
+              },
+              {
+                "virtualPath": "/aiservice",
+                "physicalPath": "site\\wwwroot\\ai\\aiservice"
+              }
+            ],
+            "http20Enabled": true
+          }
+        },
+        {
+          "apiVersion": "2022-03-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('WebAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('WebAppName'), 'appsettings')]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('WebAppName'), 'web')]"
+          ],
+          "properties": {
+            "RepoUrl": "https://github.com/boldbi/azure-arm-template.git",
+            "branch": "v15.2.6",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    }
+  ]
+}
