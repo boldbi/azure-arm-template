@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 15.1.65
+*  version : 15.2.6
 *  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -4797,10 +4797,8 @@
                         this.model.enableTouch = options[prop];
                         if (!this.model.enableTouch) {
                             this.element.addClass("e-touch");
-                            this._off(this.element, "swipeleft swiperight", ".e-gridcontent .e-table");
                         }
                         else {
-                            this._on(this.element, "swipeleft swiperight", ".e-gridcontent .e-table", bbdesigner$.proxy(this._touchGrid, this));
                             this.element.removeClass("e-touch");
                         }
                         break;
@@ -16592,13 +16590,6 @@
                 else
                     this.getFooterTable().find("colgroup").first().replaceWith(this.getHeaderTable().find("colgroup").clone());                
             }
-            var scrollObj = !BoldBIDashboard.isNullOrUndefined(this.getContent().data("BoldBIDashboardScroller")) ? this.getScrollObject() : null;
-            if(scrollObj && scrollObj.isHScroll() && !BoldBIDashboard.isNullOrUndefined(this.getFooterContent()))
-            {
-                this.getFooterContent().find("colgroup").append("<col style='width : " + this.model.scrollSettings.scrollerSize + "px'></col>");
-                if(!this.getFooterContent().find("tr.e-gridSummaryRows td.e-scrollindent").length)
-                this.getFooterContent().find("tr.e-gridSummaryRows").append("<td class='e-scrollindent'></td>");
-            }
         },
         _endRendering: function () {
             if(this.model.allowScrolling && !BoldBIDashboard.isNullOrUndefined(this.getContent().data("BoldBIDashboardScroller")))
@@ -16816,9 +16807,7 @@
                     this._on(this.element, "contextmenu", this._rightClickHandler);
                 this._on(this.element, "click", ".e-gridcontent", this._recordClick);
                 this._enableRowHover();
-                if (this.model.enableTouch)
-                    this._on(this.element, "swipeleft swiperight", ".e-gridcontent div > .e-table", bbdesigner$.proxy(this._touchGrid, this));
-                else
+                if (!this.model.enableTouch)
                     this.element.addClass("e-touch");
                 this._on(this.element, "mousedown", ".e-gridheader", this._headerMouseDown);
                 if (this.model.allowRowDragAndDrop && this.model.selectionType == "multiple")

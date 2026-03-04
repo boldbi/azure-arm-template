@@ -29,6 +29,7 @@
         var isSecureConnection = "@isSecureConnection.ToString()" == "True";
         var ignoreSslValidation = "@(GlobalAppSettings.SystemSettings.IgnoreSslValidation.ToString())".toLowerCase()  == "true";
         var validateIPWhitelistedUrl = "@Url.Action("IsIPWhitelisted", "TenantsManagement")";
+        var preventTenantProxyDomainAutoUpdate = "@(GlobalAppSettings.SystemSettings.PreventTenantProxyDomainAutoUpdate.ToString())".toLowerCase()  == "true";
         var restartLink = "@restartLink";
         var currentOrgin = "@currentOrgin";   
         var newproxy = "@protocol";
@@ -91,8 +92,7 @@
             }
 
             function getProtocol() {
-                var p = String($protocolSelect.val() || '').trim().toLowerCase();
-                return p.replace(/:\/\//, '');
+                return document.getElementById("enable-ssl").ej2_instances[0].value;
             }
 
             function buildUrl() {
@@ -109,7 +109,14 @@
             }
             
             $siteInput.on('input blur', updatePreviews);
-            $protocolSelect.on('change', updatePreviews);
+            var select = document.getElementById("enable-ssl");
+
+            if (select.ej2_instances && select.ej2_instances.length) {
+                select.ej2_instances[0].addEventListener('change', updatePreviews);
+            } else {
+                $('#enable-ssl').on('change', updatePreviews);
+            }
+
             updatePreviews();
         });
     </script>
@@ -213,7 +220,7 @@
                             </div>
                         </div>
                         <div id="enable-checkbox" class="col-12 float-start no-padding lock-site-url-checkbox" style="margin-top:18px;display:flex; flex-direction: column;">
-                            @Html.CheckBox("slock-site-url", new { @class = "material-checkbox", @id = "lock-site-url" })
+                            @Html.CheckBox("lock-site-url", new { @class = "material-checkbox", @id = "lock-site-url" })
                             @Html.Hidden("lock-site-url")
                             @Html.Label("lock-site-url", T["Lock site URLs and prevent automatic updates from reverse proxy requests"].Value, new { @class = "app-textbox-label col-4 float-start section-label lock-site-url-chkbox" })
                             <div class="form-text ms-4">@T["When enabled, the proxy URL configured above becomes the fixed source of truth. Site domains will change only when updated manually."]</div>

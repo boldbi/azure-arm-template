@@ -388,6 +388,7 @@
                     escapeSpecialChartext: "Escape Special Characters",
 					enableEncryptParameter: "Encrypt Parameters",
 					includeMasterWidgetFilters: "Include Master Widget Filters",
+					includeLinkingInExport: "Include Hyperlinks In Export",
                     mapQueryParameter: "Use Query Parameter Mapping",
                     escapeSpecialCharTooltipInfo: "Know More",
 					enableEncryptCharTooltipInfo: "The parameter with encryption can be configured in the dashboard URL. It does not support the external URL.",

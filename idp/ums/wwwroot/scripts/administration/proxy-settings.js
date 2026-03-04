@@ -20,6 +20,12 @@
             return true;
     }, window.Server.App.LocalizationContent.IsValidUrl);
 
+    if (preventTenantProxyDomainAutoUpdate) {
+        $("#lock-site-url").prop("checked", true);
+    }
+    else {
+        $("#lock-site-url").prop("checked", false);
+    }
 });
 
 $(document).on("click", "#update-proxy-settings", function () {
