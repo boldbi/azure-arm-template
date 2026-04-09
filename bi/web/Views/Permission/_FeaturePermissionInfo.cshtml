@@ -1,0 +1,64 @@
+﻿
+<!-- Access Modes Dialog -->
+<div id="access-modes-dialog" class="no-padding" ng-controller="FeaturePermissionAccessModesController">
+    <div class="col-lg-12 no-padding modal-content" id="container">
+        <div class="col-md-12 modal-header">
+            <div class="col-8 no-padding">
+                <span class="modal-title">@T["Access Modes"]</span>
+            </div>
+            <div class="col-4 no-padding">
+                <a id="close-feature-access-modes-dialog" href="#" class="popup-close"><span class="su su-close  float-end"></span></a>
+                <div id="folder-setting-arrow" class="downArrow" style="left: 37px;"></div>
+            </div>
+        </div>
+
+        <div class="modal-body col-12 no-padding">
+            <div class="col-12 no-padding">
+                <div id="feature-entity-scope-section" class="info-panel">
+                    <div class="access-modes-info-row-sec">
+                        <span class="access-modes-info-key">@T["Entity"]</span>
+                        <span class="access-modes-info-key-separation">:</span>
+                        <span class="access-modes-info-value-sec">{{entityName}}</span>
+                    </div>
+
+                    <div class="access-modes-info-row-sec">
+                        <span class="access-modes-info-key">@T["Scope"]</span>
+                        <span class="access-modes-info-key-separation">:</span>
+                        <span class="access-modes-info-value-sec">{{scopeName}}</span>
+                    </div>
+                </div>
+                
+                <!-- Access Modes: Export + Non-export list -->
+                <div id="access-modes-section" class="modes-panel">
+                    <ul class="modes-list">
+                        <!-- Render items that have children as a bold bullet + numbered sublist -->
+                        <li class="modes-group"
+                            ng-repeat="mode in selectedAccessModes | filter:hasChildren"
+                            ng-if="(mode.children || []).length">
+                            <span class="modes-key">{{ mode.Name }}:</span>
+                            <ol class="modes-sublist">
+                                <li ng-repeat="child in mode.children track by child.Id">
+                                    {{ child.Name }}
+                                </li>
+                            </ol>
+                        </li>
+
+                        <!-- Render items with NO children as plain bullets -->
+                        <li class="modes-item" ng-repeat="mode in selectedAccessModes | filter:noChildren"
+                            ng-if="!(mode.children || []).length">
+                            {{ mode.Name }}
+                        </li>
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-12 modal-footer">
+            <div class="col-8 no-padding float-end margin-top">
+                <input type="button" id="cancel-feature-access-modes-dialog" class="app-button app-secondary-button app-btn-secondary popup-close" value="@T["Cancel"]" />
+            </div>
+        </div>
+    </div>
+</div>

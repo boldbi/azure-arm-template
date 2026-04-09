@@ -1,0 +1,50 @@
+﻿@using Microsoft.AspNetCore.Razor.TagHelpers
+@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+
+﻿@{
+    Layout = null;
+    var imageHelper = new ImageHelper(Context.Request.HttpContext);
+    var currentUserIP = Context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title> @T["Permission Denied"]- @GlobalAppSettings.SystemSettings.OrganizationName</title>
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" asp-append-version="true" />
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var defaultErrorImageSrc = "@Url.Content(CloudAppConfig.FallbackLoginLogoUrl)";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimage = document.getElementById("permission-denied-page");
+            if (logoimage) {
+                logoimage.onerror = function () {
+                    this.onerror = null;
+                    this.src = defaultErrorImageSrc;
+                };
+            }
+        });
+    </script>
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img id="permission-denied-page" src="@Url.Content($"{CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')}/logos?type=login")" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@imageHelper.AccessDeniedImage()" class="error-image-2">
+                </div>
+                <div class="error-type">@T["Access Denied"]</div>
+                <div class="error-text">
+                    @string.Format(T["Sorry, you do not have permission to access this website from your current IP address {0}. Only authorized IP addresses are allowed."].Value,currentUserIP)
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

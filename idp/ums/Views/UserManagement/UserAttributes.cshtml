@@ -1,0 +1,99 @@
+﻿@{
+    var userDetail = (User)ViewBag.UserDetail;
+    ViewBag.Title = T["User Profile"].Value + " - " + T["Attributes"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/user-management-profile.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/user-management-profile.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+
+@section scripts{
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/user-management-profile.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/user-management-profile.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        $(document).on("click", "#edit-user-attribute", function () {
+            editCustomAttribute(this);
+        });
+
+        $(document).on("click", "#remove-user-attribute", function () {
+            deleteConfirmation(this);
+        });
+
+        var userAttributesUrl = "@Url.Action("GetUserAttributes", "CustomAttribute")";
+        var userId = "@userDetail.UserId";
+        var userAttributesPageUrl = "@Url.Action("UserAttributes", "UserManagement")?userId=@userDetail.UserId";
+        var addUserCustomAttributeUrl = "@Url.Action("AddUserCustomAttribute", "CustomAttribute")";
+        var editUserCustomAttributeUrl = "@Url.Action("UpdateUserCustomAttribute", "CustomAttribute")";
+        var deleteUserCustomAttributeUrl = "@Url.Action("DeleteUserCustomAttribute", "CustomAttribute")";
+        var isUserCustomAttributeNameExistUrl = "@Url.Action("IsUserAttributeNameExists", "CustomAttribute")";
+    </script>
+
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-name-template">
+        <span class="grid-content" title="${Name}">${Name}</span>
+    </script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-description-template">
+        <span class="grid-content" title="${Description}">${Description}</span>
+    </script>
+    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-value-template">
+        ${if (CanEncrypt)}
+        <span class="grid-content" title="*****">*****</span>
+        ${else}
+        <span class="grid-content" title="${Value}">${Value}</span>
+        ${/if}
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_UserProfileMenu")
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div class="admin-page-header col-md-12 col-lg-12 col-sm-12 float-start">
+            <div class="col-6 float-start no-padding">
+                <a class="back-button float-start text-decoration-none" href="@Url.Action("Index", "UserManagement")" data-bs-toggle="tooltip" data-bs-original-title="@T["Users"]" data-bs-placement="bottom" data-bs-container="body">
+                    <i class="su su-arrow-back"> </i>
+                </a>
+                <div class="admin-page-header-description col-6 float-start no-padding">
+                    <hgroup class="col-12 float-start header-group">
+                        <h1 class="page-title" id="display-name">@T["Attributes"]</h1>
+                    </hgroup>
+                </div>
+            </div>
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+        <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
+            <div class="col-12 float-start no-padding">
+                <div class="col-6 no-padding admin-header-btn float-end" id="user-management-options">
+                    <button type="button" class="primary-button float-end" id="add-custom-attribute" title="">
+                        @T["Add Attribute"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="user-attributes-container" class="col-md-12 col-sm-12 col-12 col-lg-12 float-start admin-page-content-container" role="tabpanel">
+        <div class="admin-page-content col-12 float-start no-padding">
+            <div class="col-12 float-start no-padding user-attributes-content">
+                <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-12 float-start">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start no-padding">
+                        <div id="grid-tooltip">
+                            <div id="UsersAttributesGrid"></div>
+                        </div>
+                    </div>
+                    <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="options">
+                        <div class="user-hover-options">
+                            <a href="#" class="text-decoration-none" id="edit-user-attribute" title="@T["Edit"]" data-bs-toggle="tooltip" data-id="${Id}" >
+                                <i class="su su-edit"></i>
+                            </a>
+                            <a class="delete-class text-decoration-none" href="#" id="remove-user-attribute" title="@T["Remove"]" data-bs-toggle="tooltip" data-id="${Id}">
+                                <i class="su su-delete"></i>
+                            </a>
+                        </div>
+                    </script>
+
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../TenantsManagement/_AddCustomAttribue")
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

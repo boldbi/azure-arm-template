@@ -1,0 +1,71 @@
+﻿@using Syncfusion.Server.Base.Localization;
+@inject LocalizationHandler localization;
+@{
+    var IsAutomaticActivation = GlobalAppSettings.SystemSettings.ActivationType == ActivationType.AutomaticActivation;
+    var isEmailRequired = GlobalAppSettings.SystemSettings.EmailRequired == EmailRequired.Required;
+}
+<div id="user-add-dialog-wrapper">
+    <div class="modal" tabindex="-1" role="dialog">
+        <div id="user-add-dialog" role="document">
+            <form class="col-lg-12 no-padding add-user-dialog-form modal-content" id="dialog-container" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <div class="modal-body col-12 float-start form">
+                    <div class="col-12 float-start form-padding">
+                        <label class="col-4 float-start app-textbox-label text-end">
+                            @T["Email address"]
+                            @if (isEmailRequired)
+                            {
+                                <span class="mandatory">*</span>
+                            }
+                        </label>
+                        <div class="col-8 float-start no-padding">
+                            <input type="text" id="mailid" maxlength="254" placeholder="@T["Email address"]" class="form-control validation" name="email-address" data-name="email address" />
+                            <span class="useradd-validation-messages" id="invalid-email"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 float-start form-padding">
+                        <label class="col-4 float-start app-textbox-label text-end">@T["Username"]<span class="mandatory">*</span></label>
+                        <div class="col-8 float-start no-padding">
+                            <input type="text" id="username" maxlength="254" placeholder="@T["Username"]" class="form-control validation" name="user-name" data-name="username" />
+                            <span class="useradd-validation-messages" id="invalid-username"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 float-start form-padding">
+                        <label class="col-4 float-start app-textbox-label text-end">@T["First name"]<span class="mandatory">*</span></label>
+                        <div class="col-8 float-start no-padding">
+                            <input type="text" id="firstname" maxlength="254" class="form-control  validation" placeholder="@T["First name"]" name="first-name" data-name="first name" >
+                            <span class="useradd-validation-messages" id="invalid-firstname"></span>
+                        </div>
+                    </div>
+                    <div class="col-12 float-start form-padding last-name">
+                        <label class="col-4 float-start app-textbox-label text-end">@T["Last name"]</label>
+                        <div class="col-8 float-start no-padding">
+                            <input type="text" id="lastname" maxlength="254" class="form-control  validation" placeholder="@T["Last name"]" name="last-name" data-name="last name">
+                            <span class="useradd-validation-messages"></span>
+                        </div>
+                    </div>
+                    @if (IsAutomaticActivation)
+                    {
+                        <div class="col-12 float-start form-padding password" id="form-password">
+                            <label class="col-4 float-start app-textbox-label text-end">@T["Password"]<span class="mandatory">*</span></label>
+                            <div class="col-8 float-start no-padding" style="position:relative;">
+                                <i class="su su-show view-green show-hide-password" id="show-hide-password" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]" data-bs-container="#show-hide-password"> </i>
+                                <input type="password" id="new-password" autocomplete="new-password" maxlength="85" data-bs-toggle="popover" data-bs-original-title="@T["Password must contain:"]" data-bs-trigger="focus" data-bs-html="true" data-bs-content="@PasswordPolicyManagement.DisplayMessageForPasswordPopover(localization)" data-bs-placement="right" class="form-control validation" placeholder="@T["Password"]" name="user-password" data-name="user-password" data-bs-container="#form-password">
+                                <span class="useradd-validation-messages"></span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="col-12 float-start modal-footer">
+                    <div class="col-4 float-start"></div>
+                    <div class="col-6 float-start no-padding">
+                        <input type="button" id="add-user" class="primary-button" value="@T["Add"]" />
+                        <input type="button" id="cancel-user" class="secondary-button popup-close" value="Cancel" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

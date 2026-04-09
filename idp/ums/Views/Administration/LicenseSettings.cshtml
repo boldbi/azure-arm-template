@@ -1,0 +1,337 @@
+﻿@using Syncfusion.Server.Base.DataClasses.Core;
+@using Syncfusion.Server.Base.LicenseManagement.Core;
+@using TimeZoneConverter;
+@model ManageLicense
+@{
+    ViewBag.Title = T["Manage License"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var boldBiLicense = Model != null && Model.LicensePlans != null ? Model.LicensePlans.Where(x => x.TenantType == TenantType.BoldBIOnPremise).FirstOrDefault() : null;
+    var boldReportsLicense = Model != null && Model.LicensePlans != null ? Model.LicensePlans.Where(x => x.TenantType == TenantType.BoldReportsOnPremise).FirstOrDefault() : null;
+    var buildInfoBi = Model != null && Model.BuildInfo != null ? Model.BuildInfo.Where(x => x.Name.ToLower() == AppBranding.Bold.Identifier).FirstOrDefault() : null;
+    var buildInfoReports = Model != null && Model.BuildInfo != null ? Model.BuildInfo.Where(x => x.Name.ToLower() == AppBranding.BoldReports.Identifier).FirstOrDefault() : null;
+    var isBoldBiLicenseAvailable = boldBiLicense != null;
+    var isBoldReportsLicenseAvailable = boldReportsLicense != null;
+    var isAzureApplication = string.IsNullOrEmpty(GlobalAppSettings.Configuration.GetSection("AppSettings")["IsAzureApplication"]) ? false : Convert.ToBoolean(GlobalAppSettings.Configuration.GetSection("AppSettings")["IsAzureApplication"]);
+    var licenseExpired = await LicenseManagement.ValidateBoldLicense();
+    var environment = EnvironmentHelper.GetEnvironment();
+    var boldBiInstalled = Model?.BuildInfo?.Any(x => x.Name == TenantType.BoldBI.ToString()) ?? false;
+    var boldReportsInstalled = Model?.BuildInfo?.Any(x => x.Name == TenantType.BoldReports.ToString()) ?? false;
+    var subcriptionContent = CloudAppConfig.Branding.IsWhiteLabelling ? @T["Subscription"] : @T["Plan & Subscription"];
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/license-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/license-settings.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+
+@section scripts{
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/licenese-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/licenese-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/offline-license-update.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/offline-license-update.js")" crossorigin="anonymous" asp-append-version="true"></script>
+
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var isBoldBILicenseExpired = @Json.Serialize(licenseExpired.IsBoldBILicenseExpired);
+        var updateLicenseKeyUrl = "@Url.Action("ApplyLicenseKey", "Administration")";
+        var isBoldBiLicenseAvailable = "@isBoldBiLicenseAvailable";
+        var isBoldReportsLicenseAvailable = "@isBoldReportsLicenseAvailable";
+        var validateLicenseKeyUrl = "@Url.Action("ValidateLicenseKey", "Administration")";
+        var isBoldReportsLicenseExpired = @Json.Serialize(licenseExpired.IsBoldReportsLicenseExpired);
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div class="col-md-12 float-start admin-page-header header-without-button">
+            <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
+                <hgroup class="col-12 float-start header-group">
+                    <h1 class="page-title">@T["MANAGE LICENSE"]</h1>
+                    <h5 class="page-description">@T["Managing the license and plan for the application"]</h5>
+                </hgroup>
+            </div>
+
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+
+        @if (Model != null && Model.LicensePlans != null)
+        {
+            <div class="col-12 float-start no-padding lic-page-nav-bar">
+                <ul id="license-tab-nav" class="nav nav-tabs" role="tablist">
+                    @if (!CloudAppConfig.Branding.ManageLicenseBranding.ShowInstalledProduct)
+                    {
+                        <li role="presentation" class="active">
+                            <a href="#bold-bi-tab" id="bold-bi" class="text-decoration-none" aria-controls="bold-bi-tab" role="tab" data-bs-toggle="tab">@AppBranding.Bold.ProductName</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#bold-reports-tab" id="bold-reports" class="text-decoration-none" aria-controls="bold-reports-tab" role="tab" data-bs-toggle="tab">@AppBranding.BoldReports.ProductName</a>
+                        </li>
+                    }
+                    else
+                    {
+                        @if (boldBiInstalled)
+                        {
+                            <li role="presentation" class="active">
+                                <a href="#bold-bi-tab" id="bold-bi" class="text-decoration-none" aria-controls="bold-bi-tab" role="tab" data-bs-toggle="tab">@CloudAppConfig.Branding.ProductSpecificBranding.BrandingBIName</a>
+                            </li>
+                        }
+
+                        @if (boldReportsInstalled)
+                        {
+                            <li role="presentation">
+                                <a href="#bold-reports-tab" id="bold-reports" class="text-decoration-none" aria-controls="bold-reports-tab" role="tab" data-bs-toggle="tab">@CloudAppConfig.Branding.ProductSpecificBranding.BrandingReportsName</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+
+    </div>
+    <div id="license-settings-container" class="col-12 float-start admin-page-content-container admin-page-container-with-tab">
+        <div class="admin-page-content col-12 float-start no-padding">
+            @if (Model != null && Model.LicensePlans != null)
+            {
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="bold-bi-tab">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start admin-page-body tab-data">
+                            @if (boldBiLicense != null && boldBiLicense.TenantInfoId != Guid.Empty)
+                            {
+                                <form id="license-settings-form" class="col-md-12 float-start form-horizontal no-padding" autocomplete="off">
+                                    @Html.AntiForgeryToken()
+                                    @if (licenseExpired.IsBoldBILicenseExpired)
+                                    {
+                                        <div class="renew-container">
+                                            <span class="su su-warning-alt"></span>
+                                            <span class="renew-content">@licenseExpired.BoldBIValidationMessage</span>
+                                            <span><a href="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.LicenseError)" class="text-decoration-none" target="_blank">@T["Need help?"]</a></span>
+                                        </div>
+                                    }
+                                    <div id="details-information">
+                                        <div class="col-6 float-start no-margin no-padding">
+                                            <h3 class="title sub-title display-inline">@T["Subscription Information"]</h3>
+                                            <a license-service-url="@($"{ViewBag.GetLicenseUrlForBI}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)" class="title edit-link display-inline text-decoration-none">@T["Edit Subscription"]</a>
+                                        </div>
+                                        <div class="col-6 float-start no-margin no-padding" id="subscription-information">
+                                            <table class="table active-subscription-table-section">
+                                                <tr>
+                                                    <td class="heading">@subcriptionContent</td>
+                                                    <td class="title" style="position:relative">
+                                                        @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+                                                        {
+                                                            <p class="plan">@boldBiLicense.SubscriptionInfo.Plan.PlanName</p>
+                                                        }
+                                                        <p class="display-none">@boldBiLicense.SubscriptionInfo.TenantId</p>
+                                                        <p id="subscription-id-bi"><a class="subscription-link text-decoration-none" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldBiLicense.SubscriptionInfo.TenantId)" class="text-decoration-none" target="_blank">@boldBiLicense.SubscriptionInfo.TenantId</a></p>
+                                                        <button data-bs-toggle="tooltip" class="float-end secondary-button" data-bs-original-title="@T["Click to copy"]" id="subscription-copy-bi">@T["Copy"]</button>
+                                                        <button class="float-end secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrlForBI}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Refresh License"]</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>@T["Licensed To"]</td>
+                                                    <td>@boldBiLicense.LicenseSettings["LicensedTo"]</td>
+                                                </tr>
+                                                @if (!boldBiLicense.SubscriptionInfo.IsPerpetualLicense)
+                                                {
+                                                    <tr>
+                                                        <td>@T["Expiry Date"]</td>
+                                                        <td>@boldBiLicense.SubscriptionInfo.ExpiryDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    </div>
+                                </form>
+                            }
+                            else if (buildInfoBi != null)
+                            {
+                                <div class="new-start-container">
+                                    <div class="new-start-container-bg">
+                                        <span class="first-content">
+                                            @{
+#pragma warning disable SCS0029
+                                            }
+                                            @Html.Raw(string.Format(T["Welcome to {0}{1}{2} Server"].Value, "<span>", AppBranding.Bold.ProductName, "</span>"))
+                                            @{
+#pragma warning restore SCS0029
+                                            }
+                                        </span>
+                                        <span class="second-content">
+                                            @T["See Clearly. Act Boldly."]
+                                        </span>
+                                        @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOnlineActivation)
+                                        {
+                                            <div class="btn-holder">
+                                                <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrlForBI}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
+                                            </div>
+                                        }
+                                        <div class="col-12 float-start align-center">
+                                            <span class="link-header">@T["Behind Firewall?"] <a class="offline-license-acion text-decoration-none" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Upload license file"]</a></span>
+                                        </div>
+                                        @if (!CloudAppConfig.IsHideHelpLink)
+                                        {
+                                            <a class="help col-12 float-start text-decoration-none" href="@(await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.SetupHelp, TenantType.BoldBIOnPremise))" target="_blank">@T["Need setup help?"]</a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-license-container">
+                                    <div class="no-license-container-bg">
+                                        <img class="no-license-image" src="@Url.Content("~/images/static/startup/manage-license-bi.png")" />
+                                        <p class="no-license-description">
+                                            @{
+#pragma warning disable SCS0029
+                                            }
+                                            @Html.Raw(string.Format(T["You do not have a {0} license."].Value, AppBranding.Bold.ProductName))
+                                            @{
+#pragma warning restore SCS0029
+                                            }
+                                        </p>
+                                        <p class="no-license-rediect">@T["Don’t have an account?"] <a class="no-license-signup text-decoration-none" target="_blank" href="@GlobalAppSettings.Configuration.GetSection("AppSettings")["documentation:BaseUri"]/?id=64&mode=on-premise">@T["Sign Up"]</a></p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="bold-reports-tab">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start admin-page-body tab-data">
+                            @if (boldReportsLicense != null && boldReportsLicense.TenantInfoId != Guid.Empty)
+                            {
+                                <form id="license-settings-form" class="col-md-12 float-start form-horizontal no-padding" autocomplete="off">
+                                    @Html.AntiForgeryToken()
+                                    @if (licenseExpired.IsBoldReportsLicenseExpired)
+                                    {
+                                        <div class="renew-container">
+                                            <p class="renew-content">@licenseExpired.BoldReportsValidationMessage</p>
+                                            <span class="su su-warning-alt"></span>
+                                        </div>
+                                    }
+                                    <div id="details-information">
+                                        <div class="col-6 float-start no-margin no-padding">
+                                            <h3 class="title sub-title display-inline">@T["Subscription Information"]</h3>
+                                            <a license-service-url="@($"{ViewBag.GetLicenseUrlForReports}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)" class="title edit-link display-inline text-decoration-none">@T["Edit Subscription"]</a>
+                                        </div>
+                                        <div class="col-7 float-start no-margin no-padding" id="subscription-information">
+                                            <table class="table active-subscription-table-section">
+                                                <tr>
+                                                    <td class="heading">@subcriptionContent</td>
+                                                    <td class="title">
+                                                        @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+                                                        {
+                                                            <p class="plan">@boldReportsLicense.SubscriptionInfo.Plan.PlanName</p>
+                                                        }
+                                                        <p class="display-none">@boldReportsLicense.SubscriptionInfo.TenantId</p>
+                                                        <p id="subscription-id-reports"><a class="subscription-link text-decoration-none" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldReportsLicense.SubscriptionInfo.TenantId)" target="_blank">@boldReportsLicense.SubscriptionInfo.TenantId</a></p>
+                                                        <button data-bs-toggle="tooltip" class="float-end secondary-button" data-bs-original-title="@T["Click to copy"]" id="subscription-copy-reports">@T["Copy"]</button>
+                                                        <button class="float-end secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrlForReports}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Refresh License"]</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>@T["Licensed To"]</td>
+                                                    <td>@boldReportsLicense.LicenseSettings["LicensedTo"]</td>
+                                                </tr>
+                                                @if (!boldReportsLicense.SubscriptionInfo.IsPerpetualLicense)
+                                                {
+                                                    <tr>
+                                                        <td>@T["Expiry Date"]</td>
+                                                        <td>@boldReportsLicense.SubscriptionInfo.ExpiryDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    </div>
+                                </form>
+                            }
+                            else if (buildInfoReports != null)
+                            {
+                                <div class="new-start-container">
+                                    <div class="new-start-container-bg">
+                                        <span class="first-content">
+                                            @{
+#pragma warning disable SCS0029
+                                            }
+                                            @Html.Raw(string.Format(T["Welcome to {0}{1}{2} Server"].Value, "<span>", AppBranding.BoldReports.ProductName, "</span>"))
+                                            @{
+#pragma warning restore SCS0029
+                                            }
+                                        </span>
+                                        <span class="second-content">
+                                            @T["See Clearly. Act Boldly."]
+                                        </span>
+                                        @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOnlineActivation)
+                                        {
+                                            <div class="btn-holder">
+                                                <button type="button" id="online-license-bi" license-service-url="@($"{ViewBag.GetLicenseUrlForReports}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" class="primary-button content-display">@T["Login to activate account"]</button>
+                                            </div>
+                                        }
+                                        <div class="col-12 align-center">
+                                            <span class="link-header">@T["Behind Firewall?"] <a class="offline-license-acion text-decoration-none" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Upload license file"]</a></span>
+                                        </div>
+                                        @if (!CloudAppConfig.IsHideHelpLink)
+                                        {
+                                            <a class="help col-12 float-start" href="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.SetupHelp, TenantType.BoldReportsOnPremise)" target="_blank">@T["Need setup help?"]</a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-license-container">
+                                    <div class="no-license-container-bg">
+                                        <img class="no-license-image" src="@Url.Content("~/images/static/startup/manage-license-reports.png")" />
+                                        <p class="no-license-description ">
+                                            @{
+#pragma warning disable SCS0029
+                                            }
+                                            @Html.Raw(string.Format(T["You do not have a {0} license."].Value, AppBranding.BoldReports.ProductName))
+                                            @{
+#pragma warning restore SCS0029
+                                            }
+                                        </p>
+                                        <p class="no-license-rediect">@T["Don’t have an account?"] <a class="no-license-signup text-decoration-none" target="_blank" href="@GlobalAppSettings.Configuration.GetSection("AppSettings")["documentation:BaseUri"]/?id=4046&mode=on-premise">@T["Sign Up"]</a></p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="no-license-info">
+                    @T["License details not found."]
+                </p>
+            }
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+    <div id="change-subscription-content" class="custom-template"></div>
+    <div id="change-subscription-dialog" class="change-subscription-dialog-content" style="visibility: hidden">
+        @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOnlineActivation)
+        {
+            <div class="col-6 float-start no-margin online-change-subscription-content">
+                <h3 class="title col-12 float-start">@T["From Online"]</h3>
+                <p class="col-12 float-start no-margin">@T["Log into your account portal to change the subscription."]</p>
+                <button id="online-license-bi" license-service-url="" class="link-button online-change-subscription col-12 float-start no-padding">@T["Sign in"]</button>
+            </div>
+            <div class="seperator"></div>
+        }
+        <div class="offline-change-subscription-content col-6 float-start no-margin">
+            <h3 class="title col-12 float-start">@T["From License File"]</h3>
+            @if (CloudAppConfig.Branding.ManageLicenseBranding.CanShowOfflineActivation)
+            {
+                <p class="col-12 float-start no-margin">@T["If you’re behind a firewall, please upload the offline license file."] </p>
+            }
+            else
+            {
+                <p class="col-12 float-start no-margin">@T["Use the offline license file to update the license information."] </p>
+            }
+            <button id="offline-update-bi" data-offlinelicense-url="" data-tenant-type="" class="link-button offline-change-subscription col-12 float-start no-padding">@T["Upload"]</button>
+            @if (!CloudAppConfig.Branding.IsWhiteLabelling)
+            {
+                <div class="col-12 float-start no-margin help-container">If you don’t have the license file, download it <a id="change-subscription-help" class="text-decoration-none" target="_blank" href="">@T["here"]</a>.</div>
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("_offlinelicenseupdate")
+}

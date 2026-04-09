@@ -1,0 +1,39 @@
+﻿@{ 
+    var protocolTypes = new List<SelectListItem>
+    {  new SelectListItem
+        {
+            Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+        },
+        new SelectListItem
+        {
+             Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+        }
+    };
+    var siteUrl = Url.Action("Sites", "TenantsManagement");
+    var existingDomainUrl = GlobalAppSettings.SystemSettings.BaseUrl + siteUrl + "?searchKey=" + GlobalAppSettings.SystemSettings.BaseUrl;
+}
+
+<div class="sub-section no-padding">
+    <h3 class="title sub-section-heading">@T["General"]</h3>
+    <div class="form-group section-content-first">
+        @Html.Label("site-orgname", T["Organization name"].Value, new { @class = "col-12 float-start app-textbox-label" })
+        <div class="no-padding">
+            <input type="text" id="site-orgname" name="site_name" class="form-control site-orgname-fields" placeholder="@T["Enter your organization name"]" value="@ViewBag.SystemSettings.OrganizationName" data-original-value="@ViewBag.SystemSettings.OrganizationName" />
+            <span class="validation-errors" id="site-name-validation"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.Label("enable-ssl-site", T["Site URL"].Value, new { @class = "col-12 float-start app-textbox-label" })
+
+        <div id="ssl-selectpicker" class="input-group no-padding">
+            <div class="input-group-addon">
+                @Html.DropDownList("enableSsl", protocolTypes, new { id = "enable-ssl-site", @class = "enable-ssl-site", data_live_search = "false", disabled = "disabled" })
+            </div>
+            <div class="no-padding">
+                <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="@T["Enter your URL"]" disabled value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+            </div>
+        </div>        
+
+        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
+    </div>
+</div>

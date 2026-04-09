@@ -1,0 +1,58 @@
+﻿@using Microsoft.AspNetCore.Http.Extensions;
+
+@{
+    var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    var currentUrl = requestUrl.LocalPath.TrimEnd('/');
+    var profilePageUrl = Url.Action("Profilepage", "User");
+    var myPremissionPageUrl = Url.Action("UserPermission", "User");
+    var webhookPageUrl = Url.Action("Webhooks", "User");
+    var addWebhookPageUrl = Url.Action("AddWebhookPage", "User");
+    var editWebhookPageUrl = Url.Action("EditWebhookPage", "User");
+    var connectedAccountPageUrl = Url.Action("ConnectedAccounts", "User");
+    var supportTicketsUrl = Url.Action("TicketList", "Support");
+    var connectedSitesPageUrl = Url.Action("ConnectedSites", "User");
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var enablePublishModule = ServerAppConfig.IsSelfHosted ? ServerAppConfig.EnablePublishModule : _globalAppSettings.SystemSettings.PreviewFeatures.EnablePublishModule;
+}
+
+<nav id="bi-side-nav-bar" class="no-margin profile-nav-bar @(isMobile ? "mobile-profile-menu" : string.Empty)">
+    <ul>
+        <li class="admin-menu-item @(currentUrl.IndexOf(profilePageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.Equals(profilePageUrl, StringComparison.CurrentCultureIgnoreCase) ? "active" : string.Empty)">
+            <a id="site-settings-link" href="@profilePageUrl" role="tab">
+                <i class="su su-user-1"></i>
+                <span>@T["My Profile"]</span>
+            </a>
+        </li>
+        <li class="admin-menu-item @(currentUrl.IndexOf(myPremissionPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+            <a id="dashboard-settings-link" href="@myPremissionPageUrl" role="tab">
+                <i class="su su-manage-permission"></i>
+                <span>@T["My Permissions"]</span>
+            </a>
+        </li>
+        @if (!isMobile)
+        {
+            <li class="admin-menu-item @(currentUrl.IndexOf(connectedAccountPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="active-directory-settings-link" href="@connectedAccountPageUrl" role="tab">
+                    <i class="su su-link"></i>
+                    <span>@T["Connected Accounts"]</span>
+                </a>
+            </li>
+        }
+
+        <li class="admin-menu-item @(currentUrl.IndexOf(connectedSitesPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+            <a id="connected-sites-settings-link" href="@connectedSitesPageUrl" role="tab">
+                <i class="su su-connected-sites"></i>
+                <span>@T["Connected Sites"]</span>
+            </a>
+        </li>
+        @if (!isMobile)
+        {
+            <li class="admin-menu-item @(currentUrl.IndexOf(webhookPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(editWebhookPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 || currentUrl.IndexOf(addWebhookPageUrl, StringComparison.CurrentCultureIgnoreCase) > -1 ? "active" : string.Empty)">
+                <a id="dashboard-settings-link" href="@webhookPageUrl" role="tab">
+                    <i class="su su-webhook"></i>
+                    <span>@T["Webhooks"]</span>
+                </a>
+            </li>
+        }
+        </ul>
+</nav>

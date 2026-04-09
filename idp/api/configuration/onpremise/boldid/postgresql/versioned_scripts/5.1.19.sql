@@ -1,0 +1,3 @@
+ALTER TABLE BOLDTC_Tenant ADD COLUMN ProxyFullPathUrl varchar(255) NULL;
+
+ALTER TABLE BOLDTC_Tenant ADD COLUMN PreventProxyDomainAutoUpdate int NOT NULL DEFAULT 0;
