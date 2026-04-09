@@ -1,0 +1,54 @@
+﻿@{
+    var isEnableCopyrightInfo = (bool)ViewBag.SystemSettings.IsEnableCopyrightInfo;
+    var isEnablePoweredBySyncfusion = (bool)ViewBag.SystemSettings.IsEnablePoweredBySyncfusion;
+    var restartLink = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.RestartApplication);
+    var tenantTypeValue =(int)TenantType.BoldBIOnPremise;
+}
+<script nonce="@Context.Items["ScriptNonce"]">
+    var isSitesPage = "true";
+    var isEnableCopyrightInfo = @Json.Serialize(isEnableCopyrightInfo);
+    var isEnablePoweredBySyncfusion = @Json.Serialize(isEnablePoweredBySyncfusion);
+    var ignoreSslValidation = "@(GlobalAppSettings.SystemSettings.IgnoreSslValidation.ToString())".toLowerCase()  == "true";
+    var restartLink = "@restartLink";
+    var tenantTypeValue =  @tenantTypeValue;
+    var validateIPWhitelistedUrl = "@Url.Action("IsIPWhitelisted", "TenantsManagement")";
+</script>
+<div id="site-settings-header" class="col-12 float-start header-section no-padding no-margin width-alignment">
+    <div class="col-md-12 float-start import-area admin-page-header">
+        <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
+            <hgroup class="col-12 float-start header-group">
+                <h1 class="page-title">
+                    @T["Site Settings"]
+                </h1>
+                <h5 class="page-description">@T["Rebrand with your company name, logo, domain, time zone, and date-time display formats."]</h5>
+            </hgroup>
+        </div>
+        <div class="col-4 top-nav-sec no-padding">
+            @await Html.PartialAsync("../Shared/_TopMenu")
+        </div>
+    </div>
+    <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
+        <div class="col-12 float-start no-padding">
+            <div class="col-6 no-padding admin-header-btn float-end" id="user-management-options">
+                <button class="secondary-button float-end" id="cancel-settings">@T["Cancel"]</button>
+                <button type="button" title="" id="update-mail-settings" name="UpdateSystemSettings" class="primary-button float-end update-system-settings">
+                    @T["Save"]
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="look-and-feel-container" class="admin-page-content-container col-12 float-start">
+    <div id="organization-block" class="admin-page-content col-12 float-start no-padding">
+        <form id="look-and-feel-form" class="col-md-12 float-start form-horizontal admin-page-body" autocomplete="off">
+            @Html.AntiForgeryToken()
+            @await Html.PartialAsync("_GeneralSection")
+            @await Html.PartialAsync("_DisplaySection")
+            @await Html.PartialAsync("_BrandingSection")
+        </form>
+        
+    </div>
+
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</div>
+@await Html.PartialAsync("_LocalizationSection")

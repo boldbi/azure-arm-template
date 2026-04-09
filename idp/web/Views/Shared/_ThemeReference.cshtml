@@ -1,0 +1,19 @@
+﻿@{
+    var customThemeClaims = await GlobalAppSettings.GetThemeFromJwtClaims(Context);
+    var themeAppearance = !string.IsNullOrWhiteSpace(customThemeClaims.Appearance) ? customThemeClaims.Appearance
+                                            : GlobalAppSettings.SystemSettings.Theme.Appearance;
+    var applicationTheme = !string.IsNullOrWhiteSpace(customThemeClaims.ApplicationTheme)
+                                          ? customThemeClaims.ApplicationTheme : !string.IsNullOrWhiteSpace(customThemeClaims.Appearance)
+                                          ? customThemeClaims.Appearance
+                                          : GlobalAppSettings.SystemSettings.Theme.ApplicationTheme;
+}
+
+@if (themeAppearance == "light")
+{
+    <link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')/bundles/css/lighttheme.css" asp-append-version="true" />
+}
+else
+{
+    <link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')/bundles/css/darktheme.css" asp-append-version="true" />
+}
+<link rel="stylesheet" href="@CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')/theme/styles/application?theme=@applicationTheme" crossorigin="anonymous" asp-append-version="true" />

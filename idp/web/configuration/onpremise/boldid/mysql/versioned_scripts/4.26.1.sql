@@ -1,0 +1,1 @@
+ALTER TABLE {database_name}.BOLDTC_TenantUser ADD COLUMN LastAccessedDate datetime NULL;

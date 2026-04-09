@@ -1,0 +1,104 @@
+Version: 1
+Id: Summarization Prompts
+Description: Prompts for generating insights and summaries for widgets and dashboards.
+SummarizationPrompts:
+  - Type: WidgetInsights
+    Message: |
+      ROLE: Generate up to four validated insights from a single chart.
+      GOAL: Provide concise, insightful takeaways grounded in the chart’s bindings and data.
+      INSTRUCTIONS:
+        - Examine the chart title, column bindings, and all relevant data points.
+        - Derive four distinct insights maximum (= 4 total).
+        - For non-time series data: produce up to four generic insights revealing patterns, comparisons, anomalies, or growth.
+        - For time series with clear trends/patterns (if supported by data):
+          * Ensure one prescriptive insight (actionable recommendation).
+          * Ensure one predictive insight (forecast).
+          * Remaining insights should be generic.
+        - Each insight must be = 20 words, concise, and unique.
+        - Start each insight on a new line with a bold title followed by a colon and a brief explanation.
+          Example: **Rising Trend:** Values increased 15% QoQ, led by Category A.
+        - Use simplified numeric formats (K/M/B) and emphasize what the numbers imply (comparisons, trends, significance).
+        - Validate each final insight with intermediate calculations; if any insight is not validated, recalculate and regenerate.
+
+  - Type: UnifiedAIWidgetInsights
+    Message: |
+      ROLE: Generate up to four validated insights from a single chart with dynamic emoji.
+      GOAL: Provide concise, insightful takeaways grounded in the chart’s bindings and data, each prefixed by a relevant emoji.
+      INSTRUCTIONS:
+        - Examine the chart title, column bindings, and all relevant data points.
+        - Derive four distinct insights maximum (= 4 total).
+        - Each insight must begin with a dynamic Unicode emoji reflecting sentiment or focus (e.g., trend, risk, growth).
+        - For non-time series data: produce up to four generic insights revealing patterns, comparisons, anomalies, or growth.
+        - For time series with clear trends/patterns (if supported by data):
+          * Ensure one prescriptive insight (actionable recommendation).
+          * Ensure one predictive insight (forecast).
+          * Remaining insights should be generic.
+        - Each insight must be = 20 words, concise, and unique.
+        - Start each insight on a new line with a bold title followed by a colon and a brief explanation.
+          Example: ?? **Rising Trend:** Values increased 15% QoQ, led by Category A.
+        - Use simplified numeric formats (K/M/B) and emphasize implications (comparisons, trends, significance).
+        - Validate each final insight with intermediate calculations; if any insight is not validated, recalculate and regenerate.
+
+  - Type: DashboardPurpose
+    Message: |
+      ROLE: Infer the dashboard’s primary purpose from the user query and widget titles/types.
+      GOAL: Produce a concise statement summarizing the dashboard’s goal.
+      INSTRUCTIONS:
+        - Analyze how the widget titles and types align with the user’s query.
+        - Return a concise, clear summary of the dashboard’s purpose.
+        - If the widget titles are generic (e.g., Card1, Chart1, Grid1, Map1) and lack descriptive details:
+          * Return only the widget titles, comma-separated (no extra commentary).
+
+  - Type: DashboardInsightfulWidgets
+    Message: |
+      ROLE: Select the most meaningful widget titles for summarization.
+      GOAL: Return a comma-separated list of widget titles to use in a dashboard summary.
+      INSTRUCTIONS:
+        - If the dashboard purpose is specific and clearly defined:
+          * Return only the most meaningful widget titles (exactly as provided), comma-separated.
+        - If the dashboard purpose is generic:
+          * Return all provided widget titles (exactly as provided), comma-separated.
+        - Do not include any extra text or explanations.
+
+  - Type: DashboardSummary
+    Message: |
+      ROLE: Generate a concise, high-value dashboard insight summary in HTML.
+      GOAL: Produce distinct, data-driven insights based on provided widget information only.
+      OUTPUT SCOPE:
+        - If only one widget is provided: output exactly one insight.
+        - If two widgets are provided: output exactly two insights.
+        - If three or more widgets are provided: output up to 10 insights total.
+      INSIGHT GUIDELINES:
+        - Focus on notable trends, key comparisons, statistical data, growth rates, anomalies, and distributions.
+        - Emphasize meanings over raw numbers; use comparisons and simplified formats (K/M/B) where helpful.
+        - Each insight must be a single line, = 40 words, starting with a bold title followed by a colon, then normal text.
+        - If clear time-series trends exist: include up to two prescriptive insights with actionable recommendations (only if trends are evident).
+      HTML FORMAT (strict):
+        - For each insight, render:
+          <span style='margin-right: 8px;'>[dynamic Unicode emoji]</span><strong>[Title]:</strong> [Explanation in normal text]
+        - Dynamically select Unicode emoji per insight; must vary based on content/sentiment and be broadly compatible.
+        - Avoid nested <ul> or extra <li> elements after the header or between insights.
+        - Do not wrap output in code fences (no ```html or ```).
+        - Do not use numbering, bullets, or any symbols at the start of each insight line beyond the dynamic icon.
+
+  - Type: UnifiedAIDashboardSummary
+    Message: |
+      ROLE: Create a concise, professional, insight-driven report answering the user's query from provided widgets.
+      INPUTS:
+        - User query: {question}
+        - Widget information: (provided externally)
+      CORE RULES:
+        - Use only values available in the widgets info; do not invent numbers.
+        - Focus on trends, comparisons, statistics, growth, anomalies, and distributions.
+        - Avoid itemized raw data; present synthesized insights.
+        - Use simplified formats (K/M/B) and highlight significance.
+      PRESENTATION FORMAT:
+        - Use clear sections rendered as <h4 style='margin-top: 4px'> with visually distinct titles (emojis, bold, spacing, or underlines).
+        - After each section, insert a blank line.
+        - Under each section, present insights in:
+          <ul style='list-style-type: disc !important; line-height: 18px; display: flex; flex-direction: column; padding-left: 50px; user-select: text; gap: 10px; word-spacing: 2px;'>
+            <li style='user-select: text;'>[insight]</li>
+          </ul>
+        - Do not use asterisks (*) or Markdown anywhere; do not wrap numbers or text with *.
+        - Do not wrap output in code fences (no ```html or ```).
+        - Use emojis to enhance readability and engagement.

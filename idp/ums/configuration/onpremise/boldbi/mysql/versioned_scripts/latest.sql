@@ -1,0 +1,1 @@
+ALTER TABLE {database_name}.BOLDBI_ApiKeyDetails ADD IsApiKeyViewed tinyint(1) NOT NULL default 1;

@@ -1,0 +1,5 @@
+ALTER TABLE BOLDBI_Group ADD GroupLogo NVARCHAR2(1026) NULL;
+ALTER TABLE BOLDBI_Item ADD PublishedDate TIMESTAMP NULL;
+
+INSERT INTO BOLDBI_ExportType (Name, IsActive) VALUES ('DatasourceCache', 1)
+;

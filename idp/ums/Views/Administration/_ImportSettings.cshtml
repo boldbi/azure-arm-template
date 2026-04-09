@@ -1,0 +1,38 @@
+﻿@{
+    var importSettingsStatus = ViewBag.ImportsSettingsStatus ?? false;
+    var importFileName = ViewBag.ImportsSettingsFileName ?? string.Empty;
+    var importSettingsHasError = ViewBag.ImportsSettingsHasError ?? false;
+}
+
+<div class="admin-page-body col-xs-12 no-padding" id="imports-settings-container">
+    <form enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="col-md-12 import-file no-padding">
+            <div class="no-padding">
+                <div class="upload-box no-margin">
+                    <input type="text" class="form-control col-md-6 no-margin" id="filename" value="@T["Browse file path (.zip)"]" readonly>
+                    <span id="import-trigger-file" class="input-group-addon btn popup no-left-border">
+                        ...
+                    </span>
+                    <input type="file" accept=".zip" name="importsettingfile" id="importsettingfile" class="btn popup upload-btn">
+
+                </div>
+                <div class="file-upload-btn">
+                    <button type="button" class="primary-button" id="importsettings-upload" disabled>@T["Upload"]</button>
+                </div>
+                <div id="grid-container" class="col-md-12 no-padding">
+                     <div id="import_setting_grid"></div>
+                </div>
+
+                <input type="hidden" id="imports-settings-status" data-value="@importSettingsStatus" />
+                <input type="hidden" id="imports-settings-file-path" data-value="@importFileName" />
+                <input type="hidden" id="imports-settings-has-error" data-value="@importSettingsHasError" />
+
+               @*  <div class="separator"></div> *@
+               @*  <p class="download-template-text no-padding">
+                    <a href="@Url.Action("DownloadTemplate", "Administration")" class="download-template" title="@T["Download sample template"]">@T["Download Template"]</a>
+                </p> *@
+            </div>
+        </div>
+    </form>
+</div>

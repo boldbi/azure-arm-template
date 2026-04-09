@@ -1,0 +1,245 @@
+﻿@{
+    ViewBag.Title = T["Proxy Settings"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var protocolTypes = new List<SelectListItem>
+    {  new SelectListItem
+        {
+            Text = "http", Value = "http", Selected = !GlobalAppSettings.SystemSettings.IsSecureConnection
+        },
+        new SelectListItem
+        {
+             Text = "https", Value = "https", Selected = GlobalAppSettings.SystemSettings.IsSecureConnection
+        }
+    };
+    var siteUrl = Url.Action("Sites", "TenantsManagement");
+    var existingDomainUrl = GlobalAppSettings.SystemSettings.BaseUrl + siteUrl + "?searchKey=" + GlobalAppSettings.SystemSettings.BaseUrl;
+    var isSecureConnection = GlobalAppSettings.SystemSettings.IsSecureConnection;
+    var restartLink = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.RestartApplication);
+    var currentOrgin = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var protocol = protocolTypes?.FirstOrDefault()?.Value ?? "http";
+    var newproxy = $"{protocol}";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/bundles/css/proxy-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/proxy-settings.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+@section scripts {
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/proxy-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/proxy-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var proxySettingsUrl = "@Url.Action("UpdateProxySettings", "Administration")";
+        var isSecureConnection = "@isSecureConnection.ToString()" == "True";
+        var ignoreSslValidation = "@(GlobalAppSettings.SystemSettings.IgnoreSslValidation.ToString())".toLowerCase()  == "true";
+        var validateIPWhitelistedUrl = "@Url.Action("IsIPWhitelisted", "TenantsManagement")";
+        var preventTenantProxyDomainAutoUpdate = "@(GlobalAppSettings.SystemSettings.PreventTenantProxyDomainAutoUpdate.ToString())".toLowerCase()  == "true";
+        var restartLink = "@restartLink";
+        var currentOrgin = "@currentOrgin";   
+        var newproxy = "@protocol";
+    </script>
+
+    <script>
+        $(function () {
+          var $cbUpdate = $('#update-only-matching');
+          var $cbForce  = $('#force-all-sites');
+          var $warning  = $('.force-site-warning-message');
+
+          if (!$cbUpdate.length || !$cbForce.length || !$warning.length) return;
+
+          if (!$cbUpdate.prop('checked') && !$cbForce.prop('checked')) {
+            $cbUpdate.prop('checked', true);
+          }
+
+          function ensureExclusive($changed, $other) {
+            if ($changed.prop('checked')) {
+              $other.prop('checked', false);
+            } else if (!$other.prop('checked')) {
+              $changed.prop('checked', true);
+            }
+            $warning.toggle($cbForce.prop('checked'));
+          }
+
+          $cbUpdate.on('change', function () { ensureExclusive($cbUpdate, $cbForce); });
+          $cbForce.on('change',  function () { ensureExclusive($cbForce, $cbUpdate); });
+
+          // initial visibility
+          $warning.toggle($cbForce.prop('checked'));
+        });
+    </script>
+    <script>
+        $(function () {
+          var $cb = $('#lock-site-url');
+          var $info = $('.lock-site-url-info-message');
+
+          $info.toggle($cb.prop('checked'));
+
+          $cb.on('change', function () {
+            $info.toggle($cb.prop('checked'));
+          });
+        });
+    </script>
+    
+    <script>
+        $(function () {
+            var $protocolSelect = $('#enable-ssl');
+            var $siteInput = $('#site_url');
+            var $proxyUrlEl = $('#proxyUrl');
+            var $newUrlPreviewEl = $('#newUrlPreview');
+            
+            function normalizeAuthority(value) {
+                if (!value) return '';
+                var val = String(value).trim();
+                val = val.replace(/^\s*https?:\/\//i, '');
+                val = val.replace(/\/+$/g, '');
+                return val;
+            }
+
+            function getProtocol() {
+                return document.getElementById("enable-ssl").ej2_instances[0].value;
+            }
+
+            function buildUrl() {
+                var proto = getProtocol();
+                var authority = normalizeAuthority($siteInput.val() || $siteInput.data('original-value') || '');
+                if (!authority) return '';
+                return proto ? proto + '://' + authority : authority;
+            }
+            
+            function updatePreviews() {
+                var url = buildUrl();
+                $proxyUrlEl.text(url || '—');
+                $newUrlPreviewEl.text(url || '—');
+            }
+            
+            $siteInput.on('input blur', updatePreviews);
+            var select = document.getElementById("enable-ssl");
+
+            if (select.ej2_instances && select.ej2_instances.length) {
+                select.ej2_instances[0].addEventListener('change', updatePreviews);
+            } else {
+                $('#enable-ssl').on('change', updatePreviews);
+            }
+
+            updatePreviews();
+        });
+    </script>
+}
+
+@section MainSection {
+
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div id="proxy-settings-header" class="col-12 float-start col-md-12 col-sm-12 admin-page-header header-without-button">
+            <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
+                <hgroup class="col-12 float-start header-group">
+                    <h1 class="page-title">
+                        @T["Proxy Settings"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Configure a fixed proxy URL to route all site traffic through a reverse proxy or gateway."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+
+        </div>
+
+        <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
+            <div class="col-12 float-start no-padding">
+                <div class=" col-6 float-start no-padding admin-header-btn float-end" id="user-management-options">
+                    <button class="secondary-button float-end" id="cancel-settings">@T["Cancel"]</button>
+                    <button type="button" id="update-proxy-settings" name="update-proxy-settings" class="primary-button float-end">
+                        <span>@T["Save"]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="proxy-container" class="col-12 float-start col-md-12 col-sm-12 admin-page-content-container">
+        <div class="admin-page-content col-12 float-start no-padding">
+            <form id="proxy-settings-form" class="col-md-12 form-horizontal admin-page-body ng-pristine ng-valid" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <div class="sub-section no-padding">
+                    <div class="form-group">
+                        @Html.Label("enable-ssl", T["Site or Proxy URL"].Value, new { @class = "col-12 float-start app-textbox-label" })
+
+                        <div id="ssl-selectpicker" class="input-group no-padding">
+                            <div class="input-group-addon">
+                                @Html.DropDownList("enableSsl", protocolTypes, new { id = "enable-ssl", @class = "enable-ssl", data_live_search = "false" })
+                            </div>
+                            <div class="no-padding">
+                                <input type="text" id="site_url" name="site_url" class="form-control site-url-fields" placeholder="@T["Enter your URL"]" value="@ViewBag.authority" data-original-value="@ViewBag.authority" />
+                            </div>
+                        </div>
+                        <div id="site-url-validation" class="col-12 float-start no-padding validation-errors site-url-validation"></div>
+                        <div class="exist-domain-info">
+                            <div class="info-message site-help-message" style="width: 550px;
+">
+                                @T["This URL will be used as the external access point for sites running behind a reverse proxy."]
+                            </div>
+                            <div class="proxy-preview" role="status" aria-live="polite" style="border: 1px dashed #d9d9d9;background: #fafafa;border-radius: 8px;padding: 10px 14px;color: #555;margin: 12px 0;font-size: 12px;width: 550px;">
+                                <span class="preview-label" style="font-weight: 600;color: #333;margin-right: 8px;">Preview:</span>
+                                <span class="preview-text" style="color: #666;">
+                                    <span id="proxyUrl" class="proxy-url" style="display: inline-block;background: #f5f8fb;border: 1px solid #ccc;padding: 2px 6px;border-radius: 15px;margin-left: 6px;font-family: monospace;font-size: 13px;">@Html.Raw(T["New Proxy {0}://{1}"].Value.Replace("{0}", @newproxy?.ToString().Trim().TrimEnd(':', '/')).Replace("{1}", @ViewBag.authority?.ToString().Trim().Trim('/')))</span>
+                                    @T["will be applied based on selected scope below."]
+                                </span>
+                            </div>
+                            <div class="info-message current-site-url-ref-header" style="display:flex; align-items: center;">
+                                <div class="info-message current-site-url-ref-label" style="width: auto;">
+                                    @T["Detected current site URL (reference):"]
+                                </div>
+                                <div class="info-message current-site-url-ref-value" style="display: inline-block;background: #f5f8fb;border: 1px solid #ccc;padding: 2px 6px;border-radius: 15px;margin-left: 6px;font-family: monospace;font-size: 13px;width:auto;">
+                                    @Html.Raw(string.Format(currentOrgin))
+                                </div>
+                            </div>
+                            <!--@Html.CheckBox("domain-change", true, new { @class = "material-checkbox", id = "domain-change" })
+                            @Html.Hidden("domain-change")
+                            <label for="domain-change" class="app-textbox-label no-margin">
+                                @Html.Raw(string.Format(T["Update the URL of the {0}sites{1} that are deployed to the same URL."].Value, "<a target='_blank' class='text-decoration-none' href='" + existingDomainUrl + "'>", "</a>"))
+                            </label> -->
+                            <div class="url-update-mode-container" style="display:flex; flex-direction: column">
+                                <div class="url-update-mode col-12 float-start no-padding" id="enable-checkbox" style="margin-top:18px;display:flex; flex-direction: column;">
+                                    @Html.CheckBox("update-only-matching", new { @class = "material-checkbox", @id = "update-only-matching" })
+                                    @Html.Hidden("update-only-matching")
+                                    @Html.Label("update-only-matching", T["Only sites that currently use this URL"].Value, new { @class = "app-textbox-label col-4 float-start section-label update-only-matching" })
+                                    <div class="form-text ms-4">
+                                        Sites using <div id="oldUrlPreview" style="display: inline-block;background: #f5f8fb;border: 1px solid #ccc;padding: 2px 6px;border-radius: 15px;margin-left: 6px;font-family: monospace;font-size: 13px;">@Html.Raw(string.Format(currentOrgin))</div>
+                                        will be updated to
+                                        <div id="newUrlPreview" style="display: inline-block;background: #f5f8fb;border: 1px solid #ccc;padding: 2px 6px;border-radius: 15px;margin-left: 6px;font-family: monospace;font-size: 13px;">@Html.Raw(T["{0}://{1}"].Value.Replace("{0}", @newproxy?.ToString().Trim().TrimEnd(':', '/')).Replace("{1}", @ViewBag.authority?.ToString().Trim().Trim('/')))</div>.
+                                    </div>
+                                </div>
+                                <div class="url-update-mode col-12 float-start no-padding" id="enable-checkbox" style="margin-top:18px;display:flex; flex-direction: column;">
+                                    @Html.CheckBox("force-all-sites", new {@class = "material-checkbox", @id = "force-all-sites"})
+                                    @Html.Hidden("force-all-sites")
+                                    @Html.Label("force-all-sites", T["Force this URL for all sites"].Value, new { @class = "app-textbox-label col-4 float-start section-label force-all-sites" })
+                                    <div class="form-text ms-4">@T["Overrides the existing domain of every site and applies this URL globally. Use with caution."]</div>
+                                    <div class="force-site-warning-message" style="width:550px; border-radius:4px; display:none; font-size:12px; margin-top:20px; padding:12px; letter-spacing:.26px;background-color:var(--warning-bg-normal-color); border:1px solid var(--warning-border-normal-color);">
+                                        <strong>Warning:</strong>
+                                        @T["This will replace the domain for "] <strong>all</strong> @T[" sites, regardless of their current configuration."]
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="enable-checkbox" class="col-12 float-start no-padding lock-site-url-checkbox" style="margin-top:18px;display:flex; flex-direction: column;">
+                            @Html.CheckBox("lock-site-url", new { @class = "material-checkbox", @id = "lock-site-url" })
+                            @Html.Hidden("lock-site-url")
+                            @Html.Label("lock-site-url", T["Lock site URLs and prevent automatic updates from reverse proxy requests"].Value, new { @class = "app-textbox-label col-4 float-start section-label lock-site-url-chkbox" })
+                            <div class="form-text ms-4">@T["When enabled, the proxy URL configured above becomes the fixed source of truth. Site domains will change only when updated manually."]</div>
+                            <div class="lock-site-url-info-message" style="width:550px; border-radius:4px; display:none; font-size:12px; margin-top:20px; padding:12px; letter-spacing:.26px;background-color:var(--warning-bg-normal-color); border:1px solid var(--warning-border-normal-color);">
+                                @T["Automatic domain detection is disabled. If the reverse proxy domain changes, update the Proxy URL here manually. "]
+                            </div>
+                        </div>
+                        <div id="enable-checkbox" class="col-12 float-start no-padding enable-ssl-checkbox" style="margin-top:18px;display:flex; flex-direction: column;">
+                            @Html.CheckBox("ssl-certificate", new { @class = "material-checkbox", @id = "ssl-certificate" })
+                            @Html.Hidden("c")
+                            @Html.Label("ssl-certificate", T["Ignore the SSL certificate validation errors."].Value, new { @class = "app-textbox-label col-4 float-start section-label ssl-certification" })
+                            <div class="form-text ms-4">@T["Enables connecting to proxies with self-signed/invalid certificates (not recommended for production)."]</div>
+                        </div>
+
+                        <input type="hidden" class="hidden-input" id="scheme_value" data-value="@ViewBag.scheme">
+                    </div>
+                </div>
+            </form>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

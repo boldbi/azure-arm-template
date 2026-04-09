@@ -1,0 +1,103 @@
+﻿@using Syncfusion.Server.Base.DataClasses.Core;
+@{
+    ViewBag.Title = T["Import/Export"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var isExportTab = (string.IsNullOrWhiteSpace(Context.Request.Query["view"]) || Context.Request.Query["view"] == "export-settings") ? "active" : string.Empty;
+    var isImportTab = (Context.Request.Query["view"] == "import-settings") ? "active" : string.Empty;
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/bundles/css/import-export-settings.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/import-export-settings.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+
+@section scripts {
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/import-export-settings.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/import-export-settings.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var exportSettingsUrl = "@Url.Action("ExportSettings", "Administration")";
+        var importSettingsUrl = "@Url.Action("SaveImportSettings", "Administration")";
+        var uploadSettingsUrl = "@Url.Action("UploadImportSettingsFileAction", "Administration")";
+    </script>
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var importSettingsGridColumn = [
+            { field: "SettingsType", headerText: "@T["SettingType"]", width: 150 },
+            {
+                field: "ErrorMessage",
+                headerText: "@T["Error message"]",
+                width: 150,
+                template: "<ul class='no-padding'>${ErrorMessage}</ul>"
+            }
+        ];
+
+        $(document).ready(function () {
+            var userImportGrid = new ejs.grids.Grid({
+                dataSource: [],
+                gridLines: 'None',
+                allowPaging: false,
+                allowSorting: false,
+                allowSelection: false,
+                allowScrolling: false,
+                locale: "en-us",
+                enableAltRow: false,
+                enableHover: true,
+                enableHtmlSanitizer: false,
+                dataBound: onComplete,
+                columns: importSettingsGridColumn,
+            });
+
+            userImportGrid.appendTo("#import_setting_grid");
+        });
+
+        function onComplete(args) {
+            $('[data-toggle="tooltip"]').tooltip({ container: 'body' });
+        }
+    </script>
+}
+
+@section MainSection {
+
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-xs-12 float-start header-section no-padding no-margin width-alignment">
+        <div class="col-md-12 float-start admin-page-header">
+            <div class="admin-page-header-description col-xs-6 float-start no-padding" id="application-title">
+                <hgroup class="col-xs-12 float-start header-group">
+                    <h1 class="page-title">@T["Export / Import Configurations"]</h1>
+                    <h5 class="page-description">@T["Manage and transfer your application settings seamlessly with Import/Export configuration."]</h5>
+                </hgroup>
+            </div>
+            <div class="col-xs-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+        <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
+            <div class="col-xs-12 no-padding">
+                <div class="col-xs-6 float-start no-padding admin-header-btn pull-right  float-end" id="user-management-options">
+                    <button class="secondary-button pull-right float-end" id="cancel-settings">@T["Cancel"]</button>
+                    <button type="button" title="" class="primary-button pull-right float-end" id="export-settings-button">@T["Export"]</button>
+                    <button type="button" title="" class="primary-button pull-right float-end" disabled id="import-settings-button">@T["Import"]</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 no-padding import-export-page-nav-bar">
+            <ul id="import-export-settings-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isExportTab">
+                    <a href="#export-setting" class="text-decoration-none" id="export-setting-tab" aria-controls="export-setting-tab" role="tab" data-bs-toggle="tab">@T["Export"]</a>
+                </li>
+                <li role="presentation" class="@isImportTab">
+                    <a href="#import-setting" class="text-decoration-none" id="import-setting-tab" aria-controls="import-setting-tab" role="tab" data-bs-toggle="tab">@T["Import"]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="import-export-settings-container" role="tabpanel" class="col-xs-12 admin-page-content-container admin-page-container-with-tab">
+        <div class="admin-page-content col-xs-12 no-padding">
+            <div class="tab-content col-xs-12 no-padding">
+                <div class="col-lg-12 col-md-12 col-sm-12 admin-page-body">
+                @await Html.PartialAsync("_ExportSettings")
+           
+                @await Html.PartialAsync("_ImportSettings")
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

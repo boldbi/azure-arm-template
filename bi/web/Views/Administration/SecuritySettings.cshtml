@@ -1,0 +1,232 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Security Settings"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var isNetworkSettingsTab = (Context.Request.Query["tab"].ToString().ToLower() == "network-settings") ? "active" : string.Empty;
+    var isXFrameTab = (Context.Request.Query["tab"].ToString().ToLower() == "x-frame-options") ? "active" : string.Empty;
+    var isCSPTab = (string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) || Context.Request.Query["tab"].ToString().ToLower() == "csp-settings" || (!string.IsNullOrWhiteSpace(Context.Request.Query["tab"]) && string.IsNullOrWhiteSpace(isXFrameTab) && string.IsNullOrWhiteSpace(isNetworkSettingsTab))) ? "active" : string.Empty;
+    var model = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var canShowAdminMenu = await ServerAppConfig.CanShowAdminMenu(model, _identityResponse.IsAdmin, _featureManager);
+    var contentSecurityPolicySettings = ViewBag.ContentSecurityPolicySettings != null ? ViewBag.ContentSecurityPolicySettings : new ContentSecurityPolicy();
+    var styleSources = contentSecurityPolicySettings.StyleSource != null ? contentSecurityPolicySettings.StyleSource.Split(',') : contentSecurityPolicySettings.StyleSource;
+    var scriptSources = contentSecurityPolicySettings.ScriptSource != null ? contentSecurityPolicySettings.ScriptSource.Split(',') : contentSecurityPolicySettings.ScriptSource;
+    var fontSources = contentSecurityPolicySettings.FontSource != null ? contentSecurityPolicySettings.FontSource.Split(',') : contentSecurityPolicySettings.FontSource;
+    var imgSources = contentSecurityPolicySettings.ImageSource != null ? contentSecurityPolicySettings.ImageSource.Split(',') : contentSecurityPolicySettings.ImageSource;
+    var connectSources = contentSecurityPolicySettings.ConnectSource != null ? contentSecurityPolicySettings.ConnectSource.Split(',') : contentSecurityPolicySettings.ConnectSource;
+    var frameSources = contentSecurityPolicySettings.FrameSource != null ? contentSecurityPolicySettings.FrameSource.Split(',') : contentSecurityPolicySettings.FrameSource;
+    var frameAncestor = contentSecurityPolicySettings.FrameAncestor != null ? contentSecurityPolicySettings.FrameAncestor.Split(',') : contentSecurityPolicySettings.FrameAncestor;
+    var isCspEnabled = (bool)contentSecurityPolicySettings.EnableCSP || ServerAppConfig.EnableCSPByDefault;
+    var helpSiteBaseUrl = ServerAppConfig.AppSettings.Documentation.BaseUri;
+    var CSPHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy);
+    var pageDescription = T["Configure security-related settings for your site."];
+    var currentUserIPAddress = Context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+
+@section styles{
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/site-settings.min.css" />
+    </environment>
+}
+
+@section scripts{
+    <environment include="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
+    </environment>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var updateCSPSettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
+        var updateXFrameHeaderSettingsUrl= "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
+        var updateNetworkSettingsUrl = "@Url.Action("UpdateNetworkSettings", "Administration")";
+        var fetchNetworkSettingsUrl = "@Url.Action("GetNetworkSettings", "Administration")";
+        var styleSourcesList = @Html.Raw(Json.Serialize(styleSources));
+        var scriptSourcesList = @Html.Raw(Json.Serialize(scriptSources));
+        var fontSourcesList = @Html.Raw(Json.Serialize(fontSources));
+        var imgSourcesList = @Html.Raw(Json.Serialize(imgSources));
+        var connectSourcesList = @Html.Raw(Json.Serialize(connectSources));
+        var frameSourcesList = @Html.Raw(Json.Serialize(frameSources));
+        var frameAncestorsList = @Html.Raw(Json.Serialize(frameAncestor));
+        var contentSecurityPolicyUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy)";
+        var xFrameOptionUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.XFrameOption)";
+        var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
+        var networkSettingsUrl = helpSiteBaseUrl;
+        var currentUserIP = "@currentUserIPAddress";
+    </script>
+}
+
+
+@section MainSection{
+
+    @await Html.PartialAsync("_AdminMenu")
+    <div class="col-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
+        <div class="col-12 no-padding">
+            @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Security"] }, { "PageDescription", @pageDescription } })
+        </div>
+        <div  id="security-settings-page" class="col-12 bi-page-header tabs-header-padding top-nav-btn-secton">
+            <div id="security-settings-header" class="col-12 no-padding">
+                <div class="col-xs-6 no-padding button-section">
+                    <a href="@Url.Action("Index", "Home")" class="secondary-button app-btn-secondary float-end" id="cancel-site-settings" title="">@T["Cancel"]</a>
+                    <button type="button" title="" id="update-csp-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary float-end">
+                        @T["Save"]
+                    </button>
+                    <button type="button" title="" id="update-x-frame-options-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary float-end">
+                        @T["Save"]
+                    </button>
+                    <button type="button" title="" id="update-network-settings" name="UpdateSystemSettings" class="primary-button app-btn-primary float-end">
+                        @T["Save"]
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 no-padding bi-page-nav-bar">
+            <ul id="cors-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="@isCSPTab">
+                    <a href="#csp-settings" id="csp-settings-tab" aria-controls="csp-settings-tab" role="tab" data-bs-toggle="tab">Content Security Policy</a>
+                </li>
+                <li role="presentation" class="@isXFrameTab">
+                    <a href="#x-frame-options" id="x-frame-options-tab" aria-controls="x-frame-options-tab" role="tab" data-bs-toggle="tab">X-Frame-Options</a>
+                </li>
+                <li role="presentation" class="@isNetworkSettingsTab">
+                    <a href="#network-settings" id="network-settings-tab" aria-controls="network-settings-tab" role="tab" data-bs-toggle="tab">IP Whitelisting</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="security-container" class="bi-page-container bi-page-container-with-tab @(canShowAdminMenu ? string.Empty : "admin-panel-full-width")">
+        <div class="bi-page-content col-12 no-padding">
+            <div class="tab-content col-12 no-padding">
+                <div role="tabpanel" class="tab-pane bi-page-body @isCSPTab" id="csp-settings">
+                    <div id="csp-settings-body" class="col-12 no-padding">
+                        <form id="csp-settings-form" class="no-padding col-12 no-padding content-display text-wrap" autocomplete="off">
+                            <div class="col-12 no-padding enable-csp settings-page-fields">
+                                <div class="col-12 no-padding">
+                                    <div class="info-label">
+                                        @Html.CheckBox("enable-csp", isCspEnabled, new { @class = "material-checkbox" })
+                                        @Html.Hidden("enable-csp")
+                                        <label for="enable-csp">
+                                            @string.Format(T["Enable {0}"].Value, "Content-Security-Policy")
+                                        </label>
+                                    </div>
+                                    <div class="info-message">
+                                        @string.Format(T["You can configure a {0} for your site. {1} will not be applied if this option is disabled."].Value, "content security policy (CSP)", "CSP") @Html.Raw(string.Format(T["Click {0}here{1} to learn more."].Value, "<a class='app-hyperlink' href='" + helpSiteBaseUrl + CSPHelpSiteUrl + "' target='_blank'>", "</a>"))
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
+                                <div class="info-label">
+                                    @Html.Label("style-src", T["Style Source"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @T["This directive specifies valid sources for stylesheets."]
+                                </div>
+                                <span id="style-src-content" class="style-src-input src-input-class">
+                                    <span id="style-src-chip-content" class="style-src-chip src-input-chip"></span>
+                                    <input id="txt-stylesrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="style-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
+                                <div class="info-label">
+                                    @Html.Label("script-src", T["Script Source"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @string.Format(T["This directive specifies valid sources for {0}."].Value, "JavaScript")
+                                </div>
+                                <span id="script-src-content" class="script-src-input src-input-class">
+                                    <span id="script-src-chip-content" class="script-src-chip src-input-chip"></span>
+                                    <input id="txt-scriptsrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="script-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
+                                <div class="info-label">
+                                    @Html.Label("font-src", T["Font Source"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @T["This directive specifies valid sources for fonts."]
+                                </div>
+                                <span id="font-src-content" class="font-src-input src-input-class">
+                                    <span id="font-src-chip-content" class="font-src-chip src-input-chip"></span>
+                                    <input id="txt-fontsrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="font-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
+                                <div class="info-label">
+                                    @Html.Label("img-src", T["Image Source"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @T["This directive specifies valid sources for images."]
+                                </div>
+                                <span id="img-src-content" class="img-src-input src-input-class">
+                                    <span id="img-src-chip-content" class="img-src-chip src-input-chip"></span>
+                                    <input id="txt-imgsrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="img-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
+                                <div class="info-label">
+                                    @Html.Label("conconnecttent-src", T["Connect Source"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @string.Format(T["This directive specifies the sources that can be used to make {0} requests."].Value, "Fetch/XHR")
+                                </div>
+                                <span id="connect-src-content" class="connect-src-input src-input-class">
+                                    <span id="connect-src-chip-content" class="connect-src-chip src-input-chip"></span>
+                                    <input id="txt-connectsrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="connect-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list">
+                                <div class="info-label">
+                                    @Html.Label("frame-src", T["Frame Source"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @string.Format(T["This directive specifies valid sources for the nested document using elements like {0} and {1}."].Value, "<frame>", "<iframe>")
+                                </div>
+                                <span id="frame-src-content" class="frame-src-input src-input-class">
+                                    <span id="frame-src-chip-content" class="frame-src-chip src-input-chip"></span>
+                                    <input id="txt-framesrc" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="frame-src-validation validation-errors"></span>
+                            </div>
+                            <div class="col-12 no-padding settings-page-fields form-fields-top-margin src-names-list bottom-src-bottom-margin">
+                                <div class="info-label">
+                                    @Html.Label("frame-src", T["Frame Ancestors"].Value, new { @class = "app-textbox-label" })
+                                </div>
+                                <div class="info-message">
+                                    @string.Format(T["This directive specifies valid parent domains that may embed a dashboard or complete application using an {0}. However, the CSP header will not apply this directive if the X-Frame-Options has already been enabled."].Value, "<iframe>")
+                                </div>
+                                <span id="frame-ancestors-content" class="frame-ancestors-input src-input-class">
+                                    <span id="frame-ancestors-chip-content" class="frame-ancestors-chip src-input-chip"></span>
+                                    <input id="txt-frameancestors" autocomplete="off" class="form-control validation-padding txt-holder txt-input-src" placeholder="@string.Format(T["Enter a list of {0} separated by commas"].Value, "URLs")" maxlength="253">
+                                </span>
+                                <span class="frame-ancestors-validation validation-errors"></span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane col-md-12 col-12 col-sm-12 bi-page-body @isXFrameTab" id="x-frame-options">
+                    @await Html.PartialAsync("_XFrameOptionsSettings")
+                </div>
+                <div role="tabpanel" class="tab-pane col-md-12 col-12 col-sm-12 bi-page-body @isNetworkSettingsTab" id="network-settings">
+                    @await Html.PartialAsync("_NetworkSettings")
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_Footer", new ViewDataDictionary(ViewData) { { "appsettings", globalAppSettings } })
+    </div>
+    <environment include="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/content-security-policy.min.js"></script>
+    </environment>
+
+}

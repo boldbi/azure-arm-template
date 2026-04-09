@@ -1,0 +1,66 @@
+﻿@{
+    var userDetail = (User)ViewBag.UserDetail;
+    ViewBag.Title = T["Profile"].Value + " - " + T["Attributes"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/profile.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/profile.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+
+@section scripts{
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/profile.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/profile.js")" crossorigin="anonymous" asp-append-version="true"></script>
+       <script nonce="@Context.Items["ScriptNonce"]">
+        var userAttributesUrl = "@Url.Action("GetUserAttributes", "User")";
+        var userId = "@userDetail.UserId";
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        $(document).ready(function () {
+            generateProfileAvatar();
+        });
+    </script>
+
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-name-template">
+        <span class="grid-content" title="${Name}" data-bs-toggle="tooltip">${Name}</span>
+    </script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-description-template">
+        <span class="grid-content" title="${Description}" data-bs-toggle="tooltip">${Description}</span>
+    </script>
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="attribute-value-template">
+        ${if (CanEncrypt)}
+        <span class="grid-content" title="*****" data-bs-toggle="tooltip">*****</span>
+        ${else}
+        <span class="grid-content" title="${Value}" data-bs-toggle="tooltip">${Value}</span>
+        ${/if}
+    </script>
+}
+
+@section MainSection{
+    @await Html.PartialAsync("_UserProfileMenu")
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div class="admin-page-header col-md-12 col-lg-12 col-sm-12 float-start">
+            <div class="col-6 float-start no-padding">
+                <div class="admin-page-header-description col-6 float-start no-padding">
+                    <hgroup class="col-12 float-start header-group">
+                        <h1 class="page-title" id="display-name">@T["Attributes"]</h1>
+                    </hgroup>
+                </div>
+            </div>
+            <div class="col-4 top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+    </div>
+    <div id="user-attributes-container" class="col-md-12 col-sm-12 col-12 col-lg-12 float-start admin-page-content-container height-without-button" role="tabpanel">
+        <div class="admin-page-content col-12 float-start no-padding">
+            <div class="col-12 float-start no-padding user-attributes-content">
+                <div class="admin-page-body col-lg-12 col-md-12 col-sm-12 col-12 float-start">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-start no-padding">
+                        <div id="grid-tooltip">
+                            <div id="UsersAttributesGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+}

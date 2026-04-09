@@ -1,0 +1,114 @@
+@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var themeBasedImageHelper = new ThemeBasedImageHelper(globalAppSettings);
+    var cdnLink = string.Empty;
+    var faviconLogo = string.Empty;
+    var dashboardServerResourceUrl = string.Empty;
+    if (ServerAppConfig.IsSelfHosted)
+    {
+        cdnLink = (GlobalAppSettings.HttpPathBase.ToString().Equals("/") ? string.Empty : GlobalAppSettings.HttpPathBase.ToString()) + ServerAppConfig.AppSettings.EndPoints.CdnLink + "/cdn/images";
+        dashboardServerResourceUrl = GlobalAppSettings.HttpPathBase + ServerAppConfig.AppSettings.EndPoints.CdnLink;
+        faviconLogo =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/logos?type=favicon";
+    }
+    else
+    {
+        cdnLink = @GlobalAppSettings.CdnDomain;
+        dashboardServerResourceUrl = ServerAppConfig.AppSettings.EndPoints.CdnLink.TrimEnd('/');
+        faviconLogo = dashboardServerResourceUrl + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + @ServerAppConfig.BrandingJson.BrandingImages.FavIcon;
+    }
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dns = url.GetLeftPart(UriPartial.Authority);
+    var activateTenantUrl = $"{dns}/bi/site/{globalAppSettings.SystemSettings.TenantIdentifier}/activate-suspended-tenant";
+}
+
+<!DOCTYPE html>
+<html class="dashboard-server">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Site Suspended"] - @GlobalAppSettings.BrandingDisplayName</title>
+    @await Html.PartialAsync("~/Views/Shared/_ApplicationThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_BaseFontStyleSheet.cshtml")
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.css" />
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/error-page.min.css" />
+    </environment>
+    <script @Context.Items["ScriptNonce"]>
+        document.addEventListener("DOMContentLoaded", function () {
+            var initialFaviconPath = "@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var fallbackFaviconPath = "@dashboardServerResourceUrl/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+
+            var faviconLink = document.getElementById("favicon-link");
+            if (faviconLink) {
+                faviconLink.addEventListener("error", function () {
+                    var currentHref = faviconLink.getAttribute("href");
+                    if (currentHref && currentHref.toLowerCase() !== initialFaviconPath.toLowerCase()) {
+                        faviconLink.setAttribute("href", fallbackFaviconPath);
+                    }
+                });
+            }
+        });
+
+</script>
+    @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
+    <link rel="icon" href="@faviconLogo" id="favicon-link" />
+</head>
+<body>
+    <div class="suspended-container-bg">
+        <div class="suspended-conatiner" id="suspended-conatiner">
+            <div id="suspended-main-div">
+                <div class="suspended-logo">
+                    <img src="@themeBasedImageHelper.SuspendedErrorImage()" />
+                </div>
+                <div class="suspended-secondary-div">
+                    @if (ServerAppConfig.Sandbox.BI.Enabled)
+                    {
+                        <div class="suspended-page-title">
+                            @T["Your Dashboard Access is Inactive"]
+                        </div>
+                        <div class="suspended-page-content">
+                            @T["Your subscription was paused due to inactivity. Do not worry your data is safe and can be restored."]
+                        </div>
+                        <div class="suspended-page-content">
+                            @T["To continue using your dashboard, simply reactivate below."]
+                        </div>
+                        <div>
+                            <a href="@activateTenantUrl" class="e-control e-btn e-lib e-primary e-flat" id="activate-suspended-tenant">@T["Reactivate My Access"]</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="suspended-page-title">
+                            @T["Suspended"]
+                        </div>
+                        <div class="suspended-page-content">
+                            @T["Subscriptions to the dashboard have been suspended."]
+                            @if (!ServerAppConfig.IsSelfHosted)
+                            {
+                                <div>
+                                    @{
+#pragma warning disable SCS0029
+                                    }
+                                    @Html.Raw(string.Format(T["If you are a subscription administrator for {0}, you can activate your suspended site {1}here{2}."].Value, globalAppSettings.SystemSettings.OrganizationName, "<a href='" + ServerAppConfig.AppSettings.EndPoints.TenantAppUrl.TrimEnd('/') + "/sites/" + _globalAppSettings.SystemSettings.TenantId + "/subscription' class='redirect-link' target='_blank'>", "</a>"))
+                                    @{
+#pragma warning restore SCS0029
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div>@T["Please contact your System Administrator for more details."]</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
