@@ -36,7 +36,7 @@ Please follow the below step to create the Bold BI Azure web app using the ARM t
 
 	**Web App name**: This is the name of the Bold BI App that you want to have in the URL. As this is going to be the URL, it should be unique globally. The deployment process will get failed if this is present already and you will need to start once again with another name.
     
-    **Storage account name**: This is optional if you have chosen File storage in Storage type and mandatory for Blob storage. This also must be unique as that of the Web App name. Learn more about storage accounts [here](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview).
+    **Storage account name**: This is for Blob storage. This also must be unique as that of the Web App name. Learn more about storage accounts [here](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview).
 
 	**Storage account type**: Required for Blob storage. Learn more about storage account types [here](https://docs.microsoft.com/en-us/azure/storage/blobs/object-replication-overview).
 
