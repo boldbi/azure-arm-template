@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.common.all.js
-*  version : 15.3.8
+*  version : 16.1.90
 *  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -37460,11 +37460,39 @@ BoldBIDashboard.DateRangePicker.Locale['default'] = BoldBIDashboard.DateRangePic
             });
         },
         _toggleCustomRangeSelection: function () {
-            if ((BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) || BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) && BoldBIDashboard.isNullOrUndefined(this.selectedRange)) {
+            var matchedRelativeRange = null;
+            if (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) && !BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) && !BoldBIDashboard.isNullOrUndefined(this.model.ranges)) {
+                var currentStart = this._getDateString(this.selectedStartDate.date);
+                var currentEnd = this._getDateString(this.selectedEndDate.date);
+                this.container.find(".e-dashboarddatepicker-ranges ul li[e-data-value]").each(function (index, el) {
+                    var rangeElement = bbdesigner$(el);
+                    var rangeData = rangeElement.attr("e-data-range");
+                    if (BoldBIDashboard.isNullOrUndefined(rangeData) || matchedRelativeRange !== null) {
+                        return;
+                    }
+                    var range = bbdesigner$.parseJSON(rangeData);
+                    if (Array.isArray(range) && range.length === 2 && range[0] === currentStart && range[1] === currentEnd) {
+                        matchedRelativeRange = rangeElement;
+                    }
+                });
+            }
+            if ((BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) || BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) &&
+                BoldBIDashboard.isNullOrUndefined(this.selectedRange) && BoldBIDashboard.isNullOrUndefined(matchedRelativeRange)) {
                 this._clearRangeSelection();
                 this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").prop({ "disabled": true });
             } else {
                 this._clearRangeSelection();
+                if (!BoldBIDashboard.isNullOrUndefined(matchedRelativeRange)) {
+                    this.selectedRange = matchedRelativeRange;
+                    this.selectedRange.addClass("selected").attr({ "aria-selected": "true" });
+                    if ((BoldBIDashboard.isNullOrUndefined(this.oldSelectedStartDate) && BoldBIDashboard.isNullOrUndefined(this.oldSelectedEndDate)) ||
+                        (+this.selectedStartDate.date !== +this.oldSelectedStartDate.date || +this.selectedEndDate.date !== +this.oldSelectedEndDate.date)) {
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": false });
+                    } else {
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
+                    }
+                    return;
+                }
                 if (this.model.fixedCalendarSelection) {
                     var validRange = this.selectedStartDate.date <= this.selectedEndDate.date;
                     this.container.find(".date-range-alert-message").css("display", validRange ? "none" : "block");

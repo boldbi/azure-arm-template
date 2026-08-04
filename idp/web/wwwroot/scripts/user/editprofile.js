@@ -319,6 +319,7 @@ $(document).on("click", "#image-path", function () {
 });
 
 $(document).on("click", "#edit", function (e) {
+    e.preventDefault();
     var isAdUser = $("#is-aduser").html().toLowerCase();
     $("#user-phonenumber").val(userDetails.Contact);
     $("#user-lastname").val(userDetails.LastName);

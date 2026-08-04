@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    syncPasswordFieldState();
+
     if (typeof loginDisclaimer !== 'undefined' && loginDisclaimer != null && loginDisclaimer.IsEnabled == true && loginDisclaimer.IsConsentCheckboxEnabled == true) {
         $("#login-button").attr("disabled", true);
         $(".link-button").attr("disabled", true);
@@ -18,6 +20,12 @@ $(document).ready(function () {
     var loginForm = $("#login-form");
     if (loginForm.length) {
         loginForm.on("submit", function (event) {
+            if ($("#password-field").css("display") === "none") {
+                event.preventDefault();
+                FormValidate();
+                return;
+            }
+
             if (!FormValidate()) {
                 event.preventDefault();
             }
@@ -71,7 +79,7 @@ $(document).ready(function () {
         },
         onfocusout: function (element) { $(element).valid(); },
         rules: {
-            "email": {
+            "userName": {
                 required: true
             },
             "password": {
@@ -93,7 +101,7 @@ $(document).ready(function () {
             $("#error-password").css("display", "none");
         },
         messages: {
-            "email": {
+            "userName": {
                 required: window.Server.App.LocalizationContent.EmailValidator
             },
             "password": {
@@ -204,6 +212,7 @@ $(document).on("click change", "#login-email", function () {
         $("#password-field").removeClass("has-error");
         $("#login-button").html(window.Server.App.LocalizationContent.ContinueButton);
         $('#current-password').val("");
+        syncPasswordFieldState();
     }
 });
 
@@ -283,6 +292,7 @@ function FormValidate() {
         if ($("#login-form").valid()) {
             $("#password-field, .login-options").slideDown();
             $("#password-field").children(".e-float-input").removeClass("e-error");
+            syncPasswordFieldState(true);
             if (loginContent.toString().trim() !== ""){
                 $("#login-button").html(loginContent);
             }
@@ -298,12 +308,17 @@ function FormValidate() {
             return false;
         }
     } else {
-
+        syncPasswordFieldState(true);
         if ($("#login-form").valid()) {
             showWaitingPopup('body');
         }
         return $("#login-form").valid();
     }
+}
+
+function syncPasswordFieldState(forceRequired) {
+    var isPasswordVisible = $("#password-field").css("display") !== "none";
+    $("#current-password").prop("required", forceRequired === true || isPasswordVisible);
 }
 
 function getParameterByName(name) {

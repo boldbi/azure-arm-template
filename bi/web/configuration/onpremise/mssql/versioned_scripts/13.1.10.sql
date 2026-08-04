@@ -5,5 +5,5 @@ INSERT INTO [BOLDBI_ExportType] (Name, IsActive) SELECT 'DatasourceCache', 1
 WHERE NOT EXISTS (SELECT Name FROM [BOLDBI_ExportType] WHERE Name = 'DatasourceCache')
 ;
 
-ALTER TABLE [BOLDBI_SystemSettings] ADD CONSTRAINT UK_BOLDBI_SystemSettings_Key_SiteId UNIQUE([Key], SiteId)
+ALTER TABLE [BOLDBI_SystemSettings] ADD CONSTRAINT UK_SystemSettings_Key_SiteId UNIQUE([Key], SiteId)
 ;

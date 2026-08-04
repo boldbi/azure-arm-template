@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_CustomEmailTemplate (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     IsEnabled BIT,

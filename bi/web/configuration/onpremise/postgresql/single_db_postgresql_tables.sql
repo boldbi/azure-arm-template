@@ -33,6 +33,7 @@ CREATE TABLE SyncDS_Group(
 	ModifiedDate timestamp NOT NULL,
 	DirectoryTypeId int NOT NULL DEFAULT 0,
 	ExternalProviderId varchar(100) NULL,
+	IsAdminGroup smallint NOT NULL DEFAULT 0,
 	IsActive smallint NOT NULL)
 ;
 
@@ -1380,7 +1381,6 @@ INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUE
 INSERT INTO SyncDS_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Users',1,12,1)
 ;
 
-
 INSERT into SyncDS_ItemCommentLogType (Name,IsActive) VALUES ( N'Added',1)
 ;
 INSERT into SyncDS_ItemCommentLogType (Name,IsActive) VALUES ( N'Edited',1)
@@ -2532,8 +2532,6 @@ ALTER TABLE SyncDS_UserResourceFeaturePermission  ADD  FOREIGN KEY(ItemId) REFER
 ;
 ALTER TABLE SyncDS_UserResourceFeaturePermission  ADD  FOREIGN KEY(UserId) REFERENCES SyncDS_User (Id)
 ;
-ALTER TABLE SyncDS_UserResourceFeaturePermission  ADD FOREIGN KEY(SettingsTypeId) REFERENCES SyncDS_SettingsType (Id) 
-;
 ALTER TABLE SyncDS_UserResourceFeaturePermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES SyncDS_Group (Id)
 ;
 ALTER TABLE SyncDS_UserResourceFeaturePermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES SyncDS_ItemType (Id)
@@ -2544,8 +2542,6 @@ ALTER TABLE SyncDS_GroupResourceFeaturePermission  ADD  FOREIGN KEY(PermissionEn
 ALTER TABLE SyncDS_GroupResourceFeaturePermission  ADD  FOREIGN KEY(ItemId) REFERENCES SyncDS_Item (Id)
 ;
 ALTER TABLE SyncDS_GroupResourceFeaturePermission  ADD  FOREIGN KEY(GroupId) REFERENCES SyncDS_Group (Id)
-;
-ALTER TABLE SyncDS_GroupResourceFeaturePermission  ADD FOREIGN KEY(SettingsTypeId) REFERENCES SyncDS_SettingsType (Id)
 ;
 ALTER TABLE SyncDS_GroupResourceFeaturePermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES SyncDS_Group (Id)
 ;

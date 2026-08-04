@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_Notification (
     Id int NOT NULL AUTO_INCREMENT,
     CurrentUserId int NOT NULL,

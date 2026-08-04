@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Routing;
+@using System.Collections.Generic
 @inject Microsoft.AspNetCore.Mvc.Infrastructure.IActionContextAccessor actionContextAccessor
 @{
     var globalAppSettings = _globalAppSettings;
@@ -23,7 +24,7 @@
         faviconLogo = dashboardServerResourceUrl + "/cdn/images/application/" + @ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + @ServerAppConfig.BrandingJson.BrandingImages.FavIcon;
     }
 
-    if (homePageUrl == string.Empty)
+    if (string.IsNullOrWhiteSpace(homePageUrl))
     {
         homePageUrl =  ServerAppConfig.GetClientServiceUrl(ServerAppConfig.InternalAppIdpUrl, Context) + "/ums/homepage";
     }
@@ -31,12 +32,17 @@
     var organisationName = globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.OrganizationName : string.Empty;
     var errorandDebugHelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ErrorAndDebugLogs);
     var language = globalAppSettings.SystemSettings != null ? globalAppSettings.SystemSettings.Language : System.Globalization.CultureInfo.CurrentCulture.ToString();
-    var loginLogo = globalAppSettings.SystemSettings != null ? _identityResponse.LoginLogo : cdnLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.LoginLogo;
+    var defaultLoginLogo = cdnLink + "/cdn/images/application/" + ServerAppConfig.AppSettings.AppBranding.Identifier + "/" + ServerAppConfig.BrandingJson.BrandingImages.LoginLogo;
+    var loginLogo = globalAppSettings.SystemSettings != null && _identityResponse != null && !string.IsNullOrWhiteSpace(_identityResponse.LoginLogo) ? _identityResponse.LoginLogo : defaultLoginLogo;
     var isDeploymentError = !string.IsNullOrWhiteSpace(ViewBag.TenantErrorMessage);
+    var isUpgradeExecutionError = string.Equals(ViewBag.ErrorType as string, "upgrade_execution", StringComparison.OrdinalIgnoreCase);
+    var upgradeErrorDetails = ViewBag.UpgradeErrorDetails as IEnumerable<KeyValuePair<string, string>>;
+    var upgradeAccessDecision = ViewBag.UpgradeSiteAccessDecision as UpgradeSiteAccessDecision;
     var errorMessage = string.IsNullOrWhiteSpace(ViewBag.TenantErrorMessage) ? ViewBag.ErrorMessage : ViewBag.TenantErrorMessage;
     var canShowOrgName = !isDeploymentError || !string.IsNullOrWhiteSpace(organisationName);
     var url = new Uri(Context.Request.GetDisplayUrl());
     var dns = url.GetLeftPart(UriPartial.Authority);
+    var continueAccessUrl = homePageUrl + (homePageUrl.Contains("?") ? "&" : "?") + "continue-upgrade-access=true";
 }
 <!DOCTYPE html>
 <html class="dashboard-server">
@@ -61,7 +67,7 @@
         var setPermissionUrl = "@Url.Action("SetCookieStoragePermission", "Accounts")";
                 document.addEventListener("DOMContentLoaded", function () {
             // Favicon fallback
-            var initialFaviconPath = "@globalAppSettings.SystemSettings.CDNLink/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.FavIcon";
+            var initialFaviconPath = "@faviconLogo";
             var fallbackFaviconPath = initialFaviconPath;
 
             var faviconLink = document.getElementById("favicon-link");
@@ -75,8 +81,8 @@
             }
 
             // Login logo fallback
-            var initialLogoPath = "@globalAppSettings.SystemSettings.LoginLogo";
-            var fallbackLogoPath = "@cdnLink/cdn/images/application/@ServerAppConfig.AppSettings.AppBranding.Identifier/@ServerAppConfig.BrandingJson.BrandingImages.LoginLogo";
+            var initialLogoPath = "@loginLogo";
+            var fallbackLogoPath = "@defaultLoginLogo";
 
             var loginLogo = document.getElementById("login-logo");
             if (loginLogo) {
@@ -111,7 +117,23 @@
                 @if (!string.IsNullOrWhiteSpace(errorMessage))
                 {
                     <div id="deploy-error-container">
-                        <textarea type="text" id="deploy-error-box" disabled>@errorMessage</textarea>
+                        @if (isUpgradeExecutionError && upgradeErrorDetails != null)
+                        {
+                            <div class="upgrade-error-box" style="width: 500px; height: 120px; overflow: auto; border: 1px solid var(--grey-400); box-sizing: border-box; border-radius: 4px; padding: 12px 36px 12px 14px; text-align: left; background: var(--surface); color: var(--primary-text-normal-color); font-size: 12px; line-height: 20px;">
+                                @foreach (var detail in upgradeErrorDetails)
+                                {
+                                    <div>
+                                        <strong>@detail.Key:</strong>
+                                        <span>@detail.Value</span>
+                                    </div>
+                                }
+                            </div>
+                            <textarea type="text" id="deploy-error-box" disabled style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">@errorMessage</textarea>
+                        }
+                        else
+                        {
+                            <textarea type="text" id="deploy-error-box" disabled>@errorMessage</textarea>
+                        }
                         <span class="su su-copy text focus" id="deploy-error-copy" data-bs-toggle="tooltip" title="@T["Click to copy"]"></span>
                     </div>
                 }
@@ -152,8 +174,27 @@
                     }
                     else
                     {
-                        @if (isAdminUser && ServerAppConfig.IsSelfHosted && !ServerAppConfig.IsHideHelpLink)
-                        { 
+                        @if (isUpgradeExecutionError)
+                        {
+                            @if (upgradeAccessDecision?.CanAccessSite == true)
+                            {
+                                @Html.Raw(string.Format(
+                                    T["{0}Continue to site{1} or {2}create a support ticket{3} with application logs by referring to this {4}link{5}."].Value,
+                                    "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + continueAccessUrl + "' style='color: var(--global-link-text-normal-color); text-decoration: underline;'>",
+                                    "</a></span>",
+                                    "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='https://www." + GlobalAppSettings.BrandingDomain + "/support' target='_blank'>",
+                                    "</a></span><span class='error-text-color'>",
+                                    "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + (ServerAppConfig.AppSettings.Documentation.BaseUri + errorandDebugHelpSiteUrl) + "' target='_blank'>",
+                                    "</a></span>"
+                                ))
+                            }
+                            else
+                            {
+                                <span>@T["Site access is temporarily blocked because the database upgrade could not be safely completed. Review the application logs and resolve the upgrade issue before retrying."]</span>
+                            }
+                        }
+                        else if (isAdminUser && ServerAppConfig.IsSelfHosted && !ServerAppConfig.IsHideHelpLink)
+                        {
                             @Html.Raw(string.Format(T["{0}Go to home page{1} or {2}Create a support{3} ticket with application logs by referring to this {4}link{5}."].Value,
                                 "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + homePageUrl + "'>",
                                 "</a></span><span class='error-text-color'>",
@@ -162,7 +203,7 @@
                                 "</span><span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + (ServerAppConfig.AppSettings.Documentation.BaseUri + errorandDebugHelpSiteUrl) + "' target='_blank'>",
                                 "</a></span>"));
                         }
-                        @if (isAdminUser && ServerAppConfig.IsSelfHosted && ServerAppConfig.IsHideHelpLink)
+                        @if (!isUpgradeExecutionError && isAdminUser && ServerAppConfig.IsSelfHosted && ServerAppConfig.IsHideHelpLink)
                         {
                             @Html.Raw(string.Format(T["{0}Go to home page{1} or {2}Create a support{3} ticket."].Value,
                                 "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='" + homePageUrl + "'>",
@@ -170,7 +211,7 @@
                                 "</span><span class='error-page-cursor'><a class='error-to-beck-text-color' href='https://www." + (GlobalAppSettings.BrandingDomain) + "/support' target='_blank'>",
                                 "</a></span><span class='error-text-color'>"));
                         }
-                        @if (!ServerAppConfig.IsSelfHosted)
+                        @if (!isUpgradeExecutionError && !ServerAppConfig.IsSelfHosted)
                         {
                             @Html.Raw(string.Format(T["{0}Go to home page{1} or {2}Create a support ticket{3}"].Value,
                             "<span class='error-page-cursor'><a class='error-to-beck-text-color' href='"+ homePageUrl + "'>",

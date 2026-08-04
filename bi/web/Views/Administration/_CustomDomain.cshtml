@@ -22,6 +22,9 @@
 <div id="stripePublicKey" style="display:none">
     @ServerAppConfig.AppSettings.Subscription.StripeKey
 </div>
+@{
+#pragma warning restore SCS0029
+}
 <div id="custom-domain-popup" class="fluent-popup" style="display: none">
     <div class="fluent-popup-header">
         <h4 class="popup-title">
@@ -40,7 +43,14 @@
         </div>
         <div class="custom-domain-description text-center">
             <label id="custom-domain-description-label" class="popup-label text-center">
+                @{
+                    // Suppress SCS0029: no direct user input involved
+#pragma warning disable SCS0029
+                }
                 @Html.Raw(string.Format(T["To continue, add a {0} record mapping to the below domain name, for your domain in the {1} settings."].Value, "CNAME", "DNS"))
+                @{
+#pragma warning restore SCS0029
+                }
                 <a class="app-hyperlink" href="@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.CustomDomain))" target="_blank">@T["Learn how to do it."]</a>
             </label>
             <div class="input-group custom-domain-link-div">
@@ -57,7 +67,14 @@
             <div id="domain-validation-message" class="col-12 error-message text-center"></div>
         </div>
         <label id="custom-domain-description-label" class="popup-label text-center">
+            @{
+                // Suppress SCS0029: no direct user input involved
+#pragma warning disable SCS0029
+            }
             @Html.Raw(string.Format(T["Note: Use only a subdomain and not your root domain when adding a {0} record. (For example: if you want use a root domain like {1}, add www as subdomain and update custom domain as {2}."].Value, "CNAME", "yourcompany.com", "www.yourcompany.com"))
+            @{
+#pragma warning restore SCS0029
+            }
         </label>
     </div>
     <div id="custom-domain-footer" class="fluent-popup-footer col-12">

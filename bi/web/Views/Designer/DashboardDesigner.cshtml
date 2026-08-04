@@ -1,5 +1,9 @@
 ﻿@using Newtonsoft.Json
 @{
+    // Suppress SCS0029: no direct user input involved
+#pragma warning disable SCS0029
+}
+@{
     Layout = null;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
@@ -39,6 +43,7 @@
     var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var currentUrlLocalPath = requestUrl.LocalPath.ToLower();
     var baseUrl = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.BaseUrl, Context);
+    var cloudDashboardServiceUrl = isSelfHosted ? globalAppSettings.SystemSettings.BaseUrl : GlobalAppSettings.GetBaseUrlUpToBi(globalAppSettings.SystemSettings.BaseUrl);
     var isImageRequest = currentUrl.IndexOf(".png", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                          currentUrl.IndexOf(".jpg", StringComparison.CurrentCultureIgnoreCase) > 0 ||
                          currentUrl.IndexOf(".gif", StringComparison.CurrentCultureIgnoreCase) > 0 ||
@@ -86,21 +91,69 @@
     var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
     var dashboardCutomTheme = string.Empty;
     var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
-    var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    var embed_mode_param = string.Empty;
+    var isEmbed = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature);
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
-    var isEmbed = (ViewBag.isEmbed != null && ViewBag.isEmbed == "true") ? true : false;
+    // ViewBag.isEmbed may be present, but prefer query/embed signature value already set in `isEmbed` above.
     var embedConfig = ViewBag.EmbedConfig as EmbedConfig;
     var customThemeAppearance = _identityResponse.ThemeAppearance;
+    var resolvedAppearance = customThemeAppearance;
+    var resolvedApplicationTheme = _identityResponse.CustomApplicationTheme;
+    var resolvedDashboardTheme = dashboardCutomTheme;
+
     var nonce = Context.Items["ScriptNonce"]?.ToString();
     var isSingleDatabaseMode = _globalAppSettings.SystemSettings.ConfigurationMode ==
                                ConfigurationMode.SingleDatabaseForAllTenants;
-    if (isEmbedTrue)
+    if (isEmbed)
     {
-        dashboardCutomTheme = Context.Request.Query["embed_theme"];
+        if (!string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
+        {
+            dashboardCutomTheme = Context.Request.Query["embed_theme"];
+            ViewBag.embedThemeEnabled = true;
+        }
+        else if (!string.IsNullOrWhiteSpace(Context.Request.Query["embed_mode"]))
+        {
+            var mode = Context.Request.Query["embed_mode"].ToString().ToLower();
+            if (mode == "dark")
+                embed_mode_param = "dark";
+            else
+                embed_mode_param = "light";
+
+            ViewBag.embedThemeEnabled = true;
+        }
     }
     else
     {
         dashboardCutomTheme = _identityResponse.CustomDashboardTheme;
+    }
+    // Resolve final theme values for JS layer according to priority rules:
+    // Case priority: embed_theme (highest) → embed_mode → defaults
+    var embedThemeProvided = !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    var embedModeProvided = !string.IsNullOrWhiteSpace(Context.Request.Query["embed_mode"]);
+
+    if (isEmbed)
+    {
+        if (embedModeProvided && !embedThemeProvided)
+        {
+            // embed_mode only
+            resolvedAppearance = embed_mode_param;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = string.Empty;
+        }
+        else if (embedThemeProvided && !embedModeProvided)
+        {
+            // embed_theme only
+            resolvedAppearance = string.Empty;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = Context.Request.Query["embed_theme"];
+        }
+        else if (embedThemeProvided && embedModeProvided)
+        {
+            // both provided
+            resolvedAppearance = embed_mode_param;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = Context.Request.Query["embed_theme"];
+        }
     }
 }
 <!DOCTYPE html>
@@ -118,7 +171,6 @@
     <meta name="dashboard_service:url" content="@globalAppSettings.SystemSettings.InternalAppDataServiceUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
     <meta name="etl_service:url" content="@navigateETLUrl" />
-    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="data_service:url" content="@designerServiceUrl" />
     <meta name="datasource_schedule:url" content="@Url.Action("GetRecurrenceTypeView", "DataSources")" />
     <meta name="dashboard:version" content="@ViewBag.Version" />
@@ -145,7 +197,7 @@
     <meta name="globalization:time_format" content="@_clientDateTimeInfo.ClientDateTime.TimeFormat" />
 
     <title>@(ViewBag.dashboardName != null ? ViewBag.dashboardName : "Untitled") - @T["Design Dashboard"] - @globalAppSettings.SystemSettings.OrganizationName</title>
-    @if (isEmbedTrue)
+    @if (isEmbed)
     {
         <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
     }
@@ -231,6 +283,7 @@
         var helpSiteBaseUrl = "@helpSiteBaseUrl";
         var appBranding = "@GlobalAppSettings.Branding";
         var rootUrlAction = "@rootUrl";
+        var cloudDashboardServiceUrl = "@cloudDashboardServiceUrl";
         var isSelfHosted = @Json.Serialize(isSelfHosted);
         var tenantIdentifierPrefix = "@ServerAppConfig.TenantIdentifierPrefix";
         var exportFormat = @Html.Raw(Json.Serialize(ViewBag.ExportFormat));
@@ -243,22 +296,37 @@
         var customHelpLinkDomain = "@(ServerAppConfig.AllowCustomHelpLink ? ServerAppConfig.AppSettings.Documentation.BaseUri : string.Empty)";
         var custombrandName = "@ServerAppConfig.CustomBrandName";
         var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
+        @{
+                    // Suppress SCS0029: no direct user input involved
+    #pragma warning disable SCS0029
+        }
         var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+        @{
+    #pragma warning restore SCS0029
+        }
         var confirmationMessage = "@T["Are you sure you want to close? The current progress will be lost if you continue."]";
-        var dashboardCustomThemename = "@dashboardCutomTheme";
-        var customThemeAppearance = "@customThemeAppearance";
-        var applicationTheme = "@(_identityResponse.CustomApplicationTheme)";
+        var dashboardCustomThemename = @Json.Serialize(resolvedDashboardTheme);
+        var customThemeAppearance = @Json.Serialize(resolvedAppearance);
+        var applicationTheme = @Json.Serialize(resolvedApplicationTheme);
+        var embed_mode = @Json.Serialize(embed_mode_param);
         var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
+        var enableHTMLSanitizer = @Json.Serialize(ServerAppConfig.Designer != null && ServerAppConfig.Designer.EnableHTMLSanitizer);
+        var enableSkeletonLoading = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.EnableSkeletonLoading != null && ServerAppConfig.Designer.DashboardExperience.EnableSkeletonLoading);
+        var showInBanner = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetProgress?.ShowInBanner != null && ServerAppConfig.Designer.DashboardExperience.WidgetProgress.ShowInBanner);
+        var showInDetailsView = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetProgress?.ShowInDetailsView != null && ServerAppConfig.Designer.DashboardExperience.WidgetProgress.ShowInDetailsView);
+        var showInWidgets = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetProgress?.ShowInWidgets != null && ServerAppConfig.Designer.DashboardExperience.WidgetProgress.ShowInWidgets);
+        var enableModernLayout = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetPanel?.EnableModernLayout != null && ServerAppConfig.Designer.DashboardExperience.WidgetPanel.EnableModernLayout);
+        var displayMode = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetPanel?.DisplayMode ?? "Both");
         var isUmsAdmin = "@isUmsAdmin";
         var appVersion = "@ServerAppConfig.ProductVersion";
-        var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
+        var canCheckSession = @Json.Serialize(canShowSession);
         var canHideLogoAndProfile = @ServerAppConfig.CanHideLogoAndProfile.ToString().ToLower();
-        var embedConfig = @Html.Raw(Json.Serialize(embedConfig));
+        var embedConfig = @Json.Serialize(embedConfig);
         var faviconLogo = "@faviconLogo";
         var aiLogo = "@aiLogo";
         var isSingleDatabaseMode = "@isSingleDatabaseMode";
-        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures ?? new object[0]);
         var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
         var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
     </script>
@@ -275,7 +343,7 @@
         });
     </script>
 </head>
-<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+<body id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
     <input type="hidden" id="embed-iframe" value="@ViewBag.isEmbed" />
     <div class="preloader-wrap" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: #fff; z-index : 2; ">
         <div id="loader_image" align="center" style="position:relative;top:39%;">
@@ -308,6 +376,68 @@
     @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]">
+         (function ($) {
+             if (!$ || !$.fn) {
+                 return;
+             }
+
+             [
+                 "Autocomplete",
+                 "Breadcrumb",
+                 "Button",
+                 "Card",
+                 "Chart",
+                 "CheckBox",
+                 "ColorPicker",
+                 "DatePicker",
+                 "DateRangePicker",
+                 "DateTimePicker",
+                 "Designer",
+                 "Dialog",
+                 "Draggable",
+                 "DropDownList",
+                 "DynamicParameterConfiguration",
+                 "Grid",
+                 "KPICard",
+                 "ListBox",
+                 "Map",
+                 "MaskEdit",
+                 "Menu",
+                 "NumberCard",
+                 "ProgressBar",
+                 "QueryDesigner",
+                 "RadioButton",
+                 "Scroller",
+                 "Slider",
+                 "SplitButton",
+                 "Splitter",
+                 "Tab",
+                 "Toolbar",
+                 "Tooltip",
+                 "TreeMap",
+                 "TreeView",
+                 "Uploadbox",
+                 "WaitingPopup"
+             ].forEach(function (widgetName) {
+                 var brandedName = "BoldBIDashboard" + widgetName;
+                 var ejName = "ej" + widgetName;
+                 if ($.fn[ejName] && !$.fn[brandedName]) {
+                     $.fn[brandedName] = function () {
+                         var result = $.fn[ejName].apply(this, arguments);
+                         this.each(function () {
+                             var widget = $(this).data(ejName);
+                             if (widget && !$(this).data(brandedName)) {
+                                 $(this).data(brandedName, widget);
+                             }
+                         });
+
+                         return result;
+                     };
+                 }
+             });
+         })(window.jQuery);
+     </script>
 
     <environment include="Development,CloudDevelopment">
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
@@ -418,3 +548,6 @@
 
 
 </html>
+@{
+#pragma warning restore SCS0029
+}

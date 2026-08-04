@@ -385,34 +385,44 @@ $(document).on("click", "#refresh", function () {
 });
 
 $(document).on("click", ".email-log-info", function (args) {
-    openEmailLogDetails(args)
+    openEmailLogDetails(args);
 });
 
-var serverApp = angular.module("serverApp", []);
-serverApp.controller('emailLogInfoCtrl', ["$scope", "$timeout", function ($scope, $timeout) {
-    $scope.EmailLogDetail = null;
+function setEmailLogText(id, value) {
+    var element = document.getElementById(id);
+    if (element) {
+        element.textContent = value && value !== "" ? value : '-';
+    }
+}
 
-    $scope.openEmailLogInfoDialog = function (emailLogDetail) {
-        if (emailLogDetail.rowData.StatusMessage != null && emailLogDetail.rowData.StatusMessage != " " && emailLogDetail.rowData.StatusMessage != "") {
-            $(".mail-error-message").show();
-        }
-        $scope.EmailLogDetail = emailLogDetail.rowData; 
-       
-        document.getElementById("email-activity-log").style.visibility = 'visible';
-        document.getElementById("email-activity-log").ej2_instances[0].show();
-        $timeout(function () {
-            $scope.$apply();
-        }, 10);
-    };
-}]);
+function openEmailLogInfoDialog(record) {
+    var rowData = record && record.rowData ? record.rowData : {};
+
+    setEmailLogText('emaillog-event-value', rowData.Event);
+    setEmailLogText('emaillog-date-value', rowData.ModifiedDateString);
+    setEmailLogText('emaillog-status-value', rowData.Status);
+    setEmailLogText('emaillog-recipient-value', rowData.RecipientEmail);
+    setEmailLogText('emaillog-initiated-value', rowData.InitiatedBy);
+
+    var statusMessage = rowData.StatusMessage && rowData.StatusMessage.trim() !== '' ? rowData.StatusMessage : '';
+    setEmailLogText('mail-error-message', statusMessage || '-');
+    setEmailLogText('mail-body', rowData.MailBody);
+
+    if (statusMessage) {
+        $('.mail-error-message').show();
+    } else {
+        $('.mail-error-message').hide();
+    }
+
+    document.getElementById('email-activity-log').style.visibility = 'visible';
+    document.getElementById('email-activity-log').ej2_instances[0].show();
+}
 
 function openEmailLogDetails(args) {
-    var LogInfoCtrl = angular.element('[ng-controller=emailLogInfoCtrl]').scope();
-    var grid = document.getElementById("emailActivityLogGrid").ej2_instances[0];
-    var record = grid.getRowInfo(args.target);
-    LogInfoCtrl.openEmailLogInfoDialog(record) ;
-};
-
+    var gridObj = document.getElementById('emailActivityLogGrid').ej2_instances[0];
+    var record = gridObj.getRowInfo(args.target);
+    openEmailLogInfoDialog(record);
+}
 $(document).on("click", "#reset", function () {
     daterangeobj.value = null;
     $("#search-event").val("");
@@ -426,4 +436,5 @@ $(document).on("click", "#reset", function () {
     gridObj.dataSource = emaildata;
     document.getElementById("email-event").ej2_instances[0].text = selectedEventText;
 });
+
 

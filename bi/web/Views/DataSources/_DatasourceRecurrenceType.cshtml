@@ -43,6 +43,10 @@
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/datasourcerecurrencedependency.min.js"></script>
     </environment>
      <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+                 @{
+                // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+        }
         var getActiveandInactiveUserWebUrl = "@Url.Action("getallactivegroupsandusers", "scheduler")";
         var getRecurrenceTypeUrl = "@Url.Action("GetRecurrenceTypeForDatasourceSchedule", "DataSources")";
         var getNextScheduleUrl = "@Url.Action("GetNextScheduleDate", "Scheduler")";
@@ -72,6 +76,9 @@
         var failureOccurenceCount = @Json.Serialize(ServerAppConfig.FailureOccurrence);
         var dataCacheInterval = @ServerAppConfig.DataSourceDataCacheIntervalInMinutes;
         var isDataSourceCache = @Json.Serialize(isDataCache);
+                @{
+        #pragma warning restore SCS0029
+        }
     </script>
 </head>
 <body class="recurrence-view">
@@ -379,6 +386,10 @@
             <div class="col-sm-1 col-1 margin-issue d-flex"></div>
             <div class="col-sm-10 col-10" id="schedule-message-container"><span class="su su-info"></span><span id="schedule-message"></span></div>
             <div class="col-sm-12 col-12" id="refresh-interval-message">
+                @{
+                    // Suppressing SCS0029 because no direct user input handled
+                #pragma warning disable SCS0029
+                }
                 @if (minimumTime[0] == "00" && minimumTime[1] == "05")
                 {
                     <span class="admin-refresh-interval-five-minutes-warning-message" id="refresh-interval-warning-message" style="display:none">
@@ -406,7 +417,7 @@
                         </span>
                     }
                 }
-                else
+                else if (minimumTime != null && minimumTime.Length == 2 && minimumTime[1] != "day" && minimumTime[1] != "month" && minimumTime[1] != "week")
                 {
                     if (isSelfHosted && isAdmin)
                     {
@@ -427,6 +438,28 @@
                         </span>
                     }
                 }
+                else
+                {
+                    if (isSelfHosted && isAdmin)
+                    {
+                        <span class="admin-refresh-interval-warning-message" id="refresh-interval-warning-message" style="display:none">
+                            @Html.Raw(string.Format(T["Your minimum data refresh interval is {0} {1}. Please {2}upgrade your plan{3} or {4}contact us{5} to reduce the data refresh interval."].Value, minimumTime[0], minimumTime[1], "<a href='" + manageLicenseSettingsUrl + "' target='_blank'>", "</a>", "<a target='_blank' href='https://www." + (GlobalAppSettings.BrandingDomain) + "/contact'>", "</a>"))
+                        </span>
+                    }
+                    else if (!isSelfHosted && isAdmin)
+                    {
+                        <span class="admin-refresh-interval-warning-message" id="refresh-interval-warning-message" style="display:none">
+                            @Html.Raw(string.Format(T["Your minimum data refresh interval is {0} {1}. Please {2}contact us{3} to reduce the data refresh interval."].Value, minimumTime[0], minimumTime[1], "<a class='request-concierge-support' target='_blank' href='https://www." + (GlobalAppSettings.BrandingDomain) + "/contact'>", "</a>"))
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="refresh-interval-warning-message" id="refresh-interval-warning-message" style="display:none">
+                            @string.Format(T["Your minimum data refresh interval is {0} {1}. Please check with your administrator to reduce the data refresh interval."].Value, minimumTime[0], minimumTime[1])
+                        </span>
+                    }
+                }
+
             </div>
             @if (!isDataCache)
             {
@@ -451,9 +484,16 @@
                     <div id="note-message" class="col-sm-12 col-12 note no-margin">
                         <b>@T["Note: "]</b>
                         @(String.Format(T["The application deactivates your refresh after {0} consecutive failures."].Value, ServerAppConfig.FailureOccurrence))
+                        @{
+                            // Suppressing SCS0029 because no direct user input handled
+                    #pragma warning disable SCS0029
+                        }
                         @if (!@ServerAppConfig.IsHideHelpLink)
                         {
                             <span>@Html.Raw(string.Format(T["To learn more, click {0}here{1}."].Value, "<a href='" + (ServerAppConfig.AppSettings.Documentation.BaseUri + helpSiteUrl) + " title='help' target='_blank'>", "</a>")) </span>
+                        }
+                        @{
+                    #pragma warning restore SCS0029
                         }
                     </div>
                 </div>
@@ -521,3 +561,6 @@
     </environment>
 </body>
 </html>
+@{
+#pragma warning restore SCS0029
+}

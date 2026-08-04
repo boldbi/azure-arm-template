@@ -875,6 +875,7 @@ function provideAccesstoUsers() {
             type: "POST",
             data: { selectedUsers: selectedUsers },
             url: requestUrl,
+            headers: { "RequestVerificationToken": $("input[name='__RequestVerificationToken']").val() },
             success: function (result) {
                 $("#grant-users-access-dialog").children(".e-spinner-pane").removeClass("e-spin-show").removeClass("e-spinner-bg").addClass("e-spin-hide");
                 $(".provide-access-button").attr("disabled", "disabled");
@@ -926,6 +927,9 @@ function removeUserAccess(users) {
             type: "POST",
             data: { selectedUsers: users },
             url: requestUrl,
+            headers: {
+                "RequestVerificationToken": $("input[name='__RequestVerificationToken']").val()
+            },
             success: function (result) {
                 hideWaitingPopup('user-remove-confirmation-dialog');
                 var userGridObj = document.getElementById('users_grid').ej2_instances[0];
@@ -1057,6 +1061,9 @@ function updateTenantStatus(actionUrl, tenantId, action) {
         type: "POST",
         url: actionUrl,
         data: input,
+        headers: {
+            "RequestVerificationToken": $("input[name='__RequestVerificationToken']").val()
+        },
         success: function (data) {
             if (data.Success) {
                 if (action === "suspend") {
@@ -1272,6 +1279,9 @@ $(document).on("click", "#update-tenant-settings", function () {
         type: "POST",
         data: { tenantInfoId: tenantInfoId, globalSettingsOptions: globalSettingsOptions },
         url: updateTenantSettingsUrl,
+        headers: {
+            "RequestVerificationToken": $("input[name='__RequestVerificationToken']").val()
+        },
         success: function (result) {
             if (result.Status) {
                 SuccessAlert(window.Server.App.LocalizationContent.SiteSettings, window.Server.App.LocalizationContent.SiteSettingsSucess, 7000);

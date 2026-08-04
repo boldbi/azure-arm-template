@@ -1,3 +1,4 @@
+﻿
 ALTER TABLE {database_name}.BOLDBI_ScheduleDetail ADD DashboardWidgetId Char(38) NULL
 ;
 

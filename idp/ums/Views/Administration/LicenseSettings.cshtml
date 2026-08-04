@@ -16,6 +16,8 @@
     var boldBiInstalled = Model?.BuildInfo?.Any(x => x.Name == TenantType.BoldBI.ToString()) ?? false;
     var boldReportsInstalled = Model?.BuildInfo?.Any(x => x.Name == TenantType.BoldReports.ToString()) ?? false;
     var subcriptionContent = CloudAppConfig.Branding.IsWhiteLabelling ? @T["Subscription"] : @T["Plan & Subscription"];
+    var biWelcomeBrandingName = CloudAppConfig.Branding.ProductSpecificBranding.BrandingBIName;
+    var reportsWelcomeBrandingName = CloudAppConfig.Branding.ProductSpecificBranding.BrandingReportsName;
 }
 
 @section styles{
@@ -121,8 +123,8 @@
                                                         }
                                                         <p class="display-none">@boldBiLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-bi"><a class="subscription-link text-decoration-none" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldBiLicense.SubscriptionInfo.TenantId)" class="text-decoration-none" target="_blank">@boldBiLicense.SubscriptionInfo.TenantId</a></p>
-                                                        <button data-bs-toggle="tooltip" class="float-end secondary-button" data-bs-original-title="@T["Click to copy"]" id="subscription-copy-bi">@T["Copy"]</button>
-                                                        <button class="float-end secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrlForBI}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Refresh License"]</button>
+                                                        <button type="button" data-bs-toggle="tooltip" class="float-end secondary-button" data-bs-original-title="@T["Click to copy"]" id="subscription-copy-bi">@T["Copy"]</button>
+                                                        <button type="button" class="float-end secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrlForBI}{(int)TenantType.BoldBIOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldBIOnPremise)" data-tenant-type="@((int)TenantType.BoldBIOnPremise)">@T["Refresh License"]</button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -149,7 +151,7 @@
                                             @{
 #pragma warning disable SCS0029
                                             }
-                                            @Html.Raw(string.Format(T["Welcome to {0}{1}{2} Server"].Value, "<span>", AppBranding.Bold.ProductName, "</span>"))
+                                            @Html.Raw(string.Format(T["Welcome to {0}{1}{2} Server"].Value, "<span>", biWelcomeBrandingName, "</span>"))
                                             @{
 #pragma warning restore SCS0029
                                             }
@@ -222,8 +224,8 @@
                                                         }
                                                         <p class="display-none">@boldReportsLicense.SubscriptionInfo.TenantId</p>
                                                         <p id="subscription-id-reports"><a class="subscription-link text-decoration-none" href="@CloudAppConfig.GetOnPremiseSubscriptionUrl(boldReportsLicense.SubscriptionInfo.TenantId)" target="_blank">@boldReportsLicense.SubscriptionInfo.TenantId</a></p>
-                                                        <button data-bs-toggle="tooltip" class="float-end secondary-button" data-bs-original-title="@T["Click to copy"]" id="subscription-copy-reports">@T["Copy"]</button>
-                                                        <button class="float-end secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrlForReports}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Refresh License"]</button>
+                                                        <button type="button" data-bs-toggle="tooltip" class="float-end secondary-button" data-bs-original-title="@T["Click to copy"]" id="subscription-copy-reports">@T["Copy"]</button>
+                                                        <button type="button" class="float-end secondary-button" id="change-subscription" license-service-url="@($"{ViewBag.GetLicenseUrlForReports}{(int)TenantType.BoldReportsOnPremise}&environment={environment}")" data-offlinelicense-url="@await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Downloads, TenantType.BoldReportsOnPremise)" data-tenant-type="@((int)TenantType.BoldReportsOnPremise)">@T["Refresh License"]</button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -250,7 +252,7 @@
                                             @{
 #pragma warning disable SCS0029
                                             }
-                                            @Html.Raw(string.Format(T["Welcome to {0}{1}{2} Server"].Value, "<span>", AppBranding.BoldReports.ProductName, "</span>"))
+                                            @Html.Raw(string.Format(T["Welcome to {0}{1}{2} Server"].Value, "<span>", reportsWelcomeBrandingName, "</span>"))
                                             @{
 #pragma warning restore SCS0029
                                             }
@@ -326,7 +328,7 @@
             {
                 <p class="col-12 float-start no-margin">@T["Use the offline license file to update the license information."] </p>
             }
-            <button id="offline-update-bi" data-offlinelicense-url="" data-tenant-type="" class="link-button offline-change-subscription col-12 float-start no-padding">@T["Upload"]</button>
+            <button type="button" id="offline-update-bi" data-offlinelicense-url="" data-tenant-type="" class="link-button offline-change-subscription col-12 float-start no-padding">@T["Upload"]</button>
             @if (!CloudAppConfig.Branding.IsWhiteLabelling)
             {
                 <div class="col-12 float-start no-margin help-container">If you don’t have the license file, download it <a id="change-subscription-help" class="text-decoration-none" target="_blank" href="">@T["here"]</a>.</div>

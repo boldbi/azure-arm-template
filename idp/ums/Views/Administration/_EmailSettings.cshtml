@@ -79,7 +79,7 @@
                                 })
                                 </div>
                                 <div class="form-input-field col-12 float-start no-padding">
-                                    <input type="text" id="smtp-address" class="form-control txt-holder validation-padding mail-settings-fields" name="smtp_address" placeholder="@string.Format(T["{0} server"].Value,"SMTP")" value="@ViewBag.SystemSettings.MailSettings.MailSettingsHost" />
+                                    <input type="text" id="smtp-address" class="form-control txt-holder validation-padding mail-settings-fields" name="smtp_address" placeholder="@string.Format(T["{0} server"].Value,"SMTP")" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsHost" />
                                     <span class="validation-errors"></span>
                                 </div>
                             </div>
@@ -93,7 +93,7 @@
                                 })
                             </div>
                             <div>
-                                <input type="text" id="port-number" class="form-control mail-settings-fields" name="port_number" placeholder="@T["SMTP Port"]" value="@ViewBag.SystemSettings.MailSettings.MailSettingsPort" />
+                                <input type="text" id="port-number" class="form-control mail-settings-fields" name="port_number" placeholder="@T["SMTP Port"]" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsPort" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
@@ -106,7 +106,7 @@
                                 })
                             </div>
                             <div>
-                                <input type="text" id="mail-display-name" class="form-control mail-settings-fields" name="mail_display_name" placeholder="@T["Sender Name"]" value="@ViewBag.SystemSettings.MailSettings.MailSettingsSenderName" />
+                                <input type="text" id="mail-display-name" class="form-control mail-settings-fields" name="mail_display_name" placeholder="@T["Sender Name"]" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsSenderName" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                                 })
                             </div>
                             <div>
-                                <input type="text" id="mail-user-name" class="form-control mail-settings-fields" name="mail_user_name" placeholder="@T["Sender Email Address"]" value="@ViewBag.SystemSettings.MailSettings.MailSettingsAddress" />
+                                <input type="text" id="mail-user-name" class="form-control mail-settings-fields" name="mail_user_name" placeholder="@T["Sender Email Address"]" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsAddress" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
@@ -127,11 +127,11 @@
                                 <label class="app-textbox-label mail-authentication">@T["Authentication Type"]</label>
                             </div>
                             <div class="authentication-type" id="anonymous">
-                                <input type="radio" id="anonymous-authentication" name="mail-authentication-type" class="css-radio" value="0" @(GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAuthType == MailSettingsAuthType.Anonymous ? "checked" : string.Empty) />
+                                    <input type="radio" id="anonymous-authentication" name="mail-authentication-type" class="css-radio" value="0" @(GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAuthType == MailSettingsAuthType.Anonymous ? "checked" : string.Empty) />
                                 <label for="anonymous-authentication" class="app-textbox-label radio-btn-label">@T["Anonymous authentication"]</label>
                             </div>
                             <div class="authentication-type">
-                                <input type="radio" id="basic-authentication" name="mail-authentication-type" class="css-radio" value="1" @(GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAuthType == MailSettingsAuthType.Basic ? "checked" : string.Empty) />
+                                <input type="radio" id="basic-authentication" name="mail-authentication-type" class="css-radio" value="1" @(GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAuthType == MailSettingsAuthType.Basic ? "checked" : string.Empty) />
                                 <label for="basic-authentication" class="app-textbox-label radio-btn-label">@T["Basic authentication"]</label>
                             </div>
                         </div>
@@ -150,9 +150,9 @@
                                 })
                             </div>
                             <div>
-                                @if (GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAuthType == MailSettingsAuthType.Basic)
+                                @if (GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAuthType == MailSettingsAuthType.Basic)
                                 {
-                                    <input type="text" id="sender-user-name" class="form-control mail-settings-fields mail-credentials" name="sender_user_name" placeholder="@T["Username"]" value="@ViewBag.SystemSettings.MailSettings.MailSettingsUserName" />
+                                    <input type="text" id="sender-user-name" class="form-control mail-settings-fields mail-credentials" name="sender_user_name" placeholder="@T["Username"]" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsUserName" />
                                 }
                                 else
                                 {
@@ -171,7 +171,7 @@
                             <div class="col-12 float-start no-padding" style="position:relative">
                                 <input type="text" class="hidden-input" style="display: none;">
                                 <input style="visibility: hidden; position: absolute; left: -99999px" class="hidden-input" type="password" name="fake_passwordfield_to_turnoff_autocomplete">
-                                @if (GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAuthType == MailSettingsAuthType.Basic)
+                                @if (GlobalAppSettings.SystemSettings.MailSettings?.MailSettingsAuthType == MailSettingsAuthType.Basic)
                                 {
                                     <input type="password" id="mail-password" class="form-control mail-settings-fields mail-credentials" name="mail_password" placeholder="@T["Password"]" />
                                 }
@@ -185,7 +185,7 @@
                         </div>
 
                         <div class="col-12 float-start no-padding input-field-margin smtp-field">
-                            @Html.CheckBox("secure-mail-authentication", (bool)ViewBag.SystemSettings.MailSettings.MailSettingsIsSecureAuthentication, new { @class = "material-checkbox", @id = "secure-mail-authentication" })
+                            @Html.CheckBox("secure-mail-authentication", (bool)ViewBag.SystemSettings.MailSettings?.MailSettingsIsSecureAuthentication, new { @class = "material-checkbox", @id = "secure-mail-authentication" })
                             @Html.Hidden("secure-mail-authentication")
                             @Html.Label("secure-mail-authentication", T["Enable SSL"].Value, new { @class = "app-textbox-label" })
                         </div>
@@ -195,14 +195,14 @@
                             </div>
                            
                             <div class="form-input-field col-12 float-start no-padding">
-                                <input type="text" id="tenant-id" class="form-control txt-holder validation-padding mail-settings-fields" name="tenant_id" placeholder="@string.Format(T["Tenant ID"].Value,"Tenant ID")" value="@ViewBag.SystemSettings.MailSettings.MailSettingsTenantId" />
+                                <input type="text" id="tenant-id" class="form-control txt-holder validation-padding mail-settings-fields" name="tenant_id" placeholder="@string.Format(T["Tenant ID"].Value,"Tenant ID")" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsTenantId" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
                         <div class="form-group col-12 float-start no-padding input-field-bottom-margin oauth-field">
                             @Html.Label("client-id", string.Format(T["Client ID"].Value, "Client ID"), new { @class = "app-textbox-label col-lg-12" })
                             <div class="form-input-field col-12 float-start no-padding">
-                                <input type="text" id="client-id" class="form-control txt-holder validation-padding mail-settings-fields" name="client_id" placeholder="@string.Format(T["Client ID"].Value,"Client ID")" value="@ViewBag.SystemSettings.MailSettings.MailSettingsClientId" />
+                                <input type="text" id="client-id" class="form-control txt-holder validation-padding mail-settings-fields" name="client_id" placeholder="@string.Format(T["Client ID"].Value,"Client ID")" value="@ViewBag.SystemSettings.MailSettings?.MailSettingsClientId" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                             </div>
                         </div>
                         <div class="col-12 float-start no-padding input-field-margin">
-                            <button id="test-mail-button" class="primary-button float-start test-connection-button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="" data-bs-original-title="@T["Send Test Email"]">@T["Send Test Email"] </button>
+                            <button type="button" id="test-mail-button" class="primary-button float-start test-connection-button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-container="body" title="" data-bs-original-title="@T["Send Test Email"]">@T["Send Test Email"] </button>
                         </div>
                     </form>
 

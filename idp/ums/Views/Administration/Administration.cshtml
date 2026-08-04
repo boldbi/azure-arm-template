@@ -13,7 +13,8 @@
     {
         new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.BoldAIService)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.BoldAIService)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.BoldAIService },
         new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.OpenAI)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.OpenAI)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.OpenAI },
-        new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.AzureAI }
+        new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.AzureAI },
+        new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.Anthropic)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.Anthropic)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.Anthropic }
     };
     var emailAccountText = GlobalAppSettings.SystemSettings.MailSettings != null ? GlobalAppSettings.GetDescription(GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAccount) : GlobalAppSettings.GetDescription(MailAccount.SMTP);
     var emailAccountValue = GlobalAppSettings.SystemSettings.MailSettings != null ? ((int)GlobalAppSettings.SystemSettings.MailSettings.MailSettingsAccount).ToString() : ((int)MailAccount.SMTP).ToString();
@@ -22,6 +23,7 @@
     var boldaiservice = GlobalAppSettings.GetDescription(AIModel.BoldAIService);
     var openai = GlobalAppSettings.GetDescription(AIModel.OpenAI);
     var azureai = GlobalAppSettings.GetDescription(AIModel.AzureAI);
+    var anthropic = GlobalAppSettings.GetDescription(AIModel.Anthropic);
     var idpUrl = GlobalAppSettings.SystemSettings.InternalAppUrls.Idp.TrimEnd('/');
     var protocolTypes = new List<SelectListItem>
     {
@@ -42,16 +44,10 @@
 
 @section scripts {
     <script nonce="@Context.Items["ScriptNonce"]">
-        var applicationImageUrl = "content/images/@GlobalAppSettings.Branding/application";
-        serverApp.controller("adSettingsController",
-            [
-                "$scope", function ($scope) {
-                    $scope.regex =
-                        '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
-                    $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_\s]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_\s]+)*$/;
-                }
-            ]);
-
+        var applicationImageUrl = "content/images/@GlobalAppSettings.Branding/application";   
+        window.adSettingsScope = window.adSettingsScope || {};
+        window.adSettingsScope.regex = '^(?!(ftp|https?):\\/\\/)([a-zA-Z0-9-_]+\\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\\.[a-z]{2,6})?(:\\d{1,5})?(\\\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\\.[a-z]{2,8})?)*?$';
+        window.adSettingsScope.distinguishedNameRegex = /^(\\w+[=]{1}[a-zA-Z0-9-_\\s]+)([\\,{1}]\\w+[=]{1}[a-zA-Z0-9-_\\s]+)*$/;
     </script>
 
     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
@@ -107,6 +103,7 @@
                 var boldaiservice = "@boldaiservice";
                 var openai = "@openai";
                 var azureai = "@azureai";
+                var anthropic = "@anthropic";
                 var idpUrl = "@idpUrl";
                 $(function() {
                     if ("@ViewBag.scheme.ToLower()" != "null") {

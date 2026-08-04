@@ -1045,6 +1045,7 @@ function updateTenant(waitingPopUpElement, connectionString) {
     $.ajax({
         type: "POST",
         url: updateTenantDetailsUrl,
+        headers: { "RequestVerificationToken": $("input[name='__RequestVerificationToken']").val() },
         data: { tenantId: tenantId, tenantName: name, tenantIdentifier: tenantIdentifier.toLowerCase(), tenantUrl: tenantUrl, databaseDetails: connectionString, additionalParameters: additionalParameters, useSiteIdentifier: siteIdentifier, SchemaName: schemaName, Prefix: tenantPrefix, PreventTenantProxyDomainAutoUpdate: preventTenantProxyDomainAutoUpdate },
         success: function (data) {
             if (data.result == true) {

@@ -202,11 +202,14 @@ CREATE TABLE {database_name}.BOLDTC_UserLogin (
 	SessionId char(38) NULL,
 	DirectoryTypeId int not null,
 	ClientToken nvarchar(4000) NOT NULL,
+	EncryptedIdToken nvarchar(4000) NULL,
 	LoggedInDomain nvarchar(255) NOT NULL,
 	IpAddress nvarchar(255) NOT NULL,
 	Browser nvarchar(255) NULL,
 	LoggedInTime datetime NOT NULL,
+	IdTokenExpiresAt datetime NULL,
 	LastActive datetime NULL,
+	IsUsedForLogout tinyint(1) NULL,
 	IsActive tinyint(1) NOT NULL,
   CONSTRAINT PK_BOLDTC_USERLOGIN PRIMARY KEY (Id ASC)
 ) ROW_FORMAT=DYNAMIC
@@ -317,14 +320,14 @@ CREATE TABLE {database_name}.BOLDTC_SAMLSettings (
 CREATE TABLE {database_name}.BOLDTC_SystemSettings (
 	Id int NOT NULL AUTO_INCREMENT,
 	SystemKey nvarchar(255) NOT NULL UNIQUE,
-	SystemValue nvarchar(4000),
+	SystemValue LONGTEXT,
 	ModifiedDate datetime NOT NULL,
 	IsActive tinyint(1) NOT NULL,
-  CONSTRAINT PK_BOLDTC_SYSTEMSETTINGS PRIMARY KEY 
+  CONSTRAINT PK_BOLDTC_SYSTEMSETTINGS PRIMARY KEY
   (
   Id ASC
   )
-
+ 
 ) ROW_FORMAT=DYNAMIC
 ;
 CREATE TABLE {database_name}.BOLDTC_AzureADCredential (
@@ -1433,4 +1436,16 @@ ALTER TABLE {database_name}.BOLDTC_TenantSettings ADD CONSTRAINT BOLDTC_TenantSe
 ; 
 
 ALTER TABLE  {database_name}.BOLDTC_UserAttributes ADD FOREIGN KEY(UserId) REFERENCES {database_name}.BOLDTC_User (Id)
+;
+
+CREATE TABLE {database_name}.BOLDTC_TokenVault (
+	TenantId CHAR(38) NOT NULL,
+	IdpUserId CHAR(38) NOT NULL,
+	AuthUserId CHAR(38) NOT NULL,
+	AuthProviderId INT NOT NULL,
+	EncryptedToken LONGTEXT NOT NULL,
+	ExpiresAt DATETIME(6) NULL,
+	UpdatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+	CONSTRAINT PK_BOLDTC_TokenVault PRIMARY KEY (TenantId, IdpUserId, AuthProviderId)
+) ROW_FORMAT=DYNAMIC
 ;

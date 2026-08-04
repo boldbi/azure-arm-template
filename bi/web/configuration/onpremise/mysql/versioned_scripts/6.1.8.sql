@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_UserSession(
 	Id Char(38) NOT NULL,
 	IdpReferenceId Char(38) NOT NULL,

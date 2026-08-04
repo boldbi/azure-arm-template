@@ -36,6 +36,49 @@
         });
         var entityObj = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.PermissionEntity)));
         var accessObj = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.FeaturePermissionAccess)));
+
+        (function () {
+            function tryParseJson(response) {
+                if (typeof response !== "string") {
+                    return response;
+                }
+                var trimmed = response.trim();
+                if (!trimmed) {
+                    return response;
+                }
+                var first = trimmed[0];
+                if (first !== "[" && first !== "{") {
+                    return response;
+                }
+                try {
+                    return JSON.parse(trimmed);
+                } catch (e) {
+                    return response;
+                }
+            }
+
+            function wrapAjaxService(service) {
+                if (!service || typeof service.getData !== "function") {
+                    return null;
+                }
+
+                return {
+                    getData: function (url, data) {
+                        var result = service.getData(url, data);
+                        if (result && typeof result.then === "function") {
+                            return result.then(tryParseJson);
+                        }
+                        return result;
+                    }
+                };
+            }
+
+            var baseService = (window.parent && window.parent.ajaxService) ? window.parent.ajaxService : window.ajaxService;
+            var wrapped = wrapAjaxService(baseService);
+            if (wrapped) {
+                window.ajaxService = wrapped;
+            }
+        })();
 </script>
 
 <div class="add-permissions" id="add-user-feature-permission">

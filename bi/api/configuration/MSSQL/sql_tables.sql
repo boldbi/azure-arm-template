@@ -36,6 +36,7 @@ CREATE TABLE [SyncDS_Group](
 	[ModifiedDate] [datetime] NOT NULL,
 	[DirectoryTypeId] [int] NOT NULL DEFAULT 0,
 	[ExternalProviderId] [nvarchar](100) NULL,
+	[IsAdminGroup] [bit] NOT NULL DEFAULT 0,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -767,7 +768,7 @@ INSERT into [SyncDS_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VAL
 INSERT into [SyncDS_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Slideshow',1,10,1)
 ;
 
-INSERT into [SyncDS_Group] (Name,Description,Color,ModifiedDate,DirectoryTypeId,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',GETDATE(), 1, 1)
+INSERT into [SyncDS_Group] (Name,Description,Color,ModifiedDate,DirectoryTypeId,IsAdminGroup,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',GETDATE(), 1, 1, 1)
 ;
 
 INSERT into [SyncDS_ItemCommentLogType] (Name,IsActive) VALUES ( N'Added',1)

@@ -1,3 +1,4 @@
+﻿
 INSERT into {database_name}.BOLDBI_LogField (ModuleId,Field,Description,ModifiedDate,IsActive) SELECT 2,'EnableNotificationForDashboardOwner','UserNotificationSettings.UserSystemNotificationSettings.EnableNotificationForDashboardOwner',NOW(),1 FROM DUAL 
 WHERE NOT EXISTS (SELECT * FROM {database_name}.BOLDBI_LogField WHERE Field = 'EnableNotificationForDashboardOwner' LIMIT 1)
 ;

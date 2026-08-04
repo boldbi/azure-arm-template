@@ -281,7 +281,7 @@
 
 </head>
 
-<body ng-app="serverApp" class="clearfix" id="body">
+<body class="clearfix" id="body">
     @if (!(ViewBag.HidePageLoader != null && ViewBag.HidePageLoader))
     {
         <div class="loader-blue loader-icon" id="layout-body-loader-icon">
@@ -297,9 +297,11 @@
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/notification-listing.css" />
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/layout.min.css" />
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/notification-listing.min.css" />
     </environment>
 
     @RenderSection("styles", false)
@@ -354,8 +356,14 @@
         var manageLicenseUrl = "@(ServerAppConfig.IsSelfHosted ? globalAppSettings.SystemSettings.IDPUrl + "/" + ServerAppConfig.TenantManagementHostName + "/administration/license-settings" : Url.Action("LicenseSettings", "Administration"))";
         var contactUsUrl = "https://www.@(GlobalAppSettings.BrandingDomain)/contact";
         var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
+        var getUserNotificationPanelPartialUrl = "@Url.Action("GetUserNotificationPanelPartial", "notification")";
         var paymentPageUrl = "@(ServerAppConfig.IsSelfHosted ? string.Empty : (ServerAppConfig.AppSettings.EndPoints.TenantAppUrl?.TrimEnd('/') + "/sites/" + globalAppSettings.SystemSettings.TenantId + "/subscription"))";
         var getNotificationCountUrl = "@Url.Action("GetNotificationCount", "PartialView")";
+        var userSystemnotificationUrl = "@Url.Action("getnotificationsonrequest", "notification")";
+        var viewUrl = "@Url.Action("Dashboards", "Dashboards")";
+        var viewWidgetUrl = "@Url.Action("widgets", "widgets")";
+        var commentNotificationSource = "@NotificationSource.Comment";
+        var downloadedResourcesUrl = "@Url.Action("GetPublishedItems", "publish")" + "?tab=offline-files";
         var etlHealthyStatusUrl = "@Url.Action("CheckETLHealthStatus", "Accounts")";
         var canCheckEtlHealthStatus = isSelfHosted;
         var getTenantStatusUrl = "@Url.Action("GetTenantStatus", "PartialView")";
@@ -526,6 +534,7 @@
                 </section>
             }
         }
+            @await Html.PartialAsync("~/Views/Shared/_UpgradeLimitedAccessBanner.cshtml")
         <div id="content-area" class="clearfix col-12 @(isSlideshow ? "no-padding" : string.Empty)">
             <div class="suspension-warning" style="display:none">
                 <div class="warning-content"></div>

@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_ResourceFeatureAccess (
     Id int NOT NULL AUTO_INCREMENT,
     Name varchar(4000) NOT NULL,
@@ -16,7 +17,7 @@ CREATE TABLE {database_name}.BOLDBI_UserResourceFeaturePermission (
     Id int NOT NULL AUTO_INCREMENT,
     PermissionEntityId int NOT NULL,
     ResourceFeatureAccessJson varchar(4000) NOT NULL,
-    ItemId varchar(4000) NULL,
+    ItemId Char(38) NULL,
     UserId int NOT NULL,
     ScopeGroupId int NULL,
     ItemTypeId int NULL,
@@ -27,7 +28,7 @@ CREATE TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission (
     Id int NOT NULL AUTO_INCREMENT,
     PermissionEntityId int NOT NULL,
     ResourceFeatureAccessJson varchar(4000) NOT NULL,
-    ItemId varchar(4000) NULL,
+    ItemId Char(38) NULL,
     GroupId int NOT NULL,
     ScopeGroupId int NULL,
     ItemTypeId int NULL,
@@ -92,33 +93,230 @@ INSERT into {database_name}.BOLDBI_ResourceFeatureAccEntity (PermissionEntityId,
 INSERT into {database_name}.BOLDBI_ResourceFeatureAccEntity (PermissionEntityId,ResourceFeatureAccessId,IsActive) VALUES (14,7,1)
 ;
 
-ALTER TABLE  {database_name}.BOLDBI_ResourceFeatureAccEntity  ADD FOREIGN KEY(PermissionEntityId) REFERENCES {database_name}.BOLDBI_PermissionEntity (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_ResourceFeatureAccEntity  ADD FOREIGN KEY(ResourceFeatureAccessId) REFERENCES {database_name}.BOLDBI_ResourceFeatureAccess (Id)
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_ResourceFeatureAccEntity'
+      AND COLUMN_NAME = 'PermissionEntityId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_PermissionEntity'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_ResourceFeatureAccEntity ADD CONSTRAINT FK_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId FOREIGN KEY(PermissionEntityId) REFERENCES {database_name}.BOLDBI_PermissionEntity (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
 
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(PermissionEntityId) REFERENCES {database_name}.BOLDBI_PermissionEntity (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(ItemId) REFERENCES {database_name}.BOLDBI_Item (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(UserId) REFERENCES {database_name}.BOLDBI_User (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission ADD FOREIGN KEY(SettingsTypeId) REFERENCES {database_name}.BOLDBI_SettingsType (Id) 
-;
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES {database_name}.BOLDBI_ItemType (Id)
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_ResourceFeatureAccEntity'
+      AND COLUMN_NAME = 'ResourceFeatureAccessId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_ResourceFeatureAccess'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_ResourceFeatureAccEntity ADD CONSTRAINT FK_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId FOREIGN KEY(ResourceFeatureAccessId) REFERENCES {database_name}.BOLDBI_ResourceFeatureAccess (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
 
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN KEY(PermissionEntityId) REFERENCES {database_name}.BOLDBI_PermissionEntity (Id)
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_UserResourceFeaturePermission'
+      AND COLUMN_NAME = 'PermissionEntityId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_PermissionEntity'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_UserResourceFeaturePermission_PermissionEntityId FOREIGN KEY(PermissionEntityId) REFERENCES {database_name}.BOLDBI_PermissionEntity (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN KEY(ItemId) REFERENCES {database_name}.BOLDBI_Item (Id)
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_UserResourceFeaturePermission'
+      AND COLUMN_NAME = 'ItemId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_Item'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_UserResourceFeaturePermission_ItemId FOREIGN KEY(ItemId) REFERENCES {database_name}.BOLDBI_Item (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN KEY(GroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_UserResourceFeaturePermission'
+      AND COLUMN_NAME = 'UserId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_User'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_UserResourceFeaturePermission_UserId FOREIGN KEY(UserId) REFERENCES {database_name}.BOLDBI_User (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission ADD FOREIGN KEY(SettingsTypeId) REFERENCES {database_name}.BOLDBI_SettingsType (Id)
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_UserResourceFeaturePermission'
+      AND COLUMN_NAME = 'ScopeGroupId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_Group'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_UserResourceFeaturePermission_ScopeGroupId FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission ADD  FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_UserResourceFeaturePermission'
+      AND COLUMN_NAME = 'ItemTypeId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_ItemType'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_UserResourceFeaturePermission_ItemTypeId FOREIGN KEY(ItemTypeId) REFERENCES {database_name}.BOLDBI_ItemType (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES {database_name}.BOLDBI_ItemType (Id)
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_GroupResourceFeaturePermission'
+      AND COLUMN_NAME = 'PermissionEntityId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_PermissionEntity'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_GroupResourceFeaturePermission_PermissionEntityId FOREIGN KEY(PermissionEntityId) REFERENCES {database_name}.BOLDBI_PermissionEntity (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
+;
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_GroupResourceFeaturePermission'
+      AND COLUMN_NAME = 'ItemId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_Item'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_GroupResourceFeaturePermission_ItemId FOREIGN KEY(ItemId) REFERENCES {database_name}.BOLDBI_Item (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
+;
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_GroupResourceFeaturePermission'
+      AND COLUMN_NAME = 'GroupId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_Group'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_GroupResourceFeaturePermission_GroupId FOREIGN KEY(GroupId) REFERENCES {database_name}.BOLDBI_Group (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
+;
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_GroupResourceFeaturePermission'
+      AND COLUMN_NAME = 'ScopeGroupId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_Group'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_GroupResourceFeaturePermission_ScopeGroupId FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
+;
+
+SET @boldbi_fk_count := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'BOLDBI_GroupResourceFeaturePermission'
+      AND COLUMN_NAME = 'ItemTypeId'
+      AND REFERENCED_TABLE_NAME = 'BOLDBI_ItemType'
+      AND REFERENCED_COLUMN_NAME = 'Id'
+);
+SET @boldbi_sql := IF(
+    @boldbi_fk_count = 0,
+    'ALTER TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_BOLDBI_GroupResourceFeaturePermission_ItemTypeId FOREIGN KEY(ItemTypeId) REFERENCES {database_name}.BOLDBI_ItemType (Id)',
+    'SELECT 1'
+);
+PREPARE boldbi_stmt FROM @boldbi_sql;
+EXECUTE boldbi_stmt;
+DEALLOCATE PREPARE boldbi_stmt;
 ;

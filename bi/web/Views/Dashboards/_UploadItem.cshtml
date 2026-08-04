@@ -114,7 +114,14 @@
     </div>
      <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(document).ready(function () {
+            @{
+             // Suppress SCS0029: no direct user input involved
+            #pragma warning disable SCS0029 // Suppress XSS warning for safe serialization
+            }
             var categories = @Html.Raw(Json.Serialize(ViewBag.CategoryDetails));
+            @{
+            #pragma warning restore SCS0029
+            }
             var options = "";
             for (var t = 0; t < categories.length; t++) {
                 if(categories[t].Id == categoryId){

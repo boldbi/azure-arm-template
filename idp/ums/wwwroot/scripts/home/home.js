@@ -11,6 +11,44 @@ var skeletonCard;
 var onScroll= true;
 var innerCard;
 var fetchCard= false;
+var themeValue = (typeof theme !== 'undefined' && theme) ? theme : 'light';
+
+function getSafeImageFallbackUrl(url) {
+    if (typeof url === "string" && url.trim() !== "" && url !== "undefined") {
+        return url;
+    }
+
+    return "";
+}
+
+function applySafeImageFallback(image, fallbackUrl, fallbackAlt) {
+    if (!image) {
+        return;
+    }
+
+    var safeFallbackUrl = getSafeImageFallbackUrl(fallbackUrl);
+    if (safeFallbackUrl && image.src !== safeFallbackUrl) {
+        image.src = safeFallbackUrl;
+        image.alt = fallbackAlt;
+        return;
+    }
+
+    image.removeAttribute("src");
+    image.alt = fallbackAlt;
+}
+
+function openValidatedSiteUrl(siteUrl) {
+    if (!siteUrl) {
+        return;
+    }
+
+    var redirectUrl = RedirectSiteUrl + "?siteUrl=" + encodeURIComponent(siteUrl);
+    var siteWindow = window.open(redirectUrl, "_blank", "noopener,noreferrer");
+    if (siteWindow) {
+        siteWindow.opener = null;
+    }
+}
+
 $(document).ready(function () {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -73,16 +111,8 @@ $(document).ready(function () {
     $(document).on("click", ".site-link", function (e) {
         e.preventDefault();
 
-        const siteUrl = $(this).data("url");
-
-        $.ajax({
-            url: ValidateSiteUrl,
-            type: "POST",
-            data: { siteUrl: siteUrl },
-            success: function (response) {
-                window.open(response.SiteUrl, '_blank');
-            }
-        });
+        var siteUrl = $(this).data("url") || $(this).attr("href");
+        openValidatedSiteUrl(siteUrl);
     });
 
     $('#card-view-button').on('click', function () {
@@ -194,17 +224,17 @@ function initializePage() {
        resizeContainer();
         activeTab();
     });
-    $(document).on("click", ".e-row", function () {
-        if (window.innerWidth < 730) {
-            var actionLink = $(this).find('.open-link a').attr('href');
-            window.open(actionLink, '_blank');
+    $(document).on("click", ".e-row", function (event) {
+        if (window.innerWidth < 730 && !$(event.target).closest('a, button').length) {
+            var actionLink = $(this).find('.open-link a').data('url') || $(this).find('.open-link a').attr('href');
+            openValidatedSiteUrl(actionLink);
         }
     });
 
-    $(document).on('click', '.tenant-card', function (event) {
-        if (!$(event.target).is('a')) {
-            var siteUrl = $(this).find('.sites-card a').data('url');
-            window.open(siteUrl, '_blank');
+    $(document).on('click', '#tenant-cards-container-all .tenant-card, #tenant-cards-container-favorite .tenant-card', function (event) {
+        if (!$(event.target).closest('a, button, .fav-card-icon').length) {
+            var siteUrl = $(this).find('.sites-card a').data('url') || $(this).find('.sites-card a').attr('href');
+            openValidatedSiteUrl(siteUrl);
         }
     });
 }
@@ -377,7 +407,7 @@ $(document).on('keyup', '#search-tenants-favorite', function () {
 function createAndAppendAttributeGrid() {
 
 
-    var actionTemplate = '<div class="open-link"><a href="${SiteUrl}" target="_blank">Open</a></div>';
+    var actionTemplate = '<div class="open-link"><a class="site-link" href="${SiteUrl}" target="_blank" rel="noopener noreferrer" data-url="${SiteUrl}">Open</a></div>';
    
     var searchQuery = window.location.href.slice(window.location.href.indexOf('?') + 1).split('=');
     if (searchQuery[0] == "searchKey") {
@@ -525,7 +555,7 @@ function initializeFavoriteGrid() {
                 { field: 'TenantType', template: '#application-tenant-template', headerText:  window.Server.App.LocalizationContent.TenantType, width: 9, allowSorting: false, allowFiltering: false },
                 { field: 'SiteUrl', template: '#application-url-template', width: 30, allowSorting: false, allowFiltering: false },
                 { field: 'CreatedDateString', headerText:  window.Server.App.LocalizationContent.CreatedDate , width: 16, allowSorting: false, allowFiltering: false },
-                { field: 'IsFavorite', headerText: '', width: 8, template: '<div class="open-link"><a href="${SiteUrl}" target="_blank">Open</a></div>' }
+                { field: 'IsFavorite', headerText: '', width: 8, template: '<div class="open-link"><a class="site-link" href="${SiteUrl}" target="_blank" rel="noopener noreferrer" data-url="${SiteUrl}">Open</a></div>' }
             ]
         });
         FavoriteGrids.appendTo("#FavoriteGrid");
@@ -568,13 +598,13 @@ function loadTenantCards(baseUrl, skip, take) {
                     var useCustomBranding = tenant.UseCustomBranding;
                     var brandingHtml = useCustomBranding
                         ? `<img id="icon-logo" class="icon-logo-container" alt="Site Logo" loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
-                        : `<img id="icon-logo" class="icon-logo" alt="Site Logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`; 
+                        : `<img id="icon-logo" class="icon-logo" alt="Site Logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${themeValue}">`; 
                     
                     var cardHtml = `<div class="tenant-card card">
                                            <div class="icon-container">${brandingHtml}</div>
                                                     <div class="tenant-card-header card-header">
                                                         <div class="card-header-title">${tenant.TenantName}</div>                                                        
-                                                         <div class="sites-card card-sub-title"> <a class="text-decoration-none site-link" href="javascript:void(0);" data-url="${tenant.SiteUrl}" data-toggle="tooltip" title="${tenant.SiteUrl}">${tenant.SiteUrl}</a></div>
+                                                         <div class="sites-card card-sub-title"> <a class="text-decoration-none site-link" href="${tenant.SiteUrl}" target="_blank" rel="noopener noreferrer" data-url="${tenant.SiteUrl}" data-toggle="tooltip" title="${tenant.SiteUrl}">${tenant.SiteUrl}</a></div>
                                                            <div class="data-card card-content"> ${tenant.CreatedDateString}</div>
                                                     </div> 
                                                       <div class="fav-card-icon"> ${favoriteButtonTemplate(tenant.IsFavorite, tenant.Id, tenant.UserId)}</div>
@@ -585,8 +615,7 @@ function loadTenantCards(baseUrl, skip, take) {
 
                 document.querySelectorAll('.icon-logo').forEach(function(img) {
                     img.addEventListener('error', function() {
-                        this.src = brokenImageForTiles;
-                        this.alt = "Broken Logo";
+                        applySafeImageFallback(this, window.brokenImageForTiles, "Broken Logo");
                     });
                 });
             }
@@ -630,14 +659,14 @@ function loadFavoriteCards(baseUrl, skip, take) {
                     var useCustomBranding = tenant.UseCustomBranding;
                     var brandingHtml = useCustomBranding
                         ? `<img id="icon-logo" class="icon-logo-container"  alt="Site Logo" loading="lazy" src="@GlobalAppSettings.SystemSettings.LoginLogo">`
-                        : `<img id="icon-logo" class="icon-logo"  alt="Site Logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${theme}">`;
+                        : `<img id="icon-logo" class="icon-logo"  alt="Site Logo" loading="lazy" src="${tenant.SiteUrl}/get-client-logo?logotype=login&theme=${themeValue}">`;
 
 
                     var cardHtml = `<div class="tenant-card card">
                                            <div class="icon-container">${brandingHtml}</div>
                                                     <div class="tenant-card-header card-header">
                                                         <div class="card-header-title">${tenant.TenantName}</div>
-                                                         <div class="sites-card card-sub-title"> <a class="text-decoration-none" href="${tenant.SiteUrl}" target="_blank">${tenant.SiteUrl}</a></div>
+                                                         <div class="sites-card card-sub-title"> <a class="text-decoration-none site-link" href="${tenant.SiteUrl}" target="_blank" rel="noopener noreferrer" data-url="${tenant.SiteUrl}" data-toggle="tooltip" title="${tenant.SiteUrl}">${tenant.SiteUrl}</a></div>
                                                            <div class="data-card card-content"> ${tenant.CreatedDateString}</div>
                                                     </div> 
                                                       <div class="fav-card-icon"> ${favoriteButtonTemplate(tenant.IsFavorite, tenant.Id, tenant.UserId)}</div>
@@ -648,8 +677,7 @@ function loadFavoriteCards(baseUrl, skip, take) {
 
                 document.querySelectorAll('.icon-logo').forEach(function(img) {
                     img.addEventListener('error', function() {
-                        this.src = brokenImageForTiles;
-                        this.alt = "Broken Logo";
+                        applySafeImageFallback(this, window.brokenImageForTiles, "Broken Logo");
                     });
                 });
             }
@@ -845,7 +873,7 @@ $(document).on("click", ".search-favorite", function () {
 
 function handleLogoError() {
     $('#boldbi-logo').on("error", function () {
-        $(this).attr("src", defaultErrorImageSrc);
+        applySafeImageFallback(this, window.defaultErrorImageSrc, "Broken Logo");
     });
 }
 

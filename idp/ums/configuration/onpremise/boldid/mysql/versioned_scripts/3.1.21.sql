@@ -1,4 +1,6 @@
-﻿ALTER TABLE {database_name}.BOLDTC_User ADD Status int NULL;
+﻿-- BOLD_UPGRADE_CHECKPOINT_COVERED: true
+-- BOLD_UPGRADE_STATEMENT_CHECKPOINT_VALIDATED: true
+ALTER TABLE {database_name}.BOLDTC_User ADD Status int NULL;
 
 CREATE TABLE {database_name}.BOLDTC_UserStatus (
 	Id int NOT NULL AUTO_INCREMENT,

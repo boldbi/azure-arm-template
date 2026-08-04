@@ -1,3 +1,4 @@
+﻿
 UPDATE {database_name}.BOLDBI_SettingsType SET Name='Site Credentials' WHERE Id = 20
 ;
 

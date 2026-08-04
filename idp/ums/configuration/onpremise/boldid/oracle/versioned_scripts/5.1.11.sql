@@ -1,4 +1,4 @@
-CREATE TABLE BOLDTC_TenantInactivity (
+﻿CREATE TABLE BOLDTC_TenantInactivity (
     Id VARCHAR2(36) PRIMARY KEY,
     TenantId VARCHAR2(36) NOT NULL,
     TenantInfoId VARCHAR2(36) NOT NULL,

@@ -1,3 +1,4 @@
+﻿
 INSERT INTO {database_name}.BOLDBI_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) SELECT 'All Users',1,12,1 FROM DUAL
 WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_PermissionEntity WHERE Name='All Users' LIMIT 1)
 ;
@@ -6,7 +7,7 @@ INSERT INTO {database_name}.BOLDBI_PermissionAccEntity (PermissionEntityId, Perm
 WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_PermissionAccEntity WHERE PermissionEntityId = 30 AND PermissionAccessId = 3 LIMIT 1)
 ;
 
-DROP TABLE {database_name}.SyncDS_UploadDataSourceMapping
+DROP TABLE IF EXISTS {database_name}.SyncDS_UploadDataSourceMapping
 ;
 
 CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
@@ -19,7 +20,7 @@ CREATE TABLE {database_name}.BOLDBI_UploadDataSourceMapping(
 	PRIMARY KEY (Id))
 ;
 
-DROP TABLE {database_name}.ScheduleMissingLogs
+DROP TABLE IF EXISTS {database_name}.ScheduleMissingLogs
 ;
 
 CREATE TABLE {database_name}.BOLDBI_ScheduleMissingLogs(

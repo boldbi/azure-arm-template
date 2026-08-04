@@ -28,7 +28,7 @@
 
 </script>
 <div id="alert-notification"></div>
-<form method="post" id="login-form" name="loginForm" class="login-form" action="@ViewBag.PostAction">
+<form method="post" id="login-form" name="loginForm" class="login-form" action="@ViewBag.PostAction" novalidate>
     @Html.AntiForgeryToken()
     <span id="message" class="text-center col-12 float-start validation-holder">
         @if (!string.IsNullOrWhiteSpace((string)TempData["Message"]))
@@ -47,13 +47,13 @@
     <div class="login-fields">
         <div class="input-field-form email">
             <input id="hidden-email" type="hidden" value="@uname" />
-            <input type="text" required md-no-asterisk ng-model="uname" value="@uname" name="userName" id="login-email" class="login-email" placeholder="@T["Username / Email Address"]" maxlength="100" />
+            <input type="text" required value="@uname" name="userName" id="login-email" class="login-email" placeholder="@T["Username / Email Address"]" maxlength="100" />
             <span class="demo-username" style="font-weight: bold; display: @showDemoAccount">Username : @demoUsername</span>
             <span class="validation-holder"></span>
             <span class="special-char-msg-login"></span>
         </div>
         <div class="input-field-form" id="password-field" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
-            <input required md-no-asterisk ng-model="pwd" name="password" type="password" id="current-password" autocomplete="current-password" placeholder="@T["Password"]" value="">
+            <input required name="password" type="password" id="current-password" autocomplete="current-password" placeholder="@T["Password"]" value="">
             <span class="su su-show show-hide-password" id="show-newpassword" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></span>
             <span class="demo-password" style="font-weight: bold; display: @showDemoAccount">Password: @demoPassword</span>
             <span id="error-password" style="display: @(TempData["errorPasswordStatus"] != null ? "block" : "none" )">
@@ -133,7 +133,7 @@
             }
         }
         <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
-        <button class="login-button proceed-button" ng-click="dsAuth()" type="submit" name="Submit" id="login-button" asp-route="PostLogin">
+        <button class="login-button proceed-button" type="submit" name="Submit" id="login-button" asp-route="PostLogin">
             @T["Continue"]
         </button>
     </div>

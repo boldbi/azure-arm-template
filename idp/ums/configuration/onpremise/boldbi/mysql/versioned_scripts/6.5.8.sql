@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_PublishType(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(100) NOT NULL,

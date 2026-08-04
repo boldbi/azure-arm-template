@@ -1,4 +1,4 @@
-﻿CREATE TABLE [BOLDTC_CouponLogType] (
+CREATE TABLE [BOLDTC_CouponLogType] (
 	Id int IDENTITY(1,1) NOT NULL,
 	Name nvarchar(max) NOT NULL,
 	IsActive bit NOT NULL,
@@ -260,11 +260,14 @@ CREATE TABLE [BOLDTC_UserLogin] (
 	SessionId uniqueidentifier NULL,
 	DirectoryTypeId int not null,
 	ClientToken nvarchar(4000) NOT NULL,
+	EncryptedIdToken nvarchar(4000) NULL,
 	LoggedInDomain nvarchar(255) NOT NULL,
 	IpAddress nvarchar(255) NOT NULL,
 	Browser nvarchar(255) NULL,
+	IdTokenExpiresAt datetime NULL,
 	LoggedInTime datetime NOT NULL,
 	LastActive datetime NULL,
+	IsUsedForLogout bit NULL,
 	IsActive bit NOT NULL,
   CONSTRAINT [PK_BOLDTC_USERLOGIN] PRIMARY KEY CLUSTERED
   (
@@ -413,7 +416,7 @@ CREATE TABLE [BOLDTC_SAMLSettings] (
 CREATE TABLE [BOLDTC_SystemSettings] (
 	Id int IDENTITY(1,1) NOT NULL,
 	SystemKey nvarchar(255) NOT NULL UNIQUE,
-	SystemValue nvarchar(4000),
+	SystemValue nvarchar(max),
 	ModifiedDate datetime NOT NULL,
 	IsActive bit NOT NULL,
   CONSTRAINT [PK_BOLDTC_SYSTEMSETTINGS] PRIMARY KEY CLUSTERED
@@ -1760,3 +1763,17 @@ ALTER TABLE [BOLDTC_TenantSettings] CHECK CONSTRAINT [BOLDTC_TenantSettings_fk0]
 
 ALTER TABLE [BOLDTC_UserAttributes] ADD FOREIGN KEY([UserId]) REFERENCES [BOLDTC_User] ([Id])
 ;
+
+CREATE TABLE [BOLDTC_TokenVault] (
+		TenantId UNIQUEIDENTIFIER NOT NULL,
+		IdpUserId UNIQUEIDENTIFIER NOT NULL,
+		AuthUserId UNIQUEIDENTIFIER NOT NULL,
+		AuthProviderId INT NOT NULL,
+		EncryptedToken NVARCHAR(MAX) NOT NULL,
+		ExpiresAt DATETIMEOFFSET(7) NULL,
+		UpdatedAt DATETIMEOFFSET(7) NOT NULL DEFAULT SYSUTCDATETIME(),
+	CONSTRAINT [PK_BOLDTC_TokenVault] PRIMARY KEY CLUSTERED
+	(
+	[TenantId], [IdpUserId], [AuthProviderId]
+	) WITH (IGNORE_DUP_KEY = OFF)
+);

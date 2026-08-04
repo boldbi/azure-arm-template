@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = T["Authentication Settings"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
     var defaultSettingsCount = ViewBag.DefaultAuthenticationSettings != null ? ViewBag.DefaultAuthenticationSettings.ProviderName.Count : "0";
     var selectedDefaultAuthenticationText = "";
@@ -35,36 +35,11 @@
         var baseRootUrl = "@Url.Content("~/")";
         if (baseRootUrl.toLowerCase() === "/")
             baseRootUrl = "";
-
-        var isEnabled = @Json.Serialize(ViewBag.AzureAdSettings.IsEnabled);
-        var isB2CEnabled = @Json.Serialize(ViewBag.AzureADB2CSettings.IsEnabled);
-        var isSloEnabled = @Json.Serialize(isAzureAdSloEnabled);
-        var isB2CSloEnabled = @Json.Serialize(isAzureAdB2CSloEnabled);
-        var oAuthEnabled = @Json.Serialize(ViewBag.OAuthDetails.IsEnabled);
-        var openIdEnabled = @Json.Serialize(ViewBag.OpenIDSettings.IsEnabled);
-        var oAuthUserCreationEnabled = @Json.Serialize(ViewBag.OAuthDetails.OAuthAuthSettings.CanCreateAccount);
-        var openIdUserCreationEnabled = @Json.Serialize(ViewBag.OpenIDSettings.OIDCAuthSettings.CanCreateAccount);
-        var jwtIsEnabled = @Json.Serialize(ViewBag.JwtSettings.IsEnabled);
-        var windowsAdEnabled = @Json.Serialize(ViewBag.WindowsAdSettings.IsEnabled);
         if (providerNameCount != 0) {
             var selectedDefaultAuthText = "@selectedDefaultAuthenticationText";
             var selectedDefaultAuthValue = "@selectedDefaultAuthenticationValue";
         }
         var defaultAuthEnabled = @Json.Serialize(ViewBag.DefaultAuthenticationSettings.IsDefaultAuthenticationEnabled);
-        serverApp.controller("adSettingsController", ["$scope", function ($scope) {
-            $scope.IsEnabled = isEnabled;
-            $scope.isB2CEnabled = isB2CEnabled;
-            $scope.IsSloEnabled = isSloEnabled;
-            $scope.IsB2CSloEnabled = isB2CSloEnabled;
-            $scope.oauthIsEnabled = oAuthEnabled;
-            $scope.openidIsEnabled = openIdEnabled;
-            $scope.jwtIsEnabled = jwtIsEnabled;
-            $scope.windowsAdEnabled = windowsAdEnabled;
-            $scope.defaultauthenticationIsEnabled = defaultAuthEnabled;
-            $scope.oAuthUserCreationEnabled = oAuthUserCreationEnabled;
-            $scope.openIdUserCreationEnabled = openIdUserCreationEnabled;
-
-        }]);
         var oauthKnownProviderType = "@oauthKnownProvider";
         var openIdKnownProviderType = "@openIdKnownProvider";
         var openIdResponseType = "@responseType";
@@ -74,32 +49,34 @@
 }
 
 @section MainSection{
+    @Html.AntiForgeryToken()
     @await Html.PartialAsync("_AdminMenu")
     @await Html.PartialAsync("_DiologBox")
 
-    <div ng-controller="adSettingsController" class="col-12 float-start no-padding no-margin auth-page-height width-alignment">
+    <div class="col-12 float-start no-padding no-margin auth-page-height width-alignment">
         <div class="col-md-12 admin-page-header">
             <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
                 <hgroup class="col-12 float-start header-group">
                     <h1 class="page-title">@T["Authentication Settings"]</h1>
-                <h5 class="page-description">@T["Configure authentication/authorization providers’ information."]</h5>
+                <h5 class="page-description">@T["Configure authentication/authorization providers' information."]</h5>
             </hgroup>
         </div>
                 <div class="col-4 top-nav-sec no-padding">
                     @await Html.PartialAsync("../Shared/_TopMenu")
                 </div>
             </div>
-        <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
+        <div id="auth-settings-shell">
+            <div class="col-md-12 float-start import-area bi-page-header admin-page-icon">
             <div class="col-12 float-start no-padding">
                 <div class="col-6 no-padding admin-header-btn float-end" id="user-management-options">
                 <button class="secondary-button float-end" id="cancel-settings" title="">@T["Cancel"]</button>
-                <button type="submit" id="update-saml-settings" class="primary-button float-end update-auth-settings" ng-disabled="ssoSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-azure-b2c-settings" class="primary-button float-end update-auth-settings" ng-disabled="ssoSettingsb2cForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-jwt-settings" class="primary-button float-end update-auth-settings" ng-disabled="jwtSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-defaultauthlogin-settings" class="primary-button float-end update-defaultauth-settings @(ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0 ? "display-none" : string.Empty)" ng-disabled>@T["Save"]</button>
-                <button type="submit" id="update-oauth-settings" class="primary-button float-end update-auth-settings" ng-disabled="oauthSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-openid-settings" class="primary-button float-end update-auth-settings" ng-disabled="openidSettingsForm.$invalid">@T["Save"]</button>
-                <button type="submit" id="update-windowsad-settings" class="primary-button float-end update-auth-settings" ng-disabled="windowsadSettingsForm.$invalid">@T["Save"]</button>
+                <button type="submit" id="update-saml-settings" class="primary-button float-end update-auth-settings">@T["Save"]</button>
+                <button type="submit" id="update-azure-b2c-settings" class="primary-button float-end update-auth-settings">@T["Save"]</button>
+                <button type="submit" id="update-jwt-settings" class="primary-button float-end update-auth-settings">@T["Save"]</button>
+                <button type="submit" id="update-defaultauthlogin-settings" class="primary-button float-end update-defaultauth-settings @(ViewBag.DefaultAuthenticationSettings.ProviderName.Count == 0 ? "display-none" : string.Empty)" disabled>@T["Save"]</button>
+                <button type="submit" id="update-oauth-settings" class="primary-button float-end update-auth-settings">@T["Save"]</button>
+                <button type="submit" id="update-openid-settings" class="primary-button float-end update-auth-settings">@T["Save"]</button>
+                <button type="submit" id="update-windowsad-settings" class="primary-button float-end update-auth-settings">@T["Save"]</button>
                 </div>
             </div>
         </div>
@@ -144,6 +121,7 @@
             @await Html.PartialAsync("../Shared/_FooterOnPremise")
         </div>
     </div>
+    </div>
 
     <div id="dialog" class="custom-template"></div>
     <div id="dlgContent" style="visibility: hidden" class="dialogContent">
@@ -153,3 +131,4 @@
         </span>
     </div>
 }
+

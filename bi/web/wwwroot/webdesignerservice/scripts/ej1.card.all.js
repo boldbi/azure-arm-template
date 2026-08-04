@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.card.all.js
-*  version : 15.3.8
+*  version : 16.1.90
 *  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -6568,7 +6568,7 @@ var BoldBIDashboardSparkline;
         },
         _selectedHandler: function(evt) {
             var that = this;
-            this._hideTooltip();
+            this._hideTooltip(evt);
             this.singleTimer = setTimeout(function() {
                 var args = {};
                 if (that.model && that.model.selected) {
@@ -7940,8 +7940,8 @@ var BoldBIDashboardSparkline;
         },
         _selectedHandler: function(evt) {
             var that = this;
-            this._hideTooltip();
-            this._hideTooltipDescription();
+            this._hideTooltip(evt);
+            this._hideTooltipDescription(evt);
             this.singleTimer = setTimeout(function() {
                 var args = {};
                 if (that.model && that.model.selected) {
@@ -7979,7 +7979,7 @@ var BoldBIDashboardSparkline;
             var args = {};
 
             this.singleTimer = setTimeout(function() {    
-                if (!that.model || !that.model.measure || !that.model.measure.text) {
+                if (!that.model || !that.model.measure || that.model.measure.text == null) {
                     return;
                 }
                 var value = that.formatting.applyFormat(that.model.measure.text, that.model.valueRepresentation);
@@ -8054,7 +8054,7 @@ var BoldBIDashboardSparkline;
         
         _showTooltipDescription: function(evt) {
             var that = this;
-            this._hideTooltip();
+            this._hideTooltip(evt);
             this.singleTimer = setTimeout(function() {
                 var tooltipdivRect = bbdesigner$("#" + that.pluginName + "Description_Track_ToolTip_Template");
                 if (tooltipdivRect.length === 0) {

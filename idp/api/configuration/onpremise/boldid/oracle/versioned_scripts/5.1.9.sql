@@ -1,4 +1,4 @@
-CREATE TABLE BOLDTC_TenantStorageDetails (
+﻿CREATE TABLE BOLDTC_TenantStorageDetails (
     Id VARCHAR2(36) NOT NULL,
     TenantInfoId VARCHAR2(36) NOT NULL,
     StorageType NUMBER NOT NULL,

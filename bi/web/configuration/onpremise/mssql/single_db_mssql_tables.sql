@@ -40,6 +40,7 @@ CREATE TABLE [BOLDBI_Group](
 	[ModifiedDate] [datetime] NOT NULL,
 	[DirectoryTypeId] [int] NOT NULL DEFAULT 0,
 	[ExternalProviderId] [nvarchar](100) NULL,
+	[IsAdminGroup] [bit] NOT NULL DEFAULT 0,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -2540,8 +2541,6 @@ ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ItemId]) R
 ;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
 ;
-ALTER TABLE [BOLDBI_UserResourceFeaturePermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id) 
-;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ItemTypeId]) REFERENCES [BOLDBI_ItemType] ([Id])
@@ -2552,8 +2551,6 @@ ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([Permissio
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
-;
-ALTER TABLE [BOLDBI_GroupResourceFeaturePermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id)
 ;
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;

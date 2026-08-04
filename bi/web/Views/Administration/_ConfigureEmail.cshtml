@@ -213,6 +213,9 @@
         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
             $(function () {
                 $("#search-template").val("");
+                var cachedSpecificEventTemplates = typeof getCachedSpecificEmailTemplateGridData === "function"
+                    ? getCachedSpecificEmailTemplateGridData(emailTemplateId.toString())
+                    : null;
                 var data = ej.DataManager({
                     url:emailTemplateURL + '?templateId=' + emailTemplateId,
                     adaptor: new ej.UrlAdaptor()
@@ -256,6 +259,16 @@
                         { width: 7, allowFiltering: true, allowSorting: false, template: "#options" },
                     ],
                 });
+
+                if (cachedSpecificEventTemplates && cachedSpecificEventTemplates.length > 0) {
+                    var gridObj = $("#specificEmailTemplateListGrid").data("ejGrid");
+                    if (gridObj != undefined) {
+                        currentSpecificEventTemplateList = cachedSpecificEventTemplates;
+                        gridObj.model.dataSource = cachedSpecificEventTemplates;
+                        gridObj.model.currentViewData = cachedSpecificEventTemplates;
+                        gridObj.refreshContent();
+                    }
+                }
 
     });
         </script>

@@ -52,6 +52,7 @@
     var isUserLanguagePreferenceDisabled = globalAppSettings.SystemSettings != null && globalAppSettings.SystemSettings.IsSystemLanguagePreference;
     var pageDescription = T["Manage your profile settings and privacy controls"];
     var isSingleDataBaseMode = ServerAppConfig.TenantConfigurationMode == ConfigurationMode.SingleDatabaseForAllTenants;
+    var isFreeTier = ServerAppConfig.Sandbox.BI.Enabled;
 }
 
 
@@ -59,15 +60,24 @@
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.css" />
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/User/UserNotificationSettings.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/profile.min.css" />
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/profile.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/User/UserNotificationSettings.min.js"></script>
     </environment>
     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
         var updateprofilepictureUrl = "@Url.Action("updateprofilepicture", "User")";
+                    @{
+                    // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+            }
         var isAdmin = @Html.Raw(Json.Serialize(ViewBag.IsAdminAccount));
+                    @{
+    #pragma warning restore SCS0029
+        }
         var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
         var avatarUrl = "@(idPUrl + Url.Action("Avatar", "User"))";
         var updatepasswordUrl = "@Url.Action("updatepassword", "User")";
@@ -95,7 +105,15 @@
         var scheduleRangeTimeFormat = "@_clientDateTimeInfo.ClientDateTime.TimeFormat";
         var today = new Date();
         var isSingleDataBaseMode = @Json.Serialize(@isSingleDataBaseMode);
+        var isFreeTier = @Json.Serialize(isFreeTier);
         $(document).ready(function () {
+            if (isFreeTier) {
+                var element = document.getElementById("edit-button");
+                if (element) {
+                    element.remove();
+                }
+            }
+
             $("#token-datePicker").ejDatePicker({
                 footer: false,
                 minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
@@ -284,6 +302,8 @@
                                                     <i class="su-dropdown-arrow arrow-margin"></i>
                                                 </button>
                                                 @{
+                                                    // Suppressing SCS0029 because no direct user input handled
+                                                    #pragma warning disable SCS0029
                                                     int i;
                                                     var supportedCultures = GlobalAppSettings.GetSupportedLanguages(globalAppSettings);
                                                     var supportedLanguages = supportedCultures.OrderBy(x => x.Name).ToList();
@@ -321,6 +341,9 @@
                                                         </ul>
                                                     }
                                                 }
+                                                @{
+                                        #pragma warning restore SCS0029
+                                                }
                                             </div>
                                         </div>
                                         <div id="id-account-link">
@@ -349,11 +372,17 @@
                                 </div>
                                 <div class="col-12 no-padding form-fields">
                                     <label class="profile-textbox-label ">@T["Default pinboard"]</label>
+                                    @{
+                                        // Suppressing SCS0029 because no direct user input handled
+                                #pragma warning disable SCS0029
+                                    }
                                     @if (!@ServerAppConfig.IsHideHelpLink)
                                     {
                                         <h6 class="no-margin">@Html.Raw(string.Format(T["Click {0}here{1} to learn how to set a default pinboard."].Value, "<a href='" + (ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.SetDefaultPinboards)) + "' target='_blank'>", "</a>"))</h6>
                                     }
-
+                                    @{
+                                #pragma warning restore SCS0029
+                                    }
                                     <div class="txt-holder margin-top-12" id="homepage-list">
                                         @Html.DropDownList("default-homepage", ViewBag.UserHomePages as IEnumerable<SelectListItem>, new { @class = "selectpicker default-homepage-dropdown float-start", data_live_search = "true", data_size = 10 })
                                     </div>

@@ -3,3 +3,5 @@ INSERT [BOLDTC_AuthType]([Name],[ModifiedDate],[IsActive]) VALUES( N'DefaultAuth
 
 ALTER TABLE [dbo].[BOLDTC_AuthSettings]
 ADD [IsDefaultAuthentication] bit NOT NULL DEFAULT('0');
+
+ALTER TABLE [BOLDTC_SystemSettings] ALTER COLUMN [SystemValue] ntext;

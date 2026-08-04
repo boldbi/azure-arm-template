@@ -89,7 +89,7 @@
     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/custom-ui.min.js"></script>
 </environment>
 
-<aside class="menu-bar" id="app-navigation" ng-controller="CustomMenuCtrl">
+<aside class="menu-bar" id="app-navigation">
     <nav id="main-nav" class="sf-nav-group">
         <a id="mobile-profile-picture" href="@profilePageUrl" class="mobile-visible">
             <div class="mobile-display-name">@displayName</div>
@@ -126,36 +126,7 @@
                 </li>
             }
 
-            <li ng-repeat="items in menuList | orderBy:'Order' | filter:{ShowMenu:true} | filter: {Condition: true} as result" ng-init="count()" ng-if="items.Condition" id="{{items.Id}}">
-                <ul class="default-lists" style="padding: 0; display:none" ng-class="!items.MobileClassName ? 'mobile-view-height' : ''">
-                    <li class="mobile-hidden sf-nav-separator" ng-show="{{currentCount == '4' || currentCount == '8' && result.length < 11 }}"></li>
-                    <li class="{{items.IsSelected}} {{items.MobileClassName}}" ng-class="{{$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)}} ? 'sf-nav-administration-item sf-nav-item' : 'sf-nav-item'" ng-show="{{result.length > 10 ? $index < 6 : $index < 10}}">
-                        <a class="sf-nav-link" href="{{items.OpenLink}}" target="{{items.OpenBehavior}}" id="{{items.HrefId}}">
-                            <span class="menu-icon-container">
-                                <i class="{{items.ImageLink}} {{items.ImageClassName}}" ng-style="{'background-image': items.ImageClassName == 'custom-menu' ? 'url(' + items.ImageLink +')' : ''}"></i>
-                            </span>
-                            <span class="menu-label">{{items.Display}}</span>
-                        </a>
-                    </li>
-                    <li class="sf-nav-administration-collapse-item listing-dropdown dropup" ng-class="result.length < 11 ? 'menu-toggle' : ''" ng-if="$index > ($index + 1 == result.length ? menuCount + 1 : menuCount)">
-                        <a class="dropdown-toggle mobile-hidden" data-bs-toggle="dropdown" ng-show="{{$index == 5 && items.Condition}}">
-                            <span class="menu-icon-container">
-                                <i class="su su-dots-menu"></i>
-                            </span>
-                        </a>
-                        <ul class="dropdown-menu sub-menu" role="menu">
-                            <li ng-repeat="items in menuList | orderBy:'Order' | filter:{ShowMenu:true} | filter: {Condition: true}" class="sf-nav-item {{items.IsSelected}} {{items.MobileClassName}}" ng-if="$index > menuCount && items.Condition">
-                                <a class="sf-nav-link" href="{{items.OpenLink}}" target="{{items.OpenBehavior}}">
-                                    <span class="menu-icon-container">
-                                        <i class="{{items.ImageLink}} {{items.ImageClassName}}" ng-style="{'background-image': items.ImageClassName == 'custom-menu' ? 'url(' + items.ImageLink +')' : ''}"></i>
-                                    </span>
-                                    <span class="menu-label">{{items.Display}}</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
+            <li id="custom-menu-list-host" style="display:none;"></li>
             @if (!ServerAppConfig.IsSelfHosted)
             {
                 <li class="mobile-visible sf-nav-separator">
@@ -174,12 +145,15 @@
             }
 
             <li class="li-logout mobile-visible">
-                <a class="" href="@Url.Action("logout", "accounts")">
-                    <span class="menu-icon-container">
-                        <i class="su su-logout"></i>
-                    </span>
-                    <span class="menu-label">@T["Sign out"]</span>
-                </a>
+                <form method="post" action="@Url.Action("logout", "accounts")">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="logout-element btn">
+                        <span class="menu-icon-container">
+                            <i class="su su-logout"></i>
+                        </span>
+                        <span class="menu-label">@T["Sign out"]</span>
+                    </button>
+                </form>
             </li>
         </ul>
     </nav>
@@ -198,7 +172,7 @@
                 @if (showNotifications)
                 {
                     <li class="sub-menu-action">
-                        <span id="user-system-notification" class="menu-icon-container">
+                        <span id="user-system-notification" class="menu-icon-container" style="cursor: pointer;">
                             <i class="su su-notification-alert"></i>
                         </span>
                     </li>
@@ -381,9 +355,10 @@
                                     <li class="sf-sub-menu-separator"></li>
                                 }
                                 <li class="sub-menu-item logout-list">
-                                    <a href="@Url.Action("logout", "accounts")">
-                                        @T["Sign out"]
-                                    </a>
+                                    <form method="post" action="@Url.Action("logout", "accounts")">
+                                        @Html.AntiForgeryToken()
+                                        <button class="logout-element btn" type="submit">@T["Sign out"]</button>
+                                    </form>
                                 </li>
                             }
                         </ul>

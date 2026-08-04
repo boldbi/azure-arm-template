@@ -29,10 +29,14 @@
             var isValidFile = "@isValidFile";
             var isValidSiteName = "@isValidSite"
             var selectedPath = "@ViewBag.FilePath";
+            var runtimeConfigurationUpdatedMessage = @Json.Serialize(T["Configuration saved successfully. Changes may take up to 30 seconds to apply across all services in multi-node deployments."].Value);
             $(document).ready(function () {
 
                 if (isRequestSuccess.toLowerCase() === "true" && isValidFile.toLowerCase() === "true" && isValidSiteName.toLowerCase() === "true") {
-                    SuccessAlert(window.Server.App.LocalizationContent.Configuration, window.Server.App.LocalizationContent.ConfigurationUpdated, 7000);
+                    var successMessage = selectedFileName && selectedFileName.toLowerCase() === "config.json"
+                        ? runtimeConfigurationUpdatedMessage
+                        : window.Server.App.LocalizationContent.ConfigurationUpdated;
+                    SuccessAlert(window.Server.App.LocalizationContent.Configuration, successMessage, 7000);
                 }
                 else if (isValidFile.toLowerCase() === "false")
                 {

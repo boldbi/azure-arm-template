@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_AI_REQUESTS (
     MessageId VARCHAR(255) NOT NULL PRIMARY KEY,
     SearchDate DATETIME,
@@ -22,6 +23,6 @@ SET SQL_SAFE_UPDATES = 0;
 
 ALTER TABLE {database_name}.BOLDBI_CustomEmailTemplate ADD COLUMN CustomVisibilityOptions TEXT NOT NULL;
 
-UPDATE {database_name}.BOLDBI_CustomEmailTemplate SET CustomVisibilityOptions = '{}'
+UPDATE {database_name}.BOLDBI_CustomEmailTemplate SET CustomVisibilityOptions = '{}';
 
 SET SQL_SAFE_UPDATES = 1;

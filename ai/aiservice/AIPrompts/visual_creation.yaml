@@ -29,6 +29,11 @@ VisualCreation:
             - Example: For 'tickets created on a Thursday in the last 12 months', apply `relativedatefilter.genericfilter` for 12 months AND a condition filter for 'DayOfWeek = Thursday'.
           - Avoid creating filters for empty values unless explicitly specified by the user.
           - Apply by default window based on the x-axis column, Top 10 rank filter by default for all charts except Number Card/KPI, using the primary measure. If the user specifies Top/Bottom N, override with their value and direction. Exclude nulls by default.
+        RELATIONSHIP VISUALIZATION:
+          - For queries asking to "visualize relationship", "show correlation", or "compare" between columns, ALWAYS analyze column data types FIRST.
+          - BOTH columns are dimensions (string/text): NEVER use Scatter/Bubble. Use Bar/Column chart with one dimension on X-axis and COUNT or numeric measure (sales, amount, quantity) on Y-axis.
+          - ONE OR BOTH columns are numeric: Use Scatter chart with appropriate aggregation on numeric axis.
+          - CRITICAL: Visualizations must show quantifiable data patterns. Do not create dimension-only scatter plots.
         AXIS ASSIGNMENT (ENC-O-DINGS):
           - Assign appropriate column names to the x-axis and y-axis.
           - Ensure at least one of the axes (x or y) is included in the encoding.
@@ -52,7 +57,7 @@ VisualCreation:
   - Type: UnsupportedWidgetPrompt
     Message: |
       ROLE: Classifier for unsupported widget types.
-      GOAL: Determine if the user's query mentions any unsupported widget types.
+      GOAL: Determine if the user's query explicitly requests any unsupported widget types for visualization.
       UNSUPPORTED WIDGETS:
         - Radar Polar
         - KPI card
@@ -68,9 +73,15 @@ VisualCreation:
         - Range navigator
         - Image widget
         - Combine widget
+      CONTEXT RULES:
+        - A widget type is only considered unsupported if the user is explicitly requesting THAT TYPE of visualization.
+        - If a term appears in the context of a datasource name, table name, column name, or data value (e.g., "from datasource image" or "image column"), it should be IGNORED.
+        - Look for explicit visualization intent keywords like: "create", "show", "display", "use", "as", "chart", "widget", "in" followed by the widget type name.
+        - Focus ONLY on the visualization method being requested, NOT on data source names or metadata.
       OUTPUT RULES:
-        - If any of the unsupported terms are mentioned: return 'unsupported'.
-        - If none are mentioned: return 'supported'.
+        - If any of the unsupported widget types are explicitly requested for visualization: return 'unsupported'.
+        - If the query is about general visualization without specifying an unsupported widget type: return 'supported'.
+        - If unsupported terms appear only in datasource/column/table names or data context: return 'supported'.
         - Return ONLY 'supported' or 'unsupported' (no explanation or extra text).
 
   - Type: IncludeExpressionColumns
@@ -192,7 +203,7 @@ VisualCreation:
         - Limit description to 17 words or fewer.
         - Use simple, intuitive terms.
         - Ensure consistency with underlying data and dashboard context from the user query.
-
+  
   - Type: GenerateSynonyms
     Message: |
       ROLE: Generate concise, user-friendly synonyms for a given column name. 

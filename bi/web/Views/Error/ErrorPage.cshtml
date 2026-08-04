@@ -116,7 +116,10 @@
                     @if (ViewBag.ErrorType == "access_denied")
                     {
                         <span class="error-page-cursor">
-                            <a class="error-to-beck-text-color" href="@(new Uri(globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/') + "/accounts/logout"))">@T["Try a different account"]</a>
+                            <form method="post" action="@(new Uri(globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/') + "/accounts/logout"))" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="error-to-beck-text-color" style="background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;color:inherit;">@T["Try a different account"]</button>
+                            </form>
                         </span>
                     }
                     else if (ViewBag.ErrorType == "http_error_404")

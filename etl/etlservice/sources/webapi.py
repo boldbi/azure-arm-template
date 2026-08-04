@@ -5,13 +5,15 @@ import pandas as pd
 import requests
 from requests.auth import HTTPBasicAuth
 import base64
-import os
 import posixpath
 from typing import Iterator
 from datetime import datetime, timedelta
 import re
+import logging
+from pathlib import Path
 
-import dlt
+logging.basicConfig(level=logging.INFO)
+
 from dlt.sources import TDataItem, TDataItems
 
 try:
@@ -61,8 +63,8 @@ if match:
         end_timestamp = int(end_of_yesterday.timestamp())
         api_endpoint = re.sub(r"today\(\)\.adddays\(-1\)\.start", str(start_timestamp), api_endpoint)
         api_endpoint = re.sub(r"today\(\)\.adddays\(-1\)\.end", str(end_timestamp), api_endpoint)
-        print("Parsed Start Timestamp:", start_timestamp)
-        print("Parsed End Timestamp:", end_timestamp)
+        logging.info("Parsed Start Timestamp: " + str(start_timestamp))
+        logging.info("Parsed End Timestamp: " + str(end_timestamp))
 
 {1}
 
@@ -73,49 +75,47 @@ if match:
 if response.status_code == 200:
     api_data = json.loads(response.text)
 else:
-    print("Error: "+ str(response.status_code))
+    logging.error("Error: " + str(response.status_code))
     api_data = None
 
 # Create DataFrame if data is available
 if api_data:
     df = pd.json_normalize(api_data)
     {11}
-    print(df.head())
+    logging.info(str(df.head()))
 
     pipeline = dlt.pipeline("{0}_pipeline", destination="filesystem", dataset_name="{0}")
     try:
         pipeline.run(df, table_name="{4}", loader_file_format="jsonl")
     except Exception as e:
         if "_dlt_pipeline_state" in str(e) and "FileNotFoundError" in str(e):
-            print('')
+            logging.debug("Pipeline state file not found, continuing...")
         else:
             raise
         
     dir_path = '{5}'
     try:
-        if os.path.isdir(dir_path):
-            
-    
-            file_paths = [os.path.join(dir_path, filename) for filename in os.listdir(directory_path)]
-
+        path = Path(dir_path)
+        if path.is_dir():
+            file_paths = list(path.iterdir())
             for file_path in file_paths:
-                filePath = (file_path)
-                df = pd.read_json(filePath)
-                data = df.to_dict(orient="records",lines=True)
-                pipelinef = dlt.pipeline(pipeline_name="{0}_pipeline",destination='{9}',staging={10} ,dataset_name="{0}",)
-                load_info = pipelinef.run(data, table_name="{6}")
-                print(pipelinef.last_trace.last_normalize_info)
+                if file_path.is_file():
+                    df = pd.read_json(file_path)
+                    data = df.to_dict(orient="records",lines=True)
+                    pipelinef = dlt.pipeline(pipeline_name="{0}_pipeline",destination='{9}',staging={10} ,dataset_name="{0}",)
+                    load_info = pipelinef.run(data, table_name="{6}")
+                    logging.info(str(pipelinef.last_trace.last_normalize_info))
         else:
             directory_path = '{7}'
-    
-            file_paths = [os.path.join(directory_path, filename) for filename in os.listdir(directory_path)]
-    
-            for file_path in file_paths:
-                filePath = (file_path)
-                df = pd.read_json(filePath,lines=True)
-                data = df.to_dict(orient="records")
-                pipelinef = dlt.pipeline(pipeline_name="{0}_pipeline",destination='{9}',staging={10} ,dataset_name="{0}",)
-                load_info = pipelinef.run(data, table_name="{6}")
-                print(pipelinef.last_trace.last_normalize_info)
+            path = Path(directory_path)
+            if path.is_dir():
+                file_paths = list(path.iterdir())
+                for file_path in file_paths:
+                    if file_path.is_file():
+                        df = pd.read_json(file_path,lines=True)
+                        data = df.to_dict(orient="records")
+                        pipelinef = dlt.pipeline(pipeline_name="{0}_pipeline",destination='{9}',staging={10} ,dataset_name="{0}",)
+                        load_info = pipelinef.run(data, table_name="{6}")
+                        logging.info(str(pipelinef.last_trace.last_normalize_info))
     except Exception as e:
-        print(f'An unexpected error occurred: {{e}}')
+        logging.error("An unexpected error occurred: " + str(e))

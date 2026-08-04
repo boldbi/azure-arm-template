@@ -22,7 +22,8 @@
 
     var idpreferenceId = Context.Session.GetString("idpReferenceId") != null ? Context.Session.GetString("idpReferenceId").ToString() : string.Empty;
 
-    var adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
+    var adminTypeValue = Context.Session.GetString("AdminType");
+    var adminType = Enum.TryParse(adminTypeValue, out AdminType parsedAdminType) ? parsedAdminType : AdminType.NoAdmin;
 
     var profilePicture = idPUrl + Url.Content("/User/Avatar?id=" + userId + "&ImageSize=64");
 

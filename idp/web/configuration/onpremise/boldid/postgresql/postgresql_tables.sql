@@ -200,11 +200,14 @@ CREATE TABLE BOLDTC_UserLogin (
 	SessionId uuid NULL,
 	DirectoryTypeId int NOT NULL,
 	ClientToken varchar(4000) NOT NULL,
+	EncryptedIdToken varchar(4000) NULL,
 	LoggedInDomain varchar(255) NOT NULL,
 	IpAddress varchar(255) NOT NULL,
 	Browser varchar(255) NULL,
+	IdTokenExpiresAt timestamp NULL,
 	LoggedInTime timestamp NOT NULL,
 	LastActive timestamp NULL,
+	IsUsedForLogout smallint NULL,
 	IsActive smallint NOT NULL,
   CONSTRAINT PK_BOLDTC_USERLOGIN PRIMARY KEY (Id)
 )
@@ -310,7 +313,7 @@ CREATE TABLE BOLDTC_SAMLSettings (
 CREATE TABLE BOLDTC_SystemSettings (
 	Id SERIAL NOT NULL,
 	SystemKey varchar(255) NOT NULL UNIQUE,
-	SystemValue varchar(4000),
+	SystemValue text,
 	ModifiedDate timestamp NOT NULL,
 	IsActive smallint NOT NULL,
   CONSTRAINT PK_BOLDTC_SYSTEMSETTINGS PRIMARY KEY (Id)
@@ -997,6 +1000,17 @@ CREATE TABLE BOLDTC_BiConfiguration (
 	SystemValue varchar(4000),
 	ModifiedDate timestamp NOT NULL,
 	CONSTRAINT PK_BOLDTC_BiConfiguration PRIMARY KEY (Id)
+);
+
+CREATE TABLE BOLDTC_TokenVault (
+	TenantId uuid NOT NULL,
+	IdpUserId uuid NOT NULL,
+	AuthUserId uuid NOT NULL,
+	AuthProviderId int NOT NULL,
+	EncryptedToken text NOT NULL,
+	ExpiresAt timestamp NULL,
+	UpdatedAt timestamp NOT NULL,
+	PRIMARY KEY (TenantId, IdpUserId, AuthProviderId)
 );
 
 INSERT into BOLDTC_TenantLogType  ( Name , IsActive ) VALUES (N'Registration', 1);

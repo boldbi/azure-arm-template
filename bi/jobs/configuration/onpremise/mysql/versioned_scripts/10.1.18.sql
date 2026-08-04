@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_AI_CHAT (
     SearchID VARCHAR(255) PRIMARY KEY,
     SessionID TEXT,

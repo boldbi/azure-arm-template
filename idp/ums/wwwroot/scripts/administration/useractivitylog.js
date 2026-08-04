@@ -1,4 +1,4 @@
-var userdaterangeobj = ""
+﻿var userdaterangeobj = ""
 var activityLogStartDateTime = ""
 var activityLogEndDateTime = ""
 var dropDownList = ""
@@ -161,54 +161,136 @@ $(document).on("click", "#refresh", function () {
 });
 
 $(document).on("click", ".activity-log-info", function (args) {
-    openActivityLogDetails(args)
+    openActivityLogDetails(args);
 });
 
-var serverApp = angular.module("serverApp", []);
-serverApp.controller('activityLogInfoCtrl', ["$scope", "$timeout", function ($scope, $timeout) {
-    $scope.ActivityLogDetail = null;
-
-    $scope.openActivityLogInfoDialog = function (activityLogDetail) {
-        if (activityLogDetail.rowData.StatusMessage != null && activityLogDetail.rowData.StatusMessage != " " && activityLogDetail.rowData.StatusMessage != "") {
-            $(".mail-error-message").show();
+function getActivityLogDetails(appType, appSource) {
+    if (appType === appTypeApi) {
+        if (appSource === appSourceBI) {
+            return dashboardServer;
         }
-        $scope.ActivityLogDetail = activityLogDetail.rowData;
-
-        document.getElementById("user-activity-log").style.visibility = 'visible';
-        document.getElementById("user-activity-log").ej2_instances[0].show();
-        $timeout(function () {
-            $scope.$apply();
-        }, 10);
-    };
-
-    $scope.capitalizeFirstLetter = function (string) {
-        if (!string) return '-';
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    };
-    
-    $scope.getLogDetails = function(appType, appSource) {
-        if (appType === appTypeApi) {
-            if (appSource === appSourceBI) {
-                return dashboardServer;
-            } else if (appSource === appSourceUMS) {
-                return identityProvider;
-            }
+        if (appSource === appSourceUMS) {
+            return identityProvider;
         }
-        else if (appType === appTypeJobs && appSource === appSourceBI)
-        {
-            return dashboardJobs;
-        }
-        return '-';
-    };
-}]);
-
-function openActivityLogDetails(args) {
-    var LogInfoCtrl = angular.element('[ng-controller=activityLogInfoCtrl]').scope();
-    var grid = document.getElementById("userActivityLogGrid").ej2_instances[0];
-    var record = grid.getRowInfo(args.target);
-    LogInfoCtrl.openActivityLogInfoDialog(record) ;
+    }
+    if (appType === appTypeJobs && appSource === appSourceBI) {
+        return dashboardJobs;
+    }
+    return '-';
 }
 
+function setActivityLogText(id, value) {
+    var element = document.getElementById(id);
+    if (element) {
+        element.textContent = value && value !== "" ? value : '-';
+    }
+}
+
+function capitalizeActivityLogValue(value) {
+    if (!value) {
+        return '-';
+    }
+    var text = String(value);
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function appendChangeSummaryItem(target, label, value) {
+    var section = document.createElement('span');
+    section.className = 'col-12 float-end no-margin no-padding change-items';
+
+    var labelElement = document.createElement('label');
+    labelElement.className = 'activity-log-label';
+    labelElement.textContent = label;
+
+    var valueElement = document.createElement('span');
+    valueElement.className = 'change-item';
+    valueElement.textContent = value && value !== "" ? value : '-';
+
+    section.appendChild(labelElement);
+    section.appendChild(valueElement);
+    target.appendChild(section);
+}
+
+function renderActivityLogChangeSummary(rowData) {
+    var section = document.getElementById('activitylog-change-summary-section');
+    var container = document.getElementById('activitylog-change-summary-body');
+    if (!section || !container) {
+        return;
+    }
+
+    container.innerHTML = '';
+    var eventType = rowData && rowData.EventTypeString ? rowData.EventTypeString : '';
+    var changeRoot = rowData && rowData.UserLogDetails ? rowData.UserLogDetails.ChangeLog : null;
+    var hasSummary = false;
+
+    var updatedFieldLabel = container.dataset.updatedFieldLabel || 'Updated Field';
+    var changesLabel = container.dataset.changesLabel || 'Changes';
+    var oldValueLabel = container.dataset.oldValueLabel || 'Old Value';
+    var newValueLabel = container.dataset.newValueLabel || 'New Value';
+
+    if (eventType === 'Added') {
+        var addedSection = document.createElement('span');
+        addedSection.className = 'col-12 float-end changes-logs-section';
+        appendChangeSummaryItem(addedSection, updatedFieldLabel, rowData.EventCategoryString || '-');
+        appendChangeSummaryItem(addedSection, changesLabel, rowData.Summary || '-');
+        container.appendChild(addedSection);
+        hasSummary = true;
+    }
+
+    if (eventType === 'Updated' && changeRoot && Array.isArray(changeRoot.ChangeLogCollection)) {
+        changeRoot.ChangeLogCollection.forEach(function (changeGroup) {
+            if (!changeGroup || changeGroup.ChangedItem === 'Password' || !Array.isArray(changeGroup.ChangeLog)) {
+                return;
+            }
+            changeGroup.ChangeLog.forEach(function (log) {
+                var updateSection = document.createElement('span');
+                updateSection.className = 'col-12 float-end changes-logs-section';
+                appendChangeSummaryItem(updateSection, updatedFieldLabel, log && log.ChangedItem ? log.ChangedItem : '-');
+                appendChangeSummaryItem(updateSection, oldValueLabel, capitalizeActivityLogValue(log ? log.From : '-'));
+                appendChangeSummaryItem(updateSection, newValueLabel, capitalizeActivityLogValue(log ? log.To : '-'));
+                container.appendChild(updateSection);
+                hasSummary = true;
+            });
+        });
+    }
+
+    section.style.display = hasSummary ? '' : 'none';
+}
+
+function openActivityLogInfoDialog(record) {
+    var rowData = record && record.rowData ? record.rowData : {};
+
+    setActivityLogText('activitylog-summary-value', rowData.Summary);
+    setActivityLogText('activitylog-date-value', rowData.EventDateformat);
+    setActivityLogText('activitylog-user-email-value', rowData.InitiatedUserEmail);
+    setActivityLogText('activitylog-site-value', rowData.Site);
+    setActivityLogText('activitylog-ip-value', rowData.UserLogDetails && rowData.UserLogDetails.IpAddress);
+    setActivityLogText('activitylog-event-category-value', rowData.EventCategoryString);
+    setActivityLogText('activitylog-event-type-value', rowData.EventTypeString);
+    setActivityLogText('activitylog-user-agent-value', rowData.UserLogDetails && rowData.UserLogDetails.UserAgent);
+
+    var performedBy = rowData.InitiatedDisplayName || getActivityLogDetails(rowData.AppType, rowData.AppSource);
+    setActivityLogText('activitylog-performed-by-value', performedBy);
+
+    var sourceRow = document.getElementById('activitylog-source-row');
+    var source = rowData.UserLogDetails && rowData.UserLogDetails.ChangeLog ? rowData.UserLogDetails.ChangeLog.Source : null;
+    var hasSource = (rowData.EventTypeString === 'Added' || rowData.EventTypeString === 'Updated') && source;
+    if (sourceRow) {
+        sourceRow.style.display = hasSource ? '' : 'none';
+    }
+    setActivityLogText('activitylog-source-value', source);
+
+    renderActivityLogChangeSummary(rowData);
+
+    document.getElementById('user-activity-log').style.visibility = 'visible';
+    document.getElementById('user-activity-log').ej2_instances[0].show();
+}
+
+function openActivityLogDetails(args) {
+    var gridObj = document.getElementById('userActivityLogGrid').ej2_instances[0];
+    var record = gridObj.getRowInfo(args.target);
+    openActivityLogInfoDialog(record);
+}
 $(document).on("click", "#reset", function () {
     userdaterangeobj.value = null;
     $("#datePicker").val('');
@@ -222,4 +304,5 @@ $(document).on("click", "#reset", function () {
     document.getElementById("user-event-type").ej2_instances[0].text = null;
     document.getElementById("user-event-category").ej2_instances[0].text = null;
 });
+
 

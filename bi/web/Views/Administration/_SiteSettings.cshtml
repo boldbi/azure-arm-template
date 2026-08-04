@@ -34,6 +34,8 @@
     var isUMSDateTimeSettingsInherited = @Json.Serialize(isUMSDateTimeSettingsInherited);
     var isUMSBrandingSettingsInherited = @Json.Serialize(isUMSBrandingSettingsInherited);
     var isUMSLanguageSettingsInherited = @Json.Serialize(isUMSLanguageSettingsInherited);
+    var SystemSettingsProperties = @Json.Serialize(ViewBag.SystemSettings);
+    var serverApp = @Json.Serialize(_globalAppSettings);
 </script>
 <div class="col-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
     @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Site Settings"] }, { "PageDescription", @pageDescription } })
@@ -90,6 +92,15 @@
     <div id="organization-block" class="bi-page-content col-12 no-padding">
         <form id="look-and-feel-form" class="col-md-12 form-horizontal bi-page-body" autocomplete="off">
             <input type="hidden" id="default-domain-id" value="@globalAppSettings.SystemSettings.OriginalDomain" />
+            <input type="hidden" name="LoginLogo" id="login-logo-hidden" value="@globalAppSettings.SystemSettings.LoginLogo" />
+            <input type="hidden" name="MainScreenLogo" id="main-screen-logo-hidden" value="@globalAppSettings.SystemSettings.MainScreenLogo" />
+            <input type="hidden" name="FavIcon" id="favicon-hidden" value="@globalAppSettings.SystemSettings.FavIcon" />
+            <input type="hidden" name="EmailLogo" id="email-logo-hidden" value="@globalAppSettings.SystemSettings.EmailLogo" />
+            <input type="hidden" name="AILogo" id="ai-logo-hidden" value="@globalAppSettings.SystemSettings.AILogo" />
+            <input type="hidden" name="FooterLogo" id="footer-logo-hidden" value="@globalAppSettings.SystemSettings.FooterLogo" />
+            <input type="hidden" id="site-base-url" value="@ViewBag.SystemSettings.BaseUrl" data-original-value="@ViewBag.SystemSettings.BaseUrl" />
+            <input type="hidden" id="scheme_value" data-value="@Context.Request.Scheme" />
+            <input type="hidden" id="enable-ssl" value="@Context.Request.Scheme" />
             @if (ServerAppConfig.IsSelfHosted)
             {
                 <div class="col-12 general-sub-section site-settings-page-section no-padding">
@@ -294,14 +305,16 @@
                                 }
                             </div>
                         </div>
-                        @if (ServerAppConfig.IsSelfHosted)
-                        {
-                            <label class="app-textbox-label section-label title col-12 copyright-info">@T["Site copyright information"]</label>
-                            <div class="no-padding col-12">
-                                <input type="text" id="site-copyright" name="copy_right_info" class="form-control validation-padding ums-inherit-branding" placeholder="@T["Enter copyright information"]" value="@globalAppSettings.SystemSettings.CopyrightInformation" data-original-value="@globalAppSettings.SystemSettings.CopyrightInformation" />
-                                <span class="validation-errors"></span>
-                            </div>
-                        }
+                        <div class="copyright-content">
+                            @if (ServerAppConfig.IsSelfHosted)
+                            {
+                                <label class="app-textbox-label section-label title col-12 copyright-info">@T["Site copyright information"]</label>
+                                <div class="no-padding col-12">
+                                    <input type="text" id="site-copyright" name="copy_right_info" class="form-control validation-padding ums-inherit-branding" placeholder="@T["Enter copyright information"]" value="@globalAppSettings.SystemSettings.CopyrightInformation" data-original-value="@globalAppSettings.SystemSettings.CopyrightInformation" />
+                                    <span class="validation-errors"></span>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
                 <div class="blur-whitelable-content col-12 no-padding branding-info">
@@ -347,7 +360,7 @@
             </div>
 
             <div class="login-disclaimer-section site-settings-page-section col-12 no-padding">
-                <div id="login-disclaimer" class="col-12 no-padding" ng-controller="LoginDisclaimerInfoCtrl">
+                <div id="login-disclaimer" class="col-12 no-padding">
                     <div class="hidden">
                         <textarea id="temp" class="hidden"></textarea>
                         <div id="toRemoveCulture"></div>
@@ -355,7 +368,7 @@
                     <h3 class="title col-12 login-disclaimer sub-section-heading blur-whitelable-content">@T["Login Disclaimer"]</h3>
                     <div class="form-group blur-whitelable-content">
                         <div class="enable-login-disclaimer">
-                            @Html.CheckBox("enablelogindisclaimer", ViewBag.SystemSettings.LoginDisclaimer.IsEnabled, new { @class = "material-checkbox", ng_click = "enableLoginDisclaimer()" })
+                            @Html.CheckBox("enablelogindisclaimer", ViewBag.SystemSettings.LoginDisclaimer.IsEnabled, new { @class = "material-checkbox" })
                             @Html.Hidden("enablelogindisclaimer")
                             <label for="enablelogindisclaimer">
                                 <span>
@@ -364,7 +377,7 @@
                             </label>
                         </div>
                         <div>
-                            @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = "!loginDisclaimerEnabled" })
+                            @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", @disabled = ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? null : (object)"disabled" })
                             @Html.Hidden("enablecheckboxconsent")
                             <label for="enablecheckboxconsent">
                                 <span>
@@ -373,27 +386,18 @@
                             </label>
                         </div>
                     </div>
-                    @*<div class="form-group blur-whitelable-content">
-                    @Html.CheckBox("enablecheckboxconsent", ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled, new { @class = "material-checkbox", ng_click = "enableConsentContent()", ng_disabled = !ViewBag.SystemSettings.LoginDisclaimer.IsEnabled })
-                    @Html.Hidden("enablecheckboxconsent")
-                    <label for="enablecheckboxconsent">
-                    <span>
-                    @T["Enable login disclaimer"]
-                    </span>
-                    </label>
-                    </div>*@
                     <div id="consent-preview-container" class="col-6 no-margin no-padding blur-whitelable-content">
                         <div class="form-group blur-whitelable-content">
                             <label class="app-textbox-label col-12 no-padding">@T["Consent content"]</label>
                             <div class="col-8 no-margin form-input-field no-padding">
-                                <input type="text" class="form-control" placeholder="@T["Enter the consent content"]" id="consent-content" name="consent-content" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") maxlength="100" value="@(ViewBag.SystemSettings.LoginDisclaimer.ConsentContent != string.Empty ? ViewBag.SystemSettings.LoginDisclaimer.ConsentContent : (ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? @T["I have read and accept the login disclaimer."] : @T["By logging in you accept our login disclaimer."]))" ng-model="consentContent" ng-change="consentContentSplit()" />
+                                <input type="text" class="form-control" placeholder="@T["Enter the consent content"]" id="consent-content" name="consent-content" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") maxlength="100" value="@(ViewBag.SystemSettings.LoginDisclaimer.ConsentContent != string.Empty ? ViewBag.SystemSettings.LoginDisclaimer.ConsentContent : (ViewBag.SystemSettings.LoginDisclaimer.IsConsentCheckboxEnabled ? @T["I have read and accept the login disclaimer."] : @T["By logging in you accept our login disclaimer."]))" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
                         <div class="form-group blur-whitelable-content">
                             <label class="app-textbox-label col-12 no-padding">@T["Title"]</label>
                             <div class="col-8 no-margin form-input-field no-padding">
-                                <input type="text" class="form-control" placeholder="@T["Enter the login disclaimer title"]" id="login-disclaimer-title" name="login-disclaimer-title" value="@(ViewBag.SystemSettings.LoginDisclaimer.Title)" maxlength="100" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") ng-model="consentTitle" />
+                                <input type="text" class="form-control" placeholder="@T["Enter the login disclaimer title"]" id="login-disclaimer-title" name="login-disclaimer-title" value="@(ViewBag.SystemSettings.LoginDisclaimer.Title)" maxlength="100" @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? string.Empty : "disabled") />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>
@@ -409,7 +413,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 text-center blur-whitelable-content" ng-if="loginDisclaimerEnabled">
+                    <div class="col-6 text-center blur-whitelable-content login-disclaimer-preview" style="display: @(ViewBag.SystemSettings.LoginDisclaimer.IsEnabled ? "block" : "none")">
                         <div id="image-container" class="center-img disclaimer-content-container">
                             @Html.CheckBox("content-disclaimer-checkbox", true, new { @class = "material-checkbox" })
                             @Html.Hidden("content-disclaimer-checkbox")
@@ -419,8 +423,8 @@
                     <div id="consent-content-dialog" style="display: none">
                         <div class="fluent-popup-header col-12 no-padding">
                             <h4 class="popup-title">
-                                <span id="info-dialog-header">{{consentTitle}}</span>
-                                <button id="close-info-dialog" type="button" title="@T["Close"]" data-bs-toggle="tool-tip" data-container="body" class="btn-close popup-close" ng-click="closeConsentContentInfo()" aria-label="Close">
+                                <span id="info-dialog-header">@ViewBag.SystemSettings.LoginDisclaimer.Title</span>
+                                <button id="close-info-dialog" type="button" title="@T["Close"]" data-bs-toggle="tool-tip" data-container="body" class="btn-close popup-close" aria-label="Close">
                                     <span class="su su-close"></span>
                                 </button>
                             </h4>
@@ -430,7 +434,7 @@
                             </div>
                         </div>
                         <div class="fluent-popup-footer text-center no-padding col-12">
-                            <button class="app-button app-secondary-button app-btn-secondary" ng-click="closeConsentContentInfo()" title="Close">@T["Close"]</button>
+                            <button class="app-button app-secondary-button app-btn-secondary" id="close-consent-dialog" title="Close">@T["Close"]</button>
                         </div>
                     </div>
                 </div>

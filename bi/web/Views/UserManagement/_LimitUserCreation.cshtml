@@ -1,5 +1,10 @@
 ﻿@{
-    var currentPlan = Html.Raw(String.Format(T["You can only have {0}0{1} users as per your {2}current plan{3}."].Value, "<span class='licensed-user-count'>","</span>", "<a href=" + Url.Action("LicenseSettings", "Administration") + "> ", "</a>") + " " + String.Format(T["{0}Upgrade your plan{1} to add more users."].Value, "<a href=" + Url.Action("LicenseSettings", "Administration") + "#plan-upgrade>", "</a>"));
+    // Suppress SCS0029: no direct user input involved
+#pragma warning disable SCS0029
+    var currentPlan = Html.Raw(String.Format(T["You can only have {0}0{1} users as per your {2}current plan{3}."].Value, "<span class='licensed-user-count'>", Html.Encode(ViewBag.LicensedUserCount) + "</span>", "<a href='" + Url.Action("LicenseSettings", "Administration") + "'>", "</a>") + " " + String.Format(T["{0}Upgrade your plan{1} to add more users."].Value, "<a href='" + Url.Action("LicenseSettings", "Administration") + "#plan-upgrade'>", "</a>"));
+}
+@{
+#pragma warning restore SCS0029
 }
 <div class="modal no-padding" id="limit-user" tabindex="-1" role="dialog" style="display:none">
     <div class="col-lg-12 modal-dialog no-padding" role="document">
@@ -19,8 +24,16 @@
                 <div class="col-12">
                     <div class="limit-user-body padding10">
                         <span id="limit-import-ad" style="display: none">
+                            @{
+                                // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                            }
                             @currentPlan
                             @Html.Raw(String.Format(T["You can only choose {0} user(s) to import since there are only {1} remaining license(s)."].Value, "<span class='importad-allowed-count'></span>", "<span class='importad-allowed-count'></span>"))
+                            @{
+                                // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                            }
                         </span>
                         <span id="zero-user-acc" style="display:none">
                             @currentPlan

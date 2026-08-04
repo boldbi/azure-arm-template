@@ -1,3 +1,5 @@
+﻿-- BOLD_UPGRADE_CHECKPOINT_COVERED: true
+-- BOLD_UPGRADE_STATEMENT_CHECKPOINT_VALIDATED: true
 ALTER TABLE {database_name}.BOLDTC_Tenant MODIFY COLUMN TenantIdentifier char(255) NULL;
 
 ALTER TABLE {database_name}.BOLDTC_Tenant ADD UseSiteIdentifier tinyint NOT NULL DEFAULT 1;

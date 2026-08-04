@@ -1,4 +1,4 @@
-﻿------------------------------------------------------------------
+------------------------------------------------------------------
 -- Write SQL queries in the following order
 -- 	1. Create Tables
 --	2. Insert Values
@@ -38,6 +38,7 @@ CREATE TABLE [BOLDBI_Group](
 	[ModifiedDate] [datetime] NOT NULL,
 	[DirectoryTypeId] [int] NOT NULL DEFAULT 0,
 	[ExternalProviderId] [nvarchar](100) NULL,
+	[IsAdminGroup] [bit] NOT NULL DEFAULT 0,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -1356,7 +1357,7 @@ INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VAL
 INSERT INTO [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Users',1,12,1)
 ;
 
-INSERT into [BOLDBI_Group] (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',null,GETDATE(), 1, 1)
+INSERT into [BOLDBI_Group] (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsAdminGroup,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',null,GETDATE(), 1, 1, 1)
 ;
 
 INSERT into [BOLDBI_ItemCommentLogType] (Name,IsActive) VALUES ( N'Added',1)
@@ -2247,8 +2248,6 @@ ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLD
 ;
 ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
 ;
-ALTER TABLE [BOLDBI_UserPermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id) 
-;
 ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;
 ALTER TABLE [BOLDBI_UserPermission]  ADD  FOREIGN KEY([ItemTypeId]) REFERENCES [BOLDBI_ItemType] ([Id])
@@ -2259,8 +2258,6 @@ ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([PermissionEntityId]) REF
 ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
-;
-ALTER TABLE [BOLDBI_GroupPermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id)
 ;
 ALTER TABLE [BOLDBI_GroupPermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;
@@ -2518,8 +2515,6 @@ ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ItemId]) R
 ;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
 ;
-ALTER TABLE [BOLDBI_UserResourceFeaturePermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id) 
-;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ItemTypeId]) REFERENCES [BOLDBI_ItemType] ([Id])
@@ -2530,8 +2525,6 @@ ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([Permissio
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
-;
-ALTER TABLE [BOLDBI_GroupResourceFeaturePermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id)
 ;
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;
@@ -2545,3 +2538,563 @@ CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleLog_ScheduleId] ON [BOLDBI_Schedule
 CREATE NONCLUSTERED INDEX [IX_BOLDBI_Item] ON [BOLDBI_Item] ([IsActive], [ItemTypeId], [ParentId], [IsDraft]) INCLUDE ([CreatedById], [CreatedDate]) WITH (ONLINE = ON)
 
 CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserPermission] ON [BOLDBI_UserPermission] ([IsActive], [UserId], [ItemId], [PermissionEntityId]) INCLUDE ([PermissionAccessId]) WITH (ONLINE = ON)
+
+-- File: boldbi_create_indexes_all.sql
+-- Purpose: Create nonclustered indexes for **all** BoldBI tables defined in your DDL.
+-- Notes:
+-- - Uses idempotent guards (IF NOT EXISTS on sys.indexes + OBJECT_ID).
+-- - Keeps your existing three indexes as-is (ONLINE = ON where already used).
+-- - Many tables here are small/lookup tables, and indexes are included per request.
+-- - Review & prune overlapping indexes based on workload before production.
+
+SET NOCOUNT ON;
+
+-- ========================
+-- Preserve existing indexes from source script
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleDetail_ScheduleId' AND object_id = OBJECT_ID('BOLDBI_ScheduleDetail'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleDetail_ScheduleId]
+    ON [BOLDBI_ScheduleDetail]([ScheduleId])
+    WITH (ONLINE = ON);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleLog_ScheduleId' AND object_id = OBJECT_ID('BOLDBI_ScheduleLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleLog_ScheduleId]
+    ON [BOLDBI_ScheduleLog] ([ScheduleId])
+    INCLUDE ([ExecutedDate], [ScheduleStatusId])
+    WITH (ONLINE = ON);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Item' AND object_id = OBJECT_ID('BOLDBI_Item'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Item]
+    ON [BOLDBI_Item] ([IsActive], [ItemTypeId], [ParentId], [IsDraft])
+    INCLUDE ([CreatedById], [CreatedDate])
+    WITH (ONLINE = ON);
+GO
+
+-- ========================
+-- Users, Groups, Membership
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_User_Email' AND object_id = OBJECT_ID('BOLDBI_User'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_User_Email] ON [BOLDBI_User]([Email]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_User_Username' AND object_id = OBJECT_ID('BOLDBI_User'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_User_Username] ON [BOLDBI_User]([Username]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_User_IsActive' AND object_id = OBJECT_ID('BOLDBI_User'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_User_IsActive] ON [BOLDBI_User]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserLogin_UserId' AND object_id = OBJECT_ID('BOLDBI_UserLogin'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserLogin_UserId] ON [BOLDBI_UserLogin]([UserId], [LoggedInTime]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserPreference_UserId' AND object_id = OBJECT_ID('BOLDBI_UserPreference'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserPreference_UserId] ON [BOLDBI_UserPreference]([UserId]) INCLUDE ([ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Group_IsActive' AND object_id = OBJECT_ID('BOLDBI_Group'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Group_IsActive] ON [BOLDBI_Group]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserGroup_GroupId' AND object_id = OBJECT_ID('BOLDBI_UserGroup'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserGroup_GroupId] ON [BOLDBI_UserGroup]([GroupId], [UserId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserGroup_UserId' AND object_id = OBJECT_ID('BOLDBI_UserGroup'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserGroup_UserId] ON [BOLDBI_UserGroup]([UserId], [GroupId]);
+GO
+
+-- ========================
+-- Item catalog, hierarchy, views, versions, trash
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Item_ParentId' AND object_id = OBJECT_ID('BOLDBI_Item'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Item_ParentId] ON [BOLDBI_Item]([ParentId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Item_CreatedById' AND object_id = OBJECT_ID('BOLDBI_Item'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Item_CreatedById] ON [BOLDBI_Item]([CreatedById]) INCLUDE ([CreatedDate], [ItemTypeId], [IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Item_ModifiedById' AND object_id = OBJECT_ID('BOLDBI_Item'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Item_ModifiedById] ON [BOLDBI_Item]([ModifiedById]) INCLUDE ([ModifiedDate], [ItemTypeId], [IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Item_ItemType_IsActive' AND object_id = OBJECT_ID('BOLDBI_Item'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Item_ItemType_IsActive] ON [BOLDBI_Item]([ItemTypeId], [IsActive]) INCLUDE ([Name], [ParentId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemView_ItemId' AND object_id = OBJECT_ID('BOLDBI_ItemView'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemView_ItemId] ON [BOLDBI_ItemView]([ItemId]) INCLUDE ([UserId], [ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemView_UserId' AND object_id = OBJECT_ID('BOLDBI_ItemView'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemView_UserId] ON [BOLDBI_ItemView]([UserId]) INCLUDE ([ItemId], [ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemTrash_ItemId' AND object_id = OBJECT_ID('BOLDBI_ItemTrash'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemTrash_ItemId] ON [BOLDBI_ItemTrash]([ItemId]) INCLUDE ([TrashedById], [TrashedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemTrashDeleted_ItemTrashId' AND object_id = OBJECT_ID('BOLDBI_ItemTrashDeleted'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemTrashDeleted_ItemTrashId] ON [BOLDBI_ItemTrashDeleted]([ItemTrashId]) INCLUDE ([ItemId], [DeletedById], [DeletedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemVersion_ItemId' AND object_id = OBJECT_ID('BOLDBI_ItemVersion'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemVersion_ItemId] ON [BOLDBI_ItemVersion]([ItemId], [IsCurrentVersion]) INCLUDE ([VersionNumber], [CreatedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemVersion_Item_Version' AND object_id = OBJECT_ID('BOLDBI_ItemVersion'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemVersion_Item_Version] ON [BOLDBI_ItemVersion]([ItemId], [VersionNumber]);
+GO
+
+-- ========================
+-- Permissions
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserPermission_User' AND object_id = OBJECT_ID('BOLDBI_UserPermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserPermission_User]
+    ON [BOLDBI_UserPermission]([UserId], [IsActive])
+    INCLUDE ([PermissionEntityId], [PermissionAccessId], [ItemId], [ItemTypeId], [SettingsTypeId], [ScopeGroupId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserPermission_Item' AND object_id = OBJECT_ID('BOLDBI_UserPermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserPermission_Item]
+    ON [BOLDBI_UserPermission]([ItemId], [IsActive])
+    INCLUDE ([UserId], [PermissionEntityId], [PermissionAccessId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupPermission_Group' AND object_id = OBJECT_ID('BOLDBI_GroupPermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupPermission_Group]
+    ON [BOLDBI_GroupPermission]([GroupId], [IsActive])
+    INCLUDE ([PermissionEntityId], [PermissionAccessId], [ItemId], [ItemTypeId], [SettingsTypeId], [ScopeGroupId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupPermission_Item' AND object_id = OBJECT_ID('BOLDBI_GroupPermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupPermission_Item]
+    ON [BOLDBI_GroupPermission]([ItemId], [IsActive])
+    INCLUDE ([GroupId], [PermissionEntityId], [PermissionAccessId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PermissionEntity_ItemType' AND object_id = OBJECT_ID('BOLDBI_PermissionEntity'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PermissionEntity_ItemType]
+    ON [BOLDBI_PermissionEntity]([ItemTypeId], [EntityType]) INCLUDE ([Name], [IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PermissionAccEntity_PermissionEntityId' AND object_id = OBJECT_ID('BOLDBI_PermissionAccEntity'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PermissionAccEntity_PermissionEntityId]
+    ON [BOLDBI_PermissionAccEntity]([PermissionEntityId]) INCLUDE ([PermissionAccessId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PermissionAccEntity_PermissionAccessId' AND object_id = OBJECT_ID('BOLDBI_PermissionAccEntity'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PermissionAccEntity_PermissionAccessId]
+    ON [BOLDBI_PermissionAccEntity]([PermissionAccessId]) INCLUDE ([PermissionEntityId]);
+GO
+
+-- ========================
+-- Scheduling & Subscriptions
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleDetail_ItemId' AND object_id = OBJECT_ID('BOLDBI_ScheduleDetail'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleDetail_ItemId]
+    ON [BOLDBI_ScheduleDetail]([ItemId])
+    INCLUDE ([ScheduleId], [Name], [IsEnabled], [NextSchedule], [RecurrenceTypeId], [ExportTypeId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleDetail_IsEnabled_Next' AND object_id = OBJECT_ID('BOLDBI_ScheduleDetail'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleDetail_IsEnabled_Next]
+    ON [BOLDBI_ScheduleDetail]([IsEnabled], [NextSchedule])
+    INCLUDE ([ScheduleId], [ItemId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SubscribedUser_Schedule' AND object_id = OBJECT_ID('BOLDBI_SubscribedUser'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SubscribedUser_Schedule] ON [BOLDBI_SubscribedUser]([ScheduleId]) INCLUDE ([RecipientUserId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SubscribedUser_Recipient' AND object_id = OBJECT_ID('BOLDBI_SubscribedUser'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SubscribedUser_Recipient] ON [BOLDBI_SubscribedUser]([RecipientUserId]) INCLUDE ([ScheduleId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SubscribedGroup_Schedule' AND object_id = OBJECT_ID('BOLDBI_SubscribedGroup'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SubscribedGroup_Schedule] ON [BOLDBI_SubscribedGroup]([ScheduleId]) INCLUDE ([RecipientGroupId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SubscribedGroup_Recipient' AND object_id = OBJECT_ID('BOLDBI_SubscribedGroup'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SubscribedGroup_Recipient] ON [BOLDBI_SubscribedGroup]([RecipientGroupId]) INCLUDE ([ScheduleId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SubscrExtnRecpt_Schedule' AND object_id = OBJECT_ID('BOLDBI_SubscrExtnRecpt'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SubscrExtnRecpt_Schedule] ON [BOLDBI_SubscrExtnRecpt]([ScheduleId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleMissingLogs_Schedule' AND object_id = OBJECT_ID('BOLDBI_ScheduleMissingLogs'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleMissingLogs_Schedule] ON [BOLDBI_ScheduleMissingLogs]([ScheduleId], [StartDate], [EndDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleLogUser_Schedule' AND object_id = OBJECT_ID('BOLDBI_ScheduleLogUser'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleLogUser_Schedule]
+    ON [BOLDBI_ScheduleLogUser]([ScheduleId], [ScheduleStatusId], [DeliveredDate])
+    INCLUDE ([DeliveredUserId], [IsOnDemand]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleLogGroup_Schedule' AND object_id = OBJECT_ID('BOLDBI_ScheduleLogGroup'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleLogGroup_Schedule]
+    ON [BOLDBI_ScheduleLogGroup]([ScheduleId], [ScheduleStatusId], [DeliveredDate])
+    INCLUDE ([GroupId], [DeliveredUserId], [IsOnDemand]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SchdLogExtnRecpt_Schedule' AND object_id = OBJECT_ID('BOLDBI_SchdLogExtnRecpt'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SchdLogExtnRecpt_Schedule]
+    ON [BOLDBI_SchdLogExtnRecpt]([ScheduleId], [ScheduleStatusId], [DeliveredDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleRunHistory_Schedule' AND object_id = OBJECT_ID('BOLDBI_ScheduleRunHistory'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleRunHistory_Schedule]
+    ON [BOLDBI_ScheduleRunHistory]([ScheduleId], [StartedDate] DESC)
+    INCLUDE ([ScheduleStatusId], [IsOnDemand], [Message]);
+GO
+
+-- ========================
+-- Comments & interactions
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Comment_ItemId' AND object_id = OBJECT_ID('BOLDBI_Comment'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Comment_ItemId] ON [BOLDBI_Comment]([ItemId], [CreatedDate] DESC) INCLUDE ([UserId], [ParentId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Comment_ParentId' AND object_id = OBJECT_ID('BOLDBI_Comment'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Comment_ParentId] ON [BOLDBI_Comment]([ParentId], [CreatedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemCommentLog_CommentId' AND object_id = OBJECT_ID('BOLDBI_ItemCommentLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemCommentLog_CommentId] ON [BOLDBI_ItemCommentLog]([CommentId]) INCLUDE ([ItemCommentLogTypeId], [ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemCommentLog_CurrentUserId' AND object_id = OBJECT_ID('BOLDBI_ItemCommentLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemCommentLog_CurrentUserId] ON [BOLDBI_ItemCommentLog]([CurrentUserId]) INCLUDE ([CommentId], [ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemWatch_ItemUser' AND object_id = OBJECT_ID('BOLDBI_ItemWatch'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemWatch_ItemUser] ON [BOLDBI_ItemWatch]([ItemId], [UserId]) INCLUDE ([IsWatched]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_FavoriteItem_User' AND object_id = OBJECT_ID('BOLDBI_FavoriteItem'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_FavoriteItem_User] ON [BOLDBI_FavoriteItem]([UserId], [ItemId]);
+GO
+
+-- ========================
+-- Widgets, Data Sources, Multi-Tab Dashboards
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DashboardWidget_DashboardItemId' AND object_id = OBJECT_ID('BOLDBI_DashboardWidget'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DashboardWidget_DashboardItemId] ON [BOLDBI_DashboardWidget]([DashboardItemId]) INCLUDE ([WidgetItemId], [ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DashboardWidget_WidgetItemId' AND object_id = OBJECT_ID('BOLDBI_DashboardWidget'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DashboardWidget_WidgetItemId] ON [BOLDBI_DashboardWidget]([WidgetItemId]) INCLUDE ([DashboardItemId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DashboardDataSource_Dashboard' AND object_id = OBJECT_ID('BOLDBI_DashboardDataSource'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DashboardDataSource_Dashboard] ON [BOLDBI_DashboardDataSource]([DashboardItemId]) INCLUDE ([DataSourceItemId], [VersionNumber]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DashboardDataSource_DataSource' AND object_id = OBJECT_ID('BOLDBI_DashboardDataSource'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DashboardDataSource_DataSource] ON [BOLDBI_DashboardDataSource]([DataSourceItemId]) INCLUDE ([DashboardItemId], [VersionNumber]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_MultiTabDashboard_Parent' AND object_id = OBJECT_ID('BOLDBI_MultiTabDashboard'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_MultiTabDashboard_Parent] ON [BOLDBI_MultiTabDashboard]([ParentDashboardId], [OrderNumber]) INCLUDE ([ChildDashboardId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_MultiTabDashboard_Child' AND object_id = OBJECT_ID('BOLDBI_MultiTabDashboard'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_MultiTabDashboard_Child] ON [BOLDBI_MultiTabDashboard]([ChildDashboardId]);
+GO
+
+-- ========================
+-- Publishing & Deployment
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PublishedItem_ItemId' AND object_id = OBJECT_ID('BOLDBI_PublishedItem'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PublishedItem_ItemId] ON [BOLDBI_PublishedItem]([ItemId], [IsActive]) INCLUDE ([DestinationItemId], [PublishType], [CreatedDate], [ExternalSiteId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PublishJobs_PublishId' AND object_id = OBJECT_ID('BOLDBI_PublishJobs'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PublishJobs_PublishId] ON [BOLDBI_PublishJobs]([PublishId], [Status]) INCLUDE ([CreatedDate], [CompletedDate], [Type]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DeploymentDashboards_Item' AND object_id = OBJECT_ID('BOLDBI_DeploymentDashboards'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DeploymentDashboards_Item] ON [BOLDBI_DeploymentDashboards]([ItemId]) INCLUDE ([CreatedById], [CreatedDate]);
+GO
+
+-- ========================
+-- Auditing & System Logs
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemLog_Item' AND object_id = OBJECT_ID('BOLDBI_ItemLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemLog_Item] ON [BOLDBI_ItemLog]([ItemId], [ModifiedDate] DESC) INCLUDE ([ItemLogTypeId], [ItemVersionId], [UpdatedUserId], [SourceTypeId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemLog_Version' AND object_id = OBJECT_ID('BOLDBI_ItemLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemLog_Version] ON [BOLDBI_ItemLog]([ItemVersionId], [ModifiedDate] DESC);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserLog_Target' AND object_id = OBJECT_ID('BOLDBI_UserLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserLog_Target] ON [BOLDBI_UserLog]([TargetUserId], [CreatedDate] DESC) INCLUDE ([UserLogTypeId], [SourceTypeId], [LogStatusId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupLog_Target' AND object_id = OBJECT_ID('BOLDBI_GroupLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupLog_Target] ON [BOLDBI_GroupLog]([TargetGroupId], [CreatedDate] DESC) INCLUDE ([GroupLogTypeId], [SourceTypeId], [LogStatusId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserPermissionLog_User' AND object_id = OBJECT_ID('BOLDBI_UserPermissionLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserPermissionLog_User] ON [BOLDBI_UserPermissionLog]([UserId], [CreatedDate] DESC) INCLUDE ([AffectedUserId], [LogTypeId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserPermissionLog_Affected' AND object_id = OBJECT_ID('BOLDBI_UserPermissionLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserPermissionLog_Affected] ON [BOLDBI_UserPermissionLog]([AffectedUserId], [CreatedDate] DESC) INCLUDE ([UserId], [LogTypeId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupPermissionLog_User' AND object_id = OBJECT_ID('BOLDBI_GroupPermissionLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupPermissionLog_User] ON [BOLDBI_GroupPermissionLog]([UserId], [CreatedDate] DESC) INCLUDE ([AffectedGroupId], [LogTypeId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupPermissionLog_Affected' AND object_id = OBJECT_ID('BOLDBI_GroupPermissionLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupPermissionLog_Affected] ON [BOLDBI_GroupPermissionLog]([AffectedGroupId], [CreatedDate] DESC) INCLUDE ([UserId], [LogTypeId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SystemLog_TypeStatusTime' AND object_id = OBJECT_ID('BOLDBI_SystemLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SystemLog_TypeStatusTime] ON [BOLDBI_SystemLog]([SystemLogTypeId], [LogStatusId], [CreatedDate] DESC);
+GO
+
+-- ========================
+-- Notifications, Email, Webhooks
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_EmailActivityLog_User' AND object_id = OBJECT_ID('BOLDBI_EmailActivityLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_EmailActivityLog_User] ON [BOLDBI_EmailActivityLog]([UserId], [CreatedDate] DESC) INCLUDE ([Status], [RecipientEmail], [MailSubject]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_EmailActivityLog_Item' AND object_id = OBJECT_ID('BOLDBI_EmailActivityLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_EmailActivityLog_Item] ON [BOLDBI_EmailActivityLog]([ItemId], [CreatedDate] DESC) INCLUDE ([Status], [RecipientEmail], [Event]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Notification_CurrentUser' AND object_id = OBJECT_ID('BOLDBI_Notification'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Notification_CurrentUser] ON [BOLDBI_Notification]([CurrentUserId], [IsRead], [ModifiedDate] DESC) INCLUDE ([ItemId], [CommentId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Notification_Item' AND object_id = OBJECT_ID('BOLDBI_Notification'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Notification_Item] ON [BOLDBI_Notification]([ItemId], [ModifiedDate] DESC) INCLUDE ([CurrentUserId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Webhook_User' AND object_id = OBJECT_ID('BOLDBI_Webhook'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Webhook_User] ON [BOLDBI_Webhook]([UserId]) INCLUDE ([IsEnable], [IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_NotificationTrigger_Webhook' AND object_id = OBJECT_ID('BOLDBI_NotificationTrigger'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_NotificationTrigger_Webhook] ON [BOLDBI_NotificationTrigger]([WebhookId]) INCLUDE ([NextScheduleDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_WebhookLog_Webhook' AND object_id = OBJECT_ID('BOLDBI_WebhookLog'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_WebhookLog_Webhook] ON [BOLDBI_WebhookLog]([WebhookId], [CreatedDate] DESC) INCLUDE ([Event], [ResponseStatusCode]);
+GO
+
+-- ========================
+-- Directory / Auth / Config
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_AzureADCredential_IsActive' AND object_id = OBJECT_ID('BOLDBI_AzureADCredential'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_AzureADCredential_IsActive] ON [BOLDBI_AzureADCredential]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ADCredential_IsActive' AND object_id = OBJECT_ID('BOLDBI_ADCredential'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ADCredential_IsActive] ON [BOLDBI_ADCredential]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SAMLSettings_IsEnabled' AND object_id = OBJECT_ID('BOLDBI_SAMLSettings'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SAMLSettings_IsEnabled] ON [BOLDBI_SAMLSettings]([IsEnabled]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SystemSettings_IsActive' AND object_id = OBJECT_ID('BOLDBI_SystemSettings'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SystemSettings_IsActive] ON [BOLDBI_SystemSettings]([IsActive]) INCLUDE ([ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ServerVersion_VersionNumber' AND object_id = OBJECT_ID('BOLDBI_ServerVersion'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ServerVersion_VersionNumber] ON [BOLDBI_ServerVersion]([VersionNumber]);
+GO
+
+-- ========================
+-- Customization & Expressions
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_CustomExpression_Dashboard' AND object_id = OBJECT_ID('BOLDBI_CustomExpression'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_CustomExpression_Dashboard] ON [BOLDBI_CustomExpression]([DashboardId]) INCLUDE ([WidgetId], [UserId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_CustomExpression_Widget' AND object_id = OBJECT_ID('BOLDBI_CustomExpression'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_CustomExpression_Widget] ON [BOLDBI_CustomExpression]([WidgetId]) INCLUDE ([DashboardId], [UserId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_CustomExpression_User' AND object_id = OBJECT_ID('BOLDBI_CustomExpression'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_CustomExpression_User] ON [BOLDBI_CustomExpression]([UserId]) INCLUDE ([DashboardId], [WidgetId]);
+GO
+
+-- ========================
+-- Data Notification & Relations
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DataNotification_Schedule' AND object_id = OBJECT_ID('BOLDBI_DataNotification'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DataNotification_Schedule] ON [BOLDBI_DataNotification]([ScheduleId]) INCLUDE ([DataSourceId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_DataNotification_DataSource' AND object_id = OBJECT_ID('BOLDBI_DataNotification'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_DataNotification_DataSource] ON [BOLDBI_DataNotification]([DataSourceId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_TableRelation_Left' AND object_id = OBJECT_ID('BOLDBI_TableRelation'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_TableRelation_Left] ON [BOLDBI_TableRelation]([LeftTableName], [LeftTableSchema]) INCLUDE ([LeftTableColumnName]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_TableRelation_Right' AND object_id = OBJECT_ID('BOLDBI_TableRelation'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_TableRelation_Right] ON [BOLDBI_TableRelation]([RightTableName], [RightTableSchema]) INCLUDE ([RightTableColumnName]);
+GO
+
+-- ========================
+-- Homepage & Preferences
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Homepage_User' AND object_id = OBJECT_ID('BOLDBI_Homepage'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Homepage_User] ON [BOLDBI_Homepage]([UserId]) INCLUDE ([IsDefaultHomepage]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_HomepageItemFilter_HomepageId' AND object_id = OBJECT_ID('BOLDBI_HomepageItemFilter'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_HomepageItemFilter_HomepageId] ON [BOLDBI_HomepageItemFilter]([HomepageId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemSettings_ItemId' AND object_id = OBJECT_ID('BOLDBI_ItemSettings'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemSettings_ItemId] ON [BOLDBI_ItemSettings]([ItemId]) INCLUDE ([ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemUserPreference_Item' AND object_id = OBJECT_ID('BOLDBI_ItemUserPreference'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemUserPreference_Item] ON [BOLDBI_ItemUserPreference]([ItemId]) INCLUDE ([UserId], [ModifiedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemUserPreference_User' AND object_id = OBJECT_ID('BOLDBI_ItemUserPreference'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemUserPreference_User] ON [BOLDBI_ItemUserPreference]([UserId]) INCLUDE ([ItemId], [ModifiedDate]);
+GO
+
+-- ========================
+-- Attributes & Site settings
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserAttributes_User' AND object_id = OBJECT_ID('BOLDBI_UserAttributes'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserAttributes_User] ON [BOLDBI_UserAttributes]([UserId]) INCLUDE ([Name]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupAttributes_Group' AND object_id = OBJECT_ID('BOLDBI_GroupAttributes'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupAttributes_Group] ON [BOLDBI_GroupAttributes]([GroupId]) INCLUDE ([Name]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SiteAttributes_IsActive' AND object_id = OBJECT_ID('BOLDBI_SiteAttributes'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SiteAttributes_IsActive] ON [BOLDBI_SiteAttributes]([IsActive]) INCLUDE ([Name]);
+GO
+
+-- ========================
+-- External sites & settings
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ExternalSites_IsActive' AND object_id = OBJECT_ID('BOLDBI_ExternalSites'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ExternalSites_IsActive] ON [BOLDBI_ExternalSites]([IsActive]) INCLUDE ([Name]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SettingsType_IsActive' AND object_id = OBJECT_ID('BOLDBI_SettingsType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SettingsType_IsActive] ON [BOLDBI_SettingsType]([IsActive]);
+GO
+
+-- ========================
+-- Events, Payloads & Mapping
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_NotificationEvents_IsActive' AND object_id = OBJECT_ID('BOLDBI_NotificationEvents'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_NotificationEvents_IsActive] ON [BOLDBI_NotificationEvents]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_EventPayloads_IsActive' AND object_id = OBJECT_ID('BOLDBI_EventPayloads'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_EventPayloads_IsActive] ON [BOLDBI_EventPayloads]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_EventPayloadsMapping_EventType' AND object_id = OBJECT_ID('BOLDBI_EventPayloadsMapping'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_EventPayloadsMapping_EventType] ON [BOLDBI_EventPayloadsMapping]([EventType]) INCLUDE ([PayloadType]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_EventPayloadsMapping_PayloadType' AND object_id = OBJECT_ID('BOLDBI_EventPayloadsMapping'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_EventPayloadsMapping_PayloadType] ON [BOLDBI_EventPayloadsMapping]([PayloadType]) INCLUDE ([EventType]);
+GO
+
+-- ========================
+-- User sessions & background jobs
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserSession_Idp' AND object_id = OBJECT_ID('BOLDBI_UserSession'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserSession_Idp] ON [BOLDBI_UserSession]([IdpReferenceId]) INCLUDE ([SessionId], [LoggedInTime], [IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserSession_SessionId' AND object_id = OBJECT_ID('BOLDBI_UserSession'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserSession_SessionId] ON [BOLDBI_UserSession]([SessionId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_BackgroundJobs_Status' AND object_id = OBJECT_ID('BOLDBI_BackgroundJobs'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_BackgroundJobs_Status] ON [BOLDBI_BackgroundJobs]([Status], [CreatedDate]) INCLUDE ([ItemId], [UserId]);
+GO
+
+-- ========================
+-- Upload mapping
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant' AND object_id = OBJECT_ID('BOLDBI_UploadDataSourceMapping'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant] ON [BOLDBI_UploadDataSourceMapping]([DownloadedTenantId]) INCLUDE ([UploadedItemId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UploadDataSourceMapping_UploadedItem' AND object_id = OBJECT_ID('BOLDBI_UploadDataSourceMapping'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UploadDataSourceMapping_UploadedItem] ON [BOLDBI_UploadDataSourceMapping]([UploadedItemId]);
+GO
+
+-- ========================
+-- AI / Metrics & Requests
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BoldBI_DSMetrics_DS_Time' AND object_id = OBJECT_ID('BoldBI_DSMetrics'))
+    CREATE NONCLUSTERED INDEX [IX_BoldBI_DSMetrics_DS_Time] ON [BoldBI_DSMetrics]([DataSourceID], [RefreshStartTime]) INCLUDE ([RefreshStatus], [RowsUpdated], [TotalRows]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_AI_SESSIONS_Time' AND object_id = OBJECT_ID('BOLDBI_AI_SESSIONS'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_AI_SESSIONS_Time] ON [BOLDBI_AI_SESSIONS]([SessionStartTime] DESC) INCLUDE ([SessionEndTime], [TotalTokensCost], [UserInfo]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_AI_CHAT_Session' AND object_id = OBJECT_ID('BOLDBI_AI_CHAT'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_AI_CHAT_Session] ON [BOLDBI_AI_CHAT]([SearchDateTime] DESC) INCLUDE ([SessionID],[TotalTokensCost], [UserInfo]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_AICredentials_IsActive' AND object_id = OBJECT_ID('BOLDBI_AICredentials'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_AICredentials_IsActive] ON [BOLDBI_AICredentials]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_AI_REQUESTS_Session' AND object_id = OBJECT_ID('BOLDBI_AI_REQUESTS'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_AI_REQUESTS_Session] ON [BOLDBI_AI_REQUESTS]([SearchDate]) INCLUDE ([SessionId],[DatasourceId], [AiModel]);
+GO
+
+-- ========================
+-- API Keys & Templates & QnA
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ApiKeyDetails_CreatedBy' AND object_id = OBJECT_ID('BOLDBI_ApiKeyDetails'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ApiKeyDetails_CreatedBy] ON [BOLDBI_ApiKeyDetails]([CreatedBy]) INCLUDE ([IsActive], [LastUsedDate]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_CustomEmailTemplate_IsActive' AND object_id = OBJECT_ID('BOLDBI_CustomEmailTemplate'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_CustomEmailTemplate_IsActive] ON [BOLDBI_CustomEmailTemplate]([IsActive]) INCLUDE ([Language], [TemplateId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BoldBI_ai_qnawidgethistory_Widget' AND object_id = OBJECT_ID('BoldBI_ai_qnawidgethistory'))
+    CREATE NONCLUSTERED INDEX [IX_BoldBI_ai_qnawidgethistory_Widget] ON [BoldBI_ai_qnawidgethistory]([widgetid]) INCLUDE ([search_date]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BoldBI_ai_qnawidgethistory_SearchDate' AND object_id = OBJECT_ID('BoldBI_ai_qnawidgethistory'))
+    CREATE NONCLUSTERED INDEX [IX_BoldBI_ai_qnawidgethistory_SearchDate] ON [BoldBI_ai_qnawidgethistory]([search_date]);
+GO
+
+-- ========================
+-- Resource Feature Access & Permissions
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ResourceFeatureAccess_IsActive' AND object_id = OBJECT_ID('BOLDBI_ResourceFeatureAccess'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ResourceFeatureAccess_IsActive] ON [BOLDBI_ResourceFeatureAccess]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId' AND object_id = OBJECT_ID('BOLDBI_ResourceFeatureAccEntity'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId] ON [BOLDBI_ResourceFeatureAccEntity]([PermissionEntityId]) INCLUDE ([ResourceFeatureAccessId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId' AND object_id = OBJECT_ID('BOLDBI_ResourceFeatureAccEntity'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId] ON [BOLDBI_ResourceFeatureAccEntity]([ResourceFeatureAccessId]) INCLUDE ([PermissionEntityId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserResourceFeaturePermission_User' AND object_id = OBJECT_ID('BOLDBI_UserResourceFeaturePermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserResourceFeaturePermission_User] ON [BOLDBI_UserResourceFeaturePermission]([UserId]) INCLUDE ([ItemId], [PermissionEntityId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserResourceFeaturePermission_Item' AND object_id = OBJECT_ID('BOLDBI_UserResourceFeaturePermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserResourceFeaturePermission_Item] ON [BOLDBI_UserResourceFeaturePermission]([ItemId]) INCLUDE ([UserId], [PermissionEntityId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupResourceFeaturePermission_Group' AND object_id = OBJECT_ID('BOLDBI_GroupResourceFeaturePermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupResourceFeaturePermission_Group] ON [BOLDBI_GroupResourceFeaturePermission]([GroupId]) INCLUDE ([ItemId], [PermissionEntityId]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupResourceFeaturePermission_Item' AND object_id = OBJECT_ID('BOLDBI_GroupResourceFeaturePermission'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupResourceFeaturePermission_Item] ON [BOLDBI_GroupResourceFeaturePermission]([ItemId]) INCLUDE ([GroupId], [PermissionEntityId]);
+GO
+
+-- ========================
+-- Type / Status (lookup) tables — per request
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemType_IsActive' AND object_id = OBJECT_ID('BOLDBI_ItemType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemType_IsActive] ON [BOLDBI_ItemType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemLogType_IsActive' AND object_id = OBJECT_ID('BOLDBI_ItemLogType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemLogType_IsActive] ON [BOLDBI_ItemLogType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_RecurrenceType_IsActive' AND object_id = OBJECT_ID('BOLDBI_RecurrenceType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_RecurrenceType_IsActive] ON [BOLDBI_RecurrenceType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ExportType_IsActive' AND object_id = OBJECT_ID('BOLDBI_ExportType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ExportType_IsActive] ON [BOLDBI_ExportType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ScheduleStatus_IsActive' AND object_id = OBJECT_ID('BOLDBI_ScheduleStatus'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ScheduleStatus_IsActive] ON [BOLDBI_ScheduleStatus]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ItemCommentLogType_IsActive' AND object_id = OBJECT_ID('BOLDBI_ItemCommentLogType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ItemCommentLogType_IsActive] ON [BOLDBI_ItemCommentLogType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PermissionAccess_IsActive' AND object_id = OBJECT_ID('BOLDBI_PermissionAccess'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PermissionAccess_IsActive] ON [BOLDBI_PermissionAccess]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PermissionLogType_IsActive' AND object_id = OBJECT_ID('BOLDBI_PermissionLogType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PermissionLogType_IsActive] ON [BOLDBI_PermissionLogType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SystemLogType_IsActive' AND object_id = OBJECT_ID('BOLDBI_SystemLogType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SystemLogType_IsActive] ON [BOLDBI_SystemLogType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_LogStatus_IsActive' AND object_id = OBJECT_ID('BOLDBI_LogStatus'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_LogStatus_IsActive] ON [BOLDBI_LogStatus]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserLogType_IsActive' AND object_id = OBJECT_ID('BOLDBI_UserLogType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserLogType_IsActive] ON [BOLDBI_UserLogType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_GroupLogType_IsActive' AND object_id = OBJECT_ID('BOLDBI_GroupLogType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_GroupLogType_IsActive] ON [BOLDBI_GroupLogType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_PublishType_IsActive' AND object_id = OBJECT_ID('BOLDBI_PublishType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_PublishType_IsActive] ON [BOLDBI_PublishType]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_UserType_Type' AND object_id = OBJECT_ID('BOLDBI_UserType'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_UserType_Type] ON [BOLDBI_UserType]([Type]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_ConditionCategory_IsActive' AND object_id = OBJECT_ID('BOLDBI_ConditionCategory'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_ConditionCategory_IsActive] ON [BOLDBI_ConditionCategory]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_Source_IsActive' AND object_id = OBJECT_ID('BOLDBI_Source'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_Source_IsActive] ON [BOLDBI_Source]([IsActive]);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_BOLDBI_SlideshowInfo_SlideshowId' AND object_id = OBJECT_ID('BOLDBI_SlideshowInfo'))
+    CREATE NONCLUSTERED INDEX [IX_BOLDBI_SlideshowInfo_SlideshowId] ON [BOLDBI_SlideshowInfo]([SlideshowId]);
+GO
+
+-- ========================
+-- Filtered (optional) — comment out if not needed
+-- ========================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IXF_BOLDBI_Item_IsActive' AND object_id = OBJECT_ID('BOLDBI_Item'))
+    CREATE NONCLUSTERED INDEX [IXF_BOLDBI_Item_IsActive]
+    ON [BOLDBI_Item]([ItemTypeId], [ParentId]) INCLUDE ([Name], [CreatedDate])
+    WHERE [IsActive] = 1;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IXF_BOLDBI_UserPermission_Active' AND object_id = OBJECT_ID('BOLDBI_UserPermission'))
+    CREATE NONCLUSTERED INDEX [IXF_BOLDBI_UserPermission_Active]
+    ON [BOLDBI_UserPermission]([UserId], [ItemId], [PermissionEntityId]) INCLUDE ([PermissionAccessId])
+    WHERE [IsActive] = 1;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IXF_BOLDBI_GroupPermission_Active' AND object_id = OBJECT_ID('BOLDBI_GroupPermission'))
+    CREATE NONCLUSTERED INDEX [IXF_BOLDBI_GroupPermission_Active]
+    ON [BOLDBI_GroupPermission]([GroupId], [ItemId], [PermissionEntityId]) INCLUDE ([PermissionAccessId])
+    WHERE [IsActive] = 1;
+GO
+
+PRINT 'All-table index creation script finished.';

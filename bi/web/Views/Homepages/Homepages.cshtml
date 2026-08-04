@@ -59,11 +59,11 @@
 
     <environment include="Development,CloudDevelopment">
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
-         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.js"></script>
+        <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-viewer-page.js"></script>
     </environment>
     <environment exclude="Development,CloudDevelopment">
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
-         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.min.js"></script>
+        <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-viewer-page.min.js"></script>
     </environment>
 
     @if (!isSelfHosted)
@@ -85,7 +85,14 @@
 
 
     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+                @{
+                // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
         var allHomepages = @Html.Raw(@ViewBag.UserHomepages);
+                @{
+    #pragma warning restore SCS0029
+        }
         var allHomepagesCount = allHomepagesCount;
         var baseUrl = "@(baseUrl.TrimEnd('/'))";
         var homepageBaseUrl = "@(baseUrl.TrimEnd('/') + "/pinboards")";
@@ -121,12 +128,55 @@
         var ipAddress = "@ipAddress";
         var appVersion = "@ServerAppConfig.ProductVersion";
 
-        serverApp.controller("homepagesController", ["$scope", function ($scope) {
-            $scope.allHomepages=allHomepages;
-        }]);
+        function getSortedHomepages() {
+            if (!Array.isArray(allHomepages)) {
+                return [];
+            }
+
+            return allHomepages.slice().sort(function (firstHomepage, secondHomepage) {
+                var firstName = firstHomepage && firstHomepage.Name ? firstHomepage.Name : "";
+                var secondName = secondHomepage && secondHomepage.Name ? secondHomepage.Name : "";
+                return firstName.localeCompare(secondName);
+            });
+        }
+
+        function renderHomepageOptions() {
+            var sortedHomepages = getSortedHomepages();
+            var homepageListElement = document.getElementById("homepage-list");
+            var defaultHomepageElement = document.getElementById("select-default-homepage");
+
+            if (homepageListElement) {
+                homepageListElement.innerHTML = "";
+                sortedHomepages.forEach(function (homepage) {
+                    var optionElement = document.createElement("option");
+                    optionElement.setAttribute("data-homepage-id", homepage.Id);
+                    optionElement.value = homepage.Name || "";
+                    optionElement.textContent = homepage.Name || "";
+                    homepageListElement.appendChild(optionElement);
+                });
+            }
+
+            if (defaultHomepageElement) {
+                var existingDefaultOption = defaultHomepageElement.querySelector("option[data-hidden='true']");
+                defaultHomepageElement.innerHTML = "";
+                if (existingDefaultOption) {
+                    defaultHomepageElement.appendChild(existingDefaultOption);
+                }
+
+                sortedHomepages.forEach(function (homepage) {
+                    var optionElement = document.createElement("option");
+                    optionElement.value = homepage.Id || "";
+                    optionElement.textContent = homepage.Name || "";
+                    defaultHomepageElement.appendChild(optionElement);
+                });
+            }
+        }
+
+        renderHomepageOptions();
         window.IsHomepagesPage = true;
 
         window.onload = function () {
+            renderHomepageOptions();
             //Add placeholder for search box in 'Select a default pinboard' selectpicker in homepage
             $("#widget-container #no-default-homepage-container .bootstrap-select .bs-searchbox .input-block-level").attr("placeholder", window.Server.App.Localization.SearchPinboards);
         }
@@ -135,14 +185,13 @@
 @section MainSection{
     <div class="col-12 no-padding">
         @await Html.PartialAsync("../Shared/_TopHeaderSection", new ViewDataDictionary(ViewData) { { "PageHeader", @T["Pinboards"] }, { "IsDefaultPage", "true" } })
-        <div id="homepage-header" class="col-12 no-padding" ng-app="serverApp" ng-controller="homepagesController">
+        <div id="homepage-header" class="col-12 no-padding">
             <div id="element-container">
                 @if (allHomepagesCount != 0)
                 {
                     <div id="homepage-menu">
                         <span id="homepage-list-container">
                             <select data-live-search="true" class="selectpicker" id="homepage-list" data-size="11" title="" data-original-value="null">
-                                <option ng-repeat="homepage in allHomepages|orderBy:'Name'" data-homepage-id="{{homepage.Id}}" value="{{homepage.Name}}">{{homepage.Name}}</option>
                             </select>
                         </span>
                     </div>
@@ -205,7 +254,7 @@
             </div>
         </div>
     </div>
-    <div id="homepage-page-container" ng-app="serverApp" ng-controller="homepagesController" class="col-12 no-padding">
+    <div id="homepage-page-container" class="col-12 no-padding">
         <div class="col-12 no-padding" id="widget-elemnt-container">
             @if (!isMobile)
             {
@@ -228,7 +277,6 @@
                     <div id="no-default-homepage-container">
                         <select class="selectpicker" id="select-default-homepage" data-live-search="true" data-size="5" title="" data-original-value="" data-none-results-text="@T["No results match"]">
                             <option data-hidden="true" value="">@T["Select a default pinboard"]</option>
-                            <option ng-repeat="homepage in allHomepages|orderBy:'Name'" value="{{homepage.Id}}">{{homepage.Name}}</option>
                         </select>
                         <input type="button" id="set-default-button" class="btn primary-button app-btn-primary" value="@T["Apply"]">
                     </div>
@@ -341,7 +389,14 @@
                 $("#server-app-container").removeClass("avoid-overflow");
             }
             if((@Json.Serialize(isDefaultHomepage))){
+                        @{
+                // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
                 var defaultHomepageDetail = @Html.Raw(Json.Serialize(defaultHomepageDetail));
+                        @{
+    #pragma warning restore SCS0029
+        }
                 $("#homepage-list").val(defaultHomepageDetail.Name);
                 $("#homepage-list").selectpicker("refresh");
                 createHomepageDom(defaultHomepageDetail);
@@ -349,7 +404,14 @@
                 $("#server-app-container").removeClass("avoid-overflow");
             }
             else if((@Json.Serialize(homepageInfo != null))) {
+                        @{
+                // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
                 var homepageInfo = @Html.Raw(Json.Serialize(homepageInfo));
+                        @{
+    #pragma warning restore SCS0029
+        }
                 $("#homepage-list").val(homepageInfo.Name);
                 $("#homepage-list").selectpicker("refresh");
                 createHomepageDom(homepageInfo);

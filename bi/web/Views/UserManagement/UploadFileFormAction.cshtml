@@ -79,7 +79,15 @@
         });
     </script>
     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+                @{
+                    // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
         var data1 = @Html.Raw(ViewBag.ser);
+                    @{
+                    // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+            }
         var csvImportGridColumn = [
             { field: "Username", templateID: "#csv-user-name", cssClass: "user-name", headerText: "@T["Username"]", width: 50, visible: isSelfHosted },
             { field: "Email", templateID: "#csv-user-emai", cssClass: "email-id", headerText: "@T["Email Address"]", width: 50 },
@@ -167,6 +175,10 @@
                                     <span id="trigger-file" class="input-group-addon btn popup no-left-border">@T["Browse"]</span>
                                     <input type="file" accept=".csv" name="csvfile" id="csvfile" class="btn popup upload-btn no-padding">
                                 </div>
+                                @{
+                                    // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                }
                                 @if (ViewBag.result.ToLower() == "error")
                                 {
                                     <span id="user-import-validation-msg">@String.Format(T["Please upload a valid {0} file."].Value, "csv")</span>
@@ -183,6 +195,10 @@
                                 {
                                     <span id=""></span>
                                 }
+                                @{
+                                    // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                }
                             </div>
                             <div class="file-upload-btn">
                                 <input type="submit" class="primary-button app-btn-primary" title="@String.Format(T["Upload {0} File here"].Value, "CSV")" id="csv-upload" disabled="" value="@T["Upload"]" />
@@ -195,7 +211,9 @@
                 <div class="col-12 grid-area no-padding">
                     <div class="list" id="grid-validation-messages">
                         <span id="grid-nodata-validation">@T["There is no data in the uploaded file. Please check and try uploading again."]</span>
-                        <span id="grid-validation">@Html.Raw(String.Format(T["{0} user(s) has been added successfully."].Value, "<span id='userCount'>@ViewBag.UserCount</span>"))</span>
+                        <span id="grid-validation">
+                            
+                            (String.Format(T["{0} user(s) has been added successfully."].Value, "<span id='userCount'>" + Html.Encode(ViewBag.UserCount) + "</span>"))</span>
                         <span id="grid-error-validation">@T["Duplicate or Invalid data is found. Please change the data accordingly and re-upload the file."] </span>
                     </div>
                     <div id="grid-container" class="col-md-12 no-padding">

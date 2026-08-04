@@ -2,13 +2,18 @@
     Layout = null;
     var isMobile = new DeviceDetection(Context).IsMobile;
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
-    var isItemPageRequested = (requestUrl.AbsolutePath == "/" || requestUrl.AbsolutePath == Url.Content("~/") || requestUrl.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0) && !isMobile;
+    var query = Context.Request.Query;
+    var isDashboardPageQuery = query.ContainsKey("isDashboardPage") && string.Equals(query["isDashboardPage"].ToString(), "true", StringComparison.OrdinalIgnoreCase);
+    var isDatasourcePageQuery = query.ContainsKey("isDatasourcePage") && string.Equals(query["isDatasourcePage"].ToString(), "true", StringComparison.OrdinalIgnoreCase);
+    var isSchedulePageQuery = query.ContainsKey("isSchedulePage") && string.Equals(query["isSchedulePage"].ToString(), "true", StringComparison.OrdinalIgnoreCase);
+    var isSlideShowPageQuery = query.ContainsKey("isSlideShowPage") && string.Equals(query["isSlideShowPage"].ToString(), "true", StringComparison.OrdinalIgnoreCase);
+    var isItemPageRequested = ((requestUrl.AbsolutePath == "/" || requestUrl.AbsolutePath == Url.Content("~/") || requestUrl.ToString().IndexOf("/dashboards", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/data-sources", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/pinboards", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/schedules", StringComparison.CurrentCultureIgnoreCase) > 0 || requestUrl.ToString().IndexOf("/slideshows", StringComparison.CurrentCultureIgnoreCase) > 0) || isDashboardPageQuery || isDatasourcePageQuery || isSchedulePageQuery || isSlideShowPageQuery) && !isMobile;
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress") : string.Empty;
     var itemPermissions = Model as Dictionary<ItemType, bool>;
     var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
     var draftCount = ViewBag.DraftDashboardCount as Dictionary<ItemType, int>;
     var showUpload = GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier || emailAddress.EndsWith("@syncfusion.com", StringComparison.OrdinalIgnoreCase) || emailAddress.Equals(ServerAppConfig.AppSettings.Syncfusion.Support.ConciergeEmail);
-    var isDashboardTab = requestUrl.LocalPath.TrimEnd('/').IndexOf(Url.Action("Dashboards", "Dashboards"), StringComparison.CurrentCultureIgnoreCase) > -1;
+    var isDashboardTab = isDashboardPageQuery || requestUrl.LocalPath.TrimEnd('/').IndexOf(Url.Action("Dashboards", "Dashboards"), StringComparison.CurrentCultureIgnoreCase) > -1;
     var userdashboardsCount = itemsCount != null ? itemsCount.ContainsKey(ItemType.Dashboard) ? itemsCount[ItemType.Dashboard] : 0 : 0;
     var draftDashboardCount = draftCount != null ? draftCount.ContainsKey(ItemType.Dashboard) ? draftCount[ItemType.Dashboard] : 0 : 0;
     var globalAppSettings = _globalAppSettings;
@@ -224,6 +229,7 @@
     @await Html.PartialAsync("../Items/_AddSampleItems")
 }
 
+@* Preserve pre-migration load behavior: on dashboards listing with existing items, resources are loaded via TileDashboards delayed loader. *@
 @if (absoluteUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 || (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] == 0))
 {
     <environment include="Development,CloudDevelopment">

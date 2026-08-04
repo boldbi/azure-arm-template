@@ -1,5 +1,4 @@
 ﻿@using System.Runtime.InteropServices;
-
 @{
     var globalAppSettings = _globalAppSettings;
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
@@ -70,7 +69,14 @@
         </script>
     }
      <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+                 @{
+                // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
         window.data = JSON.parse(@Html.Raw(Json.Serialize(ViewBag.users)));
+                @{
+    #pragma warning restore SCS0029
+        }
     </script>
     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         function selectItems(e) {
@@ -363,36 +369,64 @@
                                         <li>
                                             <a href="@Url.Action("UploadFileFormAction", "UserManagement")" title="@Html.Raw(String.Format(T["Import users from {0}"].Value, "CSV"))" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-download"> </i>
+                                                @{
+                                                    // Suppressing SCS0029 because no direct user input handled
+                                #pragma warning disable SCS0029
+                                                }
                                                 <span>@Html.Raw(String.Format(T["Import from {0}"].Value, "CSV"))</span>
+                                                @{
+                                #pragma warning restore SCS0029
+                                                }
                                             </a>
                                         </li>
                                     }
                                     @if (ServerAppConfig.IsSelfHosted && !isAzureApplication && enableWindowsAD && !userImport.HideWindowsAD)
                                     {
                                         <li>
+                                            @{
+                                                // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                            }
                                             <a class="dropdown-toggle" href="@Url.Action("ActiveDirectoryUserImport", "UserManagement")" title="@Html.Raw(String.Format(T["Import users from {0}"].Value, "Active Directory"))" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-windows-ad"> </i>
                                                 <span>@Html.Raw(String.Format(T["Import from {0}"].Value, "Active Directory"))</span>
                                             </a>
+                                            @{
+                            #pragma warning restore SCS0029
+                                            }
                                         </li>
                                     }
                                     @if (!userImport.HideAzureAD)
                                     {
                                         <li>
+                                            @{
+                                                // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                            }
                                             <a class="dropdown-toggle" href="@Url.Action("azureaduserimport", "usermanagement")" title="@Html.Raw(String.Format(T["Import users from {0}"].Value, "Azure AD"))" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-azure-ad"> </i>
                                                 <span>@Html.Raw(String.Format(T["Import from {0}"].Value, "Azure AD"))</span>
                                             </a>
+                                            @{
+                            #pragma warning restore SCS0029
+                                            }
                                         </li>
                                     }
 
                                     @if (!userImport.HideDatabase)
                                     {
                                         <li>
+                                            @{
+                                                // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                            }
                                             <a class="dropdown-toggle" href="@Url.Action("GetUserDataForImportFromDatabase", "usermanagement")" title="@Html.Raw(String.Format(T["Import users from {0}"].Value, "Database"))" data-bs-toggle="tooltip" data-placement="top">
                                                 <i class="su su-datasource"> </i>
                                                 <span>@Html.Raw(String.Format(T["Import from {0}"].Value, "Database"))</span>
                                             </a>
+                                            @{
+                            #pragma warning restore SCS0029
+                                            }
                                         </li>
                                     }
 
@@ -430,28 +464,49 @@
                                 @if (ViewBag.ActiveDirectory != null && ServerAppConfig.IsSelfHosted && !isAzureApplication && !userImport.HideWindowsAD && ViewBag.AdUserCount > 0)
                                 {
                                     <li>
+                                        @{
+                                            // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                        }
                                         <a class="dropdown-toggle" href="@Url.Action("SynchronizeUsers", "UserManagement")" data-bs-toggle="tooltip" data-placement="left" title="@Html.Raw(String.Format(T["Synchronize users with {0}"].Value, "Active Directory"))">
                                             <i class="su su-windows-ad"> </i>
                                             <span>@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Active Directory"))</span>
                                         </a>
+                                        @{
+                            #pragma warning restore SCS0029
+                                        }
                                     </li>
                                 }
                                 @if (ViewBag.AzureAD != null && !userImport.HideAzureAD && ViewBag.AzureADUserCount > 0)
                                 {
                                     <li>
+                                        @{
+                                            // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                        }
                                         <a class="dropdown-toggle" href="@Url.Action("SynchronizeAzureUsers", "UserManagement")" data-bs-toggle="tooltip" data-placement="left" title="@Html.Raw(String.Format(T["Synchronize users with {0}"].Value, "Azure AD"))">
                                             <i class="su su-azure-ad"> </i>
                                             <span>@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Azure AD"))</span>
                                         </a>
+                                        @{
+                            #pragma warning restore SCS0029
+                                        }
                                     </li>
                                 }
                                 @if (ViewBag.CustomDatabaseUserCount != null && !userImport.HideDatabase && ViewBag.DatabaseUserCount > 0)
                                 {
                                     <li>
+                                        @{
+                                            // Suppressing SCS0029 because no direct user input handled
+                            #pragma warning disable SCS0029
+                                        }
                                         <a class="dropdown-toggle" href="@Url.Action("SynchronizeCustomDatabaseUsers", "UserManagement")" data-bs-toggle="tooltip" data-placement="left" title="@T["Synchronize users with Custom Database"]">
                                             <i class="su su-datasource"> </i>
                                             <span>@Html.Raw(String.Format(T["{0} Synchronization"].Value, "Database"))</span>
                                         </a>
+                                        @{
+                            #pragma warning restore SCS0029
+                                        }
                                     </li>
                                 }
                             </ul>
@@ -488,7 +543,14 @@
             </div>
         </div>
         <div class="@(isImportInProgress ? "import-messages" : string.Empty)" style="display:none">
+            @{
+                // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+            }
             @Html.Raw(String.Format(T["The import of {0} users from {1} is still in progress"].Value, importCount, importType))
+            @{
+        #pragma warning restore SCS0029
+            }
         </div>
     </div>
     <div id="base-container" class="col-12 bi-page-container @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width") @(isImportInProgress ? "user-page-container" : string.Empty)">
@@ -499,6 +561,10 @@
                     </div>
                 </div>
                 <div class="user-directory-info col-lg-12">
+                    @{
+                        // Suppressing SCS0029 because no direct user input handled
+                #pragma warning disable SCS0029
+                    }
                     @if (ViewBag.AzureADUserCount > 0)
                     {
                         <div id="azure-ad-indication" class="ad-azure-indication"><span class="su su-azure-ad"> </span> - @Html.Raw(String.Format(T["{0} User"].Value, "Azure AD"))</div>
@@ -534,6 +600,9 @@
                     @if (ViewBag.AzureADB2CUserCount > 0)
                     {
                         <div id="ad-indication" class="ad-azure-indication"><span class="su su-azure-b2c"></span> - @Html.Raw(String.Format(T["{0} User"].Value, "Azure AD B2C"))</div>
+                    }
+                    @{
+                #pragma warning restore SCS0029
                     }
                 </div>
             </div>

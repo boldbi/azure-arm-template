@@ -1,1 +1,0 @@
-ALTER TABLE [BOLDBI_ApiKeyDetails] ADD [IsApiKeyViewed] [bit] NOT NULL DEFAULT 1;

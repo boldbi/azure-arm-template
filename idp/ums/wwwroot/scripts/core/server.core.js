@@ -6,6 +6,8 @@ var isSafari = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgen
 var clearSearch = false;
 var toastTimeout;
 var downloadLogsDialog;
+var diagnosticPackageRequestId;
+var diagnosticPackagePollTimer;
 
 var keyCode = {
     Tab: 9,
@@ -228,8 +230,8 @@ $(document).ready(function () {
         header: window.Server.App.LocalizationContent.GetDiagnosticLogs,
         content: document.getElementById("download-logs-dialog"),
         showCloseIcon: true,
-        width: '500px',
-        height: '300px',
+        width: 'min(760px, calc(100vw - 48px))',
+        height: 'auto',
         isModal: true,
         visible: false,
         beforeOpen: fnBeforeDownloadDialogsOpen,
@@ -262,7 +264,10 @@ $(document).ready(function () {
 
 $(document).on("click", "#download-log", function () {
     downloadLogsDialog.show();
-    document.getElementById("is-include-configuration").checked = false
+    document.getElementById("is-include-configuration").checked = false;
+    if (document.getElementById("is-include-upgrade-failure-files")) {
+        document.getElementById("is-include-upgrade-failure-files").checked = false;
+    }
 });
 
 $(document).on("click", "#download-logs-dialog-cancel", function () {
@@ -278,8 +283,69 @@ $(document).on("click", "#download-logs-dialog-proceed", function () {
     var dropdownElement = document.getElementById("download-logs-dialog-dropdown");
     var spanArgument = dropdownElement != null ? ("span=" + dropdownElement.ej2_instances[0].value + "&") : "";
     var isIncludeConfiguration = dropdownElement != null ? $("#is-include-configuration").is(":checked") : true;
-    window.location = getDiagnosticLogsUrl + "?" + spanArgument + "isIncludeConfiguration=" + isIncludeConfiguration;
+    var isIncludeUpgradeFailureFiles = $("#is-include-upgrade-failure-files").length ? $("#is-include-upgrade-failure-files").is(":checked") : false;
+    createDiagnosticPackage(spanArgument, isIncludeConfiguration, isIncludeUpgradeFailureFiles);
 });
+
+function createDiagnosticPackage(spanArgument, isIncludeConfiguration, isIncludeUpgradeFailureFiles) {
+    var data = spanArgument + "isIncludeConfiguration=" + isIncludeConfiguration + "&isIncludeUpgradeFailureFiles=" + isIncludeUpgradeFailureFiles;
+    $.ajax({
+        type: "GET",
+        url: getDiagnosticLogsUrl,
+        data: data,
+        success: function (result) {
+            if (result && result.status) {
+                diagnosticPackageRequestId = result.requestId;
+                SuccessAlert(window.Server.App.LocalizationContent.GetDiagnosticLogs, result.message, 4000);
+                startDiagnosticPackagePolling();
+            } else {
+                WarningAlert(window.Server.App.LocalizationContent.GetDiagnosticLogs, "Diagnostic package preparation failed.", result ? result.message : null, 7000);
+            }
+        },
+        error: function () {
+            WarningAlert(window.Server.App.LocalizationContent.GetDiagnosticLogs, "Diagnostic package preparation failed.", null, 7000);
+        }
+    });
+}
+
+function startDiagnosticPackagePolling() {
+    stopDiagnosticPackagePolling();
+    diagnosticPackagePollTimer = setInterval(function () {
+        if (!diagnosticPackageRequestId) {
+            stopDiagnosticPackagePolling();
+            return;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: getDiagnosticPackageProgressUrl + "?requestId=" + encodeURIComponent(diagnosticPackageRequestId),
+            success: function (result) {
+                if (!result || !result.status || !result.data) {
+                    return;
+                }
+
+                var progress = result.data;
+                if (progress.Status === "Completed" || progress.Status === "CompletedWithWarnings") {
+                    stopDiagnosticPackagePolling();
+                    SuccessAlert(window.Server.App.LocalizationContent.GetDiagnosticLogs, "Diagnostic package is ready. Download will begin now.", 5000);
+                    window.location = downloadDiagnosticPackageUrl + "?requestId=" + encodeURIComponent(diagnosticPackageRequestId);
+                    diagnosticPackageRequestId = null;
+                } else if (progress.Status === "Failed") {
+                    stopDiagnosticPackagePolling();
+                    WarningAlert(window.Server.App.LocalizationContent.GetDiagnosticLogs, "Diagnostic package preparation failed.", progress.ErrorMessage, 7000);
+                    diagnosticPackageRequestId = null;
+                }
+            }
+        });
+    }, 3000);
+}
+
+function stopDiagnosticPackagePolling() {
+    if (diagnosticPackagePollTimer) {
+        clearInterval(diagnosticPackagePollTimer);
+        diagnosticPackagePollTimer = null;
+    }
+}
 
 $(document).on("click", "#notification-link, #account-profile, #upload-item-section", function (e) {
     if ($(".dropdown-backdrop").length === 0) {

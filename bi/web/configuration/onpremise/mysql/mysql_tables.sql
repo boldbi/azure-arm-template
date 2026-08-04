@@ -1,4 +1,4 @@
-﻿CREATE TABLE {database_name}.BOLDBI_User(
+CREATE TABLE {database_name}.BOLDBI_User(
 	Id int NOT NULL AUTO_INCREMENT,
 	FirstName varchar(255) NOT NULL,
 	LastName varchar(255) NULL,
@@ -32,6 +32,7 @@ CREATE TABLE {database_name}.BOLDBI_Group(
 	ModifiedDate datetime NOT NULL,
 	DirectoryTypeId int NOT NULL DEFAULT 0,
 	ExternalProviderId varchar(100) NULL,
+	IsAdminGroup tinyint NOT NULL DEFAULT 0,
 	IsActive tinyint NOT NULL,
 	PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
 ;
@@ -1226,7 +1227,7 @@ CREATE TABLE {database_name}.BOLDBI_UserResourceFeaturePermission (
     Id int NOT NULL AUTO_INCREMENT,
     PermissionEntityId int NOT NULL,
     ResourceFeatureAccessJson varchar(4000) NOT NULL,
-    ItemId varchar(4000) NULL,
+    ItemId Char(38) NULL,
     UserId int NOT NULL,
     ScopeGroupId int NULL,
     ItemTypeId int NULL,
@@ -1238,7 +1239,7 @@ CREATE TABLE {database_name}.BOLDBI_GroupResourceFeaturePermission (
     Id int NOT NULL AUTO_INCREMENT,
     PermissionEntityId int NOT NULL,
     ResourceFeatureAccessJson varchar(4000) NOT NULL,
-    ItemId varchar(4000) NULL,
+    ItemId Char(38) NULL,
     GroupId int NOT NULL,
     ScopeGroupId int NULL,
     ItemTypeId int NULL,
@@ -1456,7 +1457,7 @@ INSERT into {database_name}.BOLDBI_PermissionEntity (Name,EntityType,ItemTypeId,
 INSERT into {database_name}.BOLDBI_PermissionEntity (Name,EntityType,ItemTypeId, IsActive) VALUES ('All Users',1,12,1)
 ;
 
-INSERT into {database_name}.BOLDBI_Group (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsActive) VALUES ('System Administrator','Has administrative rights for the dashboards','#ff0000',null,NOW(), 1, 1)
+INSERT into {database_name}.BOLDBI_Group (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsAdminGroup,IsActive) VALUES ('System Administrator','Has administrative rights for the dashboards','#ff0000',null,NOW(), 1, 1, 1)
 ;
 
 INSERT into {database_name}.BOLDBI_ItemCommentLogType (Name,IsActive) VALUES ( 'Added',1)
@@ -2337,8 +2338,6 @@ ALTER TABLE  {database_name}.BOLDBI_UserPermission  ADD  FOREIGN KEY(ItemId) REF
 ;
 ALTER TABLE  {database_name}.BOLDBI_UserPermission  ADD  FOREIGN KEY(UserId) REFERENCES {database_name}.BOLDBI_User (Id)
 ;
-ALTER TABLE  {database_name}.BOLDBI_UserPermission ADD FOREIGN KEY(SettingsTypeId) REFERENCES {database_name}.BOLDBI_SettingsType (Id) 
-;
 ALTER TABLE  {database_name}.BOLDBI_UserPermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
 ;
 ALTER TABLE  {database_name}.BOLDBI_UserPermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES {database_name}.BOLDBI_ItemType (Id)
@@ -2349,8 +2348,6 @@ ALTER TABLE  {database_name}.BOLDBI_GroupPermission  ADD  FOREIGN KEY(Permission
 ALTER TABLE  {database_name}.BOLDBI_GroupPermission  ADD  FOREIGN KEY(ItemId) REFERENCES {database_name}.BOLDBI_Item (Id)
 ;
 ALTER TABLE  {database_name}.BOLDBI_GroupPermission  ADD  FOREIGN KEY(GroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_GroupPermission ADD FOREIGN KEY(SettingsTypeId) REFERENCES {database_name}.BOLDBI_SettingsType (Id)
 ;
 ALTER TABLE  {database_name}.BOLDBI_GroupPermission ADD  FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
 ;
@@ -2607,8 +2604,6 @@ ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN 
 ;
 ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(UserId) REFERENCES {database_name}.BOLDBI_User (Id)
 ;
-ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission ADD FOREIGN KEY(SettingsTypeId) REFERENCES {database_name}.BOLDBI_SettingsType (Id) 
-;
 ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
 ;
 ALTER TABLE  {database_name}.BOLDBI_UserResourceFeaturePermission  ADD  FOREIGN KEY(ItemTypeId) REFERENCES {database_name}.BOLDBI_ItemType (Id)
@@ -2619,8 +2614,6 @@ ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN
 ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN KEY(ItemId) REFERENCES {database_name}.BOLDBI_Item (Id)
 ;
 ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission  ADD  FOREIGN KEY(GroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
-;
-ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission ADD FOREIGN KEY(SettingsTypeId) REFERENCES {database_name}.BOLDBI_SettingsType (Id)
 ;
 ALTER TABLE  {database_name}.BOLDBI_GroupResourceFeaturePermission ADD  FOREIGN KEY(ScopeGroupId) REFERENCES {database_name}.BOLDBI_Group (Id)
 ;
@@ -2634,3 +2627,681 @@ CREATE INDEX IX_BOLDBI_ScheduleLog_ScheduleId ON {database_name}.BOLDBI_Schedule
 CREATE INDEX IX_BOLDBI_Item ON {database_name}.BOLDBI_Item (IsActive, ItemTypeId, ParentId, IsDraft, CreatedById, CreatedDate);
 
 CREATE INDEX IX_BOLDBI_UserPermission ON {database_name}.BOLDBI_UserPermission (IsActive, UserId, ItemId, PermissionEntityId, PermissionAccessId);
+
+-- ========================
+-- Preserve existing indexes from source script
+-- ========================
+--  use boldbi
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics
+          WHERE table_schema = DATABASE() AND table_name='boldbi_scheduledetail' AND index_name='IX_BOLDBI_ScheduleDetail_ScheduleId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleDetail_ScheduleId` ON boldbi_scheduledetail (scheduleid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics
+          WHERE table_schema = DATABASE() AND table_name='boldbi_schedulelog' AND index_name='IX_BOLDBI_ScheduleLog_ScheduleId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleLog_ScheduleId` ON boldbi_schedulelog (scheduleid, executeddate, schedulestatusid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics
+          WHERE table_schema = DATABASE() AND table_name='boldbi_item' AND index_name='IX_BOLDBI_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Item` ON boldbi_item (isactive, itemtypeid, parentid, isdraft, createdbyid, createddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Users, Groups, Membership
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_user' AND index_name='IX_BOLDBI_User_Email');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_User_Email` ON boldbi_user (email)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_user' AND index_name='IX_BOLDBI_User_Username');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_User_Username` ON boldbi_user (username)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_user' AND index_name='IX_BOLDBI_User_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_User_IsActive` ON boldbi_user (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userlogin' AND index_name='IX_BOLDBI_UserLogin_UserId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserLogin_UserId` ON boldbi_userlogin (userid, loggedintime)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userpreference' AND index_name='IX_BOLDBI_UserPreference_UserId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserPreference_UserId` ON boldbi_userpreference (userid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_group' AND index_name='IX_BOLDBI_Group_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Group_IsActive` ON boldbi_group (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_usergroup' AND index_name='IX_BOLDBI_UserGroup_GroupId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserGroup_GroupId` ON boldbi_usergroup (groupid, userid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_usergroup' AND index_name='IX_BOLDBI_UserGroup_UserId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserGroup_UserId` ON boldbi_usergroup (userid, groupid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Item catalog, hierarchy, views, versions, trash
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_item' AND index_name='IX_BOLDBI_Item_ParentId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Item_ParentId` ON boldbi_item (parentid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_item' AND index_name='IX_BOLDBI_Item_CreatedById');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Item_CreatedById` ON boldbi_item (createdbyid, createddate, itemtypeid, isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_item' AND index_name='IX_BOLDBI_Item_ModifiedById');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Item_ModifiedById` ON boldbi_item (modifiedbyid, modifieddate, itemtypeid, isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_item' AND index_name='IX_BOLDBI_Item_ItemType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Item_ItemType_IsActive` ON boldbi_item (itemtypeid, isactive, name, parentid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemview' AND index_name='IX_BOLDBI_ItemView_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemView_ItemId` ON boldbi_itemview (itemid, userid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemview' AND index_name='IX_BOLDBI_ItemView_UserId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemView_UserId` ON boldbi_itemview (userid, itemid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemtrash' AND index_name='IX_BOLDBI_ItemTrash_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemTrash_ItemId` ON boldbi_itemtrash (itemid, trashedbyid, trasheddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemtrashdeleted' AND index_name='IX_BOLDBI_ItemTrashDeleted_ItemTrashId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemTrashDeleted_ItemTrashId` ON boldbi_itemtrashdeleted (itemtrashid, itemid, deletedbyid, deleteddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemversion' AND index_name='IX_BOLDBI_ItemVersion_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemVersion_ItemId` ON boldbi_itemversion (itemid, iscurrentversion, versionnumber, createddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemversion' AND index_name='IX_BOLDBI_ItemVersion_Item_Version');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemVersion_Item_Version` ON boldbi_itemversion (itemid, versionnumber)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Permissions
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userpermission' AND index_name='IX_BOLDBI_UserPermission_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserPermission_User` ON boldbi_userpermission (userid, isactive, permissionentityid, permissionaccessid, itemid, itemtypeid, settingstypeid, scopegroupid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userpermission' AND index_name='IX_BOLDBI_UserPermission_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserPermission_Item` ON boldbi_userpermission (itemid, isactive, userid, permissionentityid, permissionaccessid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_grouppermission' AND index_name='IX_BOLDBI_GroupPermission_Group');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupPermission_Group` ON boldbi_grouppermission (groupid, isactive, permissionentityid, permissionaccessid, itemid, itemtypeid, settingstypeid, scopegroupid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_grouppermission' AND index_name='IX_BOLDBI_GroupPermission_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupPermission_Item` ON boldbi_grouppermission (itemid, isactive, groupid, permissionentityid, permissionaccessid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_permissionentity' AND index_name='IX_BOLDBI_PermissionEntity_ItemType');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PermissionEntity_ItemType` ON boldbi_permissionentity (itemtypeid, entitytype, name, isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_permissionaccentity' AND index_name='IX_BOLDBI_PermissionAccEntity_PermissionEntityId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PermissionAccEntity_PermissionEntityId` ON boldbi_permissionaccentity (permissionentityid, permissionaccessid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_permissionaccentity' AND index_name='IX_BOLDBI_PermissionAccEntity_PermissionAccessId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PermissionAccEntity_PermissionAccessId` ON boldbi_permissionaccentity (permissionaccessid, permissionentityid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Scheduling & Subscriptions
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_scheduledetail' AND index_name='IX_BOLDBI_ScheduleDetail_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleDetail_ItemId` ON boldbi_scheduledetail (itemid, scheduleid, name, isenabled, nextschedule, recurrencetypeid, exporttypeid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_scheduledetail' AND index_name='IX_BOLDBI_ScheduleDetail_IsEnabled_Next');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleDetail_IsEnabled_Next` ON boldbi_scheduledetail (isenabled, nextschedule, scheduleid, itemid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_subscribeduser' AND index_name='IX_BOLDBI_SubscribedUser_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SubscribedUser_Schedule` ON boldbi_subscribeduser (scheduleid, recipientuserid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_subscribeduser' AND index_name='IX_BOLDBI_SubscribedUser_Recipient');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SubscribedUser_Recipient` ON boldbi_subscribeduser (recipientuserid, scheduleid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_subscribedgroup' AND index_name='IX_BOLDBI_SubscribedGroup_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SubscribedGroup_Schedule` ON boldbi_subscribedgroup (scheduleid, recipientgroupid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_subscribedgroup' AND index_name='IX_BOLDBI_SubscribedGroup_Recipient');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SubscribedGroup_Recipient` ON boldbi_subscribedgroup (recipientgroupid, scheduleid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_subscrextnrecpt' AND index_name='IX_BOLDBI_SubscrExtnRecpt_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SubscrExtnRecpt_Schedule` ON boldbi_subscrextnrecpt (scheduleid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_schedulemissinglogs' AND index_name='IX_BOLDBI_ScheduleMissingLogs_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleMissingLogs_Schedule` ON boldbi_schedulemissinglogs (scheduleid, startdate, enddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_scheduleloguser' AND index_name='IX_BOLDBI_ScheduleLogUser_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleLogUser_Schedule` ON boldbi_scheduleloguser (scheduleid, schedulestatusid, delivereddate, delivereduserid, isondemand)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_scheduleloggroup' AND index_name='IX_BOLDBI_ScheduleLogGroup_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleLogGroup_Schedule` ON boldbi_scheduleloggroup (scheduleid, schedulestatusid, delivereddate, groupid, delivereduserid, isondemand)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_schdlogextnrecpt' AND index_name='IX_BOLDBI_SchdLogExtnRecpt_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SchdLogExtnRecpt_Schedule` ON boldbi_schdlogextnrecpt (scheduleid, schedulestatusid, delivereddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_schedulerunhistory' AND index_name='IX_BOLDBI_ScheduleRunHistory_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleRunHistory_Schedule` ON boldbi_schedulerunhistory (scheduleid, starteddate DESC, schedulestatusid, isondemand, message(255))', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Comments & interactions
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_comment' AND index_name='IX_BOLDBI_Comment_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Comment_ItemId` ON boldbi_comment (itemid, createddate DESC, userid, parentid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_comment' AND index_name='IX_BOLDBI_Comment_ParentId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Comment_ParentId` ON boldbi_comment (parentid, createddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemcommentlog' AND index_name='IX_BOLDBI_ItemCommentLog_CommentId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemCommentLog_CommentId` ON boldbi_itemcommentlog (commentid, itemcommentlogtypeid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemcommentlog' AND index_name='IX_BOLDBI_ItemCommentLog_CurrentUserId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemCommentLog_CurrentUserId` ON boldbi_itemcommentlog (currentuserid, commentid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemwatch' AND index_name='IX_BOLDBI_ItemWatch_ItemUser');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemWatch_ItemUser` ON boldbi_itemwatch (itemid, userid, iswatched)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_favoriteitem' AND index_name='IX_BOLDBI_FavoriteItem_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_FavoriteItem_User` ON boldbi_favoriteitem (userid, itemid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Widgets, Data Sources, Multi-Tab Dashboards
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_dashboardwidget' AND index_name='IX_BOLDBI_DashboardWidget_DashboardItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DashboardWidget_DashboardItemId` ON boldbi_dashboardwidget (dashboarditemid, widgetitemid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_dashboardwidget' AND index_name='IX_BOLDBI_DashboardWidget_WidgetItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DashboardWidget_WidgetItemId` ON boldbi_dashboardwidget (widgetitemid, dashboarditemid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_dashboarddatasource' AND index_name='IX_BOLDBI_DashboardDataSource_Dashboard');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DashboardDataSource_Dashboard` ON boldbi_dashboarddatasource (dashboarditemid, datasourceitemid, versionnumber)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_dashboarddatasource' AND index_name='IX_BOLDBI_DashboardDataSource_DataSource');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DashboardDataSource_DataSource` ON boldbi_dashboarddatasource (datasourceitemid, dashboarditemid, versionnumber)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_multitabdashboard' AND index_name='IX_BOLDBI_MultiTabDashboard_Parent');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_MultiTabDashboard_Parent` ON boldbi_multitabdashboard (parentdashboardid, ordernumber, childdashboardid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_multitabdashboard' AND index_name='IX_BOLDBI_MultiTabDashboard_Child');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_MultiTabDashboard_Child` ON boldbi_multitabdashboard (childdashboardid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Publishing & Deployment
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_publisheditem' AND index_name='IX_BOLDBI_PublishedItem_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PublishedItem_ItemId` ON boldbi_publisheditem (itemid, isactive, destinationitemid, publishtype, createddate, externalsiteid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_publishjobs' AND index_name='IX_BOLDBI_PublishJobs_PublishId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PublishJobs_PublishId` ON boldbi_publishjobs (publishid, status, createddate, completeddate, type)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_deploymentdashboards' AND index_name='IX_BOLDBI_DeploymentDashboards_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DeploymentDashboards_Item` ON boldbi_deploymentdashboards (itemid, createdbyid, createddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Auditing & System Logs
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemlog' AND index_name='IX_BOLDBI_ItemLog_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemLog_Item` ON boldbi_itemlog (itemid, modifieddate DESC, itemlogtypeid, itemversionid, updateduserid, sourcetypeid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemlog' AND index_name='IX_BOLDBI_ItemLog_Version');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemLog_Version` ON boldbi_itemlog (itemversionid, modifieddate DESC)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userlog' AND index_name='IX_BOLDBI_UserLog_Target');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserLog_Target` ON boldbi_userlog (targetuserid, createddate DESC, userlogtypeid, sourcetypeid, logstatusid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_grouplog' AND index_name='IX_BOLDBI_GroupLog_Target');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupLog_Target` ON boldbi_grouplog (targetgroupid, createddate DESC, grouplogtypeid, sourcetypeid, logstatusid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userpermissionlog' AND index_name='IX_BOLDBI_UserPermissionLog_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserPermissionLog_User` ON boldbi_userpermissionlog (userid, createddate DESC, affecteduserid, logtypeid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userpermissionlog' AND index_name='IX_BOLDBI_UserPermissionLog_Affected');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserPermissionLog_Affected` ON boldbi_userpermissionlog (affecteduserid, createddate DESC, userid, logtypeid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_grouppermissionlog' AND index_name='IX_BOLDBI_GroupPermissionLog_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupPermissionLog_User` ON boldbi_grouppermissionlog (userid, createddate DESC, affectedgroupid, logtypeid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_grouppermissionlog' AND index_name='IX_BOLDBI_GroupPermissionLog_Affected');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupPermissionLog_Affected` ON boldbi_grouppermissionlog (affectedgroupid, createddate DESC, userid, logtypeid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_systemlog' AND index_name='IX_BOLDBI_SystemLog_TypeStatusTime');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SystemLog_TypeStatusTime` ON boldbi_systemlog (systemlogtypeid, logstatusid, createddate DESC)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Notifications, Email, Webhooks
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_emailactivitylog' AND index_name='IX_BOLDBI_EmailActivityLog_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_EmailActivityLog_User` ON boldbi_emailactivitylog (userid, createddate DESC, status, recipientemail, mailsubject)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_emailactivitylog' AND index_name='IX_BOLDBI_EmailActivityLog_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_EmailActivityLog_Item` ON boldbi_emailactivitylog (itemid, createddate DESC, status, recipientemail, event)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_notification' AND index_name='IX_BOLDBI_Notification_CurrentUser');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Notification_CurrentUser` ON boldbi_notification (currentuserid, isread, modifieddate DESC, itemid, commentid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_notification' AND index_name='IX_BOLDBI_Notification_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Notification_Item` ON boldbi_notification (itemid, modifieddate DESC, currentuserid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_webhook' AND index_name='IX_BOLDBI_Webhook_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Webhook_User` ON boldbi_webhook (userid, isenable, isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_notificationtrigger' AND index_name='IX_BOLDBI_NotificationTrigger_Webhook');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_NotificationTrigger_Webhook` ON boldbi_notificationtrigger (webhookid, nextscheduledate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_webhooklog' AND index_name='IX_BOLDBI_WebhookLog_Webhook');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_WebhookLog_Webhook` ON boldbi_webhooklog (webhookid, createddate DESC, event(191), responsestatuscode)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Directory / Auth / Config
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_azureadcredential' AND index_name='IX_BOLDBI_AzureADCredential_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_AzureADCredential_IsActive` ON boldbi_azureadcredential (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_adcredential' AND index_name='IX_BOLDBI_ADCredential_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ADCredential_IsActive` ON boldbi_adcredential (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_samlsettings' AND index_name='IX_BOLDBI_SAMLSettings_IsEnabled');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SAMLSettings_IsEnabled` ON boldbi_samlsettings (isenabled)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_systemsettings' AND index_name='IX_BOLDBI_SystemSettings_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SystemSettings_IsActive` ON boldbi_systemsettings (isactive, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_serverversion' AND index_name='IX_BOLDBI_ServerVersion_VersionNumber');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ServerVersion_VersionNumber` ON boldbi_serverversion (versionnumber)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Customization & Expressions
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_customexpression' AND index_name='IX_BOLDBI_CustomExpression_Dashboard');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_CustomExpression_Dashboard` ON boldbi_customexpression (dashboardid, widgetid, userid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_customexpression' AND index_name='IX_BOLDBI_CustomExpression_Widget');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_CustomExpression_Widget` ON boldbi_customexpression (widgetid, dashboardid, userid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_customexpression' AND index_name='IX_BOLDBI_CustomExpression_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_CustomExpression_User` ON boldbi_customexpression (userid, dashboardid, widgetid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Data Notification & Relations
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_datanotification' AND index_name='IX_BOLDBI_DataNotification_Schedule');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DataNotification_Schedule` ON boldbi_datanotification (scheduleid, datasourceid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_datanotification' AND index_name='IX_BOLDBI_DataNotification_DataSource');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_DataNotification_DataSource` ON boldbi_datanotification (datasourceid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_tablerelation' AND index_name='IX_BOLDBI_TableRelation_Left');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_TableRelation_Left` ON boldbi_tablerelation (lefttablename, lefttableschema, lefttablecolumnname)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_tablerelation' AND index_name='IX_BOLDBI_TableRelation_Right');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_TableRelation_Right` ON boldbi_tablerelation (righttablename, righttableschema, righttablecolumnname)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Homepage & Preferences
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_homepage' AND index_name='IX_BOLDBI_Homepage_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Homepage_User` ON boldbi_homepage (userid, isdefaulthomepage)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_homepageitemfilter' AND index_name='IX_BOLDBI_HomepageItemFilter_HomepageId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_HomepageItemFilter_HomepageId` ON boldbi_homepageitemfilter (homepageid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemsettings' AND index_name='IX_BOLDBI_ItemSettings_ItemId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemSettings_ItemId` ON boldbi_itemsettings (itemid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemuserpreference' AND index_name='IX_BOLDBI_ItemUserPreference_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemUserPreference_Item` ON boldbi_itemuserpreference (itemid, userid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemuserpreference' AND index_name='IX_BOLDBI_ItemUserPreference_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemUserPreference_User` ON boldbi_itemuserpreference (userid, itemid, modifieddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Attributes & Site settings
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userattributes' AND index_name='IX_BOLDBI_UserAttributes_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserAttributes_User` ON boldbi_userattributes (userid, name)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_groupattributes' AND index_name='IX_BOLDBI_GroupAttributes_Group');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupAttributes_Group` ON boldbi_groupattributes (groupid, name)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_siteattributes' AND index_name='IX_BOLDBI_SiteAttributes_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SiteAttributes_IsActive` ON boldbi_siteattributes (isactive, name)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- External sites & settings
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_externalsites' AND index_name='IX_BOLDBI_ExternalSites_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ExternalSites_IsActive` ON boldbi_externalsites (isactive, name)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_settingstype' AND index_name='IX_BOLDBI_SettingsType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SettingsType_IsActive` ON boldbi_settingstype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Events, Payloads & Mapping
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_notificationevents' AND index_name='IX_BOLDBI_NotificationEvents_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_NotificationEvents_IsActive` ON boldbi_notificationevents (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_eventpayloads' AND index_name='IX_BOLDBI_EventPayloads_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_EventPayloads_IsActive` ON boldbi_eventpayloads (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_eventpayloadsmapping' AND index_name='IX_BOLDBI_EventPayloadsMapping_EventType');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_EventPayloadsMapping_EventType` ON boldbi_eventpayloadsmapping (eventtype, payloadtype)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_eventpayloadsmapping' AND index_name='IX_BOLDBI_EventPayloadsMapping_PayloadType');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_EventPayloadsMapping_PayloadType` ON boldbi_eventpayloadsmapping (payloadtype, eventtype)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- User sessions & background jobs
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_usersession' AND index_name='IX_BOLDBI_UserSession_Idp');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserSession_Idp` ON boldbi_usersession (idpreferenceid, sessionid, loggedintime, isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_usersession' AND index_name='IX_BOLDBI_UserSession_SessionId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserSession_SessionId` ON boldbi_usersession (sessionid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_backgroundjobs' AND index_name='IX_BOLDBI_BackgroundJobs_Status');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_BackgroundJobs_Status` ON boldbi_backgroundjobs (status, createddate, itemid, userid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Upload mapping
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_uploaddatasourcemapping' AND index_name='IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant` ON boldbi_uploaddatasourcemapping (downloadedtenantid, uploadeditemid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_uploaddatasourcemapping' AND index_name='IX_BOLDBI_UploadDataSourceMapping_UploadedItem');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UploadDataSourceMapping_UploadedItem` ON boldbi_uploaddatasourcemapping (uploadeditemid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- AI / Metrics & Requests
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_dsmetrics' AND index_name='IX_BoldBI_DSMetrics_DS_Time');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BoldBI_DSMetrics_DS_Time` ON boldbi_dsmetrics (datasourceid, refreshstarttime, refreshstatus, rowsupdated, totalrows)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_ai_sessions' AND index_name='IX_BOLDBI_AI_SESSIONS_Time');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_AI_SESSIONS_Time` ON boldbi_ai_sessions (sessionstarttime DESC, sessionendtime, totaltokenscost, userinfo(191))', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_ai_chat' AND index_name='IX_BOLDBI_AI_CHAT_Session');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_AI_CHAT_Session` ON boldbi_ai_chat (sessionid(191), searchdatetime DESC, totaltokenscost, userinfo(191))', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_aicredentials' AND index_name='IX_BOLDBI_AICredentials_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_AICredentials_IsActive` ON boldbi_aicredentials (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_ai_requests' AND index_name='IX_BOLDBI_AI_REQUESTS_Session');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_AI_REQUESTS_Session` ON boldbi_ai_requests (sessionid, searchdate, datasourceid, aimodel)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- API Keys & Templates & QnA
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_apikeydetails' AND index_name='IX_BOLDBI_ApiKeyDetails_CreatedBy');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ApiKeyDetails_CreatedBy` ON boldbi_apikeydetails (createdby, isactive, lastuseddate)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_customemailtemplate' AND index_name='IX_BOLDBI_CustomEmailTemplate_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_CustomEmailTemplate_IsActive` ON boldbi_customemailtemplate (isactive, language, templateid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_ai_qnawidgethistory' AND index_name='IX_BoldBI_ai_qnawidgethistory_Widget');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BoldBI_ai_qnawidgethistory_Widget` ON boldbi_ai_qnawidgethistory (widgetid, search_date)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_ai_qnawidgethistory' AND index_name='IX_BoldBI_ai_qnawidgethistory_SearchDate');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BoldBI_ai_qnawidgethistory_SearchDate` ON boldbi_ai_qnawidgethistory (search_date)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+
+-- ========================
+-- Resource Feature Access & Permissions
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_resourcefeatureaccess' AND index_name='IX_BOLDBI_ResourceFeatureAccess_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ResourceFeatureAccess_IsActive` ON boldbi_resourcefeatureaccess (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_resourcefeatureaccentity' AND index_name='IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId` ON boldbi_resourcefeatureaccentity (permissionentityid, resourcefeatureaccessid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_resourcefeatureaccentity' AND index_name='IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId` ON boldbi_resourcefeatureaccentity (resourcefeatureaccessid, permissionentityid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userresourcefeaturepermission' AND index_name='IX_BOLDBI_UserResourceFeaturePermission_User');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserResourceFeaturePermission_User` ON boldbi_userresourcefeaturepermission (userid, itemid, permissionentityid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userresourcefeaturepermission' AND index_name='IX_BOLDBI_UserResourceFeaturePermission_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserResourceFeaturePermission_Item` ON boldbi_userresourcefeaturepermission (itemid, userid, permissionentityid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_groupresourcefeaturepermission' AND index_name='IX_BOLDBI_GroupResourceFeaturePermission_Group');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupResourceFeaturePermission_Group` ON boldbi_groupresourcefeaturepermission (groupid, itemid, permissionentityid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_groupresourcefeaturepermission' AND index_name='IX_BOLDBI_GroupResourceFeaturePermission_Item');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupResourceFeaturePermission_Item` ON boldbi_groupresourcefeaturepermission (itemid, groupid, permissionentityid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+
+-- ========================
+-- Type / Status (lookup) tables — per request
+-- ========================
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemtype' AND index_name='IX_BOLDBI_ItemType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemType_IsActive` ON boldbi_itemtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemlogtype' AND index_name='IX_BOLDBI_ItemLogType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemLogType_IsActive` ON boldbi_itemlogtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_recurrencetype' AND index_name='IX_BOLDBI_RecurrenceType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_RecurrenceType_IsActive` ON boldbi_recurrencetype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_exporttype' AND index_name='IX_BOLDBI_ExportType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ExportType_IsActive` ON boldbi_exporttype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_schedulestatus' AND index_name='IX_BOLDBI_ScheduleStatus_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ScheduleStatus_IsActive` ON boldbi_schedulestatus (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_itemcommentlogtype' AND index_name='IX_BOLDBI_ItemCommentLogType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ItemCommentLogType_IsActive` ON boldbi_itemcommentlogtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_permissionaccess' AND index_name='IX_BOLDBI_PermissionAccess_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PermissionAccess_IsActive` ON boldbi_permissionaccess (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_permissionlogtype' AND index_name='IX_BOLDBI_PermissionLogType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PermissionLogType_IsActive` ON boldbi_permissionlogtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_systemlogtype' AND index_name='IX_BOLDBI_SystemLogType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SystemLogType_IsActive` ON boldbi_systemlogtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_logstatus' AND index_name='IX_BOLDBI_LogStatus_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_LogStatus_IsActive` ON boldbi_logstatus (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_userlogtype' AND index_name='IX_BOLDBI_UserLogType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserLogType_IsActive` ON boldbi_userlogtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_grouplogtype' AND index_name='IX_BOLDBI_GroupLogType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_GroupLogType_IsActive` ON boldbi_grouplogtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_publishtype' AND index_name='IX_BOLDBI_PublishType_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_PublishType_IsActive` ON boldbi_publishtype (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_usertype' AND index_name='IX_BOLDBI_UserType_Type');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_UserType_Type` ON boldbi_usertype (type)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_conditioncategory' AND index_name='IX_BOLDBI_ConditionCategory_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_ConditionCategory_IsActive` ON boldbi_conditioncategory (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_source' AND index_name='IX_BOLDBI_Source_IsActive');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_Source_IsActive` ON boldbi_source (isactive)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name='boldbi_slideshowinfo' AND index_name='IX_BOLDBI_SlideshowInfo_SlideshowId');
+SET @sql = IF(@x=0, 'CREATE INDEX `IX_BOLDBI_SlideshowInfo_SlideshowId` ON boldbi_slideshowinfo (slideshowid)', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- ========================
+-- Filtered (optional) — comment out if not needed
+-- ========================
+SET @x = (
+  SELECT COUNT(*) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name   = 'boldbi_item'
+    AND index_name   = 'IXF_BOLDBI_Item_IsActive'
+);
+SET @sql = IF(@x=0,
+  'CREATE INDEX `IXF_BOLDBI_Item_IsActive`
+     ON boldbi_item (itemtypeid, parentid, name, createddate)',
+  'SELECT 1'
+);
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (
+  SELECT COUNT(*) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name   = 'boldbi_userpermission'
+    AND index_name   = 'IXF_BOLDBI_UserPermission_Active'
+);
+SET @sql = IF(@x=0,
+  'CREATE INDEX `IXF_BOLDBI_UserPermission_Active`
+     ON boldbi_userpermission (userid, itemid, permissionentityid, permissionaccessid)',
+  'SELECT 1'
+);
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @x = (
+  SELECT COUNT(*) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name   = 'boldbi_grouppermission'
+    AND index_name   = 'IXF_BOLDBI_GroupPermission_Active'
+);
+SET @sql = IF(@x=0,
+  'CREATE INDEX `IXF_BOLDBI_GroupPermission_Active`
+     ON boldbi_grouppermission (groupid, itemid, permissionentityid, permissionaccessid)',
+  'SELECT 1'
+);
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;

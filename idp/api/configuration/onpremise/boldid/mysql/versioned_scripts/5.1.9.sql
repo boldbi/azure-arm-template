@@ -1,3 +1,5 @@
+﻿-- BOLD_UPGRADE_CHECKPOINT_COVERED: true
+-- BOLD_UPGRADE_STATEMENT_CHECKPOINT_VALIDATED: true
 CREATE TABLE {database_name}.BOLDTC_TenantStorageDetails (
     Id char(38) NOT NULL,
     TenantInfoId char(38) NOT NULL,

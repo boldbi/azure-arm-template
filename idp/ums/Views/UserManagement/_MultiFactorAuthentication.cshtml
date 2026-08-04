@@ -5,6 +5,8 @@
     var isMfaEnabled = ViewBag.IsMfaEnabled != null ? (bool)ViewBag.IsMfaEnabled : false;
     var userDetail = (User)ViewBag.UserDetail;
     var imageHelper = new ImageHelper(Context);
+    var currentUserId = Context.User.GetUserId();
+    var isSelfUser = currentUserId == userDetail.UserId;
 }
 
 
@@ -23,8 +25,13 @@
             <img src="@imageHelper.MfaSuccessImage()" />
             @Html.Label("configure-2FA", T["Two factor authentication is enabled for this user account."].Value, new { @class = "app-textbox-label" })
             <div class="mfa-disable">
-                <button type="button" class="secondary-button" id="generate-recovery-code">@T["Regenerate Recovery Code"]</button>
-                <div class="mfa-button"><a href="" id="mfa-disable-button" class="mfa-disable-button text-decoration-none">@T["Remove Two Factor Authentication"]</a></div>
+                <div class="mfa-button"><a href="javascript:void(0);" id="mfa-disable-button" class="mfa-disable-button text-decoration-none" role="button">@T["Remove Two Factor Authentication"]</a></div>
+                @if (isSelfUser)
+                {
+                    <div class="mfa-button">
+                        <button type="button" class="secondary-button" id="generate-recovery-code">@T["Regenerate Recovery Code"]</button>
+                    </div>
+                }
             </div>
             }
         </div>

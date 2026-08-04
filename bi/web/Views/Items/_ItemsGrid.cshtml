@@ -538,6 +538,10 @@
     <div>
         {{if ScheduleStatus=="@((int)ScheduleStatus.Success)"}}
         <div>
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
             {{if !IsScheduleEnabled}}
                 <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="success" data-last-attempt="@Html.Raw(String.Format(T["Successful at {0}"].Value, "{{:LastAttemptAt}}"))" data-status="success" title= "@T["Refresh Disabled"]">
                     <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'success'}}"></span>
@@ -563,9 +567,20 @@
                     <Span class="lastsuccessful">@Html.Raw(String.Format(T["Last Successful at {0}"].Value, "{{:LastAttemptAt}}"))</Span>
                 </div>
             {{/if}}
+                @{
+    #pragma warning restore SCS0029
+    }
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.Fail)"}}
         <div>
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
             <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
                 <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
                 {{if !IsScheduleEnabled}}
@@ -582,16 +597,37 @@
                        <span class="data-refresh">@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
                  {{/if}}
             </span>
+                @{
+    #pragma warning restore SCS0029
+    }
             {{if LastSuccessfulAttemptAt != null}}
             <div>
+                    @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
                 <span class="last-successful" data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))">
                     @Html.Raw(String.Format(T["Last successful at {0}"].Value, "{{:LastSuccessfulAttemptAt}}"))
                 </span>
+                    @{
+    #pragma warning restore SCS0029
+    }
             </div>
             {{/if}}
+                @{
+    #pragma warning restore SCS0029
+    }
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.RateLimited)"}}
         <div>
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
             <span class="refresh-data" data-bs-toggle="tooltip" data-placement="top" data-icon="failed" data-last-attempt="@Html.Raw(String.Format(T["RateLimited - Failure at {0}"].Value, "{{:LastAttemptAt}}"))" data-status="failed" title='{{:~refreshEncode(IsScheduleEnabled, LastAttemptAt)}}'>
                 <span class="failed data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
                 {{if !IsScheduleEnabled}}
@@ -609,9 +645,16 @@
                        <span class="last-attempt-fail">@Html.Raw(String.Format(T["Failure at {0}"].Value, "{{:LastAttemptAt}}"))</span>
                  {{/if}}
             </span>
+                @{
+    #pragma warning restore SCS0029
+    }
         </div>
         {{else ScheduleStatus=="@((int)ScheduleStatus.Run)"}}
         <div>
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
             <span data-bs-toggle="tooltip" data-placement="top" title="@Html.Raw(String.Format(T["Refresh Started at {0}"].Value, "{{:LastAttemptAt}}"))">
                 <span class="refresh-started data-refresh-status su su-schedule-status {{:LastSuccessfulAttemptAt == null ? '' : 'has-last-success'}}"></span>
                 <span>@Html.Raw(String.Format(T["Refresh Started at {0}"].Value, "{{:LastAttemptAt}}"))</span>
@@ -623,11 +666,21 @@
                 </span>
             </div>
             {{/if}}
+                @{
+    #pragma warning restore SCS0029
+    }
         </div>
         {{else ExtractEngine == "@ExtractEngine.DataHub.ToString().ToLower()" && !IsScheduleSynced}}
         <div>
             <span class="not-applicable data-refresh-status su su-schedule-status"></span>
+                @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
             <span data-bs-toggle="tooltip" data-placement="top" title="@T["Please edit and save the refresh settings again in order to obtain the refresh status of this data source."]">@Html.Raw(String.Format(T["Not synced with {0}"].Value, "Data Hub"))</span>
+                @{
+    #pragma warning restore SCS0029
+    }
         </div>
         {{else !IsScheduleConfigured}}
         <div>
@@ -642,13 +695,27 @@
                 <span class="data-refresh-status su su-schedule-status {{:!IsScheduleEnabled ? 'failed' : 'not-refreshed'}}"></span>
                 {{if !IsScheduleEnabled}}
                     {{if FailureOccurence >= @ServerAppConfig.FailureOccurrence }}
+                        @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledDueToFailure, @ServerAppConfig.FailureOccurrence))</Span>
+                           @{
+    #pragma warning restore SCS0029
+    }
                        <span class="failure-history">
                             <span class="su su-refresh-history"></span>
                             <a href="#" class="data-refresh view-history-link refresh-history" title="" data-itemname="{{:Name}}" data-item-id="{{:Id}}" data-itemtype="{{:ItemType}}" data-item-extract-engine="{{:ExtractEngine}}">@T["Check Refresh History"]</a>
                        </span>
                     {{else}}
+                        @{
+            // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+    }
                        <Span class="data-refresh">@Html.Raw(String.Format(refreshDisabledBy, "{{:ModifiedByFullName}}"))</Span>
+                           @{
+    #pragma warning restore SCS0029
+    }
                     {{/if}}
                 {{else}}
                      <span class="data-refresh">@T["Not refreshed yet"]</span>

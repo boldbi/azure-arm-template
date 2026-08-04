@@ -1,3 +1,4 @@
+﻿
 INSERT INTO {database_name}.BOLDBI_SettingsType (Name, IsActive) SELECT 'CORS Settings', 1 FROM DUAL
 WHERE NOT EXISTS(SELECT * FROM {database_name}.BOLDBI_SettingsType WHERE Name='CORS Settings' LIMIT 1)
 ;

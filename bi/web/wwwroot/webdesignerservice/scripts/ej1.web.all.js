@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.web.all.js
-*  version : 15.3.8
+*  version : 16.1.90
 *  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -24009,6 +24009,8 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
 
             maxValue: 100,
 
+            dateFormat: "M/d/yyyy",
+
             sliderType: "default",
 
             value: null,
@@ -24056,6 +24058,7 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
             enableRTL: "boolean",
             minValue: "number",
             maxValue: "number",
+            dateFormat: "string",
             sliderType: "enum",
             incrementStep: "number",
             enabled: "boolean",
@@ -25029,14 +25032,15 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
  var divideBy24 = 24;
         var divideBy60 = 60;
         var divideBy1000 = 1000;
-        var dateFormat = 'M/d/yyyy';
+        var defaultDateFormat = 'M/d/yyyy';
         var init = BoldBIDashboard.Slider.prototype._init;
         var setModel = BoldBIDashboard.Slider.prototype._setModel;
         bbdesigner$.extend(true, BoldBIDashboard.Slider.prototype, {
             defaults: {
                 minDate: null,
                 maxDate: null,
-                dateValue: null
+                dateValue: null,
+                dateFormat: defaultDateFormat
             },
             _init: function (options) {
                 this._isDate = this.model.minDate && this.model.maxDate;
@@ -25058,6 +25062,9 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
             },
             _setModel: function (options) {
                 setModel.call(this, options);
+                if (!BoldBIDashboard.isNullOrUndefined(options.dateFormat)) {
+                    this.model.dateFormat = options.dateFormat;
+                }
                 for (var option in options) {
                     // if ({}.hasOwnProperty.call(option, options)) {  because of this if condition following switch case not working
                     // so commenting this condition temporarily
@@ -25116,9 +25123,10 @@ BoldBIDashboard.Dialog.Locale["default"] = BoldBIDashboard.Dialog.Locale["en-US"
                     return num;
                 }
                 dateObj = new Date(num);
-                return BoldBIDashboard.globalize.format(dateObj, dateFormat);
+                return BoldBIDashboard.globalize.format(dateObj, this.model.dateFormat);
             }
-        });;
+        });
+;
 /*!
 *  filename: BoldBIDashboard.treeview.js
 *  version : 16.2.0.41
@@ -54248,6 +54256,8 @@ bbdesigner$.extend(true, BoldBIDashboard.datavisualization.TreeMap.prototype, {
             bbdesigner$("#" + this._id + "ccDiv").BoldBIDashboardDialog('close');
             bbdesigner$(".e-columnChoosertailAlt").remove();
             bbdesigner$(".e-columnChoosertail").remove();
+            var uniqueName = bbdesigner$("#" + this._id + "ccDiv").find("button").attr("aria-describedby");
+            bbdesigner$("#" + this._id + "ccDiv").find(`button[aria-describedby=${uniqueName}]`).removeClass("e-disable");
         },
         _ccClickHandler: function (e) {
             var dlgWidth = 230, xPos, top, dialogObj, panelHeightEdge, evt = e.e, dialogHeight = 309, columnChoosertailOffset = 16, columnChoosertailAlt = 15, widgetHeight, cummalativeCalculationForDialog, chooserdialogHeight, isBrowserExceeded;
@@ -54285,7 +54295,7 @@ bbdesigner$.extend(true, BoldBIDashboard.datavisualization.TreeMap.prototype, {
             this._refreshColumnChooserList();
             this._ccVisibleColumns = this.getVisibleColumnNames();
             this._ccHiddenColumns = this.getHiddenColumnNames();
-             this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: this.model.columns.length === this._ccVisibleColumns.length });
+            this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: this.model.columns.length === this._ccVisibleColumns.length });
             bbdesigner$("#" + this._id + "liScrollerDiv").BoldBIDashboardScroller({ height: '228', width: '228', buttonSize: 0 });
             bbdesigner$("#" + this._id + "liScrollerDiv").BoldBIDashboardScroller('refresh');
             if (this.getBrowserDetails().browser == 'chrome')
@@ -82997,7 +83007,7 @@ var Gradient = function (colors) {
             series._isTransposed = (seriesType.indexOf("bar") == -1) ? series.isTransposed : !series.isTransposed;
             // 421892 - Fix for displaying tooltip without marker
             this.model.marker.push(bbdesigner$.extend(true, {}, series.marker));
-            if (seriesType === "line" || seriesType === "spline") {
+            if (seriesType === "line" || seriesType === "spline" || seriesType === "area") {
                 series.marker.visible = this.model.enableSeriesMaker;
                 if(!series.marker.visible){
                     series.marker.visible = true;
@@ -105907,7 +105917,7 @@ var BoldBIDashboardSparkline;
         },
         _selectedHandler: function(evt) {
             var that = this;
-            this._hideTooltip();
+            this._hideTooltip(evt);
             this.singleTimer = setTimeout(function() {
                 var args = {};
                 if (that.model && that.model.selected) {
@@ -107279,8 +107289,8 @@ var BoldBIDashboardSparkline;
         },
         _selectedHandler: function(evt) {
             var that = this;
-            this._hideTooltip();
-            this._hideTooltipDescription();
+            this._hideTooltip(evt);
+            this._hideTooltipDescription(evt);
             this.singleTimer = setTimeout(function() {
                 var args = {};
                 if (that.model && that.model.selected) {
@@ -107318,7 +107328,7 @@ var BoldBIDashboardSparkline;
             var args = {};
 
             this.singleTimer = setTimeout(function() {    
-                if (!that.model || !that.model.measure || !that.model.measure.text) {
+                if (!that.model || !that.model.measure || that.model.measure.text == null) {
                     return;
                 }
                 var value = that.formatting.applyFormat(that.model.measure.text, that.model.valueRepresentation);
@@ -107393,7 +107403,7 @@ var BoldBIDashboardSparkline;
         
         _showTooltipDescription: function(evt) {
             var that = this;
-            this._hideTooltip();
+            this._hideTooltip(evt);
             this.singleTimer = setTimeout(function() {
                 var tooltipdivRect = bbdesigner$("#" + that.pluginName + "Description_Track_ToolTip_Template");
                 if (tooltipdivRect.length === 0) {
@@ -108616,11 +108626,39 @@ var BoldBIDashboardSparkline;
             });
         },
         _toggleCustomRangeSelection: function () {
-            if ((BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) || BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) && BoldBIDashboard.isNullOrUndefined(this.selectedRange)) {
+            var matchedRelativeRange = null;
+            if (!BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) && !BoldBIDashboard.isNullOrUndefined(this.selectedEndDate) && !BoldBIDashboard.isNullOrUndefined(this.model.ranges)) {
+                var currentStart = this._getDateString(this.selectedStartDate.date);
+                var currentEnd = this._getDateString(this.selectedEndDate.date);
+                this.container.find(".e-dashboarddatepicker-ranges ul li[e-data-value]").each(function (index, el) {
+                    var rangeElement = bbdesigner$(el);
+                    var rangeData = rangeElement.attr("e-data-range");
+                    if (BoldBIDashboard.isNullOrUndefined(rangeData) || matchedRelativeRange !== null) {
+                        return;
+                    }
+                    var range = bbdesigner$.parseJSON(rangeData);
+                    if (Array.isArray(range) && range.length === 2 && range[0] === currentStart && range[1] === currentEnd) {
+                        matchedRelativeRange = rangeElement;
+                    }
+                });
+            }
+            if ((BoldBIDashboard.isNullOrUndefined(this.selectedStartDate) || BoldBIDashboard.isNullOrUndefined(this.selectedEndDate)) &&
+                BoldBIDashboard.isNullOrUndefined(this.selectedRange) && BoldBIDashboard.isNullOrUndefined(matchedRelativeRange)) {
                 this._clearRangeSelection();
                 this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").prop({ "disabled": true });
             } else {
                 this._clearRangeSelection();
+                if (!BoldBIDashboard.isNullOrUndefined(matchedRelativeRange)) {
+                    this.selectedRange = matchedRelativeRange;
+                    this.selectedRange.addClass("selected").attr({ "aria-selected": "true" });
+                    if ((BoldBIDashboard.isNullOrUndefined(this.oldSelectedStartDate) && BoldBIDashboard.isNullOrUndefined(this.oldSelectedEndDate)) ||
+                        (+this.selectedStartDate.date !== +this.oldSelectedStartDate.date || +this.selectedEndDate.date !== +this.oldSelectedEndDate.date)) {
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": false });
+                    } else {
+                        this.container.find(".e-dashboarddatepicker-footer .e-dashboarddatepicker-apply-btn").attr({ "disabled": true });
+                    }
+                    return;
+                }
                 if (this.model.fixedCalendarSelection) {
                     var validRange = this.selectedStartDate.date <= this.selectedEndDate.date;
                     this.container.find(".date-range-alert-message").css("display", validRange ? "none" : "block");
@@ -111861,8 +111899,8 @@ BoldBIDashboard.Toolbar.ResponsiveType = {
             autoUpload: false,
 
             showFileDetails: true,
-
-            fileSize: 31457280,
+            // Maximum allowed file size in bytes. Default: 300 MB (314572800)
+            fileSize: 314572800,
 
             extensionsAllow: "",
 

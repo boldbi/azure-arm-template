@@ -4,13 +4,18 @@
 }
 <script nonce="@Context.Items["ScriptNonce"]">
     var getDiagnosticLogsUrl = "@Url.Action("GetDiagnosticLogs", "Administration")";
+    var getDiagnosticPackageProgressUrl = "@Url.Action("GetDiagnosticPackageProgress", "Administration")";
+    var downloadDiagnosticPackageUrl = "@Url.Action("DownloadDiagnosticPackage", "Administration")";
 </script>
 <div id="download-logs-dialog-content" class="custom-template"></div>
 <div id="download-logs-dialog" class="" style="visibility: hidden">
     @if(!isConsoleLogEnabled)
     {
-        <p>@T[$"Please note that these logs only contain diagnostic logs required for {AppBranding.Bold.ProductName} and {AppBranding.BoldReports.ProductName} applications, and do not contain any of your organizational data. When reporting product-related issues, kindly download and attach the logs to your support ticket."]</p>
         <div id="download-logs-dialog-dropdown-container" class="col-12 float-start">
+            <div class="download-logs-info-panel">
+                <span class="su su-info download-logs-info-icon" aria-hidden="true"></span>
+                <p>@T["These files help support investigate product issues. Business data is not included unless you explicitly choose upgrade failure files."]</p>
+            </div>
             @Html.Label("download-logs-dialog-dropdown", "Select a time period", new { @class = "col-12 float-start download-logs-dialog-dropdown-label" })
             @Html.DropDownList("download-logs-dialog-dropdown", new List<SelectListItem>
                {
@@ -18,9 +23,25 @@
             new SelectListItem{Text="Last 1 Hour", Value=((int)(Interval.Last1Hour)).ToString()},
             new SelectListItem{Text="Last 24 Hours", Value=((int)(Interval.Last24Hours)).ToString()},
             new SelectListItem{Text="Last 7 Days", Value=((int)(Interval.Last7Days)).ToString()},}, new { id = "download-logs-dialog-dropdown", @class = "col-12 float-start", data_live_search = "false" })
-            <div>
-                @Html.CheckBox("is-include-configuration", new { @class = "material-checkbox", @id = "is-include-configuration" })
-                @Html.Label("is-include-configuration",T["Include configuration files"].Value)
+            <div class="download-logs-options">
+                <div class="download-logs-option-row">
+                    <div class="download-logs-option-copy">
+                        @Html.CheckBox("is-include-configuration", new { @class = "material-checkbox", @id = "is-include-configuration" })
+                        @Html.Label("is-include-configuration",T["Include configuration files"].Value, new { @class = "download-logs-option-title" })
+                        <p class="download-logs-option-description secodary-element">@T["Includes system configuration files and settings."]</p>
+                    </div>
+                </div>
+                <div class="download-logs-option-row">
+                    <div class="download-logs-option-copy">
+                        @Html.CheckBox("is-include-upgrade-failure-files", new { @class = "material-checkbox", @id = "is-include-upgrade-failure-files" })
+                        @Html.Label("is-include-upgrade-failure-files", T["Include upgrade failure files"].Value, new { @class = "download-logs-option-title" })
+                        <p class="download-logs-option-description secodary-element">@T["Includes IDP upgrade failure files and tenant/site upgrade logs."]</p>
+                    </div>
+                </div>
+            </div>
+            <div class="download-logs-info-panel download-logs-info-panel-bottom">
+                <span class="su su-warning-alt download-logs-info-icon" aria-hidden="true"></span>
+                <p>@T["When upgrade failure files are selected, application log files are not included. Package generation may take longer depending on the environment and tenant count."]</p>
             </div>
         </div>
     }
@@ -42,6 +63,8 @@
     }
     <div id="download-logs-dialog-buttons" class="col-12 float-start">
         <button id="download-logs-dialog-cancel" class="secondary-button float-end">@T["Cancel"]</button>
-        <button id="download-logs-dialog-proceed" class="primary-button float-end">@(isConsoleLogEnabled ? T["Download Configuration Files"] : T["Download Diagnostic Logs"])</button>
-</div>
+        <button id="download-logs-dialog-proceed" class="primary-button float-end">
+            <span class="download-logs-button-text">@(isConsoleLogEnabled ? T["Download Configuration Files"] : T["Download Diagnostic Logs"])</span>
+        </button>
+    </div>
 </div>

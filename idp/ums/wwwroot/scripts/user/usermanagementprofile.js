@@ -579,16 +579,19 @@ $(document).ready(function () {
     });
     singleUserDeleteDialog.appendTo("#singleuser-delete-confirmation");
 
+    // Regenerate recovery code is available only for self account.
+
     var recoveryCodeDialog = new ej.popups.Dialog({
         header: window.Server.App.LocalizationContent.RegenerateRecoveryCode,
         content: document.getElementById("recovery-code-regeneration-confirmation-dialog-content"),
         showCloseIcon: true,
         buttons: [
-            { click: regenerateRecoveryCode, buttonModel: { content: window.Server.App.LocalizationContent.YesButton, isPrimary: true } },
-            { click: onRecoveryCodeDialogClose, buttonModel: { content: window.Server.App.LocalizationContent.NoButton } }
+            { click: onRecoveryCodeDialogClose, buttonModel: { content: window.Server.App.LocalizationContent.NoButton } },
+            { click: regenerateRecoveryCode, buttonModel: { content: window.Server.App.LocalizationContent.YesButton, isPrimary: true } }
         ],
         width: "472px",
         height: "auto",
+        close: onRecoveryCodeDialogClose,
         isModal: true,
         animationSettings: { effect: 'Zoom' },
         visible: false
@@ -937,9 +940,7 @@ $(document).on("click", "#mfa-disable-button", function () {
     onDisableMfaDialogOpen();
 });
 
-$(document).on("click", "#generate-recovery-code", function () {
-    onRecoveryCodeDialogOpen();
-});
+
 
 function onDisableMfaDialogOpen() {
     $("#disable-mfa-confirmation").find("button.e-primary").addClass("critical-action-button");
@@ -951,13 +952,6 @@ function onDisableMfaDialogClose() {
     window.location.reload();
 }
 
-function onRecoveryCodeDialogOpen() {
-    document.getElementById("recovery-code-regeneration-confirmation").ej2_instances[0].show();
-}
-
-function onRecoveryCodeDialogClose() {
-    document.getElementById("recovery-code-regeneration-confirmation").ej2_instances[0].hide();
-}
 
 
 
@@ -985,6 +979,14 @@ function onShowRecoveryCodeDialogClose() {
     window.location.reload();
 }
 
+function onRecoveryCodeDialogOpen() {
+    document.getElementById("recovery-code-regeneration-confirmation").ej2_instances[0].show();
+}
+
+function onRecoveryCodeDialogClose() {
+    document.getElementById("recovery-code-regeneration-confirmation").ej2_instances[0].hide();
+}
+
 function regenerateRecoveryCode() {
     showWaitingPopup('content-area');
     var userId = document.getElementById("user-id").value;
@@ -993,13 +995,15 @@ function regenerateRecoveryCode() {
         url: regenerateRecoveryCodeUrl,
         data: { "userId": userId },
         success: function (result) {
-            if (result.Data.status && result.Data.recovery != "") {
+            if (result && result.Data && result.Data.status && result.Data.recovery != "") {
+                $("#table-recovery").empty();
+                onRecoveryCodeDialogClose();
                 onShowRecoveryCodeDialogOpen();
-                $(".mfa-success-message").css("display", "none");
-                let list = document.getElementById("table-recovery");
+
                 var recoveryCode = result.Data.recovery;
                 var recovery = recoveryCode.split(';');
-                document.getElementById("copy-recovery").value = recovery;
+                document.getElementById("copy-recovery").value = recovery.join("\n");
+                let list = document.getElementById("table-recovery");
                 for (let i = 0; i < recovery.length; i += 2) {
                     let tr = list.insertRow();
                     for (let j = 0; j < 2; j++) {
@@ -1008,14 +1012,19 @@ function regenerateRecoveryCode() {
                         td.appendChild(document.createTextNode(`${recoverList}`));
                     }
                 }
-
-                hideWaitingPopup('content-area');
             }
-            else {
-                hideWaitingPopup('content-area');
-            }
+            hideWaitingPopup('content-area');
         }
     });
 }
+
+$(document).on("click", "#generate-recovery-code", function () {
+    onRecoveryCodeDialogOpen();
+});
+
+$(document).on("click", "#recovery-code-copy", function () {
+    copyToClipboard('#copy-recovery', '#recovery-code-copy');
+});
+
 
 

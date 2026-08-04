@@ -132,7 +132,7 @@
             @if (showNotifications)
             {
                 <li class="icon-list-item notification-icon-list-item">
-                    <span id="user-system-notification" class="icon-container">
+                    <span id="user-system-notification" class="icon-container" style="cursor: pointer;" ng-non-bindable>
                         <i class="su su-notification-alert"></i>
                     </span>
                 </li>
@@ -243,9 +243,10 @@
                                 <li class="sf-sub-menu-separator"></li>
                             }
                             <li class="sub-menu-item logout-section">
-                                <a href="@Url.Action("logout", "accounts")">
-                                    @T["Sign out"]
-                                </a>
+                                <form method="post" action="@Url.Action("logout", "accounts")">
+                                    @Html.AntiForgeryToken()
+                                    <button class="logout-element btn" type="submit">@T["Sign out"]</button>
+                                </form>
                             </li>
                         }
                     </ul>
@@ -265,39 +266,83 @@
             }
 
             <div id="freeTierDialogTemplate" style="display: none;">
-                <div class="free-tier-header">@T["Upgrade to a Paid Plan and unlock:"]</div>
-                <ul class="free-tier-list">
-                    <li>
-                        <div class="list-item">
+                <div class="free-tier-header">
+                    <p>
+                        @T["The Free Tier is provided for evaluating Bold BI on a shared, multi-site hosted deployment. In this model, a single Bold BI deployment hosts multiple customer sites, where each customer is provisioned with a dedicated site. Each site is logically isolated, with its own users, data sources, and configurations, and users can access only the site assigned to them. The Free Tier is intended only for evaluation purposes, is not recommended for production workloads, and cannot be upgraded or converted into a paid plan."]
+                    </p>
+                </div>
+                <!-- Topic 1 -->
+                <div class="free-tier-section">
+                    <b>@T["To access full capabilities during evaluation:"]</b>
+                    <ul class="free-tier-list free-tier-ticks">
+                        <li>
+                            <i class="su su-success no-padding">
+                                <span class="su-success path1"></span><span class="su-success path2"></span>
+                            </i>
+                            <span class="text">@T["Install and configure a dedicated Bold BI instance"]</span>
+                        </li>
+                        <li>
+                            <i class="su su-success no-padding">
+                                <span class="su-success path1"></span><span class="su-success path2"></span>
+                            </i>
+                            <span class="text">@T["Request a custom cloud environment from our presales team."]</span>
+                        </li>
+                    </ul>
+                </div>
+                <br />
+
+                <!-- Topic 2 -->
+                <div class="free-tier-section">
+                    <b>@T["Upgrade to a Paid Plan and unlock:"]</b>
+                    <ul class="free-tier-list free-tier-ticks">
+                        <li>
                             <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
-                            <span><b>@T["Backup & Disaster Recovery - "]</b>@T["Keep your data safe and recover quickly from unexpected issues."]</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="list-item">
+                            <span class="text">@T["Dedicated & Managed Infrastructure Options"]</span>
+                        </li>
+                        <li>
                             <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
-                            <span><b>@T["Live Chat Support - "]</b>@T["Get help in real-time from our expert team, even in WhatsApp."]</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="list-item">
+                            <span class="text">@T["Backup & Disaster Recovery"]</span>
+                        </li>
+                        <li>
                             <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
-                            <span><b>@T["24/5 Assistance - "]</b>@T["Access our support team almost anytime during the week."]</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="list-item">
+                            <span class="text">@T["Live Chat / WhatsApp Support + 24/5 Assistance"]</span>
+                        </li>
+                        <li>
                             <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
-                            <span><b>@T["Robust Infrastructure - "]</b>@T["Choose between high-performance shared cloud or fully managed dedicated deployments, tailored for scale, security, and performance."]</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="list-item">
+                            <span class="text">@T["On-Premises Edition (Your Environment. Your Rules.)"]</span>
+                        </li>
+                    </ul>
+                </div>
+                <br />
+
+                <div class="free-tier-section">
+                    <b>@T["Production-ready deployment options:"]</b>
+                    <ul class="free-tier-list free-tier-ticks">
+                        <li>
                             <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
-                            <span><b>@T["On-Premise Edition - "]</b>@T["Your Environment, Your Rules – Install Bold BI on your own servers or private cloud for maximum data control, and customization"]</span>
-                        </div>
-                    </li>
-                </ul>
+                            <span class="text">@T["Cloud Service (Paid Plan) – Shared SaaS with a dedicated domain and production-ready capabilities"]</span>
+                        </li>
+                        <li>
+                            <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
+                            <span class="text">@T["Managed Hosting – Dedicated cloud infrastructure managed by us"]</span>
+                        </li>
+                        <li>
+                            <i class="su su-success no-padding"><span class="su-success path1"></span><span class="su-success path2"></span></i>
+                            <span class="text">@T["On-Premises Subscription – Self-host in your environment for compliance and control"]</span>
+                        </li>
+                    </ul>
+                </div>
+                <br />
+
+                <div class="free-tier-info-row">
+                    <a class="learn-more-link"
+                       href="https://support.boldbi.com/agent/kb/21253"
+                       target="_blank" rel="noopener">
+                        @T["Learn More"]
+                    </a>
+                </div>
+
+
             </div>
             <div id="freeTierDialog" style="display: none;"></div>
         }

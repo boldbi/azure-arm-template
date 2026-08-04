@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_AICredentials(
 Id char(38) NOT NULL,
 AIModel INT NOT NULL,

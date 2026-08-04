@@ -1,3 +1,5 @@
+﻿-- BOLD_UPGRADE_CHECKPOINT_COVERED: true
+-- BOLD_UPGRADE_STATEMENT_CHECKPOINT_VALIDATED: true
 
 ALTER TABLE {database_name}.BOLDTC_TenantInfo ADD AdditionalParameters longtext NULL;
 

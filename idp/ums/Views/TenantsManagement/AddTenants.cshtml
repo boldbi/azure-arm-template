@@ -10,7 +10,7 @@
     var siteDomain = url;
     var siteProtocol = baseUri.Scheme;
     var biUrl = !string.IsNullOrWhiteSpace(CloudAppConfig.InternalAppBIUrl) ? new Uri(await GlobalAppSettings.GetClientServiceUrl(CloudAppConfig.InternalAppBIUrl, Context)) : new Uri(baseUri + "bi");
-    var reportUrl = !string.IsNullOrWhiteSpace(CloudAppConfig.InternalAppReportUrl) ? new Uri(CloudAppConfig.InternalAppReportUrl) : new Uri(baseUri + "reporting");
+    var reportUrl = !string.IsNullOrWhiteSpace(CloudAppConfig.InternalAppReportUrl) ? new Uri(await GlobalAppSettings.GetClientServiceUrl(CloudAppConfig.InternalAppReportUrl, Context)) : new Uri(baseUri + "reporting");
     var biScheme = baseUri.Scheme;
     var reportScheme = baseUri.Scheme;
     var biDomain = baseUri.Authority;
@@ -48,7 +48,10 @@
         baseUrl = CloudAppConfig.InternalAppReportUrl + "/" + CloudAppConfig.TenantIdentifierPrefix + "/";
         siteDomain = reportUrl.Authority;
         siteProtocol = reportUrl.Scheme;
-        boldReportPath = reportUrl != null ? reportUrl.LocalPath.ToString() : "/reporting";
+        var basePath = reportUrl != null
+                              ? (await GlobalAppSettings.GetSubApps(Context)).SubAppUrl?.TrimEnd('/')
+                              : string.Empty;
+        boldReportPath = $"{basePath}/reporting";
         siteDefaultText = @boldReportPath + "/" + @CloudAppConfig.TenantIdentifierPrefix + "/";
     }
     else if (ViewBag.IsBoldBIMultiTenant && ViewBag.IsBoldReportsMultiTenant)

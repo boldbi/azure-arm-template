@@ -1,4 +1,4 @@
-﻿------------------------------------------------------------------
+------------------------------------------------------------------
 -- Write SQL queries in the following order
 -- 	1. Create Tables
 --	2. Insert Values
@@ -37,6 +37,7 @@ CREATE TABLE [BOLDBI_Group](
 	[ModifiedDate] [datetime] NOT NULL,
 	[DirectoryTypeId] [int] NOT NULL DEFAULT 0,
 	[ExternalProviderId] [nvarchar](100) NULL,
+	[IsAdminGroup] [bit] NOT NULL DEFAULT 0,
 	[IsActive] [bit] NOT NULL)
 ;
 
@@ -840,7 +841,7 @@ INSERT into [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VAL
 INSERT into [BOLDBI_PermissionEntity] (Name,EntityType,ItemTypeId, IsActive) VALUES (N'All Slideshow',1,10,1)
 ;
 
-INSERT into [BOLDBI_Group] (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',null,GETDATE(), 1, 1)
+INSERT into [BOLDBI_Group] (Name,Description,Color,IsolationCode,ModifiedDate,DirectoryTypeId,IsAdminGroup,IsActive) VALUES (N'System Administrator','Has administrative rights for the dashboards','#ff0000',null,GETDATE(), 1, 1, 1)
 ;
 
 INSERT into [BOLDBI_ItemCommentLogType] (Name,IsActive) VALUES ( N'Added',1)
@@ -896,11 +897,11 @@ INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read,
 INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Write, Delete',14,1)
 ;
 --INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Download',18,1)
---;
+--
 --INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Write, Download',22,1)
---;
+--
 --INSERT INTO [BOLDBI_PermissionAccess] (Name, AccessId, IsActive) VALUES (N'Read, Write, Delete, Download',30,1)
---;
+--
 
 INSERT INTO [BOLDBI_PermissionAccEntity] (PermissionEntityId, PermissionAccessId, IsActive) VALUES (4,1,1)
 ;																									  
@@ -1730,8 +1731,6 @@ ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ItemId]) R
 ;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([UserId]) REFERENCES [BOLDBI_User] ([Id])
 ;
-ALTER TABLE [BOLDBI_UserResourceFeaturePermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id) 
-;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;
 ALTER TABLE [BOLDBI_UserResourceFeaturePermission]  ADD  FOREIGN KEY([ItemTypeId]) REFERENCES [BOLDBI_ItemType] ([Id])
@@ -1742,8 +1741,6 @@ ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([Permissio
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([ItemId]) REFERENCES [BOLDBI_Item] ([Id])
 ;
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([GroupId]) REFERENCES [BOLDBI_Group] ([Id])
-;
-ALTER TABLE [BOLDBI_GroupResourceFeaturePermission] ADD FOREIGN KEY ([SettingsTypeId]) REFERENCES [BOLDBI_SettingsType] (Id)
 ;
 ALTER TABLE [BOLDBI_GroupResourceFeaturePermission]  ADD  FOREIGN KEY([ScopeGroupId]) REFERENCES [BOLDBI_Group] ([Id])
 ;

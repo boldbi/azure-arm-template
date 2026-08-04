@@ -4,11 +4,13 @@
     {
         new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.BoldAIService)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.BoldAIService)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.BoldAIService },
         new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.OpenAI)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.OpenAI)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.OpenAI },
-        new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.AzureAI }
+        new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.AzureAI)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.AzureAI },
+        new SelectListItem { Value = $"{GlobalAppSettings.GetDescription(AIModel.Anthropic)}", Text = T[$"{GlobalAppSettings.GetDescription(AIModel.Anthropic)}"].Value, Selected = ViewBag.AIModel == (int)AIModel.Anthropic }
     };
     var aiCredentials = await new AuthenticationManagement().GetAiCredentials();
     var openAi = aiCredentials != null && aiCredentials.AIModel == (int)AIModel.OpenAI ? aiCredentials.OpenAI : new OpenAI();
     var azureAI = aiCredentials != null && aiCredentials.AIModel == (int)AIModel.AzureAI ? aiCredentials.AzureAI : new AzureAI();
+    var anthropicAI = aiCredentials != null && aiCredentials.AIModel == (int)AIModel.Anthropic ? aiCredentials.Anthropic : new Anthropic();
     var enableAiFeature = GlobalAppSettings.SystemSettings.AI.EnableAiFeature != null && (bool)GlobalAppSettings.SystemSettings.AI.EnableAiFeature;
     var isAiSummariesEnabledGlobally = GlobalAppSettings.SystemSettings.AI.IsAiSummariesEnabledGlobally != null && (bool)GlobalAppSettings.SystemSettings.AI.IsAiSummariesEnabledGlobally;
     var aimodelContent = await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.AiModel);
@@ -98,6 +100,19 @@
                             </div>
                             <div>
                                 <input type="text" id="open-ai-api-key" class="form-control mail-settings-fields" name="openai_apikey" placeholder="@T["Open AI API Key"]" value="@openAi.OpenAiApiKey" />
+                                <span class="validation-errors"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 float-start no-padding input-field-margin anthropic-field">
+                            <div class="col-12 float-start no-padding">
+                                @Html.Label("anthropic-api-key", T["Anthropic Api Key"].Value, new
+                                {
+                                    @class = "app-textbox-label"
+                                })
+                            </div>
+                            <div>
+                                <input type="text" id="anthropic-api-key" class="form-control mail-settings-fields" name="anthropic_apikey" placeholder="@T["Anthropic Api Key"]" value="@anthropicAI.AnthropicApiKey" />
                                 <span class="validation-errors"></span>
                             </div>
                         </div>

@@ -447,6 +447,9 @@ $(document).ready(function () {
     $(document).on("click", "#UpdateAiSettings", function () {
         var aiModel = document.getElementById("ai-providers").ej2_instances[0].value;
         var modelName = (aiModel == "Azure AI" ? $("#azure-model-name").val().trim() : "");
+        var openAiApiKey = aiModel == openai ? $("#open-ai-api-key").val().trim() : "";
+        var azureAiApiKey = aiModel == azureai ? $("#azureai-apikey").val().trim() : "";
+        var anthropicApiKey = aiModel == anthropic ? $("#anthropic-api-key").val().trim() : "";
 
         if (aiModel == boldaiservice) {
             aiModel = "0";
@@ -454,6 +457,8 @@ $(document).ready(function () {
             aiModel = "1";
         } else if (aiModel == azureai) {
             aiModel = "2";
+        } else if (aiModel == anthropic) {
+            aiModel = "3";
         }
 
         if (($("#ai-setting-form").find(".has-error").length == 0)) {
@@ -465,10 +470,11 @@ $(document).ready(function () {
             var aiSettingsData = {
                 AIModel: parseInt(aiModel),
                 ModelName: modelName,
-                OpenAiApiKey: $("#open-ai-api-key").val().trim(),
-                DeploymentName: $("#deployment-name").val().trim(),
-                ResourceName: $("#resource-name").val().trim(),
-                AzureAiApiKey: $("#azureai-apikey").val().trim()
+                OpenAiApiKey: openAiApiKey,
+                DeploymentName: aiModel == "2" ? $("#deployment-name").val().trim() : "",
+                ResourceName: aiModel == "2" ? $("#resource-name").val().trim() : "",
+                AzureAiApiKey: azureAiApiKey,
+                AnthropicApiKey: anthropicApiKey
             };
 
             var licenseValidationMessage = window.Server.App.LocalizationContent.BoldAIserviceLicenseError
@@ -789,12 +795,24 @@ $(document).ready(function () {
             "openai_apikey": {
                 isRequired: {
                     depends: function () {
-                        return $("#aimodel-enable-switch").is(":checked") && document.getElementById("ai-providers").ej2_instances[0].value === "Open AI";
+                        return $("#aimodel-enable-switch").is(":checked") && document.getElementById("ai-providers").ej2_instances[0].value === openai;
                     }
                 },
                 isValidContent: {
                     depends: function () {
-                        return $("#aimodel-enable-switch").is(":checked") && document.getElementById("ai-providers").ej2_instances[0].value === "Open AI";
+                        return $("#aimodel-enable-switch").is(":checked") && document.getElementById("ai-providers").ej2_instances[0].value === openai;
+                    }
+                }
+            },
+            "anthropic_apikey": {
+                isRequired: {
+                    depends: function () {
+                        return $("#aimodel-enable-switch").is(":checked") && document.getElementById("ai-providers").ej2_instances[0].value === anthropic;
+                    }
+                },
+                isValidContent: {
+                    depends: function () {
+                        return $("#aimodel-enable-switch").is(":checked") && document.getElementById("ai-providers").ej2_instances[0].value === anthropic;
                     }
                 }
             },
@@ -860,6 +878,9 @@ $(document).ready(function () {
         messages: {
             "openai_apikey": {
                 isRequired: window.Server.App.LocalizationContent.OpenAiKeyValidator
+            },
+            "anthropic_apikey": {
+                isRequired: window.Server.App.LocalizationContent.AnthropicKeyValidator
             },
             "azure_model_name": {
                 isRequired: window.Server.App.LocalizationContent.AzureAiModelNameValidator
@@ -1178,10 +1199,12 @@ function aiConfiguration() {
             $(".bold-ai-service").show();
             $(".openai-field").hide();
             $(".azureai-field").hide();
+            $(".anthropic-field").hide();
             $("div.placeholder").remove();
             break;
         case openai:
             $(".bold-ai-service").hide();
+            $(".anthropic-field").hide();
             $(".azureai-field").hide();
             $(".openai-field").show();
             $("div.placeholder").remove();
@@ -1189,7 +1212,15 @@ function aiConfiguration() {
         case azureai:
             $(".bold-ai-service").hide();
             $(".openai-field").hide();
+            $(".anthropic-field").hide();
             $(".azureai-field").show();
+            $("div.placeholder").remove();
+            break;
+        case anthropic:
+            $(".bold-ai-service").hide();
+            $(".openai-field").hide();
+            $(".azureai-field").hide();
+            $(".anthropic-field").show();
             $("div.placeholder").remove();
             break;
     }
@@ -1203,6 +1234,7 @@ $(document).on('click', '#aimodel-enable-switch', function () {
 function EnableOrDisableAIModel() {
     if ($("#aimodel-enable-switch").is(":checked")) {
         $("#open-ai-api-key").prop("disabled", false);
+        $("#anthropic-api-key").prop("disabled", false);
         $("#azure-model-name").prop("disabled", false);
         $("#resource-name").prop("disabled", false);
         $("#deployment-name").prop("disabled", false);
@@ -1214,6 +1246,7 @@ function EnableOrDisableAIModel() {
         document.getElementById("ai-providers").ej2_instances[0].enabled = false;
         $("#ai-providers").prop("disabled", true);
         $("#open-ai-api-key").prop("disabled", true);
+        $("#anthropic-api-key").prop("disabled", true);
         $("#azure-model-name").prop("disabled", true);
         $("#resource-name").prop("disabled", true);
         $("#deployment-name").prop("disabled", true);

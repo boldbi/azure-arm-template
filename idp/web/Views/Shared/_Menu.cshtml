@@ -23,7 +23,8 @@
     var tenantSitesUrl = CloudAppConfig.TenantManagementUrl(Context) + "/sites";
     var tenantUsersUrl = CloudAppConfig.TenantManagementUrl (Context)+ "/administration/user-management/users";
     var tenantSettingsUrl = CloudAppConfig.TenantManagementUrl(Context) + "/administration";
-    AdminType adminType = (AdminType)Enum.Parse(typeof(AdminType), Context.Session.GetString("AdminType"));
+    var adminTypeValue = Context.Session.GetString("AdminType");
+    var adminType = Enum.TryParse(adminTypeValue, out AdminType parsedAdminType) ? parsedAdminType : AdminType.NoAdmin;
     var emailAddress = Context.Session.GetString("emailaddress") != null ? Context.Session.GetString("emailaddress").ToString() : string.Empty;
     var username = Context.Session.GetString("username") != null ? Context.Session.GetString("username").ToString() : string.Empty;
     var userId = Context.User.GetUserId();

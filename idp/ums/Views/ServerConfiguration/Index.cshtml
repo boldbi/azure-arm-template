@@ -19,7 +19,7 @@
     var nonce = Context.Items["ScriptNonce"];
     var isBoldBI = GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName;
     var productBrandingName = isBoldBI ? CloudAppConfig.Branding.ProductSpecificBranding.BrandingBIName : CloudAppConfig.Branding.ProductSpecificBranding.BrandingReportsName;
-    var welcomeMessageTemplate = CloudAppConfig.Branding.IsWhiteLabelling ? T["Welcome to {0}"].Value : T["Welcome to {0} Enterprise Server"].Value;
+    var welcomeMessageTemplate = CloudAppConfig.Branding.IsWhiteLabelling ? T["Welcome to {0}"].Value : T["Welcome to {0} Server"].Value;
     var welcomeMessage = string.Format(welcomeMessageTemplate, $"<span>{productBrandingName}</span>");
     var useSingleTenantDb = GlobalAppSettings.SystemSettings.UseSingleTenantDb != null && (bool)GlobalAppSettings.SystemSettings.UseSingleTenantDb;
     var tenantSchema = GlobalAppSettings.SystemSettings.SchemaName ?? string.Empty;
@@ -124,6 +124,7 @@
     </script>
 </head>
 <body id="startup-page-container-waiting-element" class="startup-page-container-body">
+    @Html.AntiForgeryToken()
     <div id="startup-waiting-element" class="startup-waiting-popup storage-page-content">
         @await Html.PartialAsync("_Header.OnpremiseStartup")
         <div class="system-startUp-settings-bg">

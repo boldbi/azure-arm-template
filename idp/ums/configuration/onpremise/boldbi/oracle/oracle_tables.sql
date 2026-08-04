@@ -1,4 +1,4 @@
-﻿------------------------------------------------------------------
+------------------------------------------------------------------
 -- Write SQL queries in the following order
 -- 	1. Create Tables
 --	2. Insert Values
@@ -38,6 +38,7 @@ CREATE TABLE BOLDBI_Group (
     ModifiedDate TIMESTAMP NOT NULL,
     DirectoryTypeId INT DEFAULT 0 NOT NULL,
     ExternalProviderId NVARCHAR2(100),
+    IsAdminGroup NUMBER(1, 0) DEFAULT 0 NOT NULL,
     IsActive NUMBER(1, 0) NOT NULL
 );
 
@@ -1355,7 +1356,7 @@ INSERT INTO BOLDBI_PermissionEntity (Name, EntityType, ItemTypeId, IsActive) VAL
 INSERT INTO BOLDBI_PermissionEntity (Name, EntityType, ItemTypeId, IsActive) VALUES ('All Users', 1, 12, 1)
 ;
 
-INSERT INTO BOLDBI_Group (Name, Description, Color, IsolationCode, ModifiedDate, DirectoryTypeId, IsActive) VALUES ('System Administrator', 'Has administrative rights for the dashboards', '#ff0000', null, SYSDATE, 1, 1)
+INSERT INTO BOLDBI_Group (Name, Description, Color, IsolationCode, ModifiedDate, DirectoryTypeId, IsAdminGroup, IsActive) VALUES ('System Administrator', 'Has administrative rights for the dashboards', '#ff0000', null, SYSDATE, 1, 1, 1)
 ;
 
 INSERT INTO BOLDBI_ItemCommentLogType (Name, IsActive) VALUES ('Added', 1)
@@ -2241,8 +2242,6 @@ ALTER TABLE BOLDBI_UserPermission ADD CONSTRAINT FK_UserPermission_Item FOREIGN 
 ;
 ALTER TABLE BOLDBI_UserPermission ADD CONSTRAINT FK_UserPermission_User FOREIGN KEY (UserId) REFERENCES BOLDBI_User (Id)
 ;
-ALTER TABLE BOLDBI_UserPermission ADD CONSTRAINT FK_UserPermission_SettingsType FOREIGN KEY (SettingsTypeId) REFERENCES BOLDBI_SettingsType (Id)
-;
 ALTER TABLE BOLDBI_UserPermission ADD CONSTRAINT FK_UserPermission_ScopeGroup FOREIGN KEY (ScopeGroupId) REFERENCES BOLDBI_Group (Id)
 ;
 ALTER TABLE BOLDBI_UserPermission ADD CONSTRAINT FK_UserPermission_ItemType FOREIGN KEY (ItemTypeId) REFERENCES BOLDBI_ItemType (Id)
@@ -2253,8 +2252,6 @@ ALTER TABLE BOLDBI_GroupPermission ADD CONSTRAINT FK_GroupPermission_PermissionE
 ALTER TABLE BOLDBI_GroupPermission ADD CONSTRAINT FK_GroupPermission_Item FOREIGN KEY (ItemId) REFERENCES BOLDBI_Item (Id)
 ;
 ALTER TABLE BOLDBI_GroupPermission ADD CONSTRAINT FK_GroupPermission_Group FOREIGN KEY (GroupId) REFERENCES BOLDBI_Group (Id)
-;
-ALTER TABLE BOLDBI_GroupPermission ADD CONSTRAINT FK_GroupPermission_SettingsType FOREIGN KEY (SettingsTypeId) REFERENCES BOLDBI_SettingsType (Id)
 ;
 ALTER TABLE BOLDBI_GroupPermission ADD CONSTRAINT FK_GroupPermission_ScopeGroup FOREIGN KEY (ScopeGroupId) REFERENCES BOLDBI_Group (Id)
 ;
@@ -2512,8 +2509,6 @@ ALTER TABLE BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_UserResourceF
 ;
 ALTER TABLE BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_UserResourceFeaturePermission_User FOREIGN KEY (UserId) REFERENCES BOLDBI_User (Id)
 ;
-ALTER TABLE BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_UserResourceFeaturePermission_SettingsType FOREIGN KEY (SettingsTypeId) REFERENCES BOLDBI_SettingsType (Id)
-;
 ALTER TABLE BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_UserResourceFeaturePermission_ScopeGroup FOREIGN KEY (ScopeGroupId) REFERENCES BOLDBI_Group (Id)
 ;
 ALTER TABLE BOLDBI_UserResourceFeaturePermission ADD CONSTRAINT FK_UserResourceFeaturePermission_ItemType FOREIGN KEY (ItemTypeId) REFERENCES BOLDBI_ItemType (Id)
@@ -2524,8 +2519,6 @@ ALTER TABLE BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_GroupResourc
 ALTER TABLE BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_GroupResourceFeaturePermission_Item FOREIGN KEY (ItemId) REFERENCES BOLDBI_Item (Id)
 ;
 ALTER TABLE BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_GroupResourceFeaturePermission_Group FOREIGN KEY (GroupId) REFERENCES BOLDBI_Group (Id)
-;
-ALTER TABLE BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_GroupResourceFeaturePermission_SettingsType FOREIGN KEY (SettingsTypeId) REFERENCES BOLDBI_SettingsType (Id)
 ;
 ALTER TABLE BOLDBI_GroupResourceFeaturePermission ADD CONSTRAINT FK_GroupResourceFeaturePermission_ScopeGroup FOREIGN KEY (ScopeGroupId) REFERENCES BOLDBI_Group (Id)
 ;
@@ -2543,3 +2536,1636 @@ CREATE INDEX IX_BOLDBI_UserPermission ON BOLDBI_UserPermission(IsActive, UserId,
 
 CREATE INDEX IX_BOLDBI_ScheduleDetail_ScheduleId ON BOLDBI_ScheduleDetail(ScheduleId)
 ;
+
+
+-- File: boldbi_create_indexes_all_oracle.sql
+-- Purpose: Create btree indexes for all BoldBI tables (Oracle) with IF-NOT-EXISTS semantics.
+ -- Usage:
+-- - Optional: point to your target schema for this session
+-- - ALTER SESSION SET CURRENT_SCHEMA = app
+
+-- Notes:
+-- - Index names preserved exactly (quoted). Table/column names are written in lowercase (unquoted).
+-- - Oracle doesn't support INCLUDE, so included columns are appended as trailing index key columns.
+-- - Oracle doesn't support filtered (WHERE) indexes directly, so function-based alternatives are provided.
+-- - Converted from boldbi_create_indexes_all.sql (SQL Server).
+
+-- ========================
+-- Preserve existing indexes from source script
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleDetail_ScheduleId'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleDetail_ScheduleId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleDetail_ScheduleId" ON boldbi_scheduledetail (scheduleid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleLog_ScheduleId'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleLog_ScheduleId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleLog_ScheduleId" ON boldbi_schedulelog (scheduleid, executeddate, schedulestatusid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Item'
+      OR index_name = UPPER('IX_BOLDBI_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Item" ON boldbi_item (isactive, itemtypeid, parentid, isdraft, createdbyid, createddate)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Users, Groups, Membership
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_User_Email'
+      OR index_name = UPPER('IX_BOLDBI_User_Email');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_User_Email" ON boldbi_user (email)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_User_Username'
+      OR index_name = UPPER('IX_BOLDBI_User_Username');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_User_Username" ON boldbi_user (username)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_User_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_User_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_User_IsActive" ON boldbi_user (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserLogin_UserId'
+      OR index_name = UPPER('IX_BOLDBI_UserLogin_UserId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserLogin_UserId" ON boldbi_userlogin (userid, loggedintime)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserPreference_UserId'
+      OR index_name = UPPER('IX_BOLDBI_UserPreference_UserId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserPreference_UserId" ON boldbi_userpreference (userid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Group_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_Group_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Group_IsActive" ON boldbi_group (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserGroup_GroupId'
+      OR index_name = UPPER('IX_BOLDBI_UserGroup_GroupId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserGroup_GroupId" ON boldbi_usergroup (groupid, userid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserGroup_UserId'
+      OR index_name = UPPER('IX_BOLDBI_UserGroup_UserId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserGroup_UserId" ON boldbi_usergroup (userid, groupid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Item catalog, hierarchy, views, versions, trash
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Item_ParentId'
+      OR index_name = UPPER('IX_BOLDBI_Item_ParentId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Item_ParentId" ON boldbi_item (parentid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Item_CreatedById'
+      OR index_name = UPPER('IX_BOLDBI_Item_CreatedById');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Item_CreatedById" ON boldbi_item (createdbyid, createddate, itemtypeid, isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Item_ModifiedById'
+      OR index_name = UPPER('IX_BOLDBI_Item_ModifiedById');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Item_ModifiedById" ON boldbi_item (modifiedbyid, modifieddate, itemtypeid, isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Item_ItemType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_Item_ItemType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Item_ItemType_IsActive" ON boldbi_item (itemtypeid, isactive, name, parentid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemView_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_ItemView_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemView_ItemId" ON boldbi_itemview (itemid, userid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemView_UserId'
+      OR index_name = UPPER('IX_BOLDBI_ItemView_UserId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemView_UserId" ON boldbi_itemview (userid, itemid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemTrash_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_ItemTrash_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemTrash_ItemId" ON boldbi_itemtrash (itemid, trashedbyid, trasheddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemTrashDeleted_ItemTrashId'
+      OR index_name = UPPER('IX_BOLDBI_ItemTrashDeleted_ItemTrashId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemTrashDeleted_ItemTrashId" ON boldbi_itemtrashdeleted (itemtrashid, itemid, deletedbyid, deleteddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemVersion_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_ItemVersion_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemVersion_ItemId" ON boldbi_itemversion (itemid, iscurrentversion, versionnumber, createddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemVersion_Item_Version'
+      OR index_name = UPPER('IX_BOLDBI_ItemVersion_Item_Version');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemVersion_Item_Version" ON boldbi_itemversion (itemid, versionnumber)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Permissions
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserPermission_User'
+      OR index_name = UPPER('IX_BOLDBI_UserPermission_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserPermission_User" ON boldbi_userpermission (userid, isactive, permissionentityid, permissionaccessid, itemid, itemtypeid, settingstypeid, scopegroupid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserPermission_Item'
+      OR index_name = UPPER('IX_BOLDBI_UserPermission_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserPermission_Item" ON boldbi_userpermission (itemid, isactive, userid, permissionentityid, permissionaccessid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupPermission_Group'
+      OR index_name = UPPER('IX_BOLDBI_GroupPermission_Group');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupPermission_Group" ON boldbi_grouppermission (groupid, isactive, permissionentityid, permissionaccessid, itemid, itemtypeid, settingstypeid, scopegroupid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupPermission_Item'
+      OR index_name = UPPER('IX_BOLDBI_GroupPermission_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupPermission_Item" ON boldbi_grouppermission (itemid, isactive, groupid, permissionentityid, permissionaccessid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PermissionEntity_ItemType'
+      OR index_name = UPPER('IX_BOLDBI_PermissionEntity_ItemType');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PermissionEntity_ItemType" ON boldbi_permissionentity (itemtypeid, entitytype, name, isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PermissionAccEntity_PermissionEntityId'
+      OR index_name = UPPER('IX_BOLDBI_PermissionAccEntity_PermissionEntityId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PermissionAccEntity_PermissionEntityId" ON boldbi_permissionaccentity (permissionentityid, permissionaccessid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PermissionAccEntity_PermissionAccessId'
+      OR index_name = UPPER('IX_BOLDBI_PermissionAccEntity_PermissionAccessId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PermissionAccEntity_PermissionAccessId" ON boldbi_permissionaccentity (permissionaccessid, permissionentityid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Scheduling & Subscriptions
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleDetail_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleDetail_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleDetail_ItemId" ON boldbi_scheduledetail (itemid, scheduleid, name, isenabled, nextschedule, recurrencetypeid, exporttypeid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleDetail_IsEnabled_Next'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleDetail_IsEnabled_Next');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleDetail_IsEnabled_Next" ON boldbi_scheduledetail (isenabled, nextschedule, scheduleid, itemid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SubscribedUser_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_SubscribedUser_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SubscribedUser_Schedule" ON boldbi_subscribeduser (scheduleid, recipientuserid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SubscribedUser_Recipient'
+      OR index_name = UPPER('IX_BOLDBI_SubscribedUser_Recipient');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SubscribedUser_Recipient" ON boldbi_subscribeduser (recipientuserid, scheduleid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SubscribedGroup_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_SubscribedGroup_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SubscribedGroup_Schedule" ON boldbi_subscribedgroup (scheduleid, recipientgroupid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SubscribedGroup_Recipient'
+      OR index_name = UPPER('IX_BOLDBI_SubscribedGroup_Recipient');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SubscribedGroup_Recipient" ON boldbi_subscribedgroup (recipientgroupid, scheduleid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SubscrExtnRecpt_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_SubscrExtnRecpt_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SubscrExtnRecpt_Schedule" ON boldbi_subscrextnrecpt (scheduleid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleMissingLogs_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleMissingLogs_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleMissingLogs_Schedule" ON boldbi_schedulemissinglogs (scheduleid, startdate, enddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleLogUser_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleLogUser_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleLogUser_Schedule" ON boldbi_scheduleloguser (scheduleid, schedulestatusid, delivereddate, delivereduserid, isondemand)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleLogGroup_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleLogGroup_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleLogGroup_Schedule" ON boldbi_scheduleloggroup (scheduleid, schedulestatusid, delivereddate, groupid, delivereduserid, isondemand)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SchdLogExtnRecpt_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_SchdLogExtnRecpt_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SchdLogExtnRecpt_Schedule" ON boldbi_schdlogextnrecpt (scheduleid, schedulestatusid, delivereddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleRunHistory_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleRunHistory_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleRunHistory_Schedule" ON boldbi_schedulerunhistory (scheduleid, starteddate DESC, schedulestatusid, isondemand, message)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Comments & interactions
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Comment_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_Comment_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Comment_ItemId" ON boldbi_comment (itemid, createddate DESC, userid, parentid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Comment_ParentId'
+      OR index_name = UPPER('IX_BOLDBI_Comment_ParentId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Comment_ParentId" ON boldbi_comment (parentid, createddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemCommentLog_CommentId'
+      OR index_name = UPPER('IX_BOLDBI_ItemCommentLog_CommentId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemCommentLog_CommentId" ON boldbi_itemcommentlog (commentid, itemcommentlogtypeid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemCommentLog_CurrentUserId'
+      OR index_name = UPPER('IX_BOLDBI_ItemCommentLog_CurrentUserId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemCommentLog_CurrentUserId" ON boldbi_itemcommentlog (currentuserid, commentid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemWatch_ItemUser'
+      OR index_name = UPPER('IX_BOLDBI_ItemWatch_ItemUser');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemWatch_ItemUser" ON boldbi_itemwatch (itemid, userid, iswatched)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_FavoriteItem_User'
+      OR index_name = UPPER('IX_BOLDBI_FavoriteItem_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_FavoriteItem_User" ON boldbi_favoriteitem (userid, itemid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Widgets, Data Sources, Multi-Tab Dashboards
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DashboardWidget_DashboardItemId'
+      OR index_name = UPPER('IX_BOLDBI_DashboardWidget_DashboardItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DashboardWidget_DashboardItemId" ON boldbi_dashboardwidget (dashboarditemid, widgetitemid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DashboardWidget_WidgetItemId'
+      OR index_name = UPPER('IX_BOLDBI_DashboardWidget_WidgetItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DashboardWidget_WidgetItemId" ON boldbi_dashboardwidget (widgetitemid, dashboarditemid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DashboardDataSource_Dashboard'
+      OR index_name = UPPER('IX_BOLDBI_DashboardDataSource_Dashboard');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DashboardDataSource_Dashboard" ON boldbi_dashboarddatasource (dashboarditemid, datasourceitemid, versionnumber)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DashboardDataSource_DataSource'
+      OR index_name = UPPER('IX_BOLDBI_DashboardDataSource_DataSource');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DashboardDataSource_DataSource" ON boldbi_dashboarddatasource (datasourceitemid, dashboarditemid, versionnumber)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_MultiTabDashboard_Parent'
+      OR index_name = UPPER('IX_BOLDBI_MultiTabDashboard_Parent');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_MultiTabDashboard_Parent" ON boldbi_multitabdashboard (parentdashboardid, ordernumber, childdashboardid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_MultiTabDashboard_Child'
+      OR index_name = UPPER('IX_BOLDBI_MultiTabDashboard_Child');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_MultiTabDashboard_Child" ON boldbi_multitabdashboard (childdashboardid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Publishing & Deployment
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PublishedItem_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_PublishedItem_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PublishedItem_ItemId" ON boldbi_publisheditem (itemid, isactive, destinationitemid, publishtype, createddate, externalsiteid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PublishJobs_PublishId'
+      OR index_name = UPPER('IX_BOLDBI_PublishJobs_PublishId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PublishJobs_PublishId" ON boldbi_publishjobs (publishid, status, createddate, completeddate, type)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DeploymentDashboards_Item'
+      OR index_name = UPPER('IX_BOLDBI_DeploymentDashboards_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DeploymentDashboards_Item" ON boldbi_deploymentdashboards (itemid, createdbyid, createddate)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Auditing & System Logs
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemLog_Item'
+      OR index_name = UPPER('IX_BOLDBI_ItemLog_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemLog_Item" ON boldbi_itemlog (itemid, modifieddate DESC, itemlogtypeid, itemversionid, updateduserid, sourcetypeid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemLog_Version'
+      OR index_name = UPPER('IX_BOLDBI_ItemLog_Version');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemLog_Version" ON boldbi_itemlog (itemversionid, modifieddate DESC)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserLog_Target'
+      OR index_name = UPPER('IX_BOLDBI_UserLog_Target');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserLog_Target" ON boldbi_userlog (targetuserid, createddate DESC, userlogtypeid, sourcetypeid, logstatusid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupLog_Target'
+      OR index_name = UPPER('IX_BOLDBI_GroupLog_Target');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupLog_Target" ON boldbi_grouplog (targetgroupid, createddate DESC, grouplogtypeid, sourcetypeid, logstatusid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserPermissionLog_User'
+      OR index_name = UPPER('IX_BOLDBI_UserPermissionLog_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserPermissionLog_User" ON boldbi_userpermissionlog (userid, createddate DESC, affecteduserid, logtypeid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserPermissionLog_Affected'
+      OR index_name = UPPER('IX_BOLDBI_UserPermissionLog_Affected');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserPermissionLog_Affected" ON boldbi_userpermissionlog (affecteduserid, createddate DESC, userid, logtypeid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupPermissionLog_User'
+      OR index_name = UPPER('IX_BOLDBI_GroupPermissionLog_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupPermissionLog_User" ON boldbi_grouppermissionlog (userid, createddate DESC, affectedgroupid, logtypeid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupPermissionLog_Affected'
+      OR index_name = UPPER('IX_BOLDBI_GroupPermissionLog_Affected');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupPermissionLog_Affected" ON boldbi_grouppermissionlog (affectedgroupid, createddate DESC, userid, logtypeid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SystemLog_TypeStatusTime'
+      OR index_name = UPPER('IX_BOLDBI_SystemLog_TypeStatusTime');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SystemLog_TypeStatusTime" ON boldbi_systemlog (systemlogtypeid, logstatusid, createddate DESC)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Notifications, Email, Webhooks
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_EmailActivityLog_User'
+      OR index_name = UPPER('IX_BOLDBI_EmailActivityLog_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_EmailActivityLog_User" ON boldbi_emailactivitylog (userid, createddate DESC, status, recipientemail, mailsubject)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_EmailActivityLog_Item'
+      OR index_name = UPPER('IX_BOLDBI_EmailActivityLog_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_EmailActivityLog_Item" ON boldbi_emailactivitylog (itemid, createddate DESC, status, recipientemail, event)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Notification_CurrentUser'
+      OR index_name = UPPER('IX_BOLDBI_Notification_CurrentUser');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Notification_CurrentUser" ON boldbi_notification (currentuserid, isread, modifieddate DESC, itemid, commentid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Notification_Item'
+      OR index_name = UPPER('IX_BOLDBI_Notification_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Notification_Item" ON boldbi_notification (itemid, modifieddate DESC, currentuserid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Webhook_User'
+      OR index_name = UPPER('IX_BOLDBI_Webhook_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Webhook_User" ON boldbi_webhook (userid, isenable, isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_NotificationTrigger_Webhook'
+      OR index_name = UPPER('IX_BOLDBI_NotificationTrigger_Webhook');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_NotificationTrigger_Webhook" ON boldbi_notificationtrigger (webhookid, nextscheduledate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_WebhookLog_Webhook'
+      OR index_name = UPPER('IX_BOLDBI_WebhookLog_Webhook');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_WebhookLog_Webhook" ON boldbi_webhooklog (webhookid, createddate DESC, event, responsestatuscode)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Directory / Auth / Config
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_AzureADCredential_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_AzureADCredential_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_AzureADCredential_IsActive" ON boldbi_azureadcredential (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ADCredential_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ADCredential_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ADCredential_IsActive" ON boldbi_adcredential (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SAMLSettings_IsEnabled'
+      OR index_name = UPPER('IX_BOLDBI_SAMLSettings_IsEnabled');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SAMLSettings_IsEnabled" ON boldbi_samlsettings (isenabled)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SystemSettings_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_SystemSettings_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SystemSettings_IsActive" ON boldbi_systemsettings (isactive, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ServerVersion_VersionNumber'
+      OR index_name = UPPER('IX_BOLDBI_ServerVersion_VersionNumber');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ServerVersion_VersionNumber" ON boldbi_serverversion (versionnumber)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Customization & Expressions
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_CustomExpression_Dashboard'
+      OR index_name = UPPER('IX_BOLDBI_CustomExpression_Dashboard');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_CustomExpression_Dashboard" ON boldbi_customexpression (dashboardid, widgetid, userid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_CustomExpression_Widget'
+      OR index_name = UPPER('IX_BOLDBI_CustomExpression_Widget');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_CustomExpression_Widget" ON boldbi_customexpression (widgetid, dashboardid, userid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_CustomExpression_User'
+      OR index_name = UPPER('IX_BOLDBI_CustomExpression_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_CustomExpression_User" ON boldbi_customexpression (userid, dashboardid, widgetid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Data Notification & Relations
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DataNotification_Schedule'
+      OR index_name = UPPER('IX_BOLDBI_DataNotification_Schedule');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DataNotification_Schedule" ON boldbi_datanotification (scheduleid, datasourceid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_DataNotification_DataSource'
+      OR index_name = UPPER('IX_BOLDBI_DataNotification_DataSource');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_DataNotification_DataSource" ON boldbi_datanotification (datasourceid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_TableRelation_Left'
+      OR index_name = UPPER('IX_BOLDBI_TableRelation_Left');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_TableRelation_Left" ON boldbi_tablerelation (lefttablename, lefttableschema, lefttablecolumnname)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_TableRelation_Right'
+      OR index_name = UPPER('IX_BOLDBI_TableRelation_Right');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_TableRelation_Right" ON boldbi_tablerelation (righttablename, righttableschema, righttablecolumnname)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Homepage & Preferences
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Homepage_User'
+      OR index_name = UPPER('IX_BOLDBI_Homepage_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Homepage_User" ON boldbi_homepage (userid, isdefaulthomepage)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_HomepageItemFilter_HomepageId'
+      OR index_name = UPPER('IX_BOLDBI_HomepageItemFilter_HomepageId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_HomepageItemFilter_HomepageId" ON boldbi_homepageitemfilter (homepageid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemSettings_ItemId'
+      OR index_name = UPPER('IX_BOLDBI_ItemSettings_ItemId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemSettings_ItemId" ON boldbi_itemsettings (itemid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemUserPreference_Item'
+      OR index_name = UPPER('IX_BOLDBI_ItemUserPreference_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemUserPreference_Item" ON boldbi_itemuserpreference (itemid, userid, modifieddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemUserPreference_User'
+      OR index_name = UPPER('IX_BOLDBI_ItemUserPreference_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemUserPreference_User" ON boldbi_itemuserpreference (userid, itemid, modifieddate)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Attributes & Site settings
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserAttributes_User'
+      OR index_name = UPPER('IX_BOLDBI_UserAttributes_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserAttributes_User" ON boldbi_userattributes (userid, name)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupAttributes_Group'
+      OR index_name = UPPER('IX_BOLDBI_GroupAttributes_Group');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupAttributes_Group" ON boldbi_groupattributes (groupid, name)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SiteAttributes_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_SiteAttributes_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SiteAttributes_IsActive" ON boldbi_siteattributes (isactive, name)';
+  END IF;
+END;
+/
+
+-- ========================
+-- External sites & settings
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ExternalSites_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ExternalSites_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ExternalSites_IsActive" ON boldbi_externalsites (isactive, name)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SettingsType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_SettingsType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SettingsType_IsActive" ON boldbi_settingstype (isactive)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Events, Payloads & Mapping
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_NotificationEvents_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_NotificationEvents_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_NotificationEvents_IsActive" ON boldbi_notificationevents (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_EventPayloads_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_EventPayloads_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_EventPayloads_IsActive" ON boldbi_eventpayloads (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_EventPayloadsMapping_EventType'
+      OR index_name = UPPER('IX_BOLDBI_EventPayloadsMapping_EventType');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_EventPayloadsMapping_EventType" ON boldbi_eventpayloadsmapping (eventtype, payloadtype)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_EventPayloadsMapping_PayloadType'
+      OR index_name = UPPER('IX_BOLDBI_EventPayloadsMapping_PayloadType');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_EventPayloadsMapping_PayloadType" ON boldbi_eventpayloadsmapping (payloadtype, eventtype)';
+  END IF;
+END;
+/
+
+-- ========================
+-- User sessions & background jobs
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserSession_Idp'
+      OR index_name = UPPER('IX_BOLDBI_UserSession_Idp');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserSession_Idp" ON boldbi_usersession (idpreferenceid, sessionid, loggedintime, isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserSession_SessionId'
+      OR index_name = UPPER('IX_BOLDBI_UserSession_SessionId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserSession_SessionId" ON boldbi_usersession (sessionid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_BackgroundJobs_Status'
+      OR index_name = UPPER('IX_BOLDBI_BackgroundJobs_Status');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_BackgroundJobs_Status" ON boldbi_backgroundjobs (status, createddate, itemid, userid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Upload mapping
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant'
+      OR index_name = UPPER('IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UploadDataSourceMapping_DownloadedTenant" ON boldbi_uploaddatasourcemapping (downloadedtenantid, uploadeditemid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UploadDataSourceMapping_UploadedItem'
+      OR index_name = UPPER('IX_BOLDBI_UploadDataSourceMapping_UploadedItem');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UploadDataSourceMapping_UploadedItem" ON boldbi_uploaddatasourcemapping (uploadeditemid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- AI / Metrics & Requests
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BoldBI_DSMetrics_DS_Time'
+      OR index_name = UPPER('IX_BoldBI_DSMetrics_DS_Time');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BoldBI_DSMetrics_DS_Time" ON boldbi_dsmetrics (datasourceid, refreshstarttime, refreshstatus, rowsupdated, totalrows)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_AI_SESSIONS_Time'
+      OR index_name = UPPER('IX_BOLDBI_AI_SESSIONS_Time');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_AI_SESSIONS_Time" ON boldbi_ai_sessions (sessionstarttime DESC, sessionendtime, totaltokenscost, userinfo)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_AI_CHAT_Session'
+      OR index_name = UPPER('IX_BOLDBI_AI_CHAT_Session');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_AI_CHAT_Session" ON boldbi_ai_chat (sessionid, searchdatetime DESC, totaltokenscost, userinfo)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_AICredentials_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_AICredentials_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_AICredentials_IsActive" ON boldbi_aicredentials (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_AI_REQUESTS_Session'
+      OR index_name = UPPER('IX_BOLDBI_AI_REQUESTS_Session');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_AI_REQUESTS_Session" ON boldbi_ai_requests (sessionid, searchdate, datasourceid, aimodel)';
+  END IF;
+END;
+/
+
+-- ========================
+-- API Keys & Templates & QnA
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ApiKeyDetails_CreatedBy'
+      OR index_name = UPPER('IX_BOLDBI_ApiKeyDetails_CreatedBy');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ApiKeyDetails_CreatedBy" ON boldbi_apikeydetails (createdby, isactive, lastuseddate)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_CustomEmailTemplate_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_CustomEmailTemplate_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_CustomEmailTemplate_IsActive" ON boldbi_customemailtemplate (isactive, language, templateid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BoldBI_ai_qnawidgethistory_Widget'
+      OR index_name = UPPER('IX_BoldBI_ai_qnawidgethistory_Widget');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BoldBI_ai_qnawidgethistory_Widget" ON boldbi_ai_qnawidgethistory (widgetid, search_date)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BoldBI_ai_qnawidgethistory_SearchDate'
+      OR index_name = UPPER('IX_BoldBI_ai_qnawidgethistory_SearchDate');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BoldBI_ai_qnawidgethistory_SearchDate" ON boldbi_ai_qnawidgethistory (search_date)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Resource Feature Access & Permissions
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ResourceFeatureAccess_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ResourceFeatureAccess_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ResourceFeatureAccess_IsActive" ON boldbi_resourcefeatureaccess (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId'
+      OR index_name = UPPER('IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ResourceFeatureAccEntity_PermissionEntityId" ON boldbi_resourcefeatureaccentity (permissionentityid, resourcefeatureaccessid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId'
+      OR index_name = UPPER('IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ResourceFeatureAccEntity_ResourceFeatureAccessId" ON boldbi_resourcefeatureaccentity (resourcefeatureaccessid, permissionentityid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserResourceFeaturePermission_User'
+      OR index_name = UPPER('IX_BOLDBI_UserResourceFeaturePermission_User');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserResourceFeaturePermission_User" ON boldbi_userresourcefeaturepermission (userid, itemid, permissionentityid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserResourceFeaturePermission_Item'
+      OR index_name = UPPER('IX_BOLDBI_UserResourceFeaturePermission_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserResourceFeaturePermission_Item" ON boldbi_userresourcefeaturepermission (itemid, userid, permissionentityid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupResourceFeaturePermission_Group'
+      OR index_name = UPPER('IX_BOLDBI_GroupResourceFeaturePermission_Group');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupResourceFeaturePermission_Group" ON boldbi_groupresourcefeaturepermission (groupid, itemid, permissionentityid)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupResourceFeaturePermission_Item'
+      OR index_name = UPPER('IX_BOLDBI_GroupResourceFeaturePermission_Item');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupResourceFeaturePermission_Item" ON boldbi_groupresourcefeaturepermission (itemid, groupid, permissionentityid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Type / Status (lookup) tables — per request
+-- ========================
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ItemType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemType_IsActive" ON boldbi_itemtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemLogType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ItemLogType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemLogType_IsActive" ON boldbi_itemlogtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_RecurrenceType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_RecurrenceType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_RecurrenceType_IsActive" ON boldbi_recurrencetype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ExportType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ExportType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ExportType_IsActive" ON boldbi_exporttype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ScheduleStatus_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ScheduleStatus_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ScheduleStatus_IsActive" ON boldbi_schedulestatus (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ItemCommentLogType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ItemCommentLogType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ItemCommentLogType_IsActive" ON boldbi_itemcommentlogtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PermissionAccess_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_PermissionAccess_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PermissionAccess_IsActive" ON boldbi_permissionaccess (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PermissionLogType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_PermissionLogType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PermissionLogType_IsActive" ON boldbi_permissionlogtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SystemLogType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_SystemLogType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SystemLogType_IsActive" ON boldbi_systemlogtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_LogStatus_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_LogStatus_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_LogStatus_IsActive" ON boldbi_logstatus (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserLogType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_UserLogType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserLogType_IsActive" ON boldbi_userlogtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_GroupLogType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_GroupLogType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_GroupLogType_IsActive" ON boldbi_grouplogtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_PublishType_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_PublishType_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_PublishType_IsActive" ON boldbi_publishtype (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_UserType_Type'
+      OR index_name = UPPER('IX_BOLDBI_UserType_Type');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_UserType_Type" ON boldbi_usertype (type)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_ConditionCategory_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_ConditionCategory_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_ConditionCategory_IsActive" ON boldbi_conditioncategory (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_Source_IsActive'
+      OR index_name = UPPER('IX_BOLDBI_Source_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_Source_IsActive" ON boldbi_source (isactive)';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IX_BOLDBI_SlideshowInfo_SlideshowId'
+      OR index_name = UPPER('IX_BOLDBI_SlideshowInfo_SlideshowId');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX "IX_BOLDBI_SlideshowInfo_SlideshowId" ON boldbi_slideshowinfo (slideshowid)';
+  END IF;
+END;
+/
+
+-- ========================
+-- Filtered (optional) — Oracle alternatives for SQL Server filtered indexes
+-- ========================
+-- SQL Server: WHERE IsActive = 1 (partial index).
+-- Oracle alternative: function-based index that only indexes rows meeting the predicate.
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IXF_BOLDBI_Item_IsActive'
+      OR index_name = UPPER('IXF_BOLDBI_Item_IsActive');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE
+      'CREATE INDEX "IXF_BOLDBI_Item_IsActive" '||
+      'ON boldbi_item ( '||
+      '  CASE WHEN isactive = 1 THEN itemtypeid END, '||
+      '  CASE WHEN isactive = 1 THEN parentid END, '||
+      '  CASE WHEN isactive = 1 THEN name END, '||
+      '  CASE WHEN isactive = 1 THEN createddate END '||
+      ')';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IXF_BOLDBI_UserPermission_Active'
+      OR index_name = UPPER('IXF_BOLDBI_UserPermission_Active');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE
+      'CREATE INDEX "IXF_BOLDBI_UserPermission_Active" '||
+      'ON boldbi_userpermission ( '||
+      '  CASE WHEN isactive = 1 THEN userid END, '||
+      '  CASE WHEN isactive = 1 THEN itemid END, '||
+      '  CASE WHEN isactive = 1 THEN permissionentityid END, '||
+      '  CASE WHEN isactive = 1 THEN permissionaccessid END '||
+      ')';
+  END IF;
+END;
+/
+
+DECLARE v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM user_indexes
+   WHERE index_name = 'IXF_BOLDBI_GroupPermission_Active'
+      OR index_name = UPPER('IXF_BOLDBI_GroupPermission_Active');
+  IF v_exists = 0 THEN
+    EXECUTE IMMEDIATE
+      'CREATE INDEX "IXF_BOLDBI_GroupPermission_Active" '||
+      'ON boldbi_grouppermission ( '||
+      '  CASE WHEN isactive = 1 THEN groupid END, '||
+      '  CASE WHEN isactive = 1 THEN itemid END, '||
+      '  CASE WHEN isactive = 1 THEN permissionentityid END, '||
+      '  CASE WHEN isactive = 1 THEN permissionaccessid END '||
+      ')';
+  END IF;
+END;
+/
+
+
+-- (Optional): If you had another filtered index in SQL Server for GroupPermission Active,
+-- add a similar function-based index here.
+
+-- End of script

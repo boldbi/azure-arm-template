@@ -1,5 +1,4 @@
 ﻿@using Newtonsoft.Json
-
 @{
     Layout = null;
     bool isSelfHosted = ServerAppConfig.IsSelfHosted;
@@ -41,17 +40,15 @@
     var profilePageUrl = Url.Action("Profilepage", "User");
     var homepagePageUrl = System.Net.WebUtility.UrlDecode(Url.Action("Homepages", "Boards"));
     var isMobile = new DeviceDetection(Context).IsMobile;
-    var isEmbed = @Context.Request.QueryString.ToString().ToLower().Contains("isembed");
     var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
     var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
     var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
     var url = new Uri(Context.Request.GetDisplayUrl());
+    var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isUrlInDnsList = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
-    var dashboardCutomTheme = string.Empty;
-    var isEmbedSignature = url.Query.ToLower().Contains("embed_signature") && globalAppSettings.GetLicenseSettings().EnterpriseFeatures.Embed;
     var isDataSourceConnection = string.Empty;
     var canShowSession = ServerAppConfig.IsSelfHosted && (ViewBag.CanHideSessionInEmbed == null ? true : (ViewBag.CanHideSessionInEmbed != null && ViewBag.CanHideSessionInEmbed == true) ? false : true);
     var etlEndpointPrefix = ServerAppConfig.IsSelfHosted ? ServerAppConfig.InternalAppIdpUrl : ServerAppConfig.AppSettings.EndPoints.ETLSiteURL;
@@ -60,14 +57,60 @@
     { 
         isDataSourceConnection = ViewBag.isDataSourceConnection;
     }
-    var isEmbedTrue = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
-    if (isEmbedTrue)
+    var dashboardCutomTheme = string.Empty;
+    // isEmbedSignature already declared earlier
+    var embed_mode_param = string.Empty;
+    var isEmbed = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature);
+    if (isEmbed)
     {
-        dashboardCutomTheme = Context.Request.Query["embed_theme"];
+        if (!string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
+        {
+            dashboardCutomTheme = Context.Request.Query["embed_theme"];
+            ViewBag.embedThemeEnabled = true;
+        }
+        else if (!string.IsNullOrWhiteSpace(Context.Request.Query["embed_mode"]))
+        {
+            var mode = Context.Request.Query["embed_mode"].ToString().ToLower();
+            if (mode == "dark")
+                embed_mode_param = "dark";
+            else
+                embed_mode_param = "light";
+
+            ViewBag.embedThemeEnabled = true;
+        }
     }
     else
     {
         dashboardCutomTheme = _identityResponse.CustomDashboardTheme;
+    }
+    // Resolve theme values for JS layer per embed rules
+    var embedThemeProvided = !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    var embedModeProvided = !string.IsNullOrWhiteSpace(Context.Request.Query["embed_mode"]);
+    var resolvedAppearance = _identityResponse.ThemeAppearance;
+    var resolvedApplicationTheme = _identityResponse.CustomApplicationTheme;
+    var resolvedDashboardTheme = dashboardCutomTheme;
+
+    if (isEmbed)
+    {
+        if (embedModeProvided && !embedThemeProvided)
+        {
+            // embed_mode only -> set appearance, clear application/dashboard themes
+            resolvedAppearance = embed_mode_param;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = string.Empty;
+        }
+        else if (!embedModeProvided && embedThemeProvided)
+        {
+            resolvedAppearance = string.Empty;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = Context.Request.Query["embed_theme"];
+        }
+        else if (embedModeProvided && embedThemeProvided)
+        {
+            resolvedAppearance = embed_mode_param;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = Context.Request.Query["embed_theme"];
+        }
     }
     var isSandBox = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
     var isSingleDatabaseMode = _globalAppSettings.SystemSettings.ConfigurationMode ==
@@ -127,7 +170,7 @@
             }
         </style>
     }
-    @if (isEmbedTrue)
+    @if (isEmbed)
     {
         <link rel="stylesheet" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, identityResponse: _identityResponse)" />
     }
@@ -166,7 +209,14 @@
         var isSessionActiveUrl = "@Url.Action("IsSessionActive", "Accounts")";
         var dataStoreSettingUrl = "@Url.Action("DataStoreSettings", "Administration")";
         var getUserNotificationsPartialViewResultUrl = "@Url.Action("GetUserNotificationsPartialViewResult", "notification")";
+                @{
+                // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+        }
         var licenseSettings =@Html.Raw(JsonConvert.SerializeObject(licenseSettings));
+                @{
+        #pragma warning restore SCS0029
+        }
         var baseUrl = "@siteUrl"; // If you are working on local developemnt change the baseurl as localsource url
         var currentUrl = "@currentUrl";
         var organizationName = "@globalAppSettings.SystemSettings.OrganizationName";
@@ -190,18 +240,26 @@
         var custombrandName = "@ServerAppConfig.CustomBrandName";
         var timeZone = "@_clientDateTimeInfo.ClientDateTime.TimeZone";
         var datasourceDesignerUrl = "@Url.Action("Index", "DataSourceDesigner")";
-        var dashboardCustomThemename = "@dashboardCutomTheme";
-        var customThemeAppearance = "@customThemeAppearance";
-        var applicationTheme = "@(_identityResponse.CustomApplicationTheme)";
+        var dashboardCustomThemename = @Json.Serialize(resolvedDashboardTheme);
+        var customThemeAppearance = @Json.Serialize(resolvedAppearance);
+        var applicationTheme = @Json.Serialize(resolvedApplicationTheme);
+        var embed_mode = @Json.Serialize(embed_mode_param);
         var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
         var isUmsAdmin = "@isUmsAdmin";
         var isDataSourceConnection = "@isDataSourceConnection";
         var appVersion = "@ServerAppConfig.ProductVersion";
+                @{
+                // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+        }
         var canCheckSession = @Html.Raw(Json.Serialize(canShowSession));
+                @{
+        #pragma warning restore SCS0029
+        }
         var canHideLogoAndProfile = @ServerAppConfig.CanHideLogoAndProfile.ToString().ToLower();
         var isSandBox = "@isSandBox";
         var isSingleDatabaseMode = "@isSingleDatabaseMode";
-        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+        var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures ?? new object[0]);
         var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
         var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
     </script>
@@ -235,7 +293,7 @@
         </style>
     }
 </head>
-<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+<body id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
     <div class="preloader-wrap" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: #fff; z-index : 2; ">
         <input type="hidden" id="embed-iframe" value="@ViewBag.isEmbed" />
         <div id="loader_image" align="center" style="position:relative;top:39%;">

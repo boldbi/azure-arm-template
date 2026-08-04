@@ -2,11 +2,13 @@
     Layout = null;
     var globalAppSettings = ViewBag.GlobalSettings as GlobalAppSettings;
     var requestUrl = new Uri(Context.Request.GetDisplayUrl());
+    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
+    var rootUrl = Context.Request.RouteValues["tenantName"] != null ? (GlobalAppSettings.HttpPathBase + "/" + ServerAppConfig.TenantIdentifierPrefix + "/" + Context.Request.RouteValues["tenantName"]).TrimEnd('/') : GlobalAppSettings.HttpPathBase.ToString();
+    var cloudDashboardServiceUrl = isSelfHosted ? globalAppSettings.SystemSettings.BaseUrl : GlobalAppSettings.GetBaseUrlUpToBi(globalAppSettings.SystemSettings.BaseUrl);
     var dashboardUrls = ViewBag.UrlList as List<string>;
     var isMobile = new DeviceDetection(Context).IsMobile;
     var selectedId = ViewBag.SelectedId == Guid.Empty ? string.Empty : ViewBag.SelectedId;
     var childCount = ViewBag.childIdList == null ? 0 : ViewBag.childIdList.Count;
-    bool isSelfHosted = ServerAppConfig.IsSelfHosted;
     var dashboardServerApiUrl = new DashboardServerApiEndPoints(globalAppSettings).DashboardServerApiUrl();
     var dashboardServerApiUrlForServerEmbed = new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl();
     var dashboardBIUrl = new DashboardServerEndPoints(globalAppSettings).DashboardServerBIUrl();
@@ -32,6 +34,7 @@
     var isPublic = globalAppSettings.SystemSettings.IsMarkItemsPublic && ViewBag.MultiDashboardDetails.IsPublic;
     var dashboardCutomTheme = string.Empty;
     var embedThemeEnabled = false;
+    var embed_mode_param = string.Empty;
     var baseUrl = ServerAppConfig.GetClientServiceUrl(globalAppSettings.SystemSettings.BaseUrl, Context);
     var isAIEnabledGlobally = ViewBag.AICredentials != null ? ViewBag.AICredentials.EnableAIFeature : ServerAppConfig.EnableAiFeature;
     var isAiSummariesEnabledGlobally = ViewBag.AICredentials != null ? ViewBag.AICredentials.IsAISummariesEnabledGlobally : ServerAppConfig.IsAiSummariesEnabledGlobally;
@@ -48,14 +51,56 @@
     var customThemeAppearance = _identityResponse.ThemeAppearance != null ? _identityResponse.ThemeAppearance : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.Appearance : globalAppSettings.SystemSettings.ThemeAppearance);
     var customApplicationTheme = _identityResponse.CustomApplicationTheme != null ? _identityResponse.CustomApplicationTheme : (ServerAppConfig.IsSelfHosted && globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings ? ServerAppConfig.Theme.ApplicationTheme : globalAppSettings.SystemSettings.CustomApplicationTheme);
     var nonce = Context.Items["ScriptNonce"]?.ToString();
-    if (((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature) && !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
+    var isEmbed = ((Context.Request.Query["isembed"].ToString() != null && Context.Request.Query["isembed"].ToString().ToLower() == "true") || isEmbedSignature);
+    if (isEmbed)
     {
-        dashboardCutomTheme = Context.Request.Query["embed_theme"];
-        embedThemeEnabled = true;
+        if (!string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]))
+        {
+            dashboardCutomTheme = Context.Request.Query["embed_theme"];
+            embedThemeEnabled = true;
+        }
+        else if (!string.IsNullOrWhiteSpace(Context.Request.Query["embed_mode"]))
+        {
+            var mode = Context.Request.Query["embed_mode"].ToString().ToLower();
+            if (mode == "dark")
+                embed_mode_param = "dark";
+            else
+                embed_mode_param = "light";
+
+            embedThemeEnabled = true;
+        }
     }
     else
     {
         dashboardCutomTheme = _identityResponse.CustomDashboardTheme;
+    }
+    // Resolve theme values for JS layer per embed rules
+    var embedThemeProvided = !string.IsNullOrWhiteSpace(Context.Request.Query["embed_theme"]);
+    var embedModeProvided = !string.IsNullOrWhiteSpace(Context.Request.Query["embed_mode"]);
+    var resolvedAppearance = customThemeAppearance;
+    var resolvedApplicationTheme = customApplicationTheme;
+    var resolvedDashboardTheme = dashboardCutomTheme;
+
+    if (isEmbed)
+    {
+        if (embedModeProvided && !embedThemeProvided)
+        {
+            resolvedAppearance = embed_mode_param;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = string.Empty;
+        }
+        else if (!embedModeProvided && embedThemeProvided)
+        {
+            resolvedAppearance = string.Empty;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = Context.Request.Query["embed_theme"];
+        }
+        else if (embedModeProvided && embedThemeProvided)
+        {
+            resolvedAppearance = embed_mode_param;
+            resolvedApplicationTheme = string.Empty;
+            resolvedDashboardTheme = Context.Request.Query["embed_theme"];
+        }
     }
 }
 <html>
@@ -69,7 +114,6 @@
 @*     <meta name="designer_service:url" content="@(!string.IsNullOrWhiteSpace(ServerAppConfig.ViewerServiceUrl) ? ServerAppConfig.ViewerServiceUrl : ServerAppConfig.InternalAppDataServiceUrl)" />*@
     <meta name="dashboard_server:url" content="@dashboardServerApiUrl" />
     <meta name="designer_service:url" content="@designerServiceUrl" />
-    <meta name="designer_service:access_token" content="@ViewBag.AccessToken" />
     <meta name="data_service:url" content="@designerServiceUrl" />
     <meta name="data_service_host:url" content="@designerServiceUrl.TrimEnd('/')" />
     <meta name="datasource:id" content="@ViewBag.DatasourceId" />
@@ -129,7 +173,10 @@
                     isUserAuthenticated = "false";
                 }
             }
-
+                    @{
+                // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+        }
             var scriptNonce = @Json.Serialize(nonce);
             var userName = "@userName";
             var isAdmin = @Json.Serialize(isAdmin);
@@ -142,6 +189,8 @@
             var cdnPath = "@dashboardDesignerResourceUrl/cdn/scripts/designer/";
             var dashboardTheme = "@(!ServerAppConfig.IsSelfHosted ? "" : ViewBag.Theme)";
             var baseUrl = "@baseUrl";
+            var rootUrlAction = "@rootUrl";
+            var cloudDashboardServiceUrl = "@cloudDashboardServiceUrl";
             var embedConfig = @Html.Raw(Json.Serialize(embedConfig));
             var exportFormat = @Html.Raw(Json.Serialize(ViewBag.ExportFormat));
             var multiTabId = "@ViewBag.MultiTabId";
@@ -190,9 +239,12 @@
             var isInvalidComment = @Html.Raw(Json.Serialize(isInvalidComment));
             var cdnLink = "@dashboardServerResourceUrl";
             var theming = @(!ServerAppConfig.IsSelfHosted ? "false" : themeInViewer ? Json.Serialize(globalAppSettings.SystemSettings.Theming) : "false");
-            var dashboardCustomThemename = "@dashboardCutomTheme";
-            var customThemeAppearance = "@customThemeAppearance";
-            var applicationTheme = "@customApplicationTheme";
+            var dashboardCustomThemename = @Json.Serialize(resolvedDashboardTheme);
+            var customThemeAppearance = @Json.Serialize(resolvedAppearance);
+            var applicationTheme = @Json.Serialize(resolvedApplicationTheme);
+            var embed_mode = @Json.Serialize(embed_mode_param);
+            var embedThemeProvided = @Json.Serialize(embedThemeProvided);
+            var embedModeProvided = @Json.Serialize(embedModeProvided);
             var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
             var appVersion = "@ServerAppConfig.ProductVersion";
             var canCheckSessionInActive = @Html.Raw(Json.Serialize(canShowSession));
@@ -215,9 +267,12 @@
             var dashboardId = "@ViewBag.ItemId";
             var getRenderDashboardDetailsUrl = "@Url.Action("GetRenderDashboardDetails", "FileRender")";
             var tenantId = @Json.Serialize(globalAppSettings.SystemSettings.TenantId);
-            var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures);
+            var previewFeatures = @Json.Serialize(ViewBag.PreviewFeatures ?? new object[0]);
             var isolationCode = @Json.Serialize(ViewBag.IsolationCode);
             var IsRtlEnabledForMultiTab = @Json.Serialize(ServerAppConfig.EnaleRTLSupportForMultiTab);
+                    @{
+        #pragma warning restore SCS0029
+        }
     </script>
     @if (isSandbox || (!isSelfHosted && canHideCommentIcon))
     {
@@ -225,7 +280,7 @@
     }
     @await Html.PartialAsync("~/Views/Shared/_LoaderIcon.cshtml")
 </head>
-    <body id="body" ng-app="serverApp" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%;" class="bi-dashboard">
+    <body id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%;" class="bi-dashboard">
         <div class="preloader-wrap viewer-blue-loader" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: white; z-index : 2;">
             <div id="loader_image" align="center" style="position:relative;top:45%;">
                 <div class="loader-blue loader-icon" id="loader-icon">
@@ -238,8 +293,8 @@
 
         @if (ViewBag.ShowMyDashboards && !isMobile)
         {
-            <a class="multi-tab-back" href="@Url.Action("dashboards", "dashboards" )" title="Back to all dashboards" ng-show="@embedConfig.HideTabHeader"><i class="su su-arrow-back"></i></a>
-            <div class="sf-nav-separator" ng-show="@embedConfig.HideTabHeader"></div>
+            <a class="multi-tab-back" href="@Url.Action("dashboards", "dashboards" )" title="Back to all dashboards" style="@(embedConfig.HideTabHeader ? "display:none;" : string.Empty)"><i class="su su-arrow-back"></i></a>
+            <div class="sf-nav-separator" style="@(embedConfig.HideTabHeader ? "display:none;" : string.Empty)"></div>
         }
         else if (isMobile)
         {
@@ -254,7 +309,7 @@
         }
 
         <div id="multi-tab-dashboard">
-            <div class="e-tab-header" ng-show="@embedConfig.HideTabHeader">
+            <div class="e-tab-header" style="@(embedConfig.HideTabHeader ? "display:none;" : string.Empty)">
                 @for (var i = 0; i < ViewBag.childDashboardNames.Count; i++)
                 {
                     if (ViewBag.childDashboardNames[i].TabName != "null" && ViewBag.childDashboardNames[i].TabName != null)

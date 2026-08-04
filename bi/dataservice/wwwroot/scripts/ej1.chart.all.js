@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.chart.all.js
-*  version : 15.3.8
+*  version : 16.1.90
 *  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -21878,7 +21878,7 @@ var Gradient = function (colors) {
             series._isTransposed = (seriesType.indexOf("bar") == -1) ? series.isTransposed : !series.isTransposed;
             // 421892 - Fix for displaying tooltip without marker
             this.model.marker.push(bbdesigner$.extend(true, {}, series.marker));
-            if (seriesType === "line" || seriesType === "spline") {
+            if (seriesType === "line" || seriesType === "spline" || seriesType === "area") {
                 series.marker.visible = this.model.enableSeriesMaker;
                 if(!series.marker.visible){
                     series.marker.visible = true;

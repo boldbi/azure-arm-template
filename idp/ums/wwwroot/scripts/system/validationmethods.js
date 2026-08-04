@@ -58,7 +58,7 @@
     }, window.Server.App.LocalizationContent.AvoidLeadingTrailingSpace.format("(\";)"));
 
     $.validator.addMethod("isValidCredentials", function (value, element) {
-        return /^[a-zA-Z_0-9@`~!#\$\^%&*()+=\-\[\]\\\',\.\/\{\}\|:<>\? ]+$/.test(value);
+        return /^[a-zA-Z_0-9@`~!#\$\^%&*()+=\-\[\]\\\',\.\/\{\}\|:<>\?\"; ]+$/.test(value);
     }, window.Server.App.LocalizationContent.AvoidSpecailCharacters + " (\";)");
 
 

@@ -141,7 +141,7 @@
 
     </script>
 </head>
-<body ng-app="serverApp" id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
+<body id="body" style="overflow: hidden; position: static; margin: 0; padding: 0; height: 100%; width: 100%">
     <environment include="Development,CloudDevelopment">
         <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/designer/dashboard-designer.css" />
         <link rel="stylesheet" asp-append-version="true" href="@dashboardDesignerResourceUrl/cdn/css/designer/dashboard-viewer-bundle.css" />
@@ -159,6 +159,27 @@
     @*Referred directly in the view page due to pivot grid changes and sfcompressor minification issue*@
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej1.web.all.min.js"></script>
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        (function ($) {
+            if (!$ || $.fn.ejWaitingPopup || !$.fn.BoldBIDashboardWaitingPopup) {
+                return;
+            }
+
+            $.fn.ejWaitingPopup = function () {
+                var result = $.fn.BoldBIDashboardWaitingPopup.apply(this, arguments);
+                this.each(function () {
+                    var element = $(this);
+                    var waitingPopup = element.data("BoldBIDashboardWaitingPopup");
+                    if (waitingPopup && !element.data("ejWaitingPopup")) {
+                        element.data("ejWaitingPopup", waitingPopup);
+                    }
+                });
+
+                return result;
+            };
+        })(window.jQuery);
+    </script>
 
     <environment include="Development,CloudDevelopment">
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-unifiedaiagent.js"></script>

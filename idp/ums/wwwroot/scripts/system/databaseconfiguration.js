@@ -562,6 +562,7 @@ function registerApplication(isSimpleMode) {
     $.ajax({
         url: setSystemSettingsUrl,
         type: "POST",
+        headers: { "RequestVerificationToken": $("input[name='__RequestVerificationToken']").val() },
         data: {
             systemSettingsData: systemSettingsDataString,
             storage: storage,

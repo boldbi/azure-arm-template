@@ -1,3 +1,4 @@
+﻿
 CREATE TABLE {database_name}.BOLDBI_Webhook(
 	Id int NOT NULL AUTO_INCREMENT,
 	Name varchar(512) NOT NULL,

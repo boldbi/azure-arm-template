@@ -39,29 +39,44 @@
     <environment exclude="Development,CloudDevelopment">
          <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/site-settings.min.js"></script>
     </environment>
-     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+    @{
+#pragma warning disable SCS0029
+        var styleSourcesJson = Html.Raw(Json.Serialize(styleSources));
+        var scriptSourcesJson = Html.Raw(Json.Serialize(scriptSources));
+        var fontSourcesJson = Html.Raw(Json.Serialize(fontSources));
+        var imgSourcesJson = Html.Raw(Json.Serialize(imgSources));
+        var connectSourcesJson = Html.Raw(Json.Serialize(connectSources));
+        var frameSourcesJson = Html.Raw(Json.Serialize(frameSources));
+        var frameAncestorsJson = Html.Raw(Json.Serialize(frameAncestor));
+#pragma warning restore SCS0029
+
+    }
+
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         var updateCSPSettingsUrl = "@Url.Action("UpdateSecuritySettings", "Administration")";
-        var updateXFrameHeaderSettingsUrl= "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
+        var updateXFrameHeaderSettingsUrl = "@Url.Action("UpdateXFrameHeaderSettings", "Administration")";
         var updateNetworkSettingsUrl = "@Url.Action("UpdateNetworkSettings", "Administration")";
         var fetchNetworkSettingsUrl = "@Url.Action("GetNetworkSettings", "Administration")";
-        var styleSourcesList = @Html.Raw(Json.Serialize(styleSources));
-        var scriptSourcesList = @Html.Raw(Json.Serialize(scriptSources));
-        var fontSourcesList = @Html.Raw(Json.Serialize(fontSources));
-        var imgSourcesList = @Html.Raw(Json.Serialize(imgSources));
-        var connectSourcesList = @Html.Raw(Json.Serialize(connectSources));
-        var frameSourcesList = @Html.Raw(Json.Serialize(frameSources));
-        var frameAncestorsList = @Html.Raw(Json.Serialize(frameAncestor));
+    
+        var styleSourcesList = @styleSourcesJson;
+        var scriptSourcesList = @scriptSourcesJson;
+        var fontSourcesList = @fontSourcesJson;
+        var imgSourcesList = @imgSourcesJson;
+        var connectSourcesList = @connectSourcesJson;
+        var frameSourcesList = @frameSourcesJson;
+        var frameAncestorsList = @frameAncestorsJson;
+    
         var contentSecurityPolicyUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ContentSecurityPolicy)";
         var xFrameOptionUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.XFrameOption)";
         var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
         var networkSettingsUrl = helpSiteBaseUrl;
         var currentUserIP = "@currentUserIPAddress";
     </script>
-}
+    }
+
 
 
 @section MainSection{
-
     @await Html.PartialAsync("_AdminMenu")
     <div class="col-12 no-padding no-margin @(canShowAdminMenu ? "width-alignment" : "admin-panel-full-width")">
         <div class="col-12 no-padding">
@@ -113,8 +128,24 @@
                                             @string.Format(T["Enable {0}"].Value, "Content-Security-Policy")
                                         </label>
                                     </div>
+                                    @{
+#pragma warning disable SCS0029
+
+                                        var cspMessage = Html.Raw(string.Format(
+                                            T["Click {0}here{1} to learn more."].Value, "<a class='app-hyperlink' href='" + helpSiteBaseUrl + CSPHelpSiteUrl + "' target='_blank'>", "</a>"
+                                        ));
+
+#pragma warning restore SCS0029
+
+                                    }
+
                                     <div class="info-message">
-                                        @string.Format(T["You can configure a {0} for your site. {1} will not be applied if this option is disabled."].Value, "content security policy (CSP)", "CSP") @Html.Raw(string.Format(T["Click {0}here{1} to learn more."].Value, "<a class='app-hyperlink' href='" + helpSiteBaseUrl + CSPHelpSiteUrl + "' target='_blank'>", "</a>"))
+                                        @string.Format(
+                                            T["You can configure a {0} for your site. {1} will not be applied if this option is disabled."].Value,
+                                            "content security policy (CSP)",
+                                            "CSP"
+                                        )
+                                        @cspMessage
                                     </div>
                                 </div>
                             </div>

@@ -20,7 +20,10 @@
     var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
     var dashboardBaseUrl = "@Url.Action("dashboards", "dashboards")";
     var cdnLink = "@dashboardServerResourceUrl";
+    var cdnDomain = "@GlobalAppSettings.CdnDomain";
     var enableApplicationEmbed =@ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+    var sampleAddDashboardText = @Json.Serialize(T["Add Dashboard"].Value);
+    var sampleDashboardsSearchResultFormat = @Json.Serialize(T["{0} Result(s) found for {1}"].Value);
 </script>
 
 @await Html.PartialAsync("~/Views/Shared/_BaseThemeStyleSheet.cshtml")
@@ -47,70 +50,34 @@
 
 <div class="overflow-none sample-item-popup" id="sample-item-container" style="display:none">
     <div class="no-padding" tabindex="-1" role="dialog">
-        <div class="col-lg-12 popup-header no-padding" id="samples" ng-controller="SampleListCtrl" role="document">
+        <div class="col-lg-12 popup-header no-padding" id="samples" role="document">
             <div id="sample-item-popup-container" data-spy="scroll">
                 <div class="col-12 no-padding">
                     <div id="sample-item-container" class="col-12 sample-item-container-padding no-padding">
                         <div class="sample-item">
                             <div class="col-3 sample-category">
                                 <h5>@T["Categories"]</h5>
-                                <div class="col-12 search-found ng-hide" ng-repeat="(key,value) in samples|filter:query| groupBy:'Name' as result">
-                                    <span class="badge badge-primary badge-pill">{{createDummyArray(result)}}</span>
-                                </div>
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex justify-content-between align-items-center highlight-list-item" ng-click="setFilterCategory()">
-                                        All
+                                <ul class="list-group" id="sample-category-list">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center highlight-list-item" data-category="">
+                                        @T["All"]
                                         <span class="badge badge-primary badge-pill all-dashboard-count">0</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center" ng-repeat="item in dummies | filter:query" ng-click="setFilterCategory(item.category)">
-                                        {{item.category}}
-                                        <span class="badge badge-primary badge-pill">{{getCategoryItemsCount(result,item.category)}}</span>
                                     </li>
                                 </ul>
                             </div>
                             <div class="col-9 no-padding">
                                 <div class="search-div">
                                     <div id="search-area" class="float-end">
-                                        <input type="text" id="search-sample-items" class="float-start no-margin" ng-model="query" placeholder="@T["Search"]" />
-                                        <span class="su close-icon su-inner-close float-end no-margin clear-search" ng-click="query = ''" id="clear-search" title="@T["Clear search"]"></span>
+                                        <input type="text" id="search-sample-items" class="float-start no-margin" placeholder="@T["Search"]" />
+                                        <span class="su close-icon su-inner-close float-end no-margin clear-search" id="clear-search" title="@T["Clear search"]"></span>
                                         <span class="su su-search float-end float-start no-margin" title="@T["Search"]"></span>
                                     </div>
                                 </div>
                                 <div class="sample-dashboard">
-                                    <div class="col-12 search-found ng-hide" id="serch-count" ng-show="countFilterObjects(result, query) >= 1">
-                                        <span class="dashboard-count">
-                                            @{
-                                            #pragma warning disable SCS0029
-                                            }
-                                            @Html.Raw(String.Format(T["{0} Result(s) found for {1}"].Value, "{{countFilterObjects(result, query)}}", "\"{{query}}\""))
-                                            @{
-                                            #pragma warning restore SCS0029
-                                            }
-                                        </span>
+                                    <div class="col-12 search-found" id="search-count-container" style="display:none">
+                                        <span class="dashboard-count" id="search-count-text"></span>
                                     </div>
-                                    <div class="col-12 no-padding" ng-repeat="category in filteredSamples =(samples | filter:query | filter: filterByCategory )">
-                                        <div class="col-12 no-padding" ng-repeat="dashboard in category.Dashboards ">
-                                            <div class="col-3 sample-image">
-                                                @if (ServerAppConfig.IsSelfHosted)
-                                                {
-                                                    <img ng-src="@dashboardServerResourceUrl/cdn/css/sample_dashboards/{{dashboard.ImageName | lowercase}}" />
-                                                }
-                                                else
-                                                {
-                                                    <img ng-src="@(GlobalAppSettings.CdnDomain)/static/sample-dashboards/v2/{{dashboard.ImageName | lowercase}}" />
-                                                }
-                                            </div>
-                                            <div class="col-9 sample-content">
-                                                <div data-bs-toggle="sample-dashboard-list-tooltip" data-bs-placement="right" data-container="body" title="<span class='sample-dashboard-list-title'><span class='tooltip-row'><span class='tooltip-description sample-dashbrd-name'>{{dashboard.Name}}</span></span>{{dashboard.Description != '' ? '<span class=\'tooltip-row\'><span class=\'tooltip-description\'>' + dashboard.Description + '</span></span>' : ''}}</span>" data-bs-html="true">
-                                                    <div class="sample-name">{{dashboard.Name}}</div>
-                                                    <div class="sample-description">{{dashboard.Description}}</div>
-                                                </div>
-                                                <input type="button" class="sample-add-button primary-button app-btn-primary" data-category-name="{{category.Name}}" data-sample-filename="{{dashboard.FileName}}" data-sample-description="{{dashboard.Description}}" data-sample-name="{{dashboard.Name}}" value="@T["Add Dashboard"]" />
-                                            </div>
-                                            <hr class="col-12 sample-separator" />
-                                        </div>
-                                    </div>
-                                    <div class="dashboard-empty-message-div col-12 ng-hide" ng-show="countFilterObjects(result, query) == 0">
+                                    <div class="col-12 no-padding" id="sample-dashboard-list"></div>
+                                    <div class="dashboard-empty-message-div col-12" id="sample-empty-state" style="display:none">
                                         <div class="empty-dashboard-image-div">
                                             <img class="empty-dashboard-image" src="@dashboardServerResourceUrl/cdn/css/images/dashboard-empty-state-60x60.svg" style="margin: 0 auto;/*! width: 100%; */" loading="lazy">
                                         </div>

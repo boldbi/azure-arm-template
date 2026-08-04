@@ -16,9 +16,23 @@
                             <span id="trigger-application-file" class="input-group-addon upload-file-btn">...</span>
                             <input type="file" accept=".css" name="applicationthemefile" id="applicationtheme-file" class="upload-btn">
                             <span class="applicationthemefileupload-validation-messages validation-message" id="invalid-applicationthemefile-name"></span>
-                            <p class="css-valid-link">@Html.Raw(string.Format(T["Please ensure your custom theme file is valid by uploading it into this {0}online validation helper{1}."].Value, "<a class='app-hyperlink' href='https://jigsaw.w3.org/css-validator/#validate-by-upload' target='_blank'>", "</a>"))</p>
+                            @{
+#pragma warning disable SCS0029
+                                var cssValidationMessage = Html.Raw(string.Format(
+                                    T["Please ensure your custom theme file is valid by uploading it into this {0}online validation helper{1}."].Value,
+                                    "<a class='app-hyperlink' href='https://jigsaw.w3.org/css-validator/#validate-by-upload' target='_blank'>",
+                                    "</a>"
+                                ));
+#pragma warning restore SCS0029
+
+                            }
+
+                            <p class="css-valid-link">
+                                @cssValidationMessage
+                            </p>
                         </div>
                     </div>
+
 
                     <div class="col-12 field-padding padding-bottom">
                         <label class="font-label">@T["Theme Name"]</label>
@@ -27,8 +41,33 @@
                             <span class="applicationthemeupload-validation-messages validation-message" id="invalid-applicationtheme-name"></span>
                         </div>
                     </div>
+                    @{
+#pragma warning disable SCS0029
+
+                        var downloadMessage = Html.Raw(string.Format(
+                            T["Please download the default color definition files for dark and light themes from {0}this link{1}."].Value,
+                            "<a class='app-hyperlink' href='" + themeTemplateZipUrl + "' target='_blank'>",
+                            "</a>"
+                        ));
+
+                        var customizeMessage = T["You can customize the color code in this definition file and upload it to the application."];
+
+                        var helpMessage = Html.Raw(string.Format(
+                            T["Please refer to {0}this link{1} to learn more about how to customize color codes."].Value,
+                            "<a class='app-hyperlink' href='" + helpSiteBaseUrl + lookAndFeelHelpSiteUrl + "' target='_blank'>",
+                            "</a>"
+                        ));
+
+#pragma warning restore SCS0029
+
+                    }
+
                     <div class="col-12 field-padding padding-bottom">
-                        <p class="no-margin no-padding font-label">@Html.Raw(string.Format(T["Please download the default color definition files for dark and light themes from {0}this link{1}."].Value, "<a class='app-hyperlink' href='" + themeTemplateZipUrl + "' target='_blank'>", "</a>")) @T["You can customize the color code in this definition file and upload it to the application."] @Html.Raw(string.Format(T["Please refer to {0}this link{1} to learn more about how to customize color codes."].Value, "<a class='app-hyperlink' href='" + helpSiteBaseUrl + lookAndFeelHelpSiteUrl + "' target='_blank'>", "</a>"))</p>
+                        <p class="no-margin no-padding font-label">
+                            @downloadMessage&nbsp;
+                            @customizeMessage&nbsp;
+                            @helpMessage
+                        </p>
                     </div>
                 </div>
                 <div class="col-12 modal-footer">

@@ -42,7 +42,6 @@
 <link rel="stylesheet" class="dashboard-custom-theme-file" asp-append-version="true" href="@ServerAppConfig.GetCustomThemeDesignerUrl(dashboardServerResourceUrl, Context, globalAppSettings, true, identityResponse: _identityResponse)" />
  <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context)/scripts/designerlocalization.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
  <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="~/js/localizationcontent.js?v=@ServerAppConfig.ProductVersion&c=@System.Globalization.CultureInfo.CurrentCulture"></script>
-
 @if (isMobile)
 {
     <environment include="Development,CloudDevelopment">
@@ -98,6 +97,13 @@ else
 
  <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var dataCache = @Json.Serialize(@globalAppSettings.SystemSettings.DataCacheSetting);
+    var enableHTMLSanitizer = @Json.Serialize(ServerAppConfig.Designer != null && ServerAppConfig.Designer.EnableHTMLSanitizer);
+    var enableSkeletonLoading = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.EnableSkeletonLoading != null && ServerAppConfig.Designer.DashboardExperience.EnableSkeletonLoading);
+    var showInBanner = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetProgress?.ShowInBanner != null && ServerAppConfig.Designer.DashboardExperience.WidgetProgress.ShowInBanner);
+    var showInDetailsView = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetProgress?.ShowInDetailsView != null && ServerAppConfig.Designer.DashboardExperience.WidgetProgress.ShowInDetailsView);
+    var showInWidgets = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetProgress?.ShowInWidgets != null && ServerAppConfig.Designer.DashboardExperience.WidgetProgress.ShowInWidgets);
+    var enableModernLayout = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetPanel?.EnableModernLayout != null && ServerAppConfig.Designer.DashboardExperience.WidgetPanel.EnableModernLayout);
+    var displayMode = @Json.Serialize(ServerAppConfig.Designer?.DashboardExperience?.WidgetPanel?.DisplayMode ?? "Both");
     var isMultiTab = @Json.Serialize(isMultiTab);
     var hideComments = @Json.Serialize(hideComments);
     var hideRefresh = @Json.Serialize(hideRefresh);
@@ -127,11 +133,11 @@ else
 
 <environment include="Development,CloudDevelopment">
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.js"></script>
-     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-viewer-page.js"></script>
 </environment>
 <environment exclude="Development,CloudDevelopment">
      <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-core.min.js"></script>
-     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-page.min.js"></script>
+     <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/bbi-dashboard-viewer-page.min.js"></script>
 </environment>
 
 @if ((!ServerAppConfig.IsSelfHosted && string.IsNullOrWhiteSpace(_globalAppSettings.SystemSettings.FontPreference)) || (ServerAppConfig.FontFamily == "Robotoregular" && _globalAppSettings.SystemSettings.IsInheritFromGlobalLookAndFeelSettings))

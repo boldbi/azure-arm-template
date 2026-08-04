@@ -1,6 +1,6 @@
 /*!
 *  filename: ej1.grid.all.js
-*  version : 15.3.8
+*  version : 16.1.90
 *  Copyright Syncfusion Inc. 2001 - 2026. All rights reserved.
 *  Use of this code is subject to the terms of our license.
 *  A copy of the current license can be obtained at any time by e-mailing
@@ -14333,6 +14333,8 @@
             bbdesigner$("#" + this._id + "ccDiv").BoldBIDashboardDialog('close');
             bbdesigner$(".e-columnChoosertailAlt").remove();
             bbdesigner$(".e-columnChoosertail").remove();
+            var uniqueName = bbdesigner$("#" + this._id + "ccDiv").find("button").attr("aria-describedby");
+            bbdesigner$("#" + this._id + "ccDiv").find(`button[aria-describedby=${uniqueName}]`).removeClass("e-disable");
         },
         _ccClickHandler: function (e) {
             var dlgWidth = 230, xPos, top, dialogObj, panelHeightEdge, evt = e.e, dialogHeight = 309, columnChoosertailOffset = 16, columnChoosertailAlt = 15, widgetHeight, cummalativeCalculationForDialog, chooserdialogHeight, isBrowserExceeded;
@@ -14370,7 +14372,7 @@
             this._refreshColumnChooserList();
             this._ccVisibleColumns = this.getVisibleColumnNames();
             this._ccHiddenColumns = this.getHiddenColumnNames();
-             this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: this.model.columns.length === this._ccVisibleColumns.length });
+            this._columnChooserList.find("input:checkbox.e-selectall").BoldBIDashboardCheckBox({ checked: this.model.columns.length === this._ccVisibleColumns.length });
             bbdesigner$("#" + this._id + "liScrollerDiv").BoldBIDashboardScroller({ height: '228', width: '228', buttonSize: 0 });
             bbdesigner$("#" + this._id + "liScrollerDiv").BoldBIDashboardScroller('refresh');
             if (this.getBrowserDetails().browser == 'chrome')

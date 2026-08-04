@@ -1,5 +1,12 @@
-﻿@{
+@{
     var appBranding = GlobalAppSettings.Branding;
+    var samlSettings = ViewBag.AzureAdSettings != null ? ViewBag.AzureAdSettings.SAMLSettings : null;
+    var isAzureAdEnabled = ViewBag.AzureAdSettings != null && ViewBag.AzureAdSettings.IsEnabled;
+    var isAzureAdSloEnabled = samlSettings != null && samlSettings.IsSloEnabled;
+    var applicationId = samlSettings != null && samlSettings.ApplicationId != null ? samlSettings.ApplicationId : string.Empty;
+    var applicationIdUri = samlSettings != null && samlSettings.ApplicationIdURI != null ? samlSettings.ApplicationIdURI : string.Empty;
+    var tenantName = samlSettings != null && samlSettings.TenantName != null ? samlSettings.TenantName : string.Empty;
+    var mobileApplicationId = samlSettings != null && samlSettings.MobileApplicationId != null ? samlSettings.MobileApplicationId : string.Empty;
 }
 <div role="tabpanel" class="tab-pane col-12 float-start no-padding" id="azure-ad-settings-tab">
     <div id="azure-ad-page-body" class="col-lg-12 col-md-12 col-sm-12 float-start admin-page-body">
@@ -9,7 +16,7 @@
             <div class="col-12 float-start separator-margin">
                 <div class="col-12 float-start no-padding">
                     <div class="material-switch inline-align">
-                        <input type="checkbox" id="enable-sso" ng-model="IsEnabled" ng_change="hideValidationMessage(IsEnabled, 'azuread')"/>
+                        <input type="checkbox" id="enable-sso" @(isAzureAdEnabled ? "checked" : string.Empty) />
                         <label for="enable-sso" class="label-primary"></label>
                     </div>
                     <div class="app-textbox-label inline-align">
@@ -20,9 +27,9 @@
                     <div class="col-12 float-start no-padding">
                         <label class="app-textbox-label">@T["Application Id"]</label>
                     </div>
-                    <div>
-                        <input type="text" class="form-control no-margin" ng-model="ApplicationId" ng-init="ApplicationId='@ViewBag.AzureAdSettings.SAMLSettings.ApplicationId'" name="ApplicationId" placeholder="@T["Application Id"]" id="application-id" data-ng-disabled="!IsEnabled" required/>
-                        <span class="validation-message top-padding" ng-show="ssoSettingsForm.ApplicationId.$error.required && ssoSettingsForm.ApplicationId.$dirty ">@T["Please enter Application Id"]</span>
+                    <div id="azuread-application-id-container">
+                        <input type="text" class="form-control no-margin" value="@applicationId" name="ApplicationId" placeholder="@T["Application Id"]" id="application-id" @(isAzureAdEnabled ? string.Empty : "disabled") />
+                        <span id="azuread-application-id-required-validation" class="validation-message top-padding display-none">@T["Please enter Application Id"]</span>
                     </div>
                     @if (appBranding == AppBranding.Bold.Identifier)
                     {
@@ -41,31 +48,29 @@
                     <div class="col-12 float-start no-padding">
                         <label class="app-textbox-label">@T["Application Id URI"]</label>
                     </div>
-                    <div>
-                        <input type="text" class="form-control no-margin" ng-model="ApplicationIdURI" ng-init="ApplicationIdURI='@ViewBag.AzureAdSettings.SAMLSettings.ApplicationIdURI'" name="ApplicationIdURI" placeholder="@T["Application Id URI"]" id="application-id-uri" data-ng-disabled="!IsEnabled" required/>
-                        <span class="validation-message top-padding" ng-show="ssoSettingsForm.ApplicationIdURI.$dirty && ssoSettingsForm.ApplicationIdURI.$invalid">@T["Please enter application id URI."]</span>
+                    <div id="azuread-application-id-uri-container">
+                        <input type="text" class="form-control no-margin" value="@applicationIdUri" name="ApplicationIdURI" placeholder="@T["Application Id URI"]" id="application-id-uri" @(isAzureAdEnabled ? string.Empty : "disabled") />
+                        <span id="azuread-application-id-uri-required-validation" class="validation-message top-padding display-none">@T["Please enter application id URI."]</span>
                     </div>
                     <div class="info-message no-padding">@T["The globally unique URI used to identify this web API. It is the prefix for scopes and the value of the audience claim in access tokens. It is also referred to as an identifier URI."]</div>
-
                 </div>
                 <div class="col-md-12 float-start no-padding input-field-margin">
                     <div class="col-12 float-start no-padding">
                         <label class="app-textbox-label">@T["Tenant Name"]</label>
                     </div>
-                    <div>
-                        <input type="text" class="form-control no-margin" ng-model="TenantName" ng-init="TenantName='@ViewBag.AzureAdSettings.SAMLSettings.TenantName'" name="TenantName" placeholder="@T["Tenant Name"]" id="tenant-name" data-ng-disabled="!IsEnabled" ng-pattern="tenantRegex" required/>
-                        <span class="validation-message top-padding" ng-show="ssoSettingsForm.tenantName.$error.required && ssoSettingsForm.tenantName.$dirty">@T["Please enter tenant name."]</span>
-                        <span class="validation-message top-padding" ng-show="ssoSettingsForm.tenantName.$error.pattern ">@T["Please enter a valid URL."]</span>
+                    <div id="azuread-tenant-name-container">
+                        <input type="text" class="form-control no-margin" value="@tenantName" name="TenantName" placeholder="@T["Tenant Name"]" id="tenant-name" @(isAzureAdEnabled ? string.Empty : "disabled") />
+                        <span id="azuread-tenant-name-required-validation" class="validation-message top-padding display-none">@T["Please enter tenant name."]</span>
+                        <span id="azuread-tenant-name-pattern-validation" class="validation-message top-padding display-none">@T["Please enter a valid URL."]</span>
                     </div>
                     <div class="info-message no-padding">@T["A dedicated instance of the Azure AD service."]</div>
-
                 </div>
                 <div class="col-md-12 float-start no-padding input-field-margin">
                     <div class="col-12 float-start no-padding">
                         <label class="app-textbox-label">@T["Mobile App Client Id"]</label>
                     </div>
                     <div>
-                        <input type="text" class="form-control no-margin" ng-model="MobileApplicationId" ng-init="MobileApplicationId='@ViewBag.AzureAdSettings.SAMLSettings.MobileApplicationId'" name="MobileApplicationId" placeholder="@T["Mobile App Client Id"]" id="mobile-app-id" data-ng-disabled="!IsEnabled"/>
+                        <input type="text" class="form-control no-margin" value="@mobileApplicationId" name="MobileApplicationId" placeholder="@T["Mobile App Client Id"]" id="mobile-app-id" @(isAzureAdEnabled ? string.Empty : "disabled") />
                     </div>
                     @if (appBranding == AppBranding.Bold.Identifier)
                     {
@@ -78,7 +83,7 @@
                 </div>
                 <div class="col-12 float-start no-padding input-field-margin">
                     <div class="material-switch inline-align">
-                        <input type="checkbox" id="enable-slo" ng-model="IsSloEnabled" data-ng-disabled="!IsEnabled"/>
+                        <input type="checkbox" id="enable-slo" @(isAzureAdSloEnabled ? "checked" : string.Empty) @(isAzureAdEnabled ? string.Empty : "disabled") />
                         <label for="enable-slo" class="label-primary"></label>
                     </div>
                     <div class="app-textbox-label inline-align">
@@ -92,4 +97,3 @@
         </form>
     </div>
 </div>
-

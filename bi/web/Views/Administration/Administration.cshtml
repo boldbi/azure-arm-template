@@ -31,20 +31,19 @@
 @section scripts{
 
      <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
-        serverApp.controller("adSettingsController", ["$scope", function ($scope) {
-            $scope.regex = '^(?!(ftp|https?):\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-]+(\.[a-z]{2,6})?(:\d{1,5})?(\/[a-zA-Z0-9]+[a-zA-Z0-9]*(\.[a-z]{2,8})?)*?$';
-            $scope.distinguishedNameRegex = /^(\w+[=]{1}[a-zA-Z0-9-_\s]+)([\,{1}]\w+[=]{1}[a-zA-Z0-9-_\s]+)*$/;
-        }]);
-
-    </script>
-
-<script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
     var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
     var SystemSettingsProperties = @Html.Raw(Json.Serialize(ViewBag.SystemSettings));
     var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
     var updateSiteSettingsUrl = "@Url.Action("UpdateSiteSettings", "Administration")";
     var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
     var updateLoginOptionsUrl = "@Url.Action("UpdateLoginOptions", "Administration")";
+    var serverApp = window.serverApp = window.serverApp || {
+        config: function () { return this; },
+        controller: function () { return this; },
+        service: function () { return this; },
+        directive: function () { return this; },
+        run: function () { return this; }
+    };
     var isAzureApplication = @Json.Serialize(isAzureApplication);
     var loginDisclaimer = @Html.Raw(Json.Serialize(loginDisclaimerObject));
     var brandingName = "@ServerAppConfig.BrandingJson.BrandingName";
@@ -80,10 +79,5 @@
     @if (isADPage)
     {
         @await Html.PartialAsync("_ActiveDirectorySettings")
-    }
-
-    @if (!ViewBag.ThirdPartyLogins || !ViewBag.WhiteLabel || !ViewBag.CustomDomain)
-    {
-        @await Html.PartialAsync("~/Views/UnlockFeatures/UnlockFeatures.cshtml")
     }
 }

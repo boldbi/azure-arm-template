@@ -35,6 +35,10 @@
         <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
         $(function () {
             $("#new-datasource-tab-content").css("height", window.innerHeight - 132 + "px");
+                        @{
+                            // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+            }
             if((@Json.Serialize(isDataSourceUpdated))){
                 var updatedDataSource = @Html.Raw(Json.Serialize(ViewBag.UpdatedDataSourceDetails));
                 var selectContents = parent.$("#update-data-source-popup-iframe").contents().find("select");
@@ -48,6 +52,9 @@
                     }
                 });
             }
+                @{
+            #pragma warning restore SCS0029
+                }
             window.parent.ShowWaitingProgress("#update-data-source-popup_wrapper", "hide");
         });
         </script>
@@ -57,7 +64,14 @@
         <div class="col-md-12 header-menu dialog-header">
             <span class="su su-nav-datasource Head-icon"></span>
             <span class="PopupTitle modal-title">@T["Update Data Source(s)"]</span>
-            <div class="dashboard-name report-name">@Html.Raw("<div class='float-left'>" + string.Format(T["Update data sources connected to the Dashboard - {0}"].Value,"</div><span class='item-name' data-bs-toggle='tooltip' data-placement='bottom' data-original-title=" + ViewBag.FullItemName + ">" + ViewBag.FullItemName + "</span>"))</div>
+            @{
+                // Suppressing SCS0029 because no direct user input handled
+        #pragma warning disable SCS0029
+            }
+            <div class="dashboard-name report-name">@Html.Raw("<div class='float-left'>" + string.Format(T["Update data sources connected to the Dashboard - {0}"].Value,"</div><span class='item-name' data-bs-toggle='tooltip' data-placement='bottom' data-original-title=" + Html.Encode(ViewBag.FullItemName) + ">" + Html.Encode(ViewBag.FullItemName) + "</span>"))</div>
+            @{
+        #pragma warning restore SCS0029
+            }
             <a href="#" title="@T["Close"]" class="PopupClose close-update-datasource"><span class="su su-close"></span></a>
         </div>
         <div id="datasource-popup-module">

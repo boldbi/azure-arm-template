@@ -1,4 +1,6 @@
-﻿ALTER TABLE {database_name}.BOLDTC_AuthSettings MODIFY COLUMN ModifiedBy char(38) NULL;
+﻿-- BOLD_UPGRADE_CHECKPOINT_COVERED: true
+-- BOLD_UPGRADE_STATEMENT_CHECKPOINT_VALIDATED: true
+ALTER TABLE {database_name}.BOLDTC_AuthSettings MODIFY COLUMN ModifiedBy char(38) NULL;
 ALTER TABLE {database_name}.BOLDTC_AuthSettings MODIFY COLUMN CreatedBy char(38) NULL;
 
 INSERT into {database_name}.BOLDTC_DirectoryType (DirectoryName,IsActive) VALUES (N'LinkedIn',1);
