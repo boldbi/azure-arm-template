@@ -1,0 +1,126 @@
+@inject Syncfusion.Server.Base.Localization.LocalizationHandler _localizationHandler
+@{
+    Layout = null;
+    var imageHelper = new ImageHelper(Context);
+    var errormessage = Context.Items["ErrorMessage"] as string;
+    var errorstacktrace = Context.Items["ErrorStackTrace"] as string;
+    var errorcode = Context.Items["ErrorCode"] as string;
+    var connectionIssueType = Context.Items["ConnectionIssueType"]?.ToString() ?? "Unknown";
+    var isAdmin = Context.Session.GetString("IsAdmin") != null ? Convert.ToBoolean(Context.Session.GetString("IsAdmin").ToString()) : false;
+    var hasAdminCookie = string.Equals(Context.Request.Cookies[Syncfusion.Server.Base.DataClasses.Core.CookieSchemes.AdminCookieName], bool.TrueString, StringComparison.OrdinalIgnoreCase);
+    // Some error middleware paths clear/rebuild the HttpContext user principal,
+    // causing `User.Identity.IsAuthenticated` to be unreliable while rendering
+    // the error page. Use session presence instead to detect whether a real
+    // authenticated session exists for this browser.
+    var isSessionAuthenticated = Context.Session.GetString("emailaddress") != null;
+
+    // Show DB recovery link only when the failure is a configuration issue
+    // (server reachable but credentials/configuration invalid). If the
+    // server is unavailable, do not show the link. Show the link only for
+    // signed-in admins or for users without a session (no login).
+    var isDatabaseConfigurationIssue = connectionIssueType == "DatabaseConfigurationInvalid"
+        || (!string.IsNullOrWhiteSpace(errormessage)
+            && (errormessage.IndexOf("Login failed for user", StringComparison.OrdinalIgnoreCase) >= 0
+                || errormessage.IndexOf("Cannot open database", StringComparison.OrdinalIgnoreCase) >= 0
+                || errormessage.IndexOf("password expired", StringComparison.OrdinalIgnoreCase) >= 0
+                || errormessage.IndexOf("password must be changed", StringComparison.OrdinalIgnoreCase) >= 0
+                || errormessage.IndexOf("untrusted domain", StringComparison.OrdinalIgnoreCase) >= 0));
+    var canUpdateDatabaseCredentials = isDatabaseConfigurationIssue
+        && (isAdmin || hasAdminCookie || !isSessionAuthenticated);
+    var databaseRecoveryBaseUrl = GlobalAppSettings.SystemSettings?.InternalAppUrls?.Idp?.TrimEnd('/') ?? string.Empty;
+    var databaseRecoveryUrl = !string.IsNullOrWhiteSpace(databaseRecoveryBaseUrl)
+        ? $"{databaseRecoveryBaseUrl}/admin/databaserecovery"
+        : Url.Content("~/admin/databaserecovery");
+    var configuredDbServerType = GlobalAppSettings.SystemSettings?.SqlConfiguration != null
+        ? GlobalAppSettings.SystemSettings.SqlConfiguration.ServerType.ToString()
+        : string.Empty;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@T["Database Error"]</title>
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+    <link rel="stylesheet" href="~/bundles/css/error-page.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/error-page.css")" crossorigin="anonymous" asp-append-version="true" />
+    <script src="~/bundles/js/error.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/error.js")" crossorigin="anonymous" asp-append-version="true"></script>
+</head>
+<body class="error-full-content">
+    <div class="error-page-outer">
+        <div class="error-page-content">
+            <div class="error-inside">
+                <div class="error-image-center-1">
+                    <img src="@Url.Content("~/logos?type=login")" class="error-image-1">
+                </div>
+                <div class="error-image-center-2">
+                    <img src="@imageHelper.InternalServerErrorImage()" class="error-image-2">
+                </div>
+                <div class="error-type">@T["Database connection error"]</div>
+                <div class="error-text">
+                    @if (connectionIssueType == "DatabaseServerUnavailable" && !isDatabaseConfigurationIssue)
+                    {
+                        var reachMessage = _localizationHandler.GetDatabaseServerUnavailableMessage(configuredDbServerType);
+
+                        <span>@reachMessage</span>
+                        <br />
+                        <span>@_localizationHandler.PleaseMakeSureDatabaseServerIsRunning</span>
+                    }
+                    else if (isDatabaseConfigurationIssue)
+                    {
+                        <span>@T["The application could not connect to the database with the current configuration."]</span>
+                        <br />
+                        <span>@T["Please verify the server name, database name, username, password, and related connection settings."]</span>
+                    }
+                    else
+                    {
+                        <span>@T["Sorry! Server has encountered error while establishing the connection to application database."]</span>
+                        <br />
+                        <span>@T["Please verify the database server availability and the configured connection details."]</span>
+                    }
+                </div>
+                @if (!string.IsNullOrWhiteSpace(errormessage))
+                {
+                    @if (GlobalAppSettings.SystemSettings.ShowStackTrace || isAdmin)
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorCode"]:@errorcode 
+                                @T["ErrorMessage"]:@errormessage 
+                                @T["ErrorStacktrace"]:@errorstacktrace</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-bs-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="deploy-error-container">
+                            <textarea type="text" id="deploy-error-box" disabled>@T["ErrorCode"]:@errorcode 
+                                @T["ErrorMessage"]:@errormessage</textarea>
+                            <span class="su su-copy text focus" id="deploy-error-copy" data-bs-toggle="tooltip" title="@T["Click to copy"]"></span>
+                        </div>
+                    }
+                }
+            </div>
+            @if (connectionIssueType == "DatabaseServerUnavailable" && !isDatabaseConfigurationIssue)
+            {
+                <div class="error-text">
+                    @T["Kindly start the database service and try again."]
+                </div>
+            }
+            else if (canUpdateDatabaseCredentials)
+            {
+                <a href="@databaseRecoveryUrl" style="text-decoration:none;">
+                    <div>
+                        Update database connection
+                    </div>
+                </a>
+            }
+            else
+            {
+                <div class="error-text">
+                    @T["Please contact your administrator."]
+                </div>
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("../Shared/_FooterOnPremise")
+</body>
+</html>

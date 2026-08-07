@@ -1,0 +1,28 @@
+﻿@model Syncfusion.Server.Base.DataClasses.RedirectPostModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Redirect</title>
+</head>
+<body>
+    <form id="redirectPostForm" method="post" action="@Model.ActionUrl">
+        @Html.AntiForgeryToken()
+        @if (Model.FormFields != null && Model.FormFields.Any())
+        {
+            @foreach (var field in Model.FormFields)
+            {
+                <input type="hidden" name="@field.Key" value="@field.Value" />
+            }
+        }
+    </form>
+    <script>
+        document.getElementById('redirectPostForm').submit();
+    </script>
+</body>
+
+</html>

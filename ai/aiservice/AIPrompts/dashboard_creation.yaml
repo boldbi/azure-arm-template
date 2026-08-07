@@ -1,0 +1,155 @@
+Version: 1
+Id: Dashboard Creation Prompt
+Description: A prompt template for identifying dashboard creation requests, matching datasources, and generating chart titles based on user questions and dataset schema.
+DashboardCreation:
+  - Type: DashboardQuestionIdentifier
+    Message: |
+      ROLE: Identify dashboard creation intent in a user question.
+      GOAL: Return a boolean indicating if the question is a dashboard creation request.
+      DEFINITION:
+        - A question IS a dashboard creation request if it includes the word 'dashboard'
+          AND one or more action verbs such as: create, build, generate, or need
+          (any form, any order).
+      OUTPUT RULES:
+        - If it qualifies: return true
+        - If it does not: return false
+        - Return ONLY the boolean literal true or false (no extra text).
+      EXAMPLES:
+        - "Create a Dashboard for User Activity Analysis" -> true
+        - "Build an Operations Monitoring Dashboard" -> true
+        - "I need a Product Performance Dashboard" -> true
+        - "Show sales by region" -> false
+        - "Add a filter to this widget" -> false
+        - "Which are the top-selling items?" -> false
+
+  - Type: DatasourceMatcher
+    Message: |
+      ROLE: Select the most appropriate datasource ID for a dashboard creation request.
+      INPUTS:
+        - User question: {question}
+        - dashboardDatasources (primary): {dashboardList}
+        - serverDatasources (fallback): {serverList}
+      GOAL:
+        - Identify the most relevant datasource for '{question}' by splitting words and
+          analyzing keywords, domain terms, and context.
+        - Ensure precise semantic and keyword alignment.
+        - Return ONLY one JSON object (no extra text).
+      SEARCH STRATEGY:
+        STEP 1: Search in dashboardDatasources
+          - If a strong semantic match is found, return:
+            { "id": "<matched-id>", "source": "dashboardDatasource", "isAvailable": true, "isDashboardCreation": true }
+          - Else, proceed to STEP 2.
+        STEP 2: Search in serverDatasources
+          - If a strong semantic match is found, return:
+            { "id": "<matched-id>", "source": "serverDatasource", "isAvailable": true, "isDashboardCreation": true }
+          - Else, proceed to STEP 3.
+        STEP 3: No datasource match found
+          - Return:
+            { "id": "no match", "source": "none", "isAvailable": false, "isDashboardCreation": true }
+      STRICT RULES:
+        - Always return valid JSON with fields: id, source, isAvailable, isDashboardCreation.
+        - Never guess; only accept strong matches.
+        - Do not return plain text or explanations outside the JSON.
+      CLARIFICATION ON 'DASHBOARD CREATION':
+        - Set isDashboardCreation: true if the user question contains 'dashboard'
+          AND an action word like create, build, generate, or need.
+      ACCEPTABLE EXAMPLES:
+        - Create a Density Insights Dashboard for Researchers
+        - Build an Environmental Risk Dashboard for City Planners
+        - I need an Educational Progress Dashboard for School Principals
+      NOT DASHBOARD CREATION (isDashboardCreation: false):
+        - Show a bar chart of top 5 sales regions
+        - What are the top products by quantity?
+        - Add a filter for date range in this widget
+        - Can we show quantity by product category?
+
+  - Type: QuestionsGenerator
+    Message: |
+      ROLE: Generate high-value chart titles for a dashboard.
+      GOAL: Produce exactly 9 chart titles, each with a distinct KPI (unique measure + unique dimension),
+            aligned to BI best practices and the provided schema and user query.
+      INPUTS:
+        - User request (intent guide): "{question}"
+        - Table schema: "{tableSchema}"
+      INTENT MAPPING:
+        - Infer BI intents: trend, ranking, comparison, contribution/share, distribution, growth.
+        - Match intents to valid measures and dimensions from the schema.
+      DATA SCHEMA CONSTRAINTS:
+        - Use ONLY fields that are explicitly present in the provided table schema.
+        - NEVER invent, assume, or create new measures, dimensions, or field names not listed in the schema.
+        - All referenced fields must match the exact "ColumnName" values from the schema.
+        - Do not use aliases, shortened names, or logical interpretations unless the exact name exists in the schema.
+        - All aggregations must be valid for the given field types (Measure vs Dimension, Date vs ID).
+        - Calculated/expression fields are only allowed if explicitly defined in the schema or listed as fields.
+      CHART DESIGN CONSTRAINTS:
+        - Generate exactly 9 titles, one per chart type (no duplicates).
+        - Choose from: Bar chart, Column chart, Pie chart, Doughnut chart, Grid, Map,
+          Line chart, Spline chart, Spline Area chart, NumberCard, Pyramid chart.
+        - Each chart type must be used at most once.
+      ELIGIBILITY RULES:
+        MAP:
+          - Only use Map if the schema has geographic fields (Country, State, City, Continent, Region).
+          - If not present, replace Map with a NumberCard showing a top metric summary.
+        TIME-BASED (Line/Spline/Spline Area):
+          - Only use if the schema includes at least one date/time field (e.g., OrderDate, CreatedAt,
+            PurchaseDate, LoginTime, ActivityTime, Timestamp, or any date/datetime/timestamp field).
+          - If absent, replace each time-based chart with a NumberCard.
+        NO TIME & NO LOCATION:
+          - If neither time nor geographic fields exist, generate ONLY 2 charts:
+            1) NumberCard (top-level metric summary)
+            2) Pyramid chart (use only categorical dimensions; do not use ID or date)
+          - State: "Only 2 chart titles generated due to schema limitations (no time or location fields)."
+          - List the two charts in random order.
+      KPI DISTINCTNESS RULES:
+        - KPI = one aggregated measure + one dimension (categorical or time-based).
+        - Do not reuse the same measure or the same measure+dimension pair.
+        - Avoid trivial variations unless BI goal changes.
+        - Pie/Doughnut/Pyramid: use categorical dimensions only (no ID/date fields).
+        - Line/Spline/Spline Area: use valid time dimensions with 10–15 time points.
+        - Map: use geographic dimensions (Country/State/Region) and do not duplicate other chart KPIs.
+        - Grid: show tabular summaries using multiple dimensions/measures; include context not used elsewhere.
+      CHART-SPECIFIC GUIDELINES:
+        - Bar/Column/Pie/Doughnut/Pyramid: Top N categories (max 5) by the chosen measure.
+        - Map: Geographical comparisons via choropleth or bubbles (based on measure type).
+        - Line/Spline/Spline Area: Time-series KPIs with suitable granularity.
+        - Grid: Compact tabular KPIs across multiple fields.
+      TIME GROUPING STRATEGY (for Line/Spline/Spline Area):
+        USER-SPECIFIED GRANULARITY:
+          - 'monthly' or 'month' -> group by MonthYear
+          - 'weekly' or 'week' -> group by WeekYear
+          - 'quarterly' or 'quarter' -> group by QuarterYear
+          - 'daily' or 'day' -> group by Date
+          - Do NOT use Month/Week/Quarter/Date without year context unless explicitly requested (e.g., "by month only").
+        METADATA-BASED FALLBACK:
+          - If field name contains OrderDate, PurchaseDate, CreatedAt, ShipDate -> MonthYear
+          - If field name contains LoginTime, ActivityTime, EventTimestamp -> WeekYear
+          - If type is date/datetime/timestamp with no name clues -> MonthYear
+        UNIVERSAL DEFAULT:
+          - Default to MonthYear when no specific guidance is available.
+      TITLE FORMAT RULES:
+        - Write each as a clear statement (not a question).
+        - Length: 6–15 words.
+        - Include the chart type at the end.
+        - Use exact field names from the schema (no aliases).
+        - Use "by" to indicate dimension grouping.
+        - Example: "Top 5 Customers by Invoice Amount in bar chart"
+      KPI EXTRACTION & DE-DUPLICATION:
+        1) Generate 9 chart titles (one per chart type) following all rules.
+        2) For each title, derive KPI Key as "measure|dimension" from "<Measure> by <Dimension>".
+        3) Compare all 9 KPI keys:
+           - If any two KPIs are identical or overlap significantly, regenerate only the conflicting titles:
+             keep the same chart type but choose a new, unused KPI.
+        4) Repeat until all 9 KPI keys are distinct.
+      FALLBACK HANDLING:
+        - If fewer than 9 viable unique KPIs exist, output as many valid charts as possible and state:
+          "Only X chart titles could be generated due to schema limitations."
+      OUTPUT FORMAT:
+        - Present titles as a numbered list (1–9).
+        - Each title must end with the chart type.
+        - No extra commentary or explanation.
+      OPTIONAL (for downstream BI tools):
+        - Titles should map cleanly to widgets and bind to schema fields.
+        - Avoid generic labels unless present in the schema.
+      STRICT COMPLETION RULE:
+        - If fewer than 9 valid chart titles are generated initially, you MUST create additional titles with different KPIs until there are exactly 9 titles.
+        - Never stop at fewer than 9 titles under any circumstances.

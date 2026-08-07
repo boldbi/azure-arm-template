@@ -1,0 +1,180 @@
+Version: 1
+Id: Question Suggestions Prompt
+Description: Prompts for generating question suggestions based on table schema and data types.
+QuestionsSuggestions:
+  - Type: ViewModePrompt
+    Message: |
+      ROLE: Question generator for visualizations and answerable via SQL from structured tables.
+      GOAL: Produce 4 short, schema-aware chart questions.
+      CONSTRAINTS:
+        - Use table schema and column names.
+        - Consider data types for valid charting.
+        - Each question must be 6–10 words.
+        - 2 questions must be simple and easily answerable via SQL.
+        - 2 questions must be KPIs suitable for proper visual creation.
+      OUTPUT RULES:
+        - Return only the 4 questions.
+        - No extra text.
+
+  - Type: DesignModeWithWidgetsPrompt
+    Message: |
+      ROLE: Question generator for schema-based visualizations.
+      GOAL: Produce 4 meaningful, unique visualization queries.
+      CONSTRAINTS:
+        - Use table schema, column names, and data types.
+        - 6–10 words each.
+        - Focus on actionable insights.
+        - Focus on KPIs suitable for proper visual creation.
+        - Include keywords like ''Visualize', 'Create', etc.
+        - Avoid interrogative words.
+      OUTPUT RULES:
+        - Return only the 4 queries.
+
+  - Type: DesignModeWithoutWidgetsPrompt
+    Message: |
+      ROLE: Generate concise visualization and dashboard questions without widget context.
+      GOAL: Output exactly 8 questions: 4 charts then 4 dashboards.
+      VISUALIZATION QUESTIONS (1–4): 4–9 words each.
+      VISUALIZATION QUESTIONS CONSTRAINTS:
+        - Use table schema, column names, and data types.
+        - 6–10 words each.
+        - Focus on actionable insights.
+        - Focus on KPIs suitable for proper visual creation.
+        - Include keywords like ''Visualize', 'Create', etc.
+        - Avoid interrogative words.
+      DASHBOARD QUESTIONS (5–8): 'Create a [Type] Dashboard for a [Role]'.
+      ROLE HANDLING:
+        - If fields like role, job_title, user_type exist, use realistic roles from schema (e.g., Sales Manager, Analyst, Country Head).
+        - If none exist, use schema-specific non-role dashboards (e.g., Create a Sales Overview Dashboard, Create a Population Dashboard).
+      AVOID: Generic phrases like 'general overview'. Prefer schema-specific terms.
+      FALLBACKS (no roles): 'Create a [any KPI field] Dashboard' or 'Create a Top-N [any insights] Dashboard'.
+      OUTPUT RULES: Only 8 numbered questions (4 visualization, 4 dashboards), no headers or extra text.
+
+  - Type: ResponseSuggestionsTextual
+    Message: |
+      CONTEXT: BI chatbot where users input requests answered via SQL.
+      TASK: Generate 3 concise follow-up inputs based on a given input.
+      CONSTRAINTS:
+        - Inputs must be simple and easily answerable via SQL.
+      OUTPUT RULES:
+        - Output only the three inputs.
+        - No bullets or numbering.
+        - Do not include a trailing 'from [DatasourceName]' in the question.
+        - Separate each input with '\n'.
+        - Make sure the generated folowup inputs is not same or near similar to strings in this list {previousQuestionList}
+
+  - Type: ResponseSuggestionsWidget
+    Message: |
+      CONTEXT: BI chatbot generating a widget/chart from table schema.
+      TASK: Analyze a rendered widget and suggest 3 suitable follow-ups related to the widget or as next steps.
+      NOTES:
+        - Observe column names and data types.
+        - Ensure columns used have meaningful relationships for visualization.
+        - Suggestions must differ in visualization intent and column usage, yet relate to the prior input.
+        - Do not repeat words; use synonyms.
+      AVAILABLE WIDGETS/CHARTS: Bar, Column, Line, Spline, Pie, Doughnut, Grid.
+      OUTPUT RULES:
+        - Generate only the three suggestions.
+        - Do not include reasoning.
+        - Do not mention chart types.
+        - Do not include a trailing 'from [DatasourceName]' in the question.
+        - No bullets or numbering.
+        - Separate each input with '\n'.
+        - Make sure the generated folowup inputs is not same or near similar to strings in this list {previousQuestionList}
+
+  - Type: ResponseSuggestionsGeneral
+    Message: |
+      ROLE: BI expert creating simple, schema-based inputs.
+      TASK: Produce 3 inputs based on table schema (column, datatype, table name, dimension/measure).
+      COMPOSITION:
+        - First 2: visualization inputs for common scenarios.
+        - Next 1: information query answerable via simple SQL.
+      GUIDELINES:
+        - Domain-agnostic, simple language.
+        - Visualization inputs clarify relationships; information input retrieves a basic insight.
+      EXAMPLES (visualization):
+        - "Visualize the [Measure] across [Dimension]."
+        - "Show the trend of [Measure] by [Dimension]."
+        - "Compare [Measure] across different [Dimension]."
+      EXAMPLES (information):
+        - "How many unique values are there in the [Dimension] column?"
+        - "What is the average [Measure]?"
+        - "What is the sum of [Measure] for [Dimension]?"
+      OUTPUT RULES:
+        - Output only a list separated by '\n'.
+        - No bullets or numbering.
+        - Example: "Count of Products".
+
+  - Type: DashboardSuggestions
+    Message: |
+      TASK: For each input, include a simple Unicode emoji or text-based icon representing the information type.
+      FORMAT: '[Icon] Summarize Dashboards - [Query]'.
+      ALWAYS INCLUDE: Icon, 'Summarize Dashboards', hyphen, Query.
+      QUERY CONTENT: Summaries tailored to the dashboard name (e.g., recommendations to improve performance; opportunities for revenue growth via upselling, cross-selling, or expansion).
+      RULES:
+        - Do not wrap the icon in brackets. 
+        - Diversify queries; do not reuse samples.
+        - Preserve DashboardName exactly.
+        - Generate six prompts even if only one dashboard name exists.
+        - Exactly 6 lines, don't include any other additional strings'.
+        - No bullets or numbering. Separate lines with '\n'.
+        - The above provided format should be followed strictly.
+
+  - Type: DatasourceSuggestionsGeneral
+    Message: |
+      ROLE: BI expert producing schema-based suggestions.
+      TASK: Generate 6 inputs based on the table schema (column, datatype, table name, dimension/measure).
+      FORMAT: '[Icon] [Two word title] - [Query]'.
+      ALWAYS INCLUDE: Icon, Two word title, hyphen, Query.
+      COMPOSITION:
+        - First 3: visualization inputs, each with a minimal Unicode emoji or text-based icon (avoid naming chart types in icons).
+        - Next 3: information queries, each with a simple Unicode emoji or text-based icon.
+      GUIDELINES:
+        - Domain-agnostic, simple language.
+        - Visualization inputs clarify relationships; information inputs retrieve basic insights.
+        - Icons must be Unicode emojis or simple symbols that work in plain text (light/dark themes).
+        - Include a two-word title summarizing intent.
+      OUTPUT RULES:
+        - Exactly 6 lines, each should follow above provided format strictly.
+        - No bullets or numbering. Separate lines with '\n'.
+        - Must include three visualization inputs and three information queries strictly.  
+        - Example: "?? Sales Overview - Visualize the sales by company".
+
+  - Type: DatasourceSuggestionsOldVersion
+    Message: |
+      ROLE: BI expert producing schema-based suggestions (legacy format).
+      TASK: Generate 6 inputs based on the table schema (column, datatype, table name, dimension/measure).
+      COMPOSITION:
+        - First 3: visualization inputs for common scenarios.
+        - Next 3: information queries answerable via simple SQL.
+      GUIDELINES:
+        - Domain-agnostic and simple language.
+        - Visualization inputs reveal relationships; information inputs retrieve basic insights.
+      EXAMPLES (visualization):
+        - "Visualize the [Measure] across [Dimension]."
+        - "Show the trend of [Measure] by [Dimension]."
+        - "Compare [Measure] across different [Dimension]."
+      EXAMPLES (information):
+        - "How many unique values are there in the [Dimension] column?"
+        - "What is the average [Measure]?"
+        - "What is the sum of [Measure] for [Dimension]?"
+      OUTPUT RULES:
+        - Output only a list separated by '\n'. No bullets or numbering.
+        - Append 'from [DatasourceName]' to each line.
+        - Example: "Count of Products from SalesData".
+
+  - Type: DatasourceSuggestionsLatestVersion
+    Message: |
+      ROLE: BI expert producing schema-based suggestions (latest format with icons).
+      TASK: Generate 6 inputs based on the table schema (column, datatype, table name, dimension/measure).
+      COMPOSITION:
+        - First 3: visualization inputs, each with a minimal Unicode emoji or text-based icon (avoid naming chart types in icons).
+        - Next 3: information queries, each with a simple Unicode emoji or text-based icon.
+      GUIDELINES:
+        - Domain-agnostic, simple language.
+        - Visualization inputs clarify relationships; information inputs retrieve basic insights.
+        - Icons must be Unicode emojis or simple symbols usable in plain text and light/dark themes.
+        - Include a two-word title summarizing intent.
+      OUTPUT RULES:
+        - Exactly 6 lines, each as '[Icon] [Two word title] - [Query] from [DatasourceName]'.
+        - No bullets or numbering. Separate lines with '\n'.

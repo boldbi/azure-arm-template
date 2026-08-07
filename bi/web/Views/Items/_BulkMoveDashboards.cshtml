@@ -1,0 +1,73 @@
+﻿@{
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var requesrUrl = url.AbsolutePath.ToString().ToLower();
+}
+
+<script nonce="@ViewBag.ScriptNonce" type="text/javascript">
+    var bulkMoveDashboards = "@Url.Action("movebulkdashboard", "items")";
+    var moveDashboardNamesAreValid = "@Url.Action("dashboardnamevalidation", "items")";
+    var downloadFailedMovesCsv = "@Url.Action("downloadfailedmovescsv", "items")";
+</script>
+
+<div id="BulkMoveDashboardsPopup" style="display:none">
+    <div style="background:white;" class="dialog">
+        <form class="dialog-body no-padding bulk-move-dashboard" id="bulk_move_dashboard_form" style="display: block">
+            <input type="hidden" id="bulk-move-dashboard-status" value="true" />
+            <div class="from-to-category-header">
+                <!--From to Destination Area-->
+                <div class="col-12 from-category-section" id="item-name-division">
+                    <div class="col-12 no-padding text-label" style="font-weight:bold">@T["From Category"]</div>
+                    <div class="col-lg-12 no-padding">
+                        <input type="text" id="from-category-selected-input" name="itemName" data-maxlength="255" value="" class="form-control site-orgname-fields text" disabled/>
+                        <span class="validation-error text"></span>
+                    </div>
+                </div>
+                
+                <div class="col-12 destination-category-section" id="action-category-division">
+                    <div class="col-12 no-padding">
+                        <div class="col-12 no-padding text-label" style="font-weight:bold">@T["Destination Category"]</div>
+                        <div class="col-12 no-padding">
+                            <input id="DestinationCategoryList" />
+                        </div>
+                    </div>
+                    <div class="col-12 no-padding">
+                        <span class="category-validation-error text" style="display:none">Select Destination Category</span>
+                    </div>                    
+                </div>
+            </div>
+            <!--Choose Dashboard Area-->
+            <div class="col-12" id="action-dashboard-division">
+                <div class="col-12 no-padding text-label" style="font-weight:bold">@T["Choose Dashboard"]</div>
+                <div class="col-12 no-padding">
+                    <input id="ChoosedCategoryDashboardList"/>
+                    <span class="category-validation-error text"></span>                    
+                </div>
+                <span class="category-information-text text">Choose Dashboards you want to move to the selected category</span>
+            </div>
+            <!--List the selected dashboards area-->
+            <div class="col-12 no-padding selected-dashboard-list-area" style="display: none">
+                <div class="col-12 selected-dashboard-list-header">
+                    <div class="no-padding selected-dashboardfont numbers-of-selected-dashboard"></div>
+                    <div class="no-padding selected-dashboardfont clear-selected-dashboard-list" onclick="clearAllDashboardList();">Clear</div>
+                </div>
+                <div class="col-12 no-padding selected-dashboard-list-window">
+                    <ul class="col-12 no-padding selected-dashboard-ul-list-window"></ul>
+                </div>
+            </div>
+            <input type="hidden" id="MoveItemIdHidden" value="" />
+        </form>
+    </div>
+</div>
+
+@if (requesrUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+{
+    <environment include="Development,CloudDevelopment">
+        <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/move-bulk-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/move-bulk-dashboard.min.js"></script>
+    </environment>
+}

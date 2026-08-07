@@ -1,0 +1,182 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+}
+<!DOCTYPE html>
+<head>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+    var getActiveSitesUrl = "@Url.Action("GetAllActiveTenantsForPublish", "Publish")";
+    var getUsersPermissionUrl = "@Url.Action("GetUsersWithCreatePermission", "Publish")";
+    var getDatasourceUrl = "@Url.Action("GetDataSources", "Publish")";
+    var publishDashboardUrl = { "dashboard": "@Url.Action("PublishDashboardItem", "Publish")", "datasource": "@Url.Action("PublishDatasourceItem", "Publish")" };
+    var validatePublishItemUrl = { "dashboard": "@Url.Action("ValidatePublishItem", "Publish")", "datasource": "@Url.Action("ValidateDatasourcePublishItem", "Publish")" };
+    var getExternalSitesUrl = "@Url.Action("GetExternalSites", "Publish")";
+    </script>
+    <environment include="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/publish-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/publish-dashboard.min.js"></script>
+    </environment>
+</head>
+<body>
+    <div id="publish-site-content" class="col-12 no-padding" style="display:none">
+        <div id="publish-base-container" style="display:none">
+            <div class="col-6 publish-container">
+                <div>
+                    <label id="publish-sites-label-internal">@T["Publish to these sites"]:</label>
+                    <label id="publish-sites-label-external" class="external-dropdown" style="display:none">@T["Publish to external sites"]:</label>
+                    <div id="active-sites-dropdown" class="selectpicker">
+                        <select id="multiselect-dropdown" class="form-control selectpicker" data-size="5" multiple="" data-actions-box="true" data-live-search="true" data-none-results-text="@T["No results matched"]" data-select-all-text="@T["Select All"]" data-deselect-all-text="@T["Deselect All"]" data-none-Selected-text="@T["Nothing selected"]"></select>
+                    </div>
+                    <span class="col-1 input-group-btn no-padding" id="add-external-sites" style="display:none">
+                        <button class="btn btn-default" type="button" data-bs-placement="right" title="@T["Add external sites"]" data-bs-toggle="tooltip" id="get-externalsite-detail"><span class="su-add"></span></button>
+                    </span>
+                </div>
+                <span id="active-sites-validation" class="validation-message text"></span>
+                <label class="publish-base-dashboard-category-label">@T["Category name"]</label>
+                <input id="publish-category-name" autocomplete.="off" class="form-control publish-base-dashboard-category-input" placeholder="@T["Category name"]" data-maxlength="255" autofocus>
+                <span id="publish-category-validation" class="validation-message text"></span>
+                <div id="use-source-category-checkbox" class="publish-base-dashboard-only">
+                    <input type="checkbox" id="use-source-category" class="material-checkbox" />
+                    <input name="use-source-category" type="hidden" value="false">
+                    <label for="use-source-category" data-container="#use-source-category-checkbox">@T["Use source category name."]</label>
+                </div>
+                <div id="publish-plugin-validation" class="validation-message text publish-base-dashboard-category-validation"></div>
+                <label class="publish-base-dashboard-name-label">@T["Dashboard name"]</label>
+                <label class="publish-base-datasource-name-label" style="display:none">@T["Data Source Name"]</label>
+                <input id="publish-dashboard-name" class="form-control" maxlength="253" disabled>
+                <div id="use-source-name-checkbox">
+                    <input type="checkbox" id="use-source-name" class="material-checkbox" />
+                    <input name="use-source-name" type="hidden" value="false">
+                    <label for="use-source-name" data-bs-toggle="tooltip" data-bs-placement="bottom" data-container="#use-source-name-checkbox" class="publish-base-source-name-label" data-dashboard-title="@T["On enabling this, if a dashboard or data source with the same name exists in the destination site, the publishing will fail."]" data-datasource-title="@T["On enabling this, if data source with the same name exists in the destination site, the publishing will fail."]" data-dashboard-text="@T["Use source dashboard and data source name."]" data-datasource-text="@T["Use original data source and linked data source name."]">@T["Use source dashboard and data source name."]</label>
+                </div>
+                <label class="publish-base-dashboard-description-label">@T["Dashboard description"] </label>
+                <label class="publish-base-datasource-description-label" style="display:none">@T["Data Source Description"]</label>
+                <textarea id="publish-dashboard-description" autocomplete="off" class="form-control" placeholder="@T["Write a description of the dashboard"]" data-dashboard-placeholder="@T["Write a description of the dashboard"]" data-datasource-placeholder="@T["Write a description of the data source"]" data-maxlength="1024" rows="3"> </textarea>
+                <span id="publish-description-validation" class="validation-message text"></span>
+                <div id="publish-description-plugin-validation" class="validation-message text"></div>
+                <div id="publish-dashboard-checkbox">
+                    @Html.CheckBox("publish-dashboard-edit", new { @class = "material-checkbox" })
+                    <label for="publish-dashboard-edit" class="toggle-space publish-base-dashboard-edit-label" data-dashboard-text="@T["Lock dashboard editing in published site."]" data-datasource-text="@T["Lock data source editing in the published site."]">@T["Lock dashboard editing in published site."]</label>
+                </div>
+                <div id="publish-datasource-checkbox">
+                    @Html.CheckBox("publish-datasource-edit", new { @class = "material-checkbox" })
+                    <label for="publish-datasource-edit" class="toggle-space publish-base-datasource-edit-label" data-dashboard-text="@T["Lock data source editing in published site."]" data-datasource-text="@T["Lock linked data source editing in the published site."]">@T["Lock data source editing in published site."]</label>
+                </div>
+                <div id="make-public-checkbox" class="publish-base-dashboard-only">
+                    @Html.CheckBox("make-public", new { @class = "material-checkbox" })
+                    @Html.Label("make-public", T["Make dashboard as public in published site."].Value, new { @class = "toggle-space" })
+                </div>
+                <div id="ignore-sync-checkbox" class="publish-base-dashboard-only">
+                    @Html.CheckBox("ignore-datasource-sync", new { @class = "material-checkbox" })
+                    @Html.Label("ignore-datasource-sync", T["Skip All Data Source Publishing on the Target Site to Use Existing Data Sources."].Value, new { @class = "toggle-space" })
+                </div>
+            </div>
+            <div class="col-6 publish-info">
+                <h5>@T["Sites"]:</h5>
+                <p class="publish-info-dashboard-sites">@T["Choose the sites you want to publish the dashboard to."]</p>
+                <p class="publish-info-datasource-sites" style="display:none">@T["Choose the sites you want to publish the data source to."]</p>
+                <h5 class="publish-info-dashboard-category">@T["Category name"]:</h5>
+                <p class="publish-info-dashboard-category-note">@T["An existing category will be used if one is present in the destination site. Otherwise, a new category will be created in the destination site according to the name entered in this field."]</p>
+                <h5>@T["Owner"]:</h5>
+                <p class="publish-info-dashboard-owner">@T["The dashboard will be created in the destination site with an owner who has permission to create dashboards, data sources, and categories."]</p>
+                <p class="publish-info-datasource-owner" style="display:none">@T["The data source will be created in the destination site with an owner who has permission to create data sources."]</p>
+                <h5 class="publish-info-datasource-note-title" style="display:none">@T["Note"]</h5>
+                <p class="publish-info-datasource-note" style="display:none">@T["Publishing the data source will automatically publish all of the linked data sources on destination sites. Click Advanced below to check the linked data source details."]</p>
+                <div class="advanced-info">
+                    @{
+#pragma warning disable SCS0029
+                    }
+                    <p class="publish-info-dashboard-advanced">
+                        @Html.Raw(String.Format(T["If you want to publish the dashboard for a specific user, click on {0}Advanced{1} and choose the user you want."].Value, "<b>", "</b>"))
+                    </p>
+                    <p class="publish-info-datasource-advanced" style="display:none">
+                        @Html.Raw(String.Format(T["If you want to publish the data source for a specific user, click on {0}Advanced{1} and choose the user you want."].Value, "<b>", "</b>"))
+                    </p>
+                    @{
+#pragma warning restore SCS0029
+                    }
+                </div>
+            </div>
+        </div>
+        <div id="publish-advanced-container" class="col-12 no-padding" style="display: none">
+            <div class="selected-sites col-6" data-warning-title="@T["One or more details are invalid"]">
+                <div id="publish-advanced-sites-list"></div>
+            </div>
+            <div class="col-6 advanced-page-container">
+                <label class="publish-advanced-dashboard-owner-label">@T["Select the dashboard owner for the destination site."]</label>
+                <label class="publish-advanced-datasource-owner-label" style="display:none">@T["Select the data source owner for the destination site."]</label>
+                <div class="users-list">
+                    <select id="user-selected" name="p.UserId" class="primary-select form-control" data-size="5" data-live-search="true"></select>
+                </div>
+                <label class="publish-advanced-dashboard-only">@T["Category name"]</label>
+                <input id="advanced-category-name" autocomplete="off" class="form-control publish-advanced-dashboard-only" placeholder="@T["Category name"]" data-maxlength="255" autofocus>
+                <span id="advanced-category-validation" class="validation-message text"></span>
+                <div id="advanced-plugin-validation" class="validation-message text"></div>
+                <div id="use-same-category-checkbox" class="publish-advanced-dashboard-only">
+                    <input type="checkbox" id="use-same-category" class="material-checkbox" />
+                    <input name="use-same-category" type="hidden" value="false">
+                    <label for="use-same-category" data-container="#use-same-category-checkbox">@T["Use source category name."]</label>
+                </div>
+                <input class="form-control publish-advanced-dashboard-only" id="select-source-category" />
+                
+                <label class="publish-advanced-dashboard-name-label">@T["Dashboard name"]</label>
+                <label class="publish-advanced-datasource-name-label" style="display:none">@T["Data Source Name"]</label>
+                <input id="advanced-dashboard-name" class="form-control" maxlength="253" disabled>
+                <div id="advanced-source-name-checkbox">
+                    <input type="checkbox" id="advanced-source-name" class="material-checkbox" />
+                    <input name="advanced-source-name" type="hidden" value="false">
+                    <label for="advanced-source-name" data-bs-toggle="tooltip" data-bs-placement="bottom" class="publish-advanced-source-name-label" data-dashboard-title='@T["On enabling this, if a dashboard or data source with the same name exists in the destination site, the publishing will fail."]' data-datasource-title='@T["On enabling this, if a data source with the same name exists in the destination site, the publishing will fail."]' data-dashboard-text='@T["Use source dashboard and data source name."]' data-datasource-text='@T["Use source data source and linked data source name."]'>@T["Use source dashboard and data source name."]</label>
+                </div>
+                <label class="publish-advanced-dashboard-description-label">@T["Dashboard description"]</label>
+                <label class="publish-advanced-datasource-description-label" style="display:none">@T["Data Source Description"]</label>
+                <textarea id="advanced-dashboard-description" autocomplete="off" class="form-control" placeholder="@T["Write a description of the dashboard"]" data-dashboard-placeholder="@T["Write a description of the dashboard"]" data-datasource-placeholder="@T["Write a description of the data source"]" data-maxlength="1024"></textarea>
+                <span id="advance-publish-description-validation" class="validation-message text"></span>
+                <div id="advance-publish-description-plugin-validation" class="validation-message text"></div>
+                <div id="advanced-dashboard-checkbox">
+                    <input type="checkbox" id="advanced-dashboard-edit" class="material-checkbox" />
+                    <input name="advanced-dashboard-edit" type="hidden" value="false">
+                    <label for="advanced-dashboard-edit" class="publish-advanced-dashboard-edit-label" data-dashboard-text="@T["Lock dashboard editing in published site"]" data-datasource-text="@T["Lock this data source editing in published site"]">@T["Lock dashboard editing in published site"] </label>
+                </div>
+                <div id="advanced-make-public-checkbox" class="publish-advanced-dashboard-only">
+                    <input type="checkbox" id="advanced-make-public" class="material-checkbox" />
+                    <input name="advanced-make-public" type="hidden" value="false">
+                    <label for="advanced-make-public">@T["Make dashboard as public in published site."] </label>
+                </div>
+                <div>
+                    <label class="publish-advanced-dashboard-datasource-select-label">@T["Select data sources that you want to lock from editing in the destination site."]</label>
+                    <label class="publish-advanced-datasource-datasource-select-label" style="display:none">@T["Select the linked data sources that you want to lock from editing in the destination site."]</label>
+                    <div id="selected-datasources" class="selectpicker dropup">
+                        <select id="datasource-list-dropdown" class="form-control select-picker-publishdialog" title='@T["Select data sources"]' data-dashboard-title='@T["Select data sources"]' data-datasource-title='@T["Select linked data sources"]' multiple="" data-size="5" data-actions-box="true" data-live-search="true" style="display:none"></select>
+                    </div>
+                </div>
+                <div id="advanced-ignore-sync-checkbox" class="publish-advanced-dashboard-only">
+                    <input type="checkbox" id="advanced-ignore-datasource-sync" class="material-checkbox" />
+                    <input name="advanced-ignore-datasource-sync" type="hidden" value="false">
+                    <label for="advanced-ignore-datasource-sync">@T["Skip All Data Source Publishing on the Target Site to Use Existing Data Sources."] </label>
+                </div>
+            </div>
+        </div>
+        <div id="publish-select-site-container" class="col-12" style="display:none">
+            <div class="site-content-container first-label">
+                <input type="radio" name="publish-site" class="css-radio" checked="checked" id="internal-site" data-publish-type="Internal" />
+                <label for="internal-site" class="float-start app-radio-label normal-font">@T["Internal Site"]</label>
+                <br />
+                <p class="site-content internal-site-dashboard-text">@T["Allows you to publish the dashboard to the sites created in the same server."]</p>
+                <p class="site-content internal-site-datasource-text" style="display:none">@T["Allows you to publish a data source to the sites created in the same server."]</p>
+            </div>
+            <div class="site-content-container">
+                <input type="radio" name="publish-site" class="css-radio" id="external-site" data-publish-type="External" />
+                <label for="external-site" class="float-start app-radio-label normal-font">@T["External Site"]</label>
+                <br />
+                <p class="site-content external-site-dashboard-text">@T["Allows you to publish the dashboard to the sites created in other servers."]</p>
+                <p class="site-content external-site-datasource-text" style="display:none">@T["Allows you to publish a data source to the sites created in other servers."]</p>
+            </div>
+        </div>
+    </div>
+</body>
