@@ -1,0 +1,1 @@
+-- Empty version marker. The upgrade runner treats comment-only files as no-op scripts.

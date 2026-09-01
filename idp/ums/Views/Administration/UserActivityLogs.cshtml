@@ -1,0 +1,148 @@
+@{
+    ViewBag.Title = T["ActivityLogs"].Value + " - " + GlobalAppSettings.SystemSettings.OrganizationName;
+    var eventTypeList = ViewBag.ActivityLogType;
+    var eventCategoryList = ViewBag.ActivityLogModule;
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/bundles/css/user-activity.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/user-activity.css")" crossorigin="anonymous" asp-append-version="true" />
+}
+
+@section scripts
+{
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var filterUserLogsUrl = "@Url.Action("UserActivityLog", "Administration")";
+        var filterUserLoginLogsUrl = "@Url.Action("UserLoginLogs", "Administration")";
+        var eventType = @Json.Serialize(eventTypeList);
+        var eventCategory = @Json.Serialize(eventCategoryList);
+        var loginEventType = @Json.Serialize(ViewBag.LoginEventType ?? new List<object>());
+        var userActivityLogDateFormat = "@GlobalAppSettings.SystemSettings.DateFormat";
+        var userActivityLogTimeFormat = "@GlobalAppSettings.SystemSettings.TimeFormat";
+        var dashboardServer = "@Source.DashboardServerAPI";
+        var identityProvider = "@Source.IdentityProviderAPI";
+        var dashboardJobs = "@Source.DashboardServerJobs";
+        var appSourceBI = "@SiteType.BI";
+        var appSourceUMS = "@SiteType.UMS";
+        var appTypeWeb = "@ApplicationPath.Web";
+        var appTypeApi = "@ApplicationPath.API";
+        var appTypeJobs = "@ApplicationPath.Jobs";
+    </script>
+
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/user-activity-log.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/activity-log.js")" crossorigin="anonymous" asp-append-version="true"></script>
+}
+
+@section MainSection
+{
+    @await Html.PartialAsync("_AdminMenu")
+
+    <div class="col-12 float-start header-section no-padding no-margin width-alignment">
+        <div id="activity-setting" class="col-12 admin-page-header header-without-button">
+            <div class="admin-page-header-description col-6 float-start no-padding" id="application-title">
+                <hgroup class="col-12 header-group">
+                    <h1 class="page-title">
+                        @T["Audit Logs"]
+                    </h1>
+                    <h5 class="page-description">
+                        @T["Audit logs provide a comprehensive and detailed record of application and login activities to support monitoring and security oversight."]
+                    </h5>
+                </hgroup>
+            </div>
+            <div class="col-4 float-end top-nav-sec no-padding">
+                @await Html.PartialAsync("../Shared/_TopMenu")
+            </div>
+        </div>
+        <div class="col-12 float-start no-padding auth-page-border auth-page-nav-bar">
+            <ul id="activity-tab-nav" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#audit-logs-tab" class="text-decoration-none active" id="audit-logs-tab-link" aria-controls="audit-logs-tab" role="tab" data-bs-toggle="tab">@T["System Activity"]</a>
+                </li>
+                <li role="presentation">
+                    <a href="#login-activity-tab" id="login-activity-tab-link" class="text-decoration-none" aria-controls="login-activity-tab" role="tab" data-bs-toggle="tab">@T["Login Activity"]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="activity-log-container" class="col-12 float-end admin-page-content-container">
+        <div class="admin-page-content col-12 float-end no-padding">
+            <div class="tab-content col-12 float-start no-padding">
+                <div id="audit-logs-tab" role="tabpanel" class="tab-pane active">
+                    <div class="filter-section">
+                        <div class="float-end filter-alignment">
+                            <div class="col-sm-3 float-start date-picker no-padding me-3">
+                                <input type="text" name="application-activity-filter-date-range" class="form-control full-width" id="applicationDatePicker">
+                            </div>
+                            <div id="event-category-filter-wrapper" class="dropdown activity-settings-drop-down-category float-start col-sm-2 col-3">
+                                <input id="user-event-category" />
+                            </div>
+                            <div class="dropdown activity-settings-drop-down-type float-start col-sm-3 col-3 ms-2">
+                                <input id="user-event-type" />
+                            </div>
+                            <span>
+                                <button type="button" id="apply-button" class="link-button btn float-start">@T["Apply"]</button>
+                            </span>
+                            <span id="reset">@T["Clear"]</span>
+                            <span class="separator float-start"></span>
+                            <span class="su su-sync float-start" id="refresh"></span>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="userActivityLogGrid" class="col-lg-8 no-padding dialog-override">
+                    </div>
+                </div>
+
+                <div id="login-activity-tab" role="tabpanel" class="tab-pane">
+                    <div class="filter-section">
+                        <div class="float-end filter-alignment">
+                            <div class="col-sm-3 float-start date-picker no-padding me-3">
+                                <input type="text" name="login-activity-filter-date-range" class="form-control full-width" id="loginDatePicker">
+                            </div>
+                            <div class="dropdown activity-settings-drop-down-category float-start col-sm-2 col-3">
+                                <input id="login-event-type" />
+                            </div>
+                            <span>
+                                <button type="button" id="apply-button" class="link-button btn float-start">@T["Apply"]</button>
+                            </span>
+                            <span id="reset">@T["Clear"]</span>
+                            <span class="separator float-start"></span>
+                            <span class="su su-sync float-start" id="refresh"></span>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="loginActivityLogGrid" class="col-lg-8 no-padding dialog-override">
+                    </div>
+                </div>
+            </div>
+            <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="user-username-template">
+                        ${if (InitiatedDisplayName !== "")}
+                        <span class="grid-content user-event-name" title="${InitiatedDisplayName}">${InitiatedDisplayName}</span>
+                        ${else}
+                        ${if (AppType === "@ApplicationPath.API" && AppSource === "@SiteType.BI")}
+                        <span class="grid-content" title="Dashboard Server API">"@GlobalAppSettings.GetDescription(Source.DashboardServerAPI)"</span>
+                        ${else}
+                        ${if (AppType === "@ApplicationPath.API" && AppSource === "@SiteType.UMS")}
+                        <span class="grid-content" title="Identity Provider API">@GlobalAppSettings.GetDescription(Source.IdentityProviderAPI)</span>
+                        ${/if}
+                        ${if (AppType === "@ApplicationPath.Jobs" && AppSource === "@SiteType.BI")}
+                        <span class="grid-content" title="Jobs Server">@GlobalAppSettings.GetDescription(Source.DashboardServerJobs)</span>
+                        ${/if}
+                        ${/if}
+                        ${/if}
+                        <br />
+                        <span class="grid-content" title="${EventDateformat}">${EventDateformat}</span>
+            </script>
+            <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="initiated-display-name">
+                        <span class="grid-content initiate-display-name" title="${Summary}">${Summary}</span>
+            </script>
+            <script type="text/x-jsrender" nonce="@Context.Items["ScriptNonce"]" id="activity-user-log-options">
+                        <span title="View" data-bs-toggle="dropdown">
+                        <a href="#" class="text-decoration-none activity-log-info" data-email>
+                        <span>@T["View"]</span>
+                        </a>
+                        </span>
+            </script>
+        </div>
+        @await Html.PartialAsync("../Shared/_FooterOnPremise")
+    </div>
+    @await Html.PartialAsync("_ActivityLogInfo")
+}

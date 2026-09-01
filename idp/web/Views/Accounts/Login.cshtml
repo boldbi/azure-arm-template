@@ -1,0 +1,82 @@
+﻿@using Syncfusion.Server.Base;
+@using System.IO;
+
+@{
+    Layout = "~/Views/Shared/_Layout.Accounts.cshtml";
+    var organizationName = (ViewBag.OrganizationName != null) ? ViewBag.OrganizationName : GlobalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.Title = $"{T["Sign in"].Value} - {organizationName}";
+    var isAdfsUserNotFound = TempData["IsAdfsUserNotFound"] as string;
+    var authMessage = TempData["AuthMessage"] as string;
+    var isAuthError = (authMessage != null || (TempData["AuthError"] != null && (bool)TempData["AuthError"])) ? true : false;
+    var IsAdfsUserStatus = (TempData["AdfsUserStatus"] as string) ?? string.Empty;
+    var callBackUri = ViewBag.CallBackUri;
+    var showBoldSignUp = ViewBag.IsBoldSign ?? false;
+    var isAzureResetPassword = TempData["AzureResetPassword"];
+    var customCssPath = System.IO.Path.GetFullPath(AppEnvironment.GetAppDataFolderPath() + "/idp/content/styles/login.css");
+    var customLoginContent = GlobalAppSettings.SystemSettings.CustomizeLoginContent;
+}
+
+@section styles{
+    <link rel="stylesheet" href="~/bundles/css/accounts.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/accounts.css")" crossorigin="anonymous"asp-append-version="true" />
+
+    @if (File.Exists(customCssPath))
+    {
+        <style type="text/css">
+			@File.ReadAllText(customCssPath)
+        </style>
+    }
+}
+
+@section scripts{
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var callBackUri = "@callBackUri";
+        var IsAdfsUserStatus = '@IsAdfsUserStatus';
+        var showBoldSignUp = "@showBoldSignUp";
+        var isAuthError = "@isAuthError";
+        var authMessage = "@authMessage";
+        var isAzureResetPassword = "@isAzureResetPassword";
+        var IsAdfsUserNotFound = '@isAdfsUserNotFound';
+        var isWindowADDefaultAuth = "@ViewBag.IsWindowADDefaultAuth";
+		var IsWindowADEmbedSSOAuth = "@ViewBag.IsWindowADEmbedSSOAuth";
+        var WindowADCallBackUrl = "@ViewBag.WindowADCallBackUrl";
+        var rootUrl = "@Url.Content("~/")";
+        var homeUrl = "@Url.Action("Index", "Home")";
+        var mfaVerificationPageUrl = "@Url.Action("LoginMfaVerificationCodeValidation", "Accounts")";
+        var loginContent = "@customLoginContent";
+    </script>
+
+      <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/accounts-login.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/accounts-login.js")" crossorigin="anonymous"asp-append-version="true"></script>
+        <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/ej2.js")" crossorigin="anonymous" asp-append-version="true"></script>
+}
+
+@section MainSection{
+    <div class="login-wrapper">
+        <div class="login-body">
+            @await Html.PartialAsync("~/Views/Shared/_LoginForm.cshtml")
+            @await Html.PartialAsync("~/Views/Shared/_ExternalAuthentication.cshtml")
+            @if(ViewBag.LoginDisclaimer != null)
+            {
+                @await Html.PartialAsync("~/Views/Shared/_LoginDisclaimer.cshtml")
+            }
+            <div id="azure-b2c-password-reset" class="error-message validation-holder">
+                @{
+#pragma warning disable SCS0029
+                }
+                <span class="auth-error-text">
+                    @Html.Raw(string.Format(T["We are unable to process password reset request. Please refer to {0} this documentation {1} and enable self-service password reset."].Value, $"<a target='_blank' href={await HelpSiteManager.GetHelpSiteUrl(HelpSiteUrlNames.Azure_B2C_Self_Reset_password)}>", "</a>"))
+                </span>
+                @{
+#pragma warning restore SCS0029
+                }
+            </div>
+            <div id="access-denied" class="error-message validation-holder">
+                <span class="su su-login-error text-danger"></span><span id="login-input-error">@T["Access denied"]</span>
+            </div>
+
+            <div id="validate-auth-user" class="error-message validation-holder">
+                <span class="auth-error-text"></span>
+            </div>
+            <div class="forget-password-align"><a href="@Url.Action("RecoverAccount", "Accounts")" class="forgot-pwd-link text-decoration-none" tabindex="6">@T["Cannot access your account?"]</a></div>
+        </div>
+    </div>
+}

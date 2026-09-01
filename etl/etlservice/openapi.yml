@@ -1,0 +1,72 @@
+﻿openapi: 3.0.0
+info:
+  description: ''
+  title: ''
+  version: '20220523'
+servers:
+- url: 'https://services.odata.org/V4/Northwind/Northwind.svc/'
+paths:
+  /Orders:
+    get:
+      summary: Retrieve a list of orders
+      description: Retrieve a list of orders from the Northwind database.
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: object  # Adjust as per your API response structure
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Orders'
+  /Orders/{orderId}:
+    parameters:
+      - name: orderId
+        in: path
+        description: The ID of the order to retrieve.
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Retrieve a specific order by ID
+      description: Retrieve a specific order from the Northwind database by its ID.
+      responses:
+        '200':
+          description: The requested order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orders'
+components:
+  schemas:
+    Orders:
+      type: object
+      properties:
+        OrderID:
+          type: integer
+        CustomerID:
+          type: string
+        EmployeeID:
+          type: integer
+        OrderDate:
+          type: string
+          format: date-time
+        ShipName:
+          type: string
+        ShipAddress:
+          type: string
+        ShipCity:
+          type: string
+        ShipRegion:
+          type: string
+        ShipPostalCode:
+          type: string
+        ShipCountry:
+          type: string
+      required:
+        - OrderID

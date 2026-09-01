@@ -1,0 +1,102 @@
+﻿@{
+    var isBoldBI = GlobalAppSettings.BrandingDisplayName == AppBranding.Bold.DisplayName;
+    var displayName = GlobalAppSettings.BrandingDisplayName;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        @{
+        #pragma warning disable SCS0029
+        }
+        @Html.Raw(string.Format(T["Welcome to {0}"].Value, displayName))
+        @{
+        #pragma warning restore SCS0029
+        }
+    </title>
+    <link rel="icon" href="@Url.Content("~/images/" + GlobalAppSettings.Branding + "/application/favicon.ico")" />
+    <link rel="stylesheet" href="~/bundles/css/storage-validation.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/storage-validation.css")" crossorigin="anonymous" asp-append-version="true" />
+</head>
+<body class="startup-page-container-body">
+    <div id="loader"></div>
+    <div class="storage-validation-container">
+        <div class="message-container">
+           <div class="header-message">@T["Storage configuration is invalid"]</div>
+           <div class="default-message">@T["The storage settings provide in the environment variables is incorrect or missing. Please resolve the issue to continue."]</div>
+           <div class="validation-box">
+               <div class="configure-storage-type">
+                   <div class="item-title">@T["Provided storage type:"]</div>
+                   <div class="item-content">@T[$"{GlobalAppSettings.StorageValidation.StorageType}"]</div>
+               </div>
+                <div class="supported-storage-types">
+                    <div class="item-title">@T["Supported storage types:"]</div>
+                    <div class="item-content">@T["File Storage - Azure Blob - Amazon S3 - OCI Object Storage"]</div>
+                </div>
+                <div class="validation-message">
+                    <div class="item-title">@T["Validation message:"]</div>
+                    <div class="item-content">@T[$"{GlobalAppSettings.StorageValidation.ValidationMessage}"]</div>
+                </div>
+           </div>
+           <div class="trouble-shot-guidance">
+               <div class="title-message">@T["Please follow the below steps"]</div>
+                @if (GlobalAppSettings.IsAutoDeployment)
+                {
+                    <div class="auto-deployment">
+                       <ol>
+                           <li>@T["Environment variables are loaded during the startup process. Update the required variables with proper values."]</li>
+                           <li>@T["Once updated restart the application for changes to be applied."]</li>
+                       </ol>
+                    </div>
+                }
+                else
+                {
+                    <div class="manual-deployment">
+                        <ol>
+                            <li>@T["Environment variables are loaded during the startup process. Update the required variables with proper values."]</li>
+                            <li>@T["Once updated refresh the page for changes to be applied."]</li>
+                        </ol>
+                    </div>
+                }
+            </div>
+           <div class="required-environment-variable">
+                <div class="title-message">@T["Required storage environment variables"]</div>
+                @if (GlobalAppSettings.StorageValidation.StorageType == StorageType.AzureBlob)
+                {
+                    <ul>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.StorageType}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AzureBlobStorageContainerName}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AzureBlobStorageUri}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AzureBlobConnectionType}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AzureBlobAccountName}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AzureBlobAccessKey}"]</li>
+                    </ul>
+                }
+                @if (GlobalAppSettings.StorageValidation.StorageType == StorageType.AmazonS3)
+                {
+                    <ul>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.StorageType}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.StorageType}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AmazonRegion}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AmazonAccessKeyId}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AmazonAccessKeySecret}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AmazonRootFolderName}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.AmazonBucketName}"]</li>
+                    </ul>
+                }
+                @if (GlobalAppSettings.StorageValidation.StorageType == StorageType.OCIObjectStorage)
+                {
+                    <ul>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.StorageType}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.OCIRegion}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.OCIAccessKey}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.OCISecretKey}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.OCIRootFolderName}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.OCIBucketName}"]</li>
+                        <li>@T[$"{BoldServicesEnvironmentVariables.OCINameSpace}"]</li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

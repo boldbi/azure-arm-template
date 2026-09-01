@@ -1,0 +1,21 @@
+ALTER TABLE [BOLDTC_SystemSettings] ALTER COLUMN [SystemValue] nvarchar(max) NULL;
+
+CREATE TABLE [BOLDTC_TokenVault] (
+		TenantId UNIQUEIDENTIFIER NOT NULL,
+		IdpUserId UNIQUEIDENTIFIER NOT NULL,
+		AuthUserId UNIQUEIDENTIFIER NOT NULL,
+		AuthProviderId INT NOT NULL,
+		EncryptedToken NVARCHAR(MAX) NOT NULL,
+		ExpiresAt DATETIMEOFFSET(7) NULL,
+		UpdatedAt DATETIMEOFFSET(7) NOT NULL DEFAULT SYSUTCDATETIME(),
+	CONSTRAINT [PK_BOLDTC_TokenVault] PRIMARY KEY CLUSTERED
+	(
+	[TenantId], [IdpUserId], [AuthProviderId]
+	) WITH (IGNORE_DUP_KEY = OFF)
+);
+
+ALTER TABLE [BOLDTC_UserLogin] ADD EncryptedIdToken nvarchar(4000) NULL;
+
+ALTER TABLE [BOLDTC_UserLogin] ADD IdTokenExpiresAt datetime NULL;
+
+ALTER TABLE [BOLDTC_UserLogin] ADD IsUsedForLogout bit NULL;

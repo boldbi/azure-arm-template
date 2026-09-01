@@ -1,0 +1,13 @@
+﻿-- BOLD_UPGRADE_CHECKPOINT_COVERED: true
+-- BOLD_UPGRADE_STATEMENT_CHECKPOINT_VALIDATED: true
+CREATE TABLE {database_name}.BOLDTC_AICredentials(
+    Id char(38) NOT NULL,
+    AIModel INT NOT NULL,
+    AIConfiguration varchar(4000) NULL,
+    CreatedById char(38) NULL,
+    ModifiedById char(38) NULL,
+    CreatedDate datetime NOT NULL,
+    ModifiedDate datetime NOT NULL,
+    IsActive tinyint NOT NULL,
+    PRIMARY KEY (Id)) ROW_FORMAT=DYNAMIC
+;

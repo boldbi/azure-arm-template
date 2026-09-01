@@ -1,0 +1,261 @@
+@{
+    var oauthSettings = ViewBag.OAuthDetails != null ? ViewBag.OAuthDetails.OAuthAuthSettings : null;
+    var isOAuthEnabled = ViewBag.OAuthDetails != null && ViewBag.OAuthDetails.IsEnabled;
+    var providerName = oauthSettings != null && oauthSettings.ProviderName != null ? oauthSettings.ProviderName : string.Empty;
+    var authorizationEndPoint = oauthSettings != null && oauthSettings.AuthorizationEndPoint != null ? oauthSettings.AuthorizationEndPoint : string.Empty;
+    var tokenEndPoint = oauthSettings != null && oauthSettings.TokenEndPoint != null ? oauthSettings.TokenEndPoint : string.Empty;
+    var tokenEndPointMethod = oauthSettings != null && oauthSettings.TokenEndPointMethod != null ? oauthSettings.TokenEndPointMethod : "POST";
+    var userInfoEndPoint = oauthSettings != null && oauthSettings.UserInfoEndPoint != null ? oauthSettings.UserInfoEndPoint : string.Empty;
+    var userInfoEndPointMethod = oauthSettings != null && oauthSettings.UserInfoEndPointMethod != null ? oauthSettings.UserInfoEndPointMethod : "GET";
+    var issuerEndPoint = oauthSettings != null && oauthSettings.IssuerEndPoint != null ? oauthSettings.IssuerEndPoint : string.Empty;
+    var jwksEndPoint = oauthSettings != null && oauthSettings.JwksEndPoint != null ? oauthSettings.JwksEndPoint : string.Empty;
+    var clientId = oauthSettings != null && oauthSettings.ClientId != null ? oauthSettings.ClientId : string.Empty;
+    var scopes = oauthSettings != null && oauthSettings.Scopes != null ? oauthSettings.Scopes : string.Empty;
+    var logoutEndPoint = oauthSettings != null && oauthSettings.LogoutEndPoint != null ? oauthSettings.LogoutEndPoint : string.Empty;
+    var userInfoEmail = oauthSettings != null && oauthSettings.UserInfoEmail != null ? oauthSettings.UserInfoEmail : string.Empty;
+    var userInfoFirstname = oauthSettings != null && oauthSettings.UserInfoFirstname != null ? oauthSettings.UserInfoFirstname : string.Empty;
+    var userInfoLastname = oauthSettings != null && oauthSettings.UserInfoLastname != null ? oauthSettings.UserInfoLastname : string.Empty;
+    var logoUrl = ViewBag.OAuthDetails != null && ViewBag.OAuthDetails.LogoUrl != null ? ViewBag.OAuthDetails.LogoUrl : string.Empty;
+    var logoStyle = string.Empty;
+    if (!string.IsNullOrWhiteSpace(logoUrl))
+    {
+        logoStyle = logoUrl.TrimStart().StartsWith("url(", StringComparison.OrdinalIgnoreCase) ? logoUrl : $"url('{logoUrl}')";
+    }
+    var canCreateAccount = oauthSettings != null && oauthSettings.CanCreateAccount;
+}
+<div role="tabpanel" class="tab-pane col-12 float-start no-padding" id="oauth-settings-tab">
+    <div id="oauth-page-body" class="col-12 float-start col-md-12 col-sm-12 admin-page-body">
+        <form id="oauth-setting" name="oauthSettingsForm" class="auth-settings-form col-12 float-start col-md-12 col-sm-12 no-padding" method="post" enctype="multipart/form-data" autocomplete="off">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="oauthAuthenticationProvider" value="@ViewBag.OAuthDetails.AuthProvider">
+            <input type="hidden" name="oauthLogo" value="@ViewBag.OAuthDetails.OAuthAuthSettings.Logo">
+            <div class="col-12 float-start separator-margin">
+                <div class="col-md-12 float-start no-padding">
+                    <div class="material-switch inline-align">
+                        <input type="checkbox" id="oauthIsEnabled" @(isOAuthEnabled ? "checked" : string.Empty) />
+                        <label for="oauthIsEnabled" class="label-primary"></label>
+                    </div>
+                    <div class="app-textbox-label inline-align">
+                        @T["Enable OAuth 2.0"]
+                    </div>
+                </div>
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Provider Name"]</label>
+                    </div>
+                    <div id="oauth-provider-name-container">
+                        <input type="text" class="form-control no-margin" value="@providerName" maxlength="20" name="oauthProviderName" placeholder="@T["Provider Name"]" id="oauth-provider-name" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-provider-name-maxlength-validation" class="validation-message top-padding display-none">@T["Provider name is too long. Must be no more than 20 characters."]</span>
+                        <span id="oauth-provider-name-required-validation" class="validation-message top-padding display-none">@T["Please enter the OAuth provider name."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["Name of the authentication provider to be displayed in the login page."]</div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Provider Logo"]</label>
+                    </div>
+                    <div class="col-md-12 float-start no-padding logo-container">
+                        <div id="oauth-image-upload-box" class="auth-image-upload-box">
+                            <div class="js-image-preview" style="background-image:@logoStyle"></div>
+                            <div class="upload-options">
+                                <label>
+                                    <span>@T["Change logo"]</span>
+                                    <input type="file" class="image-upload" accept="image/png,image/jpeg,image/svg+xml" name="oauthLogoUrl" @(isOAuthEnabled ? string.Empty : "disabled") />
+                                </label>
+                            </div>
+                        </div>
+
+                        <span id="oauth-logo-validation" class="validation-message top-padding display-none"></span>
+                    </div>
+                    <div class="info-message no-padding">@T["Logo of the authentication provider to be displayed in the login page."]</div>
+                </div>
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Authorization Endpoint"]</label>
+                    </div>
+                    <div id="oauth-authorization-endpoint-container">
+                        <input type="text" class="form-control no-margin" value="@authorizationEndPoint" name="oauthAuthorizationEP" placeholder="@T["Authorization Endpoint"]" id="oauth-authorization-endpoint" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-authorization-endpoint-required-validation" class="validation-message display-none">@T["Please enter the authorization endpoint."]</span>
+                        <span id="oauth-authorization-endpoint-pattern-validation" class="validation-message display-none">@T["Please enter a valid authorization endpoint."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["An authorization URL where the resource owner grants authorization to the OAuth client to access protected resources."]</div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Token Endpoint"]</label>
+                    </div>
+                    <div class="col-md-12 float-start no-padding method" id="oauth-token-endpoint-container">
+                        <select id="token-method-type" class="method-type" @(isOAuthEnabled ? string.Empty : "disabled")>
+                            <option class="no-margin-dropdown-ul" value="POST" selected="@(tokenEndPointMethod == "POST")">@T["POST"]</option>
+                            <option class="no-margin-dropdown-ul" value="GET" selected="@(tokenEndPointMethod == "GET")">@T["GET"]</option>
+                        </select>
+                        <input type="text" class="form-control no-margin" value="@tokenEndPoint" name="oauthTokenEP" placeholder="@T["Token Endpoint"]" id="oauth-token-endpoint" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-token-endpoint-required-validation" class="validation-message display-none">@T["Please enter a token endpoint."]</span>
+                        <span id="oauth-token-endpoint-pattern-validation" class="validation-message display-none">@T["Please enter a valid token endpoint."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["A token request URL where the OAuth client exchanges an authorization grant for an access token."]</div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding no-margin">
+                        <label class="app-textbox-label">@T["User Information Endpoint"]</label>
+                    </div>
+                    <div class="col-12 float-start no-padding method" id="oauth-userinfo-endpoint-container">
+                        <select id="user-info-method-type" class="selectpicker method-type" @(isOAuthEnabled ? string.Empty : "disabled")>
+                            <option class="no-margin-dropdown-ul" value="GET" selected="@(userInfoEndPointMethod == "GET")">@T["GET"]</option>
+                            <option class="no-margin-dropdown-ul" value="POST" selected="@(userInfoEndPointMethod == "POST")">@T["POST"]</option>
+                        </select>
+                        <input type="text" class="form-control no-margin" value="@userInfoEndPoint" name="oauthUserInfoEP" placeholder="@T["User Information Endpoint"]" id="oauth-userinfo-endpoint" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-userinfo-endpoint-required-validation" class="validation-message display-none">@T["Please enter the user information endpoint."]</span>
+                        <span id="oauth-userinfo-endpoint-pattern-validation" class="validation-message display-none">@T["Please enter a valid user information endpoint."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["URL to retrieve the user information based on the token."]</div>
+
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Issuer EndPoint"]</label>
+                    </div>
+                    <div id="oauth-issuer-endpoint-container">
+                        <input type="text" class="form-control no-margin" value="@issuerEndPoint" name="oauthIssuerEP" placeholder="@T["Issuer Endpoint (Optional)"]" id="oauth-issuer-endpoint" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-issuer-endpoint-pattern-validation" class="validation-message display-none">@T["Please enter a valid issuer endpoint."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["The URL of the authorization server that issues tokens and serves as the central identity provider for authentication and authorization requests. It is used by OAuth and OpenID Connect clients to obtain metadata, validate tokens, and interact with authentication flows."]</div>
+                </div>
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding no-margin">
+                        <label class="app-textbox-label">@T["Jwks EndPoint"]</label>
+                    </div>
+                    <div id="oauth-jwks-endpoint-container">
+                        <input type="text" class="form-control no-margin" value="@jwksEndPoint" name="oauthJwksEP" placeholder="@T["Jwks Endpoint (Optional)"]" id="oauth-Jwks-endpoint" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-jwks-endpoint-pattern-validation" class="validation-message display-none">@T["Please enter a valid jwks endpoint."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["A URL that provides the JSON Web Key Set (JWKS), containing the public keys used to verify the signatures of JSON Web Tokens (JWTs). OAuth and OpenID Connect clients use this endpoint to retrieve the keys dynamically for token validation and secure authentication."]</div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Client Id"]</label>
+                    </div>
+                    <div class="col-md-12 float-start no-padding" id="oauth-client-id-container">
+                        <input type="text" class="form-control no-margin" value="@clientId" name="oauthClientId" placeholder="@T["Client Id"]" id="oauth-client-id" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-client-id-required-validation" class="validation-message display-none">@T["Please enter the client ID."]</span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Client Secret"]</label>
+                    </div>
+                    <div class="col-md-12 float-start no-padding" id="oauth-client-secret-container" style="position:relative">
+                        <input type="password" class="form-control no-margin" name="oauthClientSecret" placeholder="@T["Client Secret"]" id="oauth-client-secret" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-client-secret-required-validation" class="validation-message display-none">@T["Please enter the client secret."]</span>
+                        <span class="show-hide-password su su-show" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Scopes"]</label>
+                    </div>
+                    <div id="oauth-scopes-container">
+                        <input type="text" class="form-control no-margin" value="@scopes" name="oauthScopes" placeholder="@T["Comma separated scopes"]" id="oauth-scopes" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-scopes-required-validation" class="validation-message display-none">@T["Please enter comma separated scopes."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["Scope is a mechanism in OAuth 2.0 to limit an application's access to a user's account. An application can request one or more scopes. This information is then presented to the user in the consent screen, and the access token issued to the application will be limited to the scopes granted."]</div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Logout Endpoint"]</label>
+                    </div>
+                    <div id="oauth-logout-endpoint-container">
+                        <input type="text" class="form-control no-margin" value="@logoutEndPoint" name="oauthLogoutEndpoint" placeholder="@T["Logout Endpoint (Optional)"]" id="oauth-logout-endpoint" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-logout-endpoint-pattern-validation" class="validation-message display-none">@T["Please enter a valid logout endpoint."]</span>
+                    </div>
+                    <div class="info-message no-padding">@T["We support logout endpoints that have static request parameters."]</div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding">
+                        <label class="app-textbox-label">@T["Redirect URI"]</label>
+                    </div>
+                    <div class="col-md-12 no-padding">
+                        <input id="oauth-callback-link" value="@(GlobalAppSettings.SystemSettings.BaseUrl + AuthenticationConfig.OAuthCallabckUrl)" class="form-control col-md-6 no-margin" readonly />
+                        <div class="form-control su su-copy text focus" id="oauth-callback-link-copy" readonly="" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to copy"]"></div>
+                    </div>
+                    <div class="info-message col-md-12 no-padding">@T["This URI is used to receive the response from the authorization server. When setting up your OAuth 2.0 application, it's essential to register the redirect URI using only lowercase characters."]</div>
+                </div>
+                @if (!GlobalAppSettings.SystemSettings.HideMobileAppRedirectURI)
+                {
+                    <div class="col-md-12 float-start no-padding input-field-margin">
+                        <div class="col-md-12 float-start no-padding">
+                            <label class="app-textbox-label">@T["Mobile App Redirect URI"]</label>
+                        </div>
+                        <div>
+                            <input id="oauth-mobile-callback-link" value="com.boldbi.dashboard://auth" class="form-control col-md-6 no-margin" readonly />
+                            <div class="form-control su su-copy text focus" id="oauth-mobile-callback-link-copy" readonly="" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to copy"]"></div>
+                        </div>
+                    </div>
+                }
+                <div class="col-md-12 float-start no-padding switch-margin">
+                    <div class="material-switch inline-align">
+                        <input type="checkbox" id="enable-oauth-account-creation" @(canCreateAccount ? "checked" : string.Empty) @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <label for="enable-oauth-account-creation" class="label-primary"></label>
+                    </div>
+                    <div class="app-textbox-label inline-align">
+                        @T["Enable User Account Creation"]
+                    </div>
+                    <div class="info-message no-padding">@T["Create a new user account during login if one does not already exist."]</div>
+                </div>
+            </div>
+            <div class="col-12 float-start separator-margin">
+                <div class="col-md-12 float-start no-padding auth-sub-title">
+                    <div class="col-md-12 float-start no-padding section-title">
+                        <span>@T["User data"]</span>
+                    </div>
+                    <div class="section-info-message">
+                        @T["The user information endpoint returns claims about the authenticated user. These claims are normally represented by a JSON object that contains a collection of name and value pairs for each claim. Fill JSON keys with respect to the required details to identify the exact values."]
+                    </div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding no-margin">
+                        <label class="app-textbox-label">@T["Email"]</label>
+                    </div>
+                    <div id="oauth-user-info-email-container">
+                        <input type="text" class="form-control no-margin" value="@userInfoEmail" name="userInfoEmail" placeholder="@T["Email"]" id="user-info-email" @(isOAuthEnabled ? string.Empty : "disabled") />
+                        <span id="oauth-user-info-email-required-validation" class="validation-message display-none">@T["Please enter the value for email."]</span>
+                    </div>
+                </div>
+
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding no-margin">
+                        <label class="app-textbox-label">@T["First Name"]</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control no-margin" value="@userInfoFirstname" name="userInfoFirstname" placeholder="@T["First Name"]" id="user-info-firstname" @(isOAuthEnabled ? string.Empty : "disabled") />
+                    </div>
+
+                </div>
+                <div class="col-md-12 float-start no-padding input-field-margin">
+                    <div class="col-md-12 float-start no-padding no-margin">
+                        <label class="app-textbox-label">@T["Last Name"]</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control no-margin" value="@userInfoLastname" name="userInfoLastname" placeholder="@T["Last Name"]" id="user-info-lastname" @(isOAuthEnabled ? string.Empty : "disabled") />
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 float-start separator-margin">
+                <div id="oauth-group-import" class="group-import">
+                    @await Html.PartialAsync("_AuthenticationGroupImportSettings", (AuthGroupImportSettings)ViewBag.OAuthDetails.OAuthAuthSettings.GroupImportSettings, new ViewDataDictionary(ViewData) { { "AuthType", AuthType.OAuth } })
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
