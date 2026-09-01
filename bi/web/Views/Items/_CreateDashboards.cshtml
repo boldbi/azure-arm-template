@@ -1,0 +1,125 @@
+﻿@{
+    Layout = null;
+    var globalAppSettings = _globalAppSettings;
+    var tenantInfoId = globalAppSettings.SystemSettings.TenantId;
+    var data = new List<TemplateDataSource>();
+    var permissions = Model as Dictionary<ItemType, bool>;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var designerServiceUrl = ServerAppConfig.GetDesignerServiceEndPointUrl(ServerAppConfig.InternalAppDataServiceUrl, _globalAppSettings, Context);
+    var themeAppearanceName = _identityResponse.ThemeAppearance;
+    var url = new Uri(Context.Request.GetDisplayUrl());
+    var requestUrl = url.AbsolutePath.ToString().ToLower();
+    var dashboardsPageUrl = Url.Action("Dashboards", "Dashboards");
+    var dataSourcePageUrl = Url.Action("DataSources", "DataSources");
+    var schedulePageUrl = Url.Action("Schedules", "Scheduler");
+    var slideshowPageUrl = Url.Action("Slideshows", "Slideshow");
+}
+
+<!DOCTYPE html>
+<head>
+    <style>
+        #create-dashboard-popup #loader-icon {
+            position: absolute;
+            margin-left: 38px;
+        }
+
+        #create-dashboard-popup .loader-gif {
+            position: absolute;
+            top: 140px;
+        }
+
+        .display-none {
+            display: none !important;
+        }
+    </style>
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var rootBaseUrl = "@Url.Content("~/")";
+        var tenantInfoId = "@tenantInfoId";
+        var getTemplateDashboardStatusUrl = "@Url.Action("GetTemplateDashboardStatus", "Dashboards")";
+        var addTemplateDashboardUrl = "@Url.Action("AddTemplateDashboard", "Dashboards")";
+        var getTemplateDashboardUrl = "@Url.Action("GetTemplateDashboards", "items")";
+        var dashboardServerResourceUrl = "@globalAppSettings.SystemSettings.CDNLink";
+        @{
+        #pragma warning disable SCS0029
+        }
+        window.templatedashboardsList = @Html.Raw(Json.Serialize(@data));
+        @{
+        #pragma warning restore SCS0029
+        }
+        var dataServiceUrl = "@designerServiceUrl.TrimEnd('/')";
+        window.templateDashboardAuthorizeServerUrl = "@(new DashboardServerApiEndPoints(globalAppSettings, true).DashboardServerApiUrl())";
+        window.templateDashboardPreviewImageBaseUrl = "@(ServerAppConfig.IsSelfHosted ? dashboardServerResourceUrl + "/cdn/css/template_dashboards/" : GlobalAppSettings.CdnDomain + "/static/template-dashboards/v2/")";
+        window.templateDashboardDatasourceImageBaseUrl = "@globalAppSettings.SystemSettings.CDNLink.TrimEnd('/')/cdn/css/designer/@themeAppearanceName.Trim()/images/datasource/";
+        window.templateDashboardConnectText = "@T["Connect your data"]";
+        window.templateDashboardLoadSampleText = "@T["Load with sample data"]";
+        window.templateDashboardWaitingAuthorizationText = "@T["Waiting for authorization..."]";
+        window.templateDashboardPreparingText = "@T["Your dashboard is being prepared. We will notify you once the dashboard is ready."]";
+        window.templateDashboardPermissionTitle = "@T["You need permission to create a new data source to connect your data."]";
+        window.canCreateDataSource = "@Json.Serialize(permissions[ItemType.Datasource])";
+        var serverAppPathBase = "@GlobalAppSettings.HttpPathBase";
+    </script>
+
+    <environment include="Development,CloudDevelopment">  
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/create-dashboard.min.js"></script>
+    </environment>
+
+    @if (requestUrl.IndexOf(dashboardsPageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(dataSourcePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(schedulePageUrl, StringComparison.OrdinalIgnoreCase) == -1 && requestUrl.IndexOf(slideshowPageUrl, StringComparison.OrdinalIgnoreCase) == -1)
+    {
+        <environment include="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.css" />
+        </environment>
+        <environment exclude="Development,CloudDevelopment">
+            <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/create-dashboard.min.css" />
+        </environment>
+    }
+</head>
+<body>
+    <div id="create-dashboard-popup" class="fluent-popup display-none custom-bootstrap-styles custom-server-style">
+        <div class="create-dashboard-popup-body no-padding">
+            <div class="temp-dashboard-title">
+                <h4 class="no-margin">@T["Select Dashboard Template"]</h4>
+                <p>@T["Quickly create a dashboard with the help of dashboard templates. Choose your required connection, build a dashboard, and share with other users within minutes."]</p>
+            </div>
+            <div id="template-listing-container" class="template-listing-container">
+                <div class="preloader-wrap" data-template-visibility="show-loader">
+                    <div id="loader_image" align="center">
+                        <div class="loader-blue loader-icon" id="loader-icon">
+                            <svg class="circular">
+                                <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 template-item no-padding">
+                    <div class="col-xs-2 template-datasource">
+                        <div id="template-datasource-search-area" class="col-12 float-start">
+                            <input type="text" id="template-datasource-search-items" class="float-start no-margin" data-template-bind="search-query" placeholder="@T["Search Template"]" />
+                            <span class="su close-icon su-inner-close float-end no-margin clear-search" data-template-action="clear-search-query" id="clear-search" title="@T["Clear search"]"></span>
+                            <span class="su su-search search-item float-end no-margin" title="@T["Search"]"></span>
+                        </div>
+                        <div class="col-12 checkbox-groups no-padding">
+                            <h1 class="template-datasource-label domain-label">@T["Domains"]</h1>
+                            <ul id="template-domain-filter-list" class="datasource-list-group"></ul>
+                            <h1 class="template-datasource-label service-label">@T["Services"]</h1>
+                            <ul id="template-service-filter-list" class="datasource-list-group"></ul>
+                        </div>
+                    </div>
+                    <div class="col-xs-10 template-dashboard-content-section no-padding">
+                        <div id="template-dashboard-cards-container"></div>
+                        <div class="empty-filter-division display-none" data-template-visibility="empty-filter">
+                            <p id="empty-filter">@T["No templates found."]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-dashboard-image-popup" class="modal">
+        <span class="create-dashboard-image-popup-close">&times;</span>
+        <img id="create-dashboard-image-popup-content">
+    </div>
+</body>

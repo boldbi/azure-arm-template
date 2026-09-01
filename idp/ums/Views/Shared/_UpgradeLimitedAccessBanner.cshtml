@@ -1,0 +1,38 @@
+@using Syncfusion.Server.Base.Core
+@{
+    var accessDecision = Context.Items["UpgradeSiteAccessDecision"] as UpgradeSiteAccessDecision;
+
+    if (accessDecision == null)
+    {
+        var upgradeStatus = await new UpgradeExecutionStatusService().GetStatusAsync(Context.RequestAborted);
+        accessDecision = UpgradeExecutionStatusService.GetSiteAccessDecision(upgradeStatus);
+    }
+
+    var UpgradeProgress = Context.Items["IsUpgradeInProgress"] as UpgradeInfo;
+
+    if(UpgradeProgress == null)
+    {
+        UpgradeProgress = await new UpgradeInfoManagement().GetUpgradeDetails();
+    }
+
+    var idPUrl = await GlobalAppSettings.GetClientServiceUrl(GlobalAppSettings.SystemSettings.InternalAppUrls.Idp, Context);
+    var upgradeCenterUrl = $"{idPUrl.TrimEnd('/')}/upgrade-center/monitor/{UpgradeProgress.JobId}";
+}
+
+@if (accessDecision?.ShowWarningBanner == true)
+{
+    <div class="upgrade-limited-access-banner" role="status" aria-live="polite" style="background: var(--warning-bg-normal-color); border-bottom: 1px solid var(--warning-border-normal-color); color: var(--primary-text-normal-color); font-size: 13px; line-height: 20px; padding: 10px 24px 10px 96px; position: relative;">
+        <strong>@T["Upgrade is in progress. "]</strong>
+        <span>@T["Existing UMS pages are available in limited mode while the database upgrade issue is being resolved. Some administrative actions may be temporarily unavailable until the upgrade completes successfully."]</span>
+        <a class="app-hyperlink" href="@Url.Content("~/error/upgrade-execution")" style="color: var(--global-link-text-normal-color); margin-left: 8px; text-decoration: underline;">@T["View upgrade details"]</a>
+    </div>
+}
+
+@if (UpgradeProgress.IsUpgradeInProgress)
+{
+    <div class="upgrade-limited-access-banner" role="status" aria-live="polite" style="background: var(--warning-bg-normal-color); border-bottom: 1px solid var(--warning-border-normal-color); color: var(--primary-text-normal-color); font-size: 13px; line-height: 20px; padding: 10px 24px 10px 96px; position: relative;">
+        <strong>@T["{0} is currently undergoing a system upgrade.", "Bold BI"]</strong>
+        <span>@T["Please avoid creating or modifying dashboards, sites, users, and application settings until the upgrade completes."]</span>
+        <a class="app-hyperlink" href="@upgradeCenterUrl" style="color: var(--global-link-text-normal-color); margin-left: 8px; text-decoration: underline;">@T["View upgrade details"]</a>
+    </div>
+}

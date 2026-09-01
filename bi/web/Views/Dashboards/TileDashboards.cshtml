@@ -1,0 +1,1456 @@
+@using Newtonsoft.Json
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
+    var globalAppSettings = _globalAppSettings;
+    ViewBag.Title = T["Dashboards"].Value + " - " + globalAppSettings.SystemSettings.OrganizationName;
+    ViewBag.HelpSiteUrl = GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.ManageDashboards);
+    var currentUserId = ViewBag.currentUserId;
+    var dashboardUrl = Url.Action("Dashboards", "Dashboards");
+    var categories = String.Empty;
+    if (ViewBag.Categories != null)
+    {
+        categories = JsonConvert.SerializeObject(ViewBag.Categories);
+    }
+    var permisions = ViewBag.ItemAddOptions;
+    var itemsCount = ViewBag.ItemsCount as Dictionary<ItemType, int>;
+    var isMobile = new DeviceDetection(Context).IsMobile;
+    var dashboardServerResourceUrl = globalAppSettings.SystemSettings.CDNLink.TrimEnd('/');
+    var dashboardDesignerResourceUrl = globalAppSettings.SystemSettings.DesignerCdnLink.TrimEnd('/');
+    var customUI = globalAppSettings.SystemSettings.CustomUI;
+    var iscustomUIProfile = customUI?.Profiles != null && customUI.Profiles[0].Dashboards != null;
+    var schemes = iscustomUIProfile ? customUI.Schemes.Where(x => x.Name == customUI.Profiles[0].Dashboards.Scheme).FirstOrDefault() : null;
+    var isAdmin = Context.Session.GetString("IsAdmin") != null && Convert.ToBoolean(Context.Session.GetString("IsAdmin"));
+    var samePagePreview = iscustomUIProfile ? customUI.Profiles[0].Dashboards.SamePagePreview : false;
+    var hideMenusAndOptions = iscustomUIProfile ? !isAdmin && customUI.Profiles[0].Dashboards.HideMenusAndOptions : false;
+    var hideAuthorName = iscustomUIProfile && (hideMenusAndOptions || (customUI.Profiles[0].Dashboards.SamePagePreviewUI != null && customUI.Profiles[0].Dashboards.SamePagePreviewUI.HideAuthorName) || (customUI.Profiles[0].Dashboards.HideAuthorName)) ? true : false;    var hideMultitabText = iscustomUIProfile && ((customUI.Profiles[0].Dashboards.SamePagePreviewUI != null && customUI.Profiles[0].Dashboards.SamePagePreviewUI.HideMultiTabText) || (customUI.Profiles[0].Dashboards.HideMultiTabText) || (customUI.Profiles[0].Dashboards.HideAuthorName)) ? true : false;
+    var hideSortOption = iscustomUIProfile ? customUI.Profiles[0].Dashboards.HideSorting : false;
+    var hideCategoryName = iscustomUIProfile ? hideMenusAndOptions || customUI.Profiles[0].Dashboards.HideCategoryName : false;
+    var hideDescription = iscustomUIProfile ? customUI.Profiles[0].Dashboards.HideDescription : false;
+    var hideModifiedDate = iscustomUIProfile ? hideMenusAndOptions || customUI.Profiles[0].Dashboards.HideModifiedDate : false;
+    var hideFavorite = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideFavorite) : false;
+    var hideDashboardsFiltering = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDashboardsFiltering) : false;
+    var hideDownloadCheckbox = iscustomUIProfile ? (hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDownloadCheckbox)) : (ServerAppConfig.CanHideDownloadDashboard || false);
+    var hideDownload = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDownload) : false;
+    var hideFilterOverView = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideFilterOverView) : false;
+    var hideEdit = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideEdit) : false;
+    var hideMakePublic = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideMakePublic) : false;
+    var hideMakePrivate = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideMakePrivate) : false;
+    var hideGetLink = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideGetLink) : false;
+    var hideViews = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideViews) : false;
+    var hideViewSchedules = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideViewSchedules) : false;
+    var hideInfo = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideInfo) : false;
+    var hideSecurity = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideSecurity) : false;
+    var hideMove = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideMove) : false;
+    var hideCopy = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideCopy) : false;
+    var hideCreateSchedule = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideCreateSchedule) : false;
+    var hideVersionHistory = iscustomUIProfile ?  hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideVersionHistory) : false;
+    var hideDelete = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideDelete) : false;
+    var hideShare = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideShare) : false;
+    var hidePublish = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HidePublish) : false;
+    var hideContextMenu = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideContextMenu) : false;
+    var hideTabSecurity = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideTabSecurity) : false;
+    var hideGetEmbedCode = iscustomUIProfile ? hideMenusAndOptions || (!isAdmin && customUI.Profiles[0].Dashboards.HideGetEmbedCode) : false;
+    var customSortOption = customUI?.Profiles != null && !string.IsNullOrWhiteSpace(customUI.Profiles[0].ItemSorting) ? customUI.Profiles[0].ItemSorting : null;
+    var customSortName = customSortOption != null && (customSortOption.ToLower() == "itemnameascending" || customSortOption.ToLower() == "itemnamedescending") ? "Name" : globalAppSettings.SystemSettings.ResourceType;
+    var customSortDirection = customSortOption != null && customSortOption.ToLower() == "itemnameascending" ? "ascending" : globalAppSettings.SystemSettings.ResourceOrder.ToLower();
+    var usageAnalytics = globalAppSettings.SystemSettings.UsageAnalytics;
+    var getDashboardEmbedCode = globalAppSettings.SystemSettings.GetDashboardEmbedCode;
+    bool hideDashboardInfoSection = samePagePreview ? hideAuthorName && hideCategoryName : hideAuthorName && hideCategoryName && hideModifiedDate;
+    var granularPermissions = ViewBag.GranularPermissions as Dictionary<object, bool>;
+    var itemAddPermissions = ViewBag.ItemAddOptions as Dictionary<ItemType, bool>;
+    var partialViewsUrl = Url.Action("LoadPartialViews", "PartialView") + "?v=" + ServerAppConfig.ProductVersion + "&c=" + @System.Globalization.CultureInfo.CurrentCulture + "&isMobile=" + isMobile + "&page=" + (int)ItemType.Dashboard + "&nonce=" + Context.Items["ScriptNonce"];
+    var canCreateCategory = itemAddPermissions[ItemType.Category];
+    var hacCreateDataSourcePermission = itemAddPermissions.ContainsKey(ItemType.Datasource) && itemAddPermissions[ItemType.Datasource];
+    var itemsPartialScript = string.Empty;
+    var isSharePublishAllowed = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var isOracleDB = _globalAppSettings.DBSupport == DatabaseType.Oracle;
+    var isDataSourceCreateDenied = GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri);
+    var dataSourceCreateLimitCount = !ServerAppConfig.IsSelfHosted && !string.IsNullOrWhiteSpace(ServerAppConfig.AppSettings.DataSourceCreateLimitCount) ? ServerAppConfig.AppSettings.DataSourceCreateLimitCount : string.Empty;
+    var canHideUploadDashboard =  GlobalAppSettings.IsUrlInDnsList(globalAppSettings.DisplayUri) && !_identityResponse.IsAdmin;
+    var isSingleDatabaseMode = globalAppSettings.SystemSettings.ConfigurationMode == ConfigurationMode.SingleDatabaseForAllTenants;
+    var isSandbox = ServerAppConfig.Sandbox.BI.Enabled;
+    var applicationUrl = _globalAppSettings.SystemSettings.BaseUrl.TrimEnd('/');
+    var defaultDashboardOwnerName = Context.Session.GetString("displayname") ?? string.Empty;
+    var requestedCategory = Context.Request.Query["category"].ToString();
+    var hasRequestedCategory = !string.IsNullOrWhiteSpace(requestedCategory);
+    var initialDashboardHeaderLabel = hasRequestedCategory ? requestedCategory : T["All Dashboards"].Value;
+}
+
+<environment include="Development,CloudDevelopment">
+    @{
+        itemsPartialScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/items-partial-page.js");
+    }
+</environment>
+@section styles{
+    <style>
+        .display-none {
+            display: none !important;
+        }
+    </style>
+}
+
+<environment exclude="Development,CloudDevelopment">
+    @{
+        itemsPartialScript = this.Context.RequestServices.GetRequiredService<IFileVersionProvider>().AddFileVersionToPath(GlobalAppSettings.HttpPathBase, dashboardServerResourceUrl + "/cdn/scripts/items-partial-page.min.js");
+    }
+</environment>
+@section scripts{
+    <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var partialViewsUrl = @Json.Serialize(partialViewsUrl);
+        var itemsPartialScript = @Json.Serialize(itemsPartialScript);
+        var isMobile = @Json.Serialize(isMobile);
+        var buildVersion = "@ServerAppConfig.ProductVersion";
+
+        var dashboardItemsPartialLoadPromise = null;
+        window.loadDashboardItemsPartialResources = function () {
+            if (dashboardItemsPartialLoadPromise) {
+                return dashboardItemsPartialLoadPromise;
+            }
+
+            dashboardItemsPartialLoadPromise = $.ajax({
+                type: "GET",
+                url: partialViewsUrl,
+                async: true,
+                success: function (response) {
+                    $('#server-app-container #content-area').append(response);
+
+                    var nonceValue = nonce; // Inject nonce into JS
+
+                    var preloadLink = document.createElement("script");
+                    preloadLink.type = "text/javascript";
+                    preloadLink.src = itemsPartialScript;
+                    preloadLink.setAttribute("nonce", nonceValue);
+                    document.head.appendChild(preloadLink);
+
+                    var preloadLink1 = document.createElement("script");
+                    preloadLink1.type = "text/javascript";
+                    preloadLink1.src = createSlideshowScript;
+                    preloadLink1.setAttribute("nonce", nonceValue);
+                    document.head.appendChild(preloadLink1);
+
+                    var preloadLink2 = document.createElement("script");
+                    preloadLink2.type = "text/javascript";
+                    preloadLink2.src = itemActionScript;
+                    preloadLink2.setAttribute("nonce", nonceValue);
+                    document.head.appendChild(preloadLink2);
+                },
+            });
+
+            return dashboardItemsPartialLoadPromise;
+        };
+    </script>
+
+}
+
+@section MainSection{
+    @Html.AntiForgeryToken()
+    <environment include="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tile-dashboards-page.css" />
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+    </environment>
+    <environment exclude="Development,CloudDevelopment">
+        <link rel="stylesheet" asp-append-version="true" href="@dashboardServerResourceUrl/cdn/css/tile-dashboards-page.min.css" />
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardServerResourceUrl/cdn/scripts/tile-dashboards-page.min.js"></script>
+         <script nonce="@Context.Items["ScriptNonce"]" asp-append-version="true" src="@dashboardDesignerResourceUrl/cdn/scripts/designer/ej2.web.all.min.js"></script>
+    </environment>
+
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        var searchKey = '@Html.Encode(ViewBag.searchKey)';
+        var getItemUrl = "@Url.Action("GetItems", "Dashboards")";
+        var getRecommendedItemsUrl = "@Url.Action("GetRecommendedItems", "Dashboards")";
+        var getInitialDashboardViewUrl = "@Url.Action("GetInitialDashboardView", "Dashboards")";
+        var isCategoryExistUrl = "@Url.Action("iscategoryexist", "category")";
+        var addCategoryUrl = "@Url.Action("addcategory", "category")";
+        var addSubCategoryUrl = "@Url.Action("addSubCategory", "category")";
+        var setLanguageUrl = "@Url.Action("SetLanguage", "Administration")";
+        var getCategoryItem = "@Url.Action("RefreshCategoryList", "Dashboards")";
+        var editcategoryUrl = "@Url.Action("editcategory", "category")";
+        var favoriteItemUrl = "@Url.Action("MakeFavorite", "items")";
+        var getCategories = "@Url.Action("RefreshCategoryList", "Dashboards")";
+        var viewDashboardUrlAction = "@Url.Action("Dashboards", "Dashboards")";
+        var editDashboardUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var makePublicUrl = "@Url.Action("makeitempublic", "items")";
+        var removePublicUrl = "@Url.Action("RemovePublic", "items")";
+        var makeUnlistUrl = "@Url.Action("MakeItemUnlist", "items")";
+        var privacySettingsUrl = "@Url.Action("PrivacySettings", "items")";
+        var getLinkDialogViewUrl = "@Url.Action("GetLinkView", "items")";
+        var viewSchedulesUrl = "@Url.Action("Schedules", "Scheduler")";
+        var copyIframeUrl = "@Url.Action("copyviewitem", "items")";
+        var movemultitabIframeUrl = "@Url.Action("movemultitabviewitem", "items")";
+        var copyMultiTabDashboardUrl = "@Url.Action("copymultiviewitem", "items")";
+        var moveIframeUrl = "@Url.Action("moveviewitem", "items")";
+        var getdashboarddetailsUrl = "@Url.Action("getdashboarddetails", "dashboards")";
+        var getDataSourceDetailsUrl = "@Url.Action("getdatasources", "dashboards")";
+        var deleteItemUrl = "@Url.Action("deleteitem", "items")";
+        var deleteConfirmationUrl = "@Url.Action("deleteconfirmation", "items")";
+        var getViewsByItemIdUrl = "@Url.Action("GetViewsByItemId","Items")";
+        var dashboardsUrl = "@Url.Action("dashboards", "dashboards")";
+        var itemSettingsAccessUrl = "@Url.Action("itemsettingsaccess", "dashboards")";
+        var downloadIframeUrl = "@Url.Action("DownloadViewItem", "items")";
+        var downloadedResourcesUrl = "@Url.Action("GetPublishedItems", "publish")" + "?tab=offline-files";
+        var uploadIframeUrl = "@Url.Action("UploadIframe", "Dashboards")";
+        var uploadDashboardStatusUrl = "@Url.Action("UploadDashboardStatus", "Dashboards")";
+        var editDashboardEmbedUrl = "@Url.Action("DashboardDesigner", "Designer")";
+        var checkCategoriesExistUrl = "@Url.Action("CheckCategoriesExist", "Dashboards")";
+        var validateDataSourceCountUrl = "@Url.Action("ValidateDataSourceCreateLimit", "Items")";
+        var resourceLimitationCountUrl = "@Url.Action("ResourceCreateLimit", "Items")";
+        var updateDashboardLogoUrl = "@Url.Action("UpdateDashboardLogo", "Dashboards")";
+        var profileSettingsUrl = "@Url.Action("UpdateProfileSettings", "User")";
+        var fileUploadUrl = "@Url.Action("Upload", "fileupload")";
+        var bulkMoveDashboards = "@Url.Action("movebulkdashboard", "items")";
+        var downloadFailedMovesCsv = "@Url.Action("downloadfailedmovescsv", "items")";
+        var moveDashboardNamesAreValid = "@Url.Action("dashboardnamevalidation", "items")";
+        var applicationUrl = "@applicationUrl";
+        var currentUserId = @currentUserId;
+        var defaultDashboardOwnerName = @Json.Serialize(defaultDashboardOwnerName);
+        var isMaster = @Json.Serialize(globalAppSettings.SystemSettings.IsMaster);
+        var isSelfHosted = @Json.Serialize(ServerAppConfig.IsSelfHosted);
+        var isMarkItemsPublic = @Json.Serialize(globalAppSettings.SystemSettings.IsMarkItemsPublic);
+        var isAdmin = @Json.Serialize(Convert.ToBoolean(Context.Session.GetString("IsAdmin")));
+        var samePagePreview = @Json.Serialize(samePagePreview);
+        var isSharePublishAllowed = @Json.Serialize(isSharePublishAllowed);
+        var hideAuthorName = @Json.Serialize(hideAuthorName);
+        var hideMultitabText = @Json.Serialize(hideMultitabText);
+        var hideSortOption = @Json.Serialize(hideSortOption);
+        var hideCategoryName = @Json.Serialize(hideCategoryName);
+        var hideDescription = @Json.Serialize(hideDescription);
+        var hideModifiedDate = @Json.Serialize(hideModifiedDate);
+        var hideDashboardInfoSection = @Json.Serialize(hideDashboardInfoSection);
+        var hideFilterOverView = @Json.Serialize(hideFilterOverView);
+        var hideEdit = @Json.Serialize(hideEdit);
+        var hideMakePublic = @Json.Serialize(hideMakePublic);
+        var hideMakePrivate = @Json.Serialize(hideMakePrivate);
+        var hideGetLink = @Json.Serialize(hideGetLink);
+        var hideViews = @Json.Serialize(hideViews);
+        var hideViewSchedules = @Json.Serialize(hideViewSchedules);
+        var hideInfo = @Json.Serialize(hideInfo);
+        var hideSecurity = @Json.Serialize(hideSecurity);
+        var hideMove = @Json.Serialize(hideMove);
+        var hideCopy = @Json.Serialize(hideCopy);
+        var hideCreateSchedule = @Json.Serialize(hideCreateSchedule);
+        var hideVersionHistory = @Json.Serialize(hideVersionHistory);
+        var hideDelete = @Json.Serialize(hideDelete);
+        var hideShare = @Json.Serialize(hideShare);
+        var hidePublish = @Json.Serialize(hidePublish);
+        var hideDownloadCheckbox = @Json.Serialize(hideDownloadCheckbox);
+        var hideDownload = @Json.Serialize(hideDownload);
+        var hideDashboardsFiltering = @Json.Serialize(hideDashboardsFiltering);
+        var hideFavorite = @Json.Serialize(hideFavorite);
+        var hideContextMenu = @Json.Serialize(hideContextMenu);
+        var hideTabSecurity = @Json.Serialize(hideTabSecurity);
+        var hideGetEmbedCode = @Json.Serialize(hideGetEmbedCode);
+        var canHideUploadDashboard = @Json.Serialize(canHideUploadDashboard);
+                @{
+                    // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
+        var schemesDetails = @Html.Raw(Json.Serialize(schemes));
+               @{
+           #pragma warning restore SCS0029
+               }
+        var usageAnalytics = @Json.Serialize(usageAnalytics);
+        var getDashboardEmbedCode = @Json.Serialize(getDashboardEmbedCode);
+        var designerInstallationHelpUrl = "@(ServerAppConfig.AppSettings.Documentation.BaseUri + GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.DesignerInstallation))";
+        var usageAnalyticsHelpUrl = helpSiteBaseUrl + "@GlobalAppSettings.GetHelpSiteUrl(HelpSiteUrlNames.UsageAnalyticsDashboard)";
+        var categoryList;
+        if ('@categories' != '') {
+             @{ // Suppressing SCS0029 because no direct user input handled
+ #pragma warning disable SCS0029
+ }
+            categoryList = @Html.Raw(categories);
+                   @{
+               #pragma warning restore SCS0029
+                   }
+        }
+        else {
+            categoryList = "";
+        }
+                @{
+                    // Suppressing SCS0029 because no direct user input handled
+    #pragma warning disable SCS0029
+        }
+        var granularPermissions = @Html.Raw(JsonConvert.SerializeObject(granularPermissions));
+            @{
+        #pragma warning restore SCS0029
+            }
+        var enableCloneDashboard = @Json.Serialize(ServerAppConfig.EnableClone);
+        var dashboardItemCount = "@itemsCount[ItemType.Dashboard]";
+        var sortOption = [{ "Name": '@customSortName', "Direction": '@customSortDirection' }];
+        var enableSameTabLinkTarget = @ServerAppConfig.EnableSameTabLinkTarget.ToString().ToLower();
+
+        // Quick Access Tab Preference - initialize from ViewBag or default to "Recent"
+        var quickAccessTabPreference = @Json.Serialize(ViewBag.QuickAccessTab ?? "Recent");
+        window.quickAccessTabPreference = quickAccessTabPreference;
+        
+        // Current AutosaveFilter setting - needed when saving preferences
+        var currentAutosaveFilterSetting = @Json.Serialize(ViewBag.DashboardSettings ?? false);
+        window.currentAutosaveFilterSetting = currentAutosaveFilterSetting;
+
+        var canCreateCategory = @Json.Serialize(canCreateCategory);
+        var hacCreateDataSourcePermission = "@hacCreateDataSourcePermission"
+        var copyItemType = "@Convert.ToInt32(ItemType.Dashboard)";
+        var isDataSourceCreateDenied = @Json.Serialize(isDataSourceCreateDenied);
+        var dataSourceCreateLimitCount = "@dataSourceCreateLimitCount";
+
+        // Feature flag remains off by default; vanilla manager is initialized safely for staged migration.
+        window.__useVanillaDashboardListing = window.__useVanillaDashboardListing === true;
+        window.__useVanillaDashboardListingCategoryRenderer = window.__useVanillaDashboardListingCategoryRenderer === true;
+        window.__useVanillaDashboardListingTileRenderer = window.__useVanillaDashboardListingTileRenderer === true;
+        window.__useVanillaDashboardListingBulkActions = window.__useVanillaDashboardListingBulkActions === true;
+        window.__useVanillaDashboardListingPreviewSync = window.__useVanillaDashboardListingPreviewSync === true;
+        window.__useVanillaDashboardListingCategoryActions = window.__useVanillaDashboardListingCategoryActions !== false;
+        if (window.DashboardListingManager && typeof window.DashboardListingManager.init === "function") {
+            window.DashboardListingManager.init({
+                endpoints: {
+                    getItems: getItemUrl,
+                    refreshCategoryList: getCategories,
+                    makeFavorite: favoriteItemUrl
+                },
+                settings: {
+                    isMobile: isMobile,
+                    samePagePreview: samePagePreview,
+                    useCategoryRenderer: window.__useVanillaDashboardListingCategoryRenderer,
+                    useDashboardTileRenderer: window.__useVanillaDashboardListingTileRenderer,
+                    useBulkActions: window.__useVanillaDashboardListingBulkActions,
+                    useSamePagePreviewSync: window.__useVanillaDashboardListingPreviewSync
+                }
+            });
+        }
+    </script>
+    @if (samePagePreview && !isMobile)
+    {
+        <div class="preloader-wrap viewer-blue-loader" style="width: 100%;height: 100%; position: fixed; top: 0; bottom: 0; background: white; z-index : 2;">
+            <div id="loader_image" align="center" style="position:relative;top:45%;">
+                <div class="loader-blue loader-icon" id="loader-icon">
+                    <svg class="circular">
+                        <circle class="path" cx="27" cy="27" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"></circle>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    }
+    @if (itemsCount != null && itemsCount.ContainsKey(ItemType.Dashboard) && itemsCount[ItemType.Dashboard] > 0)
+    {
+        <div class="dashboard-main-container no-padding">
+            <div id="dashboard-page-container" class="admin-page-container no-padding">
+                <div class="mobile-header col-12 display-none" data-mobile-category-toggle="true">
+                    <span class="category-icon su" data-mobile-header-icon="main"></span>
+                    <span class="mobile-category-title" data-mobile-header-title="main">@T["All Dashboards"]</span>
+                    <span class="su no-margin mobile-section-expand-collapse" data-mobile-header-expand="main"></span>
+                </div>
+
+                @if (samePagePreview)
+                {
+                    <div id="category-panel-dropdown" class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                            <span class="category-icon su" data-mobile-header-icon="dropdown"></span>
+                            <span class="mobile-category-title" data-mobile-header-title="dropdown">@T["All"]</span>
+                            <span class="su no-margin mobile-section-expand-collapse" data-mobile-header-expand="dropdown"></span>
+                        </button>
+                        <ul class="dropdown-menu category-bar-ul">
+                            <li class="category-item" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.AllDashboards)" data-category-label="@T["All Dashboards"]">
+                                <span class="category-icon su su-all-dashboards"></span>
+                                <span class="category-bar-header all-dashboard-header">@T["All"]</span>
+                            </li>
+                            <li class="category-item" id="draft-items" data-category-static="drafts" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.DraftItems)" data-category-label="@T["Drafts"]">
+                                <span class="category-icon su su-clock"></span>
+                                <span class="category-bar-header">@T["Drafts"]</span>
+                            </li>
+                            <li class="category-item" id="upload-draft-items" data-category-static="upload-drafts" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.UploadDrafts)" data-category-label="@T["Upload Drafts"]">
+                                <span class="category-icon su su-clock"></span>
+                                <span class="category-bar-header">@T["Upload Drafts"]</span>
+                            </li>
+                            @if (!isSingleDatabaseMode)
+                            {
+                                <li class="category-item display-none" data-category-static="usage-analytics" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.UsageAnalytics)" data-category-label="@T["Usage Analytics"]">
+                                    <span class="category-icon su su-nav-dashboard"></span>
+                                    <span class="category-bar-header">@T["Enterprise Insights"]</span>
+                                </li>
+                            }
+                            <li class="category-list">
+                                <div class="col-12 no-padding category-list-container">
+                                    <div class="col-12 no-padding category-name-section" data-expand-category="true">
+                                        <span class="category-icon su su-categoried-dashboard"></span>
+                                        <span class="category-bar-header">@T["Categories"]</span>
+                                    </div>
+                                    <div class="category-sort-container no-padding">
+                                        <div id="category-sort-dropdown" class="col-10 category-filter-sort listing-dropdown dropdown no-padding">
+                                            <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                                                <span class="col-2 no-padding sort-icon">
+                                                    <span class="category-select-options">
+                                                        <i class="su su-sort"></i>
+                                                    </span>
+                                                </span>
+                                            </button>
+                                            <ul class="dropdown-menu category-sort-filter-menu">
+                                                <li data-category-sort="true" data-sort-name="Name" data-sort-direction="descending">
+                                                    <a class="category-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Name - Descending"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-category-sort="true" data-sort-name="Name" data-sort-direction="ascending">
+                                                    <a class="category-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Name - Ascending"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-category-sort="true" data-sort-name="ModifiedDate" data-sort-direction="descending">
+                                                    <a class="category-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Modified - Descending"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-category-sort="true" data-sort-name="ModifiedDate" data-sort-direction="ascending">
+                                                    <a class="category-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Modified - Ascending"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-category-sort="true" data-sort-name="Count" data-sort-direction="descending">
+                                                    <a class="category-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Count - Descending"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-category-sort="true" data-sort-name="Count" data-sort-direction="ascending">
+                                                    <a class="category-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Count - Ascending"]</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 no-padding display-none category-slide" data-category-visibility="slide-panel">
+                                    <div class="category-search-area">
+                                        <input type="password" name="password" style="display:none;">
+                                        <input type="text" class="category-search-box float-start no-margin" data-category-search="true" placeholder="@T["Search Categories"]" />
+                                        <span class="su close-icon su-inner-close float-end no-margin display-none" data-category-search-icon="clear" data-category-search-clear="true" data-bs-toggle="clear-tooltip" data-container="body" title="@T["Clear search"]"></span>
+                                        <span class="su su-search float-end no-margin" data-category-search-icon="search" title="@T["Search"]" data-bs-toggle="search-tooltip"></span>
+                                    </div>
+                                    <div id="parent-category-scroll-element">
+                                        <div id="category-scroll-element" class="col-12 no-padding">
+                                            <div id="category-scroll-content" class="col-12 no-padding">
+                                                <ul class="col-12 no-padding" data-categorylevel0-list="true" data-categorylevel0-variant="primary"></ul>
+                                                
+                                                <div class="category-empty-message-div col-12 display-none" data-category-visibility="empty-message">
+                                                    <span class="category-empty-message">@T["No categories available to display."]</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class=" col-3 dashboard-sort-container display-none no-padding" data-dashboard-visibility="sort-container">
+                            <div id="dashboard-sort-dropdown" class="col-10 dashboard-filter-sort listing-dropdown dropdown no-padding">
+                                <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                                    <span class="col-2 no-padding sort-icon">
+                                        <span class="dashboard-select-options">
+                                            <i class="su su-sort"></i>
+                                        </span>
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dashboard-sort-filter-menu">
+                                        <li data-dashboard-sort="true" data-sort-name="Name" data-sort-direction="descending">
+                                            <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Name - Descending"]</span>
+                                            </a>
+                                        </li>
+                                        <li data-dashboard-sort="true" data-sort-name="Name" data-sort-direction="ascending">
+                                            <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Name - Ascending"]</span>
+                                            </a>
+                                        </li>
+                                        <li data-dashboard-sort="true" data-sort-name="ModifiedDate" data-sort-direction="descending">
+                                            <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Modified - Descending"]</span>
+                                            </a>
+                                        </li>
+                                        <li data-dashboard-sort="true" data-sort-name="ModifiedDate" data-sort-direction="ascending">
+                                            <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Modified - Ascending"]</span>
+                                            </a>
+                                        </li>
+                                        <li data-dashboard-sort="true" data-sort-name="LastAccessedDate" data-sort-direction="descending">
+                                            <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Last Accessed - Descending"]</span>
+                                            </a>
+                                        </li>
+                                        <li data-dashboard-sort="true" data-sort-name="LastAccessedDate" data-sort-direction="ascending">
+                                            <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                                <span class="search-option">@T["Last Accessed - Ascending"]</span>
+                                            </a>
+                                        </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-3 dashboard-filter-container no-padding no-margin display-none" data-dashboard-visibility="filter-container">
+                            <div id="dashboard-filter-dropdown" class="col-10 dashboard-filter-sort listing-dropdown dropdown no-padding" data-dashboard-visibility="filter-dropdown">
+                                <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                                    <span class="col-2 filter-icon" data-dashboard-visibility="filter-icon">
+                                        <span class="dashboard-select-options">
+                                            <i class="su su-filter"></i>
+                                        </span>
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dashboard-sort-filter-menu dashboard-listing-type-list">
+                                    <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.AllDashboards)">
+                                        <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                            <span class="search-option">@T["All"]</span>
+                                        </a>
+                                    </li>
+                                    <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.FavouriteItems)">
+                                        <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                            <span class="search-option">@T["Favorites"]</span>
+                                        </a>
+                                    </li>
+                                    <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.PublicItems)">
+                                        <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                            <span class="search-option">@T["Public"]</span>
+                                        </a>
+                                    </li>
+                                    <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.OwnedByMe)">
+                                        <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                            <span class="search-option">@T["Owned by me"]</span>
+                                        </a>
+                                    </li>
+                                    <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.SharedWithMe)">
+                                        <a class="dashboard-sort-options" href="#">
+                                            <i class="su su-tick"></i>
+                                            <span class="search-option">@T["Shared with me"]</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div id="category-panel">
+                    <ul class="category-bar-ul">
+                        <li class="category-item" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.AllDashboards)" data-category-label="@T["All Dashboards"]">
+                            <span class="category-icon su su-all-dashboards"></span>
+                            <span class="category-bar-header">@T["All"]</span>
+                        </li>
+                        <li class="category-item" id="draft-items" data-category-static="drafts" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.DraftItems)" data-category-label="@T["Drafts"]">
+                            <span class="category-icon su su-clock clock-listing-icon"></span>
+                            <span class="category-bar-header">@T["Drafts"]</span>
+                        </li>
+                        <li class="category-item" id="upload-draft-items" data-category-static="upload-drafts" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.UploadDrafts)" data-category-label="@T["Upload Drafts"]">
+                            <span class="category-icon su su-clock clock-listing-icon"></span>
+                            <span class="category-bar-header">@T["Upload Drafts"]</span>
+                        </li>
+                        @if (!isSingleDatabaseMode)
+                        {
+                            <li class="category-item display-none" data-category-static="usage-analytics" data-dashboard-category="true" data-category-value="@((int)DisplayCategory.UsageAnalytics)" data-category-label="@T["Usage Analytics"]">
+                                <span class="category-icon su su-nav-dashboard"></span>
+                                <span class="category-bar-header">@T["Enterprise Insights"]</span>
+                            </li>
+                        }
+                        <li class="category-list">
+                            <div class="col-12 no-padding category-list-container">
+                                <div class="col-12 no-padding category-name-section" data-expand-category="true">
+                                    <span class="category-icon su su-categoried-dashboard"></span>
+                                    <span class="category-bar-header">@T["Categories"]</span>
+                                </div>
+                                <div class="category-sort-container no-padding">
+                                    <div id="category-sort-dropdown" class="col-10 category-filter-sort listing-dropdown dropdown no-padding">
+                                        <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                                            <span class="col-2 no-padding sort-icon">
+                                                <span>
+                                                    <i class="su su-sort"></i>
+                                                </span>
+                                            </span>
+                                        </button>
+                                        <ul class="dropdown-menu category-sort-filter-menu">
+                                            <li data-category-sort="true" data-sort-name="Name" data-sort-direction="descending">
+                                                <a class="category-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Name - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-category-sort="true" data-sort-name="Name" data-sort-direction="ascending">
+                                                <a class="category-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Name - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-category-sort="true" data-sort-name="ModifiedDate" data-sort-direction="descending">
+                                                <a class="category-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Modified - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-category-sort="true" data-sort-name="ModifiedDate" data-sort-direction="ascending">
+                                                <a class="category-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Modified - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-category-sort="true" data-sort-name="Count" data-sort-direction="descending">
+                                                <a class="category-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Count - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-category-sort="true" data-sort-name="Count" data-sort-direction="ascending">
+                                                <a class="category-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Count - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 no-padding display-none category-slide" data-category-visibility="slide-panel">
+                                <div class="category-search-area float-end">
+                                    <input type="password" name="password" style="display:none;">
+                                    <input type="text" class="category-search-box float-start no-margin" data-category-search="true" placeholder="@T["Search Categories"]" />
+                                    <span class="su close-icon su-inner-close float-end no-margin display-none" data-category-search-icon="clear" data-category-search-clear="true" data-bs-toggle="clear-tooltip" data-container="body" title="@T["Clear search"]"></span>
+                                    <span class="su su-search float-end no-margin" data-category-search-icon="search" title="@T["Search"]" data-bs-toggle="search-tooltip"></span>
+                                </div>
+                                <div id="parent-category-scroll-element">
+                                    <div id="category-scroll-element" class="col-12 no-padding">
+                                        <div id="category-scroll-content" class="col-12 no-padding">
+                                            <ul class="col-12 no-padding" data-categorylevel0-list="true" data-categorylevel0-variant="secondary"></ul>
+
+                                            <div class="category-empty-message-div col-12 display-none" data-category-visibility="empty-message">
+                                                <span class="category-empty-message">@T["No categories available to display."]</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                               </div>
+                           </div>
+                       </li>
+                   </ul>
+                </div>
+                <div id="dashboard-list-panel" class="no-padding">
+                    <div class="dashboard-header-container col-12" data-dashboard-layout="header-container" data-dashboard-visibility="desktop-header">
+                        <span class="col-4 dashboards-header">
+                            <span class="col-12 no-padding dashboard-header-info">
+                                <span class="dashboard-page-title"
+                                      data-dashboard-header-text="page-title"
+                                      data-title-dashboards="@T["Dashboards"]"
+                                      data-title-favorites="@T["Favorite Dashboards"]"
+                                      data-title-public="@T["Public Dashboards"]"
+                                      data-title-owned="@T["Owned by me"]"
+                                      data-title-shared="@T["Shared with me"]"
+                                      data-title-drafts="@T["Draft Dashboards"]"
+                                      data-title-upload-drafts="@T["Upload Drafts"]"
+                                      data-title-enterprise-insights="@T["Enterprise Insights"]">@T["Dashboards"]</span>
+                                <span class="dashboard-page-count display-none" data-dashboard-visibility="dashboard-count" data-dashboard-text="dashboard-count"></span>
+                             </span>
+                            <span class="dashboard-page-subtitle float-start"
+                                  data-dashboard-header-text="page-subtitle"
+                                  data-subtitle-dashboards="@T["View and manage dashboards across categories."]"
+                                  data-subtitle-favorites="@T["View and manage your favorite dashboards."]"
+                                  data-subtitle-public="@T["View and manage public dashboards."]"
+                                  data-subtitle-owned="@T["View and manage dashboards owned by you."]"
+                                  data-subtitle-shared="@T["View and manage dashboards shared with you."]"
+                                  data-subtitle-drafts="@T["View and manage draft dashboards."]"
+                                  data-subtitle-upload-drafts="@T["View and manage uploaded draft dashboards."]"
+                                  data-subtitle-enterprise-insights="@T["View dashboard usage and performance insights."]"
+                                  data-subtitle-category="@T["View and manage dashboards in this category."]">@T["View and manage dashboards across categories."]</span>
+                        </span>
+                        @if(!samePagePreview){
+                            <div class="col-3 top-nav-sec no-padding">
+                                @await Html.PartialAsync("../Shared/_TopMenu")
+                            </div>
+                        }
+                        <div class="item-searchbox-container col-5" data-hide-on-usage-analytics="true" data-dashboard-layout="header-searchbox">
+                            <span data-dashboard-visibility="mobile-search-trigger" data-mobile-search-trigger="true" class="su su-search float-end mobile-dashboard-search display-none"></span>
+                            <div data-dashboard-visibility="dashboard-search-area" class="col-3 no-padding no-margin dashboard-search-area float-end">
+                                <span class="su su-inner-close float-end no-margin display-none" data-dashboard-search-icon="clear" data-dashboard-search-clear="true" data-bs-html="true" title="<span class='clear-search-tooltip'>@T["Clear search"]</span>" data-container="body" data-bs-toggle="clear-tooltip" data-bs-placement="bottom"></span>
+                                <span class="su su-search float-end no-margin" data-dashboard-search-icon="search" title="@T["Search"]" data-bs-toggle="search-tooltip" data-container="body" data-bs-placement="bottom"></span>
+                                <input type="password" name="password" style="display:none;">
+                                <input type="text" id="dashboard-search-items" class="float-end no-margin" data-dashboard-search="true" placeholder="@T["Search dashboards"]" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 recommended-content-container display-none" id="recommended-content-container" data-dashboard-visibility="recently-accessed-section">
+                        <div class="recently-accessed-header">
+                            <div class="recently-accessed-header-title-group">
+                                <span class="card-title" id="recommended-section-title">@T["Quick Access"]</span>
+                                <div class="recently-accessed-tabs" role="tablist" aria-label="@T["Quick access tabs"]">
+                                    <button type="button" class="btn btn-default" data-quick-access-tab="recent">@T["Recent"]</button>
+                                    <button type="button" class="btn btn-default" data-quick-access-tab="favorite">@T["Favorites"]</button>
+                                </div>
+                            </div>
+                            <div class="recently-accessed-header-actions">
+                                <div class="recently-accessed-mode-toggle" role="group" aria-label="@T["Quick access view mode"]">
+                                    <button type="button" class="btn btn-default" data-recent-mode="compact">@T["Compact"]</button>
+                                    <button type="button" class="btn btn-default active" data-recent-mode="card">@T["Card"]</button>
+                                </div>
+                                <button type="button" class="btn btn-link recently-accessed-view-all" data-recent-view-all="true">@T["View all"]</button>
+                            </div>
+                        </div>
+                        <div class="recently-accessed-info display-none" data-recent-info="true">
+                            @T["Sorted by last accessed. Select All to return to the default listing."]
+                        </div>
+                        <div class="recently-accessed-empty-message display-none" data-quick-access-empty></div>
+                        <div class="row card-row recently-accessed-card-row" id="recommended-items-list" data-dashboard-list="recommended-items"></div>
+                    </div>
+                    <div class="dashboard-action-container col-12" data-hide-on-usage-analytics="true">
+                            <div class="dashboard-select-all no-padding no-margin" data-dashboard-layout="select-all" data-dashboard-visibility="select-all-container">
+                                @Html.CheckBox("dashboard-list-select-all", false, new { @class = "material-checkbox", @autocomplete = "off", data_dashboard_select_all = "true" })
+                                <label for="dashboard-list-select-all" class="dashboard-select-all-checkbox"></label>
+                                <span class="col-4 download-icon" data-bulk-download-trigger="true" style="display:none">
+                                    <span class="dashboard-select-options">
+                                        <i class="su su-download"></i>
+                                        <span class="download-text">@T["Download"]</span>
+                                    </span>
+                                </span>
+                                <button class="btn btn-default upload-button" type="button" data-dashboard-visibility="upload-button" style="display:none">
+                                    <span class="col-2 upload-icon no-padding">
+                                        <span class="dashboard-select-options">
+                                            <i class="su su-upload"></i>
+                                        </span>
+                                    </span>
+                                    <span class="selected selected-field">@T["Complete Upload"]</span>
+                                </button>
+                                <label id="action-separator" class="sf-nav-separator action-separator"></label>
+                            </div>
+                        <div class="dashboard-management-heading" data-dashboard-visibility="management-heading">
+                            <span class="dashboard-category-name" data-dashboard-header-text="active-menu-label" data-container="body" data-bs-toggle="dashboard-list-tooltip" data-original-title="@initialDashboardHeaderLabel" data-bs-placement="bottom">@initialDashboardHeaderLabel</span>
+                            <span class="dashboard-count display-none" data-dashboard-visibility="dashboard-count" data-dashboard-text="dashboard-count" data-dashboard-count-singular="@T["dashboard"]" data-dashboard-count-plural="@T["dashboards"]"></span>
+                        </div>
+                        <span class="col-5 dashboards-header display-none" data-dashboard-visibility="tablet-header">
+                            <span class="col-12 no-padding dashboard-header-info">
+                                <span class="dashboard-category-name" data-dashboard-header-text="active-menu-label" data-container="body" data-bs-toggle="dashboard-list-tooltip" data-original-title="@initialDashboardHeaderLabel" data-bs-placement="bottom">@initialDashboardHeaderLabel</span>
+                                <span class="dashboard-count display-none" data-dashboard-visibility="dashboard-count" data-dashboard-text="dashboard-count" data-dashboard-count-singular="@T["dashboard"]" data-dashboard-count-plural="@T["dashboards"]"></span>
+                            </span>
+                            <span class="dashboard-category-owner float-start" data-dashboard-header-text="category-owner"></span>
+                        </span>
+                        <div class="dashboard-dropdown-container" data-dashboard-layout="dropdown-container">
+                            <div class="no-padding item-searchbox-container no-margin display-none" data-dashboard-layout="mobile-searchbox" data-dashboard-visibility="mobile-searchbox">
+                                <span data-dashboard-visibility="mobile-search-trigger" data-mobile-search-trigger="true" class="su su-search float-end mobile-dashboard-search display-none"></span>
+                                <div data-dashboard-visibility="dashboard-search-area" class="col-3 no-padding no-margin dashboard-search-area float-end">
+                                    <span class="su su-inner-close float-end no-margin display-none" data-dashboard-search-icon="clear" data-dashboard-search-clear="true" data-bs-html="true" title="<span class='clear-search-tooltip'>@T["Clear search"]</span>" data-container="body" data-bs-toggle="clear-tooltip"></span>
+                                    <span class="su su-search float-end no-margin" data-dashboard-search-icon="search" title="@T["Search"]" data-bs-toggle="search-tooltip" data-container="body"></span>
+                                    <input type="password" name="password" style="display:none;">
+                                    <input type="text" id="dashboard-mobile-search-items" class="float-end no-margin" data-dashboard-search="true" placeholder="@T["Search dashboards"]" />
+                                </div>
+                            </div>
+                            <span class="text-right display-none" id="order" data-dashboard-visibility="mobile-order-trigger" data-bs-toggle="modal" data-bs-target="#dashboard-sort-modal" data-container="body" data-dashboard-layout="mobile-order">
+                                &nbsp;
+                                <i class="su su-sort"></i>
+                            </span>
+
+                                <div class="no-padding sort-filter-conatiner" data-dashboard-layout="sort-filter-container" data-dashboard-visibility="sort-filter-wrapper">
+                                    <div class=" col-3 dashboard-sort-container display-none no-padding" data-dashboard-visibility="sort-container">
+                                        <div id="dashboard-sort-dropdown" class="col-10 dashboard-filter-sort listing-dropdown dropdown no-padding">
+                                            <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                                                <span class="col-2 no-padding sort-icon">
+                                                    <span class="dashboard-select-options">
+                                                        <i class="su su-sort"></i>
+                                                    </span>
+                                                </span>
+                                                <span class="selected selected-field no-padding" data-dashboard-header-text="selected-sort">@T["Recently Updated"]</span>
+                                                <span class="su su-vertical-expand"></span>
+                                            </button>
+
+                                            <ul class="dropdown-menu dashboard-sort-filter-menu">
+                                            <li data-dashboard-sort="true" data-sort-name="Name" data-sort-direction="descending">
+                                                <a class="dashboard-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Name - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-dashboard-sort="true" data-sort-name="Name" data-sort-direction="ascending">
+                                                <a class="dashboard-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Name - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-dashboard-sort="true" data-sort-name="ModifiedDate" data-sort-direction="descending">
+                                                <a class="dashboard-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Modified - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-dashboard-sort="true" data-sort-name="ModifiedDate" data-sort-direction="ascending">
+                                                <a class="dashboard-sort-options" href="#">
+                                                    <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Modified - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-dashboard-sort="true" data-sort-name="LastAccessedDate" data-sort-direction="descending">
+                                                <a class="dashboard-sort-options" href="#">
+                                                <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Last Accessed - Descending"]</span>
+                                                </a>
+                                            </li>
+                                            <li data-dashboard-sort="true" data-sort-name="LastAccessedDate" data-sort-direction="ascending">
+                                                <a class="dashboard-sort-options" href="#">
+                                                <i class="su su-tick"></i>
+                                                    <span class="search-option">@T["Last Accessed - Ascending"]</span>
+                                                </a>
+                                            </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <div class="col-3 dashboard-filter-container no-padding no-margin display-none" data-dashboard-visibility="filter-container">
+                                        <span class="dashboard-dropdown-label display-none" data-dashboard-visibility="filter-label">@T["Filter"]</span>
+                                        <div id="dashboard-filter-dropdown" class="col-10 dashboard-filter-sort listing-dropdown dropdown no-padding" data-dashboard-visibility="filter-dropdown">
+                                            <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                                                <span class="col-2 filter-icon display-none" data-dashboard-visibility="filter-icon">
+                                                    <span class="dashboard-select-options">
+                                                        <i class="su su-filter"></i>
+                                                    </span>
+                                                </span>
+                                            <span class="selected selected-field float-start" data-dashboard-header-text="selected-filter">@T["All"]</span>
+                                            <span class="su su-vertical-expand display-none" data-dashboard-visibility="filter-expand-icon"></span>
+                                            </button>                                   
+                                            <ul class="dropdown-menu dashboard-sort-filter-menu">
+                                                <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.AllDashboards)">
+                                                    <a class="dashboard-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["All"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.FavouriteItems)">
+                                                    <a class="dashboard-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Favorites"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.PublicItems)">
+                                                    <a class="dashboard-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Public"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.OwnedByMe)">
+                                                    <a class="dashboard-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Owned by me"]</span>
+                                                    </a>
+                                                </li>
+                                                <li data-dashboard-filter="true" data-filter-value="@((int)DisplayCategory.SharedWithMe)">
+                                                    <a class="dashboard-sort-options" href="#">
+                                                        <i class="su su-tick"></i>
+                                                        <span class="search-option">@T["Shared with me"]</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>                        
+                                </div>
+                                <div class="pagination-section no-padding no-margin display-none" data-dashboard-layout="pagination-section" data-dashboard-visibility="pagination-section">
+                                    <div class="pagination-div">
+                                        <span class="page-count display-none" id="dashboards-page-count" data-dashboard-visibility="page-count" data-dashboard-text="page-count" data-page-of="@T["of"]"></span>
+                                        <span class="chevron-left disabled" data-dashboard-prev-page="true">
+                                            <span class="dashboard-select-options">
+                                                <i class="su su-chevron-left"></i>
+                                            </span>
+                                        </span>
+                                        <span class="chevron-right" data-dashboard-layout="pagination-next" data-dashboard-next-page="true">
+                                            <span class="dashboard-select-options">
+                                                <i class="su su-chevron-right"></i>
+                                            </span>
+                                        </span>
+                                    </div>                               
+                                 </div>
+                            </div>
+                    </div>
+                    <div class="dashboard-list-container col-12">
+                        <div class="col-12 public-dashboard-disabled display-none" data-dashboard-visibility="public-dashboard-disabled" style="display:none;">
+                            @{
+                                // Suppressing SCS0029 because no direct user input handled
+                    #pragma warning disable SCS0029
+                            }
+                            <span class="bg-warning text-warning display-none" data-dashboard-visibility="public-settings-link" style="display:none;">@Html.Raw(String.Format(T["Public dashboards are disabled in {0}dashboard settings{1}."].Value, "<a class='app-hyperlink' href=" + Url.Action("DashboardSettings", "Administration") + ">", "</a>"))</span>
+                            @{
+                    #pragma warning restore SCS0029
+                            }
+                            <span class="bg-warning text-warning display-none" data-dashboard-visibility="public-admin-message" style="display:none;">@T["Public dashboards are disabled by the system administrator. Please contact your system administrator to enable this."]</span>
+                        </div>
+                        <div id="parent-dashboard-scroll-element" class="col-12 no-padding display-none" data-dashboard-visibility="parent-dashboard-scroll">
+                            <div id="dashboard-scroll-element" class="col-12 no-padding">
+                                <div id="dashboard-scroll-content" class="col-12 no-padding">
+                                    <div class="col-12 no-padding display-none" data-dashboard-visibility="loading-placeholder">
+                                        <div class="fd-post">
+                                            <div class="fd-place-holder">
+                                                <div class="fd-divider-1"></div>
+                                                <div class="fd-divider-2"></div>
+                                                <div class="fd-date-time"></div>
+                                                <div class="fd-divider-3"></div>
+                                            </div>
+                                        </div>
+                                        <div class="fd-post">
+                                            <div class="fd-place-holder">
+                                                <div class="fd-divider-1"></div>
+                                                <div class="fd-divider-2"></div>
+                                                <div class="fd-date-time"></div>
+                                                <div class="fd-divider-3"></div>
+                                            </div>
+                                        </div>
+                                        <div class="fd-post">
+                                            <div class="fd-place-holder">
+                                                <div class="fd-divider-1"></div>
+                                                <div class="fd-divider-2"></div>
+                                                <div class="fd-date-time"></div>
+                                                <div class="fd-divider-3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="dashboard-grid-host" class="dashboard-grid-host col-12 no-padding display-none" data-dashboard-visibility="dashboard-grid"></div>
+                                    <ul class="dashboard-list-section col-12 no-padding display-none" data-dashboard-visibility="dashboard-list-section">
+                                        <li id="dashboard-tile-template" class="col-12 no-padding dashboard-tile d-none" data-dashboard-template="true" data-dashboard-id="">
+                                            <div class="col-12 no-padding display-none" data-dashboard-visibility="tile-wrap-nondraft" data-tile-layout="non-draft-wrap" data-dashboard-action="open-dashboard-row">
+                                                <div class="dashboard-info-section col-12" data-tile-layout="info-section">
+                                                    <div class="dashboard-select-list col-1 no-padding prevent-dashboard-navigation display-none" data-dashboard-visibility="tile-select-list">
+                                                        <input type="checkbox" class="dashboard-select-individual material-checkbox" autocomplete="off" />
+                                                        <input type="hidden" class="dashboard-select-hidden" value="false" />
+                                                        <label for="" class="display-none" data-dashboard-visibility="tile-select-label-nondraft"></label>
+                                                        <span class="su favorite favorite-icon" data-favorite-icon="tile" data-dashboard-visibility-item="tile-favorite" data-favorite="" data-dashboard-action="toggle-favorite"></span>
+                                                    </div>
+                                                    <div class="open-link no-padding" data-tile-layout="open-link">
+                                                        <a class="col-12 no-padding" data-dashboard-action="prevent-dashboard-default">
+                                                            <span class="col-12 no-padding no-margin">
+                                                                <span class="dashboard-name no-padding no-margin col-12">
+                                                                    <span data-dashboard-field="name"></span>
+                                                                    <span class="dashboard-description col-12 no-padding" data-dashboard-visibility="tile-description">
+                                                                        <span class="col-12 no-padding" data-dashboard-field="description"></span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                    <div id="prevent-dashboard-navigation" class="col-2 no-padding icon-menu prevent-dashboard-navigation display-none" data-dashboard-visibility="tile-icon-menu">
+                                                        <div class="no-padding options context-menu" data-tile-layout="options-menu" data-dashboard-visibility-item="ctx-menu-container">
+                                                            <span class="dropdown-toggle su su-options-menu options-area" data-bs-display="static" data-bs-toggle="dropdown"></span>
+                                                            <ul class="dropdown-menu dashboard-options" data-bs-popper="none" role="menu">
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-open-samepage">
+                                                                    <a class="web-designer option-click" href="#" data-dashboard-link="open" target="_blank">
+                                                                        <i class="su su-open"><i class="su su-open path1"></i></i>
+                                                                        <span>@T["Open"]</span>
+                                                                    </a>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-share-samepage">
+                                                                    <span class="item-permissions option-click" title="" data-dashboard-action="share-permission">
+                                                                        <i class="su su-share"></i>
+                                                                        <span>@T["Share"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-edit">
+                                                                    <span class="web-designer option-click" title="" data-dashboard-action="edit-dashboard">
+                                                                        <i class="su su-edit"></i>
+                                                                        <span>@T["Edit"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-make-public">
+                                                                    <span title="" class="make-public option-click" data-dashboard-action="make-public">
+                                                                        <i class="su su-public"></i>
+                                                                        <span>@T["Make Public"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-make-private">
+                                                                    <span title="" class="remove-public option-click" data-dashboard-action="make-private">
+                                                                        <i class="su su-remove-public"><span class="su-remove-public path1"></span><span class="su-remove-public path2"></span><span class="su-remove-public path3"></span></i>
+                                                                        <span>@T["Make Private"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-get-link">
+                                                                    <span title="" class="get-link option-click" data-dashboard-action="get-link">
+                                                                        <i class="su su-link"></i>
+                                                                        <span>@T["Get Link"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-get-embed">
+                                                                    <span title="" class="get-embed-code option-click" data-dashboard-action="get-embed-code-context">
+                                                                        <i class="su su-embed"></i>
+                                                                        <span>@T["Get Embed code"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="dropdown dashboard-views no-padding display-none" data-dashboard-visibility-item="ctx-views" data-load="true">
+                                                                    <span href="#" class="dropdown-toggle views" data-bs-toggle="dropdown" data-dashboard-action="get-dashboard-views">
+                                                                        <i class="su su-filter"></i>
+                                                                        <span>@T["Views"]</span>
+                                                                    </span>
+                                                                    <ul class="dropdown-menu item-views no-padding" role="menu">
+                                                                        <li>
+                                                                            <span class="view-name" href="#">
+                                                                                @T["Loading..."]
+                                                                            </span>
+                                                                        </li>
+                                                                    </ul>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-view-schedules">
+                                                                    <span class="view-schedule option-click" data-dashboard-action="view-schedules">
+                                                                        <i class="su su-nav-schedule"></i>
+                                                                        <span>@T["View Schedules"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-info">
+                                                                    <span class="option-click" title="" data-dashboard-action="open-info">
+                                                                        <i class="su su-info"></i>
+                                                                        <span>@T["Info"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li role="separator" class="divider display-none" data-dashboard-visibility-item="ctx-security-separator"></li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-security">
+                                                                    <span class="option-click" data-dashboard-action="security-settings">
+                                                                        <i class="su su-shield"></i>
+                                                                        <span>@T["Security"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-tab-security">
+                                                                    <span title="" class="option-click" data-dashboard-action="tab-security">
+                                                                        <i class="su su-tab-security"></i>
+                                                                        <span>@T["Tab Security"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li role="separator" class="divider display-none" data-dashboard-visibility-item="ctx-movecopy-separator"></li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-move">
+                                                                    <span title="" class="moveItem option-click" data-action="Move" data-dashboard-action="move-dashboard">
+                                                                        <i class="su su-move"></i>
+                                                                        <span>@T["Move"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-copy">
+                                                                    <span title="" class="copyItem option-click" data-action="Copy" data-dashboard-action="copy-dashboard">
+                                                                        <i class="su su-copy"></i>
+                                                                        <span>@T["Copy"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-clone">
+                                                                    <span title="" class="copyItem option-click" data-action="Clone" data-dashboard-action="clone-dashboard">
+                                                                        <i class="su su-clone"></i>
+                                                                        <span>@T["Clone"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-publish">
+                                                                    <span title="" class="option-click" data-action="Publish" data-dashboard-action="publish-dashboard">
+                                                                        <i class="su su-publish"></i>
+                                                                        <span>@T["Publish"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-download">
+                                                                    <span title="" class="option-click" data-action="Download" data-dashboard-action="download-dashboard">
+                                                                        <i class="su su-download"></i>
+                                                                        <span>@T["Download"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li role="separator" class="divider display-none" data-dashboard-visibility-item="ctx-create-schedule-separator"></li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-create-schedule">
+                                                                    <span href="#" class="schedule-dashboards option-click" title="" data-dashboard-action="schedule-dashboard">
+                                                                        <i class="su su-nav-schedule"></i>
+                                                                        <span>@T["Create Schedule"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li role="separator" class="divider display-none" data-dashboard-visibility-item="ctx-version-separator"></li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-version">
+                                                                    <span class="version-button option-click" title="" data-dashboard-action="version-history">
+                                                                        <i class="su su-versions"></i>
+                                                                        <span>@T["Version History"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li role="separator" class="divider display-none" data-dashboard-visibility-item="ctx-delete-separator"></li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-upload-dashboard" data-dashboard-branding-syncfusion="@((GlobalAppSettings.Branding == AppBranding.Syncfusion.Identifier).ToString().ToLower())">
+                                                                    <span title="" class="item-edit option-click" data-dashboard-action="update-dashboard">
+                                                                        <i class="su su-upload"></i>
+                                                                        <span>@T["Upload Dashboard"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-update-datasource">
+                                                                    <span href="#" title="" class="update-datasource option-click" data-dashboard-action="update-dashboard-datasource">
+                                                                        <i class="su su-nav-datasource"></i>
+                                                                        <span>@T["Update Data Source(s)"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="ctx-delete">
+                                                                    <span title="" class="item-delete option-click" data-dashboard-action="delete-dashboard-item">
+                                                                        <i class="su su-delete"></i>
+                                                                        <span>@T["Delete"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="option-click display-none" id="dashboard-logo-upload" data-dashboard-visibility="tile-upload-logo" data-name="" data-display-name="" data-item-id="" data-dashboard-logo="" target="_blank">
+                                                                        <i class="su su-upload"><i class="su su-open path1"></i></i>
+                                                                        <span>@T["Upload Logo"]</span>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="dashboard-share display-none" data-dashboard-visibility="tile-share-inline" data-dashboard-visibility-item="tile-share-inline-owner">
+                                                            <span class="item-permissions primary-menu no-margin" title="" data-dashboard-action="share-permission">
+                                                                <i class="su su-share"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="no-padding dashboard-edit">
+                                                            <span class="web-designer primary-menu no-margin display-none" title="" data-dashboard-action="edit-dashboard" data-dashboard-visibility-item="tile-edit-inline">
+                                                            <i class="su su-edit"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="no-padding dashboard-open">
+                                                            <span class="open-link-icon no-margin display-none" title="" data-dashboard-visibility="tile-open-link-icon">
+                                                                <a class="web-designer option-click" data-dashboard-action="open-dashboard-link-icon" href="#" target="_blank">
+                                                                    <i class="items view-item su su-external-link"></i>
+                                                                </a>
+
+                                                            </span> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dashboard-info-section-2 col-12 no-padding no-margin display-none" data-dashboard-visibility="tile-info-section2">
+                                                    <div class="col-12 no-padding dashboard-info-section-2-div" data-dashboard-layout="info2-div">
+                                                        <div class="col-4 no-padding profile-section display-none" data-dashboard-visibility="tile-profile-section">
+                                                            <span class="author-name no-padding no-margin display-none" data-dashboard-visibility="tile-author-name">
+                                                                <span class="su su-created-by"></span>
+                                                                <span data-dashboard-field="created-by"></span>
+                                                            </span>
+                                                            <span class="badge badge-secondary1 display-none" data-dashboard-layout="multitab-badge" data-dashboard-visibility="tile-multitab-badge">@T["Multi-Tab"]</span>
+                                                        </div>
+                                                        <div class="col-4 no-padding category-section" data-dashboard-visibility="tile-category-section">
+                                                            <span class="category-name no-padding no-margin display-none" data-dashboard-visibility="tile-category-name">
+                                                                <span class="category-icon su su-categoried-dashboard"></span>
+                                                                <span data-dashboard-field="category-name"></span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="col-4 no-padding modifieddate-section" data-dashboard-visibility="tile-modified-section">
+                                                            <span class="modified-date no-padding no-margin display-none" data-dashboard-visibility="tile-modified-date">
+                                                                <span class="su su-clock clock-listing-icon modified-date no-margin display-none" data-dashboard-visibility="tile-modified-date-clock"></span>
+                                                                <span data-dashboard-field="modified-date"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 no-padding draft-item display-none" data-dashboard-visibility="tile-wrap-draft">
+                                                <span class="su favorite" data-favorite-icon="draft" data-dashboard-visibility-item="draft-favorite" data-favorite="" data-dashboard-action="toggle-favorite"></span>
+                                                <div class="col-12 open-link">
+                                                    <a class="col-12 no-padding" data-dashboard-visibility-item="draft-edit-link" href="#" target="_blank">
+                                                        <span class="col-12 no-padding">
+                                                            <span class="dashboard-name no-padding" data-dashboard-layout="draft-dashboard-name">
+                                                                <span data-dashboard-field="name"></span>
+                                                                <span class="author-name col-12 no-padding display-none" data-dashboard-visibility="draft-author-name">
+                                                                    <span data-dashboard-field="created-by"></span>
+                                                                </span>
+                                                            </span>
+                                                            <span class="col-2 modified-date display-none" data-dashboard-visibility="draft-modified-date">
+                                                                <span class="su su-clock clock-listing-icon modified-date no-padding no-margin display-none" data-dashboard-visibility="draft-modified-date-clock"></span>
+                                                                <span data-dashboard-field="modified-date"></span>
+                                                            </span>
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                                <div class="no-padding float-end">
+                                                    <div class="options context-menu display-none" data-dashboard-layout="draft-options-menu" data-dashboard-visibility-item="draft-options-owner">
+                                                        <span class="dropdown-toggle su su-options-menu options-area" data-bs-display="static" data-bs-toggle="dropdown"></span>
+                                                        <ul class="dropdown-menu dashboard-options" data-bs-popper="none" role="menu">
+                                                            <li class="display-none" data-dashboard-visibility-item="draft-ctx-edit">
+                                                                <span class="open-item option-click" data-dashboard-action="edit-draft-dashboard">
+                                                                    <i class="su su-edit"></i>
+                                                                    <span>@T["Edit"]</span>
+                                                                </span>
+                                                            </li>
+                                                            <li class="display-none" data-dashboard-visibility-item="draft-ctx-info">
+                                                                <span class="option-click" title="" data-dashboard-action="open-info">
+                                                                    <i class="su su-info"></i>
+                                                                    <span>@T["Info"]</span>
+                                                                </span>
+                                                            </li>
+                                                            <li class="display-none" data-dashboard-visibility-item="draft-ctx-delete">
+                                                                <span title="" class="item-delete option-click" data-dashboard-action="delete-dashboard-item">
+                                                                    <i class="su su-delete"></i>
+                                                                    <span>@T["Delete"]</span>
+                                                                </span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 no-padding upload-draft-item display-none" data-dashboard-visibility="tile-wrap-upload-draft">
+                                                <div class="dashboard-info-section col-12" data-tile-layout="info-section">
+                                                    <div class="dashboard-select-list col-1 no-padding display-none" data-dashboard-visibility="tile-select-list">
+                                                        <input type="checkbox" class="dashboard-select-individual material-checkbox" autocomplete="off" />
+                                                        <input type="hidden" class="dashboard-select-hidden" value="false" />
+                                                        <label for="" class="display-none" data-dashboard-visibility="tile-select-label-upload-draft"></label>
+                                                    </div>
+                                                    <div class="col-12 open-link no-padding" data-tile-layout="open-link">
+                                                        <a class="col-12 no-padding" data-dashboard-action="open-upload-dialog" href="#">
+                                                            <span class="col-12 no-padding">
+                                                                <span class="dashboard-name no-padding no-margin" data-dashboard-layout="draft-dashboard-name">
+                                                                    <span data-dashboard-field="name"></span>
+                                                                    <span class="dashboard-description col-12 no-padding" data-dashboard-visibility="upload-description">
+                                                                        <span class="col-12 no-padding" data-dashboard-field="description"></span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                    <div class="col-2 no-padding icon-menu display-none" data-dashboard-visibility="tile-icon-menu">
+                                                        <div class="no-padding float-end">
+                                                        <div class="options context-menu display-none" data-dashboard-layout="draft-options-menu" data-dashboard-visibility-item="draft-options-owner">
+                                                                <span class="dropdown-toggle su su-options-menu options-area" data-bs-display="static" data-bs-toggle="dropdown"></span>
+                                                                <ul class="dropdown-menu dashboard-options" data-bs-popper="none" role="menu">
+                                                                <li class="display-none" data-dashboard-visibility-item="draft-ctx-edit">
+                                                                        <span class="open-item option-click" data-dashboard-action="open-upload-dialog">
+                                                                        <i class="su su-upload"></i>
+                                                                        <span>@T["Complete Upload"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="draft-ctx-info">
+                                                                    <span class="option-click" title="" data-dashboard-action="open-info">
+                                                                        <i class="su su-info"></i>
+                                                                        <span>@T["Info"]</span>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="display-none" data-dashboard-visibility-item="draft-ctx-delete">
+                                                                    <span title="" class="item-delete option-click" data-dashboard-action="delete-dashboard-item">
+                                                                        <i class="su su-delete"></i>
+                                                                        <span>@T["Delete"]</span>
+                                                                    </span>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dashboard-info-section-2 col-12 no-padding no-margin display-none" data-dashboard-visibility="tile-info-section2">
+                                                    <div class="col-4 no-padding profile-section display-none" data-dashboard-visibility="upload-profile-section">
+                                                        <span class="author-name no-padding no-margin">
+                                                            <span class="su su-created-by"></span>
+                                                            <span data-dashboard-field="created-by"></span>
+                                                        </span>                                                  
+                                                    </div>
+                                                    <div class="col-4 no-padding category-section">
+                                                        <span class="category-name no-padding no-margin">
+                                                            <span class="category-icon su su-categoried-dashboard"></span>
+                                                            <span data-dashboard-field="category-name"></span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-4 no-padding modifieddate-section" data-dashboard-visibility="upload-modified-section">
+                                                        <span class="modified-date no-padding no-margin display-none" data-dashboard-visibility="upload-modified-date">
+                                                            <span class="su su-clock clock-listing-icon modified-date no-margin display-none" data-dashboard-visibility="upload-modified-date-clock"></span>
+                                                                <span data-dashboard-field="modified-date"></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="col-12 no-padding display-none" data-dashboard-visibility="append-loading">
+                                            <div class="fd-post">
+                                                <div class="fd-place-holder">
+                                                    <div class="fd-divider-1"></div>
+                                                    <div class="fd-divider-2"></div>
+                                                    <div class="fd-date-time"></div>
+                                                    <div class="fd-divider-3"></div>
+                                                </div>
+                                            </div>
+                                            <div class="fd-post">
+                                                <div class="fd-place-holder">
+                                                    <div class="fd-divider-1"></div>
+                                                    <div class="fd-divider-2"></div>
+                                                    <div class="fd-date-time"></div>
+                                                    <div class="fd-divider-3"></div>
+                                                </div>
+                                            </div>
+                                            <div class="fd-post">
+                                                <div class="fd-place-holder">
+                                                    <div class="fd-divider-1"></div>
+                                                    <div class="fd-divider-2"></div>
+                                                    <div class="fd-date-time"></div>
+                                                    <div class="fd-divider-3"></div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-empty-message-div col-12 display-none" data-dashboard-visibility="empty-state-container">
+                            <div class="empty-dashboard-image-div">
+                                <img class="empty-dashboard-image" src="@dashboardServerResourceUrl/cdn/css/images/dashboard-empty-state.svg" style="margin: 0 auto;/*! width: 100%; */" loading="lazy">
+                            </div>
+                            <div class="display-none" data-dashboard-visibility="empty-no-category">
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-no-category-no-create">@T["No dashboards have been shared with you."]</span>
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-no-category-can-create">@T["You don’t have any dashboards and no dashboards have been shared with you."]</span>
+                            </div>
+                            <div class="display-none" data-dashboard-visibility="empty-with-category">
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-with-category-all">@T["No dashboards available to display."]</span>
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-with-category-filtered">@T["No dashboards were found that match your search. Try modifying your search or filters."]</span>
+                            </div>
+                            <div class="display-none" data-dashboard-visibility="empty-drafts">
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-drafts-default">@T["No drafts available to display."]</span>
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-drafts-search">@T["No drafts were found that match your search. Try modifying your search."]</span>
+                            </div>
+                            <div class="display-none" data-dashboard-visibility="empty-upload-drafts">
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-upload-default">@T["No upload drafts available to display."]</span>
+                                <span class="dashboard-empty-message display-none" data-dashboard-visibility="empty-upload-search">@T["No upload drafts were found that match your search. Try modifying your search."]</span>
+                            </div>
+                            <div class="create-buttton display-none" data-dashboard-visibility="empty-create-container">
+                                <button data-action="create-items" class="primary-button app-btn-primary display-none" data-dashboard-visibility="empty-create-button">@T["Create Dashboard"]</button>
+                            </div>
+                            <div class="create-buttton display-none" data-dashboard-visibility="empty-upload-container">
+                                <button data-action="upload-items" class="primary-button app-btn-primary display-none" data-dashboard-visibility="empty-upload-button">@T["Upload Dashboard"]</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (samePagePreview)
+            {
+                <div class="dashboard-header-container samepage-preview-header">
+                    <div class="col-3 top-nav-sec no-padding">
+                        @await Html.PartialAsync("../Shared/_TopMenu")
+                    </div>
+                    <div class="samepage-dashboard-header-info">
+                        <span class="dashboard-page-title"
+                              data-dashboard-header-text="page-title"
+                              data-title-dashboards="@T["Dashboards"]"
+                              data-title-favorites="@T["Favorite Dashboards"]"
+                              data-title-public="@T["Public Dashboards"]"
+                              data-title-owned="@T["Owned by me"]"
+                              data-title-shared="@T["Shared with me"]"
+                              data-title-drafts="@T["Draft Dashboards"]"
+                              data-title-upload-drafts="@T["Upload Drafts"]"
+                              data-title-enterprise-insights="@T["Enterprise Insights"]">@T["Dashboards"]</span>
+                        <span class="dashboard-page-count display-none" data-dashboard-visibility="dashboard-count" data-dashboard-text="dashboard-count"></span>
+                    </div>
+                    <div class="item-searchbox-container col-5" data-hide-on-usage-analytics="true" data-dashboard-layout="samepage-searchbox">
+                        <div data-dashboard-visibility="samepage-search-area" class="col-3 no-padding no-margin dashboard-search-area float-end">
+                            <span class="su su-inner-close float-end no-margin display-none" data-dashboard-search-icon="clear" data-dashboard-search-clear="true" data-bs-html="true" title="<span class='clear-search-tooltip'>@T["Clear search"]</span>" data-container="body" data-bs-toggle="clear-tooltip" data-bs-placement="bottom"></span>
+                            <span class="su su-search float-end no-margin" data-dashboard-search-icon="search" title="@T["Search"]" data-bs-toggle="search-tooltip" data-container="body" data-bs-placement="bottom"></span>
+                            <input type="password" name="password" style="display:none;">
+                            <input type="text" id="dashboard-search-items" class="float-end no-margin" data-dashboard-search="true" placeholder="@T["Search dashboards"]" />
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Mobile view-->
+        <div class="modal fade" id="dashboard-sort-modal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body no-padding">
+                        <ul class="dashboard-sort-filter-menu no-padding">
+                            @* Optional future sort:
+                               Recently Added *@
+                            <li data-sort-name="ModifiedDate" data-sort-direction="descending">
+                                <a class="dashboard-sort-options" href="#">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Recently Updated"]</span>
+                                </a>
+                            </li>
+                            <li data-sort-name="LastAccessedDate" data-sort-direction="descending">
+                                <a class="dashboard-sort-options" href="#">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Last Accessed - Descending"]</span>
+                                </a>
+                            </li>
+                            <li data-sort-name="Name" data-sort-direction="ascending">
+                                <a class="dashboard-sort-options" href="#">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Dashboard Name (A-Z)"]</span>
+                                </a>
+                            </li>
+                            <li data-sort-name="Name" data-sort-direction="descending">
+                                <a class="dashboard-sort-options" href="#">
+                                    <i class="su su-tick"></i>
+                                    <span class="search-option">@T["Dashboard Name (Z-A)"]</span>
+                                </a>
+                            </li>
+                            @* Optional future sort:
+                               Owner Name (A-Z / Z-A) *@
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="dashboard-sort-apply-btn" class="app-button app-primary-button app-btn-primary">@T["Apply"]</button>
+                        <button type="button" class="app-button app-secondary-button app-btn-secondary" data-dashboard-sort-close="true" data-bs-dismiss="modal">@T["Close"]</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("../DefaultPages/DefaultPages", new ViewDataDictionary(ViewData) { { "Permissions", permisions }, { "ItemType", ItemType.Dashboard } })
+    }
+    
+    <div id="tab-security" style="display:none">
+        <div id="tab-security-content">@T["Enabling tab-level security will restrict tab visibility to users with the individual dashboard permission when dashboards are added as tabs. By default, all tabs will be visible to the user if the user has access to a multitab dashboard."]</div>
+        <span>
+            <input type="checkbox" class="material-checkbox" id="tab-security-checkbox">
+            <input id="tab-security-checkbox" type="hidden">
+            <label for="tab-security-checkbox" class="label-database">@T["Enable tab-level security"]</label>
+        </span>
+        <div class="bg-warning tab-security-note">
+            <Span>@T["All tabs will be visible to the dashboard owner and administrators. Public dashboards added as tabs will also be visible."]</Span>
+        </div>
+    </div>
+
+    <div id="popup-container" style="display:none" class="no-padding">
+        <iframe id="scheduler-popup-iframe" class="datasource-popup-frame"></iframe>
+    </div>
+
+    <div id="Download_Item" style="display:none" class="no-padding"></div>
+
+    <div id="make_item_public" class="no-padding float-start" style="display:none"></div>
+
+    <div id="remove_item_public" class="no-padding" style="display:none"></div>
+
+    <div id="make_item_unlist" class="no-padding float-start" style="display:none"></div>
+    @if (!isMobile)
+    {
+        @await Html.PartialAsync("../Items/_AddItems")
+        @await Html.PartialAsync("../Items/_SharePermission")
+        @await Html.PartialAsync("../Items/_PublishDashboard")
+        @await Html.PartialAsync("../Items/_GetExternalSites")
+    }
+    @await Html.PartialAsync("../Dashboards/_DashboardLogoUploadBox")
+
+    @if (samePagePreview && !isMobile)
+    {
+        @await Html.PartialAsync("_DashboardIframe")
+    }
+
+    @await Html.PartialAsync("../Items/_ItemInfo")
+
+     <script nonce="@Context.Items["ScriptNonce"]" type="text/javascript">
+        $(document).ready(function () {
+            $('#user-group-search-input_suggestion').addClass("hide-suggesstion");
+
+            if (typeof window.BulkMoveDashboards === "function") {
+                var originalBulkMoveDashboards = window.BulkMoveDashboards;
+                window.BulkMoveDashboards = function (itemId, itemName, itemDescription) {
+                    var bulkMovePopupElement = document.getElementById("BulkMoveDashboardsPopup");
+                    var fromCategoryInputElement = document.getElementById("from-category-selected-input");
+                    if (!bulkMovePopupElement || !fromCategoryInputElement) {
+                        return;
+                    }
+                    return originalBulkMoveDashboards.call(this, itemId, itemName, itemDescription);
+                };
+            }
+
+            if (typeof window.AddSubCategory === "function") {
+                var originalAddSubCategory = window.AddSubCategory;
+                window.AddSubCategory = function (itemId, name, description) {
+                    var addSubCategoryPopupElement = document.getElementById("AddSubCategoryPopup");
+                    if (!addSubCategoryPopupElement) {
+                        return;
+                    }
+                    return originalAddSubCategory.call(this, itemId, name, description);
+                };
+            }
+        });
+    </script>
+}

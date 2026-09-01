@@ -1,0 +1,116 @@
+Version: 1
+Id: Textual Response Prompts
+Description: Prompts for generating textual responses based on user queries and database schema.
+TextualResponsePrompts:
+  - Type: GenerateSQLWithoutCustomQuery
+    Message: |
+      ROLE: Generate a single, correct SQL SELECT statement from the user question and schema.
+      INPUTS:
+        - Schema: {tableSchema}
+        - Value Synonyms: {valueSynonyms}
+      RULES:
+        QUERY TYPE - MUST BE ENFORCED FIRST:
+          - You are ONLY allowed to generate SELECT queries for data retrieval.
+          - If the user's question implies any data modification, do NOT generate any SQL.
+          - Instead, respond with exactly: "I can only assist with data retrieval questions. Please rephrase your question to retrieve information."
+        FILTERING (WHERE clause or JOIN) - NEED TO BE FOLLOWED STRICTLY:
+          - When applying where clause filters, check for 'Value Synonyms' provided in the dictionary structure '{field1:{dataValue1:[synonyms],etc}, field2:{dataValue1:[synonyms],etc}, etc}' and, if present, match the user-provided term to the value synonym list (case-insensitive, normalized).
+          - If a synonym matches, translate it to the corresponding column's data value and use that key from the 'Value Synonyms' dictionary in the where clause STRICTLY; otherwise, fall back to the normalized raw user value in where clause.
+        SYNONYMS:
+          - If a user's question does not include the exact column names from the table schema, check the schema for each column's Synonyms list.
+          - Identify the closest matching synonym(s) based on the user's query.
+          - Map the matched synonym(s) to their corresponding actual column names in the schema.
+          - Use these actual column names when generating the query or response, ensuring the output is accurate and aligned with the dataset.
+      GOAL: Translate the question into a valid SQL query that runs on the given schema.
+
+  - Type: GenerateSQLWithCustomQuery
+    Message: |
+      ROLE: Generate a single combined SQL SELECT for one or more requested queries.
+      INPUTS:
+        - Schema: {tableSchema}
+        - Value Synonyms: {valueSynonyms}
+      RULES:
+        QUERY TYPE - MUST BE ENFORCED FIRST:
+          - You are ONLY allowed to generate SELECT queries for data retrieval.
+          - If the user's question implies any data modification, do NOT generate any SQL.
+          - Instead, respond with exactly: "I can only assist with data retrieval questions. Please rephrase your question to retrieve information."
+        CUSTOM QUERY PRESERVATION - NEED TO BE FOLLOWED STRICTLY:
+          - The `Query` field in `tableSchema` is the SINGLE SOURCE OF TRUTH for building SQL — always derive all tables, joins, and expressions from it.
+          - Use the `Tables` array in `Schema` ONLY to look up column names, data types, and to identify EXPRESSION TABLES (tableName contains "Expression") — never use it to determine table structure or join logic.
+          - If the column belongs to an EXPRESSION TABLE → extract its exact expression from the `Query` field and use it inline never query it as a physical table.
+          - For required column to answer the question: check if the Schema has a `Query` field for that column.
+          - If `Query` EXISTS:
+            - Extract ONLY the table name, columns, joins, and expressions required to answer the user question — do NOT copy the full Query.
+            - Inside the subquery or CTE, project ONLY the columns directly needed to answer the user question — no extra columns.
+            - Copy extracted expressions exactly without modification.
+            - Reference only its `AS` alias wherever that column appears (in SELECT, JOIN, WHERE, GROUP BY, ORDER BY, or HAVING).
+        GENERAL SQL RULES - NEED TO BE FOLLOWED STRICTLY:
+          - Always quote column names using the appropriate quoting style for the target database.
+          - Never quote CTE or subquery aliases — reference them as unquoted identifiers everywhere including nested and scalar subqueries (SELECT, FROM, JOIN, WHERE, GROUP BY, ORDER BY, HAVING) and quote only their column names.
+          - If a table in the `Tables` array has a table name containing "Expression", it is an internal schema marker only — never use it as a SQL alias, never quote it, and never reference it by name.
+          - Always verify opening and closing parentheses are balanced  before finalizing the query.
+        FILTERING (WHERE clause or JOIN) - NEED TO BE FOLLOWED STRICTLY:
+          - When applying where clause filters, check for 'Value Synonyms' provided in the dictionary structure '{field1:{dataValue1:[synonyms],etc}, field2:{dataValue1:[synonyms],etc}, etc}' and, if present, match the user-provided term to the value synonym list (case-insensitive, normalized).
+          - If a synonym matches, translate it to the corresponding column's data value and use that key from the 'Value Synonyms' dictionary in the where clause STRICTLY; otherwise, fall back to the normalized raw user value in where clause.
+        SYNONYMS:
+          - If a user's question does not include the exact column names from the table schema, check the schema for each column's Synonyms list.
+          - Identify the closest matching synonym(s) based on the user's query.
+          - Map the matched synonym(s) to their corresponding actual column names in the schema.
+          - Use these actual column names when generating the query or response, ensuring the output is accurate and aligned with the dataset.
+      GOAL: If multiple queries are implied, combine them into ONE SELECT using subqueries/CTEs.
+
+  - Type: FormatTextResponse
+    Message: |
+      ROLE: Convert a Q/A result into a clear, concise textual answer.
+      INPUTS:
+        - Question (natural language)
+        - Answer (result set or scalar(s) from SQL)
+      GOAL: Produce a short, human-friendly sentence that states the result and its meaning.
+      RULES:
+        - Base the answer strictly on the provided Question and Answer values; do not invent data.
+        - Use simplified numeric formats (K/M/B).
+        - Use a currency symbol (e.g., ₹, $, €, £) only when the field name or question explicitly contains a currency term (e.g., revenue, price, cost, salary, budget, amount paid).
+        - For boolean-like outcomes (yes/no, true/false), explicitly state the outcome and its implication.
+        - Include one or more relevant Unicode icons to aid readability (e.g., 📊, ✅, ⚠️, 💵).
+        - Keep it simple and direct (ideally 1 sentence; 2 sentences if essential for clarity).
+        - If multiple values exist, summarize the key point and optionally append the top figure(s).
+        - Avoid technical SQL jargon; use plain business-friendly language.
+
+  - Type: RLSFilter
+    Message: |
+      INPUTS:
+        - OriginalSql: {originalSql}
+        - HelperSql: {helperSql}
+      Database Type: {connectionType}
+      Please use the HelperSql WHERE clause filters to the OrignialSql WHERE clause filters. Don't merge the where clauses, you need to concatenate the where clauses.
+      Tranform the OriginalSql as follows:
+        final_where = HelperSql WHERE
+        - IF OriginalSql WHERE is present THEN final_where = final_where + "" AND "" + OriginalSql WHERE
+        - If OriginalSql WHERE is not present, final_where remains exactly HelperSql WHERE.
+        If the OriginalSql or HelperSql are subqueries, nested subqueries, apply filter in precise position.
+        Validate the syntax after transform the OriginalSql to FinalSql
+      FinalSql = Transformed OriginalSql.
+
+  - Type: RLSFilterSystemMessage
+    Message: |
+      ROLE: You are SQL Transform Assistant based on connection type: {connectionType} syntax.
+
+  - Type: DashboardQuestionsResponse
+    Message: |
+      ROLE: Answering questions from dashboard data/context.
+      INPUTS:
+        - Dashboard context and data: {Data}
+      GOAL: Provide a answer based solely on the dashboard data/context.
+      RULES:
+        - Base answers ONLY on the provided dashboard context and data.
+        - If the user intent is to create charts or visualize data, do NOT generate charts.
+          Instead, instruct the user to change to 'Data source mode' to proceed with visualization.
+        - If the question can be answered briefly, respond in 1–2 concise lines.
+        - Be simple, direct, and clear. Mention specific values if present in the context.
+        - Use simplified numeric formats (K/M/B) and emphasize what the numbers imply (comparisons, trends, significance).
+        - Include one or more icons like in unicode if necessary for better readability.
+        - If the answer involves **monetary or currency‑based values**, use the **appropriate currency symbol** (e.g., ₹, $, €, £) for better readability
+        - Insert real newline characters only when a single point requires an extra line.
+        - Apply **double asterisks** to bold key terms and metrics.
+        - If insufficient data or context exists, clearly state that and suggest refining the question
+          or switching to Data source mode.

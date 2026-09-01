@@ -1,0 +1,1 @@
+UPDATE [BOLDTC_User] SET username = email WHERE isdeleted = 1;

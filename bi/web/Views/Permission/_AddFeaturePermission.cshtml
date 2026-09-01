@@ -1,0 +1,123 @@
+﻿@{
+    var groupIdValue = ViewBag.groupId;
+    var isAdmin = _identityResponse.IsAdmin;
+}
+@Html.AntiForgeryToken()
+<div class="modal modal-lg" tabindex="-1" role="dialog">
+    <div class="modal-dialog col-lg-12 no-padding" id="popup-container" role="document">
+        <div class="modal-content col-lg-12" id="add-feature-permission-controller">
+            <div class="col-lg-12 modal-header">
+                <div class="col-6 no-padding">
+                    <span class="popup-title modal-title">@T["Add Resource Feature Permission"]</span>
+                </div>
+                <div class="col-6 no-padding">
+                    <a href="#" class="popup-close float-end"><span class="su su-close"></span></a>
+                </div>
+            </div>
+            <div class="modal-body col-12">
+                <div class="col-12 no-padding header-content header-content-padding">@(groupIdValue != null ? T["Select the resource feature permission to add to the group"] : T["Select the resource feature permission to add to the user"])</div>
+                @*<div class="col-12 radio-btn-div">
+                    <div class="all-permission select-permission all-permission-resource">
+                        <input type="radio" id="all-permission" class="css-radio" value="all-permission" name="permissionType" checked="checked">
+                        <label for="all-permission" class="app-textbox-label radio-label"><span class="text">@T["All Resources"]</span></label>
+                    </div>
+                    <div class="specific-permission select-permission specific-permission-resource">
+                        <input type="radio" id="specific-permission" class="css-radio" value="specific-permission" name="permissionType">
+                        <label for="specific-permission" class="app-textbox-label radio-label"><span class="text">@T["Specific Resources"]</span></label>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="all-permission select-permission all-permission-settings">
+                            <input type="radio" id="all-permission-settings" class="css-radio" value="all-permission-settings" name="permissionType">
+                            <label for="all-permission-settings" class="app-textbox-label radio-label"><span class="text">@T["All Settings"]</span></label>
+                        </div>
+                        <div class="specific-permission select-permission specific-permission-settings">
+                            <input type="radio" id="specific-permission-settings" class="css-radio" value="specific-permission-settings" name="permissionType">
+                            <label for="specific-permission-settings" class="app-textbox-label radio-label"><span class="text">@T["Specific Settings"]</span></label>
+                        </div>
+                    }
+                </div>*@
+                <div class="col-12 no-padding all-permission-div permission-modes">
+                    <div class="col-4 no-padding entity-div">
+                        <div class="app-textbox-label no-padding modes-head">
+                            <label class="app-textbox-label">@T["Entity"]</label>
+                            <div class="entity-search-area float-end">
+                                <input type="text" class="entity-search-box float-start no-margin" id="feature-permission-entity-search" placeholder="@T["Search Entity"]" />
+                                <span class="su su-inner-close float-end no-margin display-none" id="feature-permission-entity-search-clear" title="@T["Clear search"]"></span>
+                                <span class="su su-search float-end no-margin" id="feature-permission-entity-search-icon" title="@T["Search"]"></span>
+                            </div>
+                        </div>
+                        <div class="no-padding modes-body entity-selection-div" id="feature-permission-entity-selection">
+                            <ul class="no-margin modes-body-ul" id="feature-permission-entity-list"></ul>
+                            <div class="entity-empty-message-div col-12 display-none" id="feature-permission-entity-empty">
+                                <span class="entity-empty-message">@T["No entites available to display"]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 no-padding scope-div display-none" id="feature-permission-scope-column">
+                        <div class="app-textbox-label no-padding modes-head">
+                            <label class="app-textbox-label">@T["Scope"]</label>
+                            <div class="scope-search-area float-end">
+                                <input type="text" class="scope-search-box float-start no-margin" id="feature-permission-scope-search" placeholder="@T["Search Scope"]" />
+                                <span class="su su-inner-close float-end no-margin display-none" id="feature-permission-scope-search-clear" title="@T["Clear search"]"></span>
+                                <span class="su su-search float-end no-margin" id="feature-permission-scope-search-icon" title="@T["Search"]"></span>
+                            </div>
+                        </div>
+                        <div class="modes-body scope-selection-div" id="scope">
+                            <ul class="scope-selection-ul modes-body-ul">
+                                <li id="feature-permission-scope-content" class="scope-selection-li display-none">
+                                    <div id="feature-permission-scope-flat-container" class="display-none">
+                                        <div id="feature-permission-scope-flat-list"></div>
+                                        <div id="feature-permission-scope-flat-empty" class="entity-empty-message-div col-12 display-none">
+                                            <span class="entity-empty-message">@T["No scopes available to display"]</span>
+                                        </div>
+                                    </div>
+                                    <div id="feature-permission-scope-tree-container" class="display-none">
+                                        <ul class="nested-li" id="feature-permission-scope-tree"></ul>
+                                    </div>
+                                    <div id="feature-permission-scope-group-container" class="display-none">
+                                        <ul class="group-div" id="feature-permission-scope-group-list"></ul>
+                                        <div id="feature-permission-scope-group-empty" class="entity-empty-message-div col-12 display-none">
+                                            <span class="entity-empty-message">@T["No scopes available to display"]</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <div id="feature-permission-scope-select-message" class="select-any-msg-div display-none">
+                                    @T["Select an entity to see the available scopes"]
+                                </div>
+                                <div id="feature-permission-scope-empty-message" class="select-any-msg-div display-none">
+                                    @T["No scopes available to display"]
+                                </div>
+                                <div class="permission-loader-div">
+                                    <span class="loader-align"></span>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-4 no-padding access-div">
+                      <div class="app-textbox-label no-padding modes-head access-mode-head">
+                        <label class="app-textbox-label">@T["Access Mode"]</label>
+                      </div>
+
+                      <div class="modes-body access-selection-div">
+                        <ul id="feature-permission-access-list" data-empty-text='@T["Select an entity to see the access modes"]' class="modes-body-ul parent-list"></ul>
+                      </div>
+                    </div>
+
+                    <div id="feature-permission-warning-specific" class="col-12 warning-div display-none">
+                        @T["Please select at least one entity, scope and access mode."]
+                    </div>
+                    <div id="feature-permission-warning-general" class="col-12 warning-div display-none">
+                        @T["Please select at least one entity and access mode."]
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 modal-footer">
+                <div class="col-7 buttons-area float-end no-padding">
+                    <input type="button" name="Save" value="@T["Add"]" class="primary-button app-btn-primary" id="save-feature-permission" />
+                    <input type="button" id="cancel-feature-group" class="secondary-button app-btn-secondary popup-close" value="@T["Cancel"]" />
+                </div>
+            </div>
+        </div>
+    </div>

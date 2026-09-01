@@ -1,0 +1,146 @@
+﻿@using Syncfusion.Server.Base;
+@using Syncfusion.Server.Base.DataClasses;
+@using Newtonsoft.Json
+@using Microsoft.Extensions.DependencyInjection;
+@using Microsoft.AspNetCore.Authentication;
+@using System.Net;
+@using Syncfusion.Server.Base.Helpers;
+
+@{
+    var schemes = Context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+    var loginProviders = (from scheme in await schemes.GetAllSchemesAsync() where !string.IsNullOrEmpty(scheme.DisplayName) select scheme).ToList();
+    if (!ViewBag.IsADFSEnabled)
+    {
+        loginProviders = loginProviders.Where(x => x.DisplayName.ToLower() != "azure adfs").ToList();
+    }
+
+    var orderedProviders = loginProviders.Where(x => x.DisplayName.ToString() == "Azure ADFS").Select(x => x).ToList();
+
+    var showExternalAuthentication = loginProviders.Any(x => x.DisplayName == "Azure ADFS");
+    var controllerName = Context.Request.RouteValues["controller"].ToString();
+    var loginAction = ViewBag.ReturnURL != null ? Url.Action("ExternalLogin", "accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("ExternalLogin", "accounts");
+    var syncfusionLogin = ViewBag.ReturnURL != null ? Url.Action("SyncfusionLogin", "Accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("SyncfusionLogin", "Accounts");
+    var microsoftLogoLink = !CloudAppConfig.IsSelfHosted ? GlobalAppSettings.CdnDomain + "/static/logos/v1/" + IconFileNames.Microsoft : GlobalAppSettings.SystemSettings.CDNLink + "/images/common/application/azuread.png";
+    var windowsADLogoLink = GlobalAppSettings.SystemSettings.CDNLink + "/images/common/application/windows-ad.svg";
+    var windowsADclass = showExternalAuthentication ? "col-6 float-start no-padding " : string.Empty;
+    var authSettings = ViewBag.AuthSettings as List<AuthSettings>;
+    var showAuthLogin = authSettings != null && authSettings.Count > 0;
+    string openidLoginUrl = Url.Action("OpenIdLogin", "accounts");
+    string oauthLoginUrl = Url.Action("OAuthLogin", "accounts");
+    string jwtLoginUrl = Url.Action("JwtLogin", "accounts");
+    var azureb2cloginAction = ViewBag.ReturnURL != null ? Url.Action("AzureB2CLogin", "accounts") + "?returnUrl=" + WebUtility.UrlEncode(ViewBag.ReturnURL.ToString()) : Url.Action("AzureB2CLogin", "accounts");
+    var baseURL = GlobalAppSettings.SystemSettings.BaseUrl;
+    var hideExternalLoginProviders = GlobalAppSettings.SystemSettings.HideExternalLoginProviders;
+}
+<script nonce="@Context.Items["ScriptNonce"]">
+    var defaultErrorImageSrcFroAzure = "@Url.Content("~/images/common/application/azuread.png")";
+    document.addEventListener("DOMContentLoaded", function () {
+        var logoimageForAzure = document.getElementById("azuread-error-image");
+        if (logoimageForAzure) {
+            logoimageForAzure.onerror = function () {
+                this.onerror = null;
+                this.src = defaultErrorImageSrcFroAzure;
+            };
+        }
+
+    });
+        var defaultErrorImageSrcForWindows = "@Url.Content("~/images/common/application/windows-ad.svg")";
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoimageForWindows = document.getElementById("windows-ad-error-image");
+        if (logoimageForWindows) {
+            logoimageForWindows.onerror = function () {
+                this.onerror = null;
+                this.src = defaultErrorImageSrcForWindows;
+            };
+        }
+    });
+</script>
+@if (!hideExternalLoginProviders && (showExternalAuthentication || showAuthLogin))
+{
+    <meta name="base_url" content="@baseURL" />
+    <div class="external-container">
+        <div class="divider-container col-12 float-start">
+            <hr class="connect-line-left"><div class="content text-body">@T["or"]</div><hr class="connect-line-right">
+        </div>
+        <div id="alternative-login">
+            <div class="page-wrapper">
+                @if (controllerName.ToLower() == "authorization")
+                {
+                    <input id="external-authentication-client-id" type="hidden" name="clientId" value="@ViewBag.ClientId" />
+                }
+
+                <div class="col-12 float-start no-padding">
+                    @if (showExternalAuthentication)
+                    {
+                        @foreach (var item in orderedProviders)
+                        {
+                            <form method="post" action="@loginAction" class="external-login-buttons">
+                                <button class="col-6 float-start no-padding login-provider link-button button-style" type="submit" id="@item.Name.Replace(" ", "").ToLower()-login">
+                                    @Html.AntiForgeryToken()
+                                    @Html.Hidden("provider", item.DisplayName)
+                                    <input type="hidden" id="azure-email" name="email" />
+                                    <img id="azuread-error-image" class="external-provider" alt="Azure AD" src="@microsoftLogoLink" />
+                                    <span id="adfs-login-text" class="login-provider-name">@T["Sign in with Microsoft"]</span>
+                                    <div id="validate-azure-user" class="error-message validation-holder">
+                                    </div>
+                                </button>
+                            </form>
+                        }
+                    }
+
+                    @if (showAuthLogin)
+                    {
+                        foreach (var auth in authSettings)
+                        {
+                            if (auth.AuthProvider == AuthProvider.WindowsAD && EnvironmentHelper.IsWindows() && !GlobalAppSettings.IsAzureApplication)
+                            {
+                                <form id="login-button-windows" class="external-login-buttons">
+                                    @Html.AntiForgeryToken()
+                                    <button class="windows-ad-login link-button button-style @windowsADclass" type="submit">
+                                        <img id="windows-ad-error-image" class="external-provider" alt="Windows AD" src="@windowsADLogoLink" />
+                                        <span class="windows-ad-login-text">@T["Sign in with Windows AD"]</span>
+                                        <div id="validate-windows-ad-user" class="error-message validation-holder"></div>
+                                    </button>
+                                </form>
+                            }
+
+                            if (auth.AuthProvider == AuthProvider.AzureADB2C)
+                            {
+                                if (GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                                {
+                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "IsPopUp", true }, { "Auth", auth } })
+                                }
+                                else
+                                {
+                                    <form method="post" action="@azureb2cloginAction" class="external-login-buttons">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                        @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
+                                    </form>
+                                }
+                            }
+
+                            if (auth.AuthProvider != AuthProvider.AzureAD && auth.AuthProvider != AuthProvider.WindowsAD && auth.AuthProvider != AuthProvider.AzureADB2C)
+                            {
+                                if (GlobalAppSettings.SystemSettings.EnableApplicationEmbed)
+                                {
+                                    <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                    @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "IsPopUp", true }, { "Auth", auth } })
+                                }
+                                else
+                                {
+                                    <form method="post" action="@(auth.AuthProvider == AuthProvider.CustomOAuth ? oauthLoginUrl : auth.AuthProvider == AuthProvider.CustomOIDC ? openidLoginUrl : jwtLoginUrl)" class="external-login-buttons">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="AuthProvider" value="@auth.AuthProvider" />
+                                        @await Html.PartialAsync("../Shared/_LoginWindow", new ViewDataDictionary(ViewData) { { "Auth", auth } })
+                                    </form>
+                                }
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

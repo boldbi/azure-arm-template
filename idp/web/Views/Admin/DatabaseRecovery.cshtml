@@ -1,0 +1,203 @@
+﻿@model Syncfusion.Server.Base.DataClasses.DatabaseConfiguration
+@{
+    ViewBag.Title = T["Database Configuration Recovery"].Value;
+    Layout = null;
+    var successMessage = TempData["DbRecoverySuccess"] as string;
+    var errorMessage = TempData["DbRecoveryError"] as string;
+    var postSaveRedirect = TempData["PostSaveRedirect"] as string;
+    var configuredServerType = Model?.ServerType.ToString() ?? string.Empty;
+    var configuredServerTypeDisplay = configuredServerType == "MSSQL"
+        ? T["Microsoft SQL Server / Azure SQL"].Value
+        : configuredServerType;
+    var isWindowsAuthentication = Model?.IsWindowsAuthentication ?? false;
+    var showPortNumber = configuredServerType != "MSSQL";
+    var logoUrl = Url.Content($"{CloudAppConfig.TenantManagementUrl(Context).TrimEnd('/')}/logos?type=login");
+    var offlineIllustrationUrl = Url.Content("~/images/offline-setup.png");
+    var poweredByLogoUrl = Url.Content("~/images/boldid/application/powered_by_logo.svg");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    @await Html.PartialAsync("../Shared/_Favicon")
+    @await Html.PartialAsync("../Shared/_FontReference")
+    @await Html.PartialAsync("../Shared/_ThemeReference")
+
+    <link rel="stylesheet" href="~/bundles/css/layout.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/layout.css")" crossorigin="anonymous" asp-append-version="true" />
+    <link rel="stylesheet" href="~/bundles/css/database-password-update.css" integrity="@IntegrityTagHelper.GetIntegrity("bundles/css/database-password-update.css")" crossorigin="anonymous" asp-append-version="true" />
+
+    @await Html.PartialAsync("~/Views/Shared/_LocalizationContent.cshtml")
+
+    <script nonce="@Context.Items["ScriptNonce"]">
+        var setCookieHttpOnlyUrl = "@Url.Action("SetHttpOnlyCookie", "PartialView")";
+    </script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/layout.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/layout.js")" crossorigin="anonymous" asp-append-version="true"></script>
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/ej2.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/ej2.js")" crossorigin="anonymous" asp-append-version="true"></script>
+</head>
+<body id="body" class="offline-recovery-page">
+    <div class="offline-recovery-shell">
+        <header class="offline-recovery-header">
+            <img class="offline-brand-logo" src="@logoUrl" alt="Bold BI" />
+            <div class="offline-powered-brand">
+                <span class="offline-powered-text">@T["Powered by"]</span>
+                <img class="offline-powered-logo" src="@poweredByLogoUrl" alt="@T["Powered by Syncfusion"]" />
+            </div>
+        </header>
+
+        <div class="offline-recovery-grid">
+            <section class="offline-left-pane">
+                <img class="offline-illustration" src="@offlineIllustrationUrl" alt="@T["Database recovery"]" />
+                <div>
+                    <h1>@T["Database Recovery Configuration"]</h1>
+                    <p>@T["The application is unable to connect to the database. Update the connection details to restore Bold BI."]</p>
+                </div>
+            </section>
+
+            <section class="offline-form-pane">
+                <div class="offline-card">
+                    <div id="db-recovery-result" class="display-none"></div>
+
+                    <form id="db-recovery-form" method="post" action="@Url.Action("Save", "Admin")" novalidate autocomplete="off">
+                        @Html.AntiForgeryToken()
+
+                        <div class="offline-field-group">
+                            <label>@T["Server type"]</label>
+                            <input type="text" id="database-type" class="system-settings-startup-page-fields db-fields" value="@configuredServerTypeDisplay" readonly="readonly" aria-label="@T["Database provider"]" />
+                            <input type="hidden" name="ServerType" value="@configuredServerType" />
+                        </div>
+
+                        <input type="hidden" id="IsWindowsAuthentication" name="IsWindowsAuthentication" value="@isWindowsAuthentication.ToString()" />
+
+                        <div class="offline-field-group">
+                            <label>@T["Server name"]</label>
+                            <input type="text" id="txt-servername" name="ServerName" placeholder="@T["Enter server name"]" value="@Model?.ServerName" aria-label="@T["Server name"]" />
+                            <span class="startup-validation validation-txt-errors offline-validation"></span>
+                        </div>
+
+                        <div class="offline-auth-block">
+                            <label>@T["Authentication type"]</label>
+                            <div class="offline-auth-options">
+                                <label class="offline-auth-card">
+                                    <input type="radio" id="check-sql" class="radio-button" name="checkWindows" value="false" checked="@(!isWindowsAuthentication)" />
+                                    <div>
+                                        <span class="radio-title">@T["SQL authentication"]</span>
+                                        <p class="field-helper">@T["Use SQL username and password to verify and configure Bold BI."]</p>
+                                    </div>
+                                </label>
+                                <label class="offline-auth-card">
+                                    <input type="radio" id="check-windows" class="radio-button" name="checkWindows" value="true" checked="@isWindowsAuthentication" />
+                                    <div>
+                                        <span class="radio-title">@T["Windows authentication"]</span>
+                                        <p class="field-helper">@T["Verify that the Storm settings in"] <code>config.json</code> @T["are set to 2 for Windows Authentication."]</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="offline-field-group">
+                            <label>@T["Username"]</label>
+                            <input type="text" id="txt-login" name="UserName" value="@Model?.UserName" placeholder="@T["Enter username"]" aria-label="@T["Username"]" />
+                            <p class="field-helper">@T["Refer to the documentation for the permissions required to allow Bold BI to connect and make changes."]</p>
+                            <span class="startup-validation validation-txt-errors offline-validation"></span>
+                        </div>
+
+                        <div class="offline-field-group offline-password-field">
+                            <label>@T["Password"]</label>
+                            <div>
+                                <input type="password" id="txt-password-db" name="Password" autocomplete="new-password" placeholder="@T["Enter password"]" value="@Model?.Password" aria-label="@T["Password"]" />
+                                <div class="su su-show show-hide-password show-hide-password-ej2 password-toggle" role="button" tabindex="0" aria-label="@T["Show password"]" data-bs-toggle="tooltip" data-bs-original-title="@T["Click to view"]"></div>
+                            </div>
+                            <div class="startup-validation validation-txt-errors offline-validation" id="confirm-password"></div>
+                        </div>
+
+                        @if (showPortNumber)
+                        {
+                            <div class="offline-field-group">
+                                <label>@T["Port number"]</label>
+                                <input type="text" id="txt-portnumber" name="Port" placeholder="@T["Enter port number"]" value="@Model?.Port" aria-label="@T["Port number"]" />
+                                <span class="startup-validation validation-txt-errors offline-validation"></span>
+                            </div>
+                        }
+
+                        <div class="offline-field-group">
+                            <label>@T["Database name"]</label>
+                            <input type="text" id="txt-dbname" name="DatabaseName" placeholder="@T["Enter database name"]" value="@Model?.DatabaseName" aria-label="@T["Database name"]" />
+                            <p class="field-helper">@T["This is where Bold BI stores sites, dashboard resources, and datastore configurations."]</p>
+                            <span class="startup-validation validation-txt-errors offline-validation"></span>
+                        </div>
+
+                        <div class="offline-field-group">
+                            <label>@T["Additional parameters (optional)"]</label>
+                            <input type="text" id="additional-parameter" name="AdditionalParameters" placeholder="@T["Enter additional parameters"]" value="@Model?.AdditionalParameters" aria-label="@T["Additional parameters"]" />
+                            <p class="field-helper">@T["Additional parameters override values in this form. Refer to the documentation for supported connection string parameters."]</p>
+                            <span class="startup-validation validation-txt-errors offline-validation"></span>
+                        </div>
+
+                        <div class="offline-field-group">
+                            <div class="offline-ssl-row">
+                                @Html.CheckBox("SslEnabled", Model?.SslEnabled ?? false, new { id = "sslEnabled" })
+                                <label for="sslEnabled">@T["Enable SSL"]</label>
+                            </div>
+                            <p class="field-helper">@T["Provide the certificate location to secure an SSL-encrypted connection to your SQL Server."]</p>
+                        </div>
+
+                        <div class="offline-button-row">
+                            <button type="submit" id="db-test-connection" data-server-submit="true" formaction="@Url.Action("TestConnection", "Admin")" formmethod="post" class="secondary-button">@T["Test Connection"]</button>
+                            <button type="submit" id="db-save-continue"  class="proceed-button">@T["Save"]</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="messageBox">
+        <div class="message-box-close"></div>
+        <div class="message-content text-center"></div>
+    </div>
+
+    <script nonce="@Context.Items["ScriptNonce"]">
+        @{
+            var initialMessage = !string.IsNullOrWhiteSpace(errorMessage) ? errorMessage : (successMessage ?? string.Empty);
+            var initialStatus = !string.IsNullOrWhiteSpace(errorMessage) ? "error" : (!string.IsNullOrWhiteSpace(successMessage) ? "success" : string.Empty);
+            var redirectForClient = !string.IsNullOrWhiteSpace(errorMessage) ? string.Empty : (postSaveRedirect ?? string.Empty);
+        }
+        window.dbRecovery = {
+        testUrl: '@Url.Action("ValidateConnection", "Admin")',
+            initialMessage: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(initialMessage ?? string.Empty)),
+            initialStatus: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(initialStatus ?? string.Empty)),
+            postRedirect: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(redirectForClient ?? string.Empty))
+        };
+    </script>
+
+    <script nonce="@Context.Items["ScriptNonce"]">
+        if (typeof createWaitingPopup === 'function') {
+            createWaitingPopup('body');
+        }
+
+        if (document.getElementById('messageBox') && (!document.getElementById('messageBox').ej2_instances || !document.getElementById('messageBox').ej2_instances.length)) {
+            var messageBoxDialog = new ej.popups.Dialog({
+                header: 'title',
+                width: (window.innerWidth > 460) ? '472px' : (window.innerWidth - 10),
+                visible: false,
+                allowDragging: true,
+                height: 'auto',
+                isModal: true,
+                footerTemplate: 'footer',
+                close: 'onMessageDialogClose'
+            });
+
+            messageBoxDialog.appendTo('#messageBox');
+        }
+        else if (document.getElementById('messageBox') && document.getElementById('messageBox').ej2_instances && document.getElementById('messageBox').ej2_instances.length) {
+            document.getElementById('messageBox').ej2_instances[0].close = onMessageDialogClose;
+        }
+    </script>
+
+    <script nonce="@Context.Items["ScriptNonce"]" src="~/bundles/js/database-password-update.js" integrity="@IntegrityTagHelper.GetIntegrity("bundles/js/database-password-update.js")" crossorigin="anonymous" asp-append-version="true"></script>
+</body>
+</html>
