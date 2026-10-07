@@ -3,13 +3,21 @@
 
 The Bold BI Enterprise Edition is an end-to-end solution for creating, managing, and sharing interactive business dashboards. It includes a powerful dashboard server application for easily composing, managing, and sharing the dashboards.
 
-Bold BI Enterprise Edition can be installed in the following environments.
+# Important Notice
 
-* [Windows](https://help.boldbi.com/deploying-bold-bi/deploying-on-windows/?utm_source=github&utm_medium=backlinks)
-* [New Windows VM - Azure Marketplace](https://help.boldbi.com/deploying-bold-bi/deploying-on-azure/?utm_source=github&utm_medium=backlinks)
-* [Linux](https://help.boldbi.com/deploying-bold-bi/deploying-on-linux/?utm_source=github&utm_medium=backlinks)
-* [Kubernetes](https://help.boldbi.com/deploying-bold-bi/deploying-on-kubernetes/?utm_source=github&utm_medium=backlinks)
-* [Docker](https://help.boldbi.com/deploying-bold-bi/deploying-on-docker/?utm_source=github&utm_medium=backlinks)
+Windows-based Azure App Service deployment for Bold BI Enterprise Edition has been deprecated and is no longer recommended for new deployments.
+
+For all new deployments, we recommend using Bold BI on Azure App Service (Linux Container).
+
+Please refer to the following guides:
+
+1. [Deploy Bold BI on Azure App Service (Linux Container)](./doc/boldbi_appservice.md)
+2. [Deploy Bold BI on Azure App Service (Linux Container) with Existing Storage Account (Migration Guide)](./doc/boldbi_appservice_existing_storage.md)
+
+If you are an existing user of the Windows-based Azure App Service deployment, we recommend planning your migration to the Linux Container-based deployment.
+
+> **Important:** The deployment guidance below applies only to Bold BI versions up to v16.3. For versions later than v16.3, Windows-based Azure App Service deployment is no longer supported. Please use Bold BI on Azure App Service (Linux Container) instead.
+
 
 ## Deploy Bold BI Enterprise Edition in Azure Web App using ARM Template
 
