@@ -42,15 +42,13 @@ If you are currently running Bold BI on **Azure App Service for Windows**, you c
 
 For new Bold BI deployments on Azure App Service, use the **Linux container deployment** method. 
 
-## Deploy Bold BI using Azure App Service Linux Container:
+[Deploy Bold BI using Azure App Service Linux Container: ](https://github.com/boldbi/boldbi-server-azure-arm-linux/blob/master/doc/boldbi_appservice.md)
 
-[Deploy Bold BI on Azure App Service (Linux Container)](https://github.com/boldbi/boldbi-server-azure-arm-linux/blob/master/doc/boldbi_appservice.md)
-
-**Migrating an existing Windows App Service deployment**
+### Migrating an existing Windows App Service deployment
 
 If you are currently using Bold BI on Azure App Service Windows, follow the migration guide to move your existing deployment to Azure App Service Linux containers.
 
-## Migrate from Azure App Service Windows to Linux Container:
+### Migrate from Azure App Service Windows to Linux Container:
 
 [Deploy Bold BI on Azure App Service (Linux Container) with Existing Storage Account (Migration Guide)](https://github.com/boldbi/boldbi-server-azure-arm-linux/blob/master/doc/boldbi_appservice_existing_storage.md)
 
